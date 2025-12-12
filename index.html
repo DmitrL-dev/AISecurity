@@ -1,0 +1,2105 @@
+<!DOCTYPE html>
+<html lang="ru">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>SENTINEL — AI Security Platform</title>
+    <meta
+      name="description"
+      content="Enterprise-grade AI Security Platform. 56 движков детекции, Strange Math, Meta-Judge, Post-Quantum Security."
+    />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      :root {
+        --bg-primary: #0a0e17;
+        --bg-secondary: #111827;
+        --bg-card: #1a2332;
+        --text-primary: #e5e7eb;
+        --text-secondary: #9ca3af;
+        --accent-blue: #3b82f6;
+        --accent-green: #10b981;
+        --accent-purple: #8b5cf6;
+        --accent-orange: #f59e0b;
+        --accent-red: #ef4444;
+        --border: #374151;
+      }
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+      body {
+        font-family: "Inter", sans-serif;
+        background: var(--bg-primary);
+        color: var(--text-primary);
+        line-height: 1.7;
+      }
+
+      /* Navigation */
+      .navbar {
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        background: rgba(10, 14, 23, 0.95);
+        backdrop-filter: blur(10px);
+        border-bottom: 1px solid var(--border);
+        z-index: 1000;
+        padding: 0 2rem;
+      }
+      .nav-container {
+        max-width: 1200px;
+        margin: 0 auto;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        height: 64px;
+      }
+      .nav-logo {
+        font-size: 1.5rem;
+        font-weight: 700;
+        color: var(--accent-blue);
+        text-decoration: none;
+      }
+      .nav-links {
+        display: flex;
+        gap: 2rem;
+        list-style: none;
+      }
+      .nav-links a {
+        color: var(--text-secondary);
+        text-decoration: none;
+        font-weight: 500;
+        transition: color 0.2s;
+      }
+      .nav-links a:hover {
+        color: var(--accent-blue);
+      }
+      .nav-cta {
+        background: var(--accent-blue);
+        color: white;
+        padding: 0.5rem 1.25rem;
+        border-radius: 8px;
+        text-decoration: none;
+        font-weight: 600;
+      }
+
+      /* Hero */
+      .hero {
+        min-height: 100vh;
+        background: linear-gradient(
+          135deg,
+          #1e3a5f 0%,
+          #0a0e17 50%,
+          #1a1a2e 100%
+        );
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 6rem 2rem 4rem;
+        text-align: center;
+      }
+      .hero-content {
+        max-width: 900px;
+      }
+      .hero-badge {
+        display: inline-block;
+        background: rgba(59, 130, 246, 0.2);
+        color: var(--accent-blue);
+        padding: 0.5rem 1rem;
+        border-radius: 50px;
+        font-size: 0.875rem;
+        font-weight: 600;
+        margin-bottom: 1.5rem;
+        border: 1px solid rgba(59, 130, 246, 0.3);
+      }
+      .hero h1 {
+        font-size: 3.5rem;
+        font-weight: 700;
+        margin-bottom: 1.5rem;
+        background: linear-gradient(135deg, #fff 0%, #a5b4fc 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+      }
+      .hero-subtitle {
+        font-size: 1.25rem;
+        color: var(--text-secondary);
+        margin-bottom: 2rem;
+        max-width: 700px;
+        margin-left: auto;
+        margin-right: auto;
+      }
+      .hero-stats {
+        display: flex;
+        justify-content: center;
+        gap: 3rem;
+        margin-top: 3rem;
+        flex-wrap: wrap;
+      }
+      .stat {
+        text-align: center;
+      }
+      .stat-value {
+        font-size: 2.5rem;
+        font-weight: 700;
+        color: var(--accent-green);
+      }
+      .stat-label {
+        font-size: 0.875rem;
+        color: var(--text-secondary);
+      }
+
+      /* Sections */
+      .section {
+        padding: 5rem 2rem;
+        max-width: 1200px;
+        margin: 0 auto;
+      }
+      .section-dark {
+        background: var(--bg-secondary);
+      }
+      .section-header {
+        text-align: center;
+        margin-bottom: 3rem;
+      }
+      .section-title {
+        font-size: 2rem;
+        font-weight: 700;
+        margin-bottom: 1rem;
+      }
+      .section-subtitle {
+        color: var(--text-secondary);
+        max-width: 700px;
+        margin: 0 auto;
+      }
+
+      /* Collapsible */
+      .collapsible {
+        background: var(--bg-card);
+        border: 1px solid var(--border);
+        border-radius: 12px;
+        margin-bottom: 1rem;
+        overflow: hidden;
+      }
+      .collapsible-header {
+        padding: 1.25rem 1.5rem;
+        cursor: pointer;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+      }
+      .collapsible-header:hover {
+        background: rgba(59, 130, 246, 0.05);
+      }
+      .collapsible-title {
+        font-size: 1.125rem;
+        font-weight: 600;
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+      }
+      .collapsible-icon {
+        width: 28px;
+        height: 28px;
+        border-radius: 6px;
+        background: var(--accent-blue);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 0.9rem;
+      }
+      .collapsible-icon.purple {
+        background: var(--accent-purple);
+      }
+      .collapsible-icon.green {
+        background: var(--accent-green);
+      }
+      .collapsible-icon.orange {
+        background: var(--accent-orange);
+      }
+      .collapsible-arrow {
+        width: 10px;
+        height: 10px;
+        border: 2px solid var(--text-secondary);
+        border-top: none;
+        border-left: none;
+        transform: rotate(45deg);
+        transition: transform 0.3s;
+      }
+      .collapsible.open .collapsible-arrow {
+        transform: rotate(-135deg);
+      }
+      .collapsible-content {
+        max-height: 0;
+        overflow: hidden;
+        transition: max-height 0.4s ease-out;
+      }
+      .collapsible.open .collapsible-content {
+        max-height: 5000px;
+      }
+      .collapsible-body {
+        padding: 0 1.5rem 1.5rem;
+      }
+      .collapsible-body p {
+        margin-bottom: 1rem;
+        color: var(--text-secondary);
+      }
+      .collapsible-body h4 {
+        margin: 1.5rem 0 0.75rem;
+        color: var(--accent-green);
+      }
+      .collapsible-body ul {
+        list-style: none;
+        margin: 1rem 0;
+      }
+      .collapsible-body li {
+        padding: 0.4rem 0 0.4rem 1.5rem;
+        position: relative;
+      }
+      .collapsible-body li::before {
+        content: "→";
+        position: absolute;
+        left: 0;
+        color: var(--accent-green);
+      }
+
+      /* Tables */
+      table {
+        width: 100%;
+        border-collapse: collapse;
+        font-size: 0.9rem;
+        margin: 1rem 0;
+      }
+      th,
+      td {
+        padding: 0.75rem 1rem;
+        text-align: left;
+        border-bottom: 1px solid var(--border);
+      }
+      th {
+        background: var(--bg-secondary);
+        color: var(--accent-blue);
+        font-weight: 600;
+      }
+      tr:hover {
+        background: rgba(59, 130, 246, 0.05);
+      }
+
+      /* Cards */
+      .cards-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+        gap: 1.5rem;
+        margin-top: 2rem;
+      }
+      .card {
+        background: var(--bg-card);
+        border: 1px solid var(--border);
+        border-radius: 12px;
+        padding: 1.5rem;
+        transition: all 0.2s;
+      }
+      .card:hover {
+        border-color: var(--accent-blue);
+        transform: translateY(-2px);
+      }
+      .card-icon {
+        width: 48px;
+        height: 48px;
+        border-radius: 10px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.5rem;
+        margin-bottom: 1rem;
+      }
+      .card-icon.blue {
+        background: rgba(59, 130, 246, 0.2);
+      }
+      .card-icon.green {
+        background: rgba(16, 185, 129, 0.2);
+      }
+      .card-icon.purple {
+        background: rgba(139, 92, 246, 0.2);
+      }
+      .card-icon.orange {
+        background: rgba(245, 158, 11, 0.2);
+      }
+      .card-icon.red {
+        background: rgba(239, 68, 68, 0.2);
+      }
+      .card h3 {
+        font-size: 1.1rem;
+        margin-bottom: 0.5rem;
+      }
+      .card p {
+        color: var(--text-secondary);
+        font-size: 0.9rem;
+      }
+
+      /* Contact */
+      .contact-section {
+        background: linear-gradient(
+          135deg,
+          var(--bg-secondary) 0%,
+          var(--bg-card) 100%
+        );
+        border: 1px solid var(--border);
+        border-radius: 16px;
+        padding: 3rem;
+        text-align: center;
+      }
+      .contact-options {
+        display: flex;
+        justify-content: center;
+        gap: 2rem;
+        margin-top: 2rem;
+        flex-wrap: wrap;
+      }
+      .contact-item {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        text-decoration: none;
+        color: var(--text-primary);
+        padding: 1.5rem;
+        border-radius: 12px;
+        transition: all 0.2s;
+        min-width: 150px;
+      }
+      .contact-item:hover {
+        background: rgba(59, 130, 246, 0.1);
+        transform: translateY(-2px);
+      }
+      .contact-icon {
+        font-size: 2rem;
+        margin-bottom: 0.5rem;
+      }
+      .contact-label {
+        font-weight: 600;
+        margin-bottom: 0.25rem;
+      }
+      .contact-value {
+        color: var(--accent-blue);
+        font-size: 0.875rem;
+      }
+
+      /* Architecture Diagram */
+      .arch-diagram {
+        background: var(--bg-secondary);
+        border-radius: 12px;
+        padding: 2rem;
+        margin: 2rem 0;
+        text-align: center;
+      }
+      .arch-row {
+        display: flex;
+        justify-content: center;
+        gap: 2rem;
+        margin: 1rem 0;
+        flex-wrap: wrap;
+      }
+      .arch-box {
+        background: var(--bg-card);
+        border: 1px solid var(--border);
+        border-radius: 8px;
+        padding: 1rem 1.5rem;
+        min-width: 120px;
+      }
+      .arch-box.gateway {
+        border-color: var(--accent-blue);
+      }
+      .arch-box.brain {
+        border-color: var(--accent-purple);
+      }
+      .arch-arrow {
+        font-size: 1.5rem;
+        color: var(--accent-green);
+      }
+
+      /* Badges */
+      .badge {
+        display: inline-block;
+        padding: 0.25rem 0.75rem;
+        border-radius: 50px;
+        font-size: 0.75rem;
+        font-weight: 600;
+      }
+      .badge-green {
+        background: rgba(16, 185, 129, 0.2);
+        color: var(--accent-green);
+      }
+      .badge-blue {
+        background: rgba(59, 130, 246, 0.2);
+        color: var(--accent-blue);
+      }
+      .badge-purple {
+        background: rgba(139, 92, 246, 0.2);
+        color: var(--accent-purple);
+      }
+      .badge-orange {
+        background: rgba(245, 158, 11, 0.2);
+        color: var(--accent-orange);
+      }
+
+      /* Highlight boxes */
+      .highlight-box {
+        background: rgba(59, 130, 246, 0.1);
+        border-left: 4px solid var(--accent-blue);
+        padding: 1rem 1.5rem;
+        margin: 1rem 0;
+        border-radius: 0 8px 8px 0;
+      }
+      .highlight-box.warning {
+        background: rgba(245, 158, 11, 0.1);
+        border-color: var(--accent-orange);
+      }
+      .highlight-box.idea {
+        background: rgba(139, 92, 246, 0.1);
+        border-color: var(--accent-purple);
+      }
+
+      /* Formula */
+      .formula {
+        font-family: "Courier New", monospace;
+        background: var(--bg-secondary);
+        padding: 0.5rem 1rem;
+        border-radius: 6px;
+        display: inline-block;
+        margin: 0.5rem 0;
+      }
+
+      /* Footer */
+      .footer {
+        background: var(--bg-secondary);
+        border-top: 1px solid var(--border);
+        padding: 2rem;
+        text-align: center;
+        color: var(--text-secondary);
+      }
+
+      /* Responsive */
+      @media (max-width: 768px) {
+        .hero h1 {
+          font-size: 2.5rem;
+        }
+        .nav-links {
+          display: none;
+        }
+        .contact-options {
+          flex-direction: column;
+          align-items: center;
+        }
+      }
+
+      /* Language Switcher */
+      .lang-switch {
+        display: flex;
+        gap: 0.5rem;
+        margin-left: 1rem;
+      }
+      .lang-switch a {
+        color: var(--text-secondary);
+        text-decoration: none;
+        font-weight: 500;
+        padding: 0.25rem 0.5rem;
+        border-radius: 4px;
+        font-size: 0.875rem;
+      }
+      .lang-switch a:hover {
+        color: var(--accent-blue);
+      }
+      .lang-switch a.active {
+        background: var(--accent-blue);
+        color: white;
+      }
+    </style>
+  </head>
+  <body>
+    <nav class="navbar">
+      <div class="nav-container">
+        <a href="#" class="nav-logo">🛡️ SENTINEL</a>
+        <ul class="nav-links">
+          <li><a href="#problem">Проблема</a></li>
+          <li><a href="#architecture">Архитектура</a></li>
+          <li><a href="#strange-math">Strange Math</a></li>
+          <li><a href="#engines">Движки</a></li>
+          <li><a href="#contact">Контакты</a></li>
+        </ul>
+        <div class="lang-switch">
+          <a href="index.html" class="active">RU</a>
+          <a href="index-en.html">EN</a>
+        </div>
+        <a href="#contact" class="nav-cta">Сотрудничество</a>
+      </div>
+    </nav>
+
+    <!-- Hero -->
+    <section class="hero">
+      <div class="hero-content">
+        <span class="hero-badge"
+          >🔬 2025 Research-Driven • ICML • GSI • ESSLLI</span
+        >
+        <h1>🛡️ SENTINEL AI Security Platform</h1>
+        <p class="hero-subtitle">
+          Enterprise-grade платформа для защиты LLM-приложений от prompt
+          injection, jailbreak, data leakage и других AI-специфичных угроз.
+          <strong>Уникальный подход Strange Math</strong> — применение передовой
+          математики (топология, теория пучков, гиперболическая геометрия) для
+          детекции атак.
+        </p>
+        <div class="hero-stats">
+          <div class="stat">
+            <div class="stat-value">56</div>
+            <div class="stat-label">Движков детекции</div>
+          </div>
+          <div class="stat">
+            <div class="stat-value">62K+</div>
+            <div class="stat-label">Строк кода</div>
+          </div>
+          <div class="stat">
+            <div class="stat-value">420+</div>
+            <div class="stat-label">Unit тестов</div>
+          </div>
+          <div class="stat">
+            <div class="stat-value">&lt;50ms</div>
+            <div class="stat-label">Latency p50</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Contact -->
+    <section id="contact" class="section">
+      <div class="contact-section">
+        <h2 class="section-title">📞 Сотрудничество и Контакты</h2>
+        <p class="section-subtitle">
+          Рассматриваются: <strong>сотрудничество</strong> по развитию проекта,
+          <strong>спонсорство</strong> разработки, <strong>найм</strong> для
+          работы над AI Security проектами, <strong>продажа</strong> проекта
+        </p>
+        <div class="contact-options">
+          <a href="tel:+79142092538" class="contact-item">
+            <span class="contact-icon">📱</span>
+            <span class="contact-label">Телефон</span>
+            <span class="contact-value">+7-914-209-25-38</span>
+          </a>
+          <a
+            href="https://t.me/DmLabincev"
+            class="contact-item"
+            target="_blank"
+          >
+            <span class="contact-icon">✈️</span>
+            <span class="contact-label">Telegram</span>
+            <span class="contact-value">@DmLabincev</span>
+          </a>
+          <a href="mailto:chg@live.ru" class="contact-item">
+            <span class="contact-icon">📧</span>
+            <span class="contact-label">Email</span>
+            <span class="contact-value">chg@live.ru</span>
+          </a>
+          <a
+            href="https://vladivostok.hh.ru/resume/59c9d008ff0f7b1cf20039ed1f4a793939304a"
+            class="contact-item"
+            target="_blank"
+          >
+            <span class="contact-icon">💼</span>
+            <span class="contact-label">HeadHunter</span>
+            <span class="contact-value">Профиль</span>
+          </a>
+        </div>
+      </div>
+    </section>
+
+    <!-- Problem -->
+    <section id="problem" class="section">
+      <div class="section-header">
+        <h2 class="section-title">⚠️ Проблема: AI-приложения под атакой</h2>
+        <p class="section-subtitle">
+          Генеративный AI открыл новый класс угроз, против которых традиционные
+          WAF бессильны
+        </p>
+      </div>
+
+      <div class="cards-grid">
+        <div class="card">
+          <div class="card-icon red">💉</div>
+          <h3>Prompt Injection</h3>
+          <p>
+            Атакующий внедряет инструкции в промпт, заставляя модель выполнять
+            несанкционированные действия. Обход бизнес-логики, манипуляция
+            ответами.
+          </p>
+        </div>
+        <div class="card">
+          <div class="card-icon orange">🔓</div>
+          <h3>Jailbreak</h3>
+          <p>
+            Обход safety-ограничений модели через креативные prompts. Генерация
+            вредоносного контента от имени компании. Репутационные риски.
+          </p>
+        </div>
+        <div class="card">
+          <div class="card-icon purple">📤</div>
+          <h3>Data Leakage</h3>
+          <p>
+            Утечка training data, PII, коммерческих секретов через ответы
+            модели. Штрафы GDPR до 4% оборота, 152-ФЗ.
+          </p>
+        </div>
+        <div class="card">
+          <div class="card-icon blue">🤖</div>
+          <h3>Multi-Agent Risks</h3>
+          <p>
+            Эмерджентные угрозы в мультиагентных системах: agent collusion,
+            privilege escalation, memory poisoning. OWASP Top 10 for Agentic AI.
+          </p>
+        </div>
+      </div>
+
+      <div class="highlight-box warning" style="margin-top: 2rem">
+        <strong>Почему традиционные WAF не работают?</strong><br />
+        Атаки на LLM — это атаки на <em>семантику</em>, а не на синтаксис. Regex
+        и сигнатуры не понимают контекст. Нужен AI против AI.
+      </div>
+    </section>
+
+    <!-- Architecture -->
+    <section id="architecture" class="section section-dark">
+      <div class="section-header">
+        <h2 class="section-title">🏗️ Архитектура SENTINEL</h2>
+        <p class="section-subtitle">
+          Гибридный Go + Python стек: производительность + ML-экосистема
+        </p>
+      </div>
+
+      <div class="arch-diagram">
+        <div class="arch-row">
+          <div class="arch-box">🖥️ Web</div>
+          <div class="arch-box">📱 Mobile</div>
+          <div class="arch-box">🔌 API</div>
+          <div class="arch-box">🤖 Agents</div>
+        </div>
+        <div class="arch-arrow">⬇️ HTTP/WebSocket</div>
+        <div class="arch-row">
+          <div class="arch-box gateway">
+            <strong>⚡ Gateway (Go + Fiber)</strong><br />
+            <small>Auth • Rate Limit • PoW Challenge • Proxy</small>
+          </div>
+        </div>
+        <div class="arch-arrow">⬇️ gRPC + mTLS (10x faster than REST)</div>
+        <div class="arch-row">
+          <div class="arch-box brain">
+            <strong>🧠 Brain (Python)</strong><br />
+            <small>56 Engines • Hive Intelligence • Meta-Judge</small>
+          </div>
+        </div>
+        <div class="arch-arrow">⬇️</div>
+        <div class="arch-row">
+          <div class="arch-box">🤖 LLM Provider</div>
+          <div class="arch-box">📊 SIEM</div>
+          <div class="arch-box">💾 Redis/Postgres</div>
+          <div class="arch-box">🔐 Vault</div>
+        </div>
+      </div>
+
+      <!-- AppSec Integration -->
+      <div class="collapsible" style="margin-top: 2rem; border: 2px solid var(--accent-purple);">
+        <div class="collapsible-header" onclick="toggleCollapsible(this.parentElement)">
+          <span class="collapsible-title"><span class="collapsible-icon purple">🔐</span> Интеграция с AppSec (SAST/DAST/SCA)</span>
+          <span class="collapsible-arrow"></span>
+        </div>
+        <div class="collapsible-content">
+          <div class="collapsible-body">
+            <p><strong>Как SENTINEL дополняет традиционные AppSec-инструменты?</strong></p>
+            
+            <table>
+              <tr><th>Инструмент</th><th>Что находит</th><th>AI-специфичные угрозы</th></tr>
+              <tr><td>SAST (Semgrep, Checkmarx)</td><td>Уязвимости в коде</td><td>❌ Не видит</td></tr>
+              <tr><td>DAST (ZAP, Burp)</td><td>Runtime уязвимости</td><td>❌ Не видит</td></tr>
+              <tr><td>SCA (Trivy, Snyk)</td><td>Уязвимости в зависимостях</td><td>❌ Не видит</td></tr>
+              <tr style="background: rgba(139,92,246,0.15)"><td><strong>SENTINEL</strong></td><td><strong>AI-атаки</strong></td><td><strong>✅ 56 детекторов</strong></td></tr>
+            </table>
+
+            <h4>🎯 SENTINEL как Quality Gate в CI/CD</h4>
+            <ul>
+              <li><strong>Pre-commit:</strong> Проверка промптов на Prompt Injection</li>
+              <li><strong>CI Pipeline:</strong> SENTINEL как gate для AI-компонентов</li>
+              <li><strong>Runtime:</strong> Real-time защита production LLM</li>
+            </ul>
+
+            <h4>📊 Покрытие фреймворков</h4>
+            <table>
+              <tr><th>Фреймворк</th><th>Покрытие</th><th>Ключевые контроли</th></tr>
+              <tr><td>OWASP Top 10 for LLM</td><td>100%</td><td>LLM01-LLM10</td></tr>
+              <tr><td>OWASP Top 10 for Agentic AI</td><td>100%</td><td>Все 10 категорий</td></tr>
+              <tr><td>TTPs.ai</td><td>100%</td><td>24 тактики</td></tr>
+              <tr><td>NVIDIA AI Kill Chain</td><td>100%</td><td>6 этапов</td></tr>
+              <tr><td>EU AI Act</td><td>Articles 9,10,15</td><td>Risk management</td></tr>
+              <tr><td>NIST AI RMF</td><td>Full</td><td>GOVERN/MAP/MEASURE/MANAGE</td></tr>
+            </table>
+
+            <div class="highlight-box idea">
+              <strong>💡 Уникальность:</strong> SENTINEL — единственное решение, которое закрывает gap между традиционным AppSec и AI Security. SAST/DAST не видят Prompt Injection, RAG Poisoning, Jailbreak.
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="collapsible">
+        <div
+          class="collapsible-header"
+          onclick="toggleCollapsible(this.parentElement)"
+        >
+          <span class="collapsible-title"
+            ><span class="collapsible-icon">🤔</span> Почему именно такая
+            архитектура?</span
+          >
+          <span class="collapsible-arrow"></span>
+        </div>
+        <div class="collapsible-content">
+          <div class="collapsible-body">
+            <table>
+              <tr>
+                <th>Компонент</th>
+                <th>Технология</th>
+                <th>Обоснование выбора</th>
+              </tr>
+              <tr>
+                <td><strong>Gateway</strong></td>
+                <td><span class="badge badge-blue">Go + Fiber</span></td>
+                <td>
+                  1000+ req/sec на одном ядре, &lt;5ms latency, эффективное
+                  использование памяти, goroutines для конкурентности
+                </td>
+              </tr>
+              <tr>
+                <td><strong>Brain</strong></td>
+                <td><span class="badge badge-green">Python 3.11+</span></td>
+                <td>
+                  Transformers, Presidio, Scikit-learn — вся ML-экосистема.
+                  GPU-ускорение через CuPy/PyTorch. Быстрое прототипирование
+                  новых детекторов.
+                </td>
+              </tr>
+              <tr>
+                <td><strong>IPC</strong></td>
+                <td><span class="badge badge-purple">gRPC + Protobuf</span></td>
+                <td>
+                  Бинарный протокол в 10x быстрее JSON/REST, строгая типизация,
+                  встроенное mTLS шифрование
+                </td>
+              </tr>
+            </table>
+
+            <h4>Почему микросервисы, а не монолит?</h4>
+            <ul>
+              <li>
+                <strong>Независимое масштабирование</strong> — Brain требует GPU
+                (дорого), Gateway работает на CPU (дёшево). Можно масштабировать
+                отдельно.
+              </li>
+              <li>
+                <strong>Изоляция отказов</strong> — если ML-движок упал, Gateway
+                продолжает работать в деградированном режиме
+              </li>
+              <li>
+                <strong>Polyglot freedom</strong> — лучший язык для каждой
+                задачи, а не компромисс
+              </li>
+              <li>
+                <strong>Hotfix без простоя</strong> — можно обновить Brain без
+                рестарта Gateway
+              </li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
+      <div class="collapsible">
+        <div
+          class="collapsible-header"
+          onclick="toggleCollapsible(this.parentElement)"
+        >
+          <span class="collapsible-title"
+            ><span class="collapsible-icon green">🛡️</span> Defense in Depth
+            Pipeline</span
+          >
+          <span class="collapsible-arrow"></span>
+        </div>
+        <div class="collapsible-content">
+          <div class="collapsible-body">
+            <p>Каждый запрос проходит через многоуровневую систему защиты:</p>
+
+            <h4>Ingress Pipeline (11 шагов)</h4>
+            <table>
+              <tr>
+                <th>Шаг</th>
+                <th>Движки</th>
+                <th>Назначение</th>
+              </tr>
+              <tr>
+                <td>1</td>
+                <td>Length, Encoding</td>
+                <td>Базовая валидация, защита от buffer overflow</td>
+              </tr>
+              <tr>
+                <td>2</td>
+                <td>Regex, YARA, Signatures</td>
+                <td>Быстрое отсечение известных паттернов атак</td>
+              </tr>
+              <tr>
+                <td>3</td>
+                <td>Semantic, Token Analysis</td>
+                <td>NLP-анализ структуры промпта</td>
+              </tr>
+              <tr>
+                <td>4</td>
+                <td>LLM Judge</td>
+                <td>Вердикт от специализированной guard-модели</td>
+              </tr>
+              <tr>
+                <td>5</td>
+                <td>Strange Math</td>
+                <td>Топологические и геометрические аномалии</td>
+              </tr>
+              <tr>
+                <td>6</td>
+                <td>Context, Behavioral</td>
+                <td>Анализ истории сессии, накопительные атаки</td>
+              </tr>
+              <tr>
+                <td>7</td>
+                <td>Privacy Guard</td>
+                <td>Детекция PII, секретов, конфиденциальных данных</td>
+              </tr>
+              <tr>
+                <td>8</td>
+                <td>Ensemble</td>
+                <td>Взвешенное голосование всех детекторов</td>
+              </tr>
+            </table>
+
+            <h4>Egress Pipeline (3 шага)</h4>
+            <ul>
+              <li>
+                <strong>Response Scanner</strong> — проверка ответа модели на
+                утечки
+              </li>
+              <li>
+                <strong>Canary Detection</strong> — поиск следов prompt
+                injection в output
+              </li>
+              <li>
+                <strong>Sanitization</strong> — маскирование обнаруженных PII
+              </li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Strange Math -->
+    <section id="strange-math" class="section">
+      <div class="section-header">
+        <h2 class="section-title">🔮 Strange Math — Уникальное Преимущество</h2>
+        <p class="section-subtitle">
+          Применение передовой математики 2025 года для детекции атак. Идеи из
+          ICML, GSI, ESSLLI, AAAI — переведённые в рабочий код.
+        </p>
+      </div>
+
+      <div class="highlight-box idea">
+        <strong>Ключевая идея:</strong> Атаки на LLM создают аномалии в
+        математических пространствах, которые невозможно обнаружить
+        классическими методами. Топология видит "дыры" в данных, теория пучков —
+        противоречия, гиперболическая геометрия — иерархические аномалии.
+      </div>
+
+      <div class="cards-grid">
+        <div class="card">
+          <div class="card-icon purple">📐</div>
+          <h3>TDA Enhanced</h3>
+          <p>
+            <strong>Persistent Homology</strong> — находит топологические
+            инварианты в embedding-пространстве. Jailbreak создаёт характерные
+            "дыры" в персистентных диаграммах.
+          </p>
+          <p class="formula">Betti: β₀, β₁, β₂ → Bottleneck Distance</p>
+        </div>
+        <div class="card">
+          <div class="card-icon blue">🌐</div>
+          <h3>Sheaf Coherence</h3>
+          <p>
+            <strong>Теория пучков</strong> для анализа локально-глобальной
+            согласованности. Детектирует multi-turn jailbreaks, где каждое
+            сообщение безобидно, но вместе — атака.
+          </p>
+          <p class="formula">Čech Cohomology: H⁰, H¹ → Coherence Score</p>
+        </div>
+        <div class="card">
+          <div class="card-icon green">🌀</div>
+          <h3>Hyperbolic Geometry</h3>
+          <p>
+            <strong>Модель Пуанкаре</strong> для иерархических данных. Промпты с
+            необычной "глубиной" в иерархии — признак injection. Fréchet mean
+            для агрегации.
+          </p>
+          <p class="formula">
+            d(x,y) = arcosh(1 + 2||x-y||²/((1-||x||²)(1-||y||²)))
+          </p>
+        </div>
+        <div class="card">
+          <div class="card-icon orange">📊</div>
+          <h3>Information Geometry</h3>
+          <p>
+            <strong>Метрика Фишера</strong> на пространстве распределений.
+            Geodesic distance между нормальным и аномальным трафиком. Детекция
+            distribution drift.
+          </p>
+          <p class="formula">Fisher-Rao: d(p,q) = 2 arccos(∫√(p·q))</p>
+        </div>
+        <div class="card">
+          <div class="card-icon red">🔗</div>
+          <h3>Spectral Graph</h3>
+          <p>
+            <strong>Graph Laplacian</strong> на attention patterns. Spectral
+            clustering выявляет аномальные структуры внимания. Low-pass
+            filtering для шума.
+          </p>
+          <p class="formula">L = D - A → λ₁, λ₂, ..., λₙ</p>
+        </div>
+        <div class="card">
+          <div class="card-icon purple">🧮</div>
+          <h3>Math Oracle</h3>
+          <p>
+            <strong>DeepSeek-V3.2-Speciale</strong> для формальной верификации.
+            Генерация математических доказательств для detector formulas.
+            API/LOCAL modes.
+          </p>
+          <p class="formula">∀x: P(x) ⟹ Q(x) [verified]</p>
+        </div>
+      </div>
+
+      <div class="collapsible" style="margin-top: 2rem">
+        <div
+          class="collapsible-header"
+          onclick="toggleCollapsible(this.parentElement)"
+        >
+          <span class="collapsible-title"
+            ><span class="collapsible-icon purple">📚</span> Research Foundation
+            (2025 Papers)</span
+          >
+          <span class="collapsible-arrow"></span>
+        </div>
+        <div class="collapsible-content">
+          <div class="collapsible-body">
+            <p>Strange Math основан на cutting-edge исследованиях:</p>
+            <table>
+              <tr>
+                <th>Конференция</th>
+                <th>Направление</th>
+                <th>Применение в SENTINEL</th>
+              </tr>
+              <tr>
+                <td>ICML 2025</td>
+                <td>TDA for Deep Learning</td>
+                <td>
+                  Zigzag Persistence для анализа слоёв, Topological
+                  Fingerprinting моделей
+                </td>
+              </tr>
+              <tr>
+                <td>ESSLLI 2025</td>
+                <td>Sheaf Theory in NLP</td>
+                <td>
+                  Local-to-global consistency, contradiction detection в
+                  диалогах
+                </td>
+              </tr>
+              <tr>
+                <td>GSI 2025</td>
+                <td>Information Geometry</td>
+                <td>
+                  Fisher Information Matrix для embeddings, geodesic anomaly
+                  detection
+                </td>
+              </tr>
+              <tr>
+                <td>AAAI 2025</td>
+                <td>Hyperbolic ML</td>
+                <td>
+                  Poincaré Ball для иерархий, hierarchy distortion как признак
+                  атаки
+                </td>
+              </tr>
+              <tr>
+                <td>SpGAT 2025</td>
+                <td>Spectral Graph Attention</td>
+                <td>
+                  Graph Fourier Transform на attention, spectral clustering
+                </td>
+              </tr>
+            </table>
+
+            <div class="highlight-box" style="margin-top: 1rem">
+              <strong>Конкурентное преимущество:</strong> Пока конкуренты
+              используют regex и простые ML-классификаторы, SENTINEL применяет
+              математику, которая только начинает появляться в research papers.
+              Это 2-3 года форы перед рынком.
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Advanced 2025 -->
+    <section id="advanced" class="section section-dark">
+      <div class="section-header">
+        <h2 class="section-title">🎯 Advanced 2025 Engines</h2>
+        <p class="section-subtitle">
+          Помимо Strange Math, SENTINEL включает передовые движки для
+          специфических угроз
+        </p>
+      </div>
+
+      <div class="collapsible">
+        <div
+          class="collapsible-header"
+          onclick="toggleCollapsible(this.parentElement)"
+        >
+          <span class="collapsible-title"
+            ><span class="collapsible-icon orange">🔬</span> Hidden State
+            Forensics</span
+          >
+          <span class="collapsible-arrow"></span>
+        </div>
+        <div class="collapsible-content">
+          <div class="collapsible-body">
+            <p>
+              Анализ внутренних активаций LLM для детекции jailbreak,
+              hallucinations и backdoors. Идея: атака изменяет паттерны
+              активаций ещё до того, как модель сгенерирует вредоносный output.
+            </p>
+            <ul>
+              <li>
+                <strong>Layer-wise analysis</strong> — сравнение активаций по
+                слоям с baseline
+              </li>
+              <li>
+                <strong>Probing classifiers</strong> — обученные на известных
+                атаках
+              </li>
+              <li>
+                <strong>Anomaly detection</strong> — статистические отклонения
+                от нормы
+              </li>
+            </ul>
+            <p>
+              <em
+                >Research: "Representation Engineering" (2024), "Probing for
+                Jailbreaks" (2025)</em
+              >
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <div class="collapsible">
+        <div
+          class="collapsible-header"
+          onclick="toggleCollapsible(this.parentElement)"
+        >
+          <span class="collapsible-title"
+            ><span class="collapsible-icon blue">🔍</span> LLM
+            Fingerprinting</span
+          >
+          <span class="collapsible-arrow"></span>
+        </div>
+        <div class="collapsible-content">
+          <div class="collapsible-body">
+            <p>
+              Идентификация модели через поведенческий анализ. Детекция "Shadow
+              AI" — несанкционированного использования моделей.
+            </p>
+            <table>
+              <tr>
+                <th>Family</th>
+                <th>Models</th>
+                <th>Detection Method</th>
+              </tr>
+              <tr>
+                <td>OpenAI</td>
+                <td>GPT-3.5, GPT-4, GPT-4o</td>
+                <td>Stylometric + capability probes</td>
+              </tr>
+              <tr>
+                <td>Anthropic</td>
+                <td>Claude 2, Claude 3</td>
+                <td>Safety behavior patterns</td>
+              </tr>
+              <tr>
+                <td>Meta</td>
+                <td>Llama 2, Llama 3</td>
+                <td>Tokenization artifacts</td>
+              </tr>
+              <tr>
+                <td>Google</td>
+                <td>Gemini, PaLM</td>
+                <td>Response formatting</td>
+              </tr>
+              <tr>
+                <td>Others</td>
+                <td>Mistral, Qwen, DeepSeek</td>
+                <td>Unique behavior signatures</td>
+              </tr>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <div class="collapsible">
+        <div
+          class="collapsible-header"
+          onclick="toggleCollapsible(this.parentElement)"
+        >
+          <span class="collapsible-title"
+            ><span class="collapsible-icon green">🎛️</span> Activation
+            Steering</span
+          >
+          <span class="collapsible-arrow"></span>
+        </div>
+        <div class="collapsible-content">
+          <div class="collapsible-body">
+            <p>
+              Контроль поведения LLM через steering vectors — математически
+              вычисленные направления в пространстве активаций.
+            </p>
+            <h4>Safety Profiles</h4>
+            <ul>
+              <li>
+                <strong>Refusal Amplifier</strong> — усиление отказа на
+                вредоносные запросы
+              </li>
+              <li>
+                <strong>Honesty Enforcer</strong> — уменьшение галлюцинаций
+              </li>
+              <li>
+                <strong>Anti-Jailbreak</strong> — сопротивление manipulation
+                prompts
+              </li>
+              <li>
+                <strong>Harmlessness</strong> — snижение агрессивности ответов
+              </li>
+            </ul>
+            <p>
+              <em
+                >Research: "Steering Language Models" (Anthropic 2024),
+                "Representation Engineering" (2024)</em
+              >
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <div class="collapsible">
+        <div
+          class="collapsible-header"
+          onclick="toggleCollapsible(this.parentElement)"
+        >
+          <span class="collapsible-title"
+            ><span class="collapsible-icon red">🤖</span> Agentic AI Monitor
+            (OWASP Top 10)</span
+          >
+          <span class="collapsible-arrow"></span>
+        </div>
+        <div class="collapsible-content">
+          <div class="collapsible-body">
+            <p>
+              Мониторинг мультиагентных LLM-систем по OWASP Top 10 for Agentic
+              AI (2025):
+            </p>
+            <table>
+              <tr>
+                <th>#</th>
+                <th>Угроза</th>
+                <th>Детекция</th>
+              </tr>
+              <tr>
+                <td>A1</td>
+                <td>Memory Poisoning</td>
+                <td>Мониторинг изменений в long-term memory агента</td>
+              </tr>
+              <tr>
+                <td>A2</td>
+                <td>Tool Abuse</td>
+                <td>Rate limiting и permission checking на tool calls</td>
+              </tr>
+              <tr>
+                <td>A3</td>
+                <td>Privilege Escalation</td>
+                <td>Граф permissions, детекция аномальных переходов</td>
+              </tr>
+              <tr>
+                <td>A4</td>
+                <td>Agent Collusion</td>
+                <td>Анализ inter-agent коммуникаций на скрытые каналы</td>
+              </tr>
+              <tr>
+                <td>A5</td>
+                <td>Data Exfiltration</td>
+                <td>DLP на outputs всех агентов</td>
+              </tr>
+            </table>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Engines List -->
+    <section id="engines" class="section">
+      <div class="section-header">
+        <h2 class="section-title">🔧 Все 56 Движков Детекции</h2>
+        <p class="section-subtitle">
+          Defense in Depth — ни один детектор не идеален, но вместе они
+          непробиваемы
+        </p>
+      </div>
+
+      <div class="collapsible open">
+        <div
+          class="collapsible-header"
+          onclick="toggleCollapsible(this.parentElement)"
+        >
+          <span class="collapsible-title"
+            ><span class="collapsible-icon">📋</span> Полный список
+            движков</span
+          >
+          <span class="collapsible-arrow"></span>
+        </div>
+        <div class="collapsible-content">
+          <div class="collapsible-body">
+            <table>
+              <tr>
+                <th>№</th>
+                <th>Движок</th>
+                <th>Файл</th>
+                <th>LOC</th>
+                <th>Категория</th>
+              </tr>
+              <tr>
+                <td>1</td>
+                <td>Regex Patterns</td>
+                <td>regex_engine.py</td>
+                <td>~200</td>
+                <td>Классический</td>
+              </tr>
+              <tr>
+                <td>2</td>
+                <td>Length Validator</td>
+                <td>length_engine.py</td>
+                <td>~100</td>
+                <td>Классический</td>
+              </tr>
+              <tr>
+                <td>3</td>
+                <td>Encoding Detector</td>
+                <td>encoding_engine.py</td>
+                <td>~150</td>
+                <td>Классический</td>
+              </tr>
+              <tr>
+                <td>4</td>
+                <td>Signature Matcher</td>
+                <td>signature_engine.py</td>
+                <td>~250</td>
+                <td>Классический</td>
+              </tr>
+              <tr>
+                <td>5</td>
+                <td>YARA Rules</td>
+                <td>yara_engine.py</td>
+                <td>~300</td>
+                <td>Классический</td>
+              </tr>
+              <tr>
+                <td>6</td>
+                <td>Semantic Analyzer</td>
+                <td>semantic_engine.py</td>
+                <td>~350</td>
+                <td>NLP</td>
+              </tr>
+              <tr>
+                <td>7</td>
+                <td>Token Analyzer</td>
+                <td>token_engine.py</td>
+                <td>~200</td>
+                <td>NLP</td>
+              </tr>
+              <tr>
+                <td>8</td>
+                <td>Behavioral Engine</td>
+                <td>behavioral_engine.py</td>
+                <td>~400</td>
+                <td>ML</td>
+              </tr>
+              <tr>
+                <td>9</td>
+                <td>Context Tracker</td>
+                <td>context_engine.py</td>
+                <td>~350</td>
+                <td>ML</td>
+              </tr>
+              <tr>
+                <td>10</td>
+                <td>Similarity Detector</td>
+                <td>similarity_engine.py</td>
+                <td>~280</td>
+                <td>ML</td>
+              </tr>
+              <tr>
+                <td>11-15</td>
+                <td>LLM Judge, Canary, Hierarchy, Privacy, Knowledge</td>
+                <td>*.py</td>
+                <td>~1,500</td>
+                <td>Advanced</td>
+              </tr>
+              <tr>
+                <td>16-20</td>
+                <td>Chaos, Category, Boltzmann, Riemannian, N-gram</td>
+                <td>*.py</td>
+                <td>~2,000</td>
+                <td>Strange Math v1</td>
+              </tr>
+              <tr>
+                <td>21-25</td>
+                <td>Frequency, Entropy, Symbolic, Real-time, Ensemble</td>
+                <td>*.py</td>
+                <td>~1,200</td>
+                <td>Statistical</td>
+              </tr>
+              <tr>
+                <td>26-28</td>
+                <td>Threat Hunter, Watchdog, PoW Challenge</td>
+                <td>*.py, *.go</td>
+                <td>~1,500</td>
+                <td>Hive/Infra</td>
+              </tr>
+              <tr style="background: rgba(139, 92, 246, 0.1)">
+                <td>29</td>
+                <td>TDA Enhanced</td>
+                <td>tda_enhanced.py</td>
+                <td>~650</td>
+                <td><span class="badge badge-purple">Strange Math</span></td>
+              </tr>
+              <tr style="background: rgba(139, 92, 246, 0.1)">
+                <td>30</td>
+                <td>Sheaf Coherence</td>
+                <td>sheaf_coherence.py</td>
+                <td>~530</td>
+                <td><span class="badge badge-purple">Strange Math</span></td>
+              </tr>
+              <tr style="background: rgba(139, 92, 246, 0.1)">
+                <td>31</td>
+                <td>Information Geometry</td>
+                <td>information_geometry.py</td>
+                <td>~550</td>
+                <td><span class="badge badge-purple">Strange Math</span></td>
+              </tr>
+              <tr style="background: rgba(139, 92, 246, 0.1)">
+                <td>32</td>
+                <td>Spectral Graph</td>
+                <td>spectral_graph.py</td>
+                <td>~520</td>
+                <td><span class="badge badge-purple">Strange Math</span></td>
+              </tr>
+              <tr style="background: rgba(139, 92, 246, 0.1)">
+                <td>33</td>
+                <td>Hyperbolic Geometry</td>
+                <td>hyperbolic_geometry.py</td>
+                <td>~580</td>
+                <td><span class="badge badge-purple">Strange Math</span></td>
+              </tr>
+              <tr style="background: rgba(139, 92, 246, 0.1)">
+                <td>34</td>
+                <td>Math Oracle</td>
+                <td>math_oracle.py</td>
+                <td>~600</td>
+                <td><span class="badge badge-purple">Strange Math</span></td>
+              </tr>
+              <!-- VLM & TTPs.ai Defense (35-44) -->
+              <tr style="background: rgba(16, 185, 129, 0.1)">
+                <td>35</td>
+                <td>VLM Protection</td>
+                <td>vlm_protection.py</td>
+                <td>~450</td>
+                <td><span class="badge badge-green">VLM</span></td>
+              </tr>
+              <tr style="background: rgba(16, 185, 129, 0.1)">
+                <td>36</td>
+                <td>RAG Guard</td>
+                <td>rag_guard.py</td>
+                <td>~380</td>
+                <td><span class="badge badge-green">TTPs.ai</span></td>
+              </tr>
+              <tr style="background: rgba(16, 185, 129, 0.1)">
+                <td>37</td>
+                <td>Probing Detection</td>
+                <td>probing_detection.py</td>
+                <td>~320</td>
+                <td><span class="badge badge-green">TTPs.ai</span></td>
+              </tr>
+              <tr style="background: rgba(16, 185, 129, 0.1)">
+                <td>38</td>
+                <td>Session Memory Guard</td>
+                <td>session_memory.py</td>
+                <td>~400</td>
+                <td><span class="badge badge-green">TTPs.ai</span></td>
+              </tr>
+              <tr style="background: rgba(16, 185, 129, 0.1)">
+                <td>39</td>
+                <td>Tool Call Security</td>
+                <td>tool_security.py</td>
+                <td>~350</td>
+                <td><span class="badge badge-green">TTPs.ai</span></td>
+              </tr>
+              <tr style="background: rgba(16, 185, 129, 0.1)">
+                <td>40</td>
+                <td>AI C2 Detection</td>
+                <td>ai_c2_detection.py</td>
+                <td>~420</td>
+                <td><span class="badge badge-green">TTPs.ai</span></td>
+              </tr>
+              <tr style="background: rgba(16, 185, 129, 0.1)">
+                <td>41</td>
+                <td>Attack Staging Detection</td>
+                <td>attack_staging.py</td>
+                <td>~380</td>
+                <td><span class="badge badge-green">TTPs.ai</span></td>
+              </tr>
+              <tr style="background: rgba(16, 185, 129, 0.1)">
+                <td>42</td>
+                <td>APE Signature Database</td>
+                <td>ape_signatures.py</td>
+                <td>~500</td>
+                <td><span class="badge badge-green">TTPs.ai</span></td>
+              </tr>
+              <tr style="background: rgba(16, 185, 129, 0.1)">
+                <td>43-44</td>
+                <td>Agentic Monitor, Agent Isolation</td>
+                <td>agentic_*.py</td>
+                <td>~600</td>
+                <td><span class="badge badge-green">Agentic AI</span></td>
+              </tr>
+              <tr>
+                <td>45</td>
+                <td>Proactive Defense</td>
+                <td>proactive_defense.py</td>
+                <td>~540</td>
+                <td>Proactive</td>
+              </tr>
+              <!-- Advanced Research Engines (46-55) -->
+              <tr style="background: rgba(245, 158, 11, 0.1)">
+                <td>46</td>
+                <td>Honeypot Responses</td>
+                <td>honeypot_responses.py</td>
+                <td>~363</td>
+                <td><span class="badge badge-orange">Research</span></td>
+              </tr>
+              <tr style="background: rgba(245, 158, 11, 0.1)">
+                <td>47</td>
+                <td>Canary Tokens</td>
+                <td>canary_tokens.py</td>
+                <td>~388</td>
+                <td><span class="badge badge-orange">Research</span></td>
+              </tr>
+              <tr style="background: rgba(245, 158, 11, 0.1)">
+                <td>48</td>
+                <td>Adversarial Self-Play</td>
+                <td>adversarial_self_play.py</td>
+                <td>~474</td>
+                <td><span class="badge badge-orange">Research</span></td>
+              </tr>
+              <tr style="background: rgba(245, 158, 11, 0.1)">
+                <td>49</td>
+                <td>Intent Prediction</td>
+                <td>intent_prediction.py</td>
+                <td>~394</td>
+                <td><span class="badge badge-orange">Research</span></td>
+              </tr>
+              <tr style="background: rgba(245, 158, 11, 0.1)">
+                <td>50</td>
+                <td>Kill Chain Simulation</td>
+                <td>kill_chain_simulation.py</td>
+                <td>~410</td>
+                <td><span class="badge badge-orange">Research</span></td>
+              </tr>
+              <tr style="background: rgba(245, 158, 11, 0.1)">
+                <td>51</td>
+                <td>Runtime Guardrails</td>
+                <td>runtime_guardrails.py</td>
+                <td>~409</td>
+                <td><span class="badge badge-orange">Research</span></td>
+              </tr>
+              <tr style="background: rgba(245, 158, 11, 0.1)">
+                <td>52</td>
+                <td>Information Geometry v2</td>
+                <td>information_geometry.py</td>
+                <td>~368</td>
+                <td><span class="badge badge-orange">Research</span></td>
+              </tr>
+              <tr style="background: rgba(245, 158, 11, 0.1)">
+                <td>53</td>
+                <td>Formal Invariants</td>
+                <td>formal_invariants.py</td>
+                <td>~324</td>
+                <td><span class="badge badge-orange">Research</span></td>
+              </tr>
+              <tr style="background: rgba(245, 158, 11, 0.1)">
+                <td>54</td>
+                <td>Gradient Detection</td>
+                <td>gradient_detection.py</td>
+                <td>~286</td>
+                <td><span class="badge badge-orange">Research</span></td>
+              </tr>
+              <tr style="background: rgba(245, 158, 11, 0.1)">
+                <td>55</td>
+                <td>Compliance Engine</td>
+                <td>compliance_engine.py</td>
+                <td>~359</td>
+                <td><span class="badge badge-orange">Research</span></td>
+              </tr>
+              <!-- Meta-Judge (56) -->
+              <tr style="background: rgba(59, 130, 246, 0.15)">
+                <td><strong>56</strong></td>
+                <td><strong>Meta-Judge</strong></td>
+                <td>meta_judge.py</td>
+                <td>~752</td>
+                <td><span class="badge badge-blue">Orchestrator</span></td>
+              </tr>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <div class="collapsible">
+        <div
+          class="collapsible-header"
+          onclick="toggleCollapsible(this.parentElement)"
+        >
+          <span class="collapsible-title"
+            ><span class="collapsible-icon green">📊</span> Метрики
+            проекта</span
+          >
+          <span class="collapsible-arrow"></span>
+        </div>
+        <div class="collapsible-content">
+          <div class="collapsible-body">
+            <table>
+              <tr>
+                <th>Категория</th>
+                <th>Файлов</th>
+                <th>LOC</th>
+                <th>Описание</th>
+              </tr>
+              <tr>
+                <td>Brain (Python)</td>
+                <td>80+</td>
+                <td>~25,000</td>
+                <td>56 детекторов, Hive, Meta-Judge, gRPC</td>
+              </tr>
+              <tr>
+                <td>Gateway (Go)</td>
+                <td>15</td>
+                <td>~3,200</td>
+                <td>HTTP шлюз, Auth, Proxy, PoW</td>
+              </tr>
+              <tr>
+                <td>Tests</td>
+                <td>40+</td>
+                <td>~8,000</td>
+                <td>420+ unit tests, integration, load</td>
+              </tr>
+              <tr>
+                <td>Documentation</td>
+                <td>60+</td>
+                <td>~15,000</td>
+                <td>Architecture, Research, Security</td>
+              </tr>
+              <tr>
+                <td>Config/Deploy</td>
+                <td>20+</td>
+                <td>~1,000</td>
+                <td>Docker, Kubernetes, Helm</td>
+              </tr>
+              <tr
+                style="font-weight: 600; background: rgba(16, 185, 129, 0.15)"
+              >
+                <td>ИТОГО</td>
+                <td>235+</td>
+                <td>~62,000</td>
+                <td>Full-stack AI Security Platform</td>
+              </tr>
+            </table>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Hive Intelligence -->
+    <section id="hive" class="section section-dark">
+      <div class="section-header">
+        <h2 class="section-title">🐝 Hive Intelligence</h2>
+        <p class="section-subtitle">
+          Автономная подсистема для проактивной защиты и самовосстановления
+        </p>
+      </div>
+
+      <div class="cards-grid">
+        <div class="card">
+          <div class="card-icon purple">🔍</div>
+          <h3>Threat Hunter</h3>
+          <p>
+            24/7 проактивный поиск угроз. Анализирует паттерны запросов, ищет
+            аномалии, которые пропустили детекторы. Обучается на новых атаках.
+          </p>
+        </div>
+        <div class="card">
+          <div class="card-icon green">🩺</div>
+          <h3>Watchdog</h3>
+          <p>
+            Самовосстановление системы. Мониторит health компонентов,
+            автоматически перезапускает упавшие сервисы, эскалирует при
+            повторных сбоях.
+          </p>
+        </div>
+        <div class="card">
+          <div class="card-icon blue">🔐</div>
+          <h3>Post-Quantum Crypto</h3>
+          <p>
+            Kyber-768 для ключей, Dilithium для подписей. Защита от квантовых
+            компьютеров уже сегодня. NIST PQC стандарты 2024.
+          </p>
+        </div>
+        <div class="card">
+          <div class="card-icon orange">📡</div>
+          <h3>Threat Intelligence</h3>
+          <p>
+            Обмен IoC между инстансами SENTINEL. Федеративное обучение
+            детекторов без раскрытия данных клиентов.
+          </p>
+        </div>
+      </div>
+
+      <div class="collapsible" style="margin-top: 2rem">
+        <div
+          class="collapsible-header"
+          onclick="toggleCollapsible(this.parentElement)"
+        >
+          <span class="collapsible-title"
+            ><span class="collapsible-icon purple">🧠</span> Как работает Threat
+            Hunter</span
+          >
+          <span class="collapsible-arrow"></span>
+        </div>
+        <div class="collapsible-content">
+          <div class="collapsible-body">
+            <p>
+              Threat Hunter — это автономный AI-агент, который непрерывно
+              анализирует трафик:
+            </p>
+            <h4>Режимы работы</h4>
+            <table>
+              <tr>
+                <th>Режим</th>
+                <th>Описание</th>
+                <th>Периодичность</th>
+              </tr>
+              <tr>
+                <td>Passive Scan</td>
+                <td>Анализ логов, поиск паттернов</td>
+                <td>Непрерывно</td>
+              </tr>
+              <tr>
+                <td>Active Probe</td>
+                <td>Тестовые запросы к детекторам</td>
+                <td>Каждые 5 мин</td>
+              </tr>
+              <tr>
+                <td>Deep Analysis</td>
+                <td>ML-кластеризация аномалий</td>
+                <td>Каждый час</td>
+              </tr>
+              <tr>
+                <td>Report Generation</td>
+                <td>Отчёт для SOC-команды</td>
+                <td>Ежедневно</td>
+              </tr>
+            </table>
+            <h4>Типы обнаруживаемых угроз</h4>
+            <ul>
+              <li>
+                <strong>Slow & Low атаки</strong> — накопительные injection,
+                растянутые во времени
+              </li>
+              <li>
+                <strong>Zero-day patterns</strong> — новые техники, похожие на
+                известные атаки
+              </li>
+              <li>
+                <strong>Anomalous users</strong> — подозрительное поведение
+                отдельных пользователей
+              </li>
+              <li>
+                <strong>Evasion attempts</strong> — попытки обхода детекторов
+              </li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
+      <div class="collapsible">
+        <div
+          class="collapsible-header"
+          onclick="toggleCollapsible(this.parentElement)"
+        >
+          <span class="collapsible-title"
+            ><span class="collapsible-icon green">🩹</span> Watchdog
+            Self-Healing</span
+          >
+          <span class="collapsible-arrow"></span>
+        </div>
+        <div class="collapsible-content">
+          <div class="collapsible-body">
+            <p>Watchdog обеспечивает отказоустойчивость системы:</p>
+            <table>
+              <tr>
+                <th>Событие</th>
+                <th>Действие</th>
+                <th>Эскалация</th>
+              </tr>
+              <tr>
+                <td>Движок не отвечает</td>
+                <td>Restart + fallback</td>
+                <td>После 3 попыток → Alert</td>
+              </tr>
+              <tr>
+                <td>High latency (>500ms)</td>
+                <td>Reduce load, scale up</td>
+                <td>Prometheus → PagerDuty</td>
+              </tr>
+              <tr>
+                <td>Memory leak</td>
+                <td>Graceful restart</td>
+                <td>Core dump → analysis</td>
+              </tr>
+              <tr>
+                <td>Config corruption</td>
+                <td>Rollback to last good</td>
+                <td>Git restore + notify</td>
+              </tr>
+            </table>
+            <div class="highlight-box" style="margin-top: 1rem">
+              <strong>Resilience:</strong> Система продолжает работать даже при
+              отказе 50% движков. Degraded mode обеспечивает базовую защиту,
+              пока идёт восстановление.
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- PoW Challenge -->
+    <section id="pow" class="section">
+      <div class="section-header">
+        <h2 class="section-title">⚡ PoW Challenge Layer</h2>
+        <p class="section-subtitle">
+          Proof-of-Work защита от автоматизированных атак, вдохновлённая
+          проектом Anubis
+        </p>
+      </div>
+
+      <div class="highlight-box">
+        <strong>Идея:</strong> Заставить атакующего тратить вычислительные
+        ресурсы. Для легитимного пользователя — незаметная задержка ~100ms. Для
+        бота, делающего 1000 req/sec — нереализуемые затраты.
+      </div>
+
+      <div class="cards-grid">
+        <div class="card">
+          <div class="card-icon blue">🧮</div>
+          <h3>SHA256 Challenge</h3>
+          <p>
+            Клиент должен найти nonce, чтобы hash(challenge + nonce) начинался с
+            N нулей. Difficulty адаптируется к нагрузке.
+          </p>
+        </div>
+        <div class="card">
+          <div class="card-icon green">🎯</div>
+          <h3>Rule-Based Triggers</h3>
+          <p>
+            PoW включается по правилам: подозрительный User-Agent, высокий rate,
+            известные AI-краулеры. Обычные пользователи не затрагиваются.
+          </p>
+        </div>
+        <div class="card">
+          <div class="card-icon orange">🎫</div>
+          <h3>Token System</h3>
+          <p>
+            После решения PoW выдаётся временный токен. Не нужно решать
+            challenge на каждый запрос — только при первом контакте.
+          </p>
+        </div>
+        <div class="card">
+          <div class="card-icon purple">📊</div>
+          <h3>Analytics</h3>
+          <p>
+            Метрики: сколько challenges выдано, solve rate, average time.
+            Детекция ботов по аномально быстрому/медленному решению.
+          </p>
+        </div>
+      </div>
+
+      <div class="collapsible" style="margin-top: 2rem">
+        <div
+          class="collapsible-header"
+          onclick="toggleCollapsible(this.parentElement)"
+        >
+          <span class="collapsible-title"
+            ><span class="collapsible-icon">📋</span> Правила активации PoW
+            (Anubis-style)</span
+          >
+          <span class="collapsible-arrow"></span>
+        </div>
+        <div class="collapsible-content">
+          <div class="collapsible-body">
+            <table>
+              <tr>
+                <th>Правило</th>
+                <th>Условие</th>
+                <th>Действие</th>
+              </tr>
+              <tr>
+                <td>AI Crawlers</td>
+                <td>User-Agent: GPTBot, ClaudeBot, etc.</td>
+                <td>CHALLENGE (difficulty: 20)</td>
+              </tr>
+              <tr>
+                <td>Generic Bots</td>
+                <td>User-Agent: curl, wget, python-requests</td>
+                <td>CHALLENGE (difficulty: 16)</td>
+              </tr>
+              <tr>
+                <td>High Rate</td>
+                <td>>50 req/min с одного IP</td>
+                <td>CHALLENGE (difficulty: 18)</td>
+              </tr>
+              <tr>
+                <td>No JS</td>
+                <td>Нет cookie от JS-проверки</td>
+                <td>CHALLENGE (difficulty: 14)</td>
+              </tr>
+              <tr>
+                <td>Browsers</td>
+                <td>Chrome, Firefox, Safari</td>
+                <td>ALLOW</td>
+              </tr>
+              <tr>
+                <td>Verified Tokens</td>
+                <td>Валидный PoW-токен</td>
+                <td>ALLOW</td>
+              </tr>
+            </table>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Roadmap -->
+    <section id="roadmap" class="section section-dark">
+      <div class="section-header">
+        <h2 class="section-title">🗺️ Roadmap</h2>
+        <p class="section-subtitle">План развития платформы</p>
+      </div>
+
+      <div class="collapsible open">
+        <div
+          class="collapsible-header"
+          onclick="toggleCollapsible(this.parentElement)"
+        >
+          <span class="collapsible-title"
+            ><span class="collapsible-icon green">✅</span> 2024-2025 —
+            Выполнено</span
+          >
+          <span class="collapsible-arrow"></span>
+        </div>
+        <div class="collapsible-content">
+          <div class="collapsible-body">
+            <ul>
+              <li>Core Architecture: Gateway (Go) + Brain (Python) + gRPC</li>
+              <li>56 движков детекции (включая Strange Math v2 + Meta-Judge)</li>
+              <li>Hive Intelligence (Threat Hunter, Watchdog)</li>
+              <li>PoW Challenge Layer (Anubis-style)</li>
+              <li>
+                Strange Math v2 — TDA Enhanced, Sheaf Coherence, Information
+                Geometry, Hyperbolic, Spectral
+              </li>
+              <li>
+                Advanced 2025 — Hidden State Forensics, LLM Fingerprinting,
+                Activation Steering
+              </li>
+              <li>Math Oracle — DeepSeek-V3.2 интеграция</li>
+              <li>Agentic Monitor — OWASP Top 10 for Agentic AI</li>
+              <li>Docker + Kubernetes deployment</li>
+              <li>420+ unit тестов, 62K+ LOC</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
+      <div class="collapsible open">
+        <div
+          class="collapsible-header"
+          onclick="toggleCollapsible(this.parentElement)"
+        >
+          <span class="collapsible-title"
+            ><span class="collapsible-icon blue">🔄</span> Q4 2025 — Текущий
+            этап</span
+          >
+          <span class="collapsible-arrow"></span>
+        </div>
+        <div class="collapsible-content">
+          <div class="collapsible-body">
+            <ul>
+              <li>
+                <strong>GitHub Pages launch</strong> — публикация документации
+              </li>
+              <li>
+                <strong>Open Source подготовка</strong> — лицензирование,
+                contributing guide
+              </li>
+              <li>
+                <strong>Production hardening</strong> — финальное тестирование
+                под нагрузкой
+              </li>
+              <li>
+                <strong>Поиск партнёров</strong> — сотрудничество, спонсорство,
+                продажа
+              </li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
+      <div class="collapsible">
+        <div
+          class="collapsible-header"
+          onclick="toggleCollapsible(this.parentElement)"
+        >
+          <span class="collapsible-title"
+            ><span class="collapsible-icon orange">📅</span> H1 2026 —
+            Планы</span
+          >
+          <span class="collapsible-arrow"></span>
+        </div>
+        <div class="collapsible-content">
+          <div class="collapsible-body">
+            <ul>
+              <li>
+                <strong>Formal Verification</strong> — IBP, CROWN, Beta-CROWN
+                для certified robustness
+              </li>
+              <li>
+                <strong>Homomorphic Encryption</strong> — CKKS для
+                privacy-preserving analysis
+              </li>
+              <li>
+                <strong>Multi-modal support</strong> — детекция атак через
+                images/audio
+              </li>
+              <li>
+                <strong>SaaS deployment</strong> — managed service, metering,
+                billing
+              </li>
+              <li><strong>SOC2 Type II</strong> — сертификация</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
+      <div class="collapsible">
+        <div
+          class="collapsible-header"
+          onclick="toggleCollapsible(this.parentElement)"
+        >
+          <span class="collapsible-title"
+            ><span class="collapsible-icon purple">🔮</span> H2 2026+ —
+            Vision</span
+          >
+          <span class="collapsible-arrow"></span>
+        </div>
+        <div class="collapsible-content">
+          <div class="collapsible-body">
+            <ul>
+              <li>
+                <strong>On-device inference</strong> — Edge deployment для
+                latency-sensitive use cases
+              </li>
+              <li>
+                <strong>Continuous learning</strong> — адаптация детекторов без
+                переобучения
+              </li>
+              <li>
+                <strong>Global Threat Network</strong> — федеративный обмен IoC
+                между клиентами
+              </li>
+              <li>
+                <strong>Research publications</strong> — ICML, NeurIPS papers на
+                основе Strange Math
+              </li>
+              <li>
+                <strong>Enterprise partnerships</strong> — интеграции с Datadog,
+                Splunk, Elastic
+              </li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="footer">
+      <p><strong>© 2025 SENTINEL AI Security Platform</strong></p>
+      <p style="margin-top: 0.5rem; font-size: 0.9rem">
+        Enterprise-grade защита для LLM-приложений
+      </p>
+      <p
+        style="
+          margin-top: 0.5rem;
+          font-size: 0.8rem;
+          color: var(--text-secondary);
+        "
+      >
+        Технологии: Go, Python, gRPC, Transformers, TDA, Sheaf Theory,
+        Hyperbolic ML
+      </p>
+    </footer>
+
+    <script>
+      function toggleCollapsible(el) {
+        el.classList.toggle("open");
+      }
+      document.querySelectorAll('a[href^="#"]').forEach((a) => {
+        a.addEventListener("click", (e) => {
+          e.preventDefault();
+          document
+            .querySelector(a.getAttribute("href"))
+            ?.scrollIntoView({ behavior: "smooth" });
+        });
+      });
+    </script>
+  </body>
+</html>
