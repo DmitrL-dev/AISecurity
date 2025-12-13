@@ -14,8 +14,6 @@
   <a href="mailto:chg@live.ru">📧 Email</a>
 </p>
 
-> 🔗 **[Project Website](https://dmitrl-dev.github.io/AISecurity/)** — Презентации, визуальная архитектура и обзор проекта
-
 ---
 
 ### 🤝 Partnership & Collaboration
