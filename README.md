@@ -422,7 +422,8 @@ flowchart TB
     NEW --> LEVELS
 ```
 
-#### 🎯 Proactive Engines (NEW Categories)
+<details>
+<summary><strong>🎯 Proactive Engines (NEW Categories)</strong></summary>
 
 | Category               | Engines                                                                             | Key Innovation                     |
 | ---------------------- | ----------------------------------------------------------------------------------- | ---------------------------------- |
@@ -432,6 +433,8 @@ flowchart TB
 | **ASI Gap Coverage**   | `nhi_identity_guard`, `mcp_a2a_security`, `cascading_guard`                         | OWASP ASI03/04/07/08               |
 | **Preventive Threats** | `context_window_poisoning`, `semantic_firewall`, `agent_collusion_detector` +7 more | 2026-2027 threat prevention        |
 | **Strange Math v3**    | `morse_theory`, `persistent_laplacian`, `optimal_transport`                         | Wasserstein distance + TDA fusion  |
+
+</details>
 
 #### 📊 Complete Engine Matrix
 
@@ -454,6 +457,9 @@ flowchart TB
 |                              | **87** | **Industry's most comprehensive suite**  |
 
 #### 🔎 Hybrid Search Agent (NEW)
+
+<details>
+<summary><strong>🔎 Hybrid Search Agent Details</strong></summary>
 
 SENTINEL includes a **Hybrid Search Agent** that orchestrates proactive engines using tree-based search:
 
@@ -488,6 +494,8 @@ best_attack = agent.run(max_steps=20)
 | **Lead over attackers** | 0 (reactive)  | **6-12 months**                    |
 | **Structural immunity** | 0%            | **40%+ attack classes blocked**    |
 | **OWASP ASI Top 10**    | 70%           | **95%+ coverage**                  |
+
+</details>
 
 ---
 
