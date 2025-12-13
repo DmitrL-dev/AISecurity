@@ -56,7 +56,7 @@ Welcome to SENTINEL Community Edition documentation.
 
 [Upgrade to Enterprise](https://sentinel.ai/enterprise) for:
 
-- 85 detection engines
+- 87 detection engines
 - Zero-day detection
 - Red team automation
 - Compliance reporting

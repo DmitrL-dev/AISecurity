@@ -449,9 +449,9 @@ flowchart TB
 | ☠️ **Data Poisoning**        | 4      | Bootstrap, temporal, multi-tenant        |
 | 🔍 **Advanced Research**     | 9      | Honeypots, kill chain, formal            |
 | 🧠 **Deep Learning**         | 6      | Activation steering, forensics           |
-| ⚖️ **Meta-Judge + XAI**      | 2      | 84-engine aggregator                     |
+| ⚖️ **Meta-Judge + XAI**      | 2      | 87-engine aggregator                     |
 | 🔎 **Hybrid Search Agent**   | 1      | Tree-search orchestration layer          |
-|                              | **85** | **Industry's most comprehensive suite**  |
+|                              | **87** | **Industry's most comprehensive suite**  |
 
 #### 🔎 Hybrid Search Agent (NEW)
 
