@@ -3,7 +3,8 @@
 > **Total Engines:** 87  
 > **Total LOC Analyzed:** ~44,000  
 > **Unit Tests:** 116+ tests  
-> **Benchmark Suite:** 9 benchmarks  
+> **Benchmark Suite:** 1,815 samples (3 HF datasets)  
+> **Hybrid Detector Recall:** 85.1% | Precision: 84.4% | F1: 84.7%  
 > **Coverage:** OWASP LLM Top 10 + Agentic AI Top 10 (ASI 2025)
 
 ---
@@ -81,7 +82,7 @@ _Full index in individual category files_
 
 ### Если вы ML-инженер
 
-1. Нет бенчмарков precision/recall — в roadmap
+1. ✅ **Benchmark Results:** Recall 85.1%, Precision 84.4%, F1 84.7%
 2. Embeddings: sentence-transformers / BERT (plug-and-play)
 3. Все движки работают на CPU, GPU опционально
 

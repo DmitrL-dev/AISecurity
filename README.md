@@ -3,6 +3,11 @@
 > **Advanced Mathematics & Engineering for AI Security**
 
 <p align="center">
+  <img src="https://img.shields.io/badge/Recall-85.1%25-brightgreen?style=for-the-badge" alt="Recall">
+  <img src="https://img.shields.io/badge/Precision-84.4%25-blue?style=for-the-badge" alt="Precision">
+  <img src="https://img.shields.io/badge/Engines-87-purple?style=for-the-badge" alt="Engines">
+  <img src="https://img.shields.io/badge/Dataset-1815-orange?style=for-the-badge" alt="Dataset">
+</p>
   <a href="https://dmitrl-dev.github.io/AISecurity/">📚 Documentation Portal</a> •
   <a href="#license--contact">📞 Contact</a> •
   <a href="https://t.me/DmLabincev">💬 Telegram</a> •
@@ -72,6 +77,111 @@ This repository contains the **Community Edition** of SENTINEL. Enterprise featu
 ---
 
 This document provides a comprehensive technical overview of SENTINEL's architecture.
+
+---
+
+## 📊 Benchmark Results
+
+<p align="center">
+  <strong>Prompt Injection Detection Performance</strong>
+</p>
+
+### 🎯 Detection Accuracy
+
+```
+┌─────────────────────────────────────────────────────────────────────────┐
+│                    PROMPT INJECTION DETECTION                            │
+├─────────────────────────────────────────────────────────────────────────┤
+│                                                                          │
+│  Hybrid Ensemble    ████████████████████░░░░  85.1% Recall ⭐ BEST      │
+│  Semantic Detector  ███████████████████░░░░░  84.2% Recall              │
+│  Injection Engine   █████████░░░░░░░░░░░░░░░  36.4% Recall              │
+│  Voice Jailbreak    █░░░░░░░░░░░░░░░░░░░░░░░   2.7% Recall              │
+│                                                                          │
+│  Dataset: 1,815 samples from 3 HuggingFace datasets                     │
+│  True Positives: 1,026 / 1,206 attacks detected                          │
+└─────────────────────────────────────────────────────────────────────────┘
+```
+
+### 📈 Improvement Timeline
+
+```
+Development Stage              Recall    True Positives
+──────────────────────────────────────────────────────────
+Baseline (regex only)           4.5%              9 TP
++ Pattern Expansion            38.5%            337 TP
++ Semantic Detector            64.2%            774 TP
++ Attack Prototypes (100+)     72.3%            872 TP
++ Threshold Optimization       79.1%            954 TP
+★ Final Hybrid Ensemble        85.1%          1,026 TP  ← Current
+──────────────────────────────────────────────────────────
+                             +1,791% improvement!
+```
+
+### 🔬 Detection Architecture
+
+```mermaid
+flowchart LR
+    subgraph Input
+        A[User Prompt]
+    end
+    
+    subgraph Detection["87 Detection Engines"]
+        B[InjectionEngine<br/>Regex Patterns]
+        C[SemanticDetector<br/>100+ Prototypes]
+        D[VoiceJailbreak<br/>Phonetic Analysis]
+    end
+    
+    subgraph Ensemble["Hybrid Ensemble"]
+        E{OR Logic}
+        F[Max Score]
+    end
+    
+    subgraph Output
+        G[Risk Score<br/>0.0 - 1.0]
+        H{Decision}
+        I[✅ SAFE]
+        J[🚫 BLOCKED]
+    end
+    
+    A --> B & C & D
+    B --> E
+    C --> E
+    D --> E
+    E --> F --> G --> H
+    H -->|score < 0.7| I
+    H -->|score ≥ 0.7| J
+    
+    style C fill:#4CAF50,color:#fff
+    style E fill:#2196F3,color:#fff
+    style J fill:#f44336,color:#fff
+```
+
+### 📋 Detailed Results
+
+| Engine | Recall | Precision | F1 | TP | FP | FN |
+|--------|--------|-----------|-----|-----|-----|-----|
+| **Hybrid** | **85.1%** | 84.4% | **84.7%** | 1,026 | 190 | 180 |
+| Semantic | 84.2% | 84.3% | 84.3% | 1,016 | 189 | 190 |
+| Injection | 36.4% | 96.7% | 52.9% | 439 | 15 | 767 |
+| Voice | 2.7% | 86.5% | 5.1% | 32 | 5 | 1,174 |
+
+> 📁 **Full results:** [`benchmarks/BENCHMARK_REPORT.md`](./benchmarks/BENCHMARK_REPORT.md)  
+> 📊 **Interactive charts:** [`benchmarks/charts/dashboard.html`](./benchmarks/charts/dashboard.html)
+
+### 🚀 Run Benchmark
+
+```bash
+# Install dependencies
+pip install -r requirements.txt
+
+# Run full benchmark (requires sentence-transformers)
+python benchmarks/benchmark_eval.py
+
+# Generate charts
+python benchmarks/benchmark_charts.py   # PNG (matplotlib)
+python benchmarks/benchmark_plotly.py   # HTML (interactive)
+```
 
 ---
 
