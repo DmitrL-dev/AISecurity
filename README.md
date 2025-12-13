@@ -1228,9 +1228,10 @@ Automatic audit reports include:
 - Risk level assessment (EU AI Act: Minimal/Limited/High/Unacceptable)
 - Evidence for compliance auditors
 
----
 
 </details>
+
+---
 
 <details>
 <summary><h2>⚖️ Meta-Judge Engine (NEW)</h2></summary>
