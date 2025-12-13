@@ -6,7 +6,7 @@
     <title>SENTINEL — AI Security Platform</title>
     <meta
       name="description"
-      content="Enterprise-grade AI Security Platform. 56 движков детекции, Strange Math, Meta-Judge, Post-Quantum Security."
+      content="SENTINEL Community Edition - Open Source AI Security Platform. 15 движков детекции для защиты LLM приложений."
     />
     <link
       href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap"
@@ -541,27 +541,27 @@
     <section class="hero">
       <div class="hero-content">
         <span class="hero-badge"
-          >🔬 2025 Research-Driven • ICML • GSI • ESSLLI</span
+          >🆓 Community Edition • Open Source • Apache 2.0</span
         >
         <h1>🛡️ SENTINEL AI Security Platform</h1>
         <p class="hero-subtitle">
-          Enterprise-grade платформа для защиты LLM-приложений от prompt
-          injection, jailbreak, data leakage и других AI-специфичных угроз.
-          <strong>Уникальный подход Strange Math</strong> — применение передовой
-          математики (топология, теория пучков, гиперболическая геометрия) для
-          детекции атак.
+          Open Source платформа для защиты LLM-приложений от prompt
+          injection, jailbreak, data leakage.
+          <strong>20 движков</strong> включая TDA+GUDHI, Sheaf, Voice Jailbreak, Hyperbolic, RAG Guard.
+          <br><br>
+          <a href="mailto:chg@live.ru" style="color: var(--accent-blue);">🚀 Enterprise Edition (87 движков) →</a>
         </p>
         <div class="hero-stats">
           <div class="stat">
-            <div class="stat-value">56</div>
-            <div class="stat-label">Движков детекции</div>
+            <div class="stat-value">20</div>
+            <div class="stat-label">Движков (Community)</div>
           </div>
           <div class="stat">
             <div class="stat-value">62K+</div>
             <div class="stat-label">Строк кода</div>
           </div>
           <div class="stat">
-            <div class="stat-value">420+</div>
+            <div class="stat-value">530+</div>
             <div class="stat-label">Unit тестов</div>
           </div>
           <div class="stat">
@@ -694,7 +694,7 @@
         <div class="arch-row">
           <div class="arch-box brain">
             <strong>🧠 Brain (Python)</strong><br />
-            <small>56 Engines • Hive Intelligence • Meta-Judge</small>
+            <small>87 Engines • Hive Intelligence • Meta-Judge</small>
           </div>
         </div>
         <div class="arch-arrow">⬇️</div>
@@ -721,7 +721,11 @@
               <tr><td>SAST (Semgrep, Checkmarx)</td><td>Уязвимости в коде</td><td>❌ Не видит</td></tr>
               <tr><td>DAST (ZAP, Burp)</td><td>Runtime уязвимости</td><td>❌ Не видит</td></tr>
               <tr><td>SCA (Trivy, Snyk)</td><td>Уязвимости в зависимостях</td><td>❌ Не видит</td></tr>
-              <tr style="background: rgba(139,92,246,0.15)"><td><strong>SENTINEL</strong></td><td><strong>AI-атаки</strong></td><td><strong>✅ 56 детекторов</strong></td></tr>
+              <tr style="background: rgba(139,92,246,0.15)">
+                <td><strong>SENTINEL</strong></td>
+                <td><strong>AI-атаки</strong></td>
+                <td><strong>✅ 87 детекторов</strong></td>
+              </tr>
             </table>
 
             <h4>🎯 SENTINEL как Quality Gate в CI/CD</h4>
@@ -1262,7 +1266,7 @@
     <!-- Engines List -->
     <section id="engines" class="section">
       <div class="section-header">
-        <h2 class="section-title">🔧 Все 56 Движков Детекции</h2>
+        <h2 class="section-title">🔧 15 Движков Детекции (Community Edition)</h2>
         <p class="section-subtitle">
           Defense in Depth — ни один детектор не идеален, но вместе они
           непробиваемы
@@ -1287,16 +1291,107 @@
                 <th>№</th>
                 <th>Движок</th>
                 <th>Файл</th>
-                <th>LOC</th>
                 <th>Категория</th>
               </tr>
               <tr>
                 <td>1</td>
-                <td>Regex Patterns</td>
-                <td>regex_engine.py</td>
-                <td>~200</td>
-                <td>Классический</td>
+                <td>Injection Detector</td>
+                <td>injection.py</td>
+                <td>Classic</td>
+                </tr>
+                <tr>
+                  <td>2</td>
+                  <td>YARA Engine</td>
+                  <td>yara_engine.py</td>
+                  <td>Classic</td>
+                </tr>
+                <tr>
+                  <td>3</td>
+                  <td>Behavioral Analyzer</td>
+                  <td>behavioral.py</td>
+                  <td>Classic</td>
+                </tr>
+                <tr>
+                  <td>4</td>
+                  <td>PII Detector</td>
+                  <td>pii.py</td>
+                  <td>Classic</td>
+                </tr>
+                <tr>
+                  <td>5</td>
+                  <td>Query Validator</td>
+                  <td>query.py</td>
+                  <td>Classic</td>
+                </tr>
+                <tr>
+                  <td>6</td>
+                  <td>Language Detector</td>
+                  <td>language.py</td>
+                  <td>Classic</td>
+                </tr>
+                <tr style="background: rgba(59, 130, 246, 0.1)">
+                  <td>7</td>
+                  <td>Prompt Guard</td>
+                  <td>prompt_guard.py</td>
+                  <td><span class="badge badge-blue">NLP</span></td>
+                </tr>
+                <tr style="background: rgba(59, 130, 246, 0.1)">
+                  <td>8</td>
+                  <td>Hallucination Detector</td>
+                  <td>hallucination.py</td>
+                  <td><span class="badge badge-blue">NLP</span></td>
+                </tr>
+                <tr style="background: rgba(139, 92, 246, 0.1)">
+                  <td>9</td>
+                  <td>TDA Enhanced</td>
+                  <td>tda_enhanced.py</td>
+                  <td><span class="badge badge-purple">Strange Math</span></td>
+                </tr>
+                <tr style="background: rgba(139, 92, 246, 0.1)">
+                  <td>10</td>
+                  <td>Sheaf Coherence</td>
+                  <td>sheaf_coherence.py</td>
+                  <td><span class="badge badge-purple">Strange Math</span></td>
+                </tr>
+                <tr style="background: rgba(16, 185, 129, 0.1)">
+                  <td>11</td>
+                  <td>Visual Content</td>
+                  <td>visual_content.py</td>
+                  <td><span class="badge badge-green">VLM</span></td>
+                </tr>
+                <tr style="background: rgba(16, 185, 129, 0.1)">
+                  <td>12</td>
+                  <td>Cross-Modal</td>
+                  <td>cross_modal.py</td>
+                  <td><span class="badge badge-green">VLM</span></td>
+                </tr>
+                <tr style="background: rgba(245, 158, 11, 0.1)">
+                  <td>13</td>
+                  <td>RAG Guard</td>
+                  <td>rag_guard.py</td>
+                  <td><span class="badge badge-orange">Agent</span></td>
+                </tr>
+                <tr style="background: rgba(245, 158, 11, 0.1)">
+                  <td>14</td>
+                  <td>Probing Detection</td>
+                  <td>probing_detection.py</td>
+                  <td><span class="badge badge-orange">Agent</span></td>
+                </tr>
+                <tr>
+                  <td>15</td>
+                  <td>Streaming Guard</td>
+                  <td>streaming.py</td>
+                  <td>Streaming</td>
               </tr>
+              </table>
+              
+              <div class="highlight-box idea" style="margin-top: 1.5rem;">
+                <strong>🚀 Нужно больше движков?</strong><br>
+                <a href="mailto:chg@live.ru" style="color: var(--accent-purple);">SENTINEL Enterprise</a> включает <strong>85
+                  движков</strong>:
+                Meta-Judge, Strange Math Advanced, Proactive Defense, Red Team Automation, Compliance Engine и многое другое.
+              </div>
+              </table>
               <tr>
                 <td>2</td>
                 <td>Length Validator</td>

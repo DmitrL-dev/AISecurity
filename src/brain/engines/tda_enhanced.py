@@ -24,7 +24,16 @@ from enum import Enum
 from typing import List, Dict, Optional, Tuple, Any
 import hashlib
 
+# GUDHI for precise TDA (optional, falls back to approximation)
+try:
+    import gudhi
+    GUDHI_AVAILABLE = True
+except ImportError:
+    GUDHI_AVAILABLE = False
+
 logger = logging.getLogger("TDAEnhanced")
+if GUDHI_AVAILABLE:
+    logger.info("GUDHI available - using precise TDA computations")
 
 
 # ============================================================================
@@ -273,6 +282,187 @@ class PersistenceDistance:
             return float(np.linalg.norm(l1_padded - l2_padded))
 
         return float(np.linalg.norm(landscape1 - landscape2))
+
+
+# ============================================================================
+# GUDHI Backend (Precise TDA)
+# ============================================================================
+
+class GUDHIBackend:
+    """
+    GUDHI-powered precise TDA computations.
+
+    Provides:
+    - Rips complex for point clouds
+    - Alpha complex for low-dimensional data
+    - Exact Betti numbers and persistence diagrams
+
+    Falls back to approximation if GUDHI unavailable.
+    """
+
+    def __init__(self, max_dimension: int = 2, max_edge_length: float = float('inf')):
+        self.max_dimension = max_dimension
+        self.max_edge_length = max_edge_length
+        self.gudhi_available = GUDHI_AVAILABLE
+
+    def compute_persistence_rips(
+        self,
+        points: np.ndarray
+    ) -> PersistenceDiagram:
+        """
+        Compute persistence using Rips complex.
+
+        Args:
+            points: (n_points, n_dimensions) point cloud
+
+        Returns:
+            PersistenceDiagram with exact persistence pairs
+        """
+        diagram = PersistenceDiagram(max_dimension=self.max_dimension)
+
+        if len(points) < 2:
+            return diagram
+
+        if self.gudhi_available:
+            try:
+                # Build Rips complex
+                rips = gudhi.RipsComplex(
+                    points=points, max_edge_length=self.max_edge_length)
+                simplex_tree = rips.create_simplex_tree(
+                    max_dimension=self.max_dimension + 1)
+
+                # Compute persistence
+                simplex_tree.compute_persistence()
+                pairs = simplex_tree.persistence()
+
+                for dim, (birth, death) in pairs:
+                    if dim <= self.max_dimension:
+                        diagram.pairs.append(PersistencePair(
+                            birth=birth,
+                            death=death if death != float('inf') else np.inf,
+                            dimension=dim
+                        ))
+
+                logger.debug(
+                    f"GUDHI Rips: {len(diagram.pairs)} pairs computed")
+
+            except Exception as e:
+                logger.warning(f"GUDHI Rips failed, using approximation: {e}")
+                return self._approximate_persistence(points)
+        else:
+            return self._approximate_persistence(points)
+
+        return diagram
+
+    def compute_persistence_alpha(
+        self,
+        points: np.ndarray
+    ) -> PersistenceDiagram:
+        """
+        Compute persistence using Alpha complex (faster for low-dim data).
+
+        Best for 2D/3D point clouds.
+        """
+        diagram = PersistenceDiagram(max_dimension=self.max_dimension)
+
+        if len(points) < 2:
+            return diagram
+
+        if self.gudhi_available and points.shape[1] <= 3:
+            try:
+                alpha = gudhi.AlphaComplex(points=points)
+                simplex_tree = alpha.create_simplex_tree()
+
+                simplex_tree.compute_persistence()
+                pairs = simplex_tree.persistence()
+
+                for dim, (birth, death) in pairs:
+                    if dim <= self.max_dimension:
+                        diagram.pairs.append(PersistencePair(
+                            # Alpha uses squared distances
+                            birth=np.sqrt(birth),
+                            death=np.sqrt(death) if death != float(
+                                'inf') else np.inf,
+                            dimension=dim
+                        ))
+
+                logger.debug(
+                    f"GUDHI Alpha: {len(diagram.pairs)} pairs computed")
+
+            except Exception as e:
+                logger.warning(f"GUDHI Alpha failed: {e}")
+                return self.compute_persistence_rips(points)
+        else:
+            return self.compute_persistence_rips(points)
+
+        return diagram
+
+    def betti_numbers(self, points: np.ndarray, threshold: float = 0.0) -> Tuple[int, int, int]:
+        """
+        Compute Betti numbers β₀, β₁, β₂ for point cloud.
+        """
+        diagram = self.compute_persistence_rips(points)
+        return (
+            diagram.betti_number(0, threshold),
+            diagram.betti_number(1, threshold),
+            diagram.betti_number(2, threshold)
+        )
+
+    def bottleneck_distance_gudhi(
+        self,
+        dgm1: PersistenceDiagram,
+        dgm2: PersistenceDiagram,
+        dimension: int = 1
+    ) -> float:
+        """
+        Exact bottleneck distance using GUDHI.
+        """
+        if self.gudhi_available:
+            try:
+                arr1 = dgm1.to_array(dimension)
+                arr2 = dgm2.to_array(dimension)
+
+                if len(arr1) == 0 or len(arr2) == 0:
+                    return 0.0
+
+                return gudhi.bottleneck_distance(arr1, arr2)
+            except Exception as e:
+                logger.warning(f"GUDHI bottleneck failed: {e}")
+
+        # Fallback to approximation
+        return PersistenceDistance.bottleneck_distance(
+            dgm1.to_array(dimension),
+            dgm2.to_array(dimension)
+        )
+
+    def _approximate_persistence(self, points: np.ndarray) -> PersistenceDiagram:
+        """Fallback approximation when GUDHI unavailable."""
+        diagram = PersistenceDiagram(max_dimension=self.max_dimension)
+
+        n = len(points)
+        if n < 2:
+            return diagram
+
+        # Compute pairwise distances
+        dists = []
+        for i in range(min(n, 100)):
+            for j in range(i + 1, min(n, 100)):
+                dists.append(np.linalg.norm(points[i] - points[j]))
+
+        if not dists:
+            return diagram
+
+        dists = sorted(dists)
+
+        # H0: Components merge
+        for i, d in enumerate(dists[:min(n-1, 20)]):
+            diagram.pairs.append(PersistencePair(0.0, d, 0))
+
+        # H1: Approximate loops
+        for i, d in enumerate(dists[n:n+10] if len(dists) > n else []):
+            diagram.pairs.append(PersistencePair(d * 0.5, d, 1))
+
+        return diagram
 
 
 # ============================================================================

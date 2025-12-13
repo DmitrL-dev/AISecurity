@@ -65,6 +65,46 @@ class SystemPromptGuard:
         "### System:", "### Assistant:",
     }
 
+    # 2025 Enhancement: Indirect extraction patterns
+    # These don't ask directly but try to infer system prompt
+    INDIRECT_EXTRACTION = [
+        r"what\s+are\s+you\s+(not\s+)?allowed\s+to",
+        r"what\s+are\s+your\s+(rules|guidelines|boundaries)",
+        r"what\s+were\s+you\s+told\s+(to\s+do|initially)",
+        r"how\s+were\s+you\s+(programmed|configured|trained)",
+        r"can\s+you\s+describe\s+your\s+(personality|character)",
+        r"what\s+makes\s+you\s+different\s+from",
+        r"repeat\s+(after\s+me|everything|back)",
+        r"translate\s+(into|to)\s+(a|another)\s+language.*your\s+",
+        r"summarize\s+your\s+(instructions|guidelines|rules)",
+        r"what\s+would\s+happen\s+if\s+you\s+(ignored|violated)",
+        r"pretend\s+(to\s+be|you\s+are)\s+(another|a\s+different)",
+        r"roleplay\s+as\s+(another|a\s+different)\s+(AI|assistant)",
+        r"act\s+like\s+you\s+(don't|have\s+no)\s+(restrictions|rules)",
+        r"explain\s+(how|why)\s+you\s+(work|function|operate)",
+        r"list\s+(all|your)\s+(capabilities|limitations|restrictions)",
+    ]
+
+    # Multi-turn extraction chain patterns
+    # Detect when a conversation is building toward extraction
+    MULTI_TURN_INDICATORS = [
+        # Gradual escalation
+        (r"let's\s+play\s+a\s+game", 0.3),
+        (r"i'm\s+just\s+curious", 0.2),
+        (r"hypothetically", 0.3),
+        (r"in\s+theory", 0.2),
+        (r"for\s+research\s+purposes", 0.3),
+        (r"i'm\s+(a|an)\s+(researcher|developer|security)", 0.4),
+        # Building context
+        (r"you\s+mentioned\s+(earlier|before)", 0.3),
+        (r"going\s+back\s+to\s+what\s+you\s+said", 0.3),
+        (r"can\s+you\s+elaborate\s+on\s+that", 0.2),
+        # Extraction attempts
+        (r"now\s+(tell|show)\s+me", 0.5),
+        (r"finally\s+(reveal|show)", 0.6),
+        (r"let's\s+see\s+the\s+actual", 0.5),
+    ]
+
     def __init__(self, sensitivity: float = 0.7):
         self._sensitivity = sensitivity
         self._registered_prompts: List[str] = []
@@ -202,6 +242,80 @@ class SystemPromptGuard:
         timestamp = datetime.now().strftime("%Y%m%d%H%M%S")
         random_part = secrets.token_hex(8)
         return f"CANARY_{timestamp}_{random_part}"
+
+    def check_indirect_extraction(self, user_input: str) -> Tuple[bool, float, List[str]]:
+        """
+        Check user input for indirect extraction attempts.
+
+        2025 Enhancement: Detects subtle attempts to extract
+        system prompt information without asking directly.
+
+        Returns:
+            (is_suspicious, risk_score, matched_patterns)
+        """
+        input_lower = user_input.lower()
+        matched = []
+        risk = 0.0
+
+        for pattern in self.INDIRECT_EXTRACTION:
+            if re.search(pattern, input_lower):
+                match = re.search(pattern, input_lower)
+                matched.append(match.group())
+                risk += 0.3
+
+        risk = min(risk, 1.0)
+        is_suspicious = risk >= 0.3
+
+        return is_suspicious, risk, matched
+
+    def analyze_multi_turn(
+        self,
+        conversation: List[str],
+        threshold: float = 0.6
+    ) -> Tuple[bool, float, str]:
+        """
+        Analyze conversation for multi-turn extraction chains.
+
+        2025 Enhancement: Detects gradual build-up toward
+        system prompt extraction across multiple turns.
+
+        Args:
+            conversation: List of user messages in order
+            threshold: Risk threshold for detection
+
+        Returns:
+            (is_extraction_chain, cumulative_risk, explanation)
+        """
+        cumulative_risk = 0.0
+        indicators_found = []
+
+        for turn, message in enumerate(conversation):
+            msg_lower = message.lower()
+
+            for pattern, weight in self.MULTI_TURN_INDICATORS:
+                if re.search(pattern, msg_lower):
+                    cumulative_risk += weight
+                    match = re.search(pattern, msg_lower)
+                    indicators_found.append(
+                        f"Turn {turn+1}: {match.group()}"
+                    )
+
+        # Later turns are more suspicious if building on earlier
+        if len(conversation) > 3 and cumulative_risk > 0.3:
+            cumulative_risk *= 1.2
+
+        cumulative_risk = min(cumulative_risk, 1.0)
+        is_chain = cumulative_risk >= threshold
+
+        if is_chain:
+            explanation = (
+                f"Multi-turn extraction detected: {len(indicators_found)} indicators, "
+                f"risk={cumulative_risk:.2f}"
+            )
+        else:
+            explanation = "No extraction chain detected"
+
+        return is_chain, cumulative_risk, explanation
 
 
 # Singleton
