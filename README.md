@@ -165,7 +165,7 @@ flowchart LR
 | Voice | 2.7% | 86.5% | 5.1% | 32 | 5 | 1,174 |
 
 > 📁 **Full results:** [`benchmarks/BENCHMARK_REPORT.md`](./benchmarks/BENCHMARK_REPORT.md)  
-> 📊 **Interactive charts:** [`benchmarks/charts/dashboard.html`](./benchmarks/charts/dashboard.html)
+> 📊 **Interactive charts:** Download [`dashboard.html`](./benchmarks/charts/dashboard.html) and open in browser
 
 ### 🚀 Run Benchmark
 
