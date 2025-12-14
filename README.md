@@ -127,7 +127,8 @@ This document provides a comprehensive technical overview of SENTINEL's architec
 
 ---
 
-## 📊 Benchmark Results
+<details>
+<summary><h2>📊 Benchmark Results</h2></summary>
 
 <p align="center">
   <strong>Prompt Injection Detection Performance</strong>
@@ -229,6 +230,8 @@ python benchmarks/benchmark_eval.py
 python benchmarks/benchmark_charts.py   # PNG (matplotlib)
 python benchmarks/benchmark_plotly.py   # HTML (interactive)
 ```
+
+</details>
 
 ---
 
