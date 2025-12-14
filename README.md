@@ -5,7 +5,7 @@
 <p align="center">
   <img src="https://img.shields.io/badge/Recall-85.1%25-brightgreen?style=for-the-badge" alt="Recall">
   <img src="https://img.shields.io/badge/Precision-84.4%25-blue?style=for-the-badge" alt="Precision">
-  <img src="https://img.shields.io/badge/Engines-87-purple?style=for-the-badge" alt="Engines">
+  <img src="https://img.shields.io/badge/Engines-89-purple?style=for-the-badge" alt="Engines">
   <img src="https://img.shields.io/badge/Dataset-1815-orange?style=for-the-badge" alt="Dataset">
 </p>
   <a href="https://dmitrl-dev.github.io/AISecurity/">📚 Documentation Portal</a> •
@@ -64,13 +64,68 @@ This repository contains the **Community Edition** of SENTINEL. Enterprise featu
 
 | Category | Feature | Description |
 |----------|---------|-------------|
+| **Behavioral** | 🆕 Attacker Fingerprinting | IP-less attacker identification via stylometry |
+| **Behavioral** | 🆕 Adaptive Markov | Test-time learning for intent prediction |
+| **Math** | 🆕 Huber Distance | Robust similarity metrics (outlier-resistant) |
 | **Math** | GUDHI Integration | Precise TDA with Rips/Alpha complex |
 | **Math** | Hyperbolic Detector | Poincaré ball model for attack clustering |
 | **Math** | α-Divergence | Full divergence family in Information Geometry |
 | **ASI10** | Voice Jailbreak | Phonetic obfuscation detection |
 | **Production** | OpenTelemetry | Distributed tracing + Prometheus metrics |
 | **Production** | Rate Limiting | Token bucket with adaptive limits |
-| **Testing** | 116+ Unit Tests | Comprehensive engine test coverage |
+| **Testing** | 168+ Unit Tests | Comprehensive engine test coverage |
+
+---
+
+## 📚 Documentation
+
+### Quick Start
+
+| Document | Description |
+|----------|-------------|
+| [Quick Start (EN)](./docs/getting-started/README-en.md) | 5-minute setup guide |
+| [Installation (EN)](./docs/getting-started/installation-en.md) | Detailed installation with all options |
+
+### Configuration & Integration
+
+| Document | Description |
+|----------|-------------|
+| [Configuration Guide (EN)](./docs/guides/configuration-en.md) | Environment variables, thresholds, modes |
+| [Deployment Guide (EN)](./docs/guides/deployment-en.md) | Docker, Kubernetes, production setup |
+| [Integration Guide (EN)](./docs/guides/integration-en.md) | Python/JS SDK, OpenAI proxy, LangChain |
+
+### Operations (Production)
+
+| Document | Description |
+|----------|-------------|
+| [Operations Overview](./docs/operations/README.md) | Quick reference, architecture, checklist |
+| [Monitoring](./docs/operations/monitoring.md) | Prometheus metrics, Grafana dashboards |
+| [Alerting](./docs/operations/alerting.md) | Alert rules, escalation, Alertmanager |
+| [Capacity Planning](./docs/operations/capacity-planning.md) | Sizing, autoscaling, cost optimization |
+| [Backup & DR](./docs/operations/backup-restore.md) | Disaster recovery, RPO/RTO |
+| [Runbooks](./docs/operations/runbooks/) | Incident response playbooks |
+
+### Engine Reference
+
+| Document | Description |
+|----------|-------------|
+| [All 89 Engines (EN)](./docs/reference/engines-en.md) | Complete engine reference |
+| [**🔬 Expert Deep Dive (EN)**](./docs/reference/engines-expert-deep-dive-en.md) | **PhD-level mathematical foundations** |
+| [Engine Categories](./docs/reference/engines/) | Detailed per-category documentation |
+
+> [!IMPORTANT]
+> ### 📖 Full Technical Disclosure
+> 
+> We provide **complete transparency** about our detection methodology:
+> 
+> **[engines-expert-deep-dive-en.md](./docs/reference/engines-expert-deep-dive-en.md)** contains:
+> - 🔬 **67+ Strange Math engines** — Sheaf cohomology, TDA, Hyperbolic geometry, Information geometry
+> - 📐 **Mathematical foundations** — Theoretical basis with academic citations (Carlsson, Amari, Nickel & Kiela)
+> - ⚙️ **Implementation details** — What we actually built vs pure theory
+> - ⚠️ **Honest limitations** — Where each engine fails
+> - 📊 **Deviations from theory** — Explicit tables showing engineering adaptations
+> 
+> This document includes a [**Mathematical Philosophy & Disclaimer**](./docs/reference/engines-expert-deep-dive-en.md#️-mathematical-philosophy--disclaimer) section explaining that we use mathematics as **engineering inspiration**, not textbook implementation.
 
 ---
 
@@ -124,7 +179,7 @@ flowchart LR
         A[User Prompt]
     end
     
-    subgraph Detection["87 Detection Engines"]
+    subgraph Detection["89 Detection Engines"]
         B[InjectionEngine<br/>Regex Patterns]
         C[SemanticDetector<br/>100+ Prototypes]
         D[VoiceJailbreak<br/>Phonetic Analysis]
@@ -225,7 +280,7 @@ flowchart TB
     end
 
     subgraph Brain["BRAIN (Python 3.11+)"]
-        subgraph Engines["87 DETECTION ENGINES"]
+        subgraph Engines["89 DETECTION ENGINES"]
             subgraph Classic["Classic Detection (8)"]
                 C1["injection"]
                 C2["yara_engine"]
@@ -346,6 +401,11 @@ flowchart TB
             subgraph Meta["Meta & Explainability (2)"]
                 M1["meta_judge"]
                 M2["xai"]
+            end
+
+            subgraph AdaptiveBehavioral["Adaptive Behavioral (2) 🆕"]
+                AB1["attacker_fingerprinting"]
+                AB2["adaptive_markov"]
             end
 
             subgraph HybridSearch["Hybrid Search Agent"]
@@ -1563,7 +1623,8 @@ def gpu_spectral_analysis(attention_matrix: np.ndarray) -> np.ndarray:
 | Advanced Research      | 10     | honeypot, canary, kill_chain, compliance, formal   |
 | Deep Learning Analysis | 6      | activation_steering, hidden_state, llm_fingerprint |
 | Meta & Explainability  | 2      | meta_judge, xai                                    |
-| **TOTAL**              | **58** | **Full detection engine suite**                    |
+| **Adaptive Behavioral** 🆕 | **2** | **attacker_fingerprinting, adaptive_markov**   |
+| **TOTAL**              | **60** | **Full detection engine suite**                    |
 
 ---
 
