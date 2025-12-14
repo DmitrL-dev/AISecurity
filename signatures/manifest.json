@@ -1,0 +1,35 @@
+{
+  "version": "2025.12.14.1",
+  "timestamp": "2025-12-14T18:00:00Z",
+  "description": "SENTINEL Community Signatures - Auto-updated threat detection patterns",
+  "sources": [
+    "sentinel-enterprise",
+    "jailbreakchat/jailbreaks",
+    "community-contributions"
+  ],
+  "files": {
+    "jailbreaks": {
+      "path": "jailbreaks.json",
+      "description": "Jailbreak detection patterns",
+      "sha256": null,
+      "count": 0
+    },
+    "keywords": {
+      "path": "keywords.json",
+      "description": "Suspicious keyword sets",
+      "sha256": null,
+      "count": 0
+    },
+    "pii": {
+      "path": "pii.json",
+      "description": "PII detection patterns",
+      "sha256": null,
+      "count": 0
+    }
+  },
+  "update_info": {
+    "cdn_url": "https://cdn.jsdelivr.net/gh/sentinel-ai/sentinel-community@latest/signatures",
+    "update_interval_hours": 1,
+    "fallback_to_embedded": true
+  }
+}
