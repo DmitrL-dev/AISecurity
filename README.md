@@ -409,113 +409,23 @@ flowchart TB
 | **Cache**     | Redis            | Session state, rate limiting, behavioral profiles          |
 | **Secrets**   | HashiCorp Vault  | Zero-trust secret management                               |
 
-### 87 Detection Engines — The Most Comprehensive AI Security Suite
-
-<p align="center">
-  <strong>🚀 From Reactive Detection to Proactive Prevention</strong>
-</p>
-
-```mermaid
-flowchart TB
-    subgraph OLD["❌ BEFORE: Reactive"]
-        direction LR
-        A1["Wait for attacks"] --> A2["Detect"] --> A3["Respond"]
-    end
-
-    subgraph NEW["✅ AFTER: Proactive"]
-        direction LR
-        B1["Generate attacks"] --> B2["Predict evolution"] --> B3["Make impossible"]
-    end
-
-    OLD -.->|"SENTINEL Paradigm Shift"| NEW
-
-    subgraph LEVELS["🏗️ Defense Levels"]
-        direction TB
-        L4["🔴 Level 4: ATTACK GENERATION\n'We create zero-days before attackers do'\n► attack_synthesizer • vulnerability_hunter • zero_day_forge"]
-        L3["🟠 Level 3: CAUSAL IMMUNITY\n'Block root causes, not symptoms'\n► causal_attack_model • structural_immunity • immunity_compiler"]
-        L2["🟡 Level 2: PREDICTIVE DEFENSE\n'6-12 months ahead of attackers'\n► attack_evolution_predictor • threat_landscape_modeler"]
-        L1["🟢 Level 1: DETECTION\n'58 classic + Strange Math engines'\n► Comprehensive coverage of known patterns"]
-        
-        L4 --> L3 --> L2 --> L1
-    end
-
-    NEW --> LEVELS
-```
-
-<details>
-<summary><strong>🎯 Proactive Engines (NEW Categories)</strong></summary>
-
-| Category               | Engines                                                                             | Key Innovation                     |
-| ---------------------- | ----------------------------------------------------------------------------------- | ---------------------------------- |
-| **Attack Generation**  | `attack_synthesizer`, `vulnerability_hunter`, `zero_day_forge`                      | Genetic algorithm attack evolution |
-| **Causal Immunity**    | `causal_attack_model`, `structural_immunity`, `immunity_compiler`                   | 90% attack class immunity          |
-| **Predictive Defense** | `attack_evolution_predictor`, `threat_landscape_modeler`                            | 6-12 month threat prediction       |
-| **ASI Gap Coverage**   | `nhi_identity_guard`, `mcp_a2a_security`, `cascading_guard`                         | OWASP ASI03/04/07/08               |
-| **Preventive Threats** | `context_window_poisoning`, `semantic_firewall`, `agent_collusion_detector` +7 more | 2026-2027 threat prevention        |
-| **Strange Math v3**    | `morse_theory`, `persistent_laplacian`, `optimal_transport`                         | Wasserstein distance + TDA fusion  |
-
-</details>
-
-#### 📊 Complete Engine Matrix
+### 89 Detection Engines — Industry's Most Comprehensive Suite
 
 | Category                     | Count  | Purpose                                  |
 | ---------------------------- | ------ | ---------------------------------------- |
 | 🛡️ **Classic Detection**     | 8      | Injection, YARA, behavioral, cascading   |
-| 📝 **NLP / LLM Guard**       | 5      | Language analysis, hallucination         |
+| 📝 **NLP / LLM Guard**       | 6      | Language analysis, hallucination, Qwen   |
 | 🔬 **Strange Math Core**     | 8      | TDA, Sheaf, Hyperbolic, Morse, Transport |
-| 🧮 **Strange Math Extended** | 8      | Category, Chaos, Laplacian, Firewall     |
+| 🧮 **Strange Math Extended** | 18     | Category, Chaos, Laplacian, Info Geometry|
 | 🖼️ **VLM Protection**        | 3      | Visual attacks, cross-modal              |
-| ⚔️ **TTPs.ai Defense**       | 10     | RAG, probing, C2, cognitive load         |
-| 🚀 **Advanced 2025**         | 6      | Multi-agent, reward hacking, collusion   |
+| ⚔️ **TTPs.ai Defense**       | 17     | RAG, probing, C2, cognitive load         |
+| 🚀 **Advanced 2025**         | 13     | Multi-agent, reward hacking, collusion   |
 | 🔐 **Protocol Security**     | 4      | MCP, A2A, agent cards, NHI identity      |
-| 🎯 **Proactive Engines**     | 10     | Attack gen, prediction, immunity         |
-| ☠️ **Data Poisoning**        | 4      | Bootstrap, temporal, multi-tenant        |
-| 🔍 **Advanced Research**     | 9      | Honeypots, kill chain, formal            |
-| 🧠 **Deep Learning**         | 6      | Activation steering, forensics           |
-| ⚖️ **Meta-Judge + XAI**      | 2      | 87-engine aggregator                     |
-| 🔎 **Hybrid Search Agent**   | 1      | Tree-search orchestration layer          |
-|                              | **87** | **Industry's most comprehensive suite**  |
+| 🎯 **Proactive Engines**     | 9      | Honeypots, kill chain, formal invariants |
+| ⚖️ **Meta-Judge + XAI**      | 3      | Engine aggregator + explainability       |
+|                              | **89** | **Full coverage: OWASP LLM + Agentic AI**|
 
-#### 🔎 Hybrid Search Agent (NEW)
-
-<details>
-<summary><strong>🔎 Hybrid Search Agent Details</strong></summary>
-
-SENTINEL includes a **Hybrid Search Agent** that orchestrates proactive engines using tree-based search:
-
-```python
-from src.brain.hybrid_search import SentinelHybridAgent, HybridConfig
-
-config = HybridConfig(num_drafts=5, parallel_workers=4)
-agent = SentinelHybridAgent(config)
-best_attack = agent.run(max_steps=20)
-```
-
-**Architecture:**
-
-- **Core:** Adapted from [AIDE ML](https://github.com/WecoAI/aideml) (Draft → Debug → Improve cycle)
-- **Extensions:** [AI-Scientist](https://github.com/SakanaAI/AI-Scientist) (Multi-stage pipeline, VLM, Ablation)
-
-**Features:**
-| Feature | Description |
-|---------|-------------|
-| **Tree-based evolution** | Attacks evolve through search tree |
-| **Multi-stage pipeline** | Explore → Exploit → Polish |
-| **Ablation studies** | Measure each engine's contribution |
-| **Parallel workers** | 4x faster search with concurrent execution |
-| **VLM integration** | Visual analysis for adversarial images |
-
-#### 🏆 Competitive Advantage
-
-| Metric                  | Before        | After                              |
-| ----------------------- | ------------- | ---------------------------------- |
-| **Zero-day response**   | Days-weeks    | **N/A (we create first)**          |
-| **Attack coverage**     | Known attacks | **Known + predicted + impossible** |
-| **Lead over attackers** | 0 (reactive)  | **6-12 months**                    |
-| **Structural immunity** | 0%            | **40%+ attack classes blocked**    |
-| **OWASP ASI Top 10**    | 70%           | **95%+ coverage**                  |
-
-</details>
+> 📚 **Full details:** [engines-expert-deep-dive-en.md](./docs/reference/engines-expert-deep-dive-en.md) — PhD-level documentation
 
 ---
 
