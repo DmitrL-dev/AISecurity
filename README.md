@@ -218,26 +218,6 @@ python benchmarks/benchmark_plotly.py   # HTML (interactive)
 
 ---
 
-## Table of Contents
-
-1. [Architecture Overview](#architecture-overview)
-2. [Strange Math Engines (Core)](#strange-math-engines)
-3. [Strange Math Engines (Extended)](#strange-math-extended-new)
-4. [VLM Protection Engines](#vlm-protection-engines-new)
-5. [TTPs.ai Defense Engines](#ttpsai-defense-engines-new)
-6. [Protocol Security Engines](#protocol-security-engines-new)
-7. [Data Poisoning Detection](#data-poisoning-detection-new)
-8. [Proactive Defense Engine](#proactive-defense-engine-new)
-9. [Advanced Research Engines](#advanced-research-engines-new)
-10. [Deep Learning Analysis Engines](#deep-learning-analysis-new)
-11. [Defense in Depth Pipeline](#defense-in-depth-pipeline)
-12. [Hive Intelligence](#hive-intelligence)
-13. [Post-Quantum Security](#post-quantum-security)
-14. [Performance Engineering](#performance-engineering)
-15. [Research Foundation](#research-foundation)
-
----
-
 ## Architecture Overview
 
 ### System Design Principles
