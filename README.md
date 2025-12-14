@@ -77,7 +77,8 @@ This repository contains the **Community Edition** of SENTINEL. Enterprise featu
 
 ---
 
-## 📚 Documentation
+<details>
+<summary><h2>📚 Documentation</h2></summary>
 
 ### Quick Start
 
@@ -113,19 +114,12 @@ This repository contains the **Community Edition** of SENTINEL. Enterprise featu
 | [**🔬 Expert Deep Dive (EN)**](./docs/reference/engines-expert-deep-dive-en.md) | **PhD-level mathematical foundations** |
 | [Engine Categories](./docs/reference/engines/) | Detailed per-category documentation |
 
+</details>
+
 > [!IMPORTANT]
 > ### 📖 Full Technical Disclosure
 > 
-> We provide **complete transparency** about our detection methodology:
-> 
-> **[engines-expert-deep-dive-en.md](./docs/reference/engines-expert-deep-dive-en.md)** contains:
-> - 🔬 **67+ Strange Math engines** — Sheaf cohomology, TDA, Hyperbolic geometry, Information geometry
-> - 📐 **Mathematical foundations** — Theoretical basis with academic citations (Carlsson, Amari, Nickel & Kiela)
-> - ⚙️ **Implementation details** — What we actually built vs pure theory
-> - ⚠️ **Honest limitations** — Where each engine fails
-> - 📊 **Deviations from theory** — Explicit tables showing engineering adaptations
-> 
-> This document includes a [**Mathematical Philosophy & Disclaimer**](./docs/reference/engines-expert-deep-dive-en.md#️-mathematical-philosophy--disclaimer) section explaining that we use mathematics as **engineering inspiration**, not textbook implementation.
+> **[engines-expert-deep-dive-en.md](./docs/reference/engines-expert-deep-dive-en.md)** — PhD-level documentation with mathematical foundations, honest limitations, and engineering adaptations.
 
 ---
 
