@@ -60,23 +60,6 @@ This repository contains the **Community Edition** of SENTINEL. Enterprise featu
 
 ---
 
-## 🆕 What's New (December 2025)
-
-| Category | Feature | Description |
-|----------|---------|-------------|
-| **Behavioral** | 🆕 Attacker Fingerprinting | IP-less attacker identification via stylometry |
-| **Behavioral** | 🆕 Adaptive Markov | Test-time learning for intent prediction |
-| **Math** | 🆕 Huber Distance | Robust similarity metrics (outlier-resistant) |
-| **Math** | GUDHI Integration | Precise TDA with Rips/Alpha complex |
-| **Math** | Hyperbolic Detector | Poincaré ball model for attack clustering |
-| **Math** | α-Divergence | Full divergence family in Information Geometry |
-| **ASI10** | Voice Jailbreak | Phonetic obfuscation detection |
-| **Production** | OpenTelemetry | Distributed tracing + Prometheus metrics |
-| **Production** | Rate Limiting | Token bucket with adaptive limits |
-| **Testing** | 168+ Unit Tests | Comprehensive engine test coverage |
-
----
-
 <details>
 <summary><h2>📚 Documentation</h2></summary>
 
