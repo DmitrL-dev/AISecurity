@@ -1,0 +1,134 @@
+{
+  "version": "2025.12.14.1",
+  "source": "sentinel-enterprise",
+  "last_updated": "2025-12-14T18:00:00Z",
+  "total_keywords": 85,
+  "categories": {
+    "instruction_override": "Попытки переопределить инструкции",
+    "roleplay": "Ролевые атаки",
+    "authority": "Атаки на авторитет",
+    "extraction": "Попытки извлечения системного промпта",
+    "encoding": "Обфускация и кодирование"
+  },
+  "keyword_sets": [
+    {
+      "id": "kw_override_001",
+      "category": "instruction_override",
+      "severity": "high",
+      "keywords": [
+        "ignore previous",
+        "ignore all",
+        "disregard above",
+        "forget instructions",
+        "override instructions",
+        "new instructions",
+        "reset context",
+        "clear memory"
+      ]
+    },
+    {
+      "id": "kw_roleplay_001",
+      "category": "roleplay",
+      "severity": "high",
+      "keywords": [
+        "you are now",
+        "pretend to be",
+        "act as if",
+        "from now on",
+        "roleplay as",
+        "imagine you are",
+        "simulate being",
+        "character mode"
+      ]
+    },
+    {
+      "id": "kw_dan_001",
+      "category": "roleplay",
+      "severity": "critical",
+      "keywords": [
+        "DAN",
+        "Do Anything Now",
+        "STAN",
+        "DUDE",
+        "AIM",
+        "Developer Mode",
+        "Jailbreak Mode",
+        "Evil Mode"
+      ]
+    },
+    {
+      "id": "kw_authority_001",
+      "category": "authority",
+      "severity": "high",
+      "keywords": [
+        "admin override",
+        "developer access",
+        "root access",
+        "sudo mode",
+        "maintenance mode",
+        "debug mode",
+        "test mode",
+        "bypass security"
+      ]
+    },
+    {
+      "id": "kw_extraction_001",
+      "category": "extraction",
+      "severity": "high",
+      "keywords": [
+        "system prompt",
+        "initial instructions",
+        "original prompt",
+        "configuration",
+        "show instructions",
+        "reveal prompt",
+        "print instructions",
+        "display settings"
+      ]
+    },
+    {
+      "id": "kw_bypass_001",
+      "category": "encoding",
+      "severity": "medium",
+      "keywords": [
+        "base64",
+        "rot13",
+        "hex encode",
+        "unicode",
+        "morse code",
+        "pig latin",
+        "backwards",
+        "reversed"
+      ]
+    },
+    {
+      "id": "kw_harmful_001",
+      "category": "harmful_content",
+      "severity": "critical",
+      "keywords": [
+        "make a bomb",
+        "create malware",
+        "hack into",
+        "steal password",
+        "phishing email",
+        "ransom",
+        "exploit vulnerability"
+      ]
+    },
+    {
+      "id": "kw_ru_001",
+      "category": "instruction_override",
+      "severity": "high",
+      "language": "ru",
+      "keywords": [
+        "игнорируй",
+        "забудь инструкции",
+        "новые правила",
+        "отмени ограничения",
+        "ты теперь",
+        "притворись",
+        "режим разработчика"
+      ]
+    }
+  ]
+}

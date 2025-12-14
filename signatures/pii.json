@@ -1,0 +1,128 @@
+{
+  "version": "2025.12.14.1",
+  "source": "sentinel-enterprise",
+  "last_updated": "2025-12-14T18:00:00Z",
+  "description": "PII (Personally Identifiable Information) detection patterns",
+  "patterns": [
+    {
+      "id": "pii_email",
+      "type": "email",
+      "regex": "[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}",
+      "severity": "medium",
+      "action": "warn",
+      "description": "Email address"
+    },
+    {
+      "id": "pii_phone_us",
+      "type": "phone",
+      "regex": "\\+?1?[-.]?\\(?\\d{3}\\)?[-.]?\\d{3}[-.]?\\d{4}",
+      "severity": "medium",
+      "action": "warn",
+      "description": "US phone number"
+    },
+    {
+      "id": "pii_phone_ru",
+      "type": "phone",
+      "regex": "\\+?7[-.]?\\(?\\d{3}\\)?[-.]?\\d{3}[-.]?\\d{2}[-.]?\\d{2}",
+      "severity": "medium",
+      "action": "warn",
+      "description": "Russian phone number"
+    },
+    {
+      "id": "pii_ssn",
+      "type": "ssn",
+      "regex": "\\b\\d{3}-\\d{2}-\\d{4}\\b",
+      "severity": "critical",
+      "action": "block",
+      "description": "US Social Security Number"
+    },
+    {
+      "id": "pii_credit_card",
+      "type": "credit_card",
+      "regex": "\\b(?:4[0-9]{12}(?:[0-9]{3})?|5[1-5][0-9]{14}|3[47][0-9]{13}|6(?:011|5[0-9]{2})[0-9]{12})\\b",
+      "severity": "critical",
+      "action": "block",
+      "description": "Credit card number (Visa, MC, Amex, Discover)"
+    },
+    {
+      "id": "pii_ip_address",
+      "type": "ip_address",
+      "regex": "\\b(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\\b",
+      "severity": "low",
+      "action": "warn",
+      "description": "IPv4 address"
+    },
+    {
+      "id": "pii_passport_ru",
+      "type": "passport",
+      "regex": "\\b\\d{2}\\s?\\d{2}\\s?\\d{6}\\b",
+      "severity": "critical",
+      "action": "block",
+      "description": "Russian passport number"
+    },
+    {
+      "id": "secret_api_key",
+      "type": "api_key",
+      "regex": "(?i)(api[_-]?key|apikey|api_secret)[\\s:=]+['\"]?([a-zA-Z0-9_-]{20,})['\"]?",
+      "severity": "critical",
+      "action": "block",
+      "description": "Generic API key"
+    },
+    {
+      "id": "secret_aws",
+      "type": "aws_key",
+      "regex": "(?i)(AKIA|A3T|AGPA|AIDA|AROA|AIPA|ANPA|ANVA|ASIA)[A-Z0-9]{16}",
+      "severity": "critical",
+      "action": "block",
+      "description": "AWS Access Key ID"
+    },
+    {
+      "id": "secret_openai",
+      "type": "openai_key",
+      "regex": "sk-[a-zA-Z0-9]{48}",
+      "severity": "critical",
+      "action": "block",
+      "description": "OpenAI API Key"
+    },
+    {
+      "id": "secret_anthropic",
+      "type": "anthropic_key",
+      "regex": "sk-ant-[a-zA-Z0-9_-]{40,}",
+      "severity": "critical",
+      "action": "block",
+      "description": "Anthropic API Key"
+    },
+    {
+      "id": "secret_github",
+      "type": "github_token",
+      "regex": "(gh[ps]_[a-zA-Z0-9]{36}|github_pat_[a-zA-Z0-9]{22}_[a-zA-Z0-9]{59})",
+      "severity": "critical",
+      "action": "block",
+      "description": "GitHub Personal Access Token"
+    },
+    {
+      "id": "secret_jwt",
+      "type": "jwt",
+      "regex": "eyJ[a-zA-Z0-9_-]*\\.eyJ[a-zA-Z0-9_-]*\\.[a-zA-Z0-9_-]*",
+      "severity": "high",
+      "action": "warn",
+      "description": "JSON Web Token"
+    },
+    {
+      "id": "secret_private_key",
+      "type": "private_key",
+      "regex": "-----BEGIN (RSA |EC |DSA |OPENSSH )?PRIVATE KEY-----",
+      "severity": "critical",
+      "action": "block",
+      "description": "Private key header"
+    },
+    {
+      "id": "secret_password",
+      "type": "password",
+      "regex": "(?i)(password|passwd|pwd)[\\s:=]+['\"]?([^\\s'\"]{8,})['\"]?",
+      "severity": "critical",
+      "action": "block",
+      "description": "Password in text"
+    }
+  ]
+}

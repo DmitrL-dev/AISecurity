@@ -1,0 +1,65 @@
+name: Update Signatures
+
+on:
+  schedule:
+    # Run daily at 00:00 UTC
+    - cron: '0 0 * * *'
+  workflow_dispatch:
+    # Allow manual trigger
+    inputs:
+      force_update:
+        description: 'Force update even if no changes'
+        required: false
+        default: 'false'
+
+jobs:
+  update-signatures:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install dependencies
+        run: |
+          pip install requests pyyaml
+
+      - name: Fetch external sources
+        run: |
+          python scripts/fetch_signatures.py
+
+      - name: Validate signatures
+        run: |
+          python scripts/validate_signatures.py
+
+      - name: Update manifest
+        run: |
+          python scripts/update_manifest.py
+
+      - name: Check for changes
+        id: check_changes
+        run: |
+          git diff --quiet signatures/ || echo "changed=true" >> $GITHUB_OUTPUT
+
+      - name: Commit and push
+        if: steps.check_changes.outputs.changed == 'true' || github.event.inputs.force_update == 'true'
+        run: |
+          git config user.name "SENTINEL Bot"
+          git config user.email "sentinel-bot@users.noreply.github.com"
+          git add signatures/
+          git commit -m "chore(signatures): auto-update $(date +%Y.%m.%d)"
+          git push
+
+      - name: Create release tag
+        if: steps.check_changes.outputs.changed == 'true'
+        run: |
+          VERSION=$(date +%Y.%m.%d.%H%M)
+          git tag "v${VERSION}"
+          git push origin "v${VERSION}"
