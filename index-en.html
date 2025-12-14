@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>SENTINEL — AI Security Platform</title>
     <meta name="description"
-        content="SENTINEL Community Edition - Open Source AI Security Platform. 15 Detection Engines for LLM protection.">
+        content="SENTINEL Community Edition - Open Source AI Security Platform. 20 Detection Engines for LLM protection. Full PhD-level documentation disclosed.">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <style>
         :root {
@@ -175,17 +175,26 @@
             <p class="hero-subtitle">
                 Open Source platform for protecting LLM applications from prompt injection,
                 jailbreak, and data leakage.
-                <strong>15 detection engines</strong> including TDA, Sheaf coherence, RAG Guard.
+                <strong>20 detection engines</strong> including TDA+GUDHI, Sheaf, Hyperbolic, Voice Jailbreak.
                 <br><br>
-                <a href="mailto:chg@live.ru" style="color: var(--accent-blue);">🚀 Enterprise Edition (85 engines) →</a>
+                <a href="mailto:chg@live.ru" style="color: var(--accent-blue);">🚀 Enterprise Edition (89 engines) →</a>
+                <br>
+                <a href="docs/reference/engines-expert-deep-dive-en.md" style="color: var(--accent-purple);">📖 Full Technical
+                    Disclosure (PhD-level) →</a>
             </p>
             <div class="hero-stats">
                 <div class="stat">
-                    <div class="stat-value">15</div>
+                    <div class="stat-value">20</div>
                     <div class="stat-label">Engines (Community)</div>
                 </div>
-                <div class="stat"><div class="stat-value">62K+</div><div class="stat-label">Lines of Code</div></div>
-                <div class="stat"><div class="stat-value">420+</div><div class="stat-label">Unit Tests</div></div>
+                <div class="stat">
+                    <div class="stat-value">89</div>
+                    <div class="stat-label">Engines (Total)</div>
+                </div>
+                <div class="stat">
+                    <div class="stat-value">168+</div>
+                    <div class="stat-label">Unit Tests</div>
+                </div>
                 <div class="stat"><div class="stat-value">&lt;50ms</div><div class="stat-label">Latency p50</div></div>
             </div>
         </div>
@@ -287,7 +296,7 @@
             <div class="arch-row">
                 <div class="arch-box brain">
                     <strong>🧠 Brain (Python)</strong><br>
-                    <small>56 Engines • Hive Intelligence • Meta-Judge</small>
+                    <small>89 Engines • Hive Intelligence • Meta-Judge</small>
                 </div>
             </div>
             <div class="arch-arrow">⬇️</div>
@@ -314,7 +323,11 @@
                         <tr><td>SAST (Semgrep, Checkmarx)</td><td>Code vulnerabilities</td><td>❌ Blind</td></tr>
                         <tr><td>DAST (ZAP, Burp)</td><td>Runtime vulnerabilities</td><td>❌ Blind</td></tr>
                         <tr><td>SCA (Trivy, Snyk)</td><td>Dependency vulnerabilities</td><td>❌ Blind</td></tr>
-                        <tr style="background: rgba(139,92,246,0.15)"><td><strong>SENTINEL</strong></td><td><strong>AI attacks</strong></td><td><strong>✅ 56 detectors</strong></td></tr>
+                        <tr style="background: rgba(139,92,246,0.15)">
+                            <td><strong>SENTINEL</strong></td>
+                            <td><strong>AI attacks</strong></td>
+                            <td><strong>✅ 89 detectors</strong></td>
+                        </tr>
                     </table>
 
                     <h4>🎯 SENTINEL as Quality Gate in CI/CD</h4>
@@ -604,8 +617,10 @@
     <!-- Engines List -->
     <section id="engines" class="section">
         <div class="section-header">
-            <h2 class="section-title">🔧 15 Detection Engines (Community Edition)</h2>
-            <p class="section-subtitle">Defense in Depth — no single detector is perfect, but together they are impenetrable</p>
+            <h2 class="section-title">🔧 20 Detection Engines (Community Edition)</h2>
+            <p class="section-subtitle">Defense in Depth — no single detector is perfect, but together they are impenetrable. <a
+                    href="docs/reference/engines-expert-deep-dive-en.md" style="color: var(--accent-purple);">See full 89-engine
+                    PhD-level documentation →</a></p>
         </div>
 
         <div class="collapsible open">
@@ -661,6 +676,28 @@
                         <tr style="background: rgba(245,158,11,0.1)"><td>55</td><td>Compliance Engine</td><td>compliance_engine.py</td><td>~359</td><td><span class="badge badge-orange">Research</span></td></tr>
                         <!-- Meta-Judge (56) -->
                         <tr style="background: rgba(59,130,246,0.15)"><td><strong>56</strong></td><td><strong>Meta-Judge</strong></td><td>meta_judge.py</td><td>~752</td><td><span class="badge badge-blue">Orchestrator</span></td></tr>
+                        <!-- Adaptive Behavioral (87-89) 🆕 -->
+                        <tr style="background: rgba(239,68,68,0.15)">
+                            <td>87</td>
+                            <td>🆕 Attacker Fingerprinting</td>
+                            <td>attacker_fingerprinting.py</td>
+                            <td>~450</td>
+                            <td><span class="badge" style="background:rgba(239,68,68,0.2);color:#ef4444">Adaptive</span></td>
+                        </tr>
+                        <tr style="background: rgba(239,68,68,0.15)">
+                            <td>88</td>
+                            <td>🆕 Adaptive Markov</td>
+                            <td>adaptive_markov.py</td>
+                            <td>~380</td>
+                            <td><span class="badge" style="background:rgba(239,68,68,0.2);color:#ef4444">Adaptive</span></td>
+                        </tr>
+                        <tr style="background: rgba(239,68,68,0.15)">
+                            <td>89</td>
+                            <td>🆕 Huber Distance</td>
+                            <td>huber_distance.py</td>
+                            <td>~320</td>
+                            <td><span class="badge" style="background:rgba(239,68,68,0.2);color:#ef4444">Adaptive</span></td>
+                        </tr>
                     </table>
                 </div>
             </div>
@@ -675,12 +712,32 @@
                 <div class="collapsible-body">
                     <table>
                         <tr><th>Category</th><th>Files</th><th>LOC</th><th>Description</th></tr>
-                        <tr><td>Brain (Python)</td><td>80+</td><td>~25,000</td><td>56 detectors, Hive, Meta-Judge, gRPC</td></tr>
+                        <tr>
+                            <td>Brain (Python)</td>
+                            <td>95+</td>
+                            <td>~28,000</td>
+                            <td>89 detectors, Hive, Meta-Judge, gRPC</td>
+                        </tr>
                         <tr><td>Gateway (Go)</td><td>15</td><td>~3,200</td><td>HTTP gateway, Auth, Proxy, PoW</td></tr>
-                        <tr><td>Tests</td><td>40+</td><td>~8,000</td><td>420+ unit tests, integration, load</td></tr>
-                        <tr><td>Documentation</td><td>60+</td><td>~15,000</td><td>Architecture, Research, Security</td></tr>
+                        <tr>
+                            <td>Tests</td>
+                            <td>50+</td>
+                            <td>~10,000</td>
+                            <td>168+ unit tests, integration, load</td>
+                        </tr>
+                        <tr>
+                            <td>Documentation</td>
+                            <td>80+</td>
+                            <td>~20,000</td>
+                            <td>Architecture, Research, Security, PhD-level</td>
+                        </tr>
                         <tr><td>Config/Deploy</td><td>20+</td><td>~1,000</td><td>Docker, Kubernetes, Helm</td></tr>
-                        <tr style="font-weight:600;background:rgba(16,185,129,0.15)"><td>TOTAL</td><td>235+</td><td>~62,000</td><td>Full-stack AI Security Platform</td></tr>
+                        <tr style="font-weight:600;background:rgba(16,185,129,0.15)">
+                            <td>TOTAL</td>
+                            <td>260+</td>
+                            <td>~62,000</td>
+                            <td>Full-stack AI Security Platform</td>
+                        </tr>
                     </table>
                 </div>
             </div>
