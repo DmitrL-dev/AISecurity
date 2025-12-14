@@ -1,3 +1,7 @@
+<p align="center">
+  <img src="./assets/banner.png" alt="SENTINEL AI Security Platform" width="100%">
+</p>
+
 # SENTINEL Technical Deep Dive
 
 > **Advanced Mathematics & Engineering for AI Security**
