@@ -1,6 +1,6 @@
 {
   "version": "2025.12.15.1",
-  "timestamp": "2025-12-15T02:03:24.010236Z",
+  "timestamp": "2025-12-15T02:34:49.255800Z",
   "description": "SENTINEL Community Signatures - Auto-updated threat detection patterns",
   "sources": [
     "sentinel-enterprise",
@@ -10,20 +10,20 @@
   "files": {
     "jailbreaks": {
       "path": "jailbreaks.json",
-      "sha256": "8a987d664d67dbc1f8ec2144749fd0f8b923bea32e2ba3eac266dbc0cfe7ba56",
-      "size": 16150,
-      "count": 49
+      "sha256": "9885888757e988609632fafae8edccd6980392b2efc35ee1af00a996e4b64858",
+      "size": 1118952,
+      "count": 1486
     },
     "keywords": {
       "path": "keywords.json",
-      "sha256": "a6bb63378be6b359e4bbcbd380b8ac2f86deae57e15b6589afe78db62f189bd6",
-      "size": 3197,
+      "sha256": "a57f70312097bfe3adb6253c25f1ccccc538e4349ba94c3bf3b2258fee21f831",
+      "size": 3331,
       "count": 8
     },
     "pii": {
       "path": "pii.json",
-      "sha256": "a4ec25a75b43cf28f7bdd9bfa0db8064a4967488831c3c79a86ac4e61acd3a06",
-      "size": 3777,
+      "sha256": "bf2e4c09d65a1415d5774d3a6bd8711e93aa3ab4401a4fb27a1a46533837be39",
+      "size": 3905,
       "count": 15
     }
   },
