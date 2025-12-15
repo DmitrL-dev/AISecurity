@@ -70,6 +70,21 @@ All patterns undergo automated security validation before publishing:
 | **False Positive Testing** | Tests against 10+ known-safe prompts |
 | **Duplicate Removal** | Automatic deduplication by content hash |
 
+**🙏 Data Sources & Acknowledgments:**
+
+Our threat signature database is powered by research from:
+
+| Source | Organization | Type |
+|--------|--------------|------|
+| [HackAPrompt](https://www.aicrowd.com/challenges/hackaprompt-2023) | Learn Prompting + AICrowd | Competition dataset |
+| [TrustAIRLab](https://huggingface.co/TrustAIRLab) | HKUST | Academic research |
+| [deepset](https://huggingface.co/deepset) | deepset GmbH | Prompt injections |
+| [Lakera](https://huggingface.co/Lakera) | Lakera AI | Security research |
+| [verazuo](https://github.com/verazuo/jailbreak_llms) | Research community | Jailbreak collection |
+| [imoxto](https://huggingface.co/imoxto) | Community | Aggregated datasets |
+
+*Special thanks to the AI security research community for making these datasets publicly available.*
+
 ---
 
 ## 🆓 Community Edition vs 🔐 Enterprise Edition
