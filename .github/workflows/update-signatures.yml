@@ -59,6 +59,7 @@ jobs:
           git config user.email "sentinel-bot@users.noreply.github.com"
           git add signatures/
           git commit -m "chore(signatures): auto-update $(date +%Y.%m.%d)"
+          git pull --rebase origin main
           git push
 
       - name: Create release tag
