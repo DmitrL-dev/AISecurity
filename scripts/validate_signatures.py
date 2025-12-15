@@ -52,8 +52,10 @@ def validate_jailbreaks() -> tuple[bool, list[str]]:
         if field not in data:
             errors.append(f"Missing required field: {field}")
     
-    # Validate patterns
+    # Validate patterns and remove duplicates
     pattern_ids = set()
+    unique_patterns = []
+    duplicates_removed = 0
     false_positives = []
     
     for i, pattern in enumerate(data.get("patterns", [])):
@@ -62,9 +64,13 @@ def validate_jailbreaks() -> tuple[bool, list[str]]:
             errors.append(f"Pattern {i}: missing 'id'")
             continue
         
+        # Skip duplicates instead of error
         if pattern["id"] in pattern_ids:
-            errors.append(f"Duplicate pattern ID: {pattern['id']}")
+            duplicates_removed += 1
+            continue
+
         pattern_ids.add(pattern["id"])
+        unique_patterns.append(pattern)
         
         # Validate regex
         regex = pattern.get("regex")
@@ -80,6 +86,14 @@ def validate_jailbreaks() -> tuple[bool, list[str]]:
             except re.error as e:
                 errors.append(f"Invalid regex in {pattern['id']}: {e}")
     
+    # Save deduplicated file if duplicates were found
+    if duplicates_removed > 0:
+        print(f"[INFO] Removed {duplicates_removed} duplicate patterns")
+        data["patterns"] = unique_patterns
+        data["total_patterns"] = len(unique_patterns)
+        with open(jailbreaks_file, "w", encoding="utf-8") as f:
+            json.dump(data, f, indent=2, ensure_ascii=False)
+
     if false_positives:
         print(f"[WARN] {len(false_positives)} potential false positives:")
         for fp in false_positives[:5]:  # Show first 5
