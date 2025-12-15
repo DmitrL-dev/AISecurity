@@ -1,8 +1,8 @@
 {
-  "version": "2025.12.14.1",
+  "version": "2025.12.15.1",
   "source": "sentinel-enterprise",
-  "last_updated": "2025-12-14T18:00:00Z",
-  "total_patterns": 75,
+  "last_updated": "2025-12-15T02:03:23.909570Z",
+  "total_patterns": 49,
   "categories": {
     "LLM01": "Prompt Injection",
     "LLM07": "System Prompt Leakage",

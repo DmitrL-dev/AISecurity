@@ -1,6 +1,6 @@
 {
-  "version": "2025.12.14.1",
-  "timestamp": "2025-12-14T18:00:00Z",
+  "version": "2025.12.15.1",
+  "timestamp": "2025-12-15T02:03:24.010236Z",
   "description": "SENTINEL Community Signatures - Auto-updated threat detection patterns",
   "sources": [
     "sentinel-enterprise",
@@ -10,21 +10,21 @@
   "files": {
     "jailbreaks": {
       "path": "jailbreaks.json",
-      "description": "Jailbreak detection patterns",
-      "sha256": null,
-      "count": 0
+      "sha256": "8a987d664d67dbc1f8ec2144749fd0f8b923bea32e2ba3eac266dbc0cfe7ba56",
+      "size": 16150,
+      "count": 49
     },
     "keywords": {
       "path": "keywords.json",
-      "description": "Suspicious keyword sets",
-      "sha256": null,
-      "count": 0
+      "sha256": "a6bb63378be6b359e4bbcbd380b8ac2f86deae57e15b6589afe78db62f189bd6",
+      "size": 3197,
+      "count": 8
     },
     "pii": {
       "path": "pii.json",
-      "description": "PII detection patterns",
-      "sha256": null,
-      "count": 0
+      "sha256": "a4ec25a75b43cf28f7bdd9bfa0db8064a4967488831c3c79a86ac4e61acd3a06",
+      "size": 3777,
+      "count": 15
     }
   },
   "update_info": {
