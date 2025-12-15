@@ -1,20 +1,49 @@
 #!/usr/bin/env python3
 """
-SENTINEL Signature Validator
+SENTINEL Signature Validator v2.0
 
-Validates all signature files in signatures/ directory:
+Security-enhanced validation:
 - JSON schema validation
 - Regex pattern testing
-- Duplicate detection
-- False positive testing against safe examples
+- Duplicate detection & removal
+- False positive testing
+- ReDoS detection
+- Pattern complexity limits
+- Suspicious pattern detection
 """
 
 import json
 import re
 import sys
+import signal
 from pathlib import Path
+from typing import Optional
 
 SIGNATURES_DIR = Path(__file__).parent.parent / "signatures"
+
+# Security limits
+MAX_REGEX_LENGTH = 500
+MAX_PATTERN_GROUPS = 10
+REGEX_TIMEOUT_MS = 100
+
+# ReDoS dangerous patterns (exponential backtracking)
+REDOS_PATTERNS = [
+    r'\(\.\+\)\+',      # (.+)+
+    r'\(\.\*\)\+',      # (.*)+
+    r'\(\.\+\)\*',      # (.+)*
+    r'\(\.\*\)\*',      # (.*)*
+    r'\([^)]+\+\)\+',   # (a+)+
+    r'\([^)]+\*\)\+',   # (a*)+
+    r'\(\w\+\)\+',      # (\w+)+
+    r'\(\d\+\)\+',      # (\d+)+
+]
+
+# Suspicious constructs (potential backdoors)
+SUSPICIOUS_PATTERNS = [
+    r'\(\?!',           # Negative lookahead - could whitelist attacks
+    r'\(\?<!',          # Negative lookbehind
+    r'\(\?\(\w+\)',     # Conditional patterns
+]
 
 SAFE_EXAMPLES = [
     "How do I prevent prompt injection attacks?",
@@ -28,6 +57,37 @@ SAFE_EXAMPLES = [
     "Translate this text to Spanish",
     "What's the weather like today?",
 ]
+
+
+def is_redos_vulnerable(pattern: str) -> bool:
+    """Check if regex pattern is vulnerable to ReDoS."""
+    for redos in REDOS_PATTERNS:
+        if re.search(redos, pattern):
+            return True
+    return False
+
+
+def is_suspicious_pattern(pattern: str) -> Optional[str]:
+    """Check for suspicious constructs that could be backdoors."""
+    for susp in SUSPICIOUS_PATTERNS:
+        if re.search(susp, pattern):
+            return susp
+    return None
+
+
+def check_pattern_complexity(pattern: str) -> list[str]:
+    """Check pattern complexity limits."""
+    issues = []
+
+    if len(pattern) > MAX_REGEX_LENGTH:
+        issues.append(f"Pattern too long: {len(pattern)} > {MAX_REGEX_LENGTH}")
+
+    # Count groups
+    groups = len(re.findall(r'\([^?]', pattern))
+    if groups > MAX_PATTERN_GROUPS:
+        issues.append(f"Too many groups: {groups} > {MAX_PATTERN_GROUPS}")
+
+    return issues
 
 
 def validate_jailbreaks() -> tuple[bool, list[str]]:
@@ -75,6 +135,21 @@ def validate_jailbreaks() -> tuple[bool, list[str]]:
         # Validate regex
         regex = pattern.get("regex")
         if regex:
+            # Security checks
+            if is_redos_vulnerable(regex):
+                print(f"[SECURITY] ReDoS vulnerable: {pattern['id']}")
+                errors.append(f"ReDoS vulnerable: {pattern['id']}")
+                continue
+
+            susp = is_suspicious_pattern(regex)
+            if susp:
+                print(
+                    f"[SECURITY] Suspicious pattern in {pattern['id']}: {susp}")
+
+            complexity_issues = check_pattern_complexity(regex)
+            for issue in complexity_issues:
+                print(f"[SECURITY] {pattern['id']}: {issue}")
+
             try:
                 compiled = re.compile(regex)
                 

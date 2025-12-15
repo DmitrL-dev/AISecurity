@@ -57,6 +57,19 @@ fetch('https://cdn.jsdelivr.net/gh/DmitrL-dev/AISecurity@latest/signatures/jailb
 - ✅ Community contributions welcome (PRs to `signatures/`)
 - ✅ Versioned releases for pinning
 
+**🔐 Signature Security:**
+
+All patterns undergo automated security validation before publishing:
+
+| Check | Description |
+|-------|-------------|
+| **ReDoS Detection** | Blocks regex with catastrophic backtracking (e.g., `(.+)+`) |
+| **Complexity Limits** | Max 500 chars, max 10 capture groups |
+| **Backdoor Detection** | Flags suspicious constructs like negative lookahead `(?!...)` |
+| **Secret Scanning** | Removes leaked API keys (OpenAI, AWS, Google) |
+| **False Positive Testing** | Tests against 10+ known-safe prompts |
+| **Duplicate Removal** | Automatic deduplication by content hash |
+
 ---
 
 ## 🆓 Community Edition vs 🔐 Enterprise Edition

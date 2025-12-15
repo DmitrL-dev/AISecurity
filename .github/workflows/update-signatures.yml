@@ -41,6 +41,10 @@ jobs:
         run: |
           python scripts/fetch_signatures.py
 
+      - name: Clean secrets from signatures
+        run: |
+          python scripts/clean_secrets.py
+
       - name: Validate signatures
         run: |
           python scripts/validate_signatures.py
