@@ -33,6 +33,32 @@
 
 ---
 
+### 🛡️ Free Threat Signatures CDN
+
+SENTINEL provides **free, auto-updated threat signatures** for the community. No API key required!
+
+| File | Description | CDN Link |
+|------|-------------|----------|
+| `jailbreaks.json` | 49+ jailbreak patterns (DAN, roleplay, encoding) | [Download](https://cdn.jsdelivr.net/gh/DmitrL-dev/AISecurity@latest/signatures/jailbreaks.json) |
+| `keywords.json` | Suspicious keyword sets (7 categories) | [Download](https://cdn.jsdelivr.net/gh/DmitrL-dev/AISecurity@latest/signatures/keywords.json) |
+| `pii.json` | PII & secrets detection patterns | [Download](https://cdn.jsdelivr.net/gh/DmitrL-dev/AISecurity@latest/signatures/pii.json) |
+| `manifest.json` | Version & integrity metadata | [Download](https://cdn.jsdelivr.net/gh/DmitrL-dev/AISecurity@latest/signatures/manifest.json) |
+
+**Usage:**
+```javascript
+fetch('https://cdn.jsdelivr.net/gh/DmitrL-dev/AISecurity@latest/signatures/jailbreaks.json')
+  .then(r => r.json())
+  .then(patterns => console.log(`Loaded ${patterns.length} patterns`));
+```
+
+**Features:**
+- ✅ Updated daily via GitHub Actions
+- ✅ Free for commercial & non-commercial use
+- ✅ Community contributions welcome (PRs to `signatures/`)
+- ✅ Versioned releases for pinning
+
+---
+
 ## 🆓 Community Edition vs 🔐 Enterprise Edition
 
 This repository contains the **Community Edition** of SENTINEL. Enterprise features are available through licensing.
