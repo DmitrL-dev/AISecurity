@@ -33,25 +33,25 @@
 
 > [!TIP]
 > ### 🖥️ Coming Soon: SENTINEL Desktop
-> **Бесплатная защита для обычных пользователей!**  
-> Скоро выйдет десктоп-версия SENTINEL для Windows/macOS/Linux, которая будет защищать ваши AI-приложения (ChatGPT, Claude, Gemini и др.) в реальном времени.  
-> Полностью бесплатно. Без подписок. Без ограничений.
+> **Free protection for everyday users!**  
+> Desktop version for Windows/macOS/Linux coming soon — protect your AI apps (ChatGPT, Claude, Gemini, etc.) in real-time.  
+> Completely free. No subscriptions. No limits.
 
 <p align="center">
   <br>
   <img src="https://img.shields.io/badge/🖥️_COMING_SOON-SENTINEL_Desktop-ff6b6b?style=for-the-badge&labelColor=1a1a2e" alt="Coming Soon">
   <br><br>
-  <strong>🛡️ Бесплатная защита AI для каждого! 🛡️</strong>
+  <strong>🛡️ Free AI Protection for Everyone! 🛡️</strong>
   <br><br>
   <img src="https://img.shields.io/badge/Windows-0078D6?style=flat-square&logo=windows&logoColor=white" alt="Windows">
   <img src="https://img.shields.io/badge/macOS-000000?style=flat-square&logo=apple&logoColor=white" alt="macOS">
   <img src="https://img.shields.io/badge/Linux-FCC624?style=flat-square&logo=linux&logoColor=black" alt="Linux">
   <br><br>
-  <em>Защита ChatGPT, Claude, Gemini и других AI в реальном времени</em>
+  <em>Real-time protection for ChatGPT, Claude, Gemini and other AI apps</em>
   <br>
-  <strong>✨ Полностью бесплатно • Без подписок • Без ограничений ✨</strong>
+  <strong>✨ Completely Free • No Subscriptions • No Limits ✨</strong>
   <br><br>
-  <a href="https://t.me/DmLabincev">📢 Подписаться на анонс</a>
+  <a href="https://t.me/DmLabincev">📢 Subscribe for Updates</a>
 </p>
 
 ---
