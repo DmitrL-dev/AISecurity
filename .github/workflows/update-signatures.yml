@@ -53,6 +53,11 @@ jobs:
         run: |
           python scripts/update_manifest.py
 
+      - name: Split large files for CDN
+        run: |
+          # Split jailbreaks.json into parts for jsDelivr (20MB limit)
+          python scripts/split_jailbreaks.py
+
       - name: Check for changes
         id: check_changes
         run: |
