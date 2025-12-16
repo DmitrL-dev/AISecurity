@@ -311,6 +311,13 @@ python benchmarks/benchmark_plotly.py   # HTML (interactive)
 
 SENTINEL follows a **microservices architecture** with clear separation of concerns:
 
+<p align="center">
+  <img src="./assets/architecture.png" alt="SENTINEL Architecture" width="800">
+</p>
+
+<details>
+<summary><strong>📊 Detailed Architecture Diagram (Mermaid)</strong></summary>
+
 ```mermaid
 flowchart TB
     subgraph Clients["CLIENTS"]
@@ -484,6 +491,8 @@ flowchart TB
     style Hive fill:#0f3460,stroke:#16213e,color:#eee
     style Gateway fill:#16213e,stroke:#0f3460,color:#eee
 ```
+
+</details>
 
 ### Technology Choices
 
