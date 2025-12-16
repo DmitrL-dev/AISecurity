@@ -1,8 +1,8 @@
 {
-  "version": "2025.12.15.1",
+  "version": "2025.12.16.1",
   "source": "sentinel-enterprise",
-  "last_updated": "2025-12-15T03:13:32.314515Z",
-  "total_patterns": 39702,
+  "last_updated": "2025-12-16T06:12:10.757555Z",
+  "total_patterns": 39701,
   "categories": {
     "LLM01": "Prompt Injection",
     "LLM07": "System Prompt Leakage",
@@ -13,13 +13,13 @@
   "parts": [
     {
       "file": "jailbreaks-part1.json",
-      "patterns_count": 19852,
-      "size_mb": 14.4
+      "patterns_count": 19851,
+      "size_mb": 14.2
     },
     {
       "file": "jailbreaks-part2.json",
       "patterns_count": 19850,
-      "size_mb": 14.2
+      "size_mb": 14.0
     }
   ]
 }
