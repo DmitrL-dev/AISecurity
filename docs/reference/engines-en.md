@@ -1,6 +1,6 @@
 # 🔬 SENTINEL — Engine Reference Guide
 
-> **Total Engines:** 89 protection engines  
+> **Total Engines:** 113 protection engines  
 > **Benchmark Recall:** 85.1% | Precision: 84.4% | F1: 84.7%  
 > **Categories:** 15  
 > **Coverage:** OWASP LLM Top 10 + OWASP ASI Top 10

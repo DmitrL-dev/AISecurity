@@ -1,6 +1,6 @@
 # 📚 SENTINEL Community Documentation
 
-> **89 Detection Engines** • **PhD-level Mathematical Foundations** • **Production-Ready**
+> **113 detection engines** • **PhD-level Mathematical Foundations** • **Production-Ready**
 
 ---
 
@@ -89,7 +89,7 @@
 ## 🔐 Need More?
 
 **Enterprise Edition** includes:
-- All 89 detection engines (vs subset in Community)
+- All 113 detection engines (vs subset in Community)
 - Zero-day detection & Proactive Defense
 - Red team automation
 - Dedicated support & SLA
