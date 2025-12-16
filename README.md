@@ -215,7 +215,7 @@ flowchart LR
         A[User Prompt]
     end
     
-    subgraph Detection["89 Detection Engines"]
+    subgraph Detection["113 DETECTION ENGINES"]
         B[InjectionEngine<br/>Regex Patterns]
         C[SemanticDetector<br/>100+ Prototypes]
         D[VoiceJailbreak<br/>Phonetic Analysis]
@@ -298,7 +298,7 @@ flowchart TB
     end
 
     subgraph Brain["BRAIN (Python 3.11+)"]
-        subgraph Engines["89 DETECTION ENGINES"]
+        subgraph Engines["113 DETECTION ENGINES"]
             subgraph Classic["Classic Detection (8)"]
                 C1["injection"]
                 C2["yara_engine"]
@@ -467,7 +467,7 @@ flowchart TB
 | **Cache**     | Redis            | Session state, rate limiting, behavioral profiles          |
 | **Secrets**   | HashiCorp Vault  | Zero-trust secret management                               |
 
-### 89 Detection Engines — Industry's Most Comprehensive Suite
+### 113 DETECTION ENGINES — Industry's Most Comprehensive Suite
 
 | Category                     | Count  | Purpose                                  |
 | ---------------------------- | ------ | ---------------------------------------- |
