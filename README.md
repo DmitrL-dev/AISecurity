@@ -31,6 +31,29 @@
 
 **Contact:** Dmitry Labintsev • [chg@live.ru](mailto:chg@live.ru) • [@DmLabincev](https://t.me/DmLabincev) • +7-914-209-25-38
 
+> [!TIP]
+> ### 🖥️ Coming Soon: SENTINEL Desktop
+> **Бесплатная защита для обычных пользователей!**  
+> Скоро выйдет десктоп-версия SENTINEL для Windows/macOS/Linux, которая будет защищать ваши AI-приложения (ChatGPT, Claude, Gemini и др.) в реальном времени.  
+> Полностью бесплатно. Без подписок. Без ограничений.
+
+<p align="center">
+  <br>
+  <img src="https://img.shields.io/badge/🖥️_COMING_SOON-SENTINEL_Desktop-ff6b6b?style=for-the-badge&labelColor=1a1a2e" alt="Coming Soon">
+  <br><br>
+  <strong>🛡️ Бесплатная защита AI для каждого! 🛡️</strong>
+  <br><br>
+  <img src="https://img.shields.io/badge/Windows-0078D6?style=flat-square&logo=windows&logoColor=white" alt="Windows">
+  <img src="https://img.shields.io/badge/macOS-000000?style=flat-square&logo=apple&logoColor=white" alt="macOS">
+  <img src="https://img.shields.io/badge/Linux-FCC624?style=flat-square&logo=linux&logoColor=black" alt="Linux">
+  <br><br>
+  <em>Защита ChatGPT, Claude, Gemini и других AI в реальном времени</em>
+  <br>
+  <strong>✨ Полностью бесплатно • Без подписок • Без ограничений ✨</strong>
+  <br><br>
+  <a href="https://t.me/DmLabincev">📢 Подписаться на анонс</a>
+</p>
+
 ---
 
 ### 🛡️ Free Threat Signatures CDN
@@ -98,17 +121,23 @@ This repository contains the **Community Edition** of SENTINEL. Enterprise featu
 | **TTPs.ai Basic** (RAG guard, probing)                      |   ✅ Full    |    ✅ Full    |
 | **TTPs.ai Advanced** (session, tool_call, C2, staging)      |      ❌      |    ✅ Full    |
 | **Strange Math Basic** (TDA+GUDHI, Sheaf)                   |   ✅ Full    |    ✅ Full    |
-| **Strange Math Medium** (Hyperbolic Detector) 🆕            |   ✅ Full    |    ✅ Full    |
+| **Strange Math Medium** (Hyperbolic Detector)               |   ✅ Full    |    ✅ Full    |
+| **Strange Math v3** (Fractal, Wavelet, Ensemble) 🆕         |      ❌      |    ✅ Full    |
 | **Strange Math Advanced** (Info Geometry α-div, Spectral)   |      ❌      |    ✅ Full    |
 | **VLM Basic** (visual_content, cross_modal)                 |   ✅ Full    |    ✅ Full    |
 | **VLM Advanced** (adversarial_image, steganography)         |      ❌      |    ✅ Full    |
-| **ASI10 Voice Jailbreak** (phonetic attacks) 🆕             |   ✅ Full    |    ✅ Full    |
-| **Production Infrastructure** (OpenTelemetry, Rate Limit) 🆕 |   ✅ Full    |    ✅ Full    |
-| **Kubernetes Health Probes** 🆕                             |   ✅ Full    |    ✅ Full    |
+| **Shadow AI Discovery** (fingerprinter, traffic) 🆕         |   ✅ Full    |    ✅ Full    |
+| **Workflow Automation** (triggers, webhooks) 🆕             |   ✅ Full    |    ✅ Full    |
+| **Mobile SDK** (iOS, Android, React Native) 🆕              |   ✅ Full    |    ✅ Full    |
+| **API Marketplace** (rate limiting, tiers) 🆕               |  ⚠️ Free    |    ✅ Full    |
+| **Prompt Audit** (DuckDB, GDPR/SOC2) 🆕                     |      ❌      |    ✅ Full    |
+| **Visual Rule Builder** (YARA/Sigma export) 🆕              |      ❌      |    ✅ Full    |
+| **Intelligence Graph** (KùzuDB, MITRE ATT&CK) 🆕            |      ❌      |    ✅ Full    |
+| **ASI10 Voice Jailbreak** (phonetic attacks)                |   ✅ Full    |    ✅ Full    |
+| **Production Infrastructure** (OpenTelemetry, Rate Limit)   |   ✅ Full    |    ✅ Full    |
 | **Deep Learning Analysis** (activation steering, forensics) |      ❌      |    ✅ Full    |
-| **Meta-Judge** (87-engine aggregator)                       |      ❌      |    ✅ Full    |
+| **Meta-Judge** (120-engine aggregator)                      |      ❌      |    ✅ Full    |
 | **Proactive Defense** (zero-day detection)                  |      ❌      |    ✅ Full    |
-| **Red Team** (attack_synthesizer, vulnerability_hunter)     |      ❌      |    ✅ Full    |
 | Docker/K8s deployment                                       |   ✅ Full    |    ✅ Full    |
 | Documentation + Demo                                        |   ✅ Full    |    ✅ Full    |
 | Unit Tests                                                  |   ✅ Basic   |    ✅ Full    |
@@ -298,7 +327,7 @@ flowchart TB
     end
 
     subgraph Brain["BRAIN (Python 3.11+)"]
-        subgraph Engines["113 DETECTION ENGINES"]
+        subgraph Engines["120 DETECTION ENGINES"]
             subgraph Classic["Classic Detection (8)"]
                 C1["injection"]
                 C2["yara_engine"]
