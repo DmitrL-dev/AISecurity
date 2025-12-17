@@ -1,6 +1,6 @@
 # 🔬 SENTINEL — Engine Reference Guide
 
-> **Total Engines:** 113 protection engines  
+> **Total Engines:** 120 protection engines  
 > **Benchmark Recall:** 85.1% | Precision: 84.4% | F1: 84.7%  
 > **Categories:** 15  
 > **Coverage:** OWASP LLM Top 10 + OWASP ASI Top 10
@@ -38,7 +38,7 @@
 │  ┌───────────────────────────────────────────────────────────────┐  │
 │  │                      SentinelAnalyzer                          │  │
 │  │                                                                │  │
-│  │   Input → [Engine 1] → [Engine 2] → ... → [Engine 89] → Meta-Judge
+│  │   Input → [Engine 1] → [Engine 2] → ... → [Engine 120] → Meta-Judge
 │  │              ↓              ↓                    ↓              │  │
 │  │           Score 1       Score 2            Score 84             │  │
 │  │              └──────────────┴────────────────┘                  │  │
@@ -621,7 +621,7 @@ Oracle for mathematical statement verification.
 
 | #   | Engine               | Description                       |
 | --- | -------------------- | --------------------------------- |
-| 82  | MetaJudge            | 89-engine verdict aggregator      |
+| 82  | MetaJudge            | 120-engine verdict aggregator     |
 | 83  | ExplainabilityEngine | Decision explanation (LIME, SHAP) |
 
 ---
