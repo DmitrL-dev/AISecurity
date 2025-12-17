@@ -9,7 +9,7 @@
 <p align="center">
   <img src="https://img.shields.io/badge/Recall-85.1%25-brightgreen?style=for-the-badge" alt="Recall">
   <img src="https://img.shields.io/badge/Precision-84.4%25-blue?style=for-the-badge" alt="Precision">
-  <img src="https://img.shields.io/badge/Engines-120-purple?style=for-the-badge" alt="Engines">
+  <img src="https://img.shields.io/badge/Engines-121-purple?style=for-the-badge" alt="Engines">
   <img src="https://img.shields.io/badge/Dataset-1815-orange?style=for-the-badge" alt="Dataset">
 </p>
   <a href="https://dmitrl-dev.github.io/AISecurity/">📚 Documentation Portal</a> •
@@ -136,7 +136,7 @@ This repository contains the **Community Edition** of SENTINEL. Enterprise featu
 | **ASI10 Voice Jailbreak** (phonetic attacks)                |   ✅ Full    |    ✅ Full    |
 | **Production Infrastructure** (OpenTelemetry, Rate Limit)   |   ✅ Full    |    ✅ Full    |
 | **Deep Learning Analysis** (activation steering, forensics) |      ❌      |    ✅ Full    |
-| **Meta-Judge** (120-engine aggregator)                      |      ❌      |    ✅ Full    |
+| **Meta-Judge** (121-engine aggregator)                      |      ❌      |    ✅ Full    |
 | **Proactive Defense** (zero-day detection)                  |      ❌      |    ✅ Full    |
 | Docker/K8s deployment                                       |   ✅ Full    |    ✅ Full    |
 | Documentation + Demo                                        |   ✅ Full    |    ✅ Full    |
@@ -180,7 +180,7 @@ This repository contains the **Community Edition** of SENTINEL. Enterprise featu
 
 | Document | Description |
 |----------|-------------|
-| [All 120 Engines (EN)](./docs/reference/engines-en.md) | Complete engine reference |
+| [All 121 Engines (EN)](./docs/reference/engines-en.md) | Complete engine reference |
 | [**🔬 Expert Deep Dive (EN)**](./docs/reference/engines-expert-deep-dive-en.md) | **PhD-level mathematical foundations** |
 | [Engine Categories](./docs/reference/engines/) | Detailed per-category documentation |
 
@@ -334,7 +334,7 @@ flowchart TB
     end
 
     subgraph Brain["BRAIN (Python 3.11+)"]
-        subgraph Engines["120 DETECTION ENGINES"]
+        subgraph Engines["121 DETECTION ENGINES"]
             subgraph Classic["Classic Detection (8)"]
                 C1["injection"]
                 C2["yara_engine"]
@@ -519,7 +519,7 @@ flowchart TB
 | 🔐 **Protocol Security**     | 4      | MCP, A2A, agent cards, NHI identity      |
 | 🎯 **Proactive Engines**     | 9      | Honeypots, kill chain, formal invariants |
 | ⚖️ **Meta-Judge + XAI**      | 3      | Engine aggregator + explainability       |
-|                              | **120** | **Full coverage: OWASP LLM + Agentic AI**|
+|                              | **121** | **Full coverage: OWASP LLM + Agentic AI**|
 
 > 📚 **Full details:** [engines-expert-deep-dive-en.md](./docs/reference/engines-expert-deep-dive-en.md) — PhD-level documentation
 
