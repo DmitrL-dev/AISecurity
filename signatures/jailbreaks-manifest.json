@@ -1,7 +1,7 @@
 {
-  "version": "2025.12.17.1",
+  "version": "2025.12.18.1",
   "source": "sentinel-enterprise",
-  "last_updated": "2025-12-17T00:54:03.400352Z",
+  "last_updated": "2025-12-18T00:54:31.326748Z",
   "total_patterns": 39701,
   "categories": {
     "LLM01": "Prompt Injection",
