@@ -259,7 +259,7 @@ def main():
     merged = merge_with_existing(unique_patterns)
 
     # Save
-    SIGNATURES_DIR.mkdir(exist_ok=True)
+    SIGNATURES_DIR.mkdir(parents=True, exist_ok=True)
     with open(JAILBREAKS_FILE, "w", encoding="utf-8") as f:
         json.dump(merged, f, indent=2, ensure_ascii=False)
 
