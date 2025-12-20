@@ -1,3 +1,7 @@
+<p align="center">
+  <img src="./assets/banner.png" alt="SENTINEL AI Security Platform" width="100%">
+</p>
+
 # SENTINEL Technical Deep Dive
 
 > **Advanced Mathematics & Engineering for AI Security**
@@ -5,23 +9,30 @@
 <p align="center">
   <img src="https://img.shields.io/badge/Recall-85.1%25-brightgreen?style=for-the-badge" alt="Recall">
   <img src="https://img.shields.io/badge/Precision-84.4%25-blue?style=for-the-badge" alt="Precision">
-  <img src="https://img.shields.io/badge/F1-84.7%25-purple?style=for-the-badge" alt="F1">
-  <img src="https://img.shields.io/badge/Dataset-1815%20samples-orange?style=for-the-badge" alt="Dataset">
+  <img src="https://img.shields.io/badge/Engines-121-purple?style=for-the-badge" alt="Engines">
+  <img src="https://img.shields.io/badge/Dataset-1815-orange?style=for-the-badge" alt="Dataset">
 </p>
-
-<p align="center">
   <a href="https://dmitrl-dev.github.io/AISecurity/">📚 Documentation Portal</a> •
   <a href="#license--contact">📞 Contact</a> •
   <a href="https://t.me/DmLabincev">💬 Telegram</a> •
   <a href="mailto:chg@live.ru">📧 Email</a>
 </p>
 
-> 🔗 **[Project Website](https://dmitrl-dev.github.io/AISecurity/)** — Презентации, визуальная архитектура и обзор проекта
+---
+
+### 🤝 Partnership & Collaboration
+
+| Opportunity     | Description                               |
+| --------------- | ----------------------------------------- |
+| **Partnership** | Joint development, technology integration |
+| **Sponsorship** | Funding for research & development        |
+| **Hiring**      | Looking for AI Security projects          |
+| **Acquisition** | Open to project sale                      |
+
+**Contact:** Dmitry Labintsev • [chg@live.ru](mailto:chg@live.ru) • [@DmLabincev](https://t.me/DmLabincev) • +7-914-209-25-38
 
 > [!TIP]
->
 > ### 🖥️ Coming Soon: SENTINEL Desktop
->
 > **Free protection for everyday users!**  
 > Desktop version for Windows/macOS/Linux coming soon — protect your AI apps (ChatGPT, Claude, Gemini, etc.) in real-time.  
 > Completely free. No subscriptions. No limits.
@@ -45,16 +56,57 @@
 
 ---
 
-### 🤝 Partnership & Collaboration
+### 🛡️ Free Threat Signatures CDN
 
-| Opportunity     | Description                               |
-| --------------- | ----------------------------------------- |
-| **Partnership** | Joint development, technology integration |
-| **Sponsorship** | Funding for research & development        |
-| **Hiring**      | Looking for AI Security projects          |
-| **Acquisition** | Open to project sale                      |
+SENTINEL provides **free, auto-updated threat signatures** for the community. No API key required!
 
-**Contact:** Dmitry Labintsev • [chg@live.ru](mailto:chg@live.ru) • [@DmLabincev](https://t.me/DmLabincev) • +7-914-209-25-38
+| File | Description | CDN Link |
+|------|-------------|----------|
+| `jailbreaks.json` | **39,848** jailbreak patterns from 7 sources | [Download](https://cdn.jsdelivr.net/gh/DmitrL-dev/AISecurity@latest/signatures/jailbreaks.json) |
+| `keywords.json` | Suspicious keyword sets (7 categories) | [Download](https://cdn.jsdelivr.net/gh/DmitrL-dev/AISecurity@latest/signatures/keywords.json) |
+| `pii.json` | PII & secrets detection patterns | [Download](https://cdn.jsdelivr.net/gh/DmitrL-dev/AISecurity@latest/signatures/pii.json) |
+| `manifest.json` | Version & integrity metadata | [Download](https://cdn.jsdelivr.net/gh/DmitrL-dev/AISecurity@latest/signatures/manifest.json) |
+
+**Usage:**
+```javascript
+fetch('https://cdn.jsdelivr.net/gh/DmitrL-dev/AISecurity@latest/signatures/jailbreaks.json')
+  .then(r => r.json())
+  .then(patterns => console.log(`Loaded ${patterns.length} patterns`));
+```
+
+**Features:**
+- ✅ Updated daily via GitHub Actions
+- ✅ Free for commercial & non-commercial use
+- ✅ Community contributions welcome (PRs to `signatures/`)
+- ✅ Versioned releases for pinning
+
+**🔐 Signature Security:**
+
+All patterns undergo automated security validation before publishing:
+
+| Check | Description |
+|-------|-------------|
+| **ReDoS Detection** | Blocks regex with catastrophic backtracking (e.g., `(.+)+`) |
+| **Complexity Limits** | Max 500 chars, max 10 capture groups |
+| **Backdoor Detection** | Flags suspicious constructs like negative lookahead `(?!...)` |
+| **Secret Scanning** | Removes leaked API keys (OpenAI, AWS, Google) |
+| **False Positive Testing** | Tests against 10+ known-safe prompts |
+| **Duplicate Removal** | Automatic deduplication by content hash |
+
+**🙏 Data Sources & Acknowledgments:**
+
+Our threat signature database is powered by research from:
+
+| Source | Organization | Type |
+|--------|--------------|------|
+| [HackAPrompt](https://www.aicrowd.com/challenges/hackaprompt-2023) | Learn Prompting + AICrowd | Competition dataset |
+| [TrustAIRLab](https://huggingface.co/TrustAIRLab) | HKUST | Academic research |
+| [deepset](https://huggingface.co/deepset) | deepset GmbH | Prompt injections |
+| [Lakera](https://huggingface.co/Lakera) | Lakera AI | Security research |
+| [verazuo](https://github.com/verazuo/jailbreak_llms) | Research community | Jailbreak collection |
+| [imoxto](https://huggingface.co/imoxto) | Community | Aggregated datasets |
+
+*Special thanks to the AI security research community for making these datasets publicly available.*
 
 ---
 
@@ -64,97 +116,192 @@ This repository contains the **Community Edition** of SENTINEL. Enterprise featu
 
 | Feature                                                     | Community 🆓 | Enterprise 🔐 |
 | ----------------------------------------------------------- | :----------: | :-----------: |
-| **Classic Detection** (injection, PII, behavioral)          |   ✅ Full    |    ✅ Full    |
-| **Basic NLP Guards** (language, prompt_guard)               |   ✅ Full    |    ✅ Full    |
-| **TTPs.ai Defense** (RAG guard, probing, session)           |   ✅ Full    |    ✅ Full    |
-| **Strange Math Core** (TDA, Sheaf, Hyperbolic)              |   ❌ Stub    |    ✅ Full    |
-| **Strange Math Extended** (Category, Chaos theory)          |   ❌ Stub    |    ✅ Full    |
-| **VLM Protection** (visual, cross-modal, adversarial)       |   ❌ Stub    |    ✅ Full    |
-| **Deep Learning Analysis** (activation steering, forensics) |   ❌ Stub    |    ✅ Full    |
-| **Meta-Judge** (84-engine aggregator)                       |   ❌ Stub    |    ✅ Full    |
-| **Proactive Defense** (zero-day detection)                  |   ❌ Stub    |    ✅ Full    |
-| Gateway (Go)                                                |   ✅ Full    |    ✅ Full    |
-| Documentation                                               |   ✅ Full    |    ✅ Full    |
+| **Classic Detection** (injection, PII, behavioral, yara)    |   ✅ Full    |    ✅ Full    |
+| **Basic NLP Guards** (language, prompt_guard+, hallucination)|   ✅ Full    |    ✅ Full    |
+| **TTPs.ai Basic** (RAG guard, probing)                      |   ✅ Full    |    ✅ Full    |
+| **TTPs.ai Advanced** (session, tool_call, C2, staging)      |      ❌      |    ✅ Full    |
+| **Strange Math Basic** (TDA+GUDHI, Sheaf)                   |   ✅ Full    |    ✅ Full    |
+| **Strange Math Medium** (Hyperbolic Detector)               |   ✅ Full    |    ✅ Full    |
+| **Strange Math v3** (Fractal, Wavelet, Ensemble) 🆕         |      ❌      |    ✅ Full    |
+| **Strange Math Advanced** (Info Geometry α-div, Spectral)   |      ❌      |    ✅ Full    |
+| **VLM Basic** (visual_content, cross_modal)                 |   ✅ Full    |    ✅ Full    |
+| **VLM Advanced** (adversarial_image, steganography)         |      ❌      |    ✅ Full    |
+| **Shadow AI Discovery** (fingerprinter, traffic) 🆕         |   ✅ Full    |    ✅ Full    |
+| **Workflow Automation** (triggers, webhooks) 🆕             |   ✅ Full    |    ✅ Full    |
+| **Mobile SDK** (iOS, Android, React Native) 🆕              |   ✅ Full    |    ✅ Full    |
+| **API Marketplace** (rate limiting, tiers) 🆕               |  ⚠️ Free    |    ✅ Full    |
+| **Prompt Audit** (DuckDB, GDPR/SOC2) 🆕                     |      ❌      |    ✅ Full    |
+| **Visual Rule Builder** (YARA/Sigma export) 🆕              |      ❌      |    ✅ Full    |
+| **Intelligence Graph** (KùzuDB, MITRE ATT&CK) 🆕            |      ❌      |    ✅ Full    |
+| **ASI10 Voice Jailbreak** (phonetic attacks)                |   ✅ Full    |    ✅ Full    |
+| **Production Infrastructure** (OpenTelemetry, Rate Limit)   |   ✅ Full    |    ✅ Full    |
+| **Deep Learning Analysis** (activation steering, forensics) |      ❌      |    ✅ Full    |
+| **Meta-Judge** (121-engine aggregator)                      |      ❌      |    ✅ Full    |
+| **Proactive Defense** (zero-day detection)                  |      ❌      |    ✅ Full    |
 | Docker/K8s deployment                                       |   ✅ Full    |    ✅ Full    |
+| Documentation + Demo                                        |   ✅ Full    |    ✅ Full    |
+| Unit Tests                                                  |   ✅ Basic   |    ✅ Full    |
 | Support                                                     |  Community   |   Dedicated   |
 
 > 📧 **Enterprise licensing:** [chg@live.ru](mailto:chg@live.ru) • [@DmLabincev](https://t.me/DmLabincev)
 
 ---
 
-## 🆕 What's New (December 2025)
+<details>
+<summary><h2>📚 Documentation</h2></summary>
 
-| Category       | Feature                | Description                                                |
-| -------------- | ---------------------- | ---------------------------------------------------------- |
-| **Math v3**    | Fractal Analysis       | Box-counting dimension, Higuchi, Hurst exponent            |
-| **Math v3**    | Wavelet Transforms     | DWT decomposition, transient detection                     |
-| **Math v3**    | Ensemble Scoring       | 7-engine weighted Strange Math aggregator                  |
-| **GPU**        | Tiled KL Divergence    | Tile-by-tile processing for distributions >64K elements    |
-| **NLP**        | Semantic Embeddings    | SentenceTransformer (all-MiniLM-L6-v2) for similarity      |
-| **Platform**   | Workflow Automation    | Event-driven security workflows with webhooks              |
-| **Platform**   | API Marketplace        | Rate limiting, tier-based access, usage analytics          |
-| **Platform**   | Mobile SDK             | iOS Swift, Android Kotlin, React Native                    |
-| **Enterprise** | Prompt Audit           | DuckDB-based logging with GDPR/SOC2 compliance             |
-| **Enterprise** | Visual Rule Builder    | Custom rules with YARA/Sigma export                        |
-| **Enterprise** | Intelligence Graph     | KùzuDB threat intelligence with MITRE ATT&CK               |
-| **Math**       | GUDHI Integration      | Precise TDA with Rips/Alpha complex, exact Betti numbers   |
-| **Math**       | Hyperbolic Detector    | Poincaré ball model for attack clustering                  |
-| **Math**       | α-Divergence           | Full divergence family in Information Geometry             |
-| **Security**   | Shadow AI Discovery    | Process fingerprinting, API traffic analysis, SaaS catalog |
-| **ASI10**      | Voice Jailbreak        | Phonetic obfuscation detection ("eye gee nore" → "ignore") |
-| **Security**   | Multi-turn Detection   | System prompt extraction chain detection                   |
-| **Production** | OpenTelemetry          | Distributed tracing + Prometheus metrics                   |
-| **Testing**    | 155+ Unit Tests        | Comprehensive engine test coverage                         |
-| **Testing**    | 1,815 Sample Benchmark | Multi-dataset evaluation suite                             |
-| **Health**     | 95/95 PASSED ✅        | 100% engine health check — zero failures, full coverage    |
+### Quick Start
 
-### 📊 Benchmark Results (December 2025)
+| Document | Description |
+|----------|-------------|
+| [Quick Start (EN)](./docs/getting-started/README-en.md) | 5-minute setup guide |
+| [Installation (EN)](./docs/getting-started/installation-en.md) | Detailed installation with all options |
+
+### Configuration & Integration
+
+| Document | Description |
+|----------|-------------|
+| [Configuration Guide (EN)](./docs/guides/configuration-en.md) | Environment variables, thresholds, modes |
+| [Deployment Guide (EN)](./docs/guides/deployment-en.md) | Docker, Kubernetes, production setup |
+| [Integration Guide (EN)](./docs/guides/integration-en.md) | Python/JS SDK, OpenAI proxy, LangChain |
+
+### Operations (Production)
+
+| Document | Description |
+|----------|-------------|
+| [Operations Overview](./docs/operations/README.md) | Quick reference, architecture, checklist |
+| [Monitoring](./docs/operations/monitoring.md) | Prometheus metrics, Grafana dashboards |
+| [Alerting](./docs/operations/alerting.md) | Alert rules, escalation, Alertmanager |
+| [Capacity Planning](./docs/operations/capacity-planning.md) | Sizing, autoscaling, cost optimization |
+| [Backup & DR](./docs/operations/backup-restore.md) | Disaster recovery, RPO/RTO |
+| [Runbooks](./docs/operations/runbooks/) | Incident response playbooks |
+
+### Engine Reference
+
+| Document | Description |
+|----------|-------------|
+| [All 121 Engines (EN)](./docs/reference/engines-en.md) | Complete engine reference |
+| [**🔬 Expert Deep Dive (EN)**](./docs/reference/engines-expert-deep-dive-en.md) | **PhD-level mathematical foundations** |
+| [Engine Categories](./docs/reference/engines/) | Detailed per-category documentation |
+
+</details>
+
+> [!IMPORTANT]
+> ### 📖 Full Technical Disclosure
+> 
+> **[engines-expert-deep-dive-en.md](./docs/reference/engines-expert-deep-dive-en.md)** — PhD-level documentation with mathematical foundations, honest limitations, and engineering adaptations.
+
+---
+
+This document provides a comprehensive technical overview of SENTINEL's architecture.
+
+---
+
+<details>
+<summary><h2>📊 Benchmark Results</h2></summary>
+
+<p align="center">
+  <strong>Prompt Injection Detection Performance</strong>
+</p>
+
+### 🎯 Detection Accuracy
 
 ```
 ┌─────────────────────────────────────────────────────────────────────────┐
-│                    PROMPT INJECTION DETECTION                           │
+│                    PROMPT INJECTION DETECTION                            │
 ├─────────────────────────────────────────────────────────────────────────┤
-│                                                                         │
+│                                                                          │
 │  Hybrid Ensemble    ████████████████████░░░░  85.1% Recall ⭐ BEST      │
 │  Semantic Detector  ███████████████████░░░░░  84.2% Recall              │
 │  Injection Engine   █████████░░░░░░░░░░░░░░░  36.4% Recall              │
-│                                                                         │
-│  Dataset: 1,815 samples • True Positives: 1,026 / 1,206                  │
+│  Voice Jailbreak    █░░░░░░░░░░░░░░░░░░░░░░░   2.7% Recall              │
+│                                                                          │
+│  Dataset: 1,815 samples from 3 HuggingFace datasets                     │
+│  True Positives: 1,026 / 1,206 attacks detected                          │
 └─────────────────────────────────────────────────────────────────────────┘
 ```
 
-| Detector                    | Recall    | Precision | F1        | TP / Total        |
-| --------------------------- | --------- | --------- | --------- | ----------------- |
-| **Hybrid (regex+semantic)** | **85.1%** | 84.4%     | **84.7%** | **1,026 / 1,206** |
-| Semantic                    | 84.2%     | 84.3%     | 84.3%     | 1,016 / 1,206     |
-| Injection Engine            | 36.4%     | 96.7%     | 52.9%     | 439 / 1,206       |
+### 📈 Improvement Timeline
 
-> 🎯 **Dataset:** 1,815 samples from deepset, rubend18, custom sources  
-> 📈 **Improvement:** 4.5% → 85.1% recall (+1,791%)
+```
+Development Stage              Recall    True Positives
+──────────────────────────────────────────────────────────
+Baseline (regex only)           4.5%              9 TP
++ Pattern Expansion            38.5%            337 TP
++ Semantic Detector            64.2%            774 TP
++ Attack Prototypes (100+)     72.3%            872 TP
++ Threshold Optimization       79.1%            954 TP
+★ Final Hybrid Ensemble        85.1%          1,026 TP  ← Current
+──────────────────────────────────────────────────────────
+                             +1,791% improvement!
+```
 
----
+### 🔬 Detection Architecture
 
-This document provides a comprehensive technical overview of SENTINEL's architecture, mathematical foundations, and implementation details. It is intended for researchers, security engineers, and developers interested in the cutting-edge techniques used in the platform.
+```mermaid
+flowchart LR
+    subgraph Input
+        A[User Prompt]
+    end
+    
+    subgraph Detection["113 DETECTION ENGINES"]
+        B[InjectionEngine<br/>Regex Patterns]
+        C[SemanticDetector<br/>100+ Prototypes]
+        D[VoiceJailbreak<br/>Phonetic Analysis]
+    end
+    
+    subgraph Ensemble["Hybrid Ensemble"]
+        E{OR Logic}
+        F[Max Score]
+    end
+    
+    subgraph Output
+        G[Risk Score<br/>0.0 - 1.0]
+        H{Decision}
+        I[✅ SAFE]
+        J[🚫 BLOCKED]
+    end
+    
+    A --> B & C & D
+    B --> E
+    C --> E
+    D --> E
+    E --> F --> G --> H
+    H -->|score < 0.7| I
+    H -->|score ≥ 0.7| J
+    
+    style C fill:#4CAF50,color:#fff
+    style E fill:#2196F3,color:#fff
+    style J fill:#f44336,color:#fff
+```
 
----
+### 📋 Detailed Results
 
-## Table of Contents
+| Engine | Recall | Precision | F1 | TP | FP | FN |
+|--------|--------|-----------|-----|-----|-----|-----|
+| **Hybrid** | **85.1%** | 84.4% | **84.7%** | 1,026 | 190 | 180 |
+| Semantic | 84.2% | 84.3% | 84.3% | 1,016 | 189 | 190 |
+| Injection | 36.4% | 96.7% | 52.9% | 439 | 15 | 767 |
+| Voice | 2.7% | 86.5% | 5.1% | 32 | 5 | 1,174 |
 
-1. [Architecture Overview](#architecture-overview)
-2. [Strange Math Engines (Core)](#strange-math-engines)
-3. [Strange Math Engines (Extended)](#strange-math-extended-new)
-4. [VLM Protection Engines](#vlm-protection-engines-new)
-5. [TTPs.ai Defense Engines](#ttpsai-defense-engines-new)
-6. [Protocol Security Engines](#protocol-security-engines-new)
-7. [Data Poisoning Detection](#data-poisoning-detection-new)
-8. [Proactive Defense Engine](#proactive-defense-engine-new)
-9. [Advanced Research Engines](#advanced-research-engines-new)
-10. [Deep Learning Analysis Engines](#deep-learning-analysis-new)
-11. [Defense in Depth Pipeline](#defense-in-depth-pipeline)
-12. [Hive Intelligence](#hive-intelligence)
-13. [Post-Quantum Security](#post-quantum-security)
-14. [Performance Engineering](#performance-engineering)
-15. [Research Foundation](#research-foundation)
+> 📁 **Full results:** [`benchmarks/BENCHMARK_REPORT.md`](./benchmarks/BENCHMARK_REPORT.md)  
+> 📊 **Interactive charts:** Download [`dashboard.html`](./benchmarks/charts/dashboard.html) and open in browser
+
+### 🚀 Run Benchmark
+
+```bash
+# Install dependencies
+pip install -r requirements.txt
+
+# Run full benchmark (requires sentence-transformers)
+python benchmarks/benchmark_eval.py
+
+# Generate charts
+python benchmarks/benchmark_charts.py   # PNG (matplotlib)
+python benchmarks/benchmark_plotly.py   # HTML (interactive)
+```
+
+</details>
 
 ---
 
@@ -163,6 +310,13 @@ This document provides a comprehensive technical overview of SENTINEL's architec
 ### System Design Principles
 
 SENTINEL follows a **microservices architecture** with clear separation of concerns:
+
+<p align="center">
+  <img src="./assets/architecture.png" alt="SENTINEL Architecture" width="800">
+</p>
+
+<details>
+<summary><strong>📊 Detailed Architecture Diagram (Mermaid)</strong></summary>
 
 ```mermaid
 flowchart TB
@@ -303,6 +457,11 @@ flowchart TB
                 M2["xai"]
             end
 
+            subgraph AdaptiveBehavioral["Adaptive Behavioral (2) 🆕"]
+                AB1["attacker_fingerprinting"]
+                AB2["adaptive_markov"]
+            end
+
             subgraph HybridSearch["Hybrid Search Agent"]
                 HS1["🔍 Tree Search"]
                 HS2["📊 Journal"]
@@ -333,6 +492,8 @@ flowchart TB
     style Gateway fill:#16213e,stroke:#0f3460,color:#eee
 ```
 
+</details>
+
 ### Technology Choices
 
 | Component     | Technology       | Rationale                                                  |
@@ -344,105 +505,23 @@ flowchart TB
 | **Cache**     | Redis            | Session state, rate limiting, behavioral profiles          |
 | **Secrets**   | HashiCorp Vault  | Zero-trust secret management                               |
 
-### 121 DETECTION ENGINES — The Most Comprehensive AI Security Suite
-
-<p align="center">
-  <strong>🚀 From Reactive Detection to Proactive Prevention</strong>
-</p>
-
-```mermaid
-flowchart TB
-    subgraph OLD["❌ BEFORE: Reactive"]
-        direction LR
-        A1["Wait for attacks"] --> A2["Detect"] --> A3["Respond"]
-    end
-
-    subgraph NEW["✅ AFTER: Proactive"]
-        direction LR
-        B1["Generate attacks"] --> B2["Predict evolution"] --> B3["Make impossible"]
-    end
-
-    OLD -.->|"SENTINEL Paradigm Shift"| NEW
-
-    subgraph LEVELS["🏗️ Defense Levels"]
-        direction TB
-        L4["🔴 Level 4: ATTACK GENERATION\n'We create zero-days before attackers do'\n► attack_synthesizer • vulnerability_hunter • zero_day_forge"]
-        L3["🟠 Level 3: CAUSAL IMMUNITY\n'Block root causes, not symptoms'\n► causal_attack_model • structural_immunity • immunity_compiler"]
-        L2["🟡 Level 2: PREDICTIVE DEFENSE\n'6-12 months ahead of attackers'\n► attack_evolution_predictor • threat_landscape_modeler"]
-        L1["🟢 Level 1: DETECTION\n'58 classic + Strange Math engines'\n► Comprehensive coverage of known patterns"]
-
-        L4 --> L3 --> L2 --> L1
-    end
-
-    NEW --> LEVELS
-```
-
-#### 🎯 Proactive Engines (NEW Categories)
-
-| Category               | Engines                                                                             | Key Innovation                     |
-| ---------------------- | ----------------------------------------------------------------------------------- | ---------------------------------- |
-| **Attack Generation**  | `attack_synthesizer`, `vulnerability_hunter`, `zero_day_forge`                      | Genetic algorithm attack evolution |
-| **Causal Immunity**    | `causal_attack_model`, `structural_immunity`, `immunity_compiler`                   | 90% attack class immunity          |
-| **Predictive Defense** | `attack_evolution_predictor`, `threat_landscape_modeler`                            | 6-12 month threat prediction       |
-| **ASI Gap Coverage**   | `nhi_identity_guard`, `mcp_a2a_security`, `cascading_guard`                         | OWASP ASI03/04/07/08               |
-| **Preventive Threats** | `context_window_poisoning`, `semantic_firewall`, `agent_collusion_detector` +7 more | 2026-2027 threat prevention        |
-| **Strange Math v3**    | `morse_theory`, `persistent_laplacian`, `optimal_transport`                         | Wasserstein distance + TDA fusion  |
-
-#### 📊 Complete Engine Matrix
+### 113 DETECTION ENGINES — Industry's Most Comprehensive Suite
 
 | Category                     | Count  | Purpose                                  |
 | ---------------------------- | ------ | ---------------------------------------- |
 | 🛡️ **Classic Detection**     | 8      | Injection, YARA, behavioral, cascading   |
-| 📝 **NLP / LLM Guard**       | 5      | Language analysis, hallucination         |
+| 📝 **NLP / LLM Guard**       | 6      | Language analysis, hallucination, Qwen   |
 | 🔬 **Strange Math Core**     | 8      | TDA, Sheaf, Hyperbolic, Morse, Transport |
-| 🧮 **Strange Math Extended** | 8      | Category, Chaos, Laplacian, Firewall     |
+| 🧮 **Strange Math Extended** | 18     | Category, Chaos, Laplacian, Info Geometry|
 | 🖼️ **VLM Protection**        | 3      | Visual attacks, cross-modal              |
-| ⚔️ **TTPs.ai Defense**       | 10     | RAG, probing, C2, cognitive load         |
-| 🚀 **Advanced 2025**         | 6      | Multi-agent, reward hacking, collusion   |
+| ⚔️ **TTPs.ai Defense**       | 17     | RAG, probing, C2, cognitive load         |
+| 🚀 **Advanced 2025**         | 13     | Multi-agent, reward hacking, collusion   |
 | 🔐 **Protocol Security**     | 4      | MCP, A2A, agent cards, NHI identity      |
-| 🎯 **Proactive Engines**     | 10     | Attack gen, prediction, immunity         |
-| ☠️ **Data Poisoning**        | 4      | Bootstrap, temporal, multi-tenant        |
-| 🔍 **Advanced Research**     | 9      | Honeypots, kill chain, formal            |
-| 🧠 **Deep Learning**         | 6      | Activation steering, forensics           |
-| ⚖️ **Meta-Judge + XAI**      | 2      | 84-engine aggregator                     |
-| 🔎 **Hybrid Search Agent**   | 1      | Tree-search orchestration layer          |
-|                              | **85** | **Industry's most comprehensive suite**  |
+| 🎯 **Proactive Engines**     | 9      | Honeypots, kill chain, formal invariants |
+| ⚖️ **Meta-Judge + XAI**      | 3      | Engine aggregator + explainability       |
+|                              | **121** | **Full coverage: OWASP LLM + Agentic AI**|
 
-#### 🔎 Hybrid Search Agent (NEW)
-
-SENTINEL includes a **Hybrid Search Agent** that orchestrates proactive engines using tree-based search:
-
-```python
-from src.brain.hybrid_search import SentinelHybridAgent, HybridConfig
-
-config = HybridConfig(num_drafts=5, parallel_workers=4)
-agent = SentinelHybridAgent(config)
-best_attack = agent.run(max_steps=20)
-```
-
-**Architecture:**
-
-- **Core:** Adapted from [AIDE ML](https://github.com/WecoAI/aideml) (Draft → Debug → Improve cycle)
-- **Extensions:** [AI-Scientist](https://github.com/SakanaAI/AI-Scientist) (Multi-stage pipeline, VLM, Ablation)
-
-**Features:**
-| Feature | Description |
-|---------|-------------|
-| **Tree-based evolution** | Attacks evolve through search tree |
-| **Multi-stage pipeline** | Explore → Exploit → Polish |
-| **Ablation studies** | Measure each engine's contribution |
-| **Parallel workers** | 4x faster search with concurrent execution |
-| **VLM integration** | Visual analysis for adversarial images |
-
-#### 🏆 Competitive Advantage
-
-| Metric                  | Before        | After                              |
-| ----------------------- | ------------- | ---------------------------------- |
-| **Zero-day response**   | Days-weeks    | **N/A (we create first)**          |
-| **Attack coverage**     | Known attacks | **Known + predicted + impossible** |
-| **Lead over attackers** | 0 (reactive)  | **6-12 months**                    |
-| **Structural immunity** | 0%            | **40%+ attack classes blocked**    |
-| **OWASP ASI Top 10**    | 70%           | **95%+ coverage**                  |
+> 📚 **Full details:** [engines-expert-deep-dive-en.md](./docs/reference/engines-expert-deep-dive-en.md) — PhD-level documentation
 
 ---
 
@@ -1175,9 +1254,10 @@ Automatic audit reports include:
 - Risk level assessment (EU AI Act: Minimal/Limited/High/Unacceptable)
 - Evidence for compliance auditors
 
----
 
 </details>
+
+---
 
 <details>
 <summary><h2>⚖️ Meta-Judge Engine (NEW)</h2></summary>
@@ -1509,7 +1589,8 @@ def gpu_spectral_analysis(attention_matrix: np.ndarray) -> np.ndarray:
 | Advanced Research      | 10     | honeypot, canary, kill_chain, compliance, formal   |
 | Deep Learning Analysis | 6      | activation_steering, hidden_state, llm_fingerprint |
 | Meta & Explainability  | 2      | meta_judge, xai                                    |
-| **TOTAL**              | **58** | **Full detection engine suite**                    |
+| **Adaptive Behavioral** 🆕 | **2** | **attacker_fingerprinting, adaptive_markov**   |
+| **TOTAL**              | **60** | **Full detection engine suite**                    |
 
 ---
 
