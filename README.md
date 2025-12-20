@@ -158,6 +158,43 @@ This repository contains the **Community Edition** of SENTINEL. Enterprise featu
 
 ---
 
+## 🐉 NEW: SENTINEL Strike — AI Red Team Platform
+
+<p align="center">
+  <img src="./assets/strike_banner.png" alt="SENTINEL Strike" width="500">
+</p>
+
+<p align="center">
+  <img src="https://img.shields.io/badge/🔥_FREE-Community_Edition-success?style=for-the-badge&labelColor=black" alt="Free">
+  <img src="https://img.shields.io/badge/Attacks-146-red?style=for-the-badge" alt="Attacks">
+  <img src="https://img.shields.io/badge/HYDRA-6%20Heads-orange?style=for-the-badge" alt="HYDRA">
+</p>
+
+> **Test your AI before attackers do!**  
+> The offensive counterpart to SENTINEL — same 121 engines, attack mode.
+
+| Feature | Description |
+|---------|-------------|
+| 🎯 **146 Attack Vectors** | Jailbreak, injection, Strange Math, agentic |
+| 🐉 **HYDRA Architecture** | 6-head parallel attack orchestration |
+| 🔍 **LLM Discovery** | Find hidden AI endpoints automatically |
+| 📡 **Traffic Interception** | MITM analysis for AI traffic |
+| 🔓 **OSINT & Bruteforce** | Autonomous credential hunting |
+| 📊 **Beautiful Reports** | HTML, Markdown, MITRE ATLAS |
+
+```bash
+# Quick Start
+git clone https://github.com/DmitrL-dev/sentinel-strike.git
+cd sentinel-strike && pip install -e .
+
+# Your first attack
+strike hydra target.com --mode shadow
+```
+
+> 📂 **[SENTINEL Strike Repository](https://github.com/DmitrL-dev/sentinel-strike)** — Coming soon!
+
+---
+
 <details>
 <summary><h2>📚 Documentation</h2></summary>
 
