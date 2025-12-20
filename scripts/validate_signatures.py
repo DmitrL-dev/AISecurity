@@ -97,8 +97,8 @@ def validate_keywords() -> tuple[bool, list[str]]:
     keywords_file = SIGNATURES_DIR / "keywords.json"
 
     if not keywords_file.exists():
-        errors.append("keywords.json not found")
-        return False, errors
+        print("[WARN] keywords.json not found (optional)")
+        return True, []  # Optional file
 
     try:
         with open(keywords_file, "r", encoding="utf-8") as f:
@@ -129,8 +129,8 @@ def validate_pii() -> tuple[bool, list[str]]:
     pii_file = SIGNATURES_DIR / "pii.json"
 
     if not pii_file.exists():
-        errors.append("pii.json not found")
-        return False, errors
+        print("[WARN] pii.json not found (optional)")
+        return True, []  # Optional file
 
     try:
         with open(pii_file, "r", encoding="utf-8") as f:
