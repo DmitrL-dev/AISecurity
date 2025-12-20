@@ -20,6 +20,17 @@
 
 ---
 
+## 🆕 What's New (December 2025)
+
+| Feature | Description |
+|---------|-------------|
+| **🗺️ Interactive Architecture** | [Live diagram](https://dmitrl-dev.github.io/AISecurity/) with 5 attack scenarios |
+| **🔧 121 Detection Engines** | +4 new engines, 100% health check passed |
+| **📚 Updated Documentation** | Deep-dive engine docs, expert guides |
+| **🏠 On-Premise LLM Support** | Air-gapped deployment scenarios |
+
+---
+
 ### 🤝 Partnership & Collaboration
 
 | Opportunity     | Description                               |
