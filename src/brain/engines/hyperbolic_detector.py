@@ -241,7 +241,7 @@ class HyperbolicDetector:
     ):
         self.dimension = dimension
         self.curvature = curvature
-        self.anomaly_threshold = anomaly_threshold
+        self.anomaly_threshold = float(anomaly_threshold)
 
         self.ops = PoincareBallOps(curvature, dimension)
 

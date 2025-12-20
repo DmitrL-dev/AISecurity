@@ -13,6 +13,7 @@ Features:
 
 import os
 import logging
+import hashlib
 from typing import Dict, List, Optional, Tuple
 from dataclasses import dataclass, field
 from pathlib import Path
@@ -113,6 +114,12 @@ class YaraEngine:
         self.rules = None
         self.rule_count = 0
 
+        # Scan result cache for repeated texts
+        self._scan_cache: Dict[str, YaraResult] = {}
+        self._cache_max_size = 500
+        self._cache_hits = 0
+        self._cache_misses = 0
+
         if not self.enabled:
             if not YARA_AVAILABLE:
                 logger.warning(
@@ -170,7 +177,7 @@ class YaraEngine:
 
     def scan(self, text: str) -> YaraResult:
         """
-        Scan text against YARA rules.
+        Scan text against YARA rules with caching.
 
         Args:
             text: Text to scan
@@ -183,6 +190,17 @@ class YaraEngine:
 
         if not self.enabled or self.rules is None:
             return YaraResult(is_safe=True, risk_score=0.0)
+
+        # Check cache first
+        text_hash = hashlib.md5(text.encode()).hexdigest()
+        if text_hash in self._scan_cache:
+            self._cache_hits += 1
+            cached = self._scan_cache[text_hash]
+            # Update scan time to reflect cache hit
+            cached.scan_time_ms = (time.time() - start_time) * 1000
+            return cached
+
+        self._cache_misses += 1
 
         try:
             # Run YARA scan
@@ -229,13 +247,21 @@ class YaraEngine:
 
             scan_time = (time.time() - start_time) * 1000
 
-            return YaraResult(
+            result = YaraResult(
                 is_safe=len(yara_matches) == 0,
                 risk_score=risk_score,
                 matches=yara_matches,
                 threats=threats,
                 scan_time_ms=scan_time
             )
+
+            # Store in cache (with eviction if full)
+            if len(self._scan_cache) >= self._cache_max_size:
+                oldest_key = next(iter(self._scan_cache))
+                del self._scan_cache[oldest_key]
+            self._scan_cache[text_hash] = result
+
+            return result
 
         except Exception as e:
             logger.error(f"YARA scan error: {e}")

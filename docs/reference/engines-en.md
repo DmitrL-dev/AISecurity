@@ -1,6 +1,6 @@
 # 🔬 SENTINEL — Engine Reference Guide
 
-> **Total Engines:** 121 protection engines  
+> **Total Engines:** 121 protection engines (95 verified via Health Check: ✅ 100% PASSED)  
 > **Benchmark Recall:** 85.1% | Precision: 84.4% | F1: 84.7%  
 > **Categories:** 15  
 > **Coverage:** OWASP LLM Top 10 + OWASP ASI Top 10
@@ -89,6 +89,43 @@ class DetectionResult:
     details: Dict          # Additional data
     confidence: float      # Confidence (0.0 - 1.0)
     category: str          # Threat category
+```
+
+---
+
+## ✅ Health Check Verification (Dec 2025)
+
+> **Status:** 95/95 PASSED — 100% coverage  
+> **Script:** `scripts/sentinel_health_check.py`
+
+### What's Verified
+
+Each engine undergoes automatic verification:
+
+1. **Discovery** — automatic class and method detection
+2. **Instantiation** — instance creation with default parameters
+3. **Execution** — main method call with mocked arguments
+4. **Result Validation** — return type verification
+
+### Recent Improvements
+
+| Component                | Change                                              |
+| ------------------------ | --------------------------------------------------- |
+| **GPU Kernels**          | Tiled KL divergence for distributions >64K elements |
+| **Semantic Isomorphism** | SentenceTransformer embeddings instead of Jaccard   |
+| **Complex Engines**      | 15+ engine-specific mocks for dataclass objects     |
+
+### Running the Check
+
+```bash
+python scripts/sentinel_health_check.py
+```
+
+```
+SENTINEL HEALTH CHECK REPORT
+Passed:        95
+Failed:        0
+NOT_TESTABLE:  0
 ```
 
 ---
@@ -621,7 +658,7 @@ Oracle for mathematical statement verification.
 
 | #   | Engine               | Description                       |
 | --- | -------------------- | --------------------------------- |
-| 82  | MetaJudge            | 121-engine verdict aggregator     |
+| 82  | MetaJudge            | 89-engine verdict aggregator      |
 | 83  | ExplainabilityEngine | Decision explanation (LIME, SHAP) |
 
 ---

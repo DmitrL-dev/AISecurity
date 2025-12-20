@@ -12,6 +12,7 @@ Capabilities:
   - Zigzag Persistence for hidden state evolution
   - Attention Pattern Topology analysis
   - Topological fingerprinting of prompts
+  - GPU acceleration via CuPy (optional)
 
 Author: SENTINEL Team
 Date: 2025-12-09
@@ -31,9 +32,70 @@ try:
 except ImportError:
     GUDHI_AVAILABLE = False
 
+# CuPy for GPU acceleration (optional, falls back to NumPy)
+try:
+    import cupy as cp
+    CUPY_AVAILABLE = True
+except ImportError:
+    cp = np  # Fallback to NumPy
+    CUPY_AVAILABLE = False
+
 logger = logging.getLogger("TDAEnhanced")
 if GUDHI_AVAILABLE:
     logger.info("GUDHI available - using precise TDA computations")
+if CUPY_AVAILABLE:
+    logger.info("CuPy available - using GPU-accelerated computations")
+
+
+# ============================================================================
+# GPU Utilities
+# ============================================================================
+
+def to_gpu(arr: np.ndarray) -> Any:
+    """Move array to GPU if CuPy available."""
+    if CUPY_AVAILABLE and isinstance(arr, np.ndarray):
+        return cp.asarray(arr)
+    return arr
+
+
+def to_cpu(arr: Any) -> np.ndarray:
+    """Move array to CPU."""
+    if CUPY_AVAILABLE and hasattr(arr, 'get'):
+        return arr.get()
+    return np.asarray(arr)
+
+
+def gpu_pairwise_distances(points: np.ndarray) -> np.ndarray:
+    """
+    Compute pairwise Euclidean distances with GPU acceleration.
+
+    For n points in d dimensions: O(n² * d) computation
+    GPU provides significant speedup for n > 100.
+    """
+    if not CUPY_AVAILABLE or len(points) < 50:
+        # CPU fallback for small arrays
+        n = len(points)
+        dists = np.zeros((n, n))
+        for i in range(n):
+            for j in range(i + 1, n):
+                d = np.linalg.norm(points[i] - points[j])
+                dists[i, j] = dists[j, i] = d
+        return dists
+
+    # GPU-accelerated distance computation
+    points_gpu = cp.asarray(points)
+    n = len(points_gpu)
+
+    # Compute using broadcasting: ||a - b||² = ||a||² + ||b||² - 2<a,b>
+    sq_norms = cp.sum(points_gpu ** 2, axis=1)
+    gram = cp.dot(points_gpu, points_gpu.T)
+    sq_dists = sq_norms[:, None] + sq_norms[None, :] - 2 * gram
+
+    # Handle numerical errors
+    sq_dists = cp.maximum(sq_dists, 0)
+    dists = cp.sqrt(sq_dists)
+
+    return to_cpu(dists)
 
 
 # ============================================================================
@@ -514,21 +576,17 @@ class ZigzagEngine:
         self,
         activations: np.ndarray
     ) -> PersistenceDiagram:
-        """Compute persistence diagram for single layer."""
+        """Compute persistence diagram for single layer with GPU acceleration."""
         diagram = PersistenceDiagram(max_dimension=self.max_dim)
 
         if len(activations) < 3:
             return diagram
 
-        # Simplified: use distance matrix approach
+        # GPU-accelerated distance matrix computation
         try:
-            # Compute pairwise distances
             n = len(activations)
-            dists = np.zeros((n, n))
-            for i in range(n):
-                for j in range(i + 1, n):
-                    d = np.linalg.norm(activations[i] - activations[j])
-                    dists[i, j] = dists[j, i] = d
+            # Use GPU-accelerated distance computation
+            dists = gpu_pairwise_distances(activations)
 
             # Simulate Rips filtration
             max_dist = dists.max()
@@ -982,3 +1040,15 @@ class TDAEnhancedEngine:
                 "wasserstein_distance"
             ]
         }
+
+
+# Factory
+_tda_engine: Optional[TDAEnhancedEngine] = None
+
+
+def get_tda_engine(config: Optional[Dict] = None) -> TDAEnhancedEngine:
+    """Get or create singleton TDAEnhancedEngine."""
+    global _tda_engine
+    if _tda_engine is None:
+        _tda_engine = TDAEnhancedEngine(config)
+    return _tda_engine

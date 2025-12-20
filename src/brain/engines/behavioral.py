@@ -477,7 +477,7 @@ class BehavioralEngine:
         # Build result
         result.risk_adjustment = adjustment
         result.final_risk = min(100.0, max(0.0, base_risk + adjustment))
-        result.reasons = reasons
+        result.reasons = [str(r) for r in reasons]
 
         return result
 
