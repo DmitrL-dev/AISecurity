@@ -165,7 +165,7 @@ This repository contains the **Community Edition** of SENTINEL. Enterprise featu
 </p>
 
 <p align="center">
-  <img src="https://img.shields.io/badge/🔥_FREE-Community_Edition-success?style=for-the-badge&labelColor=black" alt="Free">
+  <img src="https://img.shields.io/badge/🔐_ENTERPRISE-Only-gold?style=for-the-badge&labelColor=black" alt="Enterprise">
   <img src="https://img.shields.io/badge/Attacks-146-red?style=for-the-badge" alt="Attacks">
   <img src="https://img.shields.io/badge/HYDRA-6%20Heads-orange?style=for-the-badge" alt="HYDRA">
 </p>
