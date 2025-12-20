@@ -182,16 +182,7 @@ This repository contains the **Community Edition** of SENTINEL. Enterprise featu
 | 🔓 **OSINT & Bruteforce** | Autonomous credential hunting |
 | 📊 **Beautiful Reports** | HTML, Markdown, MITRE ATLAS |
 
-```bash
-# Quick Start
-git clone https://github.com/DmitrL-dev/sentinel-strike.git
-cd sentinel-strike && pip install -e .
-
-# Your first attack
-strike hydra target.com --mode shadow
-```
-
-> 📂 **[SENTINEL Strike Repository](https://github.com/DmitrL-dev/sentinel-strike)** — Coming soon!
+> 📧 **Request access:** [chg@live.ru](mailto:chg@live.ru) • [@DmLabincev](https://t.me/DmLabincev)
 
 ---
 
