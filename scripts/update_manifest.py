@@ -13,7 +13,7 @@ import json
 from datetime import datetime
 from pathlib import Path
 
-SIGNATURES_DIR = Path(__file__).parent.parent / "signatures"
+SIGNATURES_DIR = Path(__file__).parent.parent / "sentinel-community" / "signatures"
 MANIFEST_FILE = SIGNATURES_DIR / "manifest.json"
 
 
@@ -41,25 +41,25 @@ def main():
     print("=" * 60)
     print("SENTINEL Manifest Updater")
     print("=" * 60)
-    
+
     # Load existing manifest
     if MANIFEST_FILE.exists():
         with open(MANIFEST_FILE, "r", encoding="utf-8") as f:
             manifest = json.load(f)
     else:
         manifest = {"files": {}}
-    
+
     # Update version
     manifest["version"] = datetime.utcnow().strftime("%Y.%m.%d.1")
     manifest["timestamp"] = datetime.utcnow().isoformat() + "Z"
-    
+
     # Update file info
     files_info = {
         "jailbreaks": ("jailbreaks.json", "patterns"),
         "keywords": ("keywords.json", "keyword_sets"),
         "pii": ("pii.json", "patterns"),
     }
-    
+
     for name, (filename, count_key) in files_info.items():
         filepath = SIGNATURES_DIR / filename
         if filepath.exists():
@@ -67,14 +67,16 @@ def main():
                 "path": filename,
                 "sha256": calculate_sha256(filepath),
                 "size": filepath.stat().st_size,
-                "count": count_items(filepath, count_key)
+                "count": count_items(filepath, count_key),
             }
-            print(f"[INFO] {filename}: {manifest['files'][name]['count']} items, {manifest['files'][name]['size']} bytes")
-    
+            print(
+                f"[INFO] {filename}: {manifest['files'][name]['count']} items, {manifest['files'][name]['size']} bytes"
+            )
+
     # Save manifest
     with open(MANIFEST_FILE, "w", encoding="utf-8") as f:
         json.dump(manifest, f, indent=2, ensure_ascii=False)
-    
+
     print("=" * 60)
     print(f"[OK] Manifest updated: v{manifest['version']}")
 

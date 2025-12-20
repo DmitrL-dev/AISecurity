@@ -3,14 +3,14 @@ name: Update Signatures
 on:
   schedule:
     # Run daily at 00:00 UTC
-    - cron: '0 0 * * *'
+    - cron: "0 0 * * *"
   workflow_dispatch:
     # Allow manual trigger
     inputs:
       force_update:
-        description: 'Force update even if no changes'
+        description: "Force update even if no changes"
         required: false
-        default: 'false'
+        default: "false"
 
 permissions:
   contents: write
@@ -18,7 +18,7 @@ permissions:
 jobs:
   update-signatures:
     runs-on: ubuntu-latest
-    
+
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -29,34 +29,27 @@ jobs:
       - name: Setup Python
         uses: actions/setup-python@v5
         with:
-          python-version: '3.11'
+          python-version: "3.11"
 
       - name: Install dependencies
         run: |
-          pip install requests pyyaml datasets
+          pip install requests pyyaml
 
       - name: Fetch external sources
-        env:
-          HF_TOKEN: ${{ secrets.HF_TOKEN }}
         run: |
           python scripts/fetch_signatures.py
-
-      - name: Clean secrets from signatures
-        run: |
-          python scripts/clean_secrets.py
 
       - name: Validate signatures
         run: |
           python scripts/validate_signatures.py
 
+      - name: Split large files for CDN
+        run: |
+          python scripts/split_signatures.py
+
       - name: Update manifest
         run: |
           python scripts/update_manifest.py
-
-      - name: Split large files for CDN
-        run: |
-          # Split jailbreaks.json into parts for jsDelivr (20MB limit)
-          python scripts/split_jailbreaks.py
 
       - name: Check for changes
         id: check_changes
@@ -68,12 +61,9 @@ jobs:
         run: |
           git config user.name "SENTINEL Bot"
           git config user.email "sentinel-bot@users.noreply.github.com"
-          # Sync with remote before making changes
-          git stash
-          git pull --rebase origin main
-          git stash pop || true
           git add signatures/
-          git commit -m "chore(signatures): auto-update $(date +%Y.%m.%d)" || echo "Nothing to commit"
+          git commit -m "chore(signatures): auto-update $(date +%Y.%m.%d)"
+          git pull --rebase origin main
           git push
 
       - name: Create release tag
