@@ -1,25 +1,18 @@
 {
-  "version": "2025.12.17.1",
-  "source": "sentinel-enterprise",
-  "last_updated": "2025-12-17T00:54:03.400352Z",
+  "version": "2025.12.20.1",
+  "timestamp": "2025-12-20T07:20:07.469365Z",
   "total_patterns": 39701,
-  "categories": {
-    "LLM01": "Prompt Injection",
-    "LLM07": "System Prompt Leakage",
-    "AGENT_COLLUSION": "Agent Collusion Attack",
-    "MEMORY_POISONING": "Memory Poisoning",
-    "TOOL_ABUSE": "Tool Abuse"
-  },
+  "split": true,
   "parts": [
     {
       "file": "jailbreaks-part1.json",
-      "patterns_count": 19851,
-      "size_mb": 14.2
+      "patterns_count": 20754,
+      "size": 14273733
     },
     {
       "file": "jailbreaks-part2.json",
-      "patterns_count": 19850,
-      "size_mb": 14.0
+      "patterns_count": 18947,
+      "size": 12835789
     }
   ]
 }
