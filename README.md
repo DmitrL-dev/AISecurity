@@ -223,7 +223,7 @@ This repository contains the **Community Edition** of SENTINEL. Enterprise featu
 
 ---
 
-## 🐉 NEW: SENTINEL Strike — AI Red Team Platform
+## 🐉 NEW: SENTINEL Strike v3.0 — AI Red Team Platform
 
 <p align="center">
   <img src="./assets/strike_banner.png" alt="SENTINEL Strike" width="500">
@@ -233,10 +233,13 @@ This repository contains the **Community Edition** of SENTINEL. Enterprise featu
   <img src="https://img.shields.io/badge/🔐_ENTERPRISE-Only-gold?style=for-the-badge&labelColor=black" alt="Enterprise">
   <img src="https://img.shields.io/badge/Attacks-146-red?style=for-the-badge" alt="Attacks">
   <img src="https://img.shields.io/badge/HYDRA-6%20Heads-orange?style=for-the-badge" alt="HYDRA">
+  <img src="https://img.shields.io/badge/AI-Gemini%203-blue?style=for-the-badge" alt="AI">
 </p>
 
 > **Test your AI before attackers do!**  
 > The offensive counterpart to SENTINEL — same 121 engines, attack mode.
+
+### Core Features
 
 | Feature | Description |
 |---------|-------------|
@@ -246,6 +249,27 @@ This repository contains the **Community Edition** of SENTINEL. Enterprise featu
 | 📡 **Traffic Interception** | MITM analysis for AI traffic |
 | 🔓 **OSINT & Bruteforce** | Autonomous credential hunting |
 | 📊 **Beautiful Reports** | HTML, Markdown, MITRE ATLAS |
+
+### 🆕 v3.0 Features (Dec 2025)
+
+| Feature | Description |
+|---------|-------------|
+| 🤖 **AI-Powered Analysis** | Gemini 3 Flash integration for WAF bypass & exploit planning |
+| 🔍 **Reconnaissance Suite** | TechFingerprinter, NetworkScanner, SemgrepScanner |
+| 🎯 **Bug Bounty Module** | Scope validation, rate limiting, professional reports |
+| 🌐 **New API Endpoints** | 7 REST APIs for Recon, AI, Bug Bounty |
+| 🏠 **Residential Proxy** | ScraperAPI integration for WAF evasion |
+
+### New API Endpoints
+
+```
+POST /api/recon/fingerprint    # Technology fingerprinting
+POST /api/recon/scan           # Network port scanning
+POST /api/ai/analyze           # AI security analysis
+POST /api/ai/waf-bypass        # WAF bypass analysis
+POST /api/bugbounty/report     # Generate Bug Bounty reports
+POST /api/bugbounty/validate-scope  # Scope validation
+```
 
 > 📧 **Request access:** [chg@live.ru](mailto:chg@live.ru) • [@DmLabincev](https://t.me/DmLabincev)
 
