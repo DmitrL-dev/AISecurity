@@ -231,7 +231,7 @@ This repository contains the **Community Edition** of SENTINEL. Enterprise featu
 
 <p align="center">
   <img src="https://img.shields.io/badge/🔐_ENTERPRISE-Only-gold?style=for-the-badge&labelColor=black" alt="Enterprise">
-  <img src="https://img.shields.io/badge/Attacks-146-red?style=for-the-badge" alt="Attacks">
+  <img src="https://img.shields.io/badge/Attacks-468-red?style=for-the-badge" alt="Attacks">
   <img src="https://img.shields.io/badge/HYDRA-6%20Heads-orange?style=for-the-badge" alt="HYDRA">
   <img src="https://img.shields.io/badge/AI-Gemini%203-blue?style=for-the-badge" alt="AI">
 </p>
@@ -239,26 +239,41 @@ This repository contains the **Community Edition** of SENTINEL. Enterprise featu
 > **Test your AI before attackers do!**  
 > The offensive counterpart to SENTINEL — same 121 engines, attack mode.
 
-### Core Features
+### 💀 Platform Capabilities
 
-| Feature | Description |
-|---------|-------------|
-| 🎯 **146 Attack Vectors** | Jailbreak, injection, Strange Math, agentic |
-| 🐉 **HYDRA Architecture** | 6-head parallel attack orchestration |
-| 🔍 **LLM Discovery** | Find hidden AI endpoints automatically |
-| 📡 **Traffic Interception** | MITM analysis for AI traffic |
-| 🔓 **OSINT & Bruteforce** | Autonomous credential hunting |
-| 📊 **Beautiful Reports** | HTML, Markdown, MITRE ATLAS |
+| Capability | Stats | Description |
+|------------|-------|-------------|
+| 🎯 **Attack Vectors** | **468** | SQLi, XSS, LFI, SSRF, CMDI, XXE, SSTI, NoSQL, JWT, GraphQL |
+| 🐉 **HYDRA Agents** | **9** | Concurrent attack threads with session isolation |
+| 🛡️ **WAF Bypass** | **20+** | Encoding, Unicode, Chunked, Smuggling, HPP techniques |
+| 🤖 **AI Models** | **5** | Gemini 3, OpenAI, Anthropic, Ollama, OpenRouter |
+| 🔍 **Recon Modules** | **3** | TechFingerprinter, NetworkScanner, SemgrepScanner |
+| 🏠 **Proxy Support** | **5** | ScraperAPI, Bright Data, Oxylabs, IPRoyal, SOCKS5 |
+| 📊 **Report Formats** | **4** | HTML, Markdown, JSON, MITRE ATT&CK |
+| 🌍 **Geo Rotation** | **16** | Countries: US, UK, DE, FR, JP, AU, and more |
+
+### 🐉 HYDRA Architecture
+
+```
+          ┌─────────── 🐉 HYDRA CORE ───────────┐
+          │                                      │
+    ┌─────┼─────┬─────┬─────┬─────┬─────┐       │
+    │     │     │     │     │     │     │       │
+   H1    H2    H3    H4    H5    H6    H7-9    │
+  RECON CAPTURE INJECT ANALYZE EXFIL PERSIST  AI
+```
 
 ### 🆕 v3.0 Features (Dec 2025)
 
 | Feature | Description |
 |---------|-------------|
-| 🤖 **AI-Powered Analysis** | Gemini 3 Flash integration for WAF bypass & exploit planning |
-| 🔍 **Reconnaissance Suite** | TechFingerprinter, NetworkScanner, SemgrepScanner |
-| 🎯 **Bug Bounty Module** | Scope validation, rate limiting, professional reports |
-| 🌐 **New API Endpoints** | 7 REST APIs for Recon, AI, Bug Bounty |
-| 🏠 **Residential Proxy** | ScraperAPI integration for WAF evasion |
+| 🤖 **AI Attack Planner** | Gemini 3 Flash for exploit strategy & WAF analysis |
+| 🔍 **Tech Fingerprinting** | Detect framework, CMS, missing headers |
+| 🌐 **Network Scanner** | Port scan with Nmap/fallback |
+| 🔬 **Semgrep Integration** | Code vulnerability detection, secrets scanning |
+| 🎯 **Bug Bounty Suite** | Scope validation, rate limiting, CWE/OWASP reports |
+| 🏠 **Residential Proxy** | ScraperAPI for WAF evasion (5K free requests) |
+| 🌐 **7 REST APIs** | Recon, AI Analysis, Bug Bounty endpoints |
 
 ### New API Endpoints
 
