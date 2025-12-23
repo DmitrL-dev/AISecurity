@@ -2,9 +2,9 @@
   <img src="./assets/banner.png" alt="SENTINEL AI Security Platform" width="100%">
 </p>
 
-# SENTINEL Technical Deep Dive
+# SENTINEL AI Security Platform
 
-> **Advanced Mathematics & Engineering for AI Security**
+> **Enterprise-Grade AI Protection • 121 Detection Engines • Real-Time Defense**
 
 <p align="center">
   <img src="https://img.shields.io/badge/Recall-85.1%25-brightgreen?style=for-the-badge" alt="Recall">
@@ -17,6 +17,84 @@
   <a href="#license--contact">📞 Contact</a> •
   <a href="https://t.me/DmLabincev">💬 Telegram</a> •
   <a href="mailto:chg@live.ru">📧 Email</a>
+</p>
+
+---
+
+## 🛡️ What is SENTINEL?
+
+**SENTINEL** is a comprehensive AI security platform designed to protect Large Language Model (LLM) applications from prompt injection, jailbreaks, data exfiltration, and emerging AI-specific threats.
+
+### The Problem We Solve
+
+| Threat | Description | Impact |
+|--------|-------------|--------|
+| 🎭 **Prompt Injection** | Malicious instructions hidden in user input | System prompt bypass, data theft |
+| 🔓 **Jailbreaks** | Techniques to bypass AI safety guardrails | Harmful content generation |
+| 📤 **Data Exfiltration** | PII/secrets leaked through AI responses | GDPR violations, IP theft |
+| 🤖 **Agentic Attacks** | Exploiting tool calls, MCP, multi-agent systems | Unauthorized actions |
+| 🧠 **RAG Poisoning** | Malicious documents in knowledge bases | Misinformation, backdoors |
+
+### Why SENTINEL?
+
+<table>
+<tr>
+<td width="50%">
+
+**🔬 Advanced Detection**
+- 121 specialized detection engines
+- Strange Math™ (TDA, Sheaf, Hyperbolic)
+- Machine learning + rule-based hybrid
+- 85.1% recall, 84.4% precision
+
+</td>
+<td width="50%">
+
+**⚡ Production Ready**
+- Sub-10ms latency (Go gateway)
+- 1000+ req/sec throughput
+- Docker/Kubernetes native
+- OpenTelemetry instrumentation
+
+</td>
+</tr>
+<tr>
+<td width="50%">
+
+**🛡️ Comprehensive Coverage**
+- OWASP LLM Top 10 protection
+- TTPs.ai attack framework detection
+- VLM (Vision) security
+- Protocol security (MCP, A2A)
+
+</td>
+<td width="50%">
+
+**🔄 Continuous Updates**
+- Daily threat signature updates
+- Free CDN-hosted patterns
+- Community contributions
+- ArXiv 2025 research integration
+
+</td>
+</tr>
+</table>
+
+### Use Cases
+
+| Industry | Use Case |
+|----------|----------|
+| 🏢 **Enterprise** | Protect internal ChatGPT/Copilot deployments |
+| 🏦 **FinTech** | Secure financial AI assistants, prevent fraud |
+| 🏥 **Healthcare** | HIPAA-compliant AI, PII protection |
+| 🛒 **E-commerce** | Safe customer service chatbots |
+| 🎓 **Education** | Content moderation for educational AI |
+| 🔧 **Developers** | API security for AI-powered applications |
+
+### How It Works
+
+<p align="center">
+  <img src="./assets/sentinel_flow.png" alt="SENTINEL Architecture Flow" width="800">
 </p>
 
 ---
@@ -231,8 +309,8 @@ This repository contains the **Community Edition** of SENTINEL. Enterprise featu
 
 <p align="center">
   <img src="https://img.shields.io/badge/🔐_ENTERPRISE-Only-gold?style=for-the-badge&labelColor=black" alt="Enterprise">
-  <img src="https://img.shields.io/badge/Attacks-468-red?style=for-the-badge" alt="Attacks">
-  <img src="https://img.shields.io/badge/HYDRA-6%20Heads-orange?style=for-the-badge" alt="HYDRA">
+  <img src="https://img.shields.io/badge/Payloads-39,000+-red?style=for-the-badge" alt="Payloads">
+  <img src="https://img.shields.io/badge/HYDRA-9%20Heads-orange?style=for-the-badge" alt="HYDRA">
   <img src="https://img.shields.io/badge/AI-Gemini%203-blue?style=for-the-badge" alt="AI">
 </p>
 
@@ -243,47 +321,54 @@ This repository contains the **Community Edition** of SENTINEL. Enterprise featu
 
 | Capability | Stats | Description |
 |------------|-------|-------------|
-| 🎯 **Attack Vectors** | **468** | SQLi, XSS, LFI, SSRF, CMDI, XXE, SSTI, NoSQL, JWT, GraphQL |
+| 🎯 **Attack Payloads** | **39,000+** | SQLi, XSS, LFI, SSRF, CMDI, XXE, SSTI, NoSQL, JWT, GraphQL, Jailbreaks |
 | 🐉 **HYDRA Agents** | **9** | Concurrent attack threads with session isolation |
-| 🛡️ **WAF Bypass** | **20+** | Encoding, Unicode, Chunked, Smuggling, HPP techniques |
+| 🛡️ **WAF Bypass** | **25+** | WAFFLED, DEG-WAF, Encoding, Smuggling, HPP (ArXiv 2025) |
 | 🤖 **AI Models** | **5** | Gemini 3, OpenAI, Anthropic, Ollama, OpenRouter |
-| 🔍 **Recon Modules** | **3** | TechFingerprinter, NetworkScanner, SemgrepScanner |
-| 🏠 **Proxy Support** | **5** | ScraperAPI, Bright Data, Oxylabs, IPRoyal, SOCKS5 |
-| 📊 **Report Formats** | **4** | HTML, Markdown, JSON, MITRE ATT&CK |
+| 🔍 **Recon Modules** | **5** | TechFingerprinter, NetworkScanner, SemgrepScanner, ChatbotFinder, AIDetector |
+| 📦 **Auto-Updater** | **13 sources** | SecLists, PayloadsAllTheThings, FuzzDB, BO0OM (daily) |
+| 📊 **Report Formats** | **4** | HTML, Markdown, JSON, MITRE ATT&CK + AI Security Findings |
 | 🌍 **Geo Rotation** | **16** | Countries: US, UK, DE, FR, JP, AU, and more |
 
 ### 🐉 HYDRA Architecture
 
-```
-          ┌─────────── 🐉 HYDRA CORE ───────────┐
-          │                                      │
-    ┌─────┼─────┬─────┬─────┬─────┬─────┐       │
-    │     │     │     │     │     │     │       │
-   H1    H2    H3    H4    H5    H6    H7-9    │
-  RECON CAPTURE INJECT ANALYZE EXFIL PERSIST  AI
-```
+<p align="center">
+  <img src="./assets/hydra_architecture.png" alt="HYDRA Architecture" width="700">
+</p>
 
 ### 🆕 v3.0 Features (Dec 2025)
 
 | Feature | Description |
 |---------|-------------|
 | 🤖 **AI Attack Planner** | Gemini 3 Flash for exploit strategy & WAF analysis |
-| 🔍 **Tech Fingerprinting** | Detect framework, CMS, missing headers |
-| 🌐 **Network Scanner** | Port scan with Nmap/fallback |
-| 🔬 **Semgrep Integration** | Code vulnerability detection, secrets scanning |
-| 🎯 **Bug Bounty Suite** | Scope validation, rate limiting, CWE/OWASP reports |
-| 🏠 **Residential Proxy** | ScraperAPI for WAF evasion (5K free requests) |
-| 🌐 **7 REST APIs** | Recon, AI Analysis, Bug Bounty endpoints |
+| 🔍 **ChatbotFinder** | Automated discovery of hidden AI endpoints (169 paths, 17 providers) |
+| 📦 **Payload Auto-Update** | Daily sync from SecLists, PayloadsAllTheThings, FuzzDB |
+| 🧪 **ArXiv 2025 Attacks** | WAFFLED, DEG-WAF, MCP Tool Poisoning, RAG Poisoning |
+| 🔓 **Function Calling Jailbreaks** | 10 payloads with >90% success rate on GPT-4/Claude |
+| 🕵️ **Agent Cloaking Detection** | 44 fingerprints (Webdriver, Selenium, Puppeteer) |
+| 📝 **AI Security Reports** | Bug bounty reports with AI-specific findings |
+
+### ArXiv 2025 Research Integration
+
+| Paper/Technique | Implementation |
+|-----------------|----------------|
+| WAFFLED (WAF confusion) | Content-Type/Boundary exploits |
+| DEG-WAF mutations | Homoglyphs, zero-width chars |
+| MCP Tool Poisoning | Malicious tool descriptions |
+| RAG Poisoning | Hidden text injection |
+| Function Calling Attacks | Schema manipulation, argument injection |
+| Hidden Text Detection | CSS tricks, zero-width steganography |
 
 ### New API Endpoints
 
 ```
 POST /api/recon/fingerprint    # Technology fingerprinting
+POST /api/recon/chatbot        # Chatbot endpoint discovery
 POST /api/recon/scan           # Network port scanning
 POST /api/ai/analyze           # AI security analysis
 POST /api/ai/waf-bypass        # WAF bypass analysis
-POST /api/bugbounty/report     # Generate Bug Bounty reports
-POST /api/bugbounty/validate-scope  # Scope validation
+POST /api/bugbounty/report     # Generate Bug Bounty reports (with AI findings)
+POST /api/update/check         # Check for payload updates
 ```
 
 > 📧 **Request access:** [chg@live.ru](mailto:chg@live.ru) • [@DmLabincev](https://t.me/DmLabincev)
