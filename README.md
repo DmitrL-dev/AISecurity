@@ -348,29 +348,6 @@ This repository contains the **Community Edition** of SENTINEL. Enterprise featu
 | 🕵️ **Agent Cloaking Detection** | 44 fingerprints (Webdriver, Selenium, Puppeteer) |
 | 📝 **AI Security Reports** | Bug bounty reports with AI-specific findings |
 
-### ArXiv 2025 Research Integration
-
-| Paper/Technique | Implementation |
-|-----------------|----------------|
-| WAFFLED (WAF confusion) | Content-Type/Boundary exploits |
-| DEG-WAF mutations | Homoglyphs, zero-width chars |
-| MCP Tool Poisoning | Malicious tool descriptions |
-| RAG Poisoning | Hidden text injection |
-| Function Calling Attacks | Schema manipulation, argument injection |
-| Hidden Text Detection | CSS tricks, zero-width steganography |
-
-### New API Endpoints
-
-```
-POST /api/recon/fingerprint    # Technology fingerprinting
-POST /api/recon/chatbot        # Chatbot endpoint discovery
-POST /api/recon/scan           # Network port scanning
-POST /api/ai/analyze           # AI security analysis
-POST /api/ai/waf-bypass        # WAF bypass analysis
-POST /api/bugbounty/report     # Generate Bug Bounty reports (with AI findings)
-POST /api/update/check         # Check for payload updates
-```
-
 > 📧 **Request access:** [chg@live.ru](mailto:chg@live.ru) • [@DmLabincev](https://t.me/DmLabincev)
 
 ---
