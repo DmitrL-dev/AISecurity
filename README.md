@@ -342,11 +342,28 @@ This repository contains the **Community Edition** of SENTINEL. Enterprise featu
 |---------|-------------|
 | 🤖 **AI Attack Planner** | Gemini 3 Flash for exploit strategy & WAF analysis |
 | 🔍 **ChatbotFinder** | Automated discovery of hidden AI endpoints (169 paths, 17 providers) |
+| 🌐 **Deep Recon Module** | ASN-based network detection + comprehensive endpoint discovery |
 | 📦 **Payload Auto-Update** | Daily sync from SecLists, PayloadsAllTheThings, FuzzDB |
 | 🧪 **ArXiv 2025 Attacks** | WAFFLED, DEG-WAF, MCP Tool Poisoning, RAG Poisoning |
 | 🔓 **Function Calling Jailbreaks** | 10 payloads with >90% success rate on GPT-4/Claude |
 | 🕵️ **Agent Cloaking Detection** | 44 fingerprints (Webdriver, Selenium, Puppeteer) |
 | 📝 **AI Security Reports** | Bug bounty reports with AI-specific findings |
+| 📡 **ScraperAPI Integration** | Residential proxy support for stealth scanning |
+
+### 🔍 Deep Recon Module (NEW!)
+
+Comprehensive endpoint discovery with ASN/BGP-based network detection:
+
+| Category | Paths | Description |
+|----------|-------|-------------|
+| 💬 **Chat/AI** | /chat, /bot, /assistant, /completions | AI chatbot endpoints |
+| 🔌 **APIs** | /api, /v1, /graphql, /rest | API entry points |
+| 🔐 **Admin** | /admin, /dashboard, /panel | Admin interfaces |
+| 🔑 **Auth** | /login, /oauth, /token, /sso | Authentication endpoints |
+| 📁 **Files** | /upload, /media, /storage | File operations |
+| 🪝 **Webhooks** | /webhook, /callback, /events | Integration hooks |
+| 🔧 **Internal** | /health, /metrics, /debug | Debug/monitoring |
+| 🤖 **AI/ML** | /predict, /inference, /model | ML endpoints |
 
 > 📧 **Request access:** [chg@live.ru](mailto:chg@live.ru) • [@DmLabincev](https://t.me/DmLabincev)
 
