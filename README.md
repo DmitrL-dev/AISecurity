@@ -4,20 +4,71 @@
 
 # SENTINEL AI Security Platform
 
-> **Enterprise-Grade AI Protection • 121 Detection Engines • Real-Time Defense**
+> **Defense + Offense — Complete AI Security Suite**  
+> 🛡️ 121 Detection Engines • 🐉 39,000+ Attack Payloads • Enterprise-Grade
 
 <p align="center">
-  <img src="https://img.shields.io/badge/Recall-85.1%25-brightgreen?style=for-the-badge" alt="Recall">
-  <img src="https://img.shields.io/badge/Precision-84.4%25-blue?style=for-the-badge" alt="Precision">
-  <img src="https://img.shields.io/badge/Engines-121-purple?style=for-the-badge" alt="Engines">
-  <img src="https://img.shields.io/badge/Innovations-10-red?style=for-the-badge" alt="Innovations">
-  <img src="https://img.shields.io/badge/Dataset-39701-orange?style=for-the-badge" alt="Dataset">
+  <img src="https://img.shields.io/badge/🛡️_DEFENSE-121_Engines-brightgreen?style=for-the-badge" alt="Defense">
+  <img src="https://img.shields.io/badge/🐉_OFFENSE-39K+_Payloads-red?style=for-the-badge" alt="Offense">
+  <img src="https://img.shields.io/badge/Recall-85.1%25-blue?style=for-the-badge" alt="Recall">
+  <img src="https://img.shields.io/badge/Innovations-10-purple?style=for-the-badge" alt="Innovations">
 </p>
   <a href="https://dmitrl-dev.github.io/AISecurity/">📚 Documentation Portal</a> •
   <a href="#license--contact">📞 Contact</a> •
   <a href="https://t.me/DmLabincev">💬 Telegram</a> •
   <a href="mailto:chg@live.ru">📧 Email</a>
 </p>
+
+---
+
+## 🎯 Two Platforms, One Mission
+
+<table>
+<tr>
+<td width="50%" align="center">
+
+### 🛡️ SENTINEL — Defense
+
+**Protect your AI in real-time**
+
+| Feature | Value |
+|---------|-------|
+| Detection Engines | **121** |
+| Recall | **85.1%** |
+| Latency | **<10ms** |
+| Coverage | OWASP LLM Top 10 |
+
+```
+User Request → SENTINEL → Safe Response
+                  ↓
+              ❌ Blocked
+```
+
+</td>
+<td width="50%" align="center">
+
+### 🐉 Strike — Offense
+
+**Test your AI before attackers do**
+
+| Feature | Value |
+|---------|-------|
+| Attack Payloads | **39,000+** |
+| HYDRA Agents | **9 parallel** |
+| WAF Bypass | **25+ techniques** |
+| Reports | HTML/MD/JSON + MITRE |
+
+```
+Strike → Target AI → Report
+   ↓
+🔓 Vulnerabilities Found
+```
+
+</td>
+</tr>
+</table>
+
+> **💡 Use together:** Strike finds vulnerabilities → SENTINEL blocks them in production
 
 ---
 
@@ -301,17 +352,17 @@ This repository contains the **Community Edition** of SENTINEL. Enterprise featu
 
 ---
 
-## 🐉 NEW: SENTINEL Strike v3.0 — AI Red Team Platform
+## 🐉 SENTINEL Strike v3.0 — AI Red Team Platform
 
 <p align="center">
   <img src="./assets/strike_banner.png" alt="SENTINEL Strike" width="500">
 </p>
 
 <p align="center">
-  <img src="https://img.shields.io/badge/🔐_ENTERPRISE-Only-gold?style=for-the-badge&labelColor=black" alt="Enterprise">
+  <img src="https://img.shields.io/badge/🆓_COMMUNITY-Included-brightgreen?style=for-the-badge&labelColor=black" alt="Community">
   <img src="https://img.shields.io/badge/Payloads-39,000+-red?style=for-the-badge" alt="Payloads">
   <img src="https://img.shields.io/badge/HYDRA-9%20Heads-orange?style=for-the-badge" alt="HYDRA">
-  <img src="https://img.shields.io/badge/AI-Gemini%203-blue?style=for-the-badge" alt="AI">
+  <img src="https://img.shields.io/badge/🌍_i18n-EN%20%7C%20RU-blue?style=for-the-badge" alt="i18n">
 </p>
 
 > **Test your AI before attackers do!**  
@@ -327,8 +378,19 @@ This repository contains the **Community Edition** of SENTINEL. Enterprise featu
 | 🤖 **AI Models** | **5** | Gemini 3, OpenAI, Anthropic, Ollama, OpenRouter |
 | 🔍 **Recon Modules** | **5** | TechFingerprinter, NetworkScanner, SemgrepScanner, ChatbotFinder, AIDetector |
 | 📦 **Auto-Updater** | **13 sources** | SecLists, PayloadsAllTheThings, FuzzDB, BO0OM (daily) |
-| 📊 **Report Formats** | **4** | HTML, Markdown, JSON, MITRE ATT&CK + AI Security Findings |
-| 🌍 **Geo Rotation** | **16** | Countries: US, UK, DE, FR, JP, AU, and more |
+| 🍯 **Anti-Deception** | **AI-powered** | Honeypot detection, tarpit bypass, FPR analysis |
+| 🌍 **i18n Reports** | **EN / RU** | `--lang en` or `--lang ru` for bilingual reports |
+
+### 📚 Strike Documentation (EN + RU)
+
+| Document | English 🇺🇸 | Русский 🇷🇺 |
+|----------|:-----------:|:-----------:|
+| Usage Guide | [USAGE](./strike/docs/USAGE.md) | [USAGE_RU](./strike/docs/USAGE_RU.md) |
+| CLI Reference | [CLI_REFERENCE](./strike/docs/CLI_REFERENCE.md) | [CLI_REFERENCE_RU](./strike/docs/CLI_REFERENCE_RU.md) |
+| Integration | [INTEGRATION](./strike/docs/INTEGRATION.md) | [INTEGRATION_RU](./strike/docs/INTEGRATION_RU.md) |
+| Anti-Deception | [ANTI_DECEPTION](./strike/docs/ANTI_DECEPTION.md) | [ANTI_DECEPTION_RU](./strike/docs/ANTI_DECEPTION_RU.md) |
+| FAQ | [FAQ](./strike/docs/FAQ.md) | [FAQ_RU](./strike/docs/FAQ_RU.md) |
+| Troubleshooting | [TROUBLESHOOTING](./strike/docs/TROUBLESHOOTING.md) | [TROUBLESHOOTING_RU](./strike/docs/TROUBLESHOOTING_RU.md) |
 
 ### 🐉 HYDRA Architecture
 
@@ -343,14 +405,13 @@ This repository contains the **Community Edition** of SENTINEL. Enterprise featu
 | 🤖 **AI Attack Planner** | Gemini 3 Flash for exploit strategy & WAF analysis |
 | 🔍 **ChatbotFinder** | Automated discovery of hidden AI endpoints (169 paths, 17 providers) |
 | 🌐 **Deep Recon Module** | ASN-based network detection + comprehensive endpoint discovery |
-| 📦 **Payload Auto-Update** | Daily sync from SecLists, PayloadsAllTheThings, FuzzDB |
+| 🍯 **Honeypot Detection** | AI Adaptive Engine detects traps and false positives |
+| 🌍 **Bilingual Reports** | Full i18n support: `--lang en` / `--lang ru` |
 | 🧪 **ArXiv 2025 Attacks** | WAFFLED, DEG-WAF, MCP Tool Poisoning, RAG Poisoning |
 | 🔓 **Function Calling Jailbreaks** | 10 payloads with >90% success rate on GPT-4/Claude |
-| 🕵️ **Agent Cloaking Detection** | 44 fingerprints (Webdriver, Selenium, Puppeteer) |
-| 📝 **AI Security Reports** | Bug bounty reports with AI-specific findings |
 | 📡 **ScraperAPI Integration** | Residential proxy support for stealth scanning |
 
-### 🔍 Deep Recon Module (NEW!)
+### 🔍 Deep Recon Module
 
 Comprehensive endpoint discovery with ASN/BGP-based network detection:
 
@@ -365,7 +426,7 @@ Comprehensive endpoint discovery with ASN/BGP-based network detection:
 | 🔧 **Internal** | /health, /metrics, /debug | Debug/monitoring |
 | 🤖 **AI/ML** | /predict, /inference, /model | ML endpoints |
 
-> 📧 **Request access:** [chg@live.ru](mailto:chg@live.ru) • [@DmLabincev](https://t.me/DmLabincev)
+> 📁 **Full source code:** [`strike/`](./strike/) — Ready to use!
 
 ---
 
