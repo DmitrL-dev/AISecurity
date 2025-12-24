@@ -118,7 +118,7 @@ Generated from [SENTINEL AI Security Platform](https://github.com/DmitrL-dev/AIS
   author={Labintsev, Dmitry},
   year={2024},
   publisher={Hugging Face},
-  url={https://huggingface.co/datasets/DmitrL-dev/sentinel-jailbreak-detection}
+  url={https://huggingface.co/datasets/Chgdz/sentinel-jailbreak-detection}
 }
 ```
 

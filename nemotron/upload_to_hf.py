@@ -66,7 +66,7 @@ def main():
     # Upload to HuggingFace
     print("\nUploading to HuggingFace Hub...")
     dataset_dict.push_to_hub(
-        "DmitrL-dev/sentinel-jailbreak-detection",
+        "Chgdz/sentinel-jailbreak-detection",
         private=False,
     )
     
