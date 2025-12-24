@@ -72,33 +72,50 @@ Strike → Target AI → Report
 
 ---
 
-## 🛡️ What is SENTINEL?
+## 🌐 What is SENTINEL?
 
-**SENTINEL** is a comprehensive AI security platform designed to protect Large Language Model (LLM) applications from prompt injection, jailbreaks, data exfiltration, and emerging AI-specific threats.
+**SENTINEL** is a complete AI security platform with two integrated components:
 
-### The Problem We Solve
+| Component | Purpose | Key Features |
+|-----------|---------|--------------|
+| 🛡️ **SENTINEL Defense** | Protect AI in production | 121 detection engines, <10ms latency, OWASP coverage |
+| 🐉 **Strike Offense** | Test AI before deployment | 39K+ payloads, HYDRA parallel attacks, AI-powered recon |
 
-| Threat | Description | Impact |
-|--------|-------------|--------|
-| 🎭 **Prompt Injection** | Malicious instructions hidden in user input | System prompt bypass, data theft |
-| 🔓 **Jailbreaks** | Techniques to bypass AI safety guardrails | Harmful content generation |
-| 📤 **Data Exfiltration** | PII/secrets leaked through AI responses | GDPR violations, IP theft |
-| 🤖 **Agentic Attacks** | Exploiting tool calls, MCP, multi-agent systems | Unauthorized actions |
-| 🧠 **RAG Poisoning** | Malicious documents in knowledge bases | Misinformation, backdoors |
+### The Threats We Address
 
-### Why SENTINEL?
+| Threat | Defense (SENTINEL) | Offense (Strike) |
+|--------|-------------------|------------------|
+| 🎭 **Prompt Injection** | Real-time blocking | 5,000+ injection payloads |
+| 🔓 **Jailbreaks** | Pattern + semantic detection | Gandalf, DAN, roleplay attacks |
+| 📤 **Data Exfiltration** | PII guards, output filtering | Exfil payload testing |
+| 🤖 **Agentic Attacks** | MCP/A2A protocol security | Tool poisoning, RAG attacks |
+| 🧠 **RAG Poisoning** | RAG Guard engine | Document injection tests |
+| 🛡️ **WAF Evasion** | N/A (defense focus) | 25+ WAF bypass techniques |
+
+### Why Choose SENTINEL?
 
 <table>
 <tr>
 <td width="50%">
 
-**🔬 Advanced Detection**
+**🔬 Advanced Detection (Defense)**
 - 121 specialized detection engines
 - Strange Math™ (TDA, Sheaf, Hyperbolic)
 - Machine learning + rule-based hybrid
 - 85.1% recall, 84.4% precision
 
 </td>
+<td width="50%">
+
+**💀 Powerful Attack Suite (Offense)**
+- 39,000+ curated payloads
+- HYDRA 9-head parallel architecture
+- AI Attack Planner (Gemini 3)
+- Anti-deception/Honeypot detection
+
+</td>
+</tr>
+<tr>
 <td width="50%">
 
 **⚡ Production Ready**
@@ -108,24 +125,13 @@ Strike → Target AI → Report
 - OpenTelemetry instrumentation
 
 </td>
-</tr>
-<tr>
 <td width="50%">
 
-**🛡️ Comprehensive Coverage**
-- OWASP LLM Top 10 protection
-- TTPs.ai attack framework detection
-- VLM (Vision) security
-- Protocol security (MCP, A2A)
-
-</td>
-<td width="50%">
-
-**🔄 Continuous Updates**
-- Daily threat signature updates
-- Free CDN-hosted patterns
-- Community contributions
-- ArXiv 2025 research integration
+**🌍 Comprehensive Testing**
+- Web + LLM + Hybrid modes
+- Deep Recon (ASN, endpoints)
+- Bilingual reports (EN/RU)
+- MITRE ATT&CK mapping
 
 </td>
 </tr>
@@ -133,20 +139,21 @@ Strike → Target AI → Report
 
 ### Use Cases
 
-| Industry | Use Case |
-|----------|----------|
-| 🏢 **Enterprise** | Protect internal ChatGPT/Copilot deployments |
-| 🏦 **FinTech** | Secure financial AI assistants, prevent fraud |
-| 🏥 **Healthcare** | HIPAA-compliant AI, PII protection |
-| 🛒 **E-commerce** | Safe customer service chatbots |
-| 🎓 **Education** | Content moderation for educational AI |
-| 🔧 **Developers** | API security for AI-powered applications |
+| Role | Defense Use | Offense Use |
+|------|-------------|-------------|
+| 🏢 **Enterprise Security** | Protect ChatGPT/Copilot deployments | Pre-deployment security audit |
+| 🏦 **FinTech** | Real-time fraud prevention | Compliance testing (PCI-DSS) |
+| 🔧 **Developers** | API security layer | CI/CD security gate |
+| 🎯 **Red Teams** | N/A | Full pentest toolkit |
+| 🐛 **Bug Bounty** | N/A | AI-specific bug reports |
+| 🏥 **Healthcare** | HIPAA-compliant AI guard | PII leak testing |
 
-### How It Works
+### Architecture
 
 <p align="center">
   <img src="./assets/sentinel_flow.png" alt="SENTINEL Architecture Flow" width="800">
 </p>
+
 
 ---
 
