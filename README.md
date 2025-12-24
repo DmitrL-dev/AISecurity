@@ -13,6 +13,17 @@
   <img src="https://img.shields.io/badge/Recall-85.1%25-blue?style=for-the-badge" alt="Recall">
   <img src="https://img.shields.io/badge/Innovations-10-purple?style=for-the-badge" alt="Innovations">
 </p>
+
+<p align="center">
+  <a href="https://colab.research.google.com/github/DmitrL-dev/AISecurity/blob/main/sentinel-community/SENTINEL_Strike_Demo.ipynb">
+    <img src="https://img.shields.io/badge/🚀_Try_in_Colab-Interactive_Demo-F9AB00?style=for-the-badge&logo=googlecolab" alt="Open in Colab">
+  </a>
+  <a href="https://huggingface.co/datasets/DmitrL-dev/sentinel-jailbreak-detection">
+    <img src="https://img.shields.io/badge/🤗_Dataset-51K_Samples-yellow?style=for-the-badge&logo=huggingface" alt="HuggingFace Dataset">
+  </a>
+</p>
+
+<p align="center">
   <a href="https://dmitrl-dev.github.io/AISecurity/">📚 Documentation Portal</a> •
   <a href="#license--contact">📞 Contact</a> •
   <a href="https://t.me/DmLabincev">💬 Telegram</a> •
