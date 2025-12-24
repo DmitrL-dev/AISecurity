@@ -265,6 +265,17 @@ Statistical anomaly analysis, 5 threat levels, automatic strategy adaptation.
 9-headed engine, session-isolated workers, geo-distributed requests.
 </details>
 
+<details>
+<summary><strong>🧠 Nemotron Guard</strong> — Fine-tuned LLM for threat detection (NEW)</summary>
+
+Fine-tuned NVIDIA Nemotron 3 Nano (30B MoE) on 51K+ security samples:
+- Custom threat classifier trained on 39K+ jailbreak patterns
+- JSON-structured output (threat_type, severity, confidence)
+- QLoRA training with Unsloth (2.5x faster)
+- See [`nemotron/`](./nemotron/) for setup
+
+</details>
+
 </details>
 
 ### 🤝 Partnership & Collaboration
