@@ -430,6 +430,26 @@ This repository contains the **Community Edition** of SENTINEL. Enterprise featu
 
 > 📁 **Full source code:** [`strike/`](./strike/) — Ready to use!
 
+### 🐳 Docker Quick Start (NEW!)
+
+**One-liner to scan a target:**
+```bash
+# Build and run
+docker build -f Dockerfile.strike -t sentinel-strike .
+docker run --rm sentinel-strike https://target.com
+
+# Or use docker-compose
+docker-compose -f docker-compose.strike.yml run strike https://target.com
+```
+
+**Available commands:**
+```bash
+docker run --rm sentinel-strike --help              # Show help
+docker run --rm sentinel-strike scan URL            # Quick scan
+docker run --rm sentinel-strike attack URL          # Full attack
+docker run --rm sentinel-strike recon URL           # Reconnaissance
+```
+
 </details>
 
 <details>

@@ -1,0 +1,29 @@
+# SENTINEL Strike - Docker Compose
+# Quick start: docker-compose -f docker-compose.strike.yml run strike https://target.com
+
+version: '3.8'
+
+services:
+  strike:
+    build:
+      context: .
+      dockerfile: Dockerfile.strike
+    image: sentinel-strike:latest
+    container_name: sentinel-strike
+    
+    # Mount for reports output
+    volumes:
+      - ./reports:/app/reports
+      - ./signatures:/app/signatures:ro
+    
+    # Environment
+    environment:
+      - PYTHONUNBUFFERED=1
+      - GEMINI_API_KEY=${GEMINI_API_KEY:-}
+      - SCRAPERAPI_KEY=${SCRAPERAPI_KEY:-}
+    
+    # Network access
+    network_mode: host
+    
+    # Default command
+    entrypoint: ["python", "-m", "strike.cli"]

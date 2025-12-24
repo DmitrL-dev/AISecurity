@@ -1,0 +1,40 @@
+# SENTINEL Strike - Docker Image
+# Usage: docker run --rm sentinel-strike https://target.com
+
+FROM python:3.11-slim
+
+LABEL maintainer="Dmitry Labintsev <chg@live.ru>"
+LABEL description="SENTINEL Strike - AI Red Team Toolkit"
+LABEL version="3.0"
+
+# Install system dependencies
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    git \
+    curl \
+    chromium \
+    chromium-driver \
+    && rm -rf /var/lib/apt/lists/*
+
+# Set Chrome/Chromium for Playwright
+ENV CHROME_BIN=/usr/bin/chromium
+ENV PLAYWRIGHT_BROWSERS_PATH=/usr/lib/chromium
+
+# Create app directory
+WORKDIR /app
+
+# Copy requirements first for caching
+COPY strike/requirements.txt .
+RUN pip install --no-cache-dir -r requirements.txt
+
+# Copy strike module
+COPY strike/ ./strike/
+COPY signatures/ ./signatures/
+
+# Set Python path
+ENV PYTHONPATH=/app
+
+# Default entry point
+ENTRYPOINT ["python", "-m", "strike.cli"]
+
+# Default help
+CMD ["--help"]
