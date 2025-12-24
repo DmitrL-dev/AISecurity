@@ -11,7 +11,7 @@
   <img src="https://img.shields.io/badge/Precision-84.4%25-blue?style=for-the-badge" alt="Precision">
   <img src="https://img.shields.io/badge/Engines-121-purple?style=for-the-badge" alt="Engines">
   <img src="https://img.shields.io/badge/Innovations-10-red?style=for-the-badge" alt="Innovations">
-  <img src="https://img.shields.io/badge/Dataset-39701-orange?style=for-the-badge" alt="Dataset">
+  <img src="https://img.shields.io/badge/Dataset-9-orange?style=for-the-badge" alt="Dataset">
 </p>
   <a href="https://dmitrl-dev.github.io/AISecurity/">📚 Documentation Portal</a> •
   <a href="#license--contact">📞 Contact</a> •
@@ -215,7 +215,7 @@ SENTINEL provides **free, auto-updated threat signatures** for the community. No
 
 | File | Description | CDN Link |
 |------|-------------|----------|
-| `jailbreaks.json` | **39,848** jailbreak patterns from 7 sources | [Download](https://cdn.jsdelivr.net/gh/DmitrL-dev/AISecurity@latest/signatures/jailbreaks.json) |
+| `jailbreaks.json` | **9** jailbreak patterns from 7 sources | [Download](https://cdn.jsdelivr.net/gh/DmitrL-dev/AISecurity@latest/signatures/jailbreaks.json) |
 | `keywords.json` | Suspicious keyword sets (7 categories) | [Download](https://cdn.jsdelivr.net/gh/DmitrL-dev/AISecurity@latest/signatures/keywords.json) |
 | `pii.json` | PII & secrets detection patterns | [Download](https://cdn.jsdelivr.net/gh/DmitrL-dev/AISecurity@latest/signatures/pii.json) |
 | `manifest.json` | Version & integrity metadata | [Download](https://cdn.jsdelivr.net/gh/DmitrL-dev/AISecurity@latest/signatures/manifest.json) |
