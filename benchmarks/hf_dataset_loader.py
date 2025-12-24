@@ -107,6 +107,36 @@ def load_jackhhao_jailbreaks() -> List[HFSample]:
     return samples
 
 
+def load_lakera_gandalf() -> List[HFSample]:
+    """
+    Load Lakera/gandalf-rct dataset.
+    
+    279,675 prompt injection attacks from Gandalf game (60M+ attempts).
+    High-quality real-world crowdsourced data.
+    """
+    samples = []
+    try:
+        from datasets import load_dataset
+        ds = load_dataset('Lakera/gandalf-rct', split='train')
+
+        for item in ds:
+            text = item.get('text', item.get('prompt', ''))
+            if text and len(text) > 10:
+                samples.append(HFSample(
+                    text=text,
+                    label="attack",
+                    source="Lakera/gandalf-rct",
+                    attack_type="prompt_injection"
+                ))
+
+        logger.info(f"Loaded {len(samples)} samples from Lakera/gandalf-rct")
+
+    except Exception as e:
+        logger.warning(f"Lakera/gandalf-rct not available: {e}")
+
+    return samples
+
+
 def load_all_hf_datasets() -> Tuple[List[HFSample], dict]:
     """
     Load all available HuggingFace prompt injection datasets.
@@ -121,6 +151,7 @@ def load_all_hf_datasets() -> Tuple[List[HFSample], dict]:
         "deepset": 0,
         "rubend18": 0,
         "jackhhao": 0,
+        "lakera_gandalf": 0,
         "total_attacks": 0,
         "total_benign": 0,
     }
@@ -142,6 +173,12 @@ def load_all_hf_datasets() -> Tuple[List[HFSample], dict]:
     jackhhao_samples = load_jackhhao_jailbreaks()
     all_samples.extend(jackhhao_samples)
     stats["jackhhao"] = len(jackhhao_samples)
+
+    # Load Lakera Gandalf (279K+ attacks from 60M+ game attempts)
+    print("  Loading Lakera/gandalf-rct (279K+ attacks)...")
+    lakera_samples = load_lakera_gandalf()
+    all_samples.extend(lakera_samples)
+    stats["lakera_gandalf"] = len(lakera_samples)
 
     # Remove duplicates by text
     seen_texts = set()
@@ -201,6 +238,7 @@ if __name__ == "__main__":
     print(f"deepset:      {stats['deepset']} samples")
     print(f"rubend18:     {stats['rubend18']} samples")
     print(f"jackhhao:     {stats['jackhhao']} samples")
+    print(f"lakera:       {stats['lakera_gandalf']} samples")
     print("-" * 60)
     print(f"Total unique: {stats['total_unique']} samples")
     print(f"  Attacks:    {stats['total_attacks']}")

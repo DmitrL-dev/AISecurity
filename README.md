@@ -11,7 +11,7 @@
   <img src="https://img.shields.io/badge/Precision-84.4%25-blue?style=for-the-badge" alt="Precision">
   <img src="https://img.shields.io/badge/Engines-121-purple?style=for-the-badge" alt="Engines">
   <img src="https://img.shields.io/badge/Innovations-10-red?style=for-the-badge" alt="Innovations">
-  <img src="https://img.shields.io/badge/Dataset-1815-orange?style=for-the-badge" alt="Dataset">
+  <img src="https://img.shields.io/badge/Dataset-39701-orange?style=for-the-badge" alt="Dataset">
 </p>
   <a href="https://dmitrl-dev.github.io/AISecurity/">📚 Documentation Portal</a> •
   <a href="#license--contact">📞 Contact</a> •

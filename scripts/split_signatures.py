@@ -9,7 +9,7 @@ import json
 from datetime import datetime
 from pathlib import Path
 
-SIGNATURES_DIR = Path(__file__).parent.parent / "sentinel-community" / "signatures"
+SIGNATURES_DIR = Path(__file__).parent.parent / "signatures"
 MAX_PART_SIZE_MB = 15  # Keep under 20MB with margin
 MAX_PART_SIZE_BYTES = MAX_PART_SIZE_MB * 1024 * 1024
 

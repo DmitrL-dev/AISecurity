@@ -59,10 +59,20 @@ jobs:
       - name: Commit and push
         if: steps.check_changes.outputs.changed == 'true' || github.event.inputs.force_update == 'true'
         run: |
+          # Count actual patterns in jailbreaks.json
+          JAILBREAK_COUNT=$(python -c "import json; f=open('signatures/jailbreaks.json'); d=json.load(f); print(len(d))")
+          echo "Found $JAILBREAK_COUNT jailbreak patterns"
+          
+          # Update README badge with actual count
+          sed -i "s/Dataset-[0-9,]*-orange/Dataset-${JAILBREAK_COUNT}-orange/g" README.md
+          
+          # Update jailbreaks count in CDN table
+          sed -i "s/\*\*[0-9,]*\*\* jailbreak patterns/**${JAILBREAK_COUNT}** jailbreak patterns/g" README.md
+          
           git config user.name "SENTINEL Bot"
           git config user.email "sentinel-bot@users.noreply.github.com"
-          git add signatures/
-          git commit -m "chore(signatures): auto-update $(date +%Y.%m.%d)"
+          git add signatures/ README.md
+          git commit -m "chore(signatures): auto-update $(date +%Y.%m.%d) - ${JAILBREAK_COUNT} patterns"
           git pull --rebase origin main
           git push
 
