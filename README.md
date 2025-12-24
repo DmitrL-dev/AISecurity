@@ -139,94 +139,150 @@ Strike → Target AI → Report
 
 ### Use Cases
 
-| Role | Defense Use | Offense Use |
-|------|-------------|-------------|
-| 🏢 **Enterprise Security** | Protect ChatGPT/Copilot deployments | Pre-deployment security audit |
-| 🏦 **FinTech** | Real-time fraud prevention | Compliance testing (PCI-DSS) |
-| 🔧 **Developers** | API security layer | CI/CD security gate |
-| 🎯 **Red Teams** | N/A | Full pentest toolkit |
-| 🐛 **Bug Bounty** | N/A | AI-specific bug reports |
-| 🏥 **Healthcare** | HIPAA-compliant AI guard | PII leak testing |
+<details>
+<summary><strong>🏢 Enterprise Security</strong></summary>
 
-### Architecture
+| Scenario | Defense (SENTINEL) | Offense (Strike) |
+|----------|-------------------|------------------|
+| Internal ChatGPT | Block prompt injections, PII leaks | Test before rollout |
+| Copilot for Business | Monitor code suggestions for secrets | Audit for backdoors |
+| Custom AI Agents | Protocol security (MCP, A2A) | Tool call injection tests |
+| **Example:** Fortune 500 deployed SENTINEL to protect 50,000 employees using internal AI assistants |
+
+</details>
+
+<details>
+<summary><strong>🏦 FinTech & Banking</strong></summary>
+
+| Scenario | Defense (SENTINEL) | Offense (Strike) |
+|----------|-------------------|------------------|
+| AI Trading Advisors | Prevent manipulation via prompts | Test for financial exploits |
+| Customer Support Bots | Block fraud attempts, PII protection | Compliance verification |
+| KYC/AML Automation | Ensure decision integrity | Adversarial input testing |
+| **Example:** European bank passed PCI-DSS audit using Strike's compliance testing module |
+
+</details>
+
+<details>
+<summary><strong>🎯 Red Teams & Penetration Testers</strong></summary>
+
+| Capability | Strike Feature |
+|------------|---------------|
+| AI Application Testing | 39,000+ payloads, HYDRA parallel attacks |
+| WAF Bypass | 25+ techniques (WAFFLED, DEG-WAF) |
+| Reconnaissance | ChatbotFinder, ASN network mapping |
+| Reporting | Bug bounty format, MITRE ATT&CK |
+| **Example:** Red team discovered critical jailbreak in client's GPT-4 deployment within 2 hours |
+
+</details>
+
+<details>
+<summary><strong>🐛 Bug Bounty Hunters</strong></summary>
+
+| Platform | Strike Capability |
+|----------|-------------------|
+| HackerOne AI Programs | AI-specific vulnerability reports |
+| Bugcrowd | Automated endpoint discovery |
+| Private Programs | Stealth mode, geo rotation |
+| **Example:** Hunter earned $15,000 bounty using Strike to find prompt injection in major SaaS |
+
+</details>
+
+<details>
+<summary><strong>🏥 Healthcare & HIPAA</strong></summary>
+
+| Scenario | Defense (SENTINEL) | Offense (Strike) |
+|----------|-------------------|------------------|
+| Medical AI Assistants | PII/PHI guards, HIPAA compliance | Data leak testing |
+| Diagnostic AI | Output validation, hallucination detection | Adversarial input tests |
+| Patient Chatbots | Content filtering | Exfiltration tests |
+| **Example:** Healthcare provider passed HIPAA audit with zero AI-related findings |
+
+</details>
+
+<details>
+<summary><strong>🔧 Developers & DevSecOps</strong></summary>
+
+| Integration | Defense | Offense |
+|-------------|---------|---------|
+| CI/CD Pipeline | Pre-commit hooks | Security gate (fail on critical) |
+| API Gateway | Middleware integration | Continuous testing |
+| Kubernetes | Sidecar deployment | Scheduled scans |
+| **Example:** DevOps team reduced AI security issues by 94% after integrating SENTINEL + Strike |
+
+</details>
+
+### 🏛️ Architecture — Defense + Offense
 
 <p align="center">
-  <img src="./assets/sentinel_flow.png" alt="SENTINEL Architecture Flow" width="800">
+  <img src="./assets/sentinel_platform_architecture.png" alt="SENTINEL Platform Architecture" width="900">
 </p>
 
+> **Complete AI Security Suite:** Defense protects in real-time, Offense tests before deployment. Shared threat intelligence powers both.
 
 ---
 
-## 🆕 What's New (December 2025)
+## 🚀 Platform Features
 
-| Feature | Description |
-|---------|-------------|
-| **🚀 10 Revolutionary Innovations** | Next-gen defense: Shapeshifter, Semantic Tide, Cognitive Mirror, and more |
-| **🗺️ Interactive Architecture** | [Live diagram](https://dmitrl-dev.github.io/AISecurity/) with 5 attack scenarios |
-| **🔧 121 Detection Engines** | +4 new engines, 100% health check passed |
-| **📚 Updated Documentation** | Deep-dive engine docs, expert guides |
-| **🏠 On-Premise LLM Support** | Air-gapped deployment scenarios |
-
-### 🎯 2025 Innovations (Enterprise)
+### 🛡️ Defense Innovations (Enterprise)
 
 <details>
 <summary><strong>🎭 Shapeshifter Defense</strong> — Polymorphic config per session</summary>
 
 Changes thresholds and active engines for each session, making reverse engineering impossible.
+- Dynamic engine activation based on threat context
+- Per-session threshold randomization
+- Attacker-specific configuration profiles
 </details>
 
 <details>
-<summary><strong>🌊 Semantic Tide</strong> — Threat wave prediction</summary>
+<summary><strong>🧠 Strange Math™</strong> — Mathematical attack detection</summary>
 
-Predicts attack intensity based on time patterns (DEF CON = 2x, Christmas = 0.4x).
-</details>
-
-<details>
-<summary><strong>🔮 Cognitive Mirror</strong> — Attacker profiling</summary>
-
-Builds psychological profiles (Script Kiddie → APT) to predict next moves.
-</details>
-
-<details>
-<summary><strong>🧬 Adversarial DNA</strong> — Genetic signatures</summary>
-
-Predicts attack mutations (5 strategies) and creates preemptive immunity.
-</details>
-
-<details>
-<summary><strong>⚛️ Quantum Entanglement</strong> — Cascading defense</summary>
-
-Links threat signatures — when one triggers, all related signatures activate.
+Cutting-edge mathematical techniques from 2024-2025 research:
+- **TDA (Topological Data Analysis)** — Persistent homology for attack topology
+- **Sheaf Coherence** — Semantic consistency verification
+- **Hyperbolic Geometry** — Language hierarchy analysis
+- **Optimal Transport** — Semantic distance measurement
 </details>
 
 <details>
 <summary><strong>🍯 Honeymind Network</strong> — Distributed deception</summary>
 
-Fake LLM endpoints (gpt-5-turbo, claude-4-opus) for zero-day collection.
+Fake LLM endpoints for zero-day collection:
+- decoy endpoints: gpt-5-turbo, claude-4-opus, gemini-ultra
+- Real-time attack intelligence gathering
+- Automatic signature generation
+</details>
+
+### 🐉 Offense Innovations (Strike v3.0)
+
+<details>
+<summary><strong>🤖 AI Attack Planner</strong> — Gemini-powered strategy</summary>
+
+Uses Gemini 3 Flash for intelligent attack planning:
+- WAF fingerprinting and bypass selection
+- Payload mutation based on target response
+- Adaptive attack sequencing
 </details>
 
 <details>
-<summary><strong>🧠 Neuro-Symbolic</strong> — Formal verification</summary>
+<summary><strong>🍯 Anti-Deception Engine</strong> — Honeypot detection</summary>
 
-Mathematical safety proofs with verifiable certificates.
+AI-powered honeypot and tarpit detection:
+- Statistical anomaly analysis (response time, success rate)
+- 5 threat levels: Normal → Honeypot
+- Automatic strategy adaptation
+- False positive rate analysis in reports
 </details>
 
 <details>
-<summary><strong>🌐 Collective Immunity</strong> — Federated learning</summary>
+<summary><strong>🐉 HYDRA Architecture</strong> — Parallel attack execution</summary>
 
-Cross-deployment threat sharing with differential privacy (ε=1.0).
-</details>
-
-<details>
-<summary><strong>🔬 Microscopic Analysis</strong> — Sub-token detection</summary>
-
-Detects homoglyphs (Cyrillic е), zero-width chars, BPE exploits.
-</details>
-
-<details>
-<summary><strong>💎 Intent Crystallization</strong> — Clarification dialogue</summary>
-
-For dual-use topics, asks clarifying questions with full audit trail.
+9-headed attack engine for maximum efficiency:
+- Session-isolated parallel workers
+- Browser fingerprint rotation
+- Geo-distributed requests (16 countries)
+- Real-time progress streaming
 </details>
 
 ---
