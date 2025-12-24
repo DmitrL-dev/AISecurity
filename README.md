@@ -222,7 +222,8 @@ Strike → Target AI → Report
 
 ---
 
-## 🚀 Platform Features
+<details>
+<summary><h2>🚀 Platform Features</h2></summary>
 
 ### 🛡️ Defense Innovations (Enterprise)
 
@@ -230,28 +231,18 @@ Strike → Target AI → Report
 <summary><strong>🎭 Shapeshifter Defense</strong> — Polymorphic config per session</summary>
 
 Changes thresholds and active engines for each session, making reverse engineering impossible.
-- Dynamic engine activation based on threat context
-- Per-session threshold randomization
-- Attacker-specific configuration profiles
 </details>
 
 <details>
 <summary><strong>🧠 Strange Math™</strong> — Mathematical attack detection</summary>
 
-Cutting-edge mathematical techniques from 2024-2025 research:
-- **TDA (Topological Data Analysis)** — Persistent homology for attack topology
-- **Sheaf Coherence** — Semantic consistency verification
-- **Hyperbolic Geometry** — Language hierarchy analysis
-- **Optimal Transport** — Semantic distance measurement
+TDA, Sheaf Coherence, Hyperbolic Geometry, Optimal Transport
 </details>
 
 <details>
 <summary><strong>🍯 Honeymind Network</strong> — Distributed deception</summary>
 
-Fake LLM endpoints for zero-day collection:
-- decoy endpoints: gpt-5-turbo, claude-4-opus, gemini-ultra
-- Real-time attack intelligence gathering
-- Automatic signature generation
+Fake LLM endpoints (gpt-5-turbo, claude-4-opus) for zero-day collection.
 </details>
 
 ### 🐉 Offense Innovations (Strike v3.0)
@@ -259,33 +250,22 @@ Fake LLM endpoints for zero-day collection:
 <details>
 <summary><strong>🤖 AI Attack Planner</strong> — Gemini-powered strategy</summary>
 
-Uses Gemini 3 Flash for intelligent attack planning:
-- WAF fingerprinting and bypass selection
-- Payload mutation based on target response
-- Adaptive attack sequencing
+WAF fingerprinting, payload mutation, adaptive attack sequencing.
 </details>
 
 <details>
 <summary><strong>🍯 Anti-Deception Engine</strong> — Honeypot detection</summary>
 
-AI-powered honeypot and tarpit detection:
-- Statistical anomaly analysis (response time, success rate)
-- 5 threat levels: Normal → Honeypot
-- Automatic strategy adaptation
-- False positive rate analysis in reports
+Statistical anomaly analysis, 5 threat levels, automatic strategy adaptation.
 </details>
 
 <details>
 <summary><strong>🐉 HYDRA Architecture</strong> — Parallel attack execution</summary>
 
-9-headed attack engine for maximum efficiency:
-- Session-isolated parallel workers
-- Browser fingerprint rotation
-- Geo-distributed requests (16 countries)
-- Real-time progress streaming
+9-headed engine, session-isolated workers, geo-distributed requests.
 </details>
 
----
+</details>
 
 ### 🤝 Partnership & Collaboration
 
@@ -323,7 +303,8 @@ AI-powered honeypot and tarpit detection:
 
 ---
 
-### 🛡️ Free Threat Signatures CDN
+<details>
+<summary><h3>🛡️ Free Threat Signatures CDN</h3></summary>
 
 SENTINEL provides **free, auto-updated threat signatures** for the community. No API key required!
 
@@ -349,35 +330,21 @@ fetch('https://cdn.jsdelivr.net/gh/DmitrL-dev/AISecurity@latest/signatures/jailb
 
 **🔐 Signature Security:**
 
-All patterns undergo automated security validation before publishing:
-
 | Check | Description |
 |-------|-------------|
-| **ReDoS Detection** | Blocks regex with catastrophic backtracking (e.g., `(.+)+`) |
+| **ReDoS Detection** | Blocks regex with catastrophic backtracking |
 | **Complexity Limits** | Max 500 chars, max 10 capture groups |
-| **Backdoor Detection** | Flags suspicious constructs like negative lookahead `(?!...)` |
-| **Secret Scanning** | Removes leaked API keys (OpenAI, AWS, Google) |
-| **False Positive Testing** | Tests against 10+ known-safe prompts |
+| **Secret Scanning** | Removes leaked API keys |
 | **Duplicate Removal** | Automatic deduplication by content hash |
 
-**🙏 Data Sources & Acknowledgments:**
+**🙏 Data Sources:** HackAPrompt, TrustAIRLab, deepset, Lakera, verazuo, imoxto
 
-Our threat signature database is powered by research from:
-
-| Source | Organization | Type |
-|--------|--------------|------|
-| [HackAPrompt](https://www.aicrowd.com/challenges/hackaprompt-2023) | Learn Prompting + AICrowd | Competition dataset |
-| [TrustAIRLab](https://huggingface.co/TrustAIRLab) | HKUST | Academic research |
-| [deepset](https://huggingface.co/deepset) | deepset GmbH | Prompt injections |
-| [Lakera](https://huggingface.co/Lakera) | Lakera AI | Security research |
-| [verazuo](https://github.com/verazuo/jailbreak_llms) | Research community | Jailbreak collection |
-| [imoxto](https://huggingface.co/imoxto) | Community | Aggregated datasets |
-
-*Special thanks to the AI security research community for making these datasets publicly available.*
+</details>
 
 ---
 
-## 🆓 Community Edition vs 🔐 Enterprise Edition
+<details>
+<summary><h2>🆓 Community Edition vs 🔐 Enterprise Edition</h2></summary>
 
 This repository contains the **Community Edition** of SENTINEL. Enterprise features are available through licensing.
 
@@ -388,34 +355,21 @@ This repository contains the **Community Edition** of SENTINEL. Enterprise featu
 | **TTPs.ai Basic** (RAG guard, probing)                      |   ✅ Full    |    ✅ Full    |
 | **TTPs.ai Advanced** (session, tool_call, C2, staging)      |      ❌      |    ✅ Full    |
 | **Strange Math Basic** (TDA+GUDHI, Sheaf)                   |   ✅ Full    |    ✅ Full    |
-| **Strange Math Medium** (Hyperbolic Detector)               |   ✅ Full    |    ✅ Full    |
-| **Strange Math v3** (Fractal, Wavelet, Ensemble) 🆕         |      ❌      |    ✅ Full    |
-| **Strange Math Advanced** (Info Geometry α-div, Spectral)   |      ❌      |    ✅ Full    |
-| **VLM Basic** (visual_content, cross_modal)                 |   ✅ Full    |    ✅ Full    |
-| **VLM Advanced** (adversarial_image, steganography)         |      ❌      |    ✅ Full    |
-| **Shadow AI Discovery** (fingerprinter, traffic) 🆕         |   ✅ Full    |    ✅ Full    |
-| **Workflow Automation** (triggers, webhooks) 🆕             |   ✅ Full    |    ✅ Full    |
-| **Mobile SDK** (iOS, Android, React Native) 🆕              |   ✅ Full    |    ✅ Full    |
-| **API Marketplace** (rate limiting, tiers) 🆕               |  ⚠️ Free    |    ✅ Full    |
-| **Prompt Audit** (DuckDB, GDPR/SOC2) 🆕                     |      ❌      |    ✅ Full    |
-| **Visual Rule Builder** (YARA/Sigma export) 🆕              |      ❌      |    ✅ Full    |
-| **Intelligence Graph** (KùzuDB, MITRE ATT&CK) 🆕            |      ❌      |    ✅ Full    |
-| **ASI10 Voice Jailbreak** (phonetic attacks)                |   ✅ Full    |    ✅ Full    |
-| **Production Infrastructure** (OpenTelemetry, Rate Limit)   |   ✅ Full    |    ✅ Full    |
-| **Deep Learning Analysis** (activation steering, forensics) |      ❌      |    ✅ Full    |
-| **Meta-Judge** (121-engine aggregator)                      |      ❌      |    ✅ Full    |
-| **🚀 2025 Innovations** (Shapeshifter, Tide, Mirror, DNA)   |      ❌      |    ✅ Full    |
-| **Proactive Defense** (zero-day detection)                  |      ❌      |    ✅ Full    |
+| **Strange Math Advanced** (Info Geometry, Spectral)         |      ❌      |    ✅ Full    |
+| **VLM Protection** (visual, cross-modal, adversarial)       |   ✅ Basic   |    ✅ Full    |
+| **Strike Offense** (39K+ payloads, HYDRA)                   |   ✅ Full    |    ✅ Full    |
+| **2025 Innovations** (Shapeshifter, Mirror, DNA)            |      ❌      |    ✅ Full    |
 | Docker/K8s deployment                                       |   ✅ Full    |    ✅ Full    |
-| Documentation + Demo                                        |   ✅ Full    |    ✅ Full    |
-| Unit Tests                                                  |   ✅ Basic   |    ✅ Full    |
 | Support                                                     |  Community   |   Dedicated   |
 
 > 📧 **Enterprise licensing:** [chg@live.ru](mailto:chg@live.ru) • [@DmLabincev](https://t.me/DmLabincev)
 
+</details>
+
 ---
 
-## 🐉 SENTINEL Strike v3.0 — AI Red Team Platform
+<details>
+<summary><h2>🐉 SENTINEL Strike v3.0 — AI Red Team Platform</h2></summary>
 
 <p align="center">
   <img src="./assets/strike_banner.png" alt="SENTINEL Strike" width="500">
@@ -440,7 +394,6 @@ This repository contains the **Community Edition** of SENTINEL. Enterprise featu
 | 🛡️ **WAF Bypass** | **25+** | WAFFLED, DEG-WAF, Encoding, Smuggling, HPP (ArXiv 2025) |
 | 🤖 **AI Models** | **5** | Gemini 3, OpenAI, Anthropic, Ollama, OpenRouter |
 | 🔍 **Recon Modules** | **5** | TechFingerprinter, NetworkScanner, SemgrepScanner, ChatbotFinder, AIDetector |
-| 📦 **Auto-Updater** | **13 sources** | SecLists, PayloadsAllTheThings, FuzzDB, BO0OM (daily) |
 | 🍯 **Anti-Deception** | **AI-powered** | Honeypot detection, tarpit bypass, FPR analysis |
 | 🌍 **i18n Reports** | **EN / RU** | `--lang en` or `--lang ru` for bilingual reports |
 
@@ -453,45 +406,20 @@ This repository contains the **Community Edition** of SENTINEL. Enterprise featu
 | Integration | [INTEGRATION](./strike/docs/INTEGRATION.md) | [INTEGRATION_RU](./strike/docs/INTEGRATION_RU.md) |
 | Anti-Deception | [ANTI_DECEPTION](./strike/docs/ANTI_DECEPTION.md) | [ANTI_DECEPTION_RU](./strike/docs/ANTI_DECEPTION_RU.md) |
 | FAQ | [FAQ](./strike/docs/FAQ.md) | [FAQ_RU](./strike/docs/FAQ_RU.md) |
-| Troubleshooting | [TROUBLESHOOTING](./strike/docs/TROUBLESHOOTING.md) | [TROUBLESHOOTING_RU](./strike/docs/TROUBLESHOOTING_RU.md) |
-
-### 🐉 HYDRA Architecture
-
-<p align="center">
-  <img src="./assets/hydra_architecture.png" alt="HYDRA Architecture" width="700">
-</p>
 
 ### 🆕 v3.0 Features (Dec 2025)
 
 | Feature | Description |
 |---------|-------------|
 | 🤖 **AI Attack Planner** | Gemini 3 Flash for exploit strategy & WAF analysis |
-| 🔍 **ChatbotFinder** | Automated discovery of hidden AI endpoints (169 paths, 17 providers) |
-| 🌐 **Deep Recon Module** | ASN-based network detection + comprehensive endpoint discovery |
+| 🔍 **ChatbotFinder** | Automated discovery of hidden AI endpoints (169 paths) |
 | 🍯 **Honeypot Detection** | AI Adaptive Engine detects traps and false positives |
 | 🌍 **Bilingual Reports** | Full i18n support: `--lang en` / `--lang ru` |
-| 🧪 **ArXiv 2025 Attacks** | WAFFLED, DEG-WAF, MCP Tool Poisoning, RAG Poisoning |
-| 🔓 **Function Calling Jailbreaks** | 10 payloads with >90% success rate on GPT-4/Claude |
-| 📡 **ScraperAPI Integration** | Residential proxy support for stealth scanning |
-
-### 🔍 Deep Recon Module
-
-Comprehensive endpoint discovery with ASN/BGP-based network detection:
-
-| Category | Paths | Description |
-|----------|-------|-------------|
-| 💬 **Chat/AI** | /chat, /bot, /assistant, /completions | AI chatbot endpoints |
-| 🔌 **APIs** | /api, /v1, /graphql, /rest | API entry points |
-| 🔐 **Admin** | /admin, /dashboard, /panel | Admin interfaces |
-| 🔑 **Auth** | /login, /oauth, /token, /sso | Authentication endpoints |
-| 📁 **Files** | /upload, /media, /storage | File operations |
-| 🪝 **Webhooks** | /webhook, /callback, /events | Integration hooks |
-| 🔧 **Internal** | /health, /metrics, /debug | Debug/monitoring |
-| 🤖 **AI/ML** | /predict, /inference, /model | ML endpoints |
+| 🧪 **ArXiv 2025 Attacks** | WAFFLED, DEG-WAF, MCP Tool Poisoning |
 
 > 📁 **Full source code:** [`strike/`](./strike/) — Ready to use!
 
----
+</details>
 
 <details>
 <summary><h2>📚 Documentation</h2></summary>
