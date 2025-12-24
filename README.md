@@ -15,7 +15,7 @@
 </p>
 
 <p align="center">
-  <a href="https://colab.research.google.com/github/DmitrL-dev/sentinel-community/blob/main/SENTINEL_Strike_Demo.ipynb">
+  <a href="https://colab.research.google.com/github/DmitrL-dev/AISecurity/blob/main/SENTINEL_Strike_Demo.ipynb">
     <img src="https://img.shields.io/badge/🚀_Try_in_Colab-Interactive_Demo-F9AB00?style=for-the-badge&logo=googlecolab" alt="Open in Colab">
   </a>
   <a href="https://huggingface.co/datasets/Chgdz/sentinel-jailbreak-detection">
