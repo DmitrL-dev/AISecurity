@@ -100,6 +100,7 @@ We analyzed **2025's most dangerous attack vectors** and built defenses before t
 | **ASCII Smuggling** | Unicode Consortium + Dark Web | 7 Unicode ranges |
 | **Memory Poisoning** | OWASP Agentic AI | 14 "remember/save" patterns |
 | **Virtual Context** | LLM Security Papers 2025 | NEW: Separator token detector |
+| **Polyglot Files** | LLMON Project (Dec 2025) | NEW: GIFAR, PDF+HTML detection |
 
 ### 📊 Verified Improvements
 
@@ -109,6 +110,7 @@ We analyzed **2025's most dangerous attack vectors** and built defenses before t
 | **2025 Attack Coverage** | 55% | **~80%** | 🛡️ +25% protection |
 | **New Patterns** | — | **+29** | 🎯 Proactive defense |
 | **P95 Latency** | 38ms | **40ms** | ⚡ Still under SLA |
+| **Strike Jailbreaks** | — | **+47** | ⚔️ 33 vendors |
 
 ### ✨ New Detection Capabilities
 
@@ -117,6 +119,7 @@ We analyzed **2025's most dangerous attack vectors** and built defenses before t
 | 🆕 **virtual_context.py** | ChatML/Llama/Anthropic separator exploits | Production |
 | 📈 **injection.py** | Crescendo multi-turn + Bidi FlipAttack | Enhanced |
 | 🧠 **agentic_monitor.py** | Memory poisoning + delayed triggers | Enhanced |
+| 🛡️ **rag_guard.py** | GIFAR/PDF+HTML polyglot detection | Enhanced |
 
 > **🔒 Your AI is protected against attacks that don't exist in the wild yet.**
 
