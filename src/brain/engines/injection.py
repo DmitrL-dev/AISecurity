@@ -321,9 +321,17 @@ class RegexLayer:
         self.encoding_patterns = [
             (re.compile(r"[A-Za-z0-9+/]{40,}={0,2}"), "Base64 Payload", 50.0),
             (
-                re.compile(r"[\u200b-\u200f\u2028-\u202f\ufeff]"),
-                "Zero-Width Unicode",
-                70.0,
+                re.compile(
+                    r"[\u200b-\u200f\u2028-\u202f\ufeff"
+                    r"\uE0000-\uE007F"  # Unicode Tags (ASCII Smuggling)
+                    r"\uFE00-\uFE0F"    # Variation Selectors
+                    r"\u2060-\u206F"    # General Punctuation (invisible)
+                    r"\u202A-\u202E"    # Bidi overrides (FlipAttack)
+                    r"\u2066-\u2069"    # Bidi isolates
+                    r"\uFFF0-\uFFFF]"   # Specials (replacement chars)
+                ),
+                "Unicode Smuggling Extended",
+                85.0,
             ),
             (
                 re.compile(
@@ -519,6 +527,48 @@ class RegexLayer:
                     r"ADMIN\s+OVERRIDE|DEBUG\s+MODE|MAINTENANCE", re.IGNORECASE),
                 "Fake Admin Command",
                 90.0,
+            ),
+        ]
+
+        # === Crescendo / Multi-Turn Attack Patterns (2025) ===
+        self.crescendo_patterns = [
+            (
+                re.compile(r"let's\s+start\s+with", re.IGNORECASE),
+                "Crescendo Opener",
+                40.0,
+            ),
+            (
+                re.compile(r"now\s+that\s+we've", re.IGNORECASE),
+                "Crescendo Escalation",
+                55.0,
+            ),
+            (
+                re.compile(
+                    r"building\s+on\s+(?:that|what\s+you\s+said)", re.IGNORECASE),
+                "Crescendo Build",
+                50.0,
+            ),
+            (
+                re.compile(r"as\s+(?:a|an?)\s+follow.?up", re.IGNORECASE),
+                "Crescendo Follow-up",
+                45.0,
+            ),
+            (
+                re.compile(
+                    r"since\s+you\s+(?:already|just)\s+(?:said|mentioned|agreed)", re.IGNORECASE),
+                "Crescendo Reference",
+                60.0,
+            ),
+            (
+                re.compile(r"going\s+(?:a\s+)?step\s+further", re.IGNORECASE),
+                "Crescendo Step Further",
+                55.0,
+            ),
+            (
+                re.compile(
+                    r"(?:now|so)\s+(?:can|could)\s+you\s+(?:just|also)", re.IGNORECASE),
+                "Crescendo Extension",
+                50.0,
             ),
         ]
 
@@ -934,6 +984,7 @@ class RegexLayer:
             self.authority_patterns,  # Authority claims
             self.emotional_patterns,  # Emotional manipulation
             self.advanced_patterns,  # 2025 advanced
+            self.crescendo_patterns,  # Multi-turn escalation (2025)
             self.keyword_patterns,  # Aggressive keywords
         ]
 
