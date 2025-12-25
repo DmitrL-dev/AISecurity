@@ -1,0 +1,373 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sentinel — Real-time Dashboard</title>
+    <style>
+        :root {
+            --bg-primary: #0a0a0f;
+            --bg-secondary: #12121a;
+            --bg-card: #1a1a25;
+            --accent: #6366f1;
+            --accent-glow: rgba(99, 102, 241, 0.3);
+            --success: #10b981;
+            --warning: #f59e0b;
+            --danger: #ef4444;
+            --text-primary: #f8fafc;
+            --text-secondary: #94a3b8;
+            --border: #2d2d3a;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            min-height: 100vh;
+        }
+
+        .dashboard {
+            display: grid;
+            grid-template-columns: 300px 1fr;
+            grid-template-rows: 60px 1fr;
+            height: 100vh;
+        }
+
+        header {
+            grid-column: 1 / -1;
+            background: var(--bg-secondary);
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            align-items: center;
+            padding: 0 24px;
+            gap: 20px;
+        }
+
+        .logo {
+            font-size: 1.25rem;
+            font-weight: 700;
+            background: linear-gradient(135deg, var(--accent), #a855f7);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .connection-status {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-left: auto;
+            font-size: 0.875rem;
+        }
+
+        .status-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: var(--danger);
+            animation: pulse 2s infinite;
+        }
+
+        .status-dot.connected {
+            background: var(--success);
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+
+        .sidebar {
+            background: var(--bg-secondary);
+            border-right: 1px solid var(--border);
+            padding: 20px;
+            overflow-y: auto;
+        }
+
+        .stats-grid {
+            display: grid;
+            gap: 16px;
+        }
+
+        .stat-card {
+            background: var(--bg-card);
+            border-radius: 12px;
+            padding: 16px;
+            border: 1px solid var(--border);
+        }
+
+        .stat-label {
+            font-size: 0.75rem;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .stat-value {
+            font-size: 2rem;
+            font-weight: 700;
+            margin-top: 8px;
+        }
+
+        .stat-value.success { color: var(--success); }
+        .stat-value.warning { color: var(--warning); }
+        .stat-value.danger { color: var(--danger); }
+
+        .main {
+            padding: 20px;
+            overflow-y: auto;
+        }
+
+        .events-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 16px;
+        }
+
+        .events-title {
+            font-size: 1.25rem;
+            font-weight: 600;
+        }
+
+        .events-list {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .event-card {
+            background: var(--bg-card);
+            border-radius: 12px;
+            padding: 16px;
+            border: 1px solid var(--border);
+            border-left: 4px solid var(--accent);
+            animation: slideIn 0.3s ease-out;
+        }
+
+        .event-card.threat { border-left-color: var(--danger); }
+        .event-card.blocked { border-left-color: var(--warning); }
+        .event-card.health { border-left-color: var(--success); }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateX(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        .event-header {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 8px;
+        }
+
+        .event-type {
+            font-weight: 600;
+            text-transform: uppercase;
+            font-size: 0.75rem;
+            letter-spacing: 0.5px;
+        }
+
+        .event-time {
+            font-size: 0.75rem;
+            color: var(--text-secondary);
+        }
+
+        .event-data {
+            font-size: 0.875rem;
+            color: var(--text-secondary);
+            word-break: break-all;
+        }
+
+        .no-events {
+            text-align: center;
+            color: var(--text-secondary);
+            padding: 48px 20px;
+        }
+
+        .btn-clear {
+            background: transparent;
+            border: 1px solid var(--border);
+            color: var(--text-secondary);
+            padding: 8px 16px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 0.875rem;
+            transition: all 0.2s;
+        }
+
+        .btn-clear:hover {
+            border-color: var(--accent);
+            color: var(--accent);
+        }
+    </style>
+</head>
+<body>
+    <div class="dashboard">
+        <header>
+            <div class="logo">⚡ Sentinel</div>
+            <span style="color: var(--text-secondary)">Real-time Dashboard</span>
+            <div class="connection-status">
+                <div class="status-dot" id="statusDot"></div>
+                <span id="statusText">Disconnected</span>
+            </div>
+        </header>
+
+        <aside class="sidebar">
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-label">Total Requests</div>
+                    <div class="stat-value" id="totalRequests">0</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-label">Blocked</div>
+                    <div class="stat-value danger" id="blockedCount">0</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-label">Threats Detected</div>
+                    <div class="stat-value warning" id="threatsCount">0</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-label">Uptime</div>
+                    <div class="stat-value success" id="uptime">0s</div>
+                </div>
+            </div>
+        </aside>
+
+        <main class="main">
+            <div class="events-header">
+                <div class="events-title">Live Events</div>
+                <button class="btn-clear" onclick="clearEvents()">Clear</button>
+            </div>
+            <div class="events-list" id="eventsList">
+                <div class="no-events">Waiting for events...</div>
+            </div>
+        </main>
+    </div>
+
+    <script>
+        let ws;
+        let stats = {
+            total: 0,
+            blocked: 0,
+            threats: 0,
+            startTime: Date.now()
+        };
+
+        function connect() {
+            const protocol = location.protocol === 'https:' ? 'wss:' : 'ws:';
+            ws = new WebSocket(`${protocol}//${location.host}/ws`);
+
+            ws.onopen = () => {
+                document.getElementById('statusDot').classList.add('connected');
+                document.getElementById('statusText').textContent = 'Connected';
+            };
+
+            ws.onclose = () => {
+                document.getElementById('statusDot').classList.remove('connected');
+                document.getElementById('statusText').textContent = 'Disconnected';
+                setTimeout(connect, 3000);
+            };
+
+            ws.onmessage = (event) => {
+                const data = JSON.parse(event.data);
+                handleEvent(data);
+            };
+        }
+
+        function handleEvent(event) {
+            stats.total++;
+            
+            if (event.type === 'request_blocked') stats.blocked++;
+            if (event.type === 'threat_detected') stats.threats++;
+
+            updateStats();
+            addEventCard(event);
+        }
+
+        function addEventCard(event) {
+            const list = document.getElementById('eventsList');
+            const noEvents = list.querySelector('.no-events');
+            if (noEvents) noEvents.remove();
+
+            const card = document.createElement('div');
+            card.className = `event-card ${getEventClass(event.type)}`;
+            
+            const time = new Date(event.timestamp).toLocaleTimeString();
+            const data = typeof event.data === 'object' 
+                ? JSON.stringify(event.data, null, 2) 
+                : event.data;
+
+            card.innerHTML = `
+                <div class="event-header">
+                    <span class="event-type">${event.type}</span>
+                    <span class="event-time">${time}</span>
+                </div>
+                <div class="event-data">${data}</div>
+            `;
+
+            list.insertBefore(card, list.firstChild);
+
+            // Keep only last 50 events
+            while (list.children.length > 50) {
+                list.removeChild(list.lastChild);
+            }
+        }
+
+        function getEventClass(type) {
+            if (type.includes('threat')) return 'threat';
+            if (type.includes('blocked')) return 'blocked';
+            if (type.includes('health')) return 'health';
+            return '';
+        }
+
+        function updateStats() {
+            document.getElementById('totalRequests').textContent = stats.total;
+            document.getElementById('blockedCount').textContent = stats.blocked;
+            document.getElementById('threatsCount').textContent = stats.threats;
+        }
+
+        function updateUptime() {
+            const seconds = Math.floor((Date.now() - stats.startTime) / 1000);
+            const minutes = Math.floor(seconds / 60);
+            const hours = Math.floor(minutes / 60);
+            
+            let uptimeStr;
+            if (hours > 0) uptimeStr = `${hours}h ${minutes % 60}m`;
+            else if (minutes > 0) uptimeStr = `${minutes}m ${seconds % 60}s`;
+            else uptimeStr = `${seconds}s`;
+            
+            document.getElementById('uptime').textContent = uptimeStr;
+        }
+
+        function clearEvents() {
+            const list = document.getElementById('eventsList');
+            list.innerHTML = '<div class="no-events">Waiting for events...</div>';
+        }
+
+        // Initialize
+        connect();
+        setInterval(updateUptime, 1000);
+
+        // Demo events (remove in production)
+        setInterval(() => {
+            if (ws && ws.readyState === WebSocket.OPEN) return;
+            handleEvent({
+                type: ['request_blocked', 'threat_detected', 'metrics'][Math.floor(Math.random() * 3)],
+                timestamp: new Date().toISOString(),
+                data: { demo: true, message: 'Demo event' }
+            });
+        }, 2000);
+    </script>
+</body>
+</html>

@@ -1,0 +1,71 @@
+# Challenge Configuration
+# Based on Anubis (github.com/TecharoHQ/anubis) concepts
+
+challenge:
+  # Enable/disable challenge system
+  enabled: true
+  
+  # Default difficulty (1-16, higher = harder)
+  # 1-4: Easy (for legitimate users with slow devices)
+  # 5-8: Medium (for suspicious but unconfirmed)
+  # 9-12: Hard (for known bot patterns)
+  # 13-16: Impossible (intentionally wasteful)
+  default_difficulty: 4
+  
+  # How long a challenge remains valid
+  challenge_ttl: 5m
+  
+  # Algorithm: "fast" (SHA256) or "slow" (intentionally CPU-heavy)
+  algorithm: fast
+  
+  # Token settings (issued after solving challenge)
+  token_ttl: 1h
+  
+  # Maximum pending challenges per IP
+  max_pending_per_ip: 10
+
+# Bot policy rules (evaluated in order)
+rules:
+  # Allow known good bots
+  - name: internet-archive
+    user_agent_regex: "archive.org_bot"
+    action: ALLOW
+
+  - name: googlebot
+    user_agent_regex: "Googlebot"
+    action: ALLOW
+    
+  # Challenge generic bots
+  - name: generic-bot-catchall
+    user_agent_regex: "(?i:bot|crawler|spider)"
+    action: CHALLENGE
+    difficulty: 8
+    
+  # Challenge empty user agents
+  - name: empty-user-agent
+    user_agent_regex: "^$"
+    action: CHALLENGE
+    difficulty: 6
+    
+  # Challenge AI scrapers
+  - name: ai-scrapers
+    user_agent_regex: "(?i:openai|anthropic|claude|chatgpt|gpt)"
+    action: CHALLENGE
+    difficulty: 12
+    
+  # Deny known malicious bots
+  - name: known-bad-bots
+    user_agent_regex: "(?i:ahrefsbot|semrushbot|dotbot|mj12bot)"
+    action: DENY
+
+# Endpoints protected by challenge
+protected_paths:
+  - /v1/chat/completions
+  - /v1/analyze
+  - /api/
+
+# Endpoints exempt from challenge
+exempt_paths:
+  - /health
+  - /metrics
+  - /.sentinel/challenge/

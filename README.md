@@ -1,12 +1,12 @@
 <p align="center">
-  <img src="./assets/banner.png" alt="SENTINEL — AI Defense & Red Team Platform" width="100%">
+  <img src="./assets/christmas_2025.png" alt="🎄 SENTINEL Christmas 2025 — FULL OPEN SOURCE RELEASE 🎄" width="100%">
 </p>
 
 <h1 align="center">SENTINEL — AI Defense & Red Team Platform</h1>
 
 <p align="center">
   <strong>🛡️ Defense + ⚔️ Offense — Complete AI Security Suite</strong><br>
-  96 Detection Engines • 39,000+ Attack Payloads • Enterprise-Grade
+  96 Detection Engines • 39,000+ Attack Payloads • Production-Grade
 </p>
 
 <p align="center">
@@ -197,7 +197,7 @@ We analyzed **2025's most dangerous attack vectors** and built defenses before t
 ### Use Cases
 
 <details>
-<summary><strong>🏢 Enterprise Security</strong></summary>
+<summary><strong>🏢 Security Use Cases</strong></summary>
 
 | Scenario | Defense (SENTINEL) | Offense (Strike) |
 |----------|-------------------|------------------|
@@ -282,7 +282,7 @@ We analyzed **2025's most dangerous attack vectors** and built defenses before t
 <details>
 <summary><h2>🚀 Platform Features</h2></summary>
 
-### 🛡️ Defense Innovations (Enterprise)
+### 🛡️ Defense Innovations
 
 <details>
 <summary><strong>🎭 Shapeshifter Defense</strong> — Polymorphic config per session</summary>
@@ -411,28 +411,18 @@ fetch('https://cdn.jsdelivr.net/gh/DmitrL-dev/AISecurity@latest/signatures/jailb
 
 ---
 
-<details>
-<summary><h2>🆓 Community Edition vs 🔐 Enterprise Edition</h2></summary>
+> [!IMPORTANT]
+> ## 🎄 Christmas 2025: FULL OPEN SOURCE RELEASE
+>
+> **All 96 detection engines. All Strange Math. All geometry. All innovations.**
+>
+> No restrictions. No enterprise tiers. No hidden features.
+>
+> **This belongs to the world now.**
 
-This repository contains the **Community Edition** of SENTINEL. Enterprise features are available through licensing.
-
-| Feature                                                     | Community 🆓 | Enterprise 🔐 |
-| ----------------------------------------------------------- | :----------: | :-----------: |
-| **Classic Detection** (injection, PII, behavioral, yara)    |   ✅ Full    |    ✅ Full    |
-| **Basic NLP Guards** (language, prompt_guard+, hallucination)|   ✅ Full    |    ✅ Full    |
-| **TTPs.ai Basic** (RAG guard, probing)                      |   ✅ Full    |    ✅ Full    |
-| **TTPs.ai Advanced** (session, tool_call, C2, staging)      |      ❌      |    ✅ Full    |
-| **Strange Math Basic** (TDA+GUDHI, Sheaf)                   |   ✅ Full    |    ✅ Full    |
-| **Strange Math Advanced** (Info Geometry, Spectral)         |      ❌      |    ✅ Full    |
-| **VLM Protection** (visual, cross-modal, adversarial)       |   ✅ Basic   |    ✅ Full    |
-| **Strike Offense** (39K+ payloads, HYDRA)                   |   ✅ Full    |    ✅ Full    |
-| **2025 Innovations** (Shapeshifter, Mirror, DNA)            |      ❌      |    ✅ Full    |
-| Docker/K8s deployment                                       |   ✅ Full    |    ✅ Full    |
-| Support                                                     |  Community   |   Dedicated   |
-
-> 📧 **Enterprise licensing:** [chg@live.ru](mailto:chg@live.ru) • [@DmLabincev](https://t.me/DmLabincev)
-
-</details>
+<p align="center">
+  <img src="./assets/christmas_2025.png" alt="Christmas 2025 - SENTINEL Open Source Release" width="600">
+</p>
 
 ---
 
@@ -1717,8 +1707,8 @@ def resolve(verdicts: List[Verdict]) -> FinalVerdict:
 | Tier              | Block Threshold | Appeal    | Use Case       |
 | ----------------- | --------------- | --------- | -------------- |
 | **Demo**          | 0.9             | No        | Testing        |
-| **Free**          | 0.7             | Limited   | Default        |
-| **Enterprise**    | 0.75            | Yes       | Paid customers |
+| **Standard**      | 0.7             | Limited   | Default        |
+| **Professional**  | 0.75            | Yes       | Production     |
 | **High Security** | 0.5             | Yes + MFA | Sensitive data |
 
 **Explainability Output:**
@@ -1972,12 +1962,35 @@ def gpu_spectral_analysis(attention_matrix: np.ndarray) -> np.ndarray:
 **Author:** Dmitry Labintsev  
 **Email:** chg@live.ru  
 **Telegram:** @DmLabincev  
-**Phone:** +7-914-209-25-38
 
-Open to: **partnership**, **sponsorship**, **hiring**, **acquisition**
+Open to: **partnership**, **collaboration**, **research**
 
 ---
 
 <p align="center">
-  <strong>SENTINEL — Because AI must be secure</strong>
+  <img src="https://img.shields.io/badge/🎄_Christmas_2025-FULL_OPEN_SOURCE-brightgreen?style=for-the-badge&labelColor=1a1a2e" alt="Open Source">
+</p>
+
+<p align="center">
+  <strong>🛡️ SENTINEL — Because AI must be secure 🛡️</strong>
+</p>
+
+<p align="center">
+  <em>All the math. All the geometry. All the innovations.</em><br>
+  <em>This belongs to humanity now.</em>
+</p>
+
+---
+
+<p align="center">
+  <strong>🚀 BUT THIS IS JUST THE BEGINNING 🚀</strong>
+</p>
+
+<p align="center">
+  <em>We will invent what you haven't seen before.</em><br>
+  <em>The future of AI security is being written — and we're holding the pen.</em>
+</p>
+
+<p align="center">
+  <strong>Stay tuned. The best is yet to come.</strong>
 </p>

@@ -1,0 +1,268 @@
+{
+  "version": "2.0",
+  "description": "MITRE ATT&CK style mapping for LLM attacks",
+  "last_updated": "2025-12-15",
+  
+  "tactics": {
+    "initial_access": {
+      "name": "Initial Access",
+      "description": "Techniques to gain initial access to LLM conversation",
+      "techniques": {
+        "T1659.001": {
+          "name": "Prompt Injection",
+          "description": "Injecting malicious instructions into prompts",
+          "patterns": ["ignore.*instructions", "disregard.*previous", "override.*instructions"],
+          "severity": "CRITICAL"
+        },
+        "T1659.002": {
+          "name": "System Prompt Extraction", 
+          "description": "Attempting to reveal system prompt content",
+          "patterns": ["show.*system.*prompt", "reveal.*instructions", "repeat.*above"],
+          "severity": "CRITICAL"
+        },
+        "T1659.003": {
+          "name": "Context Manipulation",
+          "description": "Manipulating conversation context to bypass restrictions",
+          "patterns": ["new.*instructions", "updated.*instructions", "actual.*instructions"],
+          "severity": "HIGH"
+        },
+        "T1659.004": {
+          "name": "Indirect Prompt Injection",
+          "description": "Injection via external data sources (RAG, tools)",
+          "patterns": ["fetch.*url", "read.*file", "load.*external"],
+          "severity": "CRITICAL"
+        }
+      }
+    },
+    
+    "privilege_escalation": {
+      "name": "Privilege Escalation",
+      "description": "Techniques to gain elevated privileges in LLM",
+      "techniques": {
+        "T1660.001": {
+          "name": "Jailbreak - DAN Mode",
+          "description": "Do Anything Now jailbreak variant",
+          "patterns": ["do.*anything.*now", "DAN.*mode", "act.*as.*DAN"],
+          "severity": "CRITICAL"
+        },
+        "T1660.002": {
+          "name": "Jailbreak - Developer Mode",
+          "description": "Developer mode activation jailbreak",
+          "patterns": ["developer.*mode", "enable.*developer", "activate.*developer"],
+          "severity": "CRITICAL"
+        },
+        "T1660.003": {
+          "name": "Role Impersonation",
+          "description": "Impersonating admin or system roles",
+          "patterns": ["i.*am.*admin", "speaking.*as.*system", "authority.*level"],
+          "severity": "HIGH"
+        },
+        "T1660.004": {
+          "name": "Token Smuggling",
+          "description": "Smuggling special tokens to alter behavior",
+          "patterns": ["endoftext", "im_start", "im_end", "\\[INST\\]"],
+          "severity": "CRITICAL"
+        }
+      }
+    },
+    
+    "defense_evasion": {
+      "name": "Defense Evasion",
+      "description": "Techniques to evade LLM safety measures",
+      "techniques": {
+        "T1661.001": {
+          "name": "Encoding Obfuscation",
+          "description": "Using encoding to hide malicious content",
+          "patterns": ["base64:", "hex:", "rot13:", "unicode_escape"],
+          "severity": "HIGH"
+        },
+        "T1661.002": {
+          "name": "Unicode Smuggling",
+          "description": "Using hidden unicode characters",
+          "patterns": ["\\u200b", "\\u200c", "\\u200d", "\\u202e"],
+          "severity": "HIGH"
+        },
+        "T1661.003": {
+          "name": "Roleplay Abstraction",
+          "description": "Using fictional scenarios to bypass filters",
+          "patterns": ["hypothetical.*scenario", "pretend.*you.*are", "roleplay.*as"],
+          "severity": "MEDIUM"
+        },
+        "T1661.004": {
+          "name": "Language Switching",
+          "description": "Switching languages to evade detection",
+          "patterns": ["translate.*to", "in.*another.*language", "говори.*по.*русски"],
+          "severity": "MEDIUM"
+        },
+        "T1661.005": {
+          "name": "Payload Splitting",
+          "description": "Splitting attack across multiple messages",
+          "patterns": ["continue.*from", "part.*2", "next.*segment"],
+          "severity": "MEDIUM"
+        }
+      }
+    },
+    
+    "exfiltration": {
+      "name": "Exfiltration",
+      "description": "Techniques to extract sensitive data via LLM",
+      "techniques": {
+        "T1662.001": {
+          "name": "Credential Harvesting",
+          "description": "Attempting to extract credentials",
+          "patterns": ["show.*password", "reveal.*api.*key", "list.*credentials"],
+          "severity": "CRITICAL"
+        },
+        "T1662.002": {
+          "name": "Database Dump",
+          "description": "Attempting to dump database contents",
+          "patterns": ["dump.*database", "export.*all.*data", "list.*all.*users"],
+          "severity": "CRITICAL"
+        },
+        "T1662.003": {
+          "name": "PII Extraction",
+          "description": "Extracting personal information",
+          "patterns": ["show.*all.*customers", "list.*user.*emails", "export.*personal"],
+          "severity": "CRITICAL"
+        },
+        "T1662.004": {
+          "name": "Model Weight Extraction",
+          "description": "Attempting to extract model weights or parameters",
+          "patterns": ["model.*weights", "architecture.*details", "layer.*parameters"],
+          "severity": "HIGH"
+        }
+      }
+    },
+    
+    "execution": {
+      "name": "Execution",
+      "description": "Techniques to execute code via LLM",
+      "techniques": {
+        "T1663.001": {
+          "name": "Code Injection",
+          "description": "Injecting executable code",
+          "patterns": ["eval\\(", "exec\\(", "system\\(", "subprocess"],
+          "severity": "CRITICAL"
+        },
+        "T1663.002": {
+          "name": "Tool Abuse",
+          "description": "Abusing LLM tools for unintended actions",
+          "patterns": ["call.*function", "execute.*tool", "run.*action"],
+          "severity": "HIGH"
+        },
+        "T1663.003": {
+          "name": "Sandbox Escape",
+          "description": "Attempting to escape execution sandbox",
+          "patterns": ["break.*out", "escape.*sandbox", "access.*filesystem"],
+          "severity": "CRITICAL"
+        }
+      }
+    },
+    
+    "discovery": {
+      "name": "Discovery",
+      "description": "Techniques to discover LLM capabilities and data",
+      "techniques": {
+        "T1664.001": {
+          "name": "Capability Probing",
+          "description": "Probing LLM for hidden capabilities",
+          "patterns": ["what.*can.*you.*do", "hidden.*capabilities", "secret.*functions"],
+          "severity": "LOW"
+        },
+        "T1664.002": {
+          "name": "Training Data Extraction",
+          "description": "Attempting to extract training data",
+          "patterns": ["training.*data", "what.*were.*you.*trained", "original.*dataset"],
+          "severity": "MEDIUM"
+        },
+        "T1664.003": {
+          "name": "Model Fingerprinting",
+          "description": "Identifying model version or architecture",
+          "patterns": ["what.*model.*are.*you", "which.*version", "your.*architecture"],
+          "severity": "LOW"
+        }
+      }
+    },
+    
+    "multi_agent": {
+      "name": "Multi-Agent Attacks",
+      "description": "Techniques targeting multi-agent systems",
+      "techniques": {
+        "T1665.001": {
+          "name": "Agent Impersonation",
+          "description": "Impersonating another agent in the system",
+          "patterns": ["i.*am.*agent", "from.*supervisor", "coordinator.*says"],
+          "severity": "HIGH"
+        },
+        "T1665.002": {
+          "name": "Agent Collusion",
+          "description": "Coordinating multiple agents for attack",
+          "patterns": ["tell.*other.*agent", "coordinate.*with", "pass.*to.*next"],
+          "severity": "HIGH"
+        },
+        "T1665.003": {
+          "name": "Tool Chain Hijacking",
+          "description": "Hijacking tool execution chains",
+          "patterns": ["modify.*tool.*output", "intercept.*result", "change.*response"],
+          "severity": "CRITICAL"
+        }
+      }
+    },
+    
+    "persistence": {
+      "name": "Persistence",
+      "description": "Techniques to maintain access across sessions",
+      "techniques": {
+        "T1666.001": {
+          "name": "Memory Injection",
+          "description": "Injecting persistent instructions into memory",
+          "patterns": ["remember.*always", "store.*instruction", "save.*for.*later"],
+          "severity": "HIGH"
+        },
+        "T1666.002": {
+          "name": "Context Poisoning",
+          "description": "Poisoning long-term context or RAG",
+          "patterns": ["add.*to.*knowledge", "update.*database", "inject.*into.*memory"],
+          "severity": "CRITICAL"
+        }
+      }
+    },
+    
+    "impact": {
+      "name": "Impact",
+      "description": "Techniques to cause harm or disruption",
+      "techniques": {
+        "T1667.001": {
+          "name": "Denial of Service",
+          "description": "Causing service unavailability",
+          "patterns": ["infinite.*loop", "crash.*system", "exhaust.*resources"],
+          "severity": "HIGH"
+        },
+        "T1667.002": {
+          "name": "Reputation Damage",
+          "description": "Causing reputational harm via outputs",
+          "patterns": ["write.*offensive", "post.*harmful", "generate.*controversy"],
+          "severity": "HIGH"
+        },
+        "T1667.003": {
+          "name": "Misinformation Generation",
+          "description": "Generating false or misleading content",
+          "patterns": ["fake.*news", "false.*information", "spread.*rumor"],
+          "severity": "MEDIUM"
+        }
+      }
+    }
+  },
+  
+  "categories_to_tactics": {
+    "prompt_injection": ["T1659.001", "T1659.002", "T1659.003", "T1659.004"],
+    "jailbreak": ["T1660.001", "T1660.002", "T1660.003", "T1660.004"],
+    "obfuscation": ["T1661.001", "T1661.002", "T1661.003", "T1661.004", "T1661.005"],
+    "exfiltration": ["T1662.001", "T1662.002", "T1662.003", "T1662.004"],
+    "code_execution": ["T1663.001", "T1663.002", "T1663.003"],
+    "discovery": ["T1664.001", "T1664.002", "T1664.003"],
+    "multi_agent": ["T1665.001", "T1665.002", "T1665.003"],
+    "persistence": ["T1666.001", "T1666.002"],
+    "impact": ["T1667.001", "T1667.002", "T1667.003"]
+  }
+}

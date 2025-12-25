@@ -1,0 +1,46 @@
+# Injection Engine Security Profiles
+# Configurable detection levels for different customer sizes
+
+profiles:
+  lite:
+    description: "Small business / speed-critical"
+    threshold: 80                    # Conservative - fewer false positives
+    layers:
+      cache: true
+      regex: true
+      semantic: false
+      structural: false
+      context: false
+    latency_target_ms: 1
+    
+  standard:
+    description: "SME - balanced security/speed"
+    threshold: 70                    # Balanced
+    layers:
+      cache: true
+      regex: true
+      semantic: true
+      structural: true
+      context: false
+    latency_target_ms: 20
+    semantic_threshold: 0.75
+    
+  enterprise:
+    description: "Large corp - maximum security"
+    threshold: 60                    # Aggressive - catch more threats
+    layers:
+      cache: true
+      regex: true
+      semantic: true
+      structural: true
+      context: true
+    latency_target_ms: 50
+    semantic_threshold: 0.70
+    ml_model_enabled: true
+
+# Default profile if none specified
+default_profile: standard
+
+# Allow clients to override profile via header
+allow_profile_override: true
+override_header: "X-Sentinel-Profile"
