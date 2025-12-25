@@ -25,6 +25,7 @@
 
 <p align="center">
   <a href="https://dmitrl-dev.github.io/AISecurity/">📚 Documentation Portal</a> •
+  <a href="./docs/COMPARISON.md">📊 Comparison</a> •
   <a href="#license--contact">📞 Contact</a> •
   <a href="https://t.me/DmLabincev">💬 Telegram</a> •
   <a href="mailto:chg@live.ru">📧 Email</a>
