@@ -5,10 +5,10 @@
 # SENTINEL AI Security Platform
 
 > **Defense + Offense — Complete AI Security Suite**  
-> 🛡️ 121 Detection Engines • 🐉 39,000+ Attack Payloads • Enterprise-Grade
+> 🛡️ 96 Detection Engines • 🐉 39,000+ Attack Payloads • Enterprise-Grade
 
 <p align="center">
-  <img src="https://img.shields.io/badge/🛡️_DEFENSE-121_Engines-brightgreen?style=for-the-badge" alt="Defense">
+  <img src="https://img.shields.io/badge/🛡️_DEFENSE-96_Engines-brightgreen?style=for-the-badge" alt="Defense">
   <img src="https://img.shields.io/badge/🐉_OFFENSE-39K+_Payloads-red?style=for-the-badge" alt="Offense">
   <img src="https://img.shields.io/badge/Recall-85.1%25-blue?style=for-the-badge" alt="Recall">
   <img src="https://img.shields.io/badge/Innovations-10-purple?style=for-the-badge" alt="Innovations">
@@ -45,7 +45,7 @@
 
 | Feature | Value |
 |---------|-------|
-| Detection Engines | **121** |
+| Detection Engines | **96** |
 | Recall | **85.1%** |
 | Latency | **<10ms** |
 | Coverage | OWASP LLM Top 10 |
@@ -84,13 +84,34 @@ Strike → Target AI → Report
 
 ---
 
+## 🆕 December 2025 Update: Engine Refactoring
+
+> [!IMPORTANT]
+> **Full engine audit and optimization completed!**
+
+| Metric | Before | After | Change |
+|--------|--------|-------|--------|
+| **Engine Count** | 95 | **96** | +1 (virtual_context.py) |
+| **Total LOC** | 38,316 | **~38,500** | +184 |
+| **Attack Patterns** | — | **+29** | Crescendo, Unicode, Memory |
+| **2025 Attack Coverage** | 55% | **~80%** | +25% |
+| **P95 Latency** | 38ms | **40ms** | +2ms (within SLA) |
+
+**New in this release:**
+- ✅ **Virtual Context Detector** — защита от separator token exploitation (ChatML, Llama, Anthropic)
+- ✅ **Crescendo Patterns** — детекция multi-turn escalation атак (SATA, Echo Chamber)
+- ✅ **Extended Unicode Smuggling** — 7 Unicode ranges (Tags, Bidi, Variation Selectors)
+- ✅ **Memory Poisoning Extended** — +8 patterns для "remember/save/note" атак
+
+---
+
 ## 🌐 What is SENTINEL?
 
 **SENTINEL** is a complete AI security platform with two integrated components:
 
 | Component | Purpose | Key Features |
 |-----------|---------|--------------|
-| 🛡️ **SENTINEL Defense** | Protect AI in production | 121 detection engines, <10ms latency, OWASP coverage |
+| 🛡️ **SENTINEL Defense** | Protect AI in production | 96 detection engines, <10ms latency, OWASP coverage |
 | 🐉 **Strike Offense** | Test AI before deployment | 39K+ payloads, HYDRA parallel attacks, AI-powered recon |
 
 ### The Threats We Address
@@ -112,7 +133,7 @@ Strike → Target AI → Report
 <td width="50%">
 
 **🔬 Advanced Detection (Defense)**
-- 121 specialized detection engines
+- 96 specialized detection engines
 - Strange Math™ (TDA, Sheaf, Hyperbolic)
 - Canary Tokens for leak detection
 - Machine learning + rule-based hybrid
@@ -408,7 +429,7 @@ This repository contains the **Community Edition** of SENTINEL. Enterprise featu
 </p>
 
 > **Test your AI before attackers do!**  
-> The offensive counterpart to SENTINEL — same 121 engines, attack mode.
+> The offensive counterpart to SENTINEL — same 96 engines, attack mode.
 
 ### 💀 Platform Capabilities
 
@@ -499,7 +520,7 @@ docker run --rm sentinel-strike recon URL           # Reconnaissance
 
 | Document | Description |
 |----------|-------------|
-| [All 121 Engines (EN)](./docs/reference/engines-en.md) | Complete engine reference |
+| [All 96 Engines (EN)](./docs/reference/engines-en.md) | Complete engine reference |
 | [**🔬 Expert Deep Dive (EN)**](./docs/reference/engines-expert-deep-dive-en.md) | **PhD-level mathematical foundations** |
 | [Engine Categories](./docs/reference/engines/) | Detailed per-category documentation |
 
@@ -658,7 +679,7 @@ flowchart TB
             I2["Semantic Tide"]
             I3["Cognitive Mirror"]
         end
-        subgraph Engines["121 DETECTION ENGINES"]
+        subgraph Engines["96 DETECTION ENGINES"]
             subgraph Classic["Classic Detection (8)"]
                 C1["injection"]
                 C2["yara_engine"]
@@ -829,22 +850,23 @@ flowchart TB
 | **Cache**     | Redis            | Session state, rate limiting, behavioral profiles          |
 | **Secrets**   | HashiCorp Vault  | Zero-trust secret management                               |
 
-### 113 DETECTION ENGINES — Industry's Most Comprehensive Suite
+### 96 DETECTION ENGINES — Industry's Most Comprehensive Suite
 
-| Category                     | Count  | Purpose                                  |
-| ---------------------------- | ------ | ---------------------------------------- |
-| 🛡️ **Classic Detection**     | 8      | Injection, YARA, behavioral, cascading   |
-| 📝 **NLP / LLM Guard**       | 6      | Language analysis, hallucination, Qwen   |
-| 🔬 **Strange Math Core**     | 8      | TDA, Sheaf, Hyperbolic, Morse, Transport |
-| 🧮 **Strange Math Extended** | 18     | Category, Chaos, Laplacian, Info Geometry|
-| 🖼️ **VLM Protection**        | 3      | Visual attacks, cross-modal              |
-| ⚔️ **TTPs.ai Defense**       | 17     | RAG, probing, C2, cognitive load         |
-| 🚀 **Advanced 2025**         | 13     | Multi-agent, reward hacking, collusion   |
-| 🔐 **Protocol Security**     | 4      | MCP, A2A, agent cards, NHI identity      |
-| 🎯 **Proactive Engines**     | 9      | Honeypots, kill chain, formal invariants |
-| ⚖️ **Meta-Judge + XAI**      | 3      | Engine aggregator + explainability       |
-| 🚀 **2025 Innovations**       | 10     | Shapeshifter, Tide, Mirror, DNA, etc.    |
-|                              | **131** | **121 engines + 10 innovation modules**  |
+| Category                     | Count | Purpose                                   |
+| ---------------------------- | ----- | ----------------------------------------- |
+| 🛡️ **Classic Detection**     | 9     | Injection, YARA, behavioral, cascading    |
+| 📝 **NLP / LLM Guard**       | 7     | Language, hallucination, Qwen, semantic   |
+| 🔬 **Strange Math Core**     | 9     | TDA, Sheaf, Hyperbolic, Morse, Transport  |
+| 🧮 **Strange Math Extended** | 11    | Category, Chaos, Laplacian, Fractal       |
+| 🖼️ **VLM Protection**        | 3     | Visual attacks, cross-modal, adversarial  |
+| ⚔️ **TTPs.ai Defense**       | 14    | RAG, probing, C2, poisoning, memory       |
+| 🔐 **Protocol Security**     | 5     | MCP, A2A, agent cards, NHI identity       |
+| 🚀 **Advanced 2025**         | 8     | Multi-agent, reward hacking, collusion    |
+| 🎯 **Proactive Engines**     | 12    | Honeypots, kill chain, attack synthesis   |
+| 🧠 **Deep Learning**         | 9     | Activation, forensics, gradient, formal   |
+| ⚖️ **Meta & Analytics**      | 6     | Meta-Judge, XAI, fingerprinting, intent   |
+| ✅ **Compliance**            | 2     | MITRE mapping, compliance checks          |
+|                              | **96**| **~38,500 LOC total**                           |
 
 > 📚 **Full details:** [engines-expert-deep-dive-en.md](./docs/reference/engines-expert-deep-dive-en.md) — PhD-level documentation
 
