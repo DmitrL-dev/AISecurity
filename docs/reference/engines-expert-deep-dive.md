@@ -2,8 +2,8 @@
 
 > **Для кого:** Исследователи, эксперты в области топологии, дифференциальной геометрии, машинного обучения.  
 > **Цель:** Детальное описание математической базы и её инженерной адаптации.  
-> **Updated:** December 2025 — GUDHI, Hyperbolic Detector, α-Divergence, Adaptive Behavioral, Titans/MIRAS  
-> **Unit Tests:** 168+ | **Engines:** 121 (95 verified ✅ Health Check 100%) | **LOC:** ~45,000
+> **Updated:** December 2025 — Virtual Context, Polyglot Detection, Crescendo, LLMON Integration  
+> **Unit Tests:** 175+ | **Engines:** 96 (verified ✅ Health Check 100%) | **LOC:** ~46,000
 
 ---
 

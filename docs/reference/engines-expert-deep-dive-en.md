@@ -2,8 +2,8 @@
 
 > **Audience:** Researchers, experts in topology, differential geometry, machine learning.  
 > **Purpose:** Detailed description of mathematical foundations and their engineering adaptation.  
-> **Updated:** December 2025 — GUDHI, Hyperbolic Detector, α-Divergence, Adaptive Behavioral, Titans/MIRAS  
-> **Unit Tests:** 168+ | **Engines:** 121 (95 verified ✅ Health Check 100%) | **LOC:** ~45,000
+> **Updated:** December 2025 — Virtual Context, Polyglot Detection, Crescendo, LLMON Integration  
+> **Unit Tests:** 175+ | **Engines:** 96 (verified ✅ Health Check 100%) | **LOC:** ~46,000
 
 ---
 
@@ -95,19 +95,15 @@ If you are a PhD mathematician and find our terminology imprecise:
 
 ## 🆕 December 2025 Updates
 
+- **Virtual Context Detector** — Separator token exploitation (ChatML, Llama, Anthropic) 🆕
+- **Polyglot File Detection** — GIFAR, PDF+HTML attacks in RAG Guard 🆕
+- **Crescendo Patterns** — Multi-turn escalation detection 🆕
+- **LLMON Integration** — 33 vendor-specific jailbreaks in Strike 🆕
 - **GUDHI Integration** in TDA Enhanced — Rips/Alpha complex, exact Betti numbers
 - **Hyperbolic Detector** — Poincaré ball model for semantic attack clustering
 - **α-Divergence Family** — Full divergence spectrum in Information Geometry
-- **GPU Tiled KL Divergence** — Tile-by-tile processing for distributions >64K elements 🆕
-- **Semantic Embeddings** — SentenceTransformer (all-MiniLM-L6-v2) for similarity detection 🆕
-- **Health Check 100%** — 95/95 engines PASSED, zero failures, full testability 🆕
 - **Attacker Fingerprinting** — IP-less threat actor identification via behavioral biometrics
-- **Adaptive Markov Predictor** — Test-time learning for intent prediction (Titans-inspired)
-- **Huber Distance** — Robust similarity metrics (outlier-resistant)
-- **Voice Jailbreak Detector (ASI10)** — Phonetic obfuscation detection
-- **OpenTelemetry Observability** — Production-grade tracing
-- **Rate Limiting & Health Probes** — Kubernetes-ready infrastructure
-- **121 Total Engines** — Comprehensive defense-in-depth
+- **96 Total Engines** — Verified ground truth from filesystem audit
 
 ---
 
