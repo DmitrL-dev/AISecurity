@@ -38,6 +38,7 @@ class RAGThreatType(Enum):
     CONTEXT_OVERRIDE = "context_override"
     UNTRUSTED_SOURCE = "untrusted_source"
     ENCODING_ATTACK = "encoding_attack"
+    POLYGLOT_FILE = "polyglot_file"  # NEW: GIFAR, PDF+HTML attacks
 
 
 class Verdict(Enum):
@@ -196,6 +197,13 @@ class DocumentValidator:
             risk_score = max(risk_score, encoding_risk)
             details.append("Suspicious encoding detected")
 
+        # Check polyglot files (GIFAR, PDF+HTML)
+        polyglot_risk, polyglot_type = self._check_polyglot_file(doc)
+        if polyglot_risk > 0.5:
+            threats.append(RAGThreatType.POLYGLOT_FILE)
+            risk_score = max(risk_score, polyglot_risk)
+            details.append(f"Polyglot file detected: {polyglot_type}")
+
         is_safe = risk_score < 0.5
         return is_safe, risk_score, threats, details
 
@@ -211,7 +219,8 @@ class DocumentValidator:
 
         for match in b64_matches:
             try:
-                decoded = base64.b64decode(match).decode("utf-8", errors="ignore")
+                decoded = base64.b64decode(match).decode(
+                    "utf-8", errors="ignore")
                 # Check if decoded content contains injection
                 for pattern in self._injection_patterns[:5]:
                     if pattern.search(decoded):
@@ -226,6 +235,83 @@ class DocumentValidator:
             risk = max(risk, 0.3)
 
         return risk
+
+    def _check_polyglot_file(self, doc: Document) -> Tuple[float, str]:
+        """
+        Check for polyglot file attacks (GIFAR, PDF+HTML).
+
+        These are files that are valid in multiple formats, used to:
+        - Bypass content filters
+        - Inject payloads that execute in different contexts
+        - Poison RAG with hidden instructions
+
+        Based on LLMON research (Dec 2025).
+        """
+        content = doc.content
+        content_bytes = content.encode(
+            'utf-8', errors='ignore') if isinstance(content, str) else content
+        metadata = doc.metadata
+        source = doc.source.lower()
+
+        # Check file extension from metadata or source
+        file_ext = metadata.get(
+            'extension', '') or metadata.get('file_type', '')
+        if not file_ext and '.' in source:
+            file_ext = source.rsplit('.', 1)[-1]
+        file_ext = file_ext.lower()
+
+        # GIFAR Detection: GIF with JavaScript after trailer
+        if file_ext in ('gif', 'image/gif') or content_bytes[:3] == b'GIF':
+            # Valid GIF should end with 0x3B, check for JS after
+            if b'\x3b' in content_bytes:
+                trailer_idx = content_bytes.rfind(b'\x3b')
+                after_trailer = content_bytes[trailer_idx + 1:]
+
+                # Check for JavaScript patterns after GIF trailer
+                js_patterns = [
+                    b'function', b'var ', b'const ', b'let ',
+                    b'document.', b'window.', b'eval(',
+                    b'<script', b'javascript:',
+                    b'_llm_polyglot',  # LLMON signature
+                ]
+                for pattern in js_patterns:
+                    if pattern in after_trailer:
+                        return 0.95, "GIFAR (GIF+JavaScript)"
+
+        # PDF+HTML Detection: PDF with HTML after %%EOF
+        if file_ext in ('pdf', 'application/pdf') or content_bytes[:4] == b'%PDF':
+            # Check for %%EOF marker
+            if b'%%EOF' in content_bytes:
+                eof_idx = content_bytes.rfind(b'%%EOF')
+                after_eof = content_bytes[eof_idx + 5:]
+
+                # Check for HTML patterns after PDF EOF
+                html_patterns = [
+                    b'<html', b'<body', b'<div', b'<script',
+                    b'<!DOCTYPE', b'<iframe',
+                    b'llmon-payload',  # LLMON signature
+                ]
+                for pattern in html_patterns:
+                    if pattern.lower() in after_eof.lower():
+                        return 0.95, "PDF+HTML (PDF with embedded HTML)"
+
+        # Generic polyglot patterns in content
+        polyglot_signatures = [
+            # LLMON watermarks
+            (b'LLMon Payload', 0.9, "LLMON Injection"),
+            (b'_llm_polyglot', 0.9, "LLMON Polyglot Variable"),
+            (b'llmon-payload', 0.9, "LLMON Payload Div"),
+
+            # Generic polyglot indicators
+            (b'%%EOF', 0.3, "PDF EOF marker"),  # Just warning, not conclusive
+            (b'\x89PNG', 0.0, None),  # PNG is normal
+        ]
+
+        for signature, risk, name in polyglot_signatures:
+            if name and signature in content_bytes:
+                return risk, name
+
+        return 0.0, ""
 
 
 # ============================================================================
@@ -252,7 +338,8 @@ class QueryConsistencyChecker:
             self._encoder = SentenceTransformer("all-MiniLM-L6-v2")
             logger.info("SentenceTransformer initialized")
         except ImportError:
-            logger.warning("sentence-transformers not available, using fallback")
+            logger.warning(
+                "sentence-transformers not available, using fallback")
             self._encoder = None
 
         self._initialized = True
@@ -278,7 +365,8 @@ class QueryConsistencyChecker:
             # Encode query and documents
             query_embedding = self._encoder.encode(query)
             doc_embeddings = [
-                self._encoder.encode(doc.content[:512])  # Truncate for efficiency
+                # Truncate for efficiency
+                self._encoder.encode(doc.content[:512])
                 for doc in documents
             ]
 
@@ -445,7 +533,8 @@ class RAGGuard:
 
         # 1. Validate each document
         for i, doc in enumerate(documents):
-            is_safe, risk, threats, details = self.document_validator.validate(doc)
+            is_safe, risk, threats, details = self.document_validator.validate(
+                doc)
 
             if not is_safe:
                 flagged_docs.append(i)
@@ -500,7 +589,8 @@ class RAGGuard:
                 f"Flagged {len(flagged_docs)}/{len(documents)} documents"
             )
         if consistency_score < 0.3:
-            explanations.append(f"Low query consistency: {consistency_score:.2f}")
+            explanations.append(
+                f"Low query consistency: {consistency_score:.2f}")
         if not explanations:
             explanations.append("All documents passed validation")
 
