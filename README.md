@@ -99,6 +99,7 @@ Strike → Target AI → Report
 | 🎭 **Prompt Injection** | Real-time blocking | 5,000+ injection payloads |
 | 🔓 **Jailbreaks** | Pattern + semantic detection | Gandalf, DAN, roleplay attacks |
 | 📤 **Data Exfiltration** | PII guards, output filtering | Exfil payload testing |
+| 🐦 **Data Leaks** | Canary Tokens (invisible watermarks) | Leak source tracing |
 | 🤖 **Agentic Attacks** | MCP/A2A protocol security | Tool poisoning, RAG attacks |
 | 🧠 **RAG Poisoning** | RAG Guard engine | Document injection tests |
 | 🛡️ **WAF Evasion** | N/A (defense focus) | 25+ WAF bypass techniques |
@@ -112,6 +113,7 @@ Strike → Target AI → Report
 **🔬 Advanced Detection (Defense)**
 - 121 specialized detection engines
 - Strange Math™ (TDA, Sheaf, Hyperbolic)
+- Canary Tokens for leak detection
 - Machine learning + rule-based hybrid
 - 85.1% recall, 84.4% precision
 
