@@ -1,11 +1,13 @@
 <p align="center">
-  <img src="./assets/banner.png" alt="SENTINEL AI Security Platform" width="100%">
+  <img src="./assets/banner.png" alt="SENTINEL — AI Defense & Red Team Platform" width="100%">
 </p>
 
-# SENTINEL AI Security Platform
+<h1 align="center">SENTINEL — AI Defense & Red Team Platform</h1>
 
-> **Defense + Offense — Complete AI Security Suite**  
-> 🛡️ 96 Detection Engines • 🐉 39,000+ Attack Payloads • Enterprise-Grade
+<p align="center">
+  <strong>🛡️ Defense + ⚔️ Offense — Complete AI Security Suite</strong><br>
+  96 Detection Engines • 39,000+ Attack Payloads • Enterprise-Grade
+</p>
 
 <p align="center">
   <img src="https://img.shields.io/badge/🛡️_DEFENSE-96_Engines-brightgreen?style=for-the-badge" alt="Defense">
