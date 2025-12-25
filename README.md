@@ -91,9 +91,9 @@ Strike → Target AI → Report
 
 | Metric | Before | After | Change |
 |--------|--------|-------|--------|
-| **Engine Count** | 95 | **96** | +1 (virtual_context.py) |
-| **Total LOC** | 38,316 | **~38,500** | +184 |
-| **Attack Patterns** | — | **+29** | Crescendo, Unicode, Memory |
+| **Engine Count** | 131 (documented) | **96** (verified) | -35 (audit cleanup) |
+| **Total LOC** | ~45,000 (claimed) | **~38,500** (actual) | Accurate count |
+| **Attack Patterns** | — | **+29 new** | Crescendo, Unicode, Memory |
 | **2025 Attack Coverage** | 55% | **~80%** | +25% |
 | **P95 Latency** | 38ms | **40ms** | +2ms (within SLA) |
 
