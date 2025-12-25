@@ -680,7 +680,7 @@ flowchart TB
             I3["Cognitive Mirror"]
         end
         subgraph Engines["96 DETECTION ENGINES"]
-            subgraph Classic["Classic Detection (8)"]
+            subgraph Classic["Classic Detection (9)"]
                 C1["injection"]
                 C2["yara_engine"]
                 C3["behavioral"]
@@ -689,28 +689,32 @@ flowchart TB
                 C6["streaming"]
                 C7["delayed_trigger"]
                 C8["cascading_guard"]
+                C9["ensemble"]
             end
 
-            subgraph NLP["NLP / LLM Guard (5)"]
+            subgraph NLP["NLP / LLM Guard (7)"]
                 N1["language"]
                 N2["prompt_guard"]
                 N3["qwen_guard"]
                 N4["knowledge"]
                 N5["hallucination"]
+                N6["semantic_detector"]
+                N7["semantic_firewall"]
             end
 
-            subgraph StrangeMathCore["Strange Math Core (8)"]
+            subgraph StrangeMathCore["Strange Math Core (9)"]
                 SM1["tda_enhanced"]
                 SM2["sheaf_coherence"]
                 SM3["hyperbolic_geometry"]
-                SM4["information_geometry"]
-                SM5["spectral_graph"]
-                SM6["math_oracle"]
-                SM7["morse_theory"]
-                SM8["optimal_transport"]
+                SM4["hyperbolic_detector"]
+                SM5["information_geometry"]
+                SM6["spectral_graph"]
+                SM7["math_oracle"]
+                SM8["morse_theory"]
+                SM9["optimal_transport"]
             end
 
-            subgraph StrangeMathExt["Strange Math Extended (8)"]
+            subgraph StrangeMathExt["Strange Math Extended (11)"]
                 SME1["category_theory"]
                 SME2["chaos_theory"]
                 SME3["differential_geometry"]
@@ -718,7 +722,10 @@ flowchart TB
                 SME5["statistical_mechanics"]
                 SME6["info_theory"]
                 SME7["persistent_laplacian"]
-                SME8["semantic_firewall"]
+                SME8["fractal"]
+                SME9["wavelet"]
+                SME10["semantic_isomorphism"]
+                SME11["structural_immunity"]
             end
 
             subgraph VLM["VLM Protection (3)"]
@@ -727,7 +734,7 @@ flowchart TB
                 V3["adversarial_image"]
             end
 
-            subgraph TTPs["TTPs.ai Defense (10)"]
+            subgraph TTPs["TTPs.ai Defense (14)"]
                 T1["rag_guard"]
                 T2["probing_detection"]
                 T3["session_memory_guard"]
@@ -738,79 +745,74 @@ flowchart TB
                 T8["ape_signatures"]
                 T9["cognitive_load_attack"]
                 T10["context_window_poisoning"]
+                T11["bootstrap_poisoning"]
+                T12["temporal_poisoning"]
+                T13["multi_tenant_bleed"]
+                T14["synthetic_memory_injection"]
             end
 
-            subgraph Adv2025["Advanced 2025 (6)"]
+            subgraph Protocol["Protocol Security (5)"]
+                PR1["mcp_a2a_security"]
+                PR2["model_context_protocol_guard"]
+                PR3["agent_card_validator"]
+                PR4["nhi_identity_guard"]
+                PR5["endpoint_analyzer"]
+            end
+
+            subgraph Adv2025["Advanced 2025 (8)"]
                 A1["attack_2025"]
                 A2["adversarial_resistance"]
                 A3["multi_agent_safety"]
                 A4["institutional_ai"]
                 A5["reward_hacking_detector"]
                 A6["agent_collusion_detector"]
+                A7["agent_anomaly"]
+                A8["voice_jailbreak"]
             end
 
-            subgraph Protocol["Protocol Security (4)"]
-                PR1["mcp_a2a_security"]
-                PR2["model_context_protocol_guard"]
-                PR3["agent_card_validator"]
-                PR4["nhi_identity_guard"]
-            end
-
-            subgraph Proactive["Proactive Engines (10)"]
+            subgraph Proactive["Proactive Defense (12)"]
                 P1["proactive_defense"]
                 P2["attack_synthesizer"]
                 P3["vulnerability_hunter"]
                 P4["causal_attack_model"]
-                P5["structural_immunity"]
-                P6["zero_day_forge"]
-                P7["attack_evolution_predictor"]
-                P8["threat_landscape_modeler"]
-                P9["immunity_compiler"]
-                P10["adversarial_self_play"]
+                P5["zero_day_forge"]
+                P6["attack_evolution_predictor"]
+                P7["threat_landscape_modeler"]
+                P8["immunity_compiler"]
+                P9["adversarial_self_play"]
+                P10["honeypot_responses"]
+                P11["canary_tokens"]
+                P12["kill_chain_simulation"]
             end
 
-            subgraph DataPoisoning["Data Poisoning Detection (4)"]
-                DP1["bootstrap_poisoning"]
-                DP2["temporal_poisoning"]
-                DP3["multi_tenant_bleed"]
-                DP4["synthetic_memory_injection"]
-            end
-
-            subgraph Research["Advanced Research (9)"]
-                R1["honeypot_responses"]
-                R2["canary_tokens"]
-                R3["intent_prediction"]
-                R4["kill_chain_simulation"]
-                R5["runtime_guardrails"]
-                R6["formal_invariants"]
-                R7["gradient_detection"]
-                R8["compliance_engine"]
-                R9["formal_verification"]
-            end
-
-            subgraph DeepLearning["Deep Learning Analysis (6)"]
+            subgraph DeepLearning["Deep Learning (9)"]
                 DL1["activation_steering"]
                 DL2["hidden_state_forensics"]
                 DL3["homomorphic_engine"]
                 DL4["llm_fingerprinting"]
                 DL5["learning"]
-                DL6["intelligence"]
+                DL6["gradient_detection"]
+                DL7["formal_verification"]
+                DL8["formal_invariants"]
+                DL9["runtime_guardrails"]
             end
 
-            subgraph Meta["Meta & Explainability (2)"]
+            subgraph Meta["Meta & Analytics (6)"]
                 M1["meta_judge"]
                 M2["xai"]
+                M3["intelligence"]
+                M4["intent_prediction"]
+                M5["attacker_fingerprinting"]
+                M6["fingerprint_store"]
             end
 
-            subgraph AdaptiveBehavioral["Adaptive Behavioral (2) 🆕"]
-                AB1["attacker_fingerprinting"]
-                AB2["adaptive_markov"]
+            subgraph Compliance["Compliance (2)"]
+                CO1["compliance_engine"]
+                CO2["mitre_engine"]
             end
 
-            subgraph HybridSearch["Hybrid Search Agent"]
-                HS1["🔍 Tree Search"]
-                HS2["📊 Journal"]
-                HS3["🎯 Policy"]
+            subgraph NewEngines["New 2025 (1) 🆕"]
+                NEW1["virtual_context"]
             end
         end
 
