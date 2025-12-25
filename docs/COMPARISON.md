@@ -6,7 +6,7 @@
 
 | Feature | SENTINEL | Lakera Guard | Rebuff | LLM Guard | Prompt Armor |
 |---------|----------|--------------|--------|-----------|--------------|
-| **Detection Engines** | 121 | ~10 | 3 | 4 | Unknown |
+| **Detection Engines** | 96 | ~10 | 3 | 4 | Unknown |
 | **Attack Patterns** | 39,701 | Unknown | ~100 | ~50 | Unknown |
 | **Open Source** | ✅ Full | ❌ SaaS only | ✅ | ✅ | ❌ |
 | **Self-Hosted** | ✅ | ❌ | ✅ | ✅ | ❌ |
@@ -71,7 +71,7 @@
 ## Summary
 
 **SENTINEL advantages:**
-- ✅ Most comprehensive detection (121 engines vs ~10)
+- ✅ Most comprehensive detection (96 engines vs ~10)
 - ✅ Only solution with integrated offense testing
 - ✅ Self-hosted option for data privacy
 - ✅ Advanced math-based detection (Strange Math™)
