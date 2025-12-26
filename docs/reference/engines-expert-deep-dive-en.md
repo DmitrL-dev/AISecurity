@@ -2,8 +2,8 @@
 
 > **Audience:** Researchers, experts in topology, differential geometry, machine learning.  
 > **Purpose:** Detailed description of mathematical foundations and their engineering adaptation.  
-> **Updated:** December 2025 — OWASP Agentic 2026 10/10, Supply Chain Guard, Trust Exploitation  
-> **Unit Tests:** 175+ | **Engines:** 98 (verified ✅ Health Check 100%) | **LOC:** ~47,000
+> **Updated:** December 2025 — OWASP Agentic 2026 10/10, Supply Chain Guard, Trust Exploitation, ESN  
+> **Unit Tests:** 175+ | **Engines:** 99 (verified ✅ Health Check 100%) | **LOC:** ~48,000
 
 ---
 
@@ -104,6 +104,7 @@ If you are a PhD mathematician and find our terminology imprecise:
 - **α-Divergence Family** — Full divergence spectrum in Information Geometry
 - **Attacker Fingerprinting** — IP-less threat actor identification via behavioral biometrics
 - **98 Total Engines** — Verified ground truth from filesystem audit
+- **Echo State Network** — Temporal pattern detection via reservoir computing 🆕
 - **OWASP Agentic 2026 10/10** — Full coverage of all 10 agentic threats 🆕
 - **Supply Chain Guard** — ASI04 MCP/A2A verification 🆕
 - **Trust Exploitation Detector** — ASI09 Human-agent social engineering 🆕
@@ -4541,6 +4542,52 @@ def robust_similarity_aggregation(
 | **Adversarial testing**    | ⚠️ Limited to synthetic scenarios         |
 
 ---
+
+---
+
+## 91. Echo State Network Engine 🆕
+
+**File:** [echo_state_network.py](file:///c:/AISecurity/src/brain/engines/echo_state_network.py)  
+**LOC:** 380  
+**Theoretical Base:** Reservoir Computing, Jaeger (2001)
+
+### 91.1. Purpose
+
+Temporal anomaly detection using reservoir computing:
+- Conversation rhythm analysis
+- Typing pattern anomalies
+- Request timing sequences
+- Behavioral state transitions
+
+### 91.2. Core Algorithm
+
+Echo State Property ensures:
+- Reservoir `forgets` initial conditions
+- Spectral radius < 1 for stability
+- Sparse connectivity for efficiency
+
+```python
+# Leaky integration update
+new_state = (1 - leak_rate) * state + leak_rate * tanh(W_in @ input + W_res @ state)
+```
+
+### 91.3. Anomaly Types Detected
+
+| Type | Description |
+|------|-------------|
+| RHYTHM_CHANGE | Sudden change in input timing |
+| PATTERN_BREAK | Prediction error exceeds threshold |
+| STATE_JUMP | Large reservoir state delta |
+| RESERVOIR_SATURATION | Activation level too high |
+
+### 91.4. Honest Assessment
+
+| Aspect | Status |
+|--------|--------|
+| **Temporal pattern capture** | ✅ Reservoir remembers history |
+| **Training requirement** | ⚠️ Needs baseline data |
+| **Computational cost** | ✅ O(n) per update |
+| **Adversarial robustness** | ⚠️ Not tested |
 
 ---
 

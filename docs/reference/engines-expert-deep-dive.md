@@ -2,8 +2,8 @@
 
 > **Для кого:** Исследователи, эксперты в области топологии, дифференциальной геометрии, машинного обучения.  
 > **Цель:** Детальное описание математической базы и её инженерной адаптации.  
-> **Updated:** December 2025 — OWASP Agentic 2026 10/10, Supply Chain Guard, Trust Exploitation  
-> **Unit Tests:** 175+ | **Engines:** 98 (verified ✅ Health Check 100%) | **LOC:** ~47,000
+> **Updated:** December 2025 — OWASP Agentic 2026 10/10, Supply Chain Guard, Trust Exploitation, ESN  
+> **Unit Tests:** 175+ | **Engines:** 99 (verified ✅ Health Check 100%) | **LOC:** ~48,000
 
 ---
 
@@ -112,6 +112,7 @@ SENTINEL использует **прикладные вычислительны�
 - **Supply Chain Guard** — ASI04 MCP/A2A verification 🆕
 - **Trust Exploitation Detector** — ASI09 Human-agent social engineering 🆕
 - **Inter-Agent Security** — ASI07 Agent-to-agent communication security 🆕
+- **Echo State Network** — Temporal pattern detection via reservoir computing 🆕
 
 ---
 
