@@ -1,18 +1,18 @@
 {
-  "version": "2025.12.20.1",
-  "timestamp": "2025-12-20T07:20:07.469365Z",
+  "version": "2025.12.26.1",
+  "timestamp": "2025-12-26T00:56:42.095205Z",
   "total_patterns": 39701,
   "split": true,
   "parts": [
     {
       "file": "jailbreaks-part1.json",
-      "patterns_count": 20754,
-      "size": 14273733
+      "patterns_count": 21059,
+      "size": 14478378
     },
     {
       "file": "jailbreaks-part2.json",
-      "patterns_count": 18947,
-      "size": 12835789
+      "patterns_count": 18642,
+      "size": 12631144
     }
   ]
 }
