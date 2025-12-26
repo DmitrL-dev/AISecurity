@@ -90,6 +90,7 @@ class RateLimiter:
     - Per-key rate limiting
     - Automatic bucket cleanup
     - Thread-safe
+    - P2 Security: Max bucket limit with LRU eviction
     """
 
     def __init__(
@@ -97,6 +98,7 @@ class RateLimiter:
         requests_per_minute: int = 60,
         burst_size: int = 10,
         cleanup_interval: int = 300,
+        max_buckets: int = 100_000,  # P2 Security: Prevent memory exhaustion
     ):
         """
         Initialize rate limiter.
@@ -105,10 +107,12 @@ class RateLimiter:
             requests_per_minute: Average allowed rate
             burst_size: Maximum burst capacity
             cleanup_interval: Seconds between bucket cleanups
+            max_buckets: Maximum number of tracked keys (P2 Security)
         """
         self.rate = requests_per_minute / 60.0  # Convert to per-second
         self.burst_size = burst_size
         self.cleanup_interval = cleanup_interval
+        self.max_buckets = max_buckets  # P2 Security
 
         self._buckets: Dict[str, TokenBucket] = {}
         self._lock = threading.Lock()
@@ -116,7 +120,7 @@ class RateLimiter:
 
         logger.info(
             f"RateLimiter initialized: {requests_per_minute} req/min, "
-            f"burst={burst_size}"
+            f"burst={burst_size}, max_buckets={max_buckets}"
         )
 
     def allow(self, key: str, tokens: int = 1) -> bool:
@@ -134,6 +138,16 @@ class RateLimiter:
             self._maybe_cleanup()
 
             if key not in self._buckets:
+                # P2 Security: LRU eviction when limit reached
+                if len(self._buckets) >= self.max_buckets:
+                    oldest_key = min(
+                        self._buckets.keys(),
+                        key=lambda k: self._buckets[k].last_update
+                    )
+                    del self._buckets[oldest_key]
+                    logger.debug(
+                        "Evicted oldest bucket due to max_buckets limit")
+
                 self._buckets[key] = TokenBucket(
                     capacity=self.burst_size,
                     refill_rate=self.rate,
@@ -143,7 +157,7 @@ class RateLimiter:
             allowed = self._buckets[key].consume(tokens)
 
             if not allowed:
-                logger.warning(f"Rate limited: {key}")
+                logger.warning("Rate limited: %s", key)
 
             return allowed
 

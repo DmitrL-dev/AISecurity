@@ -88,16 +88,61 @@ class SentinelBrainServicer(sentinel_pb2_grpc.SentinelBrainServicer):
     async def AnalyzeStream(self, request_iterator, context):
         """Streaming: Analyze tokens in real-time for SSE responses."""
         from engines.streaming import get_streaming_engine
+        import re
 
         engine = get_streaming_engine()
         buffers = {}  # session_id -> StreamBuffer
+        session_owners = {}  # session_id -> peer (P2 Security)
+        MAX_SESSIONS = 10_000  # P2 Security: Limit concurrent sessions
 
         async for chunk in request_iterator:
             session_id = chunk.session_id
+            peer = context.peer() or "unknown"
+
+            # P2 Security: Validate session ID format (must be cryptographic)
+            if not re.match(r'^[a-f0-9]{32,64}$', session_id, re.IGNORECASE):
+                logger.warning("Invalid session ID format: %s",
+                               session_id[:20])
+                yield sentinel_pb2.StreamResult(
+                    should_continue=False,
+                    risk_score=100.0,
+                    threat_type="INVALID_SESSION",
+                    severity="critical",
+                    context="Session ID must be 32-64 hex characters"
+                )
+                return
+
+            # P2 Security: Check session ownership
+            if session_id in session_owners:
+                if session_owners[session_id] != peer:
+                    logger.warning(
+                        "Session hijack attempt: %s from %s", session_id[:16], peer)
+                    yield sentinel_pb2.StreamResult(
+                        should_continue=False,
+                        risk_score=100.0,
+                        threat_type="SESSION_HIJACK",
+                        severity="critical",
+                        context="Session belongs to different peer"
+                    )
+                    return
 
             # Get or create buffer for session
             if session_id not in buffers:
+                # P2 Security: Limit concurrent sessions
+                if len(buffers) >= MAX_SESSIONS:
+                    logger.warning(
+                        "Max sessions reached, rejecting new session")
+                    yield sentinel_pb2.StreamResult(
+                        should_continue=False,
+                        risk_score=50.0,
+                        threat_type="TOO_MANY_SESSIONS",
+                        severity="high",
+                        context="Server at capacity"
+                    )
+                    return
+
                 buffers[session_id] = engine.create_buffer()
+                session_owners[session_id] = peer
                 logger.info(f"Stream session started: {session_id}")
 
             buffer = buffers[session_id]
