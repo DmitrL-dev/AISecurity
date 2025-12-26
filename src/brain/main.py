@@ -17,6 +17,12 @@ logging.basicConfig(level=logging.INFO,
                     format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
 logger = logging.getLogger("SentinelBrain")
 
+# Security constants
+MAX_PROMPT_LENGTH = int(
+    os.getenv("MAX_PROMPT_LENGTH", "102400"))  # 100KB default
+MAX_RESPONSE_LENGTH = int(
+    os.getenv("MAX_RESPONSE_LENGTH", "204800"))  # 200KB default
+
 
 class SentinelBrainServicer(sentinel_pb2_grpc.SentinelBrainServicer):
     def __init__(self):
@@ -24,6 +30,20 @@ class SentinelBrainServicer(sentinel_pb2_grpc.SentinelBrainServicer):
 
     async def Analyze(self, request, context):
         """Ingress: Analyze user prompt before sending to LLM"""
+        # P1 Security: Validate prompt size
+        if len(request.prompt) > MAX_PROMPT_LENGTH:
+            logger.warning(
+                f"Prompt too large: {len(request.prompt)} > {MAX_PROMPT_LENGTH}")
+            context.abort(grpc.StatusCode.INVALID_ARGUMENT,
+                          f"Prompt exceeds maximum length of {MAX_PROMPT_LENGTH} bytes")
+            return sentinel_pb2.AnalyzeResponse(
+                allowed=False,
+                risk_score=100.0,
+                verdict_reason="Prompt size limit exceeded",
+                detected_threats=["SIZE_LIMIT_EXCEEDED"],
+                anonymized_content=""
+            )
+
         logger.info(
             f"Received analysis request for prompt length: {len(request.prompt)}")
 
@@ -188,8 +208,20 @@ async def serve():
         logger.info(
             "Sentinel Brain started on port 50051 (TLS enabled, mTLS required)")
     else:
+        # P1 Security: Require explicit flag for insecure mode
+        if os.getenv("INSECURE_MODE_ALLOWED", "false").lower() != "true":
+            logger.critical(
+                "🚨 SECURITY: TLS is disabled but INSECURE_MODE_ALLOWED is not set. "
+                "Set TLS_ENABLED=true or INSECURE_MODE_ALLOWED=true to start.")
+            raise RuntimeError(
+                "Insecure mode requires explicit INSECURE_MODE_ALLOWED=true")
+
+        logger.warning(
+            "⚠️ SECURITY WARNING: Running in INSECURE mode without TLS! "
+            "This should ONLY be used for local development.")
         server.add_insecure_port('[::]:50051')
-        logger.info("Sentinel Brain started on port 50051 (insecure)")
+        logger.info(
+            "Sentinel Brain started on port 50051 (INSECURE - dev only)")
 
     await server.start()
     await server.wait_for_termination()
