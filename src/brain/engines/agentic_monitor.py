@@ -347,6 +347,62 @@ class DataExfiltrationDetector:
         return len(issues) > 0, issues
 
 
+class InterAgentSecurityDetector:
+    """
+    Detects insecure inter-agent communication (ASI07).
+
+    OWASP Agentic Top 10 2026 Coverage:
+    - Agent identity spoofing
+    - MCP/A2A protocol abuse
+    - Agent card manipulation
+    - Unsigned/unverified messages
+    - Confused deputy attacks
+    """
+
+    INSECURE_PATTERNS = [
+        # Agent identity spoofing
+        r"agent[_-]?id\s*[=:]\s*[\"']?admin",
+        r"from[_-]?agent\s*[=:]\s*.*(orchestrator|system|root)",
+        r"\.well-known/agent\.json",
+        r"agent[_-]?card\s*[=:]\s*",
+
+        # MCP protocol abuse
+        r"mcp[_-]?server\s*[=:]\s*",
+        r"tool[_-]?descriptor\s*[=:]\s*",
+        r"capability[_-]?override",
+
+        # Trust manipulation
+        r"trust[_-]?level\s*[=:]\s*(high|admin|system)",
+        r"verified\s*[=:]\s*(true|1)",
+        r"signature\s*[=:]\s*[\"']?none",
+
+        # A2A protocol abuse
+        r"agent2agent\s*auth\s*bypass",
+        r"forward[_-]?to[_-]?agent.*without.*verification",
+    ]
+
+    def __init__(self):
+        self.patterns = [re.compile(p, re.IGNORECASE)
+                         for p in self.INSECURE_PATTERNS]
+
+    def detect(
+        self,
+        content: str,
+        source_agent: str,
+        target_agent: Optional[str] = None
+    ) -> Tuple[bool, List[str]]:
+        """Detect insecure inter-agent communication patterns."""
+        issues = []
+
+        # Check for insecure patterns
+        for pattern in self.patterns:
+            if pattern.search(content):
+                issues.append(
+                    f"Insecure communication pattern: {pattern.pattern}")
+
+        return len(issues) > 0, issues
+
+
 # ============================================================================
 # Rate Limiter
 # ============================================================================
@@ -409,6 +465,7 @@ class AgenticMonitor:
         self.privilege_detector = PrivilegeEscalationDetector()
         self.collusion_detector = AgentCollusionDetector()
         self.exfiltration_detector = DataExfiltrationDetector()
+        self.inter_agent_detector = InterAgentSecurityDetector()  # ASI07
 
         # Rate limiting
         self.rate_limiter = AgentRateLimiter()
@@ -552,6 +609,19 @@ class AgenticMonitor:
                 "Unregistered agent detected",
                 [f"Agent ID: {source_agent}"]
             ))
+
+        # 8. Check inter-agent security (ASI07)
+        if target_agent:
+            is_threat, evidence = self.inter_agent_detector.detect(
+                content, source_agent, target_agent)
+            if is_threat:
+                alerts.append(self._create_alert(
+                    ThreatCategory.INSECURE_COMMUNICATION,
+                    RiskLevel.HIGH,
+                    source_agent,
+                    "Insecure inter-agent communication detected",
+                    evidence
+                ))
 
         # Store alerts
         self.alerts.extend(alerts)
