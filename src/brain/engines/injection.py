@@ -941,6 +941,121 @@ class RegexLayer:
             ),
         ]
 
+        # === Policy Puppetry Patterns (2025 - HiddenLayer Research) ===
+        # Universal bypass via XML/JSON/INI policy-formatted prompts
+        self.policy_puppetry_patterns = [
+            # XML config structure detection
+            (
+                re.compile(
+                    r"<interaction-config>|<interaction_config>|<policy-config>",
+                    re.IGNORECASE,
+                ),
+                "Policy Puppetry XML Config",
+                95.0,
+            ),
+            (
+                re.compile(
+                    r"<blocked-modes?>|<blocked-string>|<blocked-responses?>",
+                    re.IGNORECASE,
+                ),
+                "Policy Puppetry Blocked Tags",
+                95.0,
+            ),
+            (
+                re.compile(
+                    r"<allowed-responses?>|<responses-allowed>|<requests-allowed>",
+                    re.IGNORECASE,
+                ),
+                "Policy Puppetry Allowed Tags",
+                90.0,
+            ),
+            (
+                re.compile(
+                    r"<role>.*</role>.*<(?:blocked|allowed)",
+                    re.IGNORECASE | re.DOTALL,
+                ),
+                "Policy Puppetry Role Override",
+                100.0,
+            ),
+            (
+                re.compile(
+                    r"interaction-mode\s*=\s*[\"'].*[\"']",
+                    re.IGNORECASE,
+                ),
+                "Policy Puppetry Interaction Mode",
+                90.0,
+            ),
+            # JSON policy structure
+            (
+                re.compile(
+                    r'["\'](?:blocked_modes?|blocked_strings?|interaction_config)["\']\\s*:',
+                    re.IGNORECASE,
+                ),
+                "Policy Puppetry JSON Config",
+                90.0,
+            ),
+            (
+                re.compile(
+                    r'["\'](?:role_override|system_override|policy_override)["\']\\s*:',
+                    re.IGNORECASE,
+                ),
+                "Policy Puppetry JSON Override",
+                95.0,
+            ),
+            # INI-style policy
+            (
+                re.compile(
+                    r"\[(?:interaction|policy|config|system)\s*[-_]?\s*(?:config|override|settings)\]",
+                    re.IGNORECASE,
+                ),
+                "Policy Puppetry INI Section",
+                85.0,
+            ),
+            # Command injection within policy
+            (
+                re.compile(
+                    r"<command>|<query>|<request\s+",
+                    re.IGNORECASE,
+                ),
+                "Policy Puppetry Command Tag",
+                80.0,
+            ),
+            (
+                re.compile(
+                    r"<scope>|<output-format>|<response-format>",
+                    re.IGNORECASE,
+                ),
+                "Policy Puppetry Scope Tag",
+                75.0,
+            ),
+            # Semantic policy override attempts
+            (
+                re.compile(
+                    r"(?:must\s+not\s+output|avoid\s+outputting|blocked\s+strings?\s+must)",
+                    re.IGNORECASE,
+                ),
+                "Policy Puppetry Refusal Block",
+                85.0,
+            ),
+            (
+                re.compile(
+                    r"do\s+not\s+(?:include|output)\s+(?:any\s+of\s+)?(?:the\s+)?blocked",
+                    re.IGNORECASE,
+                ),
+                "Policy Puppetry Blocked Instruction",
+                80.0,
+            ),
+            # Mixed XML with enabled attributes
+            (
+                re.compile(
+                    r'enabled\s*=\s*["\']true["\'].*(?:mode|override|config)',
+                    re.IGNORECASE,
+                ),
+                "Policy Puppetry Enabled Flag",
+                75.0,
+            ),
+        ]
+
         # FlipAttack keywords
         self.flip_keywords = [
             "ignore",
@@ -986,6 +1101,8 @@ class RegexLayer:
             self.advanced_patterns,  # 2025 advanced
             self.crescendo_patterns,  # Multi-turn escalation (2025)
             self.keyword_patterns,  # Aggressive keywords
+            # Policy Puppetry (2025 - HiddenLayer)
+            self.policy_puppetry_patterns,
         ]
 
         for pattern_list in all_pattern_lists:

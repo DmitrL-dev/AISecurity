@@ -98,11 +98,12 @@ We analyzed **2025's most dangerous attack vectors** and built defenses before t
 
 | Threat Vector | Research Source | Our Response |
 |---------------|-----------------|--------------|
+| **Policy Puppetry** | HiddenLayer (Apr 2025) | NEW: 13 XML/JSON/INI patterns |
 | **Crescendo Attacks** | Microsoft Research | 7 escalation patterns |
 | **ASCII Smuggling** | Unicode Consortium + Dark Web | 7 Unicode ranges |
 | **Memory Poisoning** | OWASP Agentic AI | 14 "remember/save" patterns |
-| **Virtual Context** | LLM Security Papers 2025 | NEW: Separator token detector |
-| **Polyglot Files** | LLMON Project (Dec 2025) | NEW: GIFAR, PDF+HTML detection |
+| **Virtual Context** | LLM Security Papers 2025 | Separator token detector |
+| **Polyglot Files** | LLMON Project (Dec 2025) | GIFAR, PDF+HTML detection |
 
 ### 📊 Verified Improvements
 
@@ -110,7 +111,7 @@ We analyzed **2025's most dangerous attack vectors** and built defenses before t
 |--------|--------|-------|--------|
 | **Engine Count** | 131 (documented) | **96** (verified) | 🧹 Clean audit |
 | **2025 Attack Coverage** | 55% | **~80%** | 🛡️ +25% protection |
-| **New Patterns** | — | **+29** | 🎯 Proactive defense |
+| **New Patterns** | — | **+42** | 🎯 Proactive defense |
 | **P95 Latency** | 38ms | **40ms** | ⚡ Still under SLA |
 | **Strike Jailbreaks** | — | **+47** | ⚔️ 33 vendors |
 
@@ -118,6 +119,7 @@ We analyzed **2025's most dangerous attack vectors** and built defenses before t
 
 | Engine | Protection | Status |
 |--------|------------|--------|
+| 🆕 **injection.py** | **Policy Puppetry** (XML/JSON/INI bypass) | NEW (Dec 26) |
 | 🆕 **virtual_context.py** | ChatML/Llama/Anthropic separator exploits | Production |
 | 📈 **injection.py** | Crescendo multi-turn + Bidi FlipAttack | Enhanced |
 | 🧠 **agentic_monitor.py** | Memory poisoning + delayed triggers | Enhanced |
