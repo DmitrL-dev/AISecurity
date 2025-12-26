@@ -6,7 +6,7 @@
 
 <p align="center">
   <strong>🛡️ Defense + ⚔️ Offense — Complete AI Security Suite</strong><br>
-  98 Detection Engines • 39,000+ Attack Payloads • Production-Grade
+  99 Detection Engines • 39,000+ Attack Payloads • Production-Grade
 </p>
 
 <p align="center">
@@ -47,7 +47,7 @@
 
 | Feature | Value |
 |---------|-------|
-| Detection Engines | **98** |
+| Detection Engines | **99** |
 | Recall | **85.1%** |
 | Latency | **<10ms** |
 | Coverage | OWASP LLM Top 10 |
