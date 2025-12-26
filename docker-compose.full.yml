@@ -1,0 +1,196 @@
+# ============================================================================
+# SENTINEL AI Security Platform — Full Docker Compose
+# ============================================================================
+# 5 Services: Gateway, Brain, Redis, Dashboard, PostgreSQL
+#
+# Quick Start:
+#   1. cp .env.example .env
+#   2. Edit .env with your settings
+#   3. docker-compose -f docker-compose.full.yml up -d
+#
+# Services:
+#   - gateway:   HTTP/HTTPS API Gateway (Go)     → localhost:8080
+#   - brain:     AI Security Engine (Python)     → localhost:50051 (gRPC)
+#   - redis:     Cache & Rate Limiting           → localhost:6379
+#   - dashboard: Web UI (React)                  → localhost:3000
+#   - postgres:  Audit Logs & Metrics            → localhost:5432
+# ============================================================================
+
+version: '3.8'
+
+services:
+  # ==========================================================================
+  # GATEWAY — HTTP/HTTPS API Server (Go)
+  # ==========================================================================
+  gateway:
+    build:
+      context: ./src/gateway
+      dockerfile: Dockerfile
+    container_name: sentinel-gateway
+    ports:
+      - "${GATEWAY_HTTP_PORT:-8080}:8080"
+      - "${GATEWAY_HTTPS_PORT:-8443}:8443"
+    environment:
+      - BRAIN_GRPC_ADDRESS=brain:50051
+      - REDIS_URL=redis://redis:6379
+      - POSTGRES_URL=postgres://${POSTGRES_USER:-sentinel}:${POSTGRES_PASSWORD:-sentinel}@postgres:5432/${POSTGRES_DB:-sentinel}
+      - API_KEY=${GATEWAY_API_KEY}
+      - RATE_LIMIT_RPM=${RATE_LIMIT_RPM:-100}
+      - POW_DIFFICULTY=${POW_DIFFICULTY:-0}
+      - LOG_LEVEL=${LOG_LEVEL:-INFO}
+      - TLS_CERT_PATH=/certs/server.crt
+      - TLS_KEY_PATH=/certs/server.key
+    volumes:
+      - ./certs:/certs:ro
+    depends_on:
+      brain:
+        condition: service_healthy
+      redis:
+        condition: service_started
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "wget", "-q", "--spider", "http://localhost:8080/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 15s
+    networks:
+      - sentinel-network
+
+  # ==========================================================================
+  # BRAIN — AI Security Engine (Python gRPC)
+  # ==========================================================================
+  brain:
+    build:
+      context: ./src/brain
+      dockerfile: Dockerfile
+    container_name: sentinel-brain
+    ports:
+      - "${BRAIN_GRPC_PORT:-50051}:50051"
+    environment:
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+      - POSTGRES_HOST=postgres
+      - POSTGRES_PORT=5432
+      - POSTGRES_USER=${POSTGRES_USER:-sentinel}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD:-sentinel}
+      - POSTGRES_DB=${POSTGRES_DB:-sentinel}
+      - LOG_LEVEL=${LOG_LEVEL:-INFO}
+      - ENGINES_ENABLED=${ENGINES_ENABLED:-}
+      - ENABLE_STRANGE_MATH=${ENABLE_STRANGE_MATH:-true}
+      - ENABLE_HIVE=${ENABLE_HIVE:-false}
+      - MAX_PROMPT_LENGTH=${MAX_PROMPT_LENGTH:-102400}
+    volumes:
+      - ./config:/app/config:ro
+      - brain-models:/app/models
+    depends_on:
+      redis:
+        condition: service_started
+      postgres:
+        condition: service_healthy
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "python", "-c", "import grpc; ch = grpc.insecure_channel('localhost:50051'); grpc.channel_ready_future(ch).result(timeout=5)"]
+      interval: 30s
+      timeout: 15s
+      retries: 3
+      start_period: 30s
+    deploy:
+      resources:
+        limits:
+          memory: 4G
+        reservations:
+          memory: 1G
+    networks:
+      - sentinel-network
+
+  # ==========================================================================
+  # REDIS — Cache & Rate Limiting
+  # ==========================================================================
+  redis:
+    image: redis:7-alpine
+    container_name: sentinel-redis
+    ports:
+      - "${REDIS_PORT:-6379}:6379"
+    command: redis-server --appendonly yes --maxmemory 512mb --maxmemory-policy allkeys-lru
+    volumes:
+      - redis-data:/data
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+    networks:
+      - sentinel-network
+
+  # ==========================================================================
+  # POSTGRESQL — Audit Logs & Metrics
+  # ==========================================================================
+  postgres:
+    image: postgres:16-alpine
+    container_name: sentinel-postgres
+    ports:
+      - "${POSTGRES_PORT:-5432}:5432"
+    environment:
+      - POSTGRES_USER=${POSTGRES_USER:-sentinel}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD:-sentinel}
+      - POSTGRES_DB=${POSTGRES_DB:-sentinel}
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+      - ./init-db:/docker-entrypoint-initdb.d:ro
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-sentinel}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+    networks:
+      - sentinel-network
+
+  # ==========================================================================
+  # DASHBOARD — Web UI (React)
+  # ==========================================================================
+  dashboard:
+    build:
+      context: ./src/dashboard
+      dockerfile: Dockerfile
+    container_name: sentinel-dashboard
+    ports:
+      - "${DASHBOARD_PORT:-3000}:3000"
+    environment:
+      - GATEWAY_URL=http://gateway:8080
+      - SESSION_SECRET=${DASHBOARD_SESSION_SECRET:-change-me}
+      - ADMIN_USER=${DASHBOARD_ADMIN_USER:-admin}
+      - ADMIN_PASSWORD=${DASHBOARD_ADMIN_PASSWORD:-admin}
+    depends_on:
+      gateway:
+        condition: service_healthy
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "wget", "-q", "--spider", "http://localhost:3000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    networks:
+      - sentinel-network
+
+# ============================================================================
+# VOLUMES
+# ============================================================================
+volumes:
+  redis-data:
+    driver: local
+  postgres-data:
+    driver: local
+  brain-models:
+    driver: local
+
+# ============================================================================
+# NETWORKS
+# ============================================================================
+networks:
+  sentinel-network:
+    name: sentinel-network
+    driver: bridge

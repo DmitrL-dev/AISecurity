@@ -35,6 +35,15 @@
 
 ---
 
+> [!TIP]
+> ## 🚀 One-Liner Deploy — NEW!
+> ```bash
+> curl -sSL https://raw.githubusercontent.com/DmitrL-dev/AISecurity/main/install.sh | bash
+> ```
+> **5 services, 99 engines, 5 minutes.** See [QUICKSTART.md](./QUICKSTART.md) for details.
+
+---
+
 ## 🎯 Two Platforms, One Mission
 
 <table>
