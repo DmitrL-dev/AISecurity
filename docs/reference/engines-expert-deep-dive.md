@@ -2,8 +2,8 @@
 
 > **Для кого:** Исследователи, эксперты в области топологии, дифференциальной геометрии, машинного обучения.  
 > **Цель:** Детальное описание математической базы и её инженерной адаптации.  
-> **Updated:** December 2025 — Virtual Context, Polyglot Detection, Crescendo, LLMON Integration  
-> **Unit Tests:** 175+ | **Engines:** 96 (verified ✅ Health Check 100%) | **LOC:** ~46,000
+> **Updated:** December 2025 — OWASP Agentic 2026 10/10, Supply Chain Guard, Trust Exploitation  
+> **Unit Tests:** 175+ | **Engines:** 98 (verified ✅ Health Check 100%) | **LOC:** ~47,000
 
 ---
 
@@ -108,6 +108,10 @@ SENTINEL использует **прикладные вычислительны�
 - **Multi-turn Extraction Detection** — System prompt chain analysis
 - **OpenTelemetry Observability** — Production-grade tracing
 - **Rate Limiting & Health Probes** — Kubernetes-ready infrastructure
+- **OWASP Agentic 2026 10/10** — Full coverage of all 10 agentic threats 🆕
+- **Supply Chain Guard** — ASI04 MCP/A2A verification 🆕
+- **Trust Exploitation Detector** — ASI09 Human-agent social engineering 🆕
+- **Inter-Agent Security** — ASI07 Agent-to-agent communication security 🆕
 
 ---
 

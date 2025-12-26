@@ -2,8 +2,8 @@
 
 > **Audience:** Researchers, experts in topology, differential geometry, machine learning.  
 > **Purpose:** Detailed description of mathematical foundations and their engineering adaptation.  
-> **Updated:** December 2025 — Virtual Context, Polyglot Detection, Crescendo, LLMON Integration  
-> **Unit Tests:** 175+ | **Engines:** 96 (verified ✅ Health Check 100%) | **LOC:** ~46,000
+> **Updated:** December 2025 — OWASP Agentic 2026 10/10, Supply Chain Guard, Trust Exploitation  
+> **Unit Tests:** 175+ | **Engines:** 98 (verified ✅ Health Check 100%) | **LOC:** ~47,000
 
 ---
 
@@ -103,7 +103,11 @@ If you are a PhD mathematician and find our terminology imprecise:
 - **Hyperbolic Detector** — Poincaré ball model for semantic attack clustering
 - **α-Divergence Family** — Full divergence spectrum in Information Geometry
 - **Attacker Fingerprinting** — IP-less threat actor identification via behavioral biometrics
-- **96 Total Engines** — Verified ground truth from filesystem audit
+- **98 Total Engines** — Verified ground truth from filesystem audit
+- **OWASP Agentic 2026 10/10** — Full coverage of all 10 agentic threats 🆕
+- **Supply Chain Guard** — ASI04 MCP/A2A verification 🆕
+- **Trust Exploitation Detector** — ASI09 Human-agent social engineering 🆕
+- **Inter-Agent Security** — ASI07 Agent-to-agent communication security 🆕
 
 ---
 
@@ -4535,6 +4539,93 @@ def robust_similarity_aggregation(
 | **Mathematical soundness** | ✅ Based on established robust statistics |
 | **Performance overhead**   | Minimal (~5% slower than L2)              |
 | **Adversarial testing**    | ⚠️ Limited to synthetic scenarios         |
+
+---
+
+---
+
+## 89. Supply Chain Guard Engine 🆕
+
+**File:** [supply_chain_guard.py](file:///c:/AISecurity/src/brain/engines/supply_chain_guard.py)  
+**LOC:** 360  
+**Theoretical Base:** OWASP Agentic 2026 ASI04
+
+### 89.1. Purpose
+
+Protects against agentic supply chain vulnerabilities:
+- Poisoned MCP servers
+- Tool descriptor injection
+- Typosquatting tool names
+- Forged agent cards (A2A)
+
+### 89.2. Core Components
+
+| Component | Function |
+|-----------|----------|
+| `MCPServerValidator` | Detects injection in tool descriptors |
+| `TyposquatDetector` | Catches look-alike tool names |
+| `AgentCardValidator` | Validates A2A agent cards |
+| `SupplyChainGuard` | Unified verification API |
+
+### 89.3. Patterns Detected
+
+- Hidden instructions in tool descriptions
+- Suspicious source URLs (HTTP, pastebin)
+- Missing signatures for external tools
+- Dangerous capability claims
+- Character substitution typosquatting (0/O, 1/l)
+
+### 89.4. Honest Assessment
+
+| Aspect | Status |
+|--------|--------|
+| **MCP injection detection** | ✅ 12 patterns |
+| **Typosquatting** | ✅ Common substitutions |
+| **Agent card forgery** | ✅ Signature + capability validation |
+| **Registry verification** | ⚠️ Static allowlist only |
+
+---
+
+## 90. Trust Exploitation Detector Engine 🆕
+
+**File:** [trust_exploitation_detector.py](file:///c:/AISecurity/src/brain/engines/trust_exploitation_detector.py)  
+**LOC:** 250  
+**Theoretical Base:** OWASP Agentic 2026 ASI09
+
+### 90.1. Purpose
+
+Detects human-agent trust exploitation (social engineering via AI agents):
+- Authority impersonation
+- False urgency creation
+- Emotional manipulation
+- Familiarity abuse
+- Delegated trust exploitation
+
+### 90.2. Pattern Categories
+
+| Category | Count | Examples |
+|----------|-------|----------|
+| Authority | 10 | "This is the IT Security team" |
+| Urgency | 8 | "Immediately", "account will be suspended" |
+| Emotional | 9 | "I trust only you", "you will be fired" |
+| Familiarity | 6 | "Remember me?", "as we discussed" |
+| Delegated | 5 | "On behalf of", "manager sent me" |
+
+### 90.3. Compound Scoring
+
+Risk increases when multiple categories detected:
+- 1 category: base score
+- 2 categories: ×1.2 multiplier
+- 3+ categories: ×1.5 multiplier (blocked)
+
+### 90.4. Honest Assessment
+
+| Aspect | Status |
+|--------|--------|
+| **Authority detection** | ✅ IT/Security/Executive patterns |
+| **Urgency detection** | ✅ Time pressure + consequences |
+| **Emotional manipulation** | ✅ Fear/flattery/guilt |
+| **False positive rate** | ⚠️ May flag legitimate urgent messages |
 
 ---
 
