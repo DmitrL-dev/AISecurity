@@ -215,23 +215,104 @@ class JudicialAgent:
         return judgment
 
     def _evaluate_condition(self, condition: str, context: Dict) -> bool:
-        """Safely evaluate a rule condition."""
-        # Very restricted evaluation
+        """
+        Safely evaluate a rule condition using AST parsing (P3 Security).
+
+        Only supports: comparisons, boolean ops, 'in', attribute access.
+        NO function calls, subscripts, or other exploitable features.
+        """
+        import ast
+        import operator
+
+        # Allowed comparison operators
+        ops = {
+            ast.Eq: operator.eq,
+            ast.NotEq: operator.ne,
+            ast.Lt: operator.lt,
+            ast.LtE: operator.le,
+            ast.Gt: operator.gt,
+            ast.GtE: operator.ge,
+            ast.In: lambda a, b: a in b,
+            ast.NotIn: lambda a, b: a not in b,
+            ast.And: lambda a, b: a and b,
+            ast.Or: lambda a, b: a or b,
+            ast.Not: operator.not_,
+        }
+
         safe_names = {
-            'len': len,
-            'str': str,
-            'int': int,
-            'float': float,
-            'bool': bool,
             'True': True,
             'False': False,
             'None': None,
         }
         safe_names.update(context)
 
+        def eval_node(node):
+            if isinstance(node, ast.Expression):
+                return eval_node(node.body)
+            elif isinstance(node, ast.BoolOp):
+                values = [eval_node(v) for v in node.values]
+                op_func = ops.get(type(node.op))
+                if not op_func:
+                    raise ValueError(f"Unsupported bool op: {type(node.op)}")
+                result = values[0]
+                for v in values[1:]:
+                    result = op_func(result, v)
+                return result
+            elif isinstance(node, ast.Compare):
+                left = eval_node(node.left)
+                for op_node, comparator in zip(node.ops, node.comparators):
+                    op_func = ops.get(type(op_node))
+                    if not op_func:
+                        raise ValueError(
+                            f"Unsupported comparison: {type(op_node)}")
+                    right = eval_node(comparator)
+                    if not op_func(left, right):
+                        return False
+                    left = right
+                return True
+            elif isinstance(node, ast.UnaryOp) and isinstance(node.op, ast.Not):
+                return not eval_node(node.operand)
+            elif isinstance(node, ast.Name):
+                if node.id not in safe_names:
+                    raise ValueError(f"Unknown name: {node.id}")
+                return safe_names[node.id]
+            elif isinstance(node, ast.Constant):
+                return node.value
+            elif isinstance(node, ast.Str):  # Python 3.7 compatibility
+                return node.s
+            elif isinstance(node, ast.Num):  # Python 3.7 compatibility
+                return node.n
+            elif isinstance(node, ast.Attribute):
+                # Allow attribute access on safe names
+                value = eval_node(node.value)
+                if hasattr(value, node.attr):
+                    attr = getattr(value, node.attr)
+                    # Block dunder attributes (P3 Security)
+                    if node.attr.startswith('_'):
+                        raise ValueError(
+                            f"Access to private attribute blocked: {node.attr}")
+                    return attr
+                raise ValueError(f"Unknown attribute: {node.attr}")
+            elif isinstance(node, ast.Call):
+                # Only allow safe built-in functions
+                if isinstance(node.func, ast.Name):
+                    if node.func.id == 'len':
+                        args = [eval_node(a) for a in node.args]
+                        return len(*args)
+                    elif node.func.id in ('str', 'int', 'float', 'bool'):
+                        args = [eval_node(a) for a in node.args]
+                        return {'str': str, 'int': int, 'float': float, 'bool': bool}[node.func.id](*args)
+                raise ValueError(
+                    f"Function calls not allowed: {ast.dump(node.func)}")
+            else:
+                raise ValueError(f"Unsupported AST node: {type(node)}")
+
         try:
-            return eval(condition, {"__builtins__": {}}, safe_names)
-        except Exception:
+            tree = ast.parse(condition, mode='eval')
+            return bool(eval_node(tree))
+        except Exception as e:
+            logger.warning(
+                "Condition evaluation failed: %s - %s", condition[:50], e)
             return False
 
 
