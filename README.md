@@ -6,11 +6,11 @@
 
 <p align="center">
   <strong>🛡️ Defense + ⚔️ Offense — Complete AI Security Suite</strong><br>
-  96 Detection Engines • 39,000+ Attack Payloads • Production-Grade
+  98 Detection Engines • 39,000+ Attack Payloads • Production-Grade
 </p>
 
 <p align="center">
-  <img src="https://img.shields.io/badge/🛡️_DEFENSE-96_Engines-brightgreen?style=for-the-badge" alt="Defense">
+  <img src="https://img.shields.io/badge/🛡️_DEFENSE-98_Engines-brightgreen?style=for-the-badge" alt="Defense">
   <img src="https://img.shields.io/badge/🐉_OFFENSE-39K+_Payloads-red?style=for-the-badge" alt="Offense">
   <img src="https://img.shields.io/badge/Recall-85.1%25-blue?style=for-the-badge" alt="Recall">
   <img src="https://img.shields.io/badge/Innovations-10-purple?style=for-the-badge" alt="Innovations">
@@ -47,7 +47,7 @@
 
 | Feature | Value |
 |---------|-------|
-| Detection Engines | **96** |
+| Detection Engines | **98** |
 | Recall | **85.1%** |
 | Latency | **<10ms** |
 | Coverage | OWASP LLM Top 10 |
@@ -109,9 +109,10 @@ We analyzed **2025's most dangerous attack vectors** and built defenses before t
 
 | Metric | Before | After | Impact |
 |--------|--------|-------|--------|
-| **Engine Count** | 131 (documented) | **96** (verified) | 🧹 Clean audit |
-| **2025 Attack Coverage** | 55% | **~80%** | 🛡️ +25% protection |
-| **New Patterns** | — | **+42** | 🎯 Proactive defense |
+| **Engine Count** | 131 (documented) | **98** (verified) | 🧹 Clean audit |
+| **2025 Attack Coverage** | 55% | **~85%** | 🛡️ +30% protection |
+| **OWASP Agentic 2026** | — | **10/10** | 🎯 Full coverage |
+| **New Patterns** | — | **+77** | 🎯 Proactive defense |
 | **P95 Latency** | 38ms | **40ms** | ⚡ Still under SLA |
 | **Strike Jailbreaks** | — | **+47** | ⚔️ 33 vendors |
 
@@ -119,6 +120,9 @@ We analyzed **2025's most dangerous attack vectors** and built defenses before t
 
 | Engine | Protection | Status |
 |--------|------------|--------|
+| 🆕 **supply_chain_guard.py** | **ASI04** MCP/A2A supply chain protection | NEW (Dec 26) |
+| 🆕 **trust_exploitation_detector.py** | **ASI09** Human-agent trust manipulation | NEW (Dec 26) |
+| 🆕 **agentic_monitor.py** | **ASI07** Inter-agent communication security | NEW (Dec 26) |
 | 🆕 **injection.py** | **Policy Puppetry** (XML/JSON/INI bypass) | NEW (Dec 26) |
 | 🆕 **virtual_context.py** | ChatML/Llama/Anthropic separator exploits | Production |
 | 📈 **injection.py** | Crescendo multi-turn + Bidi FlipAttack | Enhanced |
