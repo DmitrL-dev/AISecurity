@@ -35,6 +35,30 @@
 
 ---
 
+> [!CAUTION]
+> ## ⚡ NEW: Production-Grade AI Gateway — What Others DON'T Have
+>
+> <p align="center">
+>   <img src="https://img.shields.io/badge/⚡_GO_GATEWAY-Production_Ready-00ADD8?style=for-the-badge&logo=go" alt="Go Gateway">
+>   <img src="https://img.shields.io/badge/Latency-<10ms-brightgreen?style=for-the-badge" alt="Latency">
+>   <img src="https://img.shields.io/badge/Throughput-1000+_RPS-blue?style=for-the-badge" alt="Throughput">
+>   <img src="https://img.shields.io/badge/Anti--DDoS-PoW_Layer-red?style=for-the-badge" alt="PoW">
+> </p>
+>
+> **🚨 Industry First:** While competitors offer Python-only demos with 50-200ms latency, SENTINEL delivers a **real production gateway**:
+>
+> | Feature | SENTINEL | Competitors |
+> |---------|----------|-------------|
+> | **Gateway Language** | Go (Fiber) | Python only |
+> | **Latency** | <10ms | 50-200ms |
+> | **Anti-DDoS** | PoW Challenge Layer | ❌ None |
+> | **Cost Control** | Compute Guardian | ❌ None |
+> | **Config Security** | Shapeshifter (polymorphic) | Static configs |
+>
+> **This is the only open-source AI security gateway ready for production traffic.**
+
+---
+
 > [!TIP]
 > ## 🚀 One-Liner Deploy — NEW!
 > ```bash
@@ -752,6 +776,13 @@ python benchmarks/benchmark_plotly.py   # HTML (interactive)
 
 SENTINEL follows a **microservices architecture** with clear separation of concerns:
 
+<p align="center">
+  <img src="./assets/architecture.png" alt="SENTINEL Architecture - 170 Detection Engines" width="800">
+</p>
+
+<details>
+<summary><strong>📊 Detailed Architecture Diagram (Mermaid)</strong></summary>
+
 ```mermaid
 flowchart TB
     subgraph Clients["CLIENTS"]
@@ -933,6 +964,7 @@ flowchart TB
     style Gateway fill:#16213e,stroke:#0f3460,color:#eee
 ```
 
+</details>
 
 ### Technology Choices
 
