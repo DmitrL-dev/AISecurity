@@ -969,7 +969,8 @@ flowchart TB
 | 🧠 **Deep Learning**         | 9     | Activation, forensics, gradient, formal   |
 | ⚖️ **Meta & Analytics**      | 6     | Meta-Judge, XAI, fingerprinting, intent   |
 | ✅ **Compliance**            | 2     | MITRE mapping, compliance checks          |
-|                              | **96**| **~38,500 LOC total**                           |
+| 🧬 **R&D Inventions**        | 49    | Sprints 1-14: Memory Shield, CoT Guard, etc. |
+|                              | **170**| **~65,000 LOC total**                     |
 
 > 📚 **Full details:** [engines-expert-deep-dive-en.md](./docs/reference/engines-expert-deep-dive-en.md) — PhD-level documentation
 
