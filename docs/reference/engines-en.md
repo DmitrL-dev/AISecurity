@@ -1,8 +1,8 @@
 # 🔬 SENTINEL — Engine Reference Guide
 
-> **Total Engines:** 121 protection engines (95 verified via Health Check: ✅ 100% PASSED)  
+> **Total Engines:** 170 protection engines (144 verified via Health Check: ✅ 100% PASSED)  
 > **Benchmark Recall:** 85.1% | Precision: 84.4% | F1: 84.7%  
-> **Categories:** 15  
+> **Categories:** 16  
 > **Coverage:** OWASP LLM Top 10 + OWASP ASI Top 10
 
 ---
@@ -24,6 +24,7 @@
 13. [Deep Learning (6)](#deep-learning)
 14. [Meta-Judge + XAI (2)](#meta-judge--xai)
 15. [Adaptive Behavioral (2)](#adaptive-behavioral) 🆕
+16. [🧬 Research Inventions (49)](#research-inventions) ← **NEW!**
 
 ---
 
@@ -95,7 +96,7 @@ class DetectionResult:
 
 ## ✅ Health Check Verification (Dec 2025)
 
-> **Status:** 95/95 PASSED — 100% coverage  
+> **Status:** 144/144 PASSED — 100% coverage  
 > **Script:** `scripts/sentinel_health_check.py`
 
 ### What's Verified
@@ -819,6 +820,84 @@ next_intent, prob = predictor.predict_next(Intent.TESTING)
 | ASI04 | Agent Cards  | agent_card_validator |
 | ASI07 | Cascading    | cascading_guard      |
 | ASI08 | MCP/A2A      | mcp_a2a_security     |
+
+---
+
+## 🧬 Research Inventions (49 engines)
+
+> **Source:** 8-phase R&D program | **Sprints:** 14 | **Tests:** 480  
+> **OWASP ASI Coverage:** 100% | **LOC:** ~20,000
+
+### Sprint 1-4: Foundation & Detection
+
+| Engine                 | OWASP  | Description                       |
+| ---------------------- | ------ | --------------------------------- |
+| `agent_memory_shield`  | ASI-02 | Short/long-term memory protection |
+| `tool_use_guardian`    | ASI-03 | Tool usage validation             |
+| `provenance_tracker`   | ASI-07 | Data provenance tracking          |
+| `system_prompt_shield` | ASI-01 | System prompt protection          |
+| `compute_guardian`     | ASI-04 | CPU/Memory resource control       |
+| `shadow_ai_detector`   | ASI-06 | Shadow AI detection               |
+| `cot_guardian`         | ASI-01 | Chain-of-Thought protection       |
+| `rag_security_shield`  | ASI-05 | RAG pipeline security             |
+
+### Sprint 5-8: Verification & Patterns
+
+| Engine                        | OWASP      | Description               |
+| ----------------------------- | ---------- | ------------------------- |
+| `formal_safety_verifier`      | Enterprise | Formal verification       |
+| `multi_agent_coordinator`     | ASI-09     | Multi-agent coordination  |
+| `semantic_drift_detector`     | ASI-01     | Semantic drift detection  |
+| `output_sanitization_guard`   | ASI-10     | Output sanitization       |
+| `multi_layer_canonicalizer`   | ASI-01     | Homoglyph normalization   |
+| `cache_isolation_guardian`    | ASI-05     | Cache isolation           |
+| `context_window_guardian`     | ASI-01     | Context window protection |
+| `atomic_operation_enforcer`   | ASI-03     | TOCTOU protection         |
+| `safety_grammar_enforcer`     | ASI-10     | Grammar constraints       |
+| `vae_prompt_anomaly_detector` | ASI-01     | VAE anomaly detection     |
+| `model_watermark_verifier`    | ASI-08     | Watermark verification    |
+| `behavioral_api_verifier`     | ASI-06     | API behavioral analysis   |
+
+### Sprint 9-12: ML & Governance
+
+| Engine                           | OWASP      | Description                |
+| -------------------------------- | ---------- | -------------------------- |
+| `contrastive_prompt_anomaly`     | ASI-01     | Self-supervised detection  |
+| `meta_attack_adapter`            | ASI-01     | Few-shot attack adaptation |
+| `cross_modal_security_analyzer`  | ASI-01     | Multi-modal security       |
+| `distilled_security_ensemble`    | Enterprise | Model distillation         |
+| `quantum_safe_model_vault`       | Enterprise | Post-quantum crypto        |
+| `emergent_security_mesh`         | ASI-09     | MARL defense               |
+| `intent_aware_semantic_analyzer` | ASI-01     | Paraphrase detection       |
+| `federated_threat_aggregator`    | Enterprise | Federated learning         |
+| `gan_adversarial_defense`        | ASI-01     | GAN-based defense          |
+| `causal_inference_detector`      | ASI-01     | Causal attack chains       |
+| `transformer_attention_shield`   | ASI-01     | Attention hijacking        |
+| `reinforcement_safety_agent`     | ASI-01     | RL adaptive defense        |
+| `compliance_policy_engine`       | Enterprise | GDPR/HIPAA compliance      |
+| `explainable_security_decisions` | Enterprise | XAI for decisions          |
+| `dynamic_rate_limiter`           | ASI-04     | Adaptive rate limiting     |
+| `secure_model_loader`            | ASI-08     | Supply chain security      |
+
+### Sprint 13-14: Zero Trust & Final
+
+| Engine                            | OWASP      | Description              |
+| --------------------------------- | ---------- | ------------------------ |
+| `hierarchical_defense_network`    | ASI-01     | Defense in depth         |
+| `symbolic_reasoning_guard`        | ASI-01     | Logic-based security     |
+| `temporal_pattern_analyzer`       | ASI-01     | Timing attack detection  |
+| `zero_trust_verification`         | Enterprise | Zero Trust AI            |
+| `adversarial_prompt_detector`     | ASI-01     | Perturbation defense     |
+| `prompt_leakage_detector`         | ASI-01     | Extraction detection     |
+| `recursive_injection_guard`       | ASI-01     | Nested injection defense |
+| `semantic_boundary_enforcer`      | ASI-01     | Context boundaries       |
+| `conversation_state_validator`    | ASI-01     | State machine security   |
+| `input_length_analyzer`           | ASI-04     | Size-based attacks       |
+| `language_detection_guard`        | ASI-01     | Multilingual attacks     |
+| `response_consistency_checker`    | ASI-10     | Output consistency       |
+| `sentiment_manipulation_detector` | ASI-01     | Social engineering       |
+
+> 📚 **Detailed Reference:** [16-research-inventions.md](engines/16-research-inventions.md)
 
 ---
 

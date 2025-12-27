@@ -71,7 +71,7 @@
 ## Summary
 
 **SENTINEL advantages:**
-- ✅ Most comprehensive detection (96 engines vs ~10)
+- ✅ Most comprehensive detection (170 engines vs ~10)
 - ✅ Only solution with integrated offense testing
 - ✅ Self-hosted option for data privacy
 - ✅ Advanced math-based detection (Strange Math™)

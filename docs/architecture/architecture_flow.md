@@ -58,7 +58,7 @@ flowchart TB
             ThreatModel["📈 Threat<br/>Modeler"]
         end
 
-        MetaJudge["⚖️ META-JUDGE<br/>95 engines → Verdict"]
+        MetaJudge["⚖️ META-JUDGE<br/>170 engines → Verdict"]
     end
 
     subgraph Decision["📍 DECISION POINT"]
