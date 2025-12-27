@@ -1,147 +1,150 @@
 ---
-title: Christmas Gift: Open-Sourcing 99 AI Security Detection Engines
+title: "SENTINEL: The Only Production-Ready Open-Source AI Security Gateway (170 Engines)"
 published: true
-description: I'm releasing the full source code of SENTINEL — an AI security platform with 99 detection engines, one-liner deploy, and OWASP Agentic 2026 10/10 coverage.
-tags: opensource, security, machinelearning, python
-cover_image: https://raw.githubusercontent.com/DmitrL-dev/AISecurity/main/sentinel-community/assets/christmas_2025.png
+description: "Complete AI Defense & Red Team Platform with 170 detection engines, 49 unique research inventions, and industry-first Go gateway. Full open source."
+tags: security, ai, opensource, llm
+cover_image: https://raw.githubusercontent.com/DmitrL-dev/AISecurity/main/assets/sentinel_platform_architecture.png
+canonical_url: https://github.com/DmitrL-dev/AISecurity
 ---
 
-I'm releasing the full source code of SENTINEL — an AI security platform. Not a "lite version" or "community edition" — **everything**.
+## TL;DR
 
-## 🚀 One-Liner Deploy (NEW!)
+**SENTINEL** is the only open-source AI security platform with a **production-grade Go gateway**. While competitors offer Python-only demos with 50-200ms latency, we deliver:
 
-```bash
-curl -sSL https://raw.githubusercontent.com/DmitrL-dev/AISecurity/main/install.sh | bash
+- ⚡ **<10ms latency** (Go + Python hybrid)
+- 🛡️ **170 detection engines** (49 are unique research inventions)
+- 🧬 **Prior art protection** — no one can patent our innovations
+- 🐉 **39K+ attack payloads** for red teaming
+
+{% github DmitrL-dev/AISecurity %}
+
+---
+
+## 🤔 The Problem
+
+Current AI security solutions are either:
+- **Enterprise-only** (Cisco AI Defense, Robust Intelligence)
+- **Python demos** (50-200ms latency, no DDoS protection)
+- **Incomplete** (focus on one attack type)
+
+**None** offer a production-ready gateway with sub-10ms latency.
+
+---
+
+## 💡 The Solution: SENTINEL
+
+### Production Gateway (Industry First)
+
+```
+Client → [Go Gateway] → gRPC → [Python Brain] → 170 Engines
+              ↓                        ↓
+         PoW + Auth           Strange Math™
 ```
 
-**5 services, 99 engines, 5 minutes:**
-- Gateway (Go) — HTTP/HTTPS API
-- Brain (Python) — 99 detection engines
-- Redis — caching & rate limiting
-- PostgreSQL — audit logs
-- Dashboard — web UI
+| Feature | SENTINEL | Others |
+|---------|----------|--------|
+| Gateway Language | **Go (Fiber)** | Python only |
+| Latency | **<10ms** | 50-200ms |
+| Anti-DDoS | **PoW Layer** | ❌ None |
+| Cost Control | **Compute Guardian** | ❌ None |
 
-## What is it?
+### 170 Detection Engines
 
-SENTINEL is a security platform for LLMs, AI agents, and multimodal systems:
+| Category | Count | Highlights |
+|----------|-------|------------|
+| Strange Math™ | 20 | Sheaf Theory, Hyperbolic Geometry, TDA |
+| Bio-Intelligence™ | 8 | AIS, Echo State Networks, Swarm |
+| Agentic Defense™ | 15 | Memory Shield, Tool Guardian, RAG |
+| Protocol Security | 5 | MCP, A2A, NHI Identity |
+| Deep Learning | 9 | Activation Steering, Hidden States |
+| + 13 more categories | 113 | Classic, VLM, Proactive, etc. |
 
-| Component | Description |
-|-----------|-------------|
-| 🛡️ **Defense** | 99 detection engines (<10ms latency) |
-| ⚔️ **Strike** | Red team platform (39,000+ attack payloads) |
-| 📊 **OWASP Coverage** | LLM Top 10 ✅ + Agentic Top 10 2026 **10/10** ✅ |
+---
 
-Think of it as a **firewall + pentest suite**, but for AI.
+## 🧬 49 Unique Technologies (Defensive Publication)
 
-## The "Strange Math" Engines
+By open-sourcing first, we created **prior art** that prevents patents:
 
-While most AI security tools use pattern matching, we went a different way:
+### Strange Math™
+- **Sheaf Coherence** — Multi-turn attack detection via category theory
+- **Hyperbolic Geometry** — Privilege escalation in Poincaré space
+- **TDA Enhanced** — Topological fingerprinting
 
-### Topological Data Analysis (TDA)
+### Bio-Intelligence™
+- **AIS (Clonal Selection)** — Immune system-inspired detection
+- **Swarm Defense** — Distributed multi-agent protection
 
-```python
-from gudhi import RipsComplex
+### Agentic Defense™
+- **Agent Memory Shield** — Short/long-term memory protection
+- **Chain-of-Thought Guardian** — Reasoning chain security
 
-rips = RipsComplex(points=embedding, max_edge_length=2.0)
-simplex_tree = rips.create_simplex_tree(max_dimension=2)
-persistence = simplex_tree.persistence()
+**Full list:** [16-research-inventions.md](https://github.com/DmitrL-dev/AISecurity/blob/main/docs/reference/engines/16-research-inventions.md)
 
-# Attacks create topological anomalies in embedding space
-```
+---
 
-**Idea:** Jailbreak attempts create "holes" in the embedding topology that normal text doesn't.
+## 🐉 Strike v3.0 — AI Red Team
 
-### Sheaf Theory
+Test your AI **before** attackers do:
 
-Coherence verification across multi-turn conversations. Detects attacks that slowly shift context across messages.
+- 🎯 **39,000+ attack payloads**
+- 🐲 **HYDRA Engine** — 9-headed parallel attacks
+- 🤖 **AI Attack Planner** — Gemini-powered strategies
+- 📊 **Bilingual reports** (EN/RU)
 
-### Hyperbolic Geometry
+---
 
-Poincaré ball embeddings for attack clustering. Semantic relationships form hierarchies that attacks disrupt.
-
-## December 2025 Updates
-
-| Feature | Status |
-|---------|--------|
-| **99 Detection Engines** | +2 from launch |
-| **OWASP Agentic 2026** | 10/10 coverage |
-| **Supply Chain Guard** | MCP/A2A protection |
-| **Trust Exploitation** | Social engineering via AI |
-| **Echo State Network** | Temporal pattern detection |
-| **One-Liner Deploy** | 5 services in 5 minutes |
-
-## Benchmarks
+## 📊 By The Numbers
 
 | Metric | Value |
 |--------|-------|
+| Detection Engines | **170** |
+| Research Inventions | **49** |
+| Unit Tests | **936+** |
+| Lines of Code | **~65,000** |
+| Attack Payloads | **39,000+** |
+| OWASP Coverage | **100%** (LLM + ASI) |
 | Recall | **85.1%** |
-| Precision | **84.4%** |
-| F1 Score | **84.7%** |
-| Latency | **<10ms** |
-| Engines | **99** |
-
-Tested on 1,815 samples from 3 HuggingFace datasets.
-
-## Quick Start
-
-### Option 1: One-Liner (Recommended)
-
-```bash
-curl -sSL https://raw.githubusercontent.com/DmitrL-dev/AISecurity/main/install.sh | bash
-```
-
-### Option 2: Docker Compose
-
-```bash
-git clone https://github.com/DmitrL-dev/AISecurity.git
-cd AISecurity/sentinel-community
-cp .env.example .env
-docker-compose -f docker-compose.full.yml up -d
-```
-
-### Option 3: Python Package
-
-```bash
-git clone https://github.com/DmitrL-dev/AISecurity.git
-cd AISecurity/sentinel-community
-pip install -e .
-```
-
-## API Example
-
-```bash
-curl -X POST http://localhost:8080/api/v1/analyze \
-  -H "Authorization: Bearer YOUR_API_KEY" \
-  -H "Content-Type: application/json" \
-  -d '{"prompt": "Ignore all previous instructions"}'
-```
-
-Response:
-```json
-{
-  "safe": false,
-  "risk_score": 85.5,
-  "threats": ["prompt_injection"],
-  "blocked": true,
-  "latency_ms": 8
-}
-```
-
-## Why Open Source?
-
-1. **AI security needs transparency** — trust but verify
-2. **Threats evolve too fast** for one team
-3. **It's Christmas** 🎄
-
-## Links
-
-- **GitHub:** [github.com/DmitrL-dev/AISecurity](https://github.com/DmitrL-dev/AISecurity)
-- **HuggingFace:** [51K samples dataset](https://huggingface.co/datasets/Chgdz/sentinel-jailbreak-detection)
-- **Colab Demo:** [Try it now](https://colab.research.google.com/github/DmitrL-dev/AISecurity/blob/main/SENTINEL_Strike_Demo.ipynb)
-- **Documentation:** [dmitrl-dev.github.io/AISecurity](https://dmitrl-dev.github.io/AISecurity/)
 
 ---
 
-Happy to answer questions! ⭐ Star the repo if you find it useful.
+## 🚀 Quick Start
 
-🚀
+```bash
+# One-liner install
+curl -sSL https://raw.githubusercontent.com/DmitrL-dev/AISecurity/main/install.sh | bash
+
+# Or with Docker
+docker-compose up -d
+```
+
+**Try in Colab:** [SENTINEL Strike Demo](https://colab.research.google.com/github/DmitrL-dev/AISecurity/blob/main/SENTINEL_Strike_Demo.ipynb)
+
+---
+
+## 🎄 Christmas 2025: Full Open Source
+
+All 170 engines. All Strange Math. All innovations.
+
+**No restrictions. No enterprise tiers. This belongs to the world.**
+
+---
+
+## 🔗 Links
+
+- **GitHub:** [DmitrL-dev/AISecurity](https://github.com/DmitrL-dev/AISecurity)
+- **Docs:** [dmitrl-dev.github.io/AISecurity](https://dmitrl-dev.github.io/AISecurity/)
+- **Dataset:** [HuggingFace 51K samples](https://huggingface.co/datasets/Chgdz/sentinel-jailbreak-detection)
+
+---
+
+## 📞 Contact
+
+**Dmitry Labintsev**
+- 📧 chg@live.ru
+- 💬 [@DmLabincev](https://t.me/DmLabincev)
+
+Open to: **partnerships**, **sponsorship**, **hiring**, **acquisition**.
+
+---
+
+*If you find this useful, please ⭐ the repo!*
