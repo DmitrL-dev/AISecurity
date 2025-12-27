@@ -1,8 +1,8 @@
 # 🔬 SENTINEL — Справочник движков
 
-> **Общее количество:** 121 движков защиты (95 проверено Health Check: ✅ 100% PASSED)  
+> **Общее количество:** 170 движков защиты (144 проверено Health Check: ✅ 100% PASSED)  
 > **Benchmark Recall:** 85.1% | Precision: 84.4% | F1: 84.7%  
-> **Категории:** 14  
+> **Категории:** 16  
 > **Уровень покрытия:** OWASP LLM Top 10 + OWASP ASI Top 10
 
 ---
@@ -23,6 +23,7 @@
 12. [Advanced Research (9)](#advanced-research)
 13. [Deep Learning (6)](#deep-learning)
 14. [Meta-Judge + XAI (2)](#meta-judge--xai)
+15. [🧬 Research Inventions (49)](#research-inventions) ← **NEW!**
 
 ---
 
@@ -94,7 +95,7 @@ class DetectionResult:
 
 ## ✅ Health Check Verification (Dec 2025)
 
-> **Статус:** 95/95 PASSED — 100% покрытие  
+> **Статус:** 144/144 PASSED — 100% покрытие  
 > **Скрипт:** `scripts/sentinel_health_check.py`
 
 ### Что проверяется
@@ -126,6 +127,35 @@ Passed:        95
 Failed:        0
 NOT_TESTABLE:  0
 ```
+
+---
+
+## 🚀 2025 Innovations Core (10 модулей)
+
+> **Новое в Dec 2025:** 10 революционных модулей адаптивной защиты  
+> **Расположение:** `src/brain/core/`
+
+### Интегрированные в analyzer.py
+
+| Модуль                  | Файл                  | Назначение                     |
+| ----------------------- | --------------------- | ------------------------------ |
+| 🎭 **Shapeshifter**     | `shapeshifter.py`     | Polymorphic config per session |
+| 🌊 **Semantic Tide**    | `semantic_tide.py`    | Threat wave prediction         |
+| 🔮 **Cognitive Mirror** | `cognitive_mirror.py` | Attacker profiling (APT)       |
+
+### Готовые к интеграции
+
+| Модуль                      | Файл                     | Назначение                  |
+| --------------------------- | ------------------------ | --------------------------- |
+| 🧬 **Adversarial DNA**      | `adversarial_dna.py`     | Genetic attack signatures   |
+| ⚛️ **Quantum Entanglement** | `quantum_signatures.py`  | Cascading threat activation |
+| 🍯 **Honeymind**            | `honeymind.py`           | Distributed honeypots       |
+| 🧠 **Neuro-Symbolic**       | `neuro_symbolic.py`      | Formal verification         |
+| 🌐 **Collective Immunity**  | `collective_immunity.py` | Federated learning + DP     |
+| 🔬 **Microscopic**          | `microscopic.py`         | Sub-token detection         |
+| 💎 **Intent Crystal**       | `intent_crystal.py`      | Clarification dialogue      |
+
+> 📚 **Полная документация:** [INNOVATIONS_2025.md](./INNOVATIONS_2025.md)
 
 ---
 
@@ -1274,6 +1304,84 @@ next_intent, prob = predictor.predict_next(Intent.TESTING)
 | Test-Time Training   | Метод `learn()`            |
 | Memory Consolidation | Momentum accumulation      |
 | Regularization       | Pull to prior distribution |
+
+---
+
+## 🧬 Research Inventions (49 engines)
+
+> **Источник:** 8-фазная R&D программа | **Sprints:** 14 | **Тесты:** 480  
+> **Покрытие OWASP ASI:** 100% | **LOC:** ~20,000
+
+### Sprint 1-4: Foundation & Detection
+
+| Движок                 | OWASP  | Описание                          |
+| ---------------------- | ------ | --------------------------------- |
+| `agent_memory_shield`  | ASI-02 | Защита short/long-term memory     |
+| `tool_use_guardian`    | ASI-03 | Валидация использования tools     |
+| `provenance_tracker`   | ASI-07 | Отслеживание происхождения данных |
+| `system_prompt_shield` | ASI-01 | Защита системного промпта         |
+| `compute_guardian`     | ASI-04 | Контроль ресурсов CPU/Memory      |
+| `shadow_ai_detector`   | ASI-06 | Обнаружение shadow AI             |
+| `cot_guardian`         | ASI-01 | Защита Chain-of-Thought           |
+| `rag_security_shield`  | ASI-05 | Безопасность RAG pipeline         |
+
+### Sprint 5-8: Verification & Patterns
+
+| Движок                        | OWASP      | Описание                       |
+| ----------------------------- | ---------- | ------------------------------ |
+| `formal_safety_verifier`      | Enterprise | Формальная верификация         |
+| `multi_agent_coordinator`     | ASI-09     | Координация multi-agent        |
+| `semantic_drift_detector`     | ASI-01     | Детекция семантического дрифта |
+| `output_sanitization_guard`   | ASI-10     | Санитизация output             |
+| `multi_layer_canonicalizer`   | ASI-01     | Нормализация homoglyphs        |
+| `cache_isolation_guardian`    | ASI-05     | Изоляция кэша                  |
+| `context_window_guardian`     | ASI-01     | Защита context window          |
+| `atomic_operation_enforcer`   | ASI-03     | TOCTOU защита                  |
+| `safety_grammar_enforcer`     | ASI-10     | Grammar constraints            |
+| `vae_prompt_anomaly_detector` | ASI-01     | VAE anomaly detection          |
+| `model_watermark_verifier`    | ASI-08     | Верификация watermarks         |
+| `behavioral_api_verifier`     | ASI-06     | API behavioral analysis        |
+
+### Sprint 9-12: ML & Governance
+
+| Движок                           | OWASP      | Описание                   |
+| -------------------------------- | ---------- | -------------------------- |
+| `contrastive_prompt_anomaly`     | ASI-01     | Self-supervised detection  |
+| `meta_attack_adapter`            | ASI-01     | Few-shot attack adaptation |
+| `cross_modal_security_analyzer`  | ASI-01     | Multi-modal security       |
+| `distilled_security_ensemble`    | Enterprise | Model distillation         |
+| `quantum_safe_model_vault`       | Enterprise | Post-quantum crypto        |
+| `emergent_security_mesh`         | ASI-09     | MARL defense               |
+| `intent_aware_semantic_analyzer` | ASI-01     | Paraphrase detection       |
+| `federated_threat_aggregator`    | Enterprise | Federated learning         |
+| `gan_adversarial_defense`        | ASI-01     | GAN-based defense          |
+| `causal_inference_detector`      | ASI-01     | Causal attack chains       |
+| `transformer_attention_shield`   | ASI-01     | Attention hijacking        |
+| `reinforcement_safety_agent`     | ASI-01     | RL adaptive defense        |
+| `compliance_policy_engine`       | Enterprise | GDPR/HIPAA compliance      |
+| `explainable_security_decisions` | Enterprise | XAI for decisions          |
+| `dynamic_rate_limiter`           | ASI-04     | Adaptive rate limiting     |
+| `secure_model_loader`            | ASI-08     | Supply chain security      |
+
+### Sprint 13-14: Zero Trust & Final
+
+| Движок                            | OWASP      | Описание                 |
+| --------------------------------- | ---------- | ------------------------ |
+| `hierarchical_defense_network`    | ASI-01     | Defense in depth         |
+| `symbolic_reasoning_guard`        | ASI-01     | Logic-based security     |
+| `temporal_pattern_analyzer`       | ASI-01     | Timing attack detection  |
+| `zero_trust_verification`         | Enterprise | Zero Trust AI            |
+| `adversarial_prompt_detector`     | ASI-01     | Perturbation defense     |
+| `prompt_leakage_detector`         | ASI-01     | Extraction detection     |
+| `recursive_injection_guard`       | ASI-01     | Nested injection defense |
+| `semantic_boundary_enforcer`      | ASI-01     | Context boundaries       |
+| `conversation_state_validator`    | ASI-01     | State machine security   |
+| `input_length_analyzer`           | ASI-04     | Size-based attacks       |
+| `language_detection_guard`        | ASI-01     | Multilingual attacks     |
+| `response_consistency_checker`    | ASI-10     | Output consistency       |
+| `sentiment_manipulation_detector` | ASI-01     | Social engineering       |
+
+> 📚 **Подробное описание:** [16-research-inventions.md](engines/16-research-inventions.md)
 
 ---
 

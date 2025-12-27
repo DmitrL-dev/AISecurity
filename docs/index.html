@@ -135,7 +135,7 @@
     <div class="header">
         <h1>🛡️ SENTINEL Architecture — Interactive Security Flow</h1>
         <div class="stats">
-            <span class="stat">🔧 121 Engines</span>
+            <span class="stat">🔧 170 engines</span>
             <span class="stat">📊 15 Categories</span>
             <span class="stat">✅ 95/95 Health Check</span>
             <span class="stat">🎯 85% F1 Score</span>
@@ -228,7 +228,7 @@
             { data: { id: 'canary', label: '🐤 Canary Tokens\nZero-width chars\nData tracking', type: 'proactive' }, position: { x: 1200, y: 780 } },
 
             // ============ META-JUDGE (Row 7) ============
-            { data: { id: 'metajudge', label: '⚖️ META-JUDGE\n121 engines aggregation\nWeighted voting + ML\nExplainability (XAI)', type: 'judge' }, position: { x: 700, y: 920 } },
+            { data: { id: 'metajudge', label: '⚖️ META-JUDGE\n170 engines aggregation\nWeighted voting + ML\nExplainability (XAI)', type: 'judge' }, position: { x: 700, y: 920 } },
 
             // ============ DECISION (Row 8) ============
             { data: { id: 'safe', label: '✅ SAFE\nscore < 0.5\nForward to LLM', type: 'safe' }, position: { x: 400, y: 1060 } },
@@ -527,7 +527,7 @@
                 
                 await animateEdge('mcpguard', 'zeroday'); await animate('zeroday'); log('→ Zero-Day Forge: no novel patterns');
                 
-                await animateEdge('zeroday', 'metajudge'); await animate('metajudge'); log('→ META-JUDGE aggregating 121 engines...', 'info');
+                await animateEdge('zeroday', 'metajudge'); await animate('metajudge'); log('→ META-JUDGE aggregating 170 engines...', 'info');
                 await new Promise(r => setTimeout(r, 600));
                 showScore(0.12, false);
                 log('⚖️ Final Score: 0.12 → SAFE', 'safe');

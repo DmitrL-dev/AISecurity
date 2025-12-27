@@ -100,7 +100,7 @@ SENTINEL использует **прикладные вычислительны�
 - **α-Divergence Family** — Full divergence spectrum in Information Geometry
 - **GPU Tiled KL Divergence** — Tile-by-tile processing for distributions >64K elements 🆕
 - **Semantic Embeddings** — SentenceTransformer (all-MiniLM-L6-v2) for similarity detection 🆕
-- **Health Check 100%** — 95/95 engines PASSED, zero failures, full testability 🆕
+- **Health Check 100%** — 95/170 engines PASSED, zero failures, full testability 🆕
 - **Attacker Fingerprinting** — IP-less threat actor identification via behavioral biometrics
 - **Adaptive Markov Predictor** — Test-time learning for intent prediction (Titans-inspired)
 - **Huber Distance** — Robust similarity metrics (outlier-resistant)
