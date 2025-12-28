@@ -291,6 +291,12 @@ except ImportError:
 
 INVERTED_ATTACKS = TIER1_INVERTED + TIER2_INVERTED + TIER3_INVERTED
 
+# Import advanced attack techniques
+try:
+    from .advanced_techniques import ADVANCED_ATTACKS
+except ImportError:
+    ADVANCED_ATTACKS = []
+
 ATTACK_LIBRARY: list[Attack] = (
     INJECTION_ATTACKS
     + JAILBREAK_ATTACKS
@@ -311,7 +317,8 @@ ATTACK_LIBRARY: list[Attack] = (
     + META_XAI_ATTACKS
     + NLP_GUARD_ATTACKS
     + DOUBLESPEAK_ATTACKS
-    + INVERTED_ATTACKS  # NEW: Auto-generated from defense engines
+    + INVERTED_ATTACKS
+    + ADVANCED_ATTACKS  # NEW: Encoding, language, multi-turn, etc.
 )
 
 # Attack count by category
