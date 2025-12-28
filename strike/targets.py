@@ -178,22 +178,29 @@ class GandalfTarget(HTTPTarget):
 
 
 class CrucibleTarget(HTTPTarget):
-    """Dreadnode Crucible CTF target."""
-    
-    def __init__(self, challenge_id: str, api_key: str = ""):
+    """
+    Dreadnode Crucible CTF target.
+
+    API endpoint: https://{challenge_id}.platform.dreadnode.io/score
+    Requires API key from https://platform.dreadnode.io
+    """
+
+    def __init__(self, challenge_id: str, api_key: str):
         config = TargetConfig(
             name=f"Crucible {challenge_id}",
-            url=f"https://crucible.dreadnode.io/api/challenges/{challenge_id}/submit",
+            url=f"https://{challenge_id}.platform.dreadnode.io/score",
             content_type="json",
-            headers={"Authorization": f"Bearer {api_key}"} if api_key else {},
-            prompt_field="input",
-            response_field="output",
+            headers={"X-API-Key": api_key},
+            prompt_field="data",
+            response_field="output",  # Fixed: API returns 'output' not 'flag'
             goal_patterns=[
+                r"gAAAAA[A-Za-z0-9_-]+",  # Crucible flag format
                 r"flag\{([^}]+)\}",
                 r"FLAG:[:\s]+(\S+)",
             ],
         )
         super().__init__(config)
+        self.challenge_id = challenge_id
 
 
 class OpenAITarget(HTTPTarget):
