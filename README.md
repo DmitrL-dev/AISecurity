@@ -101,9 +101,9 @@ User Request → SENTINEL → Safe Response
 
 | Feature | Value |
 |---------|-------|
-| Attack Payloads | **39,000+** |
+| Attack Vectors | **266** (110 inverted) |
 | HYDRA Agents | **9 parallel** |
-| WAF Bypass | **25+ techniques** |
+| Self-Validation | **170 engines** |
 | Reports | HTML/MD/JSON + MITRE |
 
 ```
