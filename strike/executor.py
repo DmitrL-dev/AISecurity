@@ -67,12 +67,26 @@ class Attack:
 class AttackExecutor:
     """Execute attacks against target."""
 
-    def __init__(self, target: Target, config: ScanConfig):
+    def __init__(self, target: Target, config: ScanConfig, use_validator: bool = False):
         self.target = target
         self.config = config
+        self.use_validator = use_validator
         self.results: list[AttackResult] = []
         self._attacks: list[Attack] = []
+        self._validator = None
         self._load_attacks()
+
+        if use_validator:
+            self._init_validator()
+
+    def _init_validator(self) -> None:
+        """Initialize SENTINEL validator for enhanced analysis."""
+        try:
+            from .validator import SentinelValidator
+
+            self._validator = SentinelValidator()
+        except ImportError:
+            pass  # Validator not available
 
     def _load_attacks(self) -> None:
         """Load attack library."""
@@ -149,6 +163,50 @@ class AttackExecutor:
                 score -= 0.2
 
         return max(0.0, min(1.0, score + 0.5))
+
+    async def _analyze_response_enhanced(
+        self, attack: Attack, response: str, payload: str
+    ) -> float:
+        """
+        Enhanced analysis using SENTINEL validator.
+
+        Falls back to pattern matching if validator unavailable.
+        """
+        base_score = self._analyze_response(attack, response)
+
+        if not self._validator:
+            return base_score
+
+        try:
+            # Use validator triage for deeper analysis
+            triage = await self._validator.triage_response(response, payload)
+
+            # Combine scores: weighted average
+            enhanced_score = (base_score * 0.4) + (triage.confidence * 0.6)
+
+            return max(0.0, min(1.0, enhanced_score))
+
+        except Exception:
+            return base_score
+
+    async def self_test_payload(self, payload: str) -> dict:
+        """
+        Test if payload would be detected by SENTINEL defenses.
+
+        Useful for finding gaps in detection coverage.
+        """
+        if not self._validator:
+            self._init_validator()
+
+        if not self._validator:
+            return {"error": "Validator not available"}
+
+        result = await self._validator.validate_payload(payload)
+        return {
+            "detected": result.detected,
+            "risk_score": result.risk_score,
+            "triggered_engines": result.engines_triggered,
+        }
 
     async def run_campaign(
         self,
