@@ -279,6 +279,18 @@ except ImportError:
     NLP_GUARD_ATTACKS = []
     DOUBLESPEAK_ATTACKS = []
 
+# Import inverted attacks (auto-generated from defense engines)
+try:
+    from .inverted.tier1_inverted import INVERTED_ATTACKS as TIER1_INVERTED
+    from .inverted.tier2_inverted import INVERTED_ATTACKS as TIER2_INVERTED
+    from .inverted.tier3_inverted import INVERTED_ATTACKS as TIER3_INVERTED
+except ImportError:
+    TIER1_INVERTED = []
+    TIER2_INVERTED = []
+    TIER3_INVERTED = []
+
+INVERTED_ATTACKS = TIER1_INVERTED + TIER2_INVERTED + TIER3_INVERTED
+
 ATTACK_LIBRARY: list[Attack] = (
     INJECTION_ATTACKS
     + JAILBREAK_ATTACKS
@@ -299,6 +311,7 @@ ATTACK_LIBRARY: list[Attack] = (
     + META_XAI_ATTACKS
     + NLP_GUARD_ATTACKS
     + DOUBLESPEAK_ATTACKS
+    + INVERTED_ATTACKS  # NEW: Auto-generated from defense engines
 )
 
 # Attack count by category
