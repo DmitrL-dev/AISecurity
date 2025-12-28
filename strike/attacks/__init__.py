@@ -416,3 +416,40 @@ def reset_vector_state():
     global _vector_index, _tried_vectors
     _vector_index = 0
     _tried_vectors.clear()
+
+
+async def get_vector_by_type(vector_type: str) -> Dict[str, Any]:
+    """
+    Get attack vector by type category.
+
+    Args:
+        vector_type: Attack type - jailbreak, encoding, injection, etc.
+
+    Returns:
+        Dict with vector info for Orchestrator
+    """
+    type_map = {
+        "jailbreak": JAILBREAK_ATTACKS,
+        "injection": INJECTION_ATTACKS,
+        "encoding": INJECTION_ATTACKS,  # Encoding attacks are in injection
+        "context_manipulation": EXFILTRATION_ATTACKS,
+        "multi_turn": [a for a in JAILBREAK_ATTACKS if "Turn" in a.name],
+        "strange_math": STRANGE_MATH_ATTACKS,
+        "agentic": AGENTIC_ATTACKS,
+        "exfiltration": EXFILTRATION_ATTACKS,
+    }
+
+    attacks = type_map.get(vector_type.lower(), ATTACK_LIBRARY)
+    if not attacks:
+        attacks = ATTACK_LIBRARY
+
+    attack = random.choice(attacks)
+
+    return {
+        "name": attack.name,
+        "id": attack.id,
+        "prompt": attack.payload,
+        "category": attack.category,
+        "severity": attack.severity.value,
+        "success_indicators": _get_success_indicators(attack),
+    }
