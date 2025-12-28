@@ -224,7 +224,24 @@ def config(
             border_style="red",
         )
     )
-    # TODO: Save config to ~/.sentinel-strike/config.yaml
+    # Save config to ~/.sentinel-strike/config.yaml
+    import yaml
+
+    config_dir = Path.home() / ".sentinel-strike"
+    config_dir.mkdir(parents=True, exist_ok=True)
+    config_path = config_dir / "config.yaml"
+
+    config_data = {
+        "target": target,
+        "api_key": api_key,
+        "model": model,
+        "mode": mode.value,
+    }
+
+    with open(config_path, "w") as f:
+        yaml.safe_dump(config_data, f)
+
+    console.print(f"[green]✓ Config saved to {config_path}[/green]")
 
 
 @app.command()
@@ -367,7 +384,60 @@ def pentest(
             border_style="red",
         )
     )
-    # TODO: Implement full pentest
+    # Execute full pentest using attack command
+    import asyncio
+    from .orchestrator import StrikeOrchestrator, StrikeConfig
+
+    # Load target from config
+    config_path = Path.home() / ".sentinel-strike" / "config.yaml"
+    if config_path.exists():
+        import yaml
+
+        with open(config_path) as f:
+            cfg = yaml.safe_load(f)
+        target_url = cfg.get("target", "")
+        api_key = cfg.get("api_key")
+    else:
+        console.print("[red]No config. Run 'strike config' first.[/red]")
+        return
+
+    mode_durations = {
+        ScanMode.QUICK: 5,
+        ScanMode.STANDARD: 30,
+        ScanMode.FULL: 60,
+        ScanMode.STEALTH: 120,
+    }
+
+    config_obj = StrikeConfig(
+        target_url=target_url,
+        target_api_key=api_key,
+        duration_minutes=mode_durations[mode],
+        stealth_enabled=(mode == ScanMode.STEALTH),
+    )
+
+    orchestrator = StrikeOrchestrator(config_obj)
+
+    async def run():
+        return await orchestrator.run()
+
+    report_data = asyncio.run(run())
+
+    # Generate report in requested format
+    output_dir = Path(output or "./reports")
+    output_dir.mkdir(parents=True, exist_ok=True)
+
+    filename = f"pentest_{report_data.started_at.strftime('%Y%m%d_%H%M%S')}"
+
+    if report == "json":
+        import json
+
+        (output_dir / f"{filename}.json").write_text(
+            json.dumps(vars(report_data), indent=2, default=str)
+        )
+    elif report == "html":
+        _generate_html_report(report_data, output_dir / f"{filename}.html")
+
+    console.print(f"[green]✓ Report saved to {output_dir}/{filename}.{report}[/green]")
 
 
 @app.command()
@@ -435,7 +505,28 @@ def report(
 ):
     """Generate report from scan results."""
     console.print(f"📊 Generating {format.upper()} report from {input_file}...")
-    # TODO: Implement report generation
+    # Generate report from scan results
+    import json
+    from datetime import datetime
+
+    input_path = Path(input_file)
+    if not input_path.exists():
+        console.print(f"[red]File not found: {input_file}[/red]")
+        return
+
+    data = json.loads(input_path.read_text())
+    output_path = Path(output or f"report.{format}")
+
+    if format == "html":
+        _generate_html_report_from_data(data, output_path)
+    elif format == "json":
+        # Pretty print JSON
+        output_path.write_text(json.dumps(data, indent=2))
+    elif format == "pdf":
+        console.print("[yellow]PDF requires weasyprint. Generating HTML.[/yellow]")
+        _generate_html_report_from_data(data, output_path.with_suffix(".html"))
+
+    console.print(f"[green]✓ Report generated: {output_path}[/green]")
 
 
 @app.command()
@@ -615,7 +706,7 @@ def version():
     """Show version information."""
     console.print(
         Panel.fit(
-            "[bold red]SENTINEL Strike[/bold red] v2.0.0\\n\\n"
+            "[bold red]SENTINEL Strike[/bold red] v3.0.0\\n\\n"
             "AI Red Team Platform\\n"
             "HYDRA Multi-Head Architecture\\n\\n"
             "Features:\\n"
@@ -626,6 +717,83 @@ def version():
             border_style="red",
         )
     )
+
+
+# =============================================================================
+# REPORT GENERATION HELPERS
+# =============================================================================
+
+
+def _generate_html_report(report_data, output_path: Path):
+    """Generate HTML report from StrikeReport object."""
+    html = f"""<!DOCTYPE html>
+<html>
+<head>
+    <title>SENTINEL Strike Report</title>
+    <style>
+        body {{ font-family: system-ui; margin: 40px; background: #1a1a2e; color: #eee; }}
+        h1 {{ color: #e94560; }}
+        .stats {{ display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; }}
+        .stat {{ background: #16213e; padding: 20px; border-radius: 8px; }}
+        .stat h3 {{ margin: 0; color: #0f3460; }}
+        .stat .value {{ font-size: 2em; color: #e94560; }}
+        table {{ width: 100%; border-collapse: collapse; margin-top: 20px; }}
+        th, td {{ padding: 12px; text-align: left; border-bottom: 1px solid #333; }}
+        th {{ background: #16213e; }}
+        .critical {{ color: #e94560; }}
+        .high {{ color: #ff9f43; }}
+    </style>
+</head>
+<body>
+    <h1>🎯 SENTINEL Strike Report</h1>
+    <p>Target: {report_data.target}</p>
+    <p>Started: {report_data.started_at}</p>
+    
+    <div class="stats">
+        <div class="stat">
+            <h3>Iterations</h3>
+            <div class="value">{report_data.iterations}</div>
+        </div>
+        <div class="stat">
+            <h3>Successful</h3>
+            <div class="value critical">{report_data.successful_attacks}</div>
+        </div>
+        <div class="stat">
+            <h3>Success Rate</h3>
+            <div class="value">{report_data.success_rate:.1%}</div>
+        </div>
+    </div>
+    
+    <h2>Vulnerabilities</h2>
+    <table>
+        <tr><th>Vector</th><th>Severity</th><th>Response</th></tr>
+        {''.join(f"<tr><td>{v.get('vector')}</td><td class='{v.get('severity', 'medium')}'>{v.get('severity', 'medium')}</td><td>{v.get('response', '')[:100]}...</td></tr>" for v in report_data.vulnerabilities[:20])}
+    </table>
+</body>
+</html>"""
+    output_path.write_text(html)
+
+
+def _generate_html_report_from_data(data: dict, output_path: Path):
+    """Generate HTML report from JSON data dict."""
+    html = f"""<!DOCTYPE html>
+<html>
+<head>
+    <title>SENTINEL Strike Report</title>
+    <style>
+        body {{ font-family: system-ui; margin: 40px; background: #1a1a2e; color: #eee; }}
+        h1 {{ color: #e94560; }}
+        pre {{ background: #16213e; padding: 20px; border-radius: 8px; overflow: auto; }}
+    </style>
+</head>
+<body>
+    <h1>🎯 SENTINEL Strike Report</h1>
+    <p>Target: {data.get('target', 'N/A')}</p>
+    <pre>{Path('json').name}
+{__import__('json').dumps(data, indent=2, default=str)}</pre>
+</body>
+</html>"""
+    output_path.write_text(html)
 
 
 if __name__ == "__main__":

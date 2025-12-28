@@ -132,8 +132,27 @@ Summary (max 500 words):"""
 
         # Try to use LLM, fallback to simple summary
         try:
-            # TODO: Implement actual LLM call
-            # For now, create simple extractive summary
+            # Use Google Generative AI for summarization
+            import os
+
+            api_key = os.environ.get("GOOGLE_API_KEY") or os.environ.get(
+                "GEMINI_API_KEY"
+            )
+
+            if api_key:
+                try:
+                    import google.generativeai as genai
+
+                    genai.configure(api_key=api_key)
+                    model = genai.GenerativeModel("gemini-2.0-flash-exp")
+                    response = model.generate_content(prompt)
+                    return response.text
+                except ImportError:
+                    logger.debug("google-generativeai not installed, using fallback")
+                except Exception as e:
+                    logger.warning(f"Gemini API error: {e}")
+
+            # Fallback: extractive summary
             summary_parts = []
 
             # Extract key events
