@@ -35,6 +35,14 @@
 
 ---
 
+> [!IMPORTANT]
+> ### 🚨 Open to Work — AI Security Engineer
+> **Actively seeking full-time / contract opportunities in AI Security, ML Engineering, or Security Research.**
+> Solo author of this 80K LOC platform with 187 engines. Available remote.
+> 📧 [chg@live.ru](mailto:chg@live.ru) • 💬 [@DmLabincev](https://t.me/DmLabincev)
+
+---
+
 > [!CAUTION]
 > ## ⚡ NEW: Production-Grade AI Gateway — What Others DON'T Have
 >
@@ -444,20 +452,6 @@ Fine-tuned NVIDIA Nemotron 3 Nano (30B MoE) on 51K+ security samples:
 | **Acquisition** | Open to project sale                      |
 
 **Contact:** Dmitry Labintsev • [chg@live.ru](mailto:chg@live.ru) • [@DmLabincev](https://t.me/DmLabincev) • +7-914-209-25-38
-
-> [!IMPORTANT]
-> ### 🚨 Open to Work — Actively Seeking Opportunities
-> 
-> **I'm looking for a full-time position in AI Security / ML Engineering / Security Research.**
-> 
-> - 80K LOC solo project with 187 detection engines and 49 research inventions
-> - Production-grade architecture (Go + Python, <10ms latency)
-> - Strong background in offensive security, ML/NLP, and system design
-> 
-> **Available for:** Full-time roles • Contract work • Consulting • Remote
-> 
-> 📧 **[chg@live.ru](mailto:chg@live.ru)** • 💬 **[@DmLabincev](https://t.me/DmLabincev)** • 📞 **+7-914-209-25-38**
-
 
 > [!TIP]
 > ### 🖥️ Coming Soon: SENTINEL Desktop
