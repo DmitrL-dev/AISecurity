@@ -445,6 +445,20 @@ Fine-tuned NVIDIA Nemotron 3 Nano (30B MoE) on 51K+ security samples:
 
 **Contact:** Dmitry Labintsev • [chg@live.ru](mailto:chg@live.ru) • [@DmLabincev](https://t.me/DmLabincev) • +7-914-209-25-38
 
+> [!IMPORTANT]
+> ### 🚨 Open to Work — Actively Seeking Opportunities
+> 
+> **I'm looking for a full-time position in AI Security / ML Engineering / Security Research.**
+> 
+> - 80K LOC solo project with 187 detection engines and 49 research inventions
+> - Production-grade architecture (Go + Python, <10ms latency)
+> - Strong background in offensive security, ML/NLP, and system design
+> 
+> **Available for:** Full-time roles • Contract work • Consulting • Remote
+> 
+> 📧 **[chg@live.ru](mailto:chg@live.ru)** • 💬 **[@DmLabincev](https://t.me/DmLabincev)** • 📞 **+7-914-209-25-38**
+
+
 > [!TIP]
 > ### 🖥️ Coming Soon: SENTINEL Desktop
 > **Free protection for everyday users!**  
