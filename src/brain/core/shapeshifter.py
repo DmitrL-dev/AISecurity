@@ -5,7 +5,7 @@ Generates unique security configurations per session to prevent
 attackers from learning and bypassing the detection system.
 
 Key Features:
-- Random engine subset (80-121 engines per session)
+- Random engine subset (80-187 engines per session)
 - Randomized thresholds (±15% from baseline)
 - Random response styles
 - Artificial latency jitter (anti-timing attacks)

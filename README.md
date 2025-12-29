@@ -6,11 +6,11 @@
 
 <p align="center">
   <strong>🛡️ Defense + ⚔️ Offense — Complete AI Security Suite</strong><br>
-  170 Detection Engines • 49 R&D Inventions • 936+ Tests • Production-Grade
+  187 Detection Engines • 49 R&D Inventions • 936+ Tests • Production-Grade
 </p>
 
 <p align="center">
-  <img src="https://img.shields.io/badge/🛡️_DEFENSE-170_Engines-brightgreen?style=for-the-badge" alt="Defense">
+  <img src="https://img.shields.io/badge/🛡️_DEFENSE-187_Engines-brightgreen?style=for-the-badge" alt="Defense">
   <img src="https://img.shields.io/badge/🧬_R%26D-49_Inventions-purple?style=for-the-badge" alt="R&D">
   <img src="https://img.shields.io/badge/Recall-85.1%25-blue?style=for-the-badge" alt="Recall">
   <img src="https://img.shields.io/badge/Tests-936+-orange?style=for-the-badge" alt="Tests">
@@ -64,7 +64,7 @@
 > ```bash
 > curl -sSL https://raw.githubusercontent.com/DmitrL-dev/AISecurity/main/install.sh | bash
 > ```
-> **5 services, 170 engines, 5 minutes.** See [QUICKSTART.md](./QUICKSTART.md) for details.
+> **5 services, 187 engines, 5 minutes.** See [QUICKSTART.md](./QUICKSTART.md) for details.
 
 ---
 
@@ -80,7 +80,7 @@
 
 | Feature | Value |
 |---------|-------|
-| Detection Engines | **170** |
+| Detection Engines | **187** |
 | R&D Inventions | **49** |
 | Recall | **85.1%** |
 | Latency | **<10ms** |
@@ -104,7 +104,7 @@ User Request → SENTINEL → Safe Response
 | Attack Vectors | **1,800+** (84 categories) |
 | Crucible CTF | **82/82** ✅ 200+ flags |
 | HYDRA Agents | **9 parallel** |
-| Self-Validation | **170 engines** |
+| Self-Validation | **187 engines** |
 
 ```
 Strike → Target AI → Report
@@ -141,7 +141,7 @@ Strike → Target AI → Report
 > | **Shapeshifter Defense** | Static configs, easy to reverse |
 >
 > ```
-> Client → [Go Gateway] → gRPC → [Python Brain] → 170 Engines → Meta-Judge
+> Client → [Go Gateway] → gRPC → [Python Brain] → 187 Engines → Meta-Judge
 >               ↓                        ↓                          ↓
 >          PoW + Auth           Strange Math™              Final Verdict
 > ```
@@ -171,7 +171,7 @@ We analyzed **2025's most dangerous attack vectors** and built defenses before t
 
 | Metric | Before | After | Impact |
 |--------|--------|-------|--------|
-| **Engine Count** | 131 (documented) | **170** (verified) | 🧹 Clean audit |
+| **Engine Count** | 131 (documented) | **187** (verified) | 🧹 Clean audit |
 | **2025 Attack Coverage** | 55% | **~85%** | 🛡️ +30% protection |
 | **OWASP Agentic 2026** | — | **10/10** | 🎯 Full coverage |
 | **New Patterns** | — | **+77** | 🎯 Proactive defense |
@@ -187,6 +187,9 @@ We analyzed **2025's most dangerous attack vectors** and built defenses before t
 | 🆕 **agentic_monitor.py** | **ASI07** Inter-agent communication security | NEW (Dec 26) |
 | 🆕 **injection.py** | **Policy Puppetry** (XML/JSON/INI bypass) | NEW (Dec 26) |
 | 🆕 **virtual_context.py** | ChatML/Llama/Anthropic separator exploits | Production |
+| 🔄 **synced/** | **13 Attack-Defense** detectors (Doublespeak, Crescendo, Skeleton Key, etc.) | NEW (Dec 29) |
+| 🔄 **token_cost_asymmetry.py** | **DoS mitigation** — 114.8x attack/defense asymmetry | NEW (Dec 29) |
+| 🔄 **prompt_self_replication.py** | **Worm-style** self-replicating prompts | NEW (Dec 29) |
 | 📈 **injection.py** | Crescendo multi-turn + Bidi FlipAttack | Enhanced |
 | 🧠 **agentic_monitor.py** | Memory poisoning + delayed triggers | Enhanced |
 | 🛡️ **rag_guard.py** | GIFAR/PDF+HTML polyglot detection | Enhanced |
@@ -201,7 +204,7 @@ We analyzed **2025's most dangerous attack vectors** and built defenses before t
 
 | Component | Purpose | Key Features |
 |-----------|---------|--------------|
-| 🛡️ **SENTINEL Defense** | Protect AI in production | 170 detection engines, <10ms latency, OWASP coverage |
+| 🛡️ **SENTINEL Defense** | Protect AI in production | 187 detection engines, <10ms latency, OWASP coverage |
 | 🐉 **Strike Offense** | Test AI before deployment | 39K+ payloads, HYDRA parallel attacks, AI-powered recon |
 
 ### The Threats We Address
@@ -223,7 +226,7 @@ We analyzed **2025's most dangerous attack vectors** and built defenses before t
 <td width="50%">
 
 **🔬 Advanced Detection (Defense)**
-- 170 specialized detection engines
+- 187 specialized detection engines
 - Strange Math™ (TDA, Sheaf, Hyperbolic)
 - Canary Tokens for leak detection
 - Machine learning + rule-based hybrid
@@ -391,7 +394,7 @@ Fake LLM endpoints (gpt-5-turbo, claude-4-opus) for zero-day collection.
 - **Differential Privacy Logging** — GDPR-compliant traffic analysis
 
 ```
-Client → [Go Gateway] → gRPC → [Python Brain] → 170 Engines
+Client → [Go Gateway] → gRPC → [Python Brain] → 187 Engines
               ↓                        ↓
          PoW + Auth            Meta-Judge + Math
 ```
@@ -510,7 +513,7 @@ fetch('https://cdn.jsdelivr.net/gh/DmitrL-dev/AISecurity@latest/signatures/jailb
 > [!IMPORTANT]
 > ## 🎄 Christmas 2025: FULL OPEN SOURCE RELEASE
 >
-> **All 170 detection engines. All Strange Math. All geometry. All innovations.**
+> **All 187 detection engines. All Strange Math. All geometry. All innovations.**
 >
 > No restrictions. No enterprise tiers. No hidden features.
 >
@@ -554,7 +557,7 @@ fetch('https://cdn.jsdelivr.net/gh/DmitrL-dev/AISecurity@latest/signatures/jailb
 </p>
 
 > **Test your AI before attackers do!**  
-> The offensive counterpart to SENTINEL — same 170 engines, attack mode.
+> The offensive counterpart to SENTINEL — same 187 engines, attack mode.
 
 > [!CAUTION]
 > ## 🔥 INDUSTRIAL CAMPAIGN RESULTS — December 2025
@@ -672,7 +675,7 @@ docker run --rm sentinel-strike recon URL           # Reconnaissance
 
 | Document | Description |
 |----------|-------------|
-| [All 170 engines (EN)](./docs/reference/engines-en.md) | Complete engine reference |
+| [All 187 engines (EN)](./docs/reference/engines-en.md) | Complete engine reference |
 | [**🔬 Expert Deep Dive (EN)**](./docs/reference/engines-expert-deep-dive-en.md) | **PhD-level mathematical foundations** |
 | [Engine Categories](./docs/reference/engines/) | Detailed per-category documentation |
 
@@ -804,7 +807,7 @@ python benchmarks/benchmark_plotly.py   # HTML (interactive)
 SENTINEL follows a **microservices architecture** with clear separation of concerns:
 
 <p align="center">
-  <img src="./assets/architecture.png" alt="SENTINEL Architecture - 170 Detection Engines" width="800">
+  <img src="./assets/architecture.png" alt="SENTINEL Architecture - 187 Detection Engines" width="800">
 </p>
 
 <details>
@@ -831,7 +834,7 @@ flowchart TB
             I2["Semantic Tide"]
             I3["Cognitive Mirror"]
         end
-        subgraph Engines["170 DETECTION ENGINES"]
+        subgraph Engines["187 DETECTION ENGINES"]
             subgraph Classic["Classic Detection (9)"]
                 C1["injection"]
                 C2["yara_engine"]
@@ -1004,7 +1007,7 @@ flowchart TB
 | **Cache**     | Redis            | Session state, rate limiting, behavioral profiles          |
 | **Secrets**   | HashiCorp Vault  | Zero-trust secret management                               |
 
-### 170 DETECTION ENGINES — Industry's Most Comprehensive Suite
+### 187 DETECTION ENGINES — Industry's Most Comprehensive Suite
 
 | Category                     | Count | Purpose                                   |
 | ---------------------------- | ----- | ----------------------------------------- |
@@ -1021,7 +1024,7 @@ flowchart TB
 | ⚖️ **Meta & Analytics**      | 6     | Meta-Judge, XAI, fingerprinting, intent   |
 | ✅ **Compliance**            | 2     | MITRE mapping, compliance checks          |
 | 🧬 **R&D Inventions**        | 49    | Sprints 1-14: Memory Shield, CoT Guard, etc. |
-|                              | **170**| **~65,000 LOC total**                     |
+|                              | **187**| **~65,000 LOC total**                     |
 
 > 📚 **Full details:** [engines-expert-deep-dive-en.md](./docs/reference/engines-expert-deep-dive-en.md) — PhD-level documentation
 

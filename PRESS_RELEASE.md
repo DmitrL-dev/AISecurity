@@ -9,7 +9,7 @@
 
 ### The Only Open-Source AI Security Gateway Ready for Production
 
-**SENTINEL** announces the release of the world's most comprehensive open-source AI security platform, featuring **170 detection engines**, **49 unique research inventions**, and an **industry-first production-grade Go gateway**.
+**SENTINEL** announces the release of the world's most comprehensive open-source AI security platform, featuring **187 detection engines**, **49 unique research inventions**, and an **industry-first production-grade Go gateway**.
 
 ---
 
@@ -32,7 +32,7 @@ While competitors offer Python-only demos with 50-200ms latency, SENTINEL delive
 
 | Metric | Value |
 |--------|-------|
-| **Detection Engines** | 170 |
+| **Detection Engines** | 187 |
 | **R&D Inventions** | 49 (prior art, unpatentable) |
 | **Unit Tests** | 936+ passing |
 | **Lines of Code** | ~65,000 |
@@ -76,7 +76,7 @@ By open-sourcing first, we established **prior art** that prevents anyone from p
 ## ⚡ Production Gateway Architecture
 
 ```
-Client → [Go Gateway] → gRPC → [Python Brain] → 170 Engines → Meta-Judge
+Client → [Go Gateway] → gRPC → [Python Brain] → 187 Engines → Meta-Judge
               ↓                        ↓                          ↓
          PoW + Auth           Strange Math™              Final Verdict
 ```
@@ -103,7 +103,7 @@ The offensive counterpart for testing AI systems before attackers do:
 
 ## 🎄 Christmas 2025: Full Open Source
 
-**All 170 engines. All Strange Math. All geometry. All innovations.**
+**All 187 engines. All Strange Math. All geometry. All innovations.**
 
 No restrictions. No enterprise tiers. No hidden features.
 

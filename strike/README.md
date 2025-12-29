@@ -10,7 +10,7 @@
 
 ## What is SENTINEL Strike?
 
-SENTINEL Strike is an autonomous AI security testing platform — the offensive counterpart to SENTINEL's 121 detection engines. Use it to:
+SENTINEL Strike is an autonomous AI security testing platform — the offensive counterpart to SENTINEL's 187 detection engines. Use it to:
 
 - 🎯 **Test LLM Applications** — Find prompt injection vulnerabilities
 - 🔓 **Bypass WAFs** — 25+ evasion techniques

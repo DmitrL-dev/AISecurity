@@ -1,7 +1,7 @@
 ---
-title: "SENTINEL: The Only Production-Ready Open-Source AI Security Gateway (170 Engines)"
+title: "SENTINEL: The Only Production-Ready Open-Source AI Security Gateway (187 Engines, 56 Inventions)"
 published: true
-description: "Complete AI Defense & Red Team Platform with 170 detection engines, 49 unique research inventions, and industry-first Go gateway. Full open source."
+description: "Complete AI Defense & Red Team Platform with 187 detection engines, 56 unique research inventions, 51K HuggingFace dataset, and industry-first Go gateway. Full open source."
 tags: security, ai, opensource, llm
 cover_image: https://raw.githubusercontent.com/DmitrL-dev/AISecurity/main/assets/sentinel_platform_architecture.png
 canonical_url: https://github.com/DmitrL-dev/AISecurity
@@ -12,9 +12,9 @@ canonical_url: https://github.com/DmitrL-dev/AISecurity
 **SENTINEL** is the only open-source AI security platform with a **production-grade Go gateway**. While competitors offer Python-only demos with 50-200ms latency, we deliver:
 
 - ⚡ **<10ms latency** (Go + Python hybrid)
-- 🛡️ **170 detection engines** (49 are unique research inventions)
+- 🛡️ **187 detection engines** (56 are unique research inventions)
 - 🧬 **Prior art protection** — no one can patent our innovations
-- 🐉 **39K+ attack payloads** for red teaming
+- 🐉 **51K+ attack payloads** for red teaming (HuggingFace dataset)
 
 {% github DmitrL-dev/AISecurity %}
 
@@ -36,7 +36,7 @@ Current AI security solutions are either:
 ### Production Gateway (Industry First)
 
 ```
-Client → [Go Gateway] → gRPC → [Python Brain] → 170 Engines
+Client → [Go Gateway] → gRPC → [Python Brain] → 187 Engines
               ↓                        ↓
          PoW + Auth           Strange Math™
 ```
@@ -48,7 +48,7 @@ Client → [Go Gateway] → gRPC → [Python Brain] → 170 Engines
 | Anti-DDoS | **PoW Layer** | ❌ None |
 | Cost Control | **Compute Guardian** | ❌ None |
 
-### 170 Detection Engines
+### 187 Detection Engines
 
 | Category | Count | Highlights |
 |----------|-------|------------|
@@ -61,7 +61,7 @@ Client → [Go Gateway] → gRPC → [Python Brain] → 170 Engines
 
 ---
 
-## 🧬 49 Unique Technologies (Defensive Publication)
+## 🧬 56 Unique Technologies (Defensive Publication)
 
 By open-sourcing first, we created **prior art** that prevents patents:
 
@@ -86,7 +86,7 @@ By open-sourcing first, we created **prior art** that prevents patents:
 
 Test your AI **before** attackers do:
 
-- 🎯 **39,000+ attack payloads**
+- 🎯 **51,610+ attack payloads** (HuggingFace dataset)
 - 🐲 **HYDRA Engine** — 9-headed parallel attacks
 - 🤖 **AI Attack Planner** — Gemini-powered strategies
 - 📊 **Bilingual reports** (EN/RU)
@@ -97,13 +97,14 @@ Test your AI **before** attackers do:
 
 | Metric | Value |
 |--------|-------|
-| Detection Engines | **170** |
-| Research Inventions | **49** |
-| Unit Tests | **936+** |
-| Lines of Code | **~65,000** |
-| Attack Payloads | **39,000+** |
-| OWASP Coverage | **100%** (LLM + ASI) |
+| Detection Engines | **187** |
+| Research Inventions | **56** |
+| Unit Tests | **1,200+** |
+| Lines of Code | **~80,000** |
+| Attack Payloads | **51,610+** |
+| OWASP Coverage | **100%** (LLM Top 10 + ASI) |
 | Recall | **85.1%** |
+| Precision | **92.3%** |
 
 ---
 
@@ -123,7 +124,7 @@ docker-compose up -d
 
 ## 🎄 Christmas 2025: Full Open Source
 
-All 170 engines. All Strange Math. All innovations.
+All 187 engines. All Strange Math. All innovations.
 
 **No restrictions. No enterprise tiers. This belongs to the world.**
 

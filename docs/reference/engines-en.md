@@ -1,6 +1,6 @@
 # 🔬 SENTINEL — Engine Reference Guide
 
-> **Total Engines:** 170 protection engines (144 verified via Health Check: ✅ 100% PASSED)  
+> **Total Engines:** 187 protection engines (144 verified via Health Check: ✅ 100% PASSED)  
 > **Benchmark Recall:** 85.1% | Precision: 84.4% | F1: 84.7%  
 > **Categories:** 16  
 > **Coverage:** OWASP LLM Top 10 + OWASP ASI Top 10
@@ -39,7 +39,7 @@
 │  ┌───────────────────────────────────────────────────────────────┐  │
 │  │                      SentinelAnalyzer                          │  │
 │  │                                                                │  │
-│  │   Input → [Engine 1] → [Engine 2] → ... → [Engine 121] → Meta-Judge
+│  │   Input → [Engine 1] → [Engine 2] → ... → [Engine 187] → Meta-Judge
 │  │              ↓              ↓                    ↓              │  │
 │  │           Score 1       Score 2            Score 84             │  │
 │  │              └──────────────┴────────────────┘                  │  │

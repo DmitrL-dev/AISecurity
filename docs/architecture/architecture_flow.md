@@ -1,7 +1,7 @@
 # 🗺️ SENTINEL Architecture — Interactive Flow Diagram
 
-> **Версия:** 1.0  
-> **Движков:** 121 | **Категорий:** 15
+> **Версия:** 2.0 (Dec 2025)  
+> **Движков:** 187 | **Категорий:** 15 | **Research Inventions:** 56
 
 ---
 
@@ -58,7 +58,7 @@ flowchart TB
             ThreatModel["📈 Threat<br/>Modeler"]
         end
 
-        MetaJudge["⚖️ META-JUDGE<br/>170 engines → Verdict"]
+        MetaJudge["⚖️ META-JUDGE<br/>187 engines → Verdict"]
     end
 
     subgraph Decision["📍 DECISION POINT"]
@@ -193,22 +193,21 @@ sequenceDiagram
 
 | Category              | Count   | Examples                           |
 | --------------------- | ------- | ---------------------------------- |
-| Classic Detection     | 8       | injection, yara, pii, behavioral   |
-| NLP / LLM Guard       | 5       | hallucination, knowledge, language |
-| Strange Math Core     | 8       | tda, sheaf, hyperbolic, morse      |
-| Strange Math Extended | 8       | chaos, category, spectral, wavelet |
-| VLM Protection        | 3       | adversarial_image, cross_modal     |
-| TTPs.ai Defense       | 10      | rag_guard, tool_security, ai_c2    |
-| Advanced 2025         | 6       | multi_agent, institutional_ai      |
-| Protocol Security     | 4       | mcp_guard, a2a_security, nhi       |
-| Proactive Engines     | 10      | zero_day_forge, attack_synth       |
-| Data Poisoning        | 4       | bootstrap, temporal, multi_tenant  |
-| Advanced Research     | 9       | honeypot, canary, kill_chain       |
-| Deep Learning         | 6       | activation_steering, forensics     |
-| Meta-Judge + XAI      | 2       | meta_judge, explainability         |
-| Adaptive Behavioral   | 2       | fingerprinting, adaptive_markov    |
-| MITRE ATT&CK          | 1       | mitre_engine                       |
-| **TOTAL**             | **121** |                                    |
+| Classic Detection     | 9       | injection, yara, pii, behavioral   |
+| NLP / LLM Guard       | 8       | qwen3_guard, hallucination, virtual_context |
+| Strange Math Core     | 21      | tda, sheaf, hyperbolic, morse, fractal |
+| TTPs.ai Defense       | 16      | rag_guard, tool_security, ai_c2, cog_load |
+| VLM Protection        | 4       | adversarial_image, cross_modal, ocr_injection |
+| Advanced 2025         | 10      | multi_agent, kill_chain, institutional_ai |
+| Protocol Security     | 5       | mcp_guard, a2a_security, nhi, endpoint_analyzer |
+| Proactive Engines     | 12      | zero_day_forge, attack_synth, immunity |
+| Data Poisoning        | 5       | bootstrap, temporal, multi_tenant  |
+| Deep Learning Forensics | 9     | activation_steering, hidden_state  |
+| Meta-Judge + XAI      | 3       | meta_judge, explainability, hierarch |
+| Adaptive Behavioral   | 3       | fingerprinting, adaptive_markov    |
+| MITRE ATT&CK          | 2       | mitre_engine, atlas_mapper         |
+| Research Inventions   | 49      | new R&D engines                    |
+| **TOTAL**             | **187** |                                    |
 
 ---
 
