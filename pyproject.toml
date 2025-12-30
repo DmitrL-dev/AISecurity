@@ -3,7 +3,7 @@ requires = ["hatchling"]
 build-backend = "hatchling.build"
 
 [project]
-name = "sentinel-ai"
+name = "sentinel-llm-security"
 version = "1.0.0"
 description = "AI Security Framework — The pytest of AI Security"
 readme = "README.md"
