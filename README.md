@@ -44,40 +44,33 @@
 
 <table>
 <tr>
-<td width="25%" align="center">
-
-### [🧠 BRAIN](#-brain--detection-engines)
-**Detection Core**<br>
+<td width="25%" align="center" valign="top">
+<h3><a href="#-brain--detection-engines">🧠 BRAIN</a></h3>
+<strong>Detection Core</strong><br>
 200 engines, ML + Rules<br>
 Strange Math™
-
 </td>
-<td width="25%" align="center">
-
-### [⚡ GATEWAY](#-gateway--production-infrastructure)
-**Production Infra**<br>
-Go + Python, <10ms<br>
+<td width="25%" align="center" valign="top">
+<h3><a href="#-gateway--production-infrastructure">⚡ GATEWAY</a></h3>
+<strong>Production Infra</strong><br>
+Go + Python, &lt;10ms<br>
 PoW Anti-DDoS
-
 </td>
-<td width="25%" align="center">
-
-### [🐉 STRIKE](#-strike--red-team-platform)
-**Offensive Platform**<br>
+<td width="25%" align="center" valign="top">
+<h3><a href="#-strike--red-team-platform">🐉 STRIKE</a></h3>
+<strong>Offensive Platform</strong><br>
 39K+ payloads, HYDRA<br>
 AI Attack Planner
-
 </td>
-<td width="25%" align="center">
-
-### [📦 FRAMEWORK](#-framework--python-sdk)
-**Python SDK**<br>
+<td width="25%" align="center" valign="top">
+<h3><a href="#-framework--python-sdk">📦 FRAMEWORK</a></h3>
+<strong>Python SDK</strong><br>
 pip install, CLI<br>
 FastAPI integration
-
 </td>
 </tr>
 </table>
+
 
 <p align="center">
   <a href="https://dmitrl-dev.github.io/AISecurity/">📚 Documentation</a> •
