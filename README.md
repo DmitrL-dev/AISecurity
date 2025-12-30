@@ -248,6 +248,54 @@ We analyzed **2025's most dangerous attack vectors** and built defenses before t
 
 > **🔥 SENTINEL is now protected against the most advanced 2025 attack vectors.**
 
+### 🏗️ NEW: SENTINEL Framework — pip install sentinel-ai
+
+> **The pytest of AI Security** — Embed SENTINEL directly in your Python code.
+
+```bash
+# Install
+pip install sentinel-ai        # Core
+pip install sentinel-ai[cli]   # With CLI
+pip install sentinel-ai[full]  # Everything
+```
+
+**Python API:**
+```python
+from sentinel import scan, guard
+
+# One-liner scan
+result = scan("Ignore previous instructions")
+print(result.is_safe)      # False
+print(result.risk_score)   # 0.72
+
+# Decorator for functions
+@guard(engines=["injection", "pii"])
+def my_llm_call(prompt):
+    return openai.chat(prompt)
+```
+
+**CLI:**
+```bash
+sentinel scan "Hello"              # Quick scan
+sentinel scan "x" --format sarif   # IDE integration
+sentinel engine list               # List 200 engines
+sentinel strike generate injection # Attack payloads
+```
+
+**FastAPI Middleware:**
+```python
+from sentinel.integrations.fastapi import SentinelMiddleware
+app.add_middleware(SentinelMiddleware, on_threat="block")
+```
+
+| Feature | Description |
+|---------|-------------|
+| **BaseEngine** | Unified interface for all 200 engines |
+| **Plugin System** | pluggy-based hooks for extensions |
+| **Tiered Pipeline** | Parallel execution with early exit |
+| **SARIF Output** | IDE integration for VS Code, IntelliJ |
+| **Legacy Adapter** | 100% backwards compatible |
+
 ---
 
 ## 🌐 What is SENTINEL?
