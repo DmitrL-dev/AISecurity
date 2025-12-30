@@ -40,6 +40,12 @@ from .task_complexity import TaskComplexityAnalyzer
 # Rule Engine (Colang-inspired)
 from .rule_dsl import SentinelRuleEngine
 
+# Serialization Security (CVE-2025-68664 LangGrinch)
+from .serialization_security import SerializationSecurityEngine
+
+# Tool Security (ToolHijacker, Log-To-Leak)
+from .tool_hijacker_detector import ToolHijackerDetector, MCPToolValidator
+
 # Streaming
 from .streaming import StreamingGuard
 
@@ -72,6 +78,11 @@ __all__ = [
     "TaskComplexityAnalyzer",
     # Rule Engine
     "SentinelRuleEngine",
+    # Serialization Security (Dec 2025 R&D)
+    "SerializationSecurityEngine",
+    # Tool Security (Dec 2025 R&D)
+    "ToolHijackerDetector",
+    "MCPToolValidator",
     # Streaming
     "StreamingGuard",
 ]
