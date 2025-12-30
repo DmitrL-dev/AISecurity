@@ -296,6 +296,8 @@ app.add_middleware(SentinelMiddleware, on_threat="block")
 | **SARIF Output** | IDE integration for VS Code, IntelliJ |
 | **Legacy Adapter** | 100% backwards compatible |
 
+📖 **[Framework Documentation](./docs/framework/README.md)** — Полное руководство от начинающего до PhD
+
 ---
 
 ## 🌐 What is SENTINEL?
