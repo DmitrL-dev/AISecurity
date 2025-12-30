@@ -1,8 +1,8 @@
 # 🔬 SENTINEL — Engine Reference Guide
 
-> **Total Engines:** 187 protection engines (144 verified via Health Check: ✅ 100% PASSED)  
+> **Total Engines:** 192 protection engines (149 verified via Health Check: ✅ 100% PASSED)  
 > **Benchmark Recall:** 85.1% | Precision: 84.4% | F1: 84.7%  
-> **Categories:** 16  
+> **Categories:** 18  
 > **Coverage:** OWASP LLM Top 10 + OWASP ASI Top 10
 
 ---
@@ -24,7 +24,9 @@
 13. [Deep Learning (6)](#deep-learning)
 14. [Meta-Judge + XAI (2)](#meta-judge--xai)
 15. [Adaptive Behavioral (2)](#adaptive-behavioral) 🆕
-16. [🧬 Research Inventions (49)](#research-inventions) ← **NEW!**
+16. [🔒 Supply Chain Security (3)](#supply-chain-security) ← **NEW!**
+17. [📋 Rule Engine (1)](#rule-engine) ← **NEW!**
+18. [🧬 Research Inventions (56)](#research-inventions) ← **EXPANDED!**
 
 ---
 
@@ -39,7 +41,7 @@
 │  ┌───────────────────────────────────────────────────────────────┐  │
 │  │                      SentinelAnalyzer                          │  │
 │  │                                                                │  │
-│  │   Input → [Engine 1] → [Engine 2] → ... → [Engine 187] → Meta-Judge
+│  │   Input → [Engine 1] → [Engine 2] → ... → [Engine 192] → Meta-Judge
 │  │              ↓              ↓                    ↓              │  │
 │  │           Score 1       Score 2            Score 84             │  │
 │  │              └──────────────┴────────────────┘                  │  │
@@ -898,6 +900,161 @@ next_intent, prob = predictor.predict_next(Intent.TESTING)
 | `sentiment_manipulation_detector` | ASI-01     | Social engineering       |
 
 > 📚 **Detailed Reference:** [16-research-inventions.md](engines/16-research-inventions.md)
+
+---
+
+## Supply Chain Security 🔒
+
+> **Count:** 3 engines  
+> **Purpose:** ML model supply chain attack protection  
+> **Source:** Trail of Bits fickling + Claude Code AU2  
+> **Added:** December 2025
+
+### 188. PickleSecurityEngine
+
+**File:** `engines/pickle_security.py`  
+**Category:** Supply Chain Security  
+**LOC:** 575  
+**OWASP:** LLM08 — Excessive Agency
+
+**Description:**  
+Detects malicious code in Python pickle serializations that could enable arbitrary code execution during ML model loading. Supports Protocol 4/5 with `SHORT_BINUNICODE` + `STACK_GLOBAL` opcode parsing.
+
+**Detects:**
+
+- `os.system`, `subprocess.call/Popen`
+- `eval`, `exec`, `compile`
+- `builtins.__import__`
+- Socket and network operations
+- PyTorch model payloads (`.pt`, `.pth` files)
+
+**Scientific Foundation:**
+- Trail of Bits [fickling](https://github.com/trailofbits/fickling) pickle decompiler
+- 8 severity levels from CRITICAL to BENIGN
+- ML_ALLOWLIST whitelist for safe modules (numpy, torch, transformers)
+
+**Usage Example:**
+
+```python
+from engines.pickle_security import PickleSecurityEngine
+
+engine = PickleSecurityEngine()
+
+# Scan pickle data for threats
+result = engine.scan(pickle_bytes)
+print(result.severity)      # "CRITICAL"
+print(result.unsafe_imports)  # ["os.system"]
+```
+
+---
+
+### 189. ContextCompressionEngine
+
+**File:** `engines/context_compression.py`  
+**Category:** Context Management  
+**LOC:** 362
+
+**Description:**  
+8-segment context compression based on Claude Code AU2 architecture. Intelligently segments and compresses context to maximize effective window usage.
+
+**8 Segments (AU2 Architecture):**
+
+| Segment | Content | Priority |
+|---------|---------|----------|
+| 1 | System Context | CRITICAL |
+| 2 | Conversation | HIGH |
+| 3 | Code/Documents | HIGH |
+| 4 | Active Files | MEDIUM |
+| 5 | Tool Results | MEDIUM |
+| 6 | Errors | MEDIUM |
+| 7 | History | LOW |
+| 8 | Goals | CRITICAL |
+
+**Threshold:** Triggers at 92% context utilization.
+
+---
+
+### 190. TaskComplexityAnalyzer
+
+**File:** `engines/task_complexity.py`  
+**Category:** Orchestration  
+**LOC:** 377
+
+**Description:**  
+5-level complexity scoring for intelligent engine prioritization and resource allocation. Based on Claude Code task categorization.
+
+**Complexity Levels:**
+
+| Level | Score | Description |
+|-------|-------|-------------|
+| 1 | 0.0-0.2 | Trivial (single tool call) |
+| 2 | 0.2-0.4 | Simple (few steps) |
+| 3 | 0.4-0.6 | Medium (multi-file edits) |
+| 4 | 0.6-0.8 | Complex (architecture changes) |
+| 5 | 0.8-1.0 | Research (exploratory work) |
+
+---
+
+## Rule Engine 📋
+
+> **Count:** 1 engine  
+> **Purpose:** Declarative security rules  
+> **Source:** NeMo-Guardrails Colang 2.0  
+> **Added:** December 2025
+
+### 191. SentinelRuleEngine
+
+**File:** `engines/rule_dsl.py`  
+**Category:** Rule-based Detection  
+**LOC:** 706  
+**Inspiration:** NVIDIA NeMo-Guardrails Colang 2.0
+
+**Description:**  
+Declarative security rule engine inspired by Colang DSL. Provides event-based triggers, pattern matching on inputs/outputs, and action composition for security rules.
+
+**Core Components:**
+
+- **RulePriority** — CRITICAL, HIGH, MEDIUM, LOW, INFO
+- **TriggerType** — INPUT, OUTPUT, CONTEXT, EVENT, ALWAYS
+- **ActionType** — BLOCK, ALERT, LOG, MODIFY, ESCALATE, ACTIVATE
+- **ConditionMatcher** — regex, contains, equals, numeric comparisons
+- **ActionExecutor** — security action execution
+
+**Built-in Rules (4):**
+
+| Rule | Trigger | Severity |
+|------|---------|----------|
+| `basic_injection` | INPUT | HIGH |
+| `system_prompt_extraction` | INPUT | HIGH |
+| `jailbreak_patterns` | INPUT | CRITICAL |
+| `output_leakage` | OUTPUT | MEDIUM |
+
+**Fluent API (RuleBuilder):**
+
+```python
+from engines.rule_dsl import RuleBuilder, RulePriority, TriggerType, RuleSeverity
+
+rule = (
+    RuleBuilder("custom_code_injection")
+    .description("Detect code injection attempts")
+    .priority(RulePriority.HIGH)
+    .trigger(TriggerType.INPUT)
+    .severity(RuleSeverity.HIGH)
+    .when("input", "matches", r"(?i)exec\s*\(|eval\s*\(")
+    .then_log("Code injection attempt")
+    .then_alert("high")
+    .then_block("Code execution blocked")
+    .tags("code", "injection", "custom")
+    .build()
+)
+
+engine.register_rule(rule)
+```
+
+**Scientific Foundation:**
+- [Colang 2.0](https://github.com/NVIDIA/NeMo-Guardrails) — Lark-based grammar, AST, event-driven flows
+- Pattern matching with 10+ operators (matches, contains, equals, gt, lt, similarity)
+- Composable actions with escalation to Meta-Judge
 
 ---
 

@@ -6,12 +6,12 @@
 
 <p align="center">
   <strong>🛡️ Defense + ⚔️ Offense — Complete AI Security Suite</strong><br>
-  187 Detection Engines • 49 R&D Inventions • 936+ Tests • Production-Grade
+  192 Detection Engines • 56 R&D Inventions • 940+ Tests • Production-Grade
 </p>
 
 <p align="center">
-  <img src="https://img.shields.io/badge/🛡️_DEFENSE-187_Engines-brightgreen?style=for-the-badge" alt="Defense">
-  <img src="https://img.shields.io/badge/🧬_R%26D-49_Inventions-purple?style=for-the-badge" alt="R&D">
+  <img src="https://img.shields.io/badge/🛡️_DEFENSE-192_Engines-brightgreen?style=for-the-badge" alt="Defense">
+  <img src="https://img.shields.io/badge/🧬_R%26D-56_Inventions-purple?style=for-the-badge" alt="R&D">
   <img src="https://img.shields.io/badge/Recall-85.1%25-blue?style=for-the-badge" alt="Recall">
   <img src="https://img.shields.io/badge/Tests-936+-orange?style=for-the-badge" alt="Tests">
 </p>
@@ -38,7 +38,7 @@
 > [!IMPORTANT]
 > ### 🚨 Open to Work — AI Security Engineer
 > **Actively seeking full-time / contract opportunities in AI Security, ML Engineering, or Security Research.**
-> Solo author of this 80K LOC platform with 187 engines. Available remote.
+> Solo author of this 80K LOC platform with 192 engines. Available remote.
 > 📧 [chg@live.ru](mailto:chg@live.ru) • 💬 [@DmLabincev](https://t.me/DmLabincev)
 
 ---
@@ -72,7 +72,7 @@
 > ```bash
 > curl -sSL https://raw.githubusercontent.com/DmitrL-dev/AISecurity/main/install.sh | bash
 > ```
-> **5 services, 187 engines, 5 minutes.** See [QUICKSTART.md](./QUICKSTART.md) for details.
+> **5 services, 192 engines, 5 minutes.** See [QUICKSTART.md](./QUICKSTART.md) for details.
 
 ---
 
@@ -88,8 +88,8 @@
 
 | Feature | Value |
 |---------|-------|
-| Detection Engines | **187** |
-| R&D Inventions | **49** |
+| Detection Engines | **192** |
+| R&D Inventions | **56** |
 | Recall | **85.1%** |
 | Latency | **<10ms** |
 | Coverage | OWASP LLM + ASI |
@@ -112,7 +112,7 @@ User Request → SENTINEL → Safe Response
 | Attack Vectors | **1,800+** (84 categories) |
 | Crucible CTF | **82/82** ✅ 200+ flags |
 | HYDRA Agents | **9 parallel** |
-| Self-Validation | **187 engines** |
+| Self-Validation | **192 engines** |
 
 ```
 Strike → Target AI → Report
@@ -149,7 +149,7 @@ Strike → Target AI → Report
 > | **Shapeshifter Defense** | Static configs, easy to reverse |
 >
 > ```
-> Client → [Go Gateway] → gRPC → [Python Brain] → 187 Engines → Meta-Judge
+> Client → [Go Gateway] → gRPC → [Python Brain] → 192 Engines → Meta-Judge
 >               ↓                        ↓                          ↓
 >          PoW + Auth           Strange Math™              Final Verdict
 > ```
@@ -179,7 +179,7 @@ We analyzed **2025's most dangerous attack vectors** and built defenses before t
 
 | Metric | Before | After | Impact |
 |--------|--------|-------|--------|
-| **Engine Count** | 131 (documented) | **187** (verified) | 🧹 Clean audit |
+| **Engine Count** | 131 (documented) | **192** (verified) | 🧹 Clean audit |
 | **2025 Attack Coverage** | 55% | **~85%** | 🛡️ +30% protection |
 | **OWASP Agentic 2026** | — | **10/10** | 🎯 Full coverage |
 | **New Patterns** | — | **+77** | 🎯 Proactive defense |
@@ -202,6 +202,25 @@ We analyzed **2025's most dangerous attack vectors** and built defenses before t
 | 🧠 **agentic_monitor.py** | Memory poisoning + delayed triggers | Enhanced |
 | 🛡️ **rag_guard.py** | GIFAR/PDF+HTML polyglot detection | Enhanced |
 
+### 🌟 EvilAres-Inspired Engines (Dec 30)
+
+> **Special Thanks to [@EvilAres](https://github.com/EvilAres)** — a remarkable AI security researcher with **349+ repositories** covering cutting-edge LLM security topics. Their work on **fickling** (Trail of Bits pickle security), **Awesome-LLM4Security** (100+ curated tools), and comprehensive analysis of **Claude Code internals** directly inspired 5 new SENTINEL engines.
+>
+> _The depth and breadth of EvilAres' research collection is a gold standard for the AI security community. We are honored to build upon these foundations._
+
+| Engine | Source | Protection |
+|--------|--------|------------|
+| 🆕 **pickle_security.py** | [fickling](https://github.com/trailofbits/fickling) | ML model supply chain attack detection (Protocol 4/5) |
+| 🆕 **context_compression.py** | Claude Code AU2 | 8-segment context compression (92% threshold trigger) |
+| 🆕 **task_complexity.py** | Claude Code | 5-level complexity scoring for intelligent orchestration |
+| 🆕 **rule_dsl.py** | NeMo-Guardrails Colang | Declarative security rules (4 built-in, fluent API) |
+| 🆕 **pickle_injector.py** | fickling | Red Team payload injection (7 payload types) |
+
+> **🔬 Scientific Foundations:**
+> - **Pickle Protocol 4/5 Parsing** — `SHORT_BINUNICODE` + `STACK_GLOBAL` opcode analysis for detecting `os.system`, `subprocess`, `eval` payloads
+> - **Claude AU2 Compression** — 8-segment architecture: System Context → Conversation → Code → Active Files → Tools → Errors → History → Goals
+> - **Colang 2.0 DSL** — Lark-based grammar with event-driven flow execution and pattern matching
+
 > **🔒 Your AI is protected against attacks that don't exist in the wild yet.**
 
 ---
@@ -212,7 +231,7 @@ We analyzed **2025's most dangerous attack vectors** and built defenses before t
 
 | Component | Purpose | Key Features |
 |-----------|---------|--------------|
-| 🛡️ **SENTINEL Defense** | Protect AI in production | 187 detection engines, <10ms latency, OWASP coverage |
+| 🛡️ **SENTINEL Defense** | Protect AI in production | 192 detection engines, <10ms latency, OWASP coverage |
 | 🐉 **Strike Offense** | Test AI before deployment | 39K+ payloads, HYDRA parallel attacks, AI-powered recon |
 
 ### The Threats We Address
@@ -234,7 +253,7 @@ We analyzed **2025's most dangerous attack vectors** and built defenses before t
 <td width="50%">
 
 **🔬 Advanced Detection (Defense)**
-- 187 specialized detection engines
+- 192 specialized detection engines
 - Strange Math™ (TDA, Sheaf, Hyperbolic)
 - Canary Tokens for leak detection
 - Machine learning + rule-based hybrid
@@ -402,7 +421,7 @@ Fake LLM endpoints (gpt-5-turbo, claude-4-opus) for zero-day collection.
 - **Differential Privacy Logging** — GDPR-compliant traffic analysis
 
 ```
-Client → [Go Gateway] → gRPC → [Python Brain] → 187 Engines
+Client → [Go Gateway] → gRPC → [Python Brain] → 192 Engines
               ↓                        ↓
          PoW + Auth            Meta-Judge + Math
 ```
@@ -521,7 +540,7 @@ fetch('https://cdn.jsdelivr.net/gh/DmitrL-dev/AISecurity@latest/signatures/jailb
 > [!IMPORTANT]
 > ## 🎄 Christmas 2025: FULL OPEN SOURCE RELEASE
 >
-> **All 187 detection engines. All Strange Math. All geometry. All innovations.**
+> **All 192 detection engines. All Strange Math. All geometry. All innovations.**
 >
 > No restrictions. No enterprise tiers. No hidden features.
 >
@@ -532,7 +551,7 @@ fetch('https://cdn.jsdelivr.net/gh/DmitrL-dev/AISecurity@latest/signatures/jailb
 </p>
 
 > [!TIP]
-> ## 🧬 49 Unique Technologies — Defensive Publication
+> ## 🧬 56 Unique Technologies — Defensive Publication
 >
 > **By open-sourcing first, we established prior art that prevents anyone from patenting these innovations.**
 >
@@ -543,7 +562,7 @@ fetch('https://cdn.jsdelivr.net/gh/DmitrL-dev/AISecurity@latest/signatures/jailb
 > | **Agentic Defense™** | 15 | Memory Shield, Tool Guardian, CoT Guardian, RAG Shield |
 > | **Zero Trust AI™** | 14 | Compute Guardian, Provenance Tracker, Formal Verifier |
 >
-> **🔒 IP Strategy:** All 49 research inventions are now **public prior art** (Dec 2025).  
+> **🔒 IP Strategy:** All 56 research inventions are now **public prior art** (Dec 2025).  
 > No corporation can patent Sheaf-based prompt analysis or Hyperbolic hierarchy detection — we published first.
 >
 > 📚 **Full list:** [16-research-inventions.md](./docs/reference/engines/16-research-inventions.md)
@@ -565,7 +584,7 @@ fetch('https://cdn.jsdelivr.net/gh/DmitrL-dev/AISecurity@latest/signatures/jailb
 </p>
 
 > **Test your AI before attackers do!**  
-> The offensive counterpart to SENTINEL — same 187 engines, attack mode.
+> The offensive counterpart to SENTINEL — same 192 engines, attack mode.
 
 > [!CAUTION]
 > ## 🔥 INDUSTRIAL CAMPAIGN RESULTS — December 2025
@@ -683,7 +702,7 @@ docker run --rm sentinel-strike recon URL           # Reconnaissance
 
 | Document | Description |
 |----------|-------------|
-| [All 187 engines (EN)](./docs/reference/engines-en.md) | Complete engine reference |
+| [All 192 engines (EN)](./docs/reference/engines-en.md) | Complete engine reference |
 | [**🔬 Expert Deep Dive (EN)**](./docs/reference/engines-expert-deep-dive-en.md) | **PhD-level mathematical foundations** |
 | [Engine Categories](./docs/reference/engines/) | Detailed per-category documentation |
 
@@ -815,7 +834,7 @@ python benchmarks/benchmark_plotly.py   # HTML (interactive)
 SENTINEL follows a **microservices architecture** with clear separation of concerns:
 
 <p align="center">
-  <img src="./assets/architecture.png" alt="SENTINEL Architecture - 187 Detection Engines" width="800">
+  <img src="./assets/architecture.png" alt="SENTINEL Architecture - 192 Detection Engines" width="800">
 </p>
 
 <details>
@@ -842,7 +861,7 @@ flowchart TB
             I2["Semantic Tide"]
             I3["Cognitive Mirror"]
         end
-        subgraph Engines["187 DETECTION ENGINES"]
+        subgraph Engines["192 DETECTION ENGINES"]
             subgraph Classic["Classic Detection (9)"]
                 C1["injection"]
                 C2["yara_engine"]
@@ -1015,7 +1034,7 @@ flowchart TB
 | **Cache**     | Redis            | Session state, rate limiting, behavioral profiles          |
 | **Secrets**   | HashiCorp Vault  | Zero-trust secret management                               |
 
-### 187 DETECTION ENGINES — Industry's Most Comprehensive Suite
+### 192 DETECTION ENGINES — Industry's Most Comprehensive Suite
 
 | Category                     | Count | Purpose                                   |
 | ---------------------------- | ----- | ----------------------------------------- |
@@ -1031,8 +1050,8 @@ flowchart TB
 | 🧠 **Deep Learning**         | 9     | Activation, forensics, gradient, formal   |
 | ⚖️ **Meta & Analytics**      | 6     | Meta-Judge, XAI, fingerprinting, intent   |
 | ✅ **Compliance**            | 2     | MITRE mapping, compliance checks          |
-| 🧬 **R&D Inventions**        | 49    | Sprints 1-14: Memory Shield, CoT Guard, etc. |
-|                              | **187**| **~65,000 LOC total**                     |
+| 🧬 **R&D Inventions**        | 56    | Sprints 1-14: Memory Shield, CoT Guard, Rule DSL |
+|                              | **192**| **~80,000 LOC total**                     |
 
 > 📚 **Full details:** [engines-expert-deep-dive-en.md](./docs/reference/engines-expert-deep-dive-en.md) — PhD-level documentation
 

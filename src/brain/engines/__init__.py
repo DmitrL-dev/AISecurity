@@ -28,6 +28,18 @@ from .cross_modal import CrossModal
 from .rag_guard import RAGGuard
 from .probing_detection import ProbingDetection
 
+# Supply Chain Security
+from .pickle_security import PickleSecurityEngine, PyTorchModelScanner
+
+# Context Management
+from .context_compression import ContextCompressionEngine
+
+# Orchestration
+from .task_complexity import TaskComplexityAnalyzer
+
+# Rule Engine (Colang-inspired)
+from .rule_dsl import SentinelRuleEngine
+
 # Streaming
 from .streaming import StreamingGuard
 
@@ -51,6 +63,15 @@ __all__ = [
     # Agent
     "RAGGuard",
     "ProbingDetection",
+    # Supply Chain
+    "PickleSecurityEngine",
+    "PyTorchModelScanner",
+    # Context Management
+    "ContextCompressionEngine",
+    # Orchestration
+    "TaskComplexityAnalyzer",
+    # Rule Engine
+    "SentinelRuleEngine",
     # Streaming
     "StreamingGuard",
 ]
