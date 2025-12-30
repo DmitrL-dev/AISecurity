@@ -376,6 +376,72 @@ class SentinelAnalyzer:
 
         return ContextCompressionEngine()
 
+    # --- Dec 30, 2025 R&D Engines ---
+
+    @cached_property
+    def serialization_security(self):
+        """Serialization Security Engine - CVE-2025-68664 LangGrinch defense."""
+        logger.info("Lazy loading Serialization Security Engine...")
+        from engines.serialization_security import SerializationSecurityEngine
+
+        return SerializationSecurityEngine()
+
+    @cached_property
+    def tool_hijacker_detector(self):
+        """Tool Hijacker Detector - ToolHijacker + Log-To-Leak defense."""
+        logger.info("Lazy loading Tool Hijacker Detector...")
+        from engines.tool_hijacker_detector import ToolHijackerDetector
+
+        return ToolHijackerDetector()
+
+    @cached_property
+    def echo_chamber_detector(self):
+        """Echo Chamber Detector - Multi-turn context poisoning defense."""
+        logger.info("Lazy loading Echo Chamber Detector...")
+        from engines.echo_chamber_detector import EchoChamberDetector
+
+        return EchoChamberDetector()
+
+    @cached_property
+    def rag_poisoning_detector(self):
+        """RAG Poisoning Detector - PoisonedRAG attack defense."""
+        logger.info("Lazy loading RAG Poisoning Detector...")
+        from engines.rag_poisoning_detector import RAGPoisoningDetector
+
+        return RAGPoisoningDetector()
+
+    @cached_property
+    def identity_privilege_detector(self):
+        """Identity Privilege Abuse Detector - OWASP ASI03 defense."""
+        logger.info("Lazy loading Identity Privilege Abuse Detector...")
+        from engines.identity_privilege_detector import IdentityPrivilegeAbuseDetector
+
+        return IdentityPrivilegeAbuseDetector()
+
+    @cached_property
+    def memory_poisoning_detector(self):
+        """Memory Poisoning Detector - Persistent memory attack defense."""
+        logger.info("Lazy loading Memory Poisoning Detector...")
+        from engines.memory_poisoning_detector import MemoryPoisoningDetector
+
+        return MemoryPoisoningDetector()
+
+    @cached_property
+    def dark_pattern_detector(self):
+        """Dark Pattern Detector - DECEPTICON attack defense."""
+        logger.info("Lazy loading Dark Pattern Detector...")
+        from engines.dark_pattern_detector import DarkPatternDetector
+
+        return DarkPatternDetector()
+
+    @cached_property
+    def polymorphic_prompt_assembler(self):
+        """Polymorphic Prompt Assembler - Dynamic prompt structure defense."""
+        logger.info("Lazy loading Polymorphic Prompt Assembler...")
+        from engines.polymorphic_prompt_assembler import PolymorphicPromptAssembler
+
+        return PolymorphicPromptAssembler()
+
     # =========================================================================
     # TIERED PARALLEL EXECUTION HELPERS
     # =========================================================================

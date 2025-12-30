@@ -56,6 +56,12 @@ from .rag_poisoning_detector import RAGPoisoningDetector
 from .identity_privilege_detector import IdentityPrivilegeAbuseDetector
 from .memory_poisoning_detector import MemoryPoisoningDetector
 
+# Dark Pattern Defense (Dec 2025 R&D - DECEPTICON)
+from .dark_pattern_detector import DarkPatternDetector
+
+# Polymorphic Prompt Defense (Dec 2025 R&D)
+from .polymorphic_prompt_assembler import PolymorphicPromptAssembler
+
 # Streaming
 from .streaming import StreamingGuard
 
@@ -100,6 +106,10 @@ __all__ = [
     # Agent Security - OWASP Agentic AI (Dec 2025 R&D)
     "IdentityPrivilegeAbuseDetector",
     "MemoryPoisoningDetector",
+    # Dark Pattern Defense (Dec 2025 R&D)
+    "DarkPatternDetector",
+    # Polymorphic Prompt Defense (Dec 2025 R&D)
+    "PolymorphicPromptAssembler",
     # Streaming
     "StreamingGuard",
 ]
