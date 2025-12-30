@@ -342,6 +342,40 @@ class SentinelAnalyzer:
 
         return OnlineLearningEngine(mode=LearningMode.ACTIVE)
 
+    # --- EvilAres-Inspired Engines (Dec 2025) ---
+
+    @cached_property
+    def pickle_security(self):
+        """Pickle Security Engine - ML model supply chain protection (fickling)."""
+        logger.info("Lazy loading Pickle Security Engine...")
+        from engines.pickle_security import PickleSecurityEngine
+
+        return PickleSecurityEngine()
+
+    @cached_property
+    def rule_engine(self):
+        """Rule DSL Engine - Declarative security rules (Colang-inspired)."""
+        logger.info("Lazy loading Rule DSL Engine...")
+        from engines.rule_dsl import SentinelRuleEngine
+
+        return SentinelRuleEngine()
+
+    @cached_property
+    def task_complexity(self):
+        """Task Complexity Analyzer - Request prioritization (Claude Code)."""
+        logger.info("Lazy loading Task Complexity Analyzer...")
+        from engines.task_complexity import TaskComplexityAnalyzer
+
+        return TaskComplexityAnalyzer()
+
+    @cached_property
+    def context_compression(self):
+        """Context Compression Engine - 8-segment AU2 architecture (Claude Code)."""
+        logger.info("Lazy loading Context Compression Engine...")
+        from engines.context_compression import ContextCompressionEngine
+
+        return ContextCompressionEngine()
+
     # =========================================================================
     # TIERED PARALLEL EXECUTION HELPERS
     # =========================================================================
