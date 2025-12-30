@@ -254,9 +254,9 @@ We analyzed **2025's most dangerous attack vectors** and built defenses before t
 
 ```bash
 # Install
-pip install sentinel-ai        # Core
-pip install sentinel-ai[cli]   # With CLI
-pip install sentinel-ai[full]  # Everything
+pip install sentinel-llm-security        # Core
+pip install sentinel-llm-security[cli]   # With CLI
+pip install sentinel-llm-security[full]  # Everything
 ```
 
 **Python API:**
