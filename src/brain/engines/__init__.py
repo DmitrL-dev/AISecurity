@@ -46,6 +46,9 @@ from .serialization_security import SerializationSecurityEngine
 # Tool Security (ToolHijacker, Log-To-Leak)
 from .tool_hijacker_detector import ToolHijackerDetector, MCPToolValidator
 
+# Multi-Turn Attack Detection (Echo Chamber)
+from .echo_chamber_detector import EchoChamberDetector
+
 # Streaming
 from .streaming import StreamingGuard
 
@@ -83,6 +86,8 @@ __all__ = [
     # Tool Security (Dec 2025 R&D)
     "ToolHijackerDetector",
     "MCPToolValidator",
+    # Multi-Turn Attack Detection (Dec 2025 R&D)
+    "EchoChamberDetector",
     # Streaming
     "StreamingGuard",
 ]
