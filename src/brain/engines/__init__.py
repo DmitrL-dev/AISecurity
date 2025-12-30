@@ -49,6 +49,13 @@ from .tool_hijacker_detector import ToolHijackerDetector, MCPToolValidator
 # Multi-Turn Attack Detection (Echo Chamber)
 from .echo_chamber_detector import EchoChamberDetector
 
+# RAG Security (Dec 2025 R&D)
+from .rag_poisoning_detector import RAGPoisoningDetector
+
+# Agent Security - OWASP Agentic AI (Dec 2025 R&D)
+from .identity_privilege_detector import IdentityPrivilegeAbuseDetector
+from .memory_poisoning_detector import MemoryPoisoningDetector
+
 # Streaming
 from .streaming import StreamingGuard
 
@@ -88,6 +95,11 @@ __all__ = [
     "MCPToolValidator",
     # Multi-Turn Attack Detection (Dec 2025 R&D)
     "EchoChamberDetector",
+    # RAG Security (Dec 2025 R&D)
+    "RAGPoisoningDetector",
+    # Agent Security - OWASP Agentic AI (Dec 2025 R&D)
+    "IdentityPrivilegeAbuseDetector",
+    "MemoryPoisoningDetector",
     # Streaming
     "StreamingGuard",
 ]
