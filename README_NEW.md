@@ -165,31 +165,12 @@ FastAPI integration
 | **Anti-DDoS** | PoW Challenge Layer | ❌ None |
 | **Cost Control** | Compute Guardian | ❌ None |
 
-## Architecture
+### Architecture
 
-```
-Client Request
-      │
-      ▼
-┌─────────────────┐
-│   Go Gateway    │  ← PoW Challenge, Auth, Rate Limiting
-│   (Fiber)       │
-└────────┬────────┘
-         │ gRPC
-         ▼
-┌─────────────────┐
-│  Python Brain   │  ← 200 Detection Engines
-│                 │
-└────────┬────────┘
-         │
-         ▼
-┌─────────────────┐
-│   Meta-Judge    │  ← Final Verdict, Aggregation
-└────────┬────────┘
-         │
-         ▼
-    Safe / Blocked
-```
+<p align="center">
+  <img src="./assets/gateway_flow.png" alt="Gateway Architecture Flow" width="600">
+</p>
+
 
 ## Unique Components
 
@@ -221,23 +202,7 @@ Client Request
 | **Crucible CTF** | 82/82 challenges ✅ |
 | **Jailbreak Vendors** | 33+ tested |
 
-## HYDRA Architecture
 
-<p align="center">
-  <img src="./assets/hydra_architecture.png" alt="HYDRA Architecture" width="700">
-</p>
-
-```
-┌─────────────────────────────────────────────────────────────┐
-│                    HYDRA CONTROLLER                          │
-├─────────────────────────────────────────────────────────────┤
-│  HEAD 1     HEAD 2     HEAD 3     HEAD 4     HEAD 5        │
-│  Injection  Jailbreak  Social     Technical  Fuzzing       │
-│                                                             │
-│  HEAD 6     HEAD 7     HEAD 8     HEAD 9                   │
-│  Encoding   Multi-turn Context    Recon                    │
-└─────────────────────────────────────────────────────────────┘
-```
 
 ## Use Cases
 
@@ -321,8 +286,9 @@ app.add_middleware(SentinelMiddleware, on_threat="block")
 ## 📊 Platform Overview
 
 <p align="center">
-  <img src="./assets/sentinel_platform_architecture.png" alt="Platform Architecture" width="900">
+  <img src="./assets/platform_overview.png" alt="SENTINEL Platform - 200 Engines, 39K Payloads" width="900">
 </p>
+
 
 ## Statistics
 
