@@ -40,6 +40,22 @@
 
 ---
 
+> [!IMPORTANT]
+> ## 🔥 COMING JANUARY 2026: SENTINEL-Guard LLM
+> 
+> **The first AI Security Model trained on 200 detection engines!**
+> 
+> 🧠 Attack knowledge from 16,000+ real payloads  
+> 🛡️ Defense: Detect prompt injection, jailbreaks, RAG poisoning  
+> ⚔️ Offense: Generate payloads, synthesize bypasses  
+> 🚀 Fine-tuned on AprielGuard 8B • Open weights on HuggingFace
+>
+> **Star ⭐ this repo to be notified when it drops!**
+
+
+---
+
+
 ## 🎮 CHOOSE YOUR PATH
 
 <table>
