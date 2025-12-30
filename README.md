@@ -97,6 +97,34 @@ FastAPI integration
 
 ---
 
+<details>
+<summary><h3>🛡️ Free Threat Signatures CDN</h3></summary>
+
+SENTINEL provides **free, auto-updated threat signatures** for the community. No API key required!
+
+| File | Description | CDN Link |
+|------|-------------|----------|
+| `jailbreaks.json` | Jailbreak patterns from 7 sources | [Download](https://cdn.jsdelivr.net/gh/DmitrL-dev/AISecurity@latest/signatures/jailbreaks.json) |
+| `keywords.json` | Suspicious keyword sets (7 categories) | [Download](https://cdn.jsdelivr.net/gh/DmitrL-dev/AISecurity@latest/signatures/keywords.json) |
+| `pii.json` | PII & secrets detection patterns | [Download](https://cdn.jsdelivr.net/gh/DmitrL-dev/AISecurity@latest/signatures/pii.json) |
+| `manifest.json` | Version & integrity metadata | [Download](https://cdn.jsdelivr.net/gh/DmitrL-dev/AISecurity@latest/signatures/manifest.json) |
+
+**Usage:**
+```javascript
+fetch('https://cdn.jsdelivr.net/gh/DmitrL-dev/AISecurity@latest/signatures/jailbreaks.json')
+  .then(r => r.json())
+  .then(patterns => console.log(`Loaded ${patterns.length} patterns`));
+```
+
+**Features:**
+- ✅ Updated daily via GitHub Actions
+- ✅ Free for commercial & non-commercial use
+- ✅ Community contributions welcome (PRs to `signatures/`)
+
+</details>
+
+---
+
 > [!IMPORTANT]
 > ### 🚨 Open to Work — AI Security Engineer
 > **Solo author of this 80K LOC platform with 200 engines. Available remote.**
