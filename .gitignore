@@ -54,3 +54,8 @@ config.local.yaml
 # OS
 .DS_Store
 Thumbs.db
+
+# CTF Workspace (temp files, attack scripts, data)
+_ctf_workspace/
+*.npy
+FLAG_FOUND.txt
