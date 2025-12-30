@@ -95,10 +95,10 @@ FastAPI integration
 
 ---
 
-# 🧠 BRAIN — Detection Engines
+## 🧠 BRAIN — Detection Engines
 
 <p align="center">
-  <img src="./assets/sentinel_flow.png" alt="SENTINEL Flow" width="800">
+  <img src="./assets/brain_engines.png" alt="SENTINEL Brain - 200 Detection Engines" width="800">
 </p>
 
 > **200 detection engines** analyzing every prompt and response in real-time.
@@ -147,10 +147,10 @@ FastAPI integration
 
 ---
 
-# ⚡ GATEWAY — Production Infrastructure
+## ⚡ GATEWAY — Production Infrastructure
 
 <p align="center">
-  <img src="./assets/architecture.png" alt="Gateway Architecture" width="800">
+  <img src="./assets/gateway_infrastructure.png" alt="Go + Python Gateway Architecture" width="800">
 </p>
 
 > **The only open-source AI security gateway ready for production traffic.**
@@ -204,10 +204,10 @@ Client Request
 
 ---
 
-# 🐉 STRIKE — Red Team Platform
+## 🐉 STRIKE — Red Team Platform
 
 <p align="center">
-  <img src="./assets/strike_banner.png" alt="Strike Banner" width="800">
+  <img src="./assets/strike_hydra.png" alt="HYDRA 9-Head Attack System" width="800">
 </p>
 
 > **Test your AI before attackers do.** 39,000+ payloads, HYDRA parallel attacks.
@@ -252,7 +252,11 @@ Client Request
 
 ---
 
-# 📦 FRAMEWORK — Python SDK
+## 📦 FRAMEWORK — Python SDK
+
+<p align="center">
+  <img src="./assets/framework_sdk.png" alt="SENTINEL Python SDK" width="800">
+</p>
 
 > **The pytest of AI Security** — Embed SENTINEL directly in your code.
 
@@ -314,7 +318,7 @@ app.add_middleware(SentinelMiddleware, on_threat="block")
 
 ---
 
-# 📊 Platform Overview
+## 📊 Platform Overview
 
 <p align="center">
   <img src="./assets/sentinel_platform_architecture.png" alt="Platform Architecture" width="900">
@@ -340,7 +344,7 @@ app.add_middleware(SentinelMiddleware, on_threat="block")
 
 ---
 
-# 🚀 Installation
+## 🚀 Installation
 
 ## Docker (Recommended)
 
@@ -364,13 +368,13 @@ pip install -e ".[dev]"
 
 ---
 
-# 🤝 Contributing
+## 🤝 Contributing
 
 We welcome contributions! See [CONTRIBUTING.md](./CONTRIBUTING.md).
 
 ---
 
-# 📞 Contact
+## 📞 Contact
 
 | Channel | Link |
 |---------|------|
