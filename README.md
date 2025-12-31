@@ -150,6 +150,10 @@ fetch('https://cdn.jsdelivr.net/gh/DmitrL-dev/AISecurity@latest/signatures/jailb
 | 📤 **Privacy** | 10+ | PII detection, data leakage prevention |
 | ⛓️ **Supply Chain** | 5+ | Pickle security, serialization attacks |
 
+> 🔥 **MCP/A2A Protocol Security** — SENTINEL protects agentic AI communication protocols.
+> *Microsoft Defender just added "AI - MCP Server" category to Cloud App Catalog (Dec 2025).*
+> *We've had MCP security since day one.*
+
 ## Strange Math™ — What Makes Us Different
 
 ```
