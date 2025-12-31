@@ -719,6 +719,24 @@ def version():
     )
 
 
+@app.command()
+def init():
+    """
+    🏰 Interactive setup wizard for new users.
+
+    Guides you through SENTINEL configuration in 3 minutes:
+    - What to protect (API/Local/LangChain)
+    - Your API provider
+    - Security level (Basic/Standard/Paranoid)
+
+    Example:
+        strike init
+    """
+    from .init_wizard import run_wizard
+
+    run_wizard()
+
+
 # =============================================================================
 # REPORT GENERATION HELPERS
 # =============================================================================

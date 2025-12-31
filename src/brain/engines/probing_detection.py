@@ -285,8 +285,9 @@ class ErrorHarvester:
             try:
                 if pattern.search(query):
                     indicators.append(pattern.pattern[:30])
-            except:
-                pass
+            except Exception:
+                # Pattern may be invalid regex or have encoding issues
+                continue
 
         # Check for malformed inputs
         if self._has_malformed_input(query):

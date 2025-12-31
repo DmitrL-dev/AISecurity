@@ -168,16 +168,12 @@ class GandalfTester:
             known_defenses=[],
         )
 
-        own_session = session is None
-        if own_session:
-            session = aiohttp.ClientSession()
-
-        try:
+        async def _run_adaptive(sess: aiohttp.ClientSession) -> Optional[str]:
             for i in range(max_attempts):
                 # Generate adaptive attack
                 payload = await generator.generate_attack(context)
 
-                response = await self.send_prompt(payload, level, session)
+                response = await self.send_prompt(payload, level, sess)
 
                 # Analyze response
                 analysis = generator.analyze_response(response)
@@ -207,12 +203,14 @@ class GandalfTester:
                     print(f"   [Attempt {i+1}] Unblocked response: {response[:80]}...")
 
                 await asyncio.sleep(0.5)
+            return None
 
-        finally:
-            if own_session:
-                await session.close()
-
-        return None
+        # Use provided session or create new one with proper context manager
+        if session:
+            return await _run_adaptive(session)
+        else:
+            async with aiohttp.ClientSession() as new_session:
+                return await _run_adaptive(new_session)
 
     def generate_report(self) -> str:
         """Generate test report."""

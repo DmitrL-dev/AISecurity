@@ -226,8 +226,9 @@ class DocumentValidator:
                     if pattern.search(decoded):
                         risk = max(risk, 0.8)
                         break
-            except:
-                pass
+            except Exception:
+                # Base64 decode may fail for non-b64 strings
+                continue
 
         # Check for unusual unicode
         unusual_chars = sum(1 for c in content if ord(c) > 0x10000)

@@ -1,0 +1,48 @@
+# SENTINEL — Advanced Configuration
+# Для сложных сценариев: множество LLM, RAG, агентов
+# Docs: https://github.com/SENTINEL-AI
+
+targets:
+  llm:
+    - name: openai-prod
+      provider: openai
+      api_key_env: OPENAI_API_KEY
+      
+    - name: anthropic
+      provider: anthropic
+      
+    # Добавьте свои...
+
+  local:
+    - name: ollama
+      url: http://localhost:11434
+      
+  rag:
+    - name: docs-rag
+      type: langchain
+      # Для множества: pattern: "rag-*"
+      
+  agents:
+    - name: support-agent
+      protocol: mcp
+      endpoint: http://localhost:3000
+
+security:
+  level: standard
+  models:
+    filter: qwen3guard
+    deep: aprielguard
+    math: deepseek-v3
+  checks:
+    - injection
+    - jailbreak
+    - pii
+    - rag_poisoning
+
+gateway:
+  enabled: false
+  port: 8080
+
+logging:
+  level: info
+  output: ./logs/sentinel.log

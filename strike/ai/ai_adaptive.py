@@ -16,7 +16,7 @@ from collections import deque
 from enum import Enum
 
 try:
-    import google.generativeai as genai
+    from google import genai
 
     GENAI_AVAILABLE = True
 except ImportError:
@@ -169,10 +169,11 @@ class HoneypotDetector:
 
         if gemini_key and GENAI_AVAILABLE:
             try:
-                genai.configure(api_key=gemini_key)
-                self.model = genai.GenerativeModel("gemini-2.0-flash-exp")
+                self.client = genai.Client(api_key=gemini_key)
+                self.model = "gemini-2.0-flash-exp"
             except Exception as e:
                 logger.warning(f"Failed to init Gemini: {e}")
+                self.client = None
 
     def calculate_honeypot_score(self) -> Tuple[float, Dict[str, float]]:
         """Calculate honeypot probability score (0-1)."""
@@ -218,7 +219,7 @@ class HoneypotDetector:
 
     async def analyze_with_ai(self, context: Dict) -> Optional[AnalysisResult]:
         """Use Gemini to analyze attack patterns."""
-        if not self.model:
+        if not hasattr(self, "client") or not self.client:
             return None
 
         prompt = f"""You are a security analyst reviewing penetration test results.
@@ -244,7 +245,9 @@ Respond in JSON format:
 }}"""
 
         try:
-            response = await self.model.generate_content_async(prompt)
+            response = await self.client.aio.models.generate_content(
+                model=self.model, contents=prompt
+            )
             text = response.text
 
             # Parse JSON from response

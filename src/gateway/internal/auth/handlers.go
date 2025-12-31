@@ -58,15 +58,15 @@ func LoginHandler(config BehavioralJWTConfig) fiber.Handler {
 
 // validateCredentials checks user credentials
 func validateCredentials(userID, password string) bool {
-	// Demo mode: check against env variables
+	// SECURITY: Credentials MUST be set via environment variables
+	// No hardcoded fallback - this prevents default credential attacks
 	demoUser := os.Getenv("DEMO_USER")
 	demoPass := os.Getenv("DEMO_PASS")
 
-	if demoUser == "" {
-		demoUser = "admin"
-	}
-	if demoPass == "" {
-		demoPass = "sentinel"
+	// Require explicit configuration - fail closed
+	if demoUser == "" || demoPass == "" {
+		// Log warning in production
+		return false
 	}
 
 	// In production: proper password hashing and DB lookup

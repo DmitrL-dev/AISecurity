@@ -1,0 +1,24 @@
+# SENTINEL-Guard QLoRA Training Requirements
+# For fine-tuning AprielGuard 8B with QLoRA
+
+# Core
+torch>=2.1.0
+transformers>=4.36.0
+datasets>=2.16.0
+accelerate>=0.25.0
+
+# PEFT / LoRA
+peft>=0.7.0
+
+# Quantization
+bitsandbytes>=0.41.0
+
+# Training
+trl>=0.7.0
+
+# Utilities
+sentencepiece>=0.1.99
+protobuf>=4.25.0
+
+# Optional: for Kaggle/Colab
+# huggingface_hub>=0.20.0

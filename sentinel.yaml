@@ -1,0 +1,6 @@
+sentinel:
+  engines: 50
+  provider: openai
+  security_level: standard
+  target: api
+  version: '1.0'
