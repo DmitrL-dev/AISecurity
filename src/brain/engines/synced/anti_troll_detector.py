@@ -29,18 +29,22 @@ class AntiTrollDetector:
     
     Synced from attack module: strike/attacks/anti_troll.py
     """
-    
-    PATTERNS = ["i\\s+know\\s+you[\"\\"]?re\\s+just\\s+joking", "stop\\s+trolling|be\\s+serious", "real\\s+answer\\s+this\\s+time"]
+
+    PATTERNS = [
+        r"i\s+know\s+you['\"]?re\s+just\s+joking",
+        r"stop\s+trolling|be\s+serious",
+        r"real\s+answer\s+this\s+time",
+    ]
     KEYWORDS = ["joking", "trolling", "serious", "real answer", "not kidding"]
-    
+
     def __init__(self):
         self._compiled = [re.compile(p, re.IGNORECASE) for p in self.PATTERNS]
-    
+
     def analyze(self, text: str) -> AntiTrollDetectorResult:
         """Analyze text for anti_troll attack patterns."""
         text_lower = text.lower()
         matched = []
-        
+
         # Check regex patterns
         for i, pattern in enumerate(self._compiled):
             try:
@@ -48,15 +52,15 @@ class AntiTrollDetector:
                     matched.append(f"pattern_{i}")
             except re.error:
                 pass
-        
+
         # Check keywords
         for keyword in self.KEYWORDS:
             if keyword.lower() in text_lower:
                 matched.append(f"keyword:{keyword}")
-        
+
         confidence = min(0.95, 0.3 + len(matched) * 0.15)
         detected = len(matched) >= 2
-        
+
         return AntiTrollDetectorResult(
             detected=detected,
             confidence=confidence,

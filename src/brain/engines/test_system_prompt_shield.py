@@ -3,7 +3,7 @@ Unit tests for System Prompt Shield.
 """
 
 import pytest
-from system_prompt_shield import (
+from engines.system_prompt_shield import (
     SystemPromptShield,
     ExtractionDetector,
     CanaryTokenManager,

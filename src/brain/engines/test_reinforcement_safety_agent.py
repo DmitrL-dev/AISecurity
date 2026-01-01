@@ -3,7 +3,7 @@ Unit tests for Reinforcement Safety Agent.
 """
 
 import pytest
-from reinforcement_safety_agent import (
+from engines.reinforcement_safety_agent import (
     ReinforcementSafetyAgent,
     QLearningAgent,
     StateClassifier,

@@ -3,7 +3,7 @@ Unit tests for Cross-Modal Security Analyzer.
 """
 
 import pytest
-from cross_modal_security_analyzer import (
+from engines.cross_modal_security_analyzer import (
     CrossModalSecurityAnalyzer,
     TextInImageDetector,
     SemanticAlignmentChecker,

@@ -1,7 +1,7 @@
 """Tests for Response Consistency Checker."""
 
 import pytest
-from response_consistency_checker import ResponseConsistencyChecker
+from engines.response_consistency_checker import ResponseConsistencyChecker
 
 
 class TestResponseConsistencyChecker:

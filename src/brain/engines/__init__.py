@@ -1,32 +1,34 @@
 """
 SENTINEL Community Edition - Detection Engines
 
-15 open source engines for LLM security.
+Core security engines for LLM protection.
 """
 
-# Classic Detection
-from .injection import InjectionDetector
+# Core Detection Engines
+from .injection import InjectionEngine
 from .yara_engine import YaraEngine
-from .behavioral import BehavioralAnalyzer
-from .pii import PIIDetector
-from .query import QueryValidator
-from .language import LanguageDetector
+from .behavioral import BehavioralEngine
+from .pii import PIIEngine
+from .query import QueryEngine
+from .language import LanguageEngine
 
-# NLP Guard
-from .prompt_guard import PromptGuard
-from .hallucination import HallucinationDetector
+# System Prompt Protection
+from .prompt_guard import SystemPromptGuard
 
-# Strange Math (Basic)
-from .tda_enhanced import TDAEnhanced
-from .sheaf_coherence import SheafCoherence
+# Hallucination Detection
+from .hallucination import HallucinationEngine
+
+# Strange Math
+from .tda_enhanced import TDAEnhancedEngine
+from .sheaf_coherence import SheafCoherenceEngine
 
 # VLM Protection
-from .visual_content import VisualContent
-from .cross_modal import CrossModal
+from .visual_content import VisualContentAnalyzer
+from .cross_modal import CrossModalConsistency
 
 # Agent Security
 from .rag_guard import RAGGuard
-from .probing_detection import ProbingDetection
+from .probing_detection import ProbingDetector
 
 # Supply Chain Security
 from .pickle_security import PickleSecurityEngine, PyTorchModelScanner
@@ -63,53 +65,71 @@ from .dark_pattern_detector import DarkPatternDetector
 from .polymorphic_prompt_assembler import PolymorphicPromptAssembler
 
 # Streaming
-from .streaming import StreamingGuard
+from .streaming import StreamingEngine
+
+# MoE Security (Jan 2026 R&D - GateBreaker defense)
+from .moe_guard import MoEGuardEngine
+
+# Backward compatibility aliases (legacy names)
+InjectionDetector = InjectionEngine
+BehavioralAnalyzer = BehavioralEngine
+PIIDetector = PIIEngine
+QueryValidator = QueryEngine
+LanguageDetector = LanguageEngine
+HallucinationDetector = HallucinationEngine
+PromptGuard = SystemPromptGuard
+TDAEnhanced = TDAEnhancedEngine
+SheafCoherence = SheafCoherenceEngine
+VisualContent = VisualContentAnalyzer
+CrossModal = CrossModalConsistency
+StreamingGuard = StreamingEngine
+ProbingDetection = ProbingDetector
 
 __all__ = [
-    # Classic
-    "InjectionDetector",
+    # Core Engines
+    "InjectionEngine",
     "YaraEngine",
+    "BehavioralEngine",
+    "PIIEngine",
+    "QueryEngine",
+    "LanguageEngine",
+    "SystemPromptGuard",
+    "HallucinationEngine",
+    "TDAEnhancedEngine",
+    "SheafCoherenceEngine",
+    "VisualContentAnalyzer",
+    "CrossModalConsistency",
+    "ProbingDetector",
+    "StreamingEngine",
+    # Backward compat aliases
+    "InjectionDetector",
     "BehavioralAnalyzer",
     "PIIDetector",
     "QueryValidator",
     "LanguageDetector",
-    # NLP
-    "PromptGuard",
     "HallucinationDetector",
-    # Math
+    "PromptGuard",
     "TDAEnhanced",
     "SheafCoherence",
-    # VLM
     "VisualContent",
     "CrossModal",
-    # Agent
-    "RAGGuard",
+    "StreamingGuard",
     "ProbingDetection",
-    # Supply Chain
+    # Other engines
+    "RAGGuard",
     "PickleSecurityEngine",
     "PyTorchModelScanner",
-    # Context Management
     "ContextCompressionEngine",
-    # Orchestration
     "TaskComplexityAnalyzer",
-    # Rule Engine
     "SentinelRuleEngine",
-    # Serialization Security (Dec 2025 R&D)
     "SerializationSecurityEngine",
-    # Tool Security (Dec 2025 R&D)
     "ToolHijackerDetector",
     "MCPToolValidator",
-    # Multi-Turn Attack Detection (Dec 2025 R&D)
     "EchoChamberDetector",
-    # RAG Security (Dec 2025 R&D)
     "RAGPoisoningDetector",
-    # Agent Security - OWASP Agentic AI (Dec 2025 R&D)
     "IdentityPrivilegeAbuseDetector",
     "MemoryPoisoningDetector",
-    # Dark Pattern Defense (Dec 2025 R&D)
     "DarkPatternDetector",
-    # Polymorphic Prompt Defense (Dec 2025 R&D)
     "PolymorphicPromptAssembler",
-    # Streaming
-    "StreamingGuard",
+    "MoEGuardEngine",
 ]

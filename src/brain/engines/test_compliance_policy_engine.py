@@ -3,7 +3,7 @@ Unit tests for Compliance Policy Engine.
 """
 
 import pytest
-from compliance_policy_engine import (
+from engines.compliance_policy_engine import (
     CompliancePolicyEngine,
     PolicyRegistry,
     ComplianceChecker,

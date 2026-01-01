@@ -3,7 +3,7 @@ Unit tests for Recursive Injection Guard.
 """
 
 import pytest
-from recursive_injection_guard import (
+from engines.recursive_injection_guard import (
     RecursiveInjectionGuard,
     DepthAnalyzer,
     PatternDetector,

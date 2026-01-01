@@ -16,7 +16,7 @@ from datetime import datetime, timedelta
 from typing import List
 
 # Import from meta_judge
-from meta_judge import (
+from engines.meta_judge import (
     Verdict,
     Severity,
     EngineCategory,

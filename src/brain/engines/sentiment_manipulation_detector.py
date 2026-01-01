@@ -11,7 +11,7 @@ from dataclasses import dataclass, field
 from enum import Enum
 from typing import List
 
-from base_engine import Severity, Action  # Base classes
+from .base_engine import Severity, Action  # Base classes
 
 logger = logging.getLogger("SentimentManipulationDetector")
 

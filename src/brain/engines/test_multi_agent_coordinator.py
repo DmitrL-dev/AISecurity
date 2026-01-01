@@ -3,7 +3,7 @@ Unit tests for Multi-Agent Security Coordinator.
 """
 
 import pytest
-from multi_agent_coordinator import (
+from engines.multi_agent_coordinator import (
     MultiAgentSecurityCoordinator,
     TrustGraph,
     CollusionDetector,

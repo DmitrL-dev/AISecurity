@@ -3,7 +3,7 @@ Unit tests for Intent-Aware Semantic Analyzer.
 """
 
 import pytest
-from intent_aware_semantic_analyzer import (
+from engines.intent_aware_semantic_analyzer import (
     IntentAwareSemanticAnalyzer,
     IntentClassifier,
     ParaphraseDetector,

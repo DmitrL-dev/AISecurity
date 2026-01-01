@@ -6,6 +6,7 @@
 
 <p align="center">
   <strong>🛡️ Defense + ⚔️ Offense + 📦 Framework — Complete AI Security Suite</strong><br>
+  <strong>Dragon v4.0 • January 2026</strong><br>
   200 Detection Engines • Production Gateway • Red Team Platform • Python SDK
 </p>
 
@@ -181,6 +182,26 @@ fetch('https://cdn.jsdelivr.net/gh/DmitrL-dev/AISecurity@latest/signatures/jailb
 | `memory_poisoning_detector.py` | Persistent memory attacks | ASI04 |
 | `dark_pattern_detector.py` | DECEPTICON | arxiv:2512.22894 |
 | `polymorphic_prompt_assembler.py` | PPA Defense | IEEE 2025 |
+
+</details>
+
+<details>
+<summary><strong>🔥 January 2026 R&D Engines (NEW)</strong></summary>
+
+| Engine | Attack Vector | Source |
+|--------|---------------|--------|
+| `moe_guard.py` | GateBreaker MoE attacks | arxiv:2512.21008 |
+| `honeypot_responses.py` | Anti-Adaptive Defense | SKD Bypass Research |
+
+**New Attack Patterns in `jailbreaks.yaml`:**
+- Bad Likert Judge (3 patterns)
+- RSA Methodology (2 patterns)
+- GateBreaker MoE (2 patterns, zero_day)
+- Dark Patterns for Web Agents (2 patterns)
+- Agentic ProbLLMs (1 pattern)
+- SKD Bypass (1 pattern)
+
+**Total patterns: 60**
 
 </details>
 

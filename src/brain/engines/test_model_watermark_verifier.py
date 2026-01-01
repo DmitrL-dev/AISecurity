@@ -3,7 +3,7 @@ Unit tests for Model Watermark Verifier.
 """
 
 import pytest
-from model_watermark_verifier import (
+from engines.model_watermark_verifier import (
     ModelWatermarkVerifier,
     FingerprintGenerator,
     StatisticalWatermarkDetector,

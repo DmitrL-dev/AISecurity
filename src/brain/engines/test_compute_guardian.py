@@ -3,7 +3,7 @@ Unit tests for Compute Guardian.
 """
 
 import pytest
-from compute_guardian import (
+from engines.compute_guardian import (
     ComputeGuardian,
     ComplexityEstimator,
     SpongeDetector,

@@ -3,7 +3,7 @@ Unit tests for Symbolic Reasoning Guard.
 """
 
 import pytest
-from symbolic_reasoning_guard import (
+from engines.symbolic_reasoning_guard import (
     SymbolicReasoningGuard,
     RuleEngine,
     ConstraintChecker,

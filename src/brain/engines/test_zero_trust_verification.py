@@ -4,7 +4,7 @@ Unit tests for Zero Trust Verification.
 
 import time
 import pytest
-from zero_trust_verification import (
+from engines.zero_trust_verification import (
     ZeroTrustVerification,
     IdentityVerifier,
     PolicyEngine,

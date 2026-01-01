@@ -3,7 +3,7 @@ Unit tests for Causal Inference Detector.
 """
 
 import pytest
-from causal_inference_detector import (
+from engines.causal_inference_detector import (
     CausalInferenceDetector,
     CausalGraph,
     CausalLearner,

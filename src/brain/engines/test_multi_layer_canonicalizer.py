@@ -3,7 +3,7 @@ Unit tests for Multi-Layer Canonicalizer.
 """
 
 import pytest
-from multi_layer_canonicalizer import (
+from engines.multi_layer_canonicalizer import (
     MultiLayerCanonicalizer,
     HomoglyphDetector,
     ZeroWidthRemover,

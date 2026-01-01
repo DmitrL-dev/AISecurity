@@ -1,7 +1,7 @@
 """Tests for Conversation State Validator."""
 
 import pytest
-from conversation_state_validator import ConversationStateValidator, ConversationState
+from engines.conversation_state_validator import ConversationStateValidator, ConversationState
 
 
 class TestConversationStateValidator:

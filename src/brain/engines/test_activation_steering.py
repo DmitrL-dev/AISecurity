@@ -4,7 +4,7 @@ Unit tests for Activation Steering Safety Layer.
 
 import pytest
 import numpy as np
-from activation_steering import (
+from engines.activation_steering import (
     ActivationSteeringEngine,
     SteeringVector,
     SteeringVectorFactory,

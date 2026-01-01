@@ -4,7 +4,7 @@ Unit tests for Homomorphic Encryption Engine.
 
 import pytest
 import numpy as np
-from homomorphic_engine import (
+from engines.homomorphic_engine import (
     HomomorphicEngine,
     HEKeyGenerator,
     HEEncryptor,

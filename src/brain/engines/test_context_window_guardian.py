@@ -3,7 +3,7 @@ Unit tests for Context Window Guardian.
 """
 
 import pytest
-from context_window_guardian import (
+from engines.context_window_guardian import (
     ContextWindowGuardian,
     ManyShotDetector,
     RepetitionDetector,

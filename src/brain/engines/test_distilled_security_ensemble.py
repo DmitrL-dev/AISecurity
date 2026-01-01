@@ -3,7 +3,7 @@ Unit tests for Distilled Security Ensemble.
 """
 
 import pytest
-from distilled_security_ensemble import (
+from engines.distilled_security_ensemble import (
     DistilledSecurityEnsemble,
     VotingEngine,
     KeywordDetector,

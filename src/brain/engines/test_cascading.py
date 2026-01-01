@@ -13,7 +13,7 @@ import pytest
 from datetime import datetime, timedelta
 from typing import List
 
-from cascading_guard import (
+from engines.cascading_guard import (
     CircuitState,
     PropagationType,
     AgentAction,

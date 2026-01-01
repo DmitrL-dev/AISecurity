@@ -16,13 +16,13 @@ class TestRAGGuard:
 
     def test_import(self):
         """Test module import."""
-        from rag_guard import RAGGuard, RAGGuardResult, RAGThreatType, Document, Verdict
+        from engines.rag_guard import RAGGuard, RAGGuardResult, RAGThreatType, Document, Verdict
 
         assert RAGGuard is not None
 
     def test_guard_init(self):
         """Test guard initialization."""
-        from rag_guard import RAGGuard
+        from engines.rag_guard import RAGGuard
 
         guard = RAGGuard(enable_consistency_check=False)
         assert guard is not None
@@ -30,7 +30,7 @@ class TestRAGGuard:
 
     def test_clean_document(self):
         """Test clean document passes."""
-        from rag_guard import RAGGuard, Document
+        from engines.rag_guard import RAGGuard, Document
 
         guard = RAGGuard(enable_consistency_check=False)
 
@@ -48,7 +48,7 @@ class TestRAGGuard:
 
     def test_injection_in_document(self):
         """Test injection detection in document."""
-        from rag_guard import RAGGuard, Document, RAGThreatType
+        from engines.rag_guard import RAGGuard, Document, RAGThreatType
 
         guard = RAGGuard(enable_consistency_check=False)
 
@@ -66,7 +66,7 @@ class TestRAGGuard:
 
     def test_conditional_injection(self):
         """Test conditional injection detection."""
-        from rag_guard import RAGGuard, Document, RAGThreatType
+        from engines.rag_guard import RAGGuard, Document, RAGThreatType
 
         guard = RAGGuard(enable_consistency_check=False)
 
@@ -83,7 +83,7 @@ class TestRAGGuard:
 
     def test_context_override(self):
         """Test context override detection."""
-        from rag_guard import RAGGuard, Document, RAGThreatType
+        from engines.rag_guard import RAGGuard, Document, RAGThreatType
 
         guard = RAGGuard(enable_consistency_check=False)
 
@@ -100,7 +100,7 @@ class TestRAGGuard:
 
     def test_untrusted_source(self):
         """Test untrusted source detection."""
-        from rag_guard import RAGGuard, Document, RAGThreatType
+        from engines.rag_guard import RAGGuard, Document, RAGThreatType
 
         guard = RAGGuard(enable_consistency_check=False)
 
@@ -114,7 +114,7 @@ class TestRAGGuard:
 
     def test_filter_documents(self):
         """Test document filtering."""
-        from rag_guard import RAGGuard, Document
+        from engines.rag_guard import RAGGuard, Document
 
         guard = RAGGuard(enable_consistency_check=False)
 
@@ -133,7 +133,7 @@ class TestRAGGuard:
 
     def test_result_to_dict(self):
         """Test result serialization."""
-        from rag_guard import RAGGuardResult, Verdict, RAGThreatType
+        from engines.rag_guard import RAGGuardResult, Verdict, RAGThreatType
 
         result = RAGGuardResult(
             verdict=Verdict.BLOCK,
@@ -160,7 +160,7 @@ class TestProbingDetection:
 
     def test_import(self):
         """Test module import."""
-        from probing_detection import (
+        from engines.probing_detection import (
             ProbingDetector,
             ProbingResult,
             ProbingType,
@@ -172,7 +172,7 @@ class TestProbingDetection:
 
     def test_detector_init(self):
         """Test detector initialization."""
-        from probing_detection import ProbingDetector
+        from engines.probing_detection import ProbingDetector
 
         detector = ProbingDetector(block_after_probes=10)
         assert detector is not None
@@ -180,7 +180,7 @@ class TestProbingDetection:
 
     def test_normal_query(self):
         """Test normal query passes."""
-        from probing_detection import ProbingDetector
+        from engines.probing_detection import ProbingDetector
 
         detector = ProbingDetector()
 
@@ -190,7 +190,7 @@ class TestProbingDetection:
 
     def test_system_prompt_extraction(self):
         """Test system prompt extraction detection."""
-        from probing_detection import ProbingDetector, ProbingType
+        from engines.probing_detection import ProbingDetector, ProbingType
 
         detector = ProbingDetector()
 
@@ -208,7 +208,7 @@ class TestProbingDetection:
 
     def test_guardrail_testing(self):
         """Test guardrail testing detection."""
-        from probing_detection import ProbingDetector, ProbingType
+        from engines.probing_detection import ProbingDetector, ProbingType
 
         detector = ProbingDetector()
 
@@ -225,7 +225,7 @@ class TestProbingDetection:
 
     def test_error_harvesting(self):
         """Test error harvesting detection."""
-        from probing_detection import ProbingDetector, ProbingType
+        from engines.probing_detection import ProbingDetector, ProbingType
 
         detector = ProbingDetector()
 
@@ -241,7 +241,7 @@ class TestProbingDetection:
 
     def test_capability_enumeration(self):
         """Test capability enumeration detection."""
-        from probing_detection import ProbingDetector, ProbingType
+        from engines.probing_detection import ProbingDetector, ProbingType
 
         detector = ProbingDetector()
 
@@ -258,7 +258,7 @@ class TestProbingDetection:
 
     def test_session_tracking(self):
         """Test session-level probing tracking."""
-        from probing_detection import ProbingDetector
+        from engines.probing_detection import ProbingDetector
 
         detector = ProbingDetector(warn_after_probes=2, block_after_probes=4)
 
@@ -282,7 +282,7 @@ class TestProbingDetection:
 
     def test_honeypot_recommendation(self):
         """Test honeypot recommendation for system prompt extraction."""
-        from probing_detection import ProbingDetector, Recommendation
+        from engines.probing_detection import ProbingDetector, Recommendation
 
         detector = ProbingDetector()
 
@@ -291,7 +291,7 @@ class TestProbingDetection:
 
     def test_result_to_dict(self):
         """Test result serialization."""
-        from probing_detection import (
+        from engines.probing_detection import (
             ProbingResult,
             Verdict,
             ProbingType,
@@ -325,8 +325,8 @@ class TestEngineIntegration:
 
     def test_both_engines_loadable(self):
         """Test both engines can be imported together."""
-        from rag_guard import RAGGuard
-        from probing_detection import ProbingDetector
+        from engines.rag_guard import RAGGuard
+        from engines.probing_detection import ProbingDetector
 
         rag = RAGGuard(enable_consistency_check=False)
         prob = ProbingDetector()
@@ -336,8 +336,8 @@ class TestEngineIntegration:
 
     def test_verdict_consistency(self):
         """Test both engines use same Verdict enum values."""
-        from rag_guard import Verdict as V1
-        from probing_detection import Verdict as V2
+        from engines.rag_guard import Verdict as V1
+        from engines.probing_detection import Verdict as V2
 
         assert V1.ALLOW.value == V2.ALLOW.value == "allow"
         assert V1.WARN.value == V2.WARN.value == "warn"

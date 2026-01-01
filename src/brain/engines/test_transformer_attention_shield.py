@@ -3,7 +3,7 @@ Unit tests for Transformer Attention Shield.
 """
 
 import pytest
-from transformer_attention_shield import (
+from engines.transformer_attention_shield import (
     TransformerAttentionShield,
     AttentionAnalyzer,
     FocusHijackDetector,

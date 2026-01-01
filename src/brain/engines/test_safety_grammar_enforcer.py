@@ -3,7 +3,7 @@ Unit tests for Safety Grammar Enforcer.
 """
 
 import pytest
-from safety_grammar_enforcer import (
+from engines.safety_grammar_enforcer import (
     SafetyGrammarEnforcer,
     SchemaValidator,
     PatternBlocker,

@@ -4,7 +4,7 @@ Unit tests for Behavioral API Verifier.
 
 import pytest
 import time
-from behavioral_api_verifier import (
+from engines.behavioral_api_verifier import (
     BehavioralAPIVerifier,
     TimingAnalyzer,
     VelocityChecker,

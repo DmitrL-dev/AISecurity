@@ -3,7 +3,7 @@ Unit tests for Federated Threat Aggregator.
 """
 
 import pytest
-from federated_threat_aggregator import (
+from engines.federated_threat_aggregator import (
     FederatedThreatAggregator,
     FederatedAggregator,
     DifferentialPrivacy,

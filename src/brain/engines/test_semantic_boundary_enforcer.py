@@ -3,7 +3,7 @@ Unit tests for Semantic Boundary Enforcer.
 """
 
 import pytest
-from semantic_boundary_enforcer import (
+from engines.semantic_boundary_enforcer import (
     SemanticBoundaryEnforcer,
     RoleBoundary,
     ContextBoundary,

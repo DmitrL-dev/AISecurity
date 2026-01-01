@@ -4,7 +4,7 @@ Unit tests for Hyperbolic Geometry Engine.
 
 import pytest
 import numpy as np
-from hyperbolic_geometry import (
+from engines.hyperbolic_geometry import (
     HyperbolicGeometryEngine,
     PoincareBall,
     HyperbolicAggregator,

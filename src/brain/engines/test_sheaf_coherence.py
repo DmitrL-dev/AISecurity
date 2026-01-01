@@ -4,7 +4,7 @@ Unit tests for Sheaf Coherence Engine.
 
 import pytest
 import numpy as np
-from sheaf_coherence import (
+from engines.sheaf_coherence import (
     SheafCoherenceEngine,
     SheafBuilder,
     CoherenceChecker,

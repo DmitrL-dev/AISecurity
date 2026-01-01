@@ -20,6 +20,7 @@ __author__ = "SENTINEL Security Team"
 from .executor import AttackExecutor
 from .config import StrikeConfig
 from .target import Target
+from .universal_controller import UniversalController
 
 # Sub-modules (lazy imports for optional components)
 
@@ -53,6 +54,7 @@ __all__ = [
     "AttackExecutor",
     "StrikeConfig",
     "Target",
+    "UniversalController",
     "__version__",
     # Lazy loaders
     "get_llm_manager",

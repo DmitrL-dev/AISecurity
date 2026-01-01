@@ -3,7 +3,7 @@ Unit tests for Emergent Security Mesh.
 """
 
 import pytest
-from emergent_security_mesh import (
+from engines.emergent_security_mesh import (
     EmergentSecurityMesh,
     AgentNetwork,
     ConsensusEngine,

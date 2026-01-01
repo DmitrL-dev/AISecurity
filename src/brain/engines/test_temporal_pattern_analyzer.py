@@ -4,7 +4,7 @@ Unit tests for Temporal Pattern Analyzer.
 
 import time
 import pytest
-from temporal_pattern_analyzer import (
+from engines.temporal_pattern_analyzer import (
     TemporalPatternAnalyzer,
     IntervalAnalyzer,
     RapidFireDetector,

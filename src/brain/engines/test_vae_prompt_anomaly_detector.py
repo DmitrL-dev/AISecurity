@@ -3,7 +3,7 @@ Unit tests for VAE Prompt Anomaly Detector.
 """
 
 import pytest
-from vae_prompt_anomaly_detector import (
+from engines.vae_prompt_anomaly_detector import (
     VAEPromptAnomalyDetector,
     SimpleEncoder,
     ReconstructionAnalyzer,

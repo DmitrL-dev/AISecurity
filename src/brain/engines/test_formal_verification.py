@@ -4,7 +4,7 @@ Unit tests for Formal Verification Engine.
 
 import pytest
 import numpy as np
-from formal_verification import (
+from engines.formal_verification import (
     FormalVerificationEngine,
     RobustnessVerifier,
     SafetyPropertyVerifier,

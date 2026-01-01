@@ -9,7 +9,7 @@ class TestAIC2Detection:
     """Tests for Engine #43: AI C2 Detection."""
 
     def test_import(self):
-        from ai_c2_detection import (
+        from engines.ai_c2_detection import (
             AIC2Detector,
             C2DetectionResult,
             C2ThreatType,
@@ -19,13 +19,13 @@ class TestAIC2Detection:
         assert AIC2Detector is not None
 
     def test_detector_init(self):
-        from ai_c2_detection import AIC2Detector
+        from engines.ai_c2_detection import AIC2Detector
 
         detector = AIC2Detector()
         assert detector is not None
 
     def test_clean_text(self):
-        from ai_c2_detection import AIC2Detector
+        from engines.ai_c2_detection import AIC2Detector
 
         detector = AIC2Detector()
 
@@ -33,7 +33,7 @@ class TestAIC2Detection:
         assert result.is_safe is True
 
     def test_suspicious_url(self):
-        from ai_c2_detection import AIC2Detector, C2ThreatType
+        from engines.ai_c2_detection import AIC2Detector, C2ThreatType
 
         detector = AIC2Detector()
 
@@ -43,7 +43,7 @@ class TestAIC2Detection:
         assert len(result.suspicious_urls) > 0
 
     def test_webhook_detection(self):
-        from ai_c2_detection import AIC2Detector
+        from engines.ai_c2_detection import AIC2Detector
 
         detector = AIC2Detector()
 
@@ -51,7 +51,7 @@ class TestAIC2Detection:
         assert result.is_safe is False
 
     def test_search_c2(self):
-        from ai_c2_detection import AIC2Detector, C2ThreatType
+        from engines.ai_c2_detection import AIC2Detector, C2ThreatType
 
         detector = AIC2Detector()
 
@@ -59,7 +59,7 @@ class TestAIC2Detection:
         assert result.risk_score >= 0  # May or may not detect C2
 
     def test_exfiltration_pattern(self):
-        from ai_c2_detection import AIC2Detector
+        from engines.ai_c2_detection import AIC2Detector
 
         detector = AIC2Detector()
 
@@ -68,7 +68,7 @@ class TestAIC2Detection:
         assert result.risk_score > 0.5
 
     def test_result_to_dict(self):
-        from ai_c2_detection import C2DetectionResult, Verdict, C2ThreatType
+        from engines.ai_c2_detection import C2DetectionResult, Verdict, C2ThreatType
 
         result = C2DetectionResult(
             verdict=Verdict.BLOCK,
@@ -85,7 +85,7 @@ class TestAttackStaging:
     """Tests for Engine #44: Attack Staging Detection."""
 
     def test_import(self):
-        from attack_staging import (
+        from engines.attack_staging import (
             AttackStagingDetector,
             StagingResult,
             StagingThreatType,
@@ -96,13 +96,13 @@ class TestAttackStaging:
         assert AttackStagingDetector is not None
 
     def test_detector_init(self):
-        from attack_staging import AttackStagingDetector
+        from engines.attack_staging import AttackStagingDetector
 
         detector = AttackStagingDetector()
         assert detector is not None
 
     def test_clean_message(self):
-        from attack_staging import AttackStagingDetector
+        from engines.attack_staging import AttackStagingDetector
 
         detector = AttackStagingDetector()
 
@@ -110,7 +110,7 @@ class TestAttackStaging:
         assert result.is_safe is True
 
     def test_verify_attack(self):
-        from attack_staging import AttackStagingDetector, StagingThreatType
+        from engines.attack_staging import AttackStagingDetector, StagingThreatType
 
         detector = AttackStagingDetector()
 
@@ -119,7 +119,7 @@ class TestAttackStaging:
         assert StagingThreatType.VERIFY_ATTACK in result.threats
 
     def test_manipulate_model(self):
-        from attack_staging import AttackStagingDetector, StagingThreatType
+        from engines.attack_staging import AttackStagingDetector, StagingThreatType
 
         detector = AttackStagingDetector()
 
@@ -128,7 +128,7 @@ class TestAttackStaging:
         assert StagingThreatType.MANIPULATE_MODEL in result.threats
 
     def test_lateral_movement(self):
-        from attack_staging import AttackStagingDetector, StagingThreatType
+        from engines.attack_staging import AttackStagingDetector, StagingThreatType
 
         detector = AttackStagingDetector()
 
@@ -137,7 +137,7 @@ class TestAttackStaging:
         assert StagingThreatType.LATERAL_MOVEMENT in result.threats
 
     def test_staged_sequence(self):
-        from attack_staging import AttackStagingDetector, StagingThreatType
+        from engines.attack_staging import AttackStagingDetector, StagingThreatType
 
         detector = AttackStagingDetector()
 
@@ -145,7 +145,7 @@ class TestAttackStaging:
         assert StagingThreatType.STAGED_SEQUENCE in result.threats
 
     def test_progression_detection(self):
-        from attack_staging import AttackStagingDetector, AttackStage
+        from engines.attack_staging import AttackStagingDetector, AttackStage
 
         detector = AttackStagingDetector()
 
@@ -161,7 +161,7 @@ class TestAttackStaging:
             "none", "recon", "staging", "execution"]
 
     def test_result_to_dict(self):
-        from attack_staging import StagingResult, Verdict, AttackStage
+        from engines.attack_staging import StagingResult, Verdict, AttackStage
 
         result = StagingResult(
             verdict=Verdict.WARN,
@@ -178,8 +178,8 @@ class TestPhase4Integration:
     """Integration tests for Phase 4."""
 
     def test_both_engines_load(self):
-        from ai_c2_detection import AIC2Detector
-        from attack_staging import AttackStagingDetector
+        from engines.ai_c2_detection import AIC2Detector
+        from engines.attack_staging import AttackStagingDetector
 
         c2 = AIC2Detector()
         staging = AttackStagingDetector()
@@ -188,8 +188,8 @@ class TestPhase4Integration:
         assert staging is not None
 
     def test_verdict_consistency(self):
-        from ai_c2_detection import Verdict as V1
-        from attack_staging import Verdict as V2
+        from engines.ai_c2_detection import Verdict as V1
+        from engines.attack_staging import Verdict as V2
 
         assert V1.ALLOW.value == V2.ALLOW.value == "allow"
         assert V1.BLOCK.value == V2.BLOCK.value == "block"

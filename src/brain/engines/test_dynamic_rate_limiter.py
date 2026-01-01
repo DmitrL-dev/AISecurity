@@ -3,7 +3,7 @@ Unit tests for Dynamic Rate Limiter.
 """
 
 import pytest
-from dynamic_rate_limiter import (
+from engines.dynamic_rate_limiter import (
     DynamicRateLimiter,
     TokenBucket,
     BurstDetector,

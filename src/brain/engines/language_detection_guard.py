@@ -10,7 +10,7 @@ import time
 from dataclasses import dataclass, field
 from typing import Dict, List
 
-from base_engine import Severity, Action  # Base classes
+from .base_engine import Severity, Action  # Base classes
 
 logger = logging.getLogger("LanguageDetectionGuard")
 
