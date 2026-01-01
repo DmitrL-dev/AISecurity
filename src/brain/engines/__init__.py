@@ -70,6 +70,9 @@ from .streaming import StreamingEngine
 # MoE Security (Jan 2026 R&D - GateBreaker defense)
 from .moe_guard import MoEGuardEngine
 
+# Evolutive Attack Detection (Jan 2026 R&D - LLM-Virus defense)
+from .evolutive_attack_detector import EvolutiveAttackDetector
+
 # Backward compatibility aliases (legacy names)
 InjectionDetector = InjectionEngine
 BehavioralAnalyzer = BehavioralEngine
@@ -132,4 +135,5 @@ __all__ = [
     "DarkPatternDetector",
     "PolymorphicPromptAssembler",
     "MoEGuardEngine",
+    "EvolutiveAttackDetector",
 ]

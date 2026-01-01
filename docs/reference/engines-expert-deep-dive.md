@@ -3,7 +3,7 @@
 > **Для кого:** Исследователи, эксперты в области топологии, дифференциальной геометрии, машинного обучения.  
 > **Цель:** Детальное описание математической базы и её инженерной адаптации.  
 > **Updated:** January 2026 — Dragon v4.0, MoE Guard, RAG Poisoning, Dark Patterns  
-> **Unit Tests:** 1,047+ | **Engines:** 200 (verified ✅ Health Check 100%) | **LOC:** ~81,000
+> **Unit Tests:** 1,047+ | **Engines:** 201 (verified ✅ Health Check 100%) | **LOC:** ~81,000
 
 ---
 

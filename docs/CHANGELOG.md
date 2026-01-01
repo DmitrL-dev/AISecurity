@@ -8,6 +8,10 @@ All notable changes to the SENTINEL AI Security Platform.
 
 ### 🔥 New Engines
 
+- **EvolutiveAttackDetector** — Real-time LLM-Virus detection (GeneticAlgorithm attacks)
+  - SimHash similarity for mutation detection
+  - 5 signals: mutation_cluster, rapid_iteration, fitness_improvement, crossover, generation_cycle
+  - Risk levels with confidence scoring
 - **MoEGuardEngine** — Detection of Mixture-of-Experts safety bypass attacks
   - Counters GateBreaker (arxiv:2512.21008) attacks
   - Detects gate manipulation, safety neuron targeting, expert disabling
