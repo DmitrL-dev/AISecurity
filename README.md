@@ -205,7 +205,7 @@ fetch('https://cdn.jsdelivr.net/gh/DmitrL-dev/AISecurity@latest/signatures/jailb
 
 </details>
 
-📖 **[Full Engine Documentation](./docs/ENGINES.md)** | **[R&D Changelog](./docs/CHANGELOG.md)**
+📖 **[Full Engine Documentation](./docs/reference/engines.md)** | **[R&D Changelog](./docs/CHANGELOG.md)**
 
 ---
 
@@ -243,7 +243,7 @@ fetch('https://cdn.jsdelivr.net/gh/DmitrL-dev/AISecurity@latest/signatures/jailb
 | **Shapeshifter** | Polymorphic config per session |
 | **Differential Privacy Logging** | GDPR-compliant analytics |
 
-📖 **[Gateway Documentation](./docs/GATEWAY.md)** | **[Deployment Guide](./QUICKSTART.md)**
+📖 **[Gateway Documentation](./docs/architecture/gateway_brain_separation.md)** | **[Deployment Guide](./docs/guides/deployment-en.md)**
 
 ---
 
@@ -275,7 +275,7 @@ fetch('https://cdn.jsdelivr.net/gh/DmitrL-dev/AISecurity@latest/signatures/jailb
 | 🏢 **Enterprise** | Pre-deployment security validation |
 | 🎓 **Researchers** | Attack methodology development |
 
-📖 **[Strike Documentation](./docs/STRIKE.md)** | **[Colab Demo](https://colab.research.google.com/github/DmitrL-dev/AISecurity/blob/main/SENTINEL_Strike_Demo.ipynb)**
+📖 **[Strike Documentation](./strike/README.md)** | **[Colab Demo](https://colab.research.google.com/github/DmitrL-dev/AISecurity/blob/main/SENTINEL_Strike_Demo.ipynb)**
 
 ---
 
@@ -398,7 +398,7 @@ pip install -e ".[dev]"
 
 ## 🤝 Contributing
 
-We welcome contributions! See [CONTRIBUTING.md](./CONTRIBUTING.md).
+We welcome contributions! See [CONTRIBUTING.md](./docs/CONTRIBUTING.md).
 
 ---
 
