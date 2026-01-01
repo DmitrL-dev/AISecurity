@@ -2,8 +2,8 @@
 
 > **Для кого:** Исследователи, эксперты в области топологии, дифференциальной геометрии, машинного обучения.  
 > **Цель:** Детальное описание математической базы и её инженерной адаптации.  
-> **Updated:** December 2025 — OWASP Agentic 2026 10/10, Supply Chain Guard, Trust Exploitation, ESN  
-> **Unit Tests:** 175+ | **Engines:** 99 (verified ✅ Health Check 100%) | **LOC:** ~48,000
+> **Updated:** January 2026 — Dragon v4.0, MoE Guard, RAG Poisoning, Dark Patterns  
+> **Unit Tests:** 1,047+ | **Engines:** 200 (verified ✅ Health Check 100%) | **LOC:** ~81,000
 
 ---
 

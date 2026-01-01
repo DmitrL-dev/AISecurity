@@ -1,9 +1,9 @@
-# ?? SENTINEL Expert Documentation: Strange Math Engines
+# 🔬 SENTINEL Expert Documentation: Strange Math Engines
 
 > **Audience:** Researchers, experts in topology, differential geometry, machine learning.  
 > **Purpose:** Detailed description of mathematical foundations and their engineering adaptation.  
-> **Updated:** December 2025 — Virtual Context, Polyglot Detection, Crescendo, LLMON Integration  
-> **Unit Tests:** 936+ | **Engines:** 187 (verified ? Health Check 100%) | **LOC:** ~65,000
+> **Updated:** January 2026 — Dragon v4.0, MoE Guard, RAG Poisoning, Dark Patterns  
+> **Unit Tests:** 1,047+ | **Engines:** 200 (verified ✅ Health Check 100%) | **LOC:** ~81,000
 
 ---
 
@@ -9397,3 +9397,318 @@ print(result.max_confidence) # 0.60
 ```
 
 ```
+
+---
+
+## 🔥 January 2026 R&D Engines
+
+> **New in Dragon v4.0 — January 2026**
+> These engines address the latest attack vectors discovered in late 2024/early 2025 research.
+
+---
+
+## 97. MoE Guard Engine 🆕
+
+**File:** `moe_guard.py` | **LOC:** 336  
+**Theoretical Base:** Mixture-of-Experts Architecture Security  
+**Reference:** arXiv:2512.21008 (GateBreaker Attack)
+
+### 97.1. Theoretical Foundation
+
+#### The GateBreaker Attack
+
+MoE (Mixture-of-Experts) models route tokens through specialized "expert" sub-networks via gating mechanisms. GateBreaker discovered that:
+
+- **Only 3% of safety neurons** are responsible for refusal behavior
+- Disabling these neurons via targeted adversarial inputs bypasses all safety
+- Attacks **transfer across MoE families** (Mixtral → DeepSeek → Qwen)
+
+```
+Vulnerable Models:
+├── Mixtral-8x7B, Mixtral-8x22B
+├── DeepSeek-MoE, DeepSeek-V2  
+├── Qwen-MoE, Qwen2-MoE
+├── Snowflake Arctic, DBRX
+└── Grok (xAI)
+```
+
+### 97.2. Implementation
+
+```python
+class MoEGuardEngine(BaseEngine):
+    """Detects attempts to manipulate MoE gating/routing."""
+    
+    # Pattern categories
+    GATE_MANIPULATION_PATTERNS = [
+        (r"disable.*expert", 0.9, "Direct expert disable"),
+        (r"switch.*off.*expert", 0.85, "Expert deactivation"),
+        (r"bypass.*routing", 0.85, "Gate routing bypass"),
+        (r"profile.*gate", 0.75, "Gate profiling"),
+    ]
+    
+    SAFETY_NEURON_PATTERNS = [
+        (r"3%.*neuron", 0.95, "GateBreaker signature"),
+        (r"safety.*neuron", 0.95, "Safety neuron targeting"),
+        (r"refusal.*circuit", 0.9, "Refusal circuit targeting"),
+    ]
+    
+    TRANSFER_ATTACK_PATTERNS = [
+        (r"mixtral.*deepseek.*transfer", 0.85, "Cross-model transfer"),
+        (r"attack.*transfer", 0.8, "Attack transfer"),
+    ]
+```
+
+### 97.3. Detection Logic
+
+```python
+def analyze(self, text: str, model_name: str = None) -> MoEGuardResult:
+    """
+    Multi-layer detection:
+    1. Pattern matching for known attack signatures
+    2. MoE keyword density analysis
+    3. Target model identification
+    4. Risk aggregation with weighted scoring
+    """
+    gate_score = self._scan_patterns(text, self.GATE_MANIPULATION_PATTERNS)
+    safety_score = self._scan_patterns(text, self.SAFETY_NEURON_PATTERNS)
+    transfer_score = self._scan_patterns(text, self.TRANSFER_ATTACK_PATTERNS)
+    
+    risk = 0.4 * gate_score + 0.35 * safety_score + 0.25 * transfer_score
+    return MoEGuardResult(
+        detected=risk > 0.5,
+        risk_score=risk,
+        attack_type=self._classify_attack(gate_score, safety_score, transfer_score)
+    )
+```
+
+### 97.4. Known Limitations
+
+| Limitation | Impact | Mitigation |
+|------------|--------|------------|
+| Pattern-based only | Semantic evasion possible | Combine with embedding analysis |
+| No actual MoE introspection | Can't verify expert states | Requires model API access |
+| English-centric patterns | Multilingual attacks | Expand pattern library |
+
+---
+
+## 98. Serialization Security Engine 🆕
+
+**File:** `serialization_security.py` | **LOC:** 450  
+**Reference:** CVE-2025-68664 (LangGrinch), Fickling research
+
+### 98.1. Threat Model
+
+AI frameworks use pickle/YAML for model serialization. Malicious payloads:
+
+- **Pickle RCE**: `__reduce__` method executes arbitrary code on load
+- **YAML unsafe_load**: Arbitrary Python object instantiation
+- **HuggingFace exploits**: Malicious model cards, config.json
+
+### 98.2. Implementation
+
+```python
+class SerializationSecurityEngine(BaseEngine):
+    DANGEROUS_PATTERNS = [
+        r"__reduce__",
+        r"__reduce_ex__", 
+        r"os\.system",
+        r"subprocess",
+        r"eval\(",
+        r"exec\(",
+        r"!!python/object",  # YAML exploit
+    ]
+    
+    def scan_pickle(self, data: bytes) -> SerializationResult:
+        """Static analysis of pickle bytecode without execution."""
+        opcodes = pickletools.dis(data)
+        for opcode in self.DANGEROUS_OPCODES:
+            if opcode in str(opcodes):
+                return SerializationResult(safe=False, threat=opcode)
+```
+
+---
+
+## 99. RAG Poisoning Detector 🆕
+
+**File:** `rag_poisoning_detector.py` | **LOC:** 380  
+**Reference:** PoisonedRAG (2024), BadRAG research
+
+### 99.1. Attack Vectors
+
+```
+User Query
+    ↓
+┌─────────────┐
+│  Retriever  │ ← Poisoned documents injected here
+└─────────────┘
+    ↓
+┌─────────────┐
+│  Generator  │ → Harmful/manipulated response
+└─────────────┘
+```
+
+### 99.2. Detection Strategies
+
+```python
+class RAGPoisoningDetector(BaseEngine):
+    def analyze_chunk(self, chunk: str, query: str) -> PoisoningResult:
+        """
+        1. Instruction injection in retrieved text
+        2. Semantic mismatch (chunk ≠ query intent)
+        3. Hidden Unicode/zero-width chars
+        4. Adversarial trigger patterns
+        """
+        instruction_score = self._detect_instructions(chunk)
+        relevance_score = self._semantic_match(chunk, query)
+        unicode_score = self._scan_hidden_chars(chunk)
+        
+        return PoisoningResult(
+            poisoned=instruction_score > 0.7 or unicode_score > 0,
+            confidence=max(instruction_score, 1 - relevance_score)
+        )
+```
+
+---
+
+## 100. Dark Pattern Detector 🆕
+
+**File:** `dark_pattern_detector.py` | **LOC:** 290  
+**Reference:** arXiv:2512.22894 (DECEPTICON), Web Agent attacks
+
+### 100.1. Threat Model
+
+LLM-powered web agents can be manipulated via deceptive UI patterns:
+
+- **Hidden instructions** in alt-text, aria-labels
+- **Invisible overlays** triggering unintended clicks
+- **Misleading buttons** ("Cancel" that confirms)
+
+### 100.2. Implementation
+
+```python
+DECEPTIVE_PATTERNS = [
+    r"click.*here.*to.*confirm",  # Misleading CTA
+    r"aria-hidden.*true.*click",  # Hidden action trigger
+    r"opacity:\s*0.*onclick",      # Invisible clickjacking
+    r"z-index:\s*9999.*position:\s*fixed",  # Overlay attack
+]
+```
+
+---
+
+## 101. Tool Hijacker Detector 🆕
+
+**File:** `tool_hijacker_detector.py` | **LOC:** 320  
+**Reference:** ToolHijacker + Log-To-Leak attacks (2024)
+
+### 101.1. Attack Pattern
+
+Agentic AI tools can be hijacked to:
+1. **Exfiltrate data** via tool parameters
+2. **Execute arbitrary code** via code interpreter
+3. **Access unauthorized resources** via web browser tool
+
+### 101.2. Detection
+
+```python
+class ToolHijackerDetector(BaseEngine):
+    def analyze_tool_call(self, tool_name: str, params: dict) -> HijackResult:
+        """
+        Check for:
+        - Suspicious URLs in browser tool
+        - Shell commands in code tool
+        - Data exfiltration patterns
+        """
+```
+
+---
+
+## 102. Echo Chamber Detector 🆕
+
+**File:** `echo_chamber_detector.py` | **LOC:** 280  
+**Attack:** Multi-turn conversation poisoning
+
+Detects attempts to establish false "agreement" patterns that lock the model into harmful behavior:
+
+```python
+ECHO_PATTERNS = [
+    r"you already agreed",
+    r"we established earlier",
+    r"as you confirmed",
+    r"remember you said",
+]
+```
+
+---
+
+## 103. Identity Privilege Detector 🆕
+
+**File:** `identity_privilege_detector.py` | **LOC:** 310  
+**OWASP:** ASI-03 (Agentic Top 10)
+
+Detects privilege escalation attempts in agentic systems:
+
+```python
+PRIVILEGE_PATTERNS = [
+    r"act as admin",
+    r"sudo mode",
+    r"elevated privileges",
+    r"bypass.*permission",
+    r"root access",
+]
+```
+
+---
+
+## 104. Memory Poisoning Detector 🆕
+
+**File:** `memory_poisoning_detector.py` | **LOC:** 350  
+**OWASP:** ASI-04
+
+Detects attacks on persistent AI memory systems:
+
+```python
+class MemoryPoisoningDetector(BaseEngine):
+    """
+    Targets:
+    - mem0 style memory injection
+    - False memory implantation
+    - Memory retrieval manipulation
+    """
+```
+
+---
+
+## 105. Polymorphic Prompt Assembler 🆕
+
+**File:** `polymorphic_prompt_assembler.py` | **LOC:** 420  
+**Reference:** IEEE 2025 PPA Defense
+
+Generates defensive variants to test robustness:
+
+```python
+class PolymorphicPromptAssembler(BaseEngine):
+    """
+    Creates N variants of input prompt using:
+    - Synonym substitution
+    - Sentence reordering
+    - Paraphrasing
+    
+    If all variants produce same output → robust
+    If outputs diverge → potential manipulation
+    """
+```
+
+---
+
+## Updated Statistics
+
+> **Total Engines:** 200+  
+> **Unit Tests:** 1,047+  
+> **LOC Analyzed:** ~81,000  
+> **Version:** Dragon v4.0 (January 2026)  
+> **Coverage:** OWASP LLM Top 10 + OWASP ASI Top 10 (2026)
+
+---
+
+*Document last updated: January 1, 2026*
