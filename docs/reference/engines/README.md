@@ -1,11 +1,12 @@
 # 🔬 SENTINEL Engine Deep-Dive Reference
 
-> **Total Engines:** 87  
-> **Total LOC Analyzed:** ~44,000  
-> **Unit Tests:** 116+ tests  
+> **Total Engines:** 200  
+> **Total LOC Analyzed:** ~81,000  
+> **Unit Tests:** 1,047+ tests  
 > **Benchmark Suite:** 1,815 samples (3 HF datasets)  
 > **Hybrid Detector Recall:** 85.1% | Precision: 84.4% | F1: 84.7%  
-> **Coverage:** OWASP LLM Top 10 + Agentic AI Top 10 (ASI 2025)
+> **Coverage:** OWASP LLM Top 10 + Agentic AI Top 10 (ASI 2026)
+> **Version:** Dragon v4.0 (January 2026)
 
 ---
 

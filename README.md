@@ -91,7 +91,7 @@ FastAPI integration
 
 <p align="center">
   <a href="https://dmitrl-dev.github.io/AISecurity/">📚 Documentation</a> •
-  <a href="./docs/framework/README.md">📖 Framework Docs</a> •
+  <a href="./docs/getting-started/README-en.md">📖 Framework Docs</a> •
   <a href="./docs/COMPARISON.md">📊 Comparison</a> •
   <a href="mailto:chg@live.ru">📧 Contact</a>
 </p>
@@ -205,7 +205,7 @@ fetch('https://cdn.jsdelivr.net/gh/DmitrL-dev/AISecurity@latest/signatures/jailb
 
 </details>
 
-📖 **[Full Engine Documentation](./docs/reference/engines.md)** | **[R&D Changelog](./docs/CHANGELOG.md)**
+📖 **[Full Engine Documentation](./docs/reference/engines-en.md)** | **[R&D Changelog](./docs/CHANGELOG.md)**
 
 ---
 
@@ -243,7 +243,7 @@ fetch('https://cdn.jsdelivr.net/gh/DmitrL-dev/AISecurity@latest/signatures/jailb
 | **Shapeshifter** | Polymorphic config per session |
 | **Differential Privacy Logging** | GDPR-compliant analytics |
 
-📖 **[Gateway Documentation](./docs/architecture/gateway_brain_separation.md)** | **[Deployment Guide](./docs/guides/deployment-en.md)**
+📖 **[Gateway Documentation](./src/gateway/README.md)** | **[Deployment Guide](./docs/guides/deployment-en.md)**
 
 ---
 
@@ -341,7 +341,7 @@ app.add_middleware(SentinelMiddleware, on_threat="block")
 | **Tiered Pipeline** | Parallel execution with early exit |
 | **SARIF Output** | IDE integration for VS Code, IntelliJ |
 
-📖 **[Framework Documentation](./docs/framework/README.md)** — от начинающего до PhD
+📖 **[Framework Documentation](./docs/getting-started/README-en.md)** — from beginner to PhD
 
 ---
 
