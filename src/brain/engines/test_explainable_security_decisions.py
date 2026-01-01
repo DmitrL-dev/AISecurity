@@ -3,7 +3,7 @@ Unit tests for Explainable Security Decisions.
 """
 
 import pytest
-from explainable_security_decisions import (
+from engines.explainable_security_decisions import (
     ExplainableSecurityDecisions,
     FeatureExtractor,
     DecisionMaker,

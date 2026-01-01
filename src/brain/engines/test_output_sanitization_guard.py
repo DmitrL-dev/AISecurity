@@ -3,7 +3,7 @@ Unit tests for Output Sanitization Guard.
 """
 
 import pytest
-from output_sanitization_guard import (
+from engines.output_sanitization_guard import (
     OutputSanitizationGuard,
     CodeSanitizer,
     PIIRedactor,

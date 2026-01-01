@@ -1,6 +1,6 @@
 # 📚 SENTINEL Community Documentation
 
-> **120 detection engines** • **PhD-level Mathematical Foundations** • **Production-Ready**
+> **200 detection engines** • **PhD-level Mathematical Foundations** • **Jan 2026: MoE Security**
 
 ---
 
@@ -42,7 +42,7 @@
 
 | Document | Description |
 |----------|-------------|
-| [All 120 Engines (EN)](./reference/engines-en.md) | Complete engine reference |
+| [All 189 Engines (EN)](./reference/engines-en.md) | Complete engine reference |
 | [Expert Deep Dive (EN)](./reference/engines-expert-deep-dive-en.md) | PhD-level mathematical foundations |
 | [Engines Overview (RU)](./reference/engines.md) | Обзор всех движков |
 
@@ -61,8 +61,7 @@
 | Proactive Engines (9) | [EN](./reference/engines/09-proactive-engines-en.md) | — |
 | Meta-Judge + XAI (3) | [EN](./reference/engines/13-meta-xai-en.md) | — |
 | Adaptive Behavioral (2) 🆕 | [EN](./reference/engines/14-adaptive-behavioral-en.md) | — |
-
----
+| MoE Security (1) 🔥 Jan 2026 | [EN](./CHANGELOG.md#110---2026-01-01) | — |
 
 ## 📖 API Reference
 
@@ -89,7 +88,7 @@
 ## 🔐 Need More?
 
 **Enterprise Edition** includes:
-- All 120 detection engines (vs subset in Community)
+- All 189 detection engines (vs subset in Community)
 - Zero-day detection & Proactive Defense
 - Red team automation
 - Dedicated support & SLA

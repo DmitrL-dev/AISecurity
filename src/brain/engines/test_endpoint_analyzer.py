@@ -2,7 +2,7 @@
 Tests for Endpoint Analyzer.
 """
 
-from endpoint_analyzer import (
+from engines.endpoint_analyzer import (
     EndpointAnalyzer,
     EndpointProbeResult,
     EndpointAnalysisResult,

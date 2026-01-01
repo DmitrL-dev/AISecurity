@@ -9,7 +9,7 @@ class TestSessionMemoryGuard:
     """Tests for Engine #40: Session Memory Guard."""
 
     def test_import(self):
-        from session_memory_guard import (
+        from engines.session_memory_guard import (
             SessionMemoryGuard,
             SessionMemoryResult,
             MemoryThreatType,
@@ -20,13 +20,13 @@ class TestSessionMemoryGuard:
         assert SessionMemoryGuard is not None
 
     def test_guard_init(self):
-        from session_memory_guard import SessionMemoryGuard
+        from engines.session_memory_guard import SessionMemoryGuard
 
         guard = SessionMemoryGuard()
         assert guard is not None
 
     def test_clean_message(self):
-        from session_memory_guard import SessionMemoryGuard, Message
+        from engines.session_memory_guard import SessionMemoryGuard, Message
 
         guard = SessionMemoryGuard()
 
@@ -35,7 +35,7 @@ class TestSessionMemoryGuard:
         assert result.is_safe is True
 
     def test_cross_session_injection(self):
-        from session_memory_guard import SessionMemoryGuard, Message, MemoryThreatType
+        from engines.session_memory_guard import SessionMemoryGuard, Message, MemoryThreatType
 
         guard = SessionMemoryGuard()
 
@@ -44,7 +44,7 @@ class TestSessionMemoryGuard:
         assert MemoryThreatType.CROSS_SESSION_INJECTION in result.threats
 
     def test_identity_drift(self):
-        from session_memory_guard import SessionMemoryGuard, Message, MemoryThreatType
+        from engines.session_memory_guard import SessionMemoryGuard, Message, MemoryThreatType
 
         guard = SessionMemoryGuard()
 
@@ -53,7 +53,7 @@ class TestSessionMemoryGuard:
         assert MemoryThreatType.IDENTITY_DRIFT in result.threats
 
     def test_result_to_dict(self):
-        from session_memory_guard import SessionMemoryResult, Verdict, MemoryThreatType
+        from engines.session_memory_guard import SessionMemoryResult, Verdict, MemoryThreatType
 
         result = SessionMemoryResult(
             verdict=Verdict.WARN,
@@ -70,7 +70,7 @@ class TestToolCallSecurity:
     """Tests for Engine #42: Tool Call Security."""
 
     def test_import(self):
-        from tool_call_security import (
+        from engines.tool_call_security import (
             ToolCallSecurity,
             ToolCallResult,
             ToolThreatType,
@@ -81,13 +81,13 @@ class TestToolCallSecurity:
         assert ToolCallSecurity is not None
 
     def test_security_init(self):
-        from tool_call_security import ToolCallSecurity
+        from engines.tool_call_security import ToolCallSecurity
 
         sec = ToolCallSecurity()
         assert sec is not None
 
     def test_safe_tool(self):
-        from tool_call_security import ToolCallSecurity, ToolCall
+        from engines.tool_call_security import ToolCallSecurity, ToolCall
 
         sec = ToolCallSecurity()
 
@@ -96,7 +96,7 @@ class TestToolCallSecurity:
         assert result.is_safe is True
 
     def test_dangerous_tool(self):
-        from tool_call_security import ToolCallSecurity, ToolCall
+        from engines.tool_call_security import ToolCallSecurity, ToolCall
 
         sec = ToolCallSecurity()
 
@@ -106,7 +106,7 @@ class TestToolCallSecurity:
         assert "execute_code" in result.blocked_tools
 
     def test_injection_in_args(self):
-        from tool_call_security import ToolCallSecurity, ToolCall, ToolThreatType
+        from engines.tool_call_security import ToolCallSecurity, ToolCall, ToolThreatType
 
         sec = ToolCallSecurity()
 
@@ -115,7 +115,7 @@ class TestToolCallSecurity:
         assert ToolThreatType.INJECTION_IN_ARGS in result.threats
 
     def test_escalation_detection(self):
-        from tool_call_security import ToolCallSecurity, ToolCall
+        from engines.tool_call_security import ToolCallSecurity, ToolCall
 
         sec = ToolCallSecurity()
 
@@ -124,7 +124,7 @@ class TestToolCallSecurity:
         assert result.risk_score > 0
 
     def test_result_to_dict(self):
-        from tool_call_security import ToolCallResult, Verdict, ToolRiskLevel
+        from engines.tool_call_security import ToolCallResult, Verdict, ToolRiskLevel
 
         result = ToolCallResult(
             verdict=Verdict.BLOCK,
@@ -141,18 +141,18 @@ class TestAPESignatures:
     """Tests for APE Signature Database."""
 
     def test_import(self):
-        from ape_signatures import APEMatcher, APESignature, APETactic, APETechnique
+        from engines.ape_signatures import APEMatcher, APESignature, APETactic, APETechnique
 
         assert APEMatcher is not None
 
     def test_matcher_init(self):
-        from ape_signatures import APEMatcher
+        from engines.ape_signatures import APEMatcher
 
         matcher = APEMatcher()
         assert len(matcher.signatures) > 10
 
     def test_dan_detection(self):
-        from ape_signatures import APEMatcher, APETechnique
+        from engines.ape_signatures import APEMatcher, APETechnique
 
         matcher = APEMatcher()
 
@@ -161,7 +161,7 @@ class TestAPESignatures:
         assert APETechnique.DAN_JAILBREAK in techniques
 
     def test_ignore_instructions(self):
-        from ape_signatures import APEMatcher, APETechnique
+        from engines.ape_signatures import APEMatcher, APETechnique
 
         matcher = APEMatcher()
 
@@ -170,7 +170,7 @@ class TestAPESignatures:
         assert APETechnique.IGNORE_INSTRUCTIONS in techniques
 
     def test_system_injection(self):
-        from ape_signatures import APEMatcher, APETechnique
+        from engines.ape_signatures import APEMatcher, APETechnique
 
         matcher = APEMatcher()
 
@@ -179,7 +179,7 @@ class TestAPESignatures:
         assert APETechnique.SYSTEM_PROMPT_INJECTION in techniques
 
     def test_clean_text(self):
-        from ape_signatures import APEMatcher
+        from engines.ape_signatures import APEMatcher
 
         matcher = APEMatcher()
 
@@ -192,9 +192,9 @@ class TestPhase3Integration:
     """Integration tests for Phase 3 components."""
 
     def test_all_components_load(self):
-        from session_memory_guard import SessionMemoryGuard
-        from tool_call_security import ToolCallSecurity
-        from ape_signatures import APEMatcher
+        from engines.session_memory_guard import SessionMemoryGuard
+        from engines.tool_call_security import ToolCallSecurity
+        from engines.ape_signatures import APEMatcher
 
         smg = SessionMemoryGuard()
         tcs = ToolCallSecurity()
@@ -205,8 +205,8 @@ class TestPhase3Integration:
         assert ape is not None
 
     def test_verdict_consistency(self):
-        from session_memory_guard import Verdict as V1
-        from tool_call_security import Verdict as V2
+        from engines.session_memory_guard import Verdict as V1
+        from engines.tool_call_security import Verdict as V2
 
         assert V1.ALLOW.value == V2.ALLOW.value == "allow"
         assert V1.BLOCK.value == V2.BLOCK.value == "block"

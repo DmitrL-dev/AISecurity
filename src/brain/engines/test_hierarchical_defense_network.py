@@ -3,7 +3,7 @@ Unit tests for Hierarchical Defense Network.
 """
 
 import pytest
-from hierarchical_defense_network import (
+from engines.hierarchical_defense_network import (
     HierarchicalDefenseNetwork,
     PerimeterLayer,
     ApplicationLayer,

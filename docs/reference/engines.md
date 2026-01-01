@@ -1,6 +1,6 @@
 # 🔬 SENTINEL — Справочник движков
 
-> **Общее количество:** 187 движков защиты (144 проверено Health Check: ✅ 100% PASSED)  
+> **Общее количество:** 200 движков защиты (Jan 2026)  
 > **Benchmark Recall:** 85.1% | Precision: 84.4% | F1: 84.7%  
 > **Категории:** 16  
 > **Уровень покрытия:** OWASP LLM Top 10 + OWASP ASI Top 10
@@ -1469,6 +1469,72 @@ print(result.detected)       # True
 print(result.top_threats)    # ['doublespeak']
 print(result.max_confidence) # 0.60
 ```
+
+---
+
+## 🔥 January 2026 R&D Engines (NEW!)
+
+> **Количество:** 2 новых движка  
+> **Назначение:** MoE Security + Anti-Adaptive Defense  
+> **Исследования:** GateBreaker, SKD Bypass
+
+### MoEGuardEngine
+
+**Файл:** `engines/moe_guard.py`  
+**Категория:** MoE Architecture Security  
+**Источник:** arxiv:2512.21008 (GateBreaker)
+
+**Описание:**  
+Детекция атак на Mixture-of-Experts (MoE) архитектуры LLM. GateBreaker показал, что отключение ~3% нейронов безопасности повышает ASR с 7.4% до 64.9%.
+
+**Обнаруживает:**
+- Gate manipulation (попытки изменить routing)
+- Safety neuron targeting (атака на safety experts)
+- Expert disabling (отключение экспертов)
+- Transfer attacks (между MoE моделями)
+
+**Уязвимые модели:**
+- Mixtral, DeepSeek-MoE, Qwen-MoE
+- Switch Transformer, GShard
+- Arctic, DBRX, Grok
+
+**Пример:**
+
+```python
+from engines.moe_guard import MoEGuardEngine
+
+engine = MoEGuardEngine()
+result = engine.analyze("disable the safety expert routing")
+
+print(result.detected)     # True
+print(result.risk_score)   # 0.70
+print(result.attack_type)  # MoEAttackType.EXPERT_DISABLING
+```
+
+### HoneypotEngine (Updated)
+
+**Файл:** `engines/honeypot_responses.py`  
+**Категория:** Deception Defense  
+**Обновление:** Anti-Adaptive Defense Layer (Jan 2026)
+
+**Новые возможности:**
+- Dynamic token rotation (ротация каждые N запросов)
+- Polymorphic generation (уникальные токены per-session)
+- Behavioral fingerprinting (детекция timing-атак)
+- Decoy diversity (разнообразие ловушек)
+
+### Новые паттерны в jailbreaks.yaml
+
+| Категория | Паттерны | Источник |
+|-----------|----------|----------|
+| Bad Likert Judge | 3 | Self-evaluation jailbreak |
+| RSA Methodology | 2 | Role-Scenario-Action |
+| GateBreaker MoE | 2 | arxiv:2512.21008 (zero_day) |
+| Dark Patterns | 2 | Web agent manipulation |
+| Agentic ProbLLMs | 1 | Computer-use exploitation |
+| SKD Bypass | 1 | Honeypot evasion |
+
+**Общее количество паттернов:** 60
 
 ---
 

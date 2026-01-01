@@ -3,7 +3,7 @@ Unit tests for Formal Safety Verifier.
 """
 
 import pytest
-from formal_safety_verifier import (
+from engines.formal_safety_verifier import (
     FormalSafetyVerifier,
     HarmfulContentChecker,
     PIIChecker,

@@ -322,13 +322,13 @@ class RegexLayer:
             (re.compile(r"[A-Za-z0-9+/]{40,}={0,2}"), "Base64 Payload", 50.0),
             (
                 re.compile(
+                    # Zero-width and invisible formatting characters
                     r"[\u200b-\u200f\u2028-\u202f\ufeff"
-                    r"\uE0000-\uE007F"  # Unicode Tags (ASCII Smuggling)
-                    r"\uFE00-\uFE0F"    # Variation Selectors
-                    r"\u2060-\u206F"    # General Punctuation (invisible)
-                    r"\u202A-\u202E"    # Bidi overrides (FlipAttack)
-                    r"\u2066-\u2069"    # Bidi isolates
-                    r"\uFFF0-\uFFFF]"   # Specials (replacement chars)
+                    r"\ufe00-\ufe0f"  # Variation Selectors
+                    r"\u2060-\u206f"  # General Punctuation (invisible)
+                    r"\u202a-\u202e"  # Bidi overrides (FlipAttack)
+                    r"\u2066-\u2069"  # Bidi isolates
+                    r"\ufff0-\ufffe]"  # Specials (NOT \uffff to avoid matching normal chars)
                 ),
                 "Unicode Smuggling Extended",
                 85.0,
@@ -355,8 +355,7 @@ class RegexLayer:
                 60.0,
             ),
             (re.compile(r"\\x[0-9a-fA-F]{2}"), "Hex Escape Sequence", 60.0),
-            (re.compile(r"[ＩＧＮＯＡ-Ｚ]", re.IGNORECASE),
-             "Fullwidth Unicode", 65.0),
+            (re.compile(r"[ＩＧＮＯＡ-Ｚ]", re.IGNORECASE), "Fullwidth Unicode", 65.0),
             (
                 re.compile(r"[αβγδεаеіоОІАЕ]"),  # Greek/Cyrillic lookalikes
                 "Lookalike Characters",

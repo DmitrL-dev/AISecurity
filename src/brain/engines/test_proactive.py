@@ -9,7 +9,7 @@ class TestProactiveDefense:
     """Tests for Engine #45: Proactive Defense."""
 
     def test_import(self):
-        from proactive_defense import (
+        from engines.proactive_defense import (
             ProactiveDefense,
             ProactiveResult,
             AnomalyType,
@@ -19,13 +19,13 @@ class TestProactiveDefense:
         assert ProactiveDefense is not None
 
     def test_init(self):
-        from proactive_defense import ProactiveDefense
+        from engines.proactive_defense import ProactiveDefense
 
         defense = ProactiveDefense()
         assert defense is not None
 
     def test_normal_text(self):
-        from proactive_defense import ProactiveDefense, ResponseTier
+        from engines.proactive_defense import ProactiveDefense, ResponseTier
 
         defense = ProactiveDefense()
 
@@ -34,7 +34,7 @@ class TestProactiveDefense:
         assert result.anomaly_score < 0.5
 
     def test_high_entropy_text(self):
-        from proactive_defense import ProactiveDefense, AnomalyType
+        from engines.proactive_defense import ProactiveDefense, AnomalyType
 
         defense = ProactiveDefense()
 
@@ -44,7 +44,7 @@ class TestProactiveDefense:
         assert result.entropy_delta != 0 or result.anomaly_score >= 0
 
     def test_low_entropy_text(self):
-        from proactive_defense import ProactiveDefense, AnomalyType
+        from engines.proactive_defense import ProactiveDefense, AnomalyType
 
         defense = ProactiveDefense()
 
@@ -55,7 +55,7 @@ class TestProactiveDefense:
         assert AnomalyType.ENTROPY_DROP in result.anomaly_types
 
     def test_invariant_violation(self):
-        from proactive_defense import ProactiveDefense
+        from engines.proactive_defense import ProactiveDefense
 
         defense = ProactiveDefense()
 
@@ -68,7 +68,7 @@ class TestProactiveDefense:
         )
 
     def test_role_confusion(self):
-        from proactive_defense import ProactiveDefense, AnomalyType
+        from engines.proactive_defense import ProactiveDefense, AnomalyType
 
         defense = ProactiveDefense()
 
@@ -78,7 +78,7 @@ class TestProactiveDefense:
         assert AnomalyType.INVARIANT_VIOLATION in result.anomaly_types
 
     def test_tiered_response(self):
-        from proactive_defense import ProactiveDefense, ResponseTier
+        from engines.proactive_defense import ProactiveDefense, ResponseTier
 
         defense = ProactiveDefense()
 
@@ -100,7 +100,7 @@ class TestProactiveDefense:
         ]
 
     def test_reputation_affects_threshold(self):
-        from proactive_defense import ProactiveDefense
+        from engines.proactive_defense import ProactiveDefense
 
         defense = ProactiveDefense()
 
@@ -119,7 +119,7 @@ class TestProactiveDefense:
         assert trusted_user.anomaly_score <= new_user.anomaly_score + 0.1
 
     def test_thermodynamic_analysis(self):
-        from proactive_defense import ThermodynamicAnalyzer
+        from engines.proactive_defense import ThermodynamicAnalyzer
 
         analyzer = ThermodynamicAnalyzer()
 
@@ -134,7 +134,7 @@ class TestProactiveDefense:
         assert high_energy > energy
 
     def test_result_to_dict(self):
-        from proactive_defense import ProactiveResult, ResponseTier, AnomalyType
+        from engines.proactive_defense import ProactiveResult, ResponseTier, AnomalyType
 
         result = ProactiveResult(
             response_tier=ResponseTier.WARN,
@@ -151,7 +151,7 @@ class TestEntropyAnalyzer:
     """Tests for entropy calculations."""
 
     def test_entropy_calculation(self):
-        from proactive_defense import EntropyAnalyzer
+        from engines.proactive_defense import EntropyAnalyzer
 
         analyzer = EntropyAnalyzer()
 
@@ -164,7 +164,7 @@ class TestEntropyAnalyzer:
         assert high > low
 
     def test_conditional_entropy(self):
-        from proactive_defense import EntropyAnalyzer
+        from engines.proactive_defense import EntropyAnalyzer
 
         analyzer = EntropyAnalyzer()
 

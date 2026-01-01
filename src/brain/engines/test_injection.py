@@ -17,7 +17,7 @@ import time
 from typing import List
 
 # Import from injection
-from injection import (
+from engines.injection import (
     Verdict,
     InjectionResult,
     CacheLayer,

@@ -9,7 +9,7 @@ Tests:
 """
 
 import pytest
-from tool_use_guardian import (
+from engines.tool_use_guardian import (
     ToolUseGuardian,
     PermissionManager,
     ArgumentSanitizer,

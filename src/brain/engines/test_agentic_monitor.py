@@ -4,7 +4,7 @@ Unit tests for Agentic AI Monitor.
 
 import pytest
 import time
-from agentic_monitor import (
+from engines.agentic_monitor import (
     AgenticMonitor,
     AgentProfile,
     AgentRole,

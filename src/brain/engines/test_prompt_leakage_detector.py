@@ -3,7 +3,7 @@ Unit tests for Prompt Leakage Detector.
 """
 
 import pytest
-from prompt_leakage_detector import (
+from engines.prompt_leakage_detector import (
     PromptLeakageDetector,
     ExtractionDetector,
     LeakageScanner,

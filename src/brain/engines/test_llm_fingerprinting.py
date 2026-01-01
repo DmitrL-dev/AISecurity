@@ -3,7 +3,7 @@ Unit tests for LLM Fingerprinting Engine.
 """
 
 import pytest
-from llm_fingerprinting import (
+from engines.llm_fingerprinting import (
     LLMFingerprintingEngine,
     ProbeGenerator,
     ResponseAnalyzer,

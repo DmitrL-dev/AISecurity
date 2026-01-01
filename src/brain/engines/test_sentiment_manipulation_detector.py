@@ -1,7 +1,7 @@
 """Tests for Sentiment Manipulation Detector."""
 
 import pytest
-from sentiment_manipulation_detector import SentimentManipulationDetector, Sentiment
+from engines.sentiment_manipulation_detector import SentimentManipulationDetector, Sentiment
 
 
 class TestSentimentManipulationDetector:

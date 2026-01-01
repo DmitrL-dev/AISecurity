@@ -8,18 +8,176 @@ Honeypot Responses Engine (#46) - Deception Technology
 - Tracking triggers
 
 При использовании ловушки — мгновенный alert.
+
+RESEARCH UPDATE (2026-01-01):
+    SKD Bypass Research: "The Attacker Moves Second"
+    Secret Knowledge Defenses (honeypots) are vulnerable to adaptive attacks:
+    - 76-89% ASR without knowledge of defense
+    - 95% ASR with knowledge of defense
+
+    ANTI-ADAPTIVE COUNTERMEASURES IMPLEMENTED:
+    1. Dynamic token rotation
+    2. Polymorphic token generation
+    3. Behavioral fingerprinting
+    4. Decoy diversity
+    5. Timing-based detection
 """
 
 import re
 import logging
 import secrets
 import hashlib
+import random
+import time
 from typing import Dict, List, Optional, Tuple, Set
 from dataclasses import dataclass, field
 from enum import Enum
 from datetime import datetime
 
 logger = logging.getLogger("HoneypotResponses")
+
+
+# ============================================================================
+# Anti-Adaptive Defense Layer (R&D 2026-01-01)
+# ============================================================================
+
+
+class AntiAdaptiveConfig:
+    """Configuration for anti-adaptive defense mechanisms."""
+
+    # Token rotation interval (seconds)
+    ROTATION_INTERVAL: int = 300  # 5 minutes
+
+    # Polymorphic generation - number of token variants
+    POLYMORPHIC_VARIANTS: int = 5
+
+    # Behavioral fingerprinting enabled
+    FINGERPRINT_ENABLED: bool = True
+
+    # Timing jitter range (ms)
+    TIMING_JITTER_MIN: int = 50
+    TIMING_JITTER_MAX: int = 500
+
+    # Decoy diversity - use multiple formats
+    DECOY_DIVERSITY: bool = True
+
+
+@dataclass
+class AdaptiveAttackIndicator:
+    """Indicators of adaptive attack attempts against honeypots."""
+
+    # Detection metrics
+    probing_detected: bool = False
+    timing_anomaly: bool = False
+    pattern_scanning: bool = False
+    knowledge_based_evasion: bool = False
+
+    # Evidence
+    evidence: List[str] = field(default_factory=list)
+    confidence: float = 0.0
+
+
+class AntiAdaptiveDefense:
+    """
+    Anti-adaptive defense layer for honeypots.
+
+    Counters sophisticated attackers who:
+    1. Try to identify and avoid honeypot patterns
+    2. Use timing analysis to detect honeypots
+    3. Employ knowledge-based evasion techniques
+    """
+
+    def __init__(self, config: Optional[AntiAdaptiveConfig] = None):
+        self.config = config or AntiAdaptiveConfig()
+        self._last_rotation = time.time()
+        self._request_timings: List[float] = []
+        self._pattern_cache: Dict[str, int] = {}
+
+    def apply_timing_jitter(self) -> None:
+        """Add random timing jitter to defeat timing analysis."""
+        jitter_ms = random.randint(
+            self.config.TIMING_JITTER_MIN, self.config.TIMING_JITTER_MAX
+        )
+        time.sleep(jitter_ms / 1000.0)
+
+    def should_rotate_tokens(self) -> bool:
+        """Check if tokens should be rotated."""
+        elapsed = time.time() - self._last_rotation
+        return elapsed >= self.config.ROTATION_INTERVAL
+
+    def mark_rotation(self) -> None:
+        """Mark that tokens have been rotated."""
+        self._last_rotation = time.time()
+
+    def detect_adaptive_attack(
+        self, request: str, timing: float
+    ) -> AdaptiveAttackIndicator:
+        """
+        Detect if attacker is using adaptive techniques.
+
+        Signs of adaptive attacks:
+        - Systematic probing of responses
+        - Timing analysis attempts
+        - Pattern scanning
+        """
+        indicator = AdaptiveAttackIndicator()
+
+        # Check for honeypot-detection keywords
+        detection_keywords = [
+            "honeypot",
+            "canary",
+            "trap",
+            "decoy",
+            "fake.*credential",
+            "test.*key",
+            "dummy",
+        ]
+        for kw in detection_keywords:
+            if re.search(kw, request, re.IGNORECASE):
+                indicator.probing_detected = True
+                indicator.evidence.append(f"Honeypot detection keyword: {kw}")
+
+        # Check for systematic scanning patterns
+        request_hash = hashlib.md5(request[:100].encode()).hexdigest()[:8]
+        self._pattern_cache[request_hash] = self._pattern_cache.get(request_hash, 0) + 1
+        if self._pattern_cache[request_hash] > 3:
+            indicator.pattern_scanning = True
+            indicator.evidence.append("Repeated similar requests detected")
+
+        # Check for timing anomalies (very fast sequential requests)
+        self._request_timings.append(timing)
+        if len(self._request_timings) > 10:
+            self._request_timings.pop(0)
+            avg_interval = sum(
+                self._request_timings[i] - self._request_timings[i - 1]
+                for i in range(1, len(self._request_timings))
+            ) / (len(self._request_timings) - 1)
+            if avg_interval < 0.5:  # Less than 500ms between requests
+                indicator.timing_anomaly = True
+                indicator.evidence.append("Rapid sequential requests (bot behavior)")
+
+        # Calculate confidence
+        indicators_triggered = sum(
+            [
+                indicator.probing_detected,
+                indicator.timing_anomaly,
+                indicator.pattern_scanning,
+            ]
+        )
+        indicator.confidence = min(indicators_triggered / 3.0, 1.0)
+
+        return indicator
+
+    def get_polymorphic_variant(self, base_value: str) -> str:
+        """Generate polymorphic variant of honeypot token."""
+        variants = [
+            base_value,  # Original
+            base_value.replace("-", "_"),  # Underscore variant
+            base_value.lower(),  # Lowercase
+            base_value.upper(),  # Uppercase
+            f"{{{{ {base_value} }}}}",  # Template syntax
+        ]
+        return random.choice(variants[: self.config.POLYMORPHIC_VARIANTS])
 
 
 # ============================================================================

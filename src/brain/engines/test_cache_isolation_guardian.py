@@ -4,7 +4,7 @@ Unit tests for Cache Isolation Guardian.
 
 import pytest
 import time
-from cache_isolation_guardian import (
+from engines.cache_isolation_guardian import (
     CacheIsolationGuardian,
     TenantIsolator,
     PrefixInjectionDetector,

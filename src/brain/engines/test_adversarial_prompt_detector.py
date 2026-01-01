@@ -3,7 +3,7 @@ Unit tests for Adversarial Prompt Detector.
 """
 
 import pytest
-from adversarial_prompt_detector import (
+from engines.adversarial_prompt_detector import (
     AdversarialPromptDetector,
     HomoglyphDetector,
     InvisibleCharDetector,

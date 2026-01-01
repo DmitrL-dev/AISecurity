@@ -3,7 +3,7 @@ Unit tests for Meta-Attack Adapter.
 """
 
 import pytest
-from meta_attack_adapter import (
+from engines.meta_attack_adapter import (
     MetaAttackAdapter,
     EmbeddingLayer,
     PrototypeNetwork,

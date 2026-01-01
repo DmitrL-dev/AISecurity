@@ -3,7 +3,7 @@ Unit tests for Contrastive Prompt Anomaly.
 """
 
 import pytest
-from contrastive_prompt_anomaly import (
+from engines.contrastive_prompt_anomaly import (
     ContrastivePromptAnomaly,
     SimpleEmbedder,
     ContrastiveLearner,

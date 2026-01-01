@@ -9,7 +9,7 @@ Tests:
 """
 
 import pytest
-from agent_memory_shield import (
+from engines.agent_memory_shield import (
     AgentMemoryShield,
     TenantIsolationManager,
     IntegrityVerifier,

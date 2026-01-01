@@ -3,7 +3,7 @@ Unit tests for Quantum-Safe Model Vault.
 """
 
 import pytest
-from quantum_safe_model_vault import (
+from engines.quantum_safe_model_vault import (
     QuantumSafeModelVault,
     SimulatedKyber,
     SimulatedDilithium,

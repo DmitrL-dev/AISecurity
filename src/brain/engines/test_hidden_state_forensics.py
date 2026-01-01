@@ -4,7 +4,7 @@ Unit tests for Hidden State Forensics Engine.
 
 import pytest
 import numpy as np
-from hidden_state_forensics import (
+from engines.hidden_state_forensics import (
     HiddenStateForensicsEngine,
     LayerAnalyzer,
     PatternDetector,

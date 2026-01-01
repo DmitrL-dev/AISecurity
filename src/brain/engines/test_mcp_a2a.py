@@ -15,7 +15,7 @@ import pytest
 from typing import List, Dict, Any
 
 # Import from mcp_a2a_security
-from mcp_a2a_security import (
+from engines.mcp_a2a_security import (
     ProtocolType,
     ValidationStatus,
     MCPServer,

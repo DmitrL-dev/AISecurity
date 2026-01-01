@@ -4,7 +4,7 @@ Unit tests for Enhanced TDA Module.
 
 import pytest
 import numpy as np
-from tda_enhanced import (
+from engines.tda_enhanced import (
     TDAEnhancedEngine,
     ZigzagEngine,
     AttentionTopologyEngine,

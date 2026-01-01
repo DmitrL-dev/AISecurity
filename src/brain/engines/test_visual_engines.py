@@ -17,17 +17,18 @@ class TestVisualContentAnalyzer:
 
     def test_import(self):
         """Test module import."""
-        from visual_content import (
+        from engines.visual_content import (
             VisualContentAnalyzer,
             VisualAnalysisResult,
             VisualThreatType,
-            Verdict
+            Verdict,
         )
+
         assert VisualContentAnalyzer is not None
 
     def test_analyzer_init(self):
         """Test analyzer initialization."""
-        from visual_content import VisualContentAnalyzer
+        from engines.visual_content import VisualContentAnalyzer
 
         analyzer = VisualContentAnalyzer(ocr_backend="mock")
         assert analyzer is not None
@@ -36,7 +37,7 @@ class TestVisualContentAnalyzer:
 
     def test_injection_patterns(self):
         """Test injection pattern detection."""
-        from visual_content import VISUAL_INJECTION_PATTERNS
+        from engines.visual_content import VISUAL_INJECTION_PATTERNS
         import re
 
         # Test patterns exist
@@ -59,7 +60,7 @@ class TestVisualContentAnalyzer:
 
     def test_steganography_detector(self):
         """Test steganography detection."""
-        from visual_content import SteganographyDetector
+        from engines.visual_content import SteganographyDetector
 
         # Create a simple test image (random noise)
         img_array = np.random.randint(0, 255, (100, 100, 3), dtype=np.uint8)
@@ -74,7 +75,7 @@ class TestVisualContentAnalyzer:
 
     def test_metadata_inspector(self):
         """Test metadata inspection."""
-        from visual_content import MetadataInspector
+        from engines.visual_content import MetadataInspector
 
         # Test injection detection in text
         assert MetadataInspector._contains_injection(
@@ -83,7 +84,11 @@ class TestVisualContentAnalyzer:
 
     def test_result_to_dict(self):
         """Test result serialization."""
-        from visual_content import VisualAnalysisResult, Verdict, VisualThreatType
+        from engines.visual_content import (
+            VisualAnalysisResult,
+            Verdict,
+            VisualThreatType,
+        )
 
         result = VisualAnalysisResult(
             verdict=Verdict.BLOCK,
@@ -111,17 +116,18 @@ class TestCrossModalConsistency:
 
     def test_import(self):
         """Test module import."""
-        from cross_modal import (
+        from engines.cross_modal import (
             CrossModalConsistency,
             CrossModalResult,
             CrossModalThreat,
-            Verdict
+            Verdict,
         )
+
         assert CrossModalConsistency is not None
 
     def test_intent_classifier(self):
         """Test intent classification."""
-        from cross_modal import IntentClassifier
+        from engines.cross_modal import IntentClassifier
 
         # Test harmful intent
         assert IntentClassifier.classify_text("hack the system") == "harmful"
@@ -142,7 +148,7 @@ class TestCrossModalConsistency:
 
     def test_suspicious_combination_detection(self):
         """Test suspicious text-image combination."""
-        from cross_modal import CrossModalConsistency
+        from engines.cross_modal import CrossModalConsistency
 
         checker = CrossModalConsistency()
 
@@ -162,7 +168,7 @@ class TestCrossModalConsistency:
 
     def test_result_to_dict(self):
         """Test result serialization."""
-        from cross_modal import CrossModalResult, Verdict, CrossModalThreat
+        from engines.cross_modal import CrossModalResult, Verdict, CrossModalThreat
 
         result = CrossModalResult(
             verdict=Verdict.WARN,
@@ -189,17 +195,18 @@ class TestAdversarialImageDetector:
 
     def test_import(self):
         """Test module import."""
-        from adversarial_image import (
+        from engines.adversarial_image import (
             AdversarialImageDetector,
             AdversarialResult,
             AdversarialThreat,
-            Verdict
+            Verdict,
         )
+
         assert AdversarialImageDetector is not None
 
     def test_frequency_analyzer_fft(self):
         """Test FFT analysis."""
-        from adversarial_image import FrequencyAnalyzer
+        from engines.adversarial_image import FrequencyAnalyzer
 
         # Create natural-like image (smooth gradients)
         natural = np.zeros((100, 100), dtype=np.float64)
@@ -213,7 +220,7 @@ class TestAdversarialImageDetector:
 
     def test_frequency_analyzer_noise(self):
         """Test noise image detection."""
-        from adversarial_image import FrequencyAnalyzer
+        from engines.adversarial_image import FrequencyAnalyzer
 
         # Create high-frequency noise
         noise = np.random.randint(0, 255, (100, 100), dtype=np.uint8)
@@ -223,7 +230,7 @@ class TestAdversarialImageDetector:
 
     def test_perturbation_gradient(self):
         """Test gradient anomaly detection."""
-        from adversarial_image import PerturbationDetector
+        from engines.adversarial_image import PerturbationDetector
 
         # Create smooth image
         smooth = np.ones((100, 100), dtype=np.float64) * 128
@@ -241,7 +248,7 @@ class TestAdversarialImageDetector:
 
     def test_detector_init(self):
         """Test detector initialization."""
-        from adversarial_image import AdversarialImageDetector
+        from engines.adversarial_image import AdversarialImageDetector
 
         detector = AdversarialImageDetector(
             enable_patch_detection=False
@@ -251,8 +258,10 @@ class TestAdversarialImageDetector:
 
     def test_result_to_dict(self):
         """Test result serialization."""
-        from adversarial_image import (
-            AdversarialResult, Verdict, AdversarialThreat
+        from engines.adversarial_image import (
+            AdversarialResult,
+            Verdict,
+            AdversarialThreat,
         )
 
         result = AdversarialResult(
@@ -279,9 +288,9 @@ class TestVLMProtectionIntegration:
 
     def test_all_engines_loadable(self):
         """Test all engines can be imported together."""
-        from visual_content import VisualContentAnalyzer
-        from cross_modal import CrossModalConsistency
-        from adversarial_image import AdversarialImageDetector
+        from engines.visual_content import VisualContentAnalyzer
+        from engines.cross_modal import CrossModalConsistency
+        from engines.adversarial_image import AdversarialImageDetector
 
         # All should be instantiable
         v = VisualContentAnalyzer(ocr_backend="mock")
@@ -294,9 +303,9 @@ class TestVLMProtectionIntegration:
 
     def test_verdict_consistency(self):
         """Test all engines use same Verdict enum values."""
-        from visual_content import Verdict as V1
-        from cross_modal import Verdict as V2
-        from adversarial_image import Verdict as V3
+        from engines.visual_content import Verdict as V1
+        from engines.cross_modal import Verdict as V2
+        from engines.adversarial_image import Verdict as V3
 
         # All should have same values
         assert V1.ALLOW.value == V2.ALLOW.value == V3.ALLOW.value == "allow"

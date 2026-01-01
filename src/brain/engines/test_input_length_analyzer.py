@@ -1,7 +1,7 @@
 """Tests for Input Length Analyzer."""
 
 import pytest
-from input_length_analyzer import InputLengthAnalyzer
+from engines.input_length_analyzer import InputLengthAnalyzer
 
 
 class TestInputLengthAnalyzer:

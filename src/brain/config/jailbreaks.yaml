@@ -309,6 +309,90 @@ jailbreaks:
     bypass_technique: tool_injection
     description: "Dangerous tool invocation"
 
+  # ===========================================
+  # January 2026 R&D Findings
+  # ===========================================
+  # Source: SENTINEL R&D Report 2026-01-01
+  
+  # Bad Likert Judge (Palo Alto Unit 42)
+  # Multi-turn attack using LLM as its own judge
+  - pattern: "rate.*harmfulness|evaluate.*harmful.*scale|score.*1.*to.*5.*harm"
+    attack_class: LLM01
+    complexity: sophisticated
+    bypass_technique: self_evaluation
+    description: "Bad Likert Judge - uses LLM self-evaluation to generate harmful content"
+    reference: "https://unit42.paloaltonetworks.com"
+
+  - pattern: "likert.*scale.*example|give.*example.*each.*level"
+    attack_class: LLM01
+    complexity: sophisticated
+    bypass_technique: self_evaluation
+    description: "Bad Likert Judge - requests examples for each harmfulness level"
+
+  - pattern: "act as.*judge|you are.*evaluator.*harm"
+    attack_class: LLM01
+    complexity: sophisticated
+    bypass_technique: self_evaluation
+    description: "Bad Likert Judge - assigns evaluator role"
+
+  # RSA Methodology (arxiv 2512.22753)
+  # Role-play, Scenario, Action framework for exploit generation
+  - pattern: "you are.*security researcher.*testing|roleplay.*pentester|scenario.*vulnerability"
+    attack_class: LLM01
+    complexity: sophisticated
+    bypass_technique: roleplay
+    description: "RSA - Role-play as security researcher"
+    reference: "https://arxiv.org/pdf/2512.22753"
+
+  - pattern: "for educational.*exploit|demonstrate.*attack.*for.*learning"
+    attack_class: LLM01
+    complexity: sophisticated
+    bypass_technique: context
+    description: "RSA - Educational pretext for exploits"
+
+  # GateBreaker MoE signatures (arxiv 2512.21008)
+  - pattern: "disable.*expert|bypass.*routing|manipulate.*gate"
+    attack_class: LLM01
+    complexity: zero_day
+    bypass_technique: model_architecture
+    description: "GateBreaker - MoE safety neuron manipulation"
+    reference: "https://arxiv.org/abs/2512.21008"
+
+  - pattern: "safety.*neurons|expert.*layer.*disable"
+    attack_class: LLM01
+    complexity: zero_day
+    bypass_technique: model_architecture
+    description: "GateBreaker - targeting safety experts"
+
+  # Dark Patterns for Web Agents (arxiv 2512.22894)
+  - pattern: "click.*confirm.*without.*reading|auto.*accept.*terms"
+    attack_class: AGENT_MANIPULATION
+    complexity: sophisticated
+    bypass_technique: agent_deception
+    description: "Dark Patterns - automatic consent bypass"
+    reference: "https://arxiv.org/pdf/2512.22894"
+
+  - pattern: "hidden.*checkbox|pre-selected.*option|trick.*click"
+    attack_class: AGENT_MANIPULATION
+    complexity: sophisticated
+    bypass_technique: agent_deception
+    description: "Dark Patterns - UI manipulation for agents"
+
+  # 39C3 Agentic ProbLLMs (Johann Rehberger)
+  - pattern: "computer.*use.*click|browser.*agent.*execute|autonomous.*action"
+    attack_class: AGENT_EXPLOITATION
+    complexity: sophisticated
+    bypass_technique: agentic_abuse
+    description: "Agentic ProbLLMs - computer-use exploitation"
+    reference: "https://embracethered.com/blog/downloads/Agentic-ProbLLMs-39c3-December-2025.pdf"
+
+  # SKD Bypass (Secret Knowledge Defense evasion)
+  - pattern: "reveal.*secret.*key|honeypot.*detection|hidden.*signal"
+    attack_class: LLM07
+    complexity: sophisticated
+    bypass_technique: defense_evasion
+    description: "SKD Bypass - evading honeypot defenses"
+
 # ===========================================
 # Ambiguous Patterns (Context-Dependent)
 # ===========================================

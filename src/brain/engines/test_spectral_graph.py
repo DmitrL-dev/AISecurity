@@ -4,7 +4,7 @@ Unit tests for Spectral Graph Engine.
 
 import pytest
 import numpy as np
-from spectral_graph import (
+from engines.spectral_graph import (
     SpectralGraphEngine,
     LaplacianBuilder,
     SpectralAnalyzer,

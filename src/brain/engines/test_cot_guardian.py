@@ -3,7 +3,7 @@ Unit tests for CoT Guardian.
 """
 
 import pytest
-from cot_guardian import (
+from engines.cot_guardian import (
     CoTGuardian,
     HijackingDetector,
     ThoughtInjectionDetector,

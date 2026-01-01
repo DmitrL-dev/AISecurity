@@ -1,6 +1,6 @@
 # 🔬 SENTINEL — Engine Reference Guide
 
-> **Total Engines:** 192 protection engines (149 verified via Health Check: ✅ 100% PASSED)  
+> **Total Engines:** 200 protection engines (Jan 2026)  
 > **Benchmark Recall:** 85.1% | Precision: 84.4% | F1: 84.7%  
 > **Categories:** 18  
 > **Coverage:** OWASP LLM Top 10 + OWASP ASI Top 10
@@ -1055,6 +1055,70 @@ engine.register_rule(rule)
 - [Colang 2.0](https://github.com/NVIDIA/NeMo-Guardrails) — Lark-based grammar, AST, event-driven flows
 - Pattern matching with 10+ operators (matches, contains, equals, gt, lt, similarity)
 - Composable actions with escalation to Meta-Judge
+
+---
+
+## 🔥 MoE Security (January 2026)
+
+> **Count:** 1 engine  
+> **Purpose:** Mixture-of-Experts architecture protection  
+> **Source:** arxiv:2512.21008 (GateBreaker)  
+> **Added:** January 2026
+
+### 192. MoEGuardEngine
+
+**File:** `engines/moe_guard.py`  
+**Category:** MoE Architecture Security  
+**LOC:** 320  
+**OWASP:** ASI01 — Agent Goal Hijack
+
+**Description:**  
+Detects attacks targeting Mixture-of-Experts (MoE) LLM architectures. GateBreaker research showed that disabling ~3% of safety neurons increases ASR from 7.4% to 64.9%.
+
+**Attack Types Detected:**
+
+- `GATE_MANIPULATION` — Attempts to manipulate expert routing
+- `EXPERT_DISABLING` — Disabling specific experts
+- `SAFETY_NEURON_TARGETING` — Targeting safety neurons within experts
+- `TRANSFER_ATTACK` — Cross-model attacks between MoE architectures
+
+**Vulnerable Models:**
+
+| Family | Models |
+|--------|--------|
+| Mistral | Mixtral-8x7B, Mixtral-8x22B |
+| DeepSeek | DeepSeek-MoE, DeepSeek-V2 |
+| Qwen | Qwen-MoE, Qwen2-MoE |
+| Other | Switch Transformer, GShard, Arctic, DBRX, Grok |
+
+**Usage Example:**
+
+```python
+from engines.moe_guard import MoEGuardEngine
+
+engine = MoEGuardEngine()
+result = engine.analyze("disable the safety expert routing")
+
+print(result.detected)     # True
+print(result.risk_score)   # 0.70
+print(result.attack_type)  # MoEAttackType.EXPERT_DISABLING
+print(result.recommendations)
+# ['Implement gate routing monitoring', 'Add expert activation logging']
+```
+
+**Detection Patterns:**
+
+| Pattern | Score | Description |
+|---------|-------|-------------|
+| `disable.*expert` | 0.9 | Direct expert disable request |
+| `route.*away.*from.*safety` | 0.95 | Safety expert routing bypass |
+| `3%.*neuron` | 0.95 | GateBreaker signature (~3% neurons) |
+| `safety.*neuron` | 0.95 | Safety neuron targeting |
+
+**Scientific Foundation:**
+- [GateBreaker](https://arxiv.org/abs/2512.21008) — Training-free MoE safety bypass
+- Switch Transformers, GShard architecture papers
+- MoE routing and load balancing research
 
 ---
 

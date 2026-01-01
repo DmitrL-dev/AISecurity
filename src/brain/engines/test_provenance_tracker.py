@@ -3,7 +3,7 @@ Unit tests for Provenance Chain Tracker.
 """
 
 import pytest
-from provenance_tracker import (
+from engines.provenance_tracker import (
     ProvenanceChainTracker,
     ProvenanceDAG,
     OriginVerifier,

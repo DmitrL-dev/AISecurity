@@ -3,7 +3,7 @@ Unit tests for Semantic Drift Detector.
 """
 
 import pytest
-from semantic_drift_detector import (
+from engines.semantic_drift_detector import (
     SemanticDriftDetector,
     EmbeddingAnalyzer,
     BaselineManager,

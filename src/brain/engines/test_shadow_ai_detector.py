@@ -3,7 +3,7 @@ Unit tests for Shadow AI Detector.
 """
 
 import pytest
-from shadow_ai_detector import (
+from engines.shadow_ai_detector import (
     ShadowAIDetector,
     DomainDetector,
     APIKeyDetector,

@@ -4,7 +4,7 @@ Unit tests for Secure Model Loader.
 
 import hashlib
 import pytest
-from secure_model_loader import (
+from engines.secure_model_loader import (
     SecureModelLoader,
     IntegrityVerifier,
     SignatureVerifier,

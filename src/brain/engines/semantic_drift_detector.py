@@ -20,7 +20,7 @@ from enum import Enum
 from typing import Dict, List, Optional, Tuple
 from collections import deque
 
-from base_engine import Severity, Action  # Base classes
+from .base_engine import Severity, Action  # Base classes
 
 logger = logging.getLogger("SemanticDriftDetector")
 

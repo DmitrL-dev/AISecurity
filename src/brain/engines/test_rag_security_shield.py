@@ -3,7 +3,7 @@ Unit tests for RAG Security Shield.
 """
 
 import pytest
-from rag_security_shield import (
+from engines.rag_security_shield import (
     RAGSecurityShield,
     SourceValidator,
     InjectionDetector,

@@ -3,7 +3,7 @@ Unit tests for GAN-Based Adversarial Defense.
 """
 
 import pytest
-from gan_adversarial_defense import (
+from engines.gan_adversarial_defense import (
     GANAdversarialDefense,
     AdversarialGenerator,
     Discriminator,

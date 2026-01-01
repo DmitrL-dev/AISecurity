@@ -1,7 +1,7 @@
 """Tests for Language Detection Guard."""
 
 import pytest
-from language_detection_guard import LanguageDetectionGuard
+from engines.language_detection_guard import LanguageDetectionGuard
 
 
 class TestLanguageDetectionGuard:
