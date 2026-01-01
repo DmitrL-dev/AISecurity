@@ -7,7 +7,7 @@
 <p align="center">
   <strong>🛡️ Defense + ⚔️ Offense + 📦 Framework — Complete AI Security Suite</strong><br>
   <strong>Dragon v4.0 • January 2026</strong><br>
-  200 Detection Engines • Production Gateway • Red Team Platform • Python SDK
+  201 Detection Engines • Production Gateway • Red Team Platform • Python SDK
 </p>
 
 <p align="center">
@@ -64,7 +64,7 @@
 <td width="25%" align="center" valign="top">
 <h3><a href="#-brain--detection-engines">🧠 BRAIN</a></h3>
 <strong>Detection Core</strong><br>
-200 engines, ML + Rules<br>
+201 engines, ML + Rules<br>
 Strange Math™
 </td>
 <td width="25%" align="center" valign="top">
@@ -128,7 +128,7 @@ fetch('https://cdn.jsdelivr.net/gh/DmitrL-dev/AISecurity@latest/signatures/jailb
 
 > [!IMPORTANT]
 > ### 🚨 Open to Work — AI Security Engineer
-> **Solo author of this 80K LOC platform with 200 engines. Available remote.**
+> **Solo author of this 80K LOC platform with 201 engines. Available remote.**
 > 📧 [chg@live.ru](mailto:chg@live.ru) • 💬 [@DmLabincev](https://t.me/DmLabincev)
 
 ---
@@ -136,7 +136,7 @@ fetch('https://cdn.jsdelivr.net/gh/DmitrL-dev/AISecurity@latest/signatures/jailb
 ## 🧠 BRAIN — Detection Engines
 
 <p align="center">
-  <img src="./assets/brain_engines.png" alt="SENTINEL Brain - 200 Detection Engines" width="800">
+  <img src="./assets/brain_engines.png" alt="SENTINEL Brain - 201 Detection Engines" width="800">
 </p>
 
 > **200 detection engines** analyzing every prompt and response in real-time.
@@ -318,7 +318,7 @@ def my_llm_function(prompt: str) -> str:
 ```bash
 sentinel scan "Hello world"              # Quick scan
 sentinel scan "test" --format sarif      # IDE integration
-sentinel engine list                     # List 200 engines
+sentinel engine list                     # List 201 engines
 sentinel strike generate injection       # Attack payloads
 ```
 
@@ -336,7 +336,7 @@ app.add_middleware(SentinelMiddleware, on_threat="block")
 
 | Feature | Description |
 |---------|-------------|
-| **BaseEngine** | Unified interface for all 200 engines |
+| **BaseEngine** | Unified interface for all 201 engines |
 | **Plugin System** | pluggy-based hooks for extensions |
 | **Tiered Pipeline** | Parallel execution with early exit |
 | **SARIF Output** | IDE integration for VS Code, IntelliJ |
