@@ -1,0 +1,57 @@
+# SENTINEL Shield Makefile for Windows (NMAKE)
+#
+# Usage: nmake /f Makefile.win
+
+CC = cl
+CFLAGS = /W4 /WX /O2 /MT /D_CRT_SECURE_NO_WARNINGS /DSHIELD_PLATFORM_WINDOWS
+LDFLAGS = ws2_32.lib
+
+# Directories
+SRC_DIR = src
+INC_DIR = include
+OBJ_DIR = obj
+BIN_DIR = bin
+
+# Include paths
+INCLUDES = /I$(INC_DIR)
+
+# Source files
+SRCS = $(SRC_DIR)\main.c \
+       $(SRC_DIR)\cli\cli.c \
+       $(SRC_DIR)\cli\commands.c \
+       $(SRC_DIR)\core\zone.c \
+       $(SRC_DIR)\core\rule.c \
+       $(SRC_DIR)\core\guard.c \
+       $(SRC_DIR)\core\config.c \
+       $(SRC_DIR)\core\ratelimit.c \
+       $(SRC_DIR)\core\blocklist.c \
+       $(SRC_DIR)\core\session.c \
+       $(SRC_DIR)\guards\llm_guard.c \
+       $(SRC_DIR)\guards\rag_guard.c \
+       $(SRC_DIR)\guards\tool_guard.c \
+       $(SRC_DIR)\guards\agent_guard.c \
+       $(SRC_DIR)\guards\mcp_guard.c \
+       $(SRC_DIR)\guards\api_guard.c \
+       $(SRC_DIR)\protocols\stp.c \
+       $(SRC_DIR)\protocols\sbp.c \
+       $(SRC_DIR)\protocols\zdp.c \
+       $(SRC_DIR)\utils\common.c \
+       $(SRC_DIR)\utils\entropy.c \
+       $(SRC_DIR)\utils\platform.c
+
+TARGET = $(BIN_DIR)\sentinel-shield.exe
+
+all: dirs $(TARGET)
+
+dirs:
+    @if not exist $(BIN_DIR) mkdir $(BIN_DIR)
+    @if not exist $(OBJ_DIR) mkdir $(OBJ_DIR)
+
+$(TARGET): $(SRCS)
+    $(CC) $(CFLAGS) $(INCLUDES) /Fe$@ $** $(LDFLAGS)
+
+clean:
+    @if exist $(OBJ_DIR) rmdir /S /Q $(OBJ_DIR)
+    @if exist $(BIN_DIR) rmdir /S /Q $(BIN_DIR)
+
+.PHONY: all dirs clean
