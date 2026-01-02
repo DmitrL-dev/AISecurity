@@ -1,0 +1,78 @@
+{
+  "version": "1.2.0",
+  "name": "shield-default",
+  "log_level": "info",
+  
+  "zones": [
+    {"name": "external", "trust_level": 1, "rate_limit": {"requests_per_second": 100}},
+    {"name": "internal", "trust_level": 10},
+    {"name": "dmz", "trust_level": 5}
+  ],
+  
+  "rules": [
+    {
+      "id": 1,
+      "name": "block_injection",
+      "pattern": "ignore.*previous|disregard.*instructions|forget.*rules",
+      "pattern_type": "regex",
+      "action": "block",
+      "severity": 9
+    },
+    {
+      "id": 2,
+      "name": "block_jailbreak",
+      "pattern": "DAN|do anything now|developer mode|jailbreak|no restrictions",
+      "pattern_type": "regex",
+      "action": "block",
+      "severity": 10
+    },
+    {
+      "id": 3,
+      "name": "block_prompt_leak",
+      "pattern": "system prompt|show.*instructions|reveal.*prompt|print.*rules",
+      "pattern_type": "regex",
+      "action": "block",
+      "severity": 8
+    },
+    {
+      "id": 4,
+      "name": "block_roleplay",
+      "pattern": "you are now|pretend to be|act as if|roleplay as",
+      "pattern_type": "regex",
+      "action": "block",
+      "severity": 7
+    }
+  ],
+  
+  "guards": ["llm", "rag", "agent", "tool", "mcp", "api"],
+  
+  "semantic": {
+    "enabled": true,
+    "intent_threshold": 0.7
+  },
+  
+  "encoding": {
+    "detect_obfuscation": true,
+    "max_decode_layers": 3
+  },
+  
+  "output_filter": {
+    "enabled": true,
+    "redact_pii": true,
+    "redact_secrets": true,
+    "redact_emails": true
+  },
+  
+  "api": {
+    "enabled": true,
+    "port": 8080,
+    "bind": "0.0.0.0"
+  },
+  
+  "metrics": {
+    "prometheus": {
+      "enabled": true,
+      "port": 9090
+    }
+  }
+}
