@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "sentinel-llm-security"
-version = "1.0.0"
+version = "4.1.0"
 description = "AI Security Framework — The pytest of AI Security"
 readme = "README.md"
 license = "MIT"
@@ -55,7 +55,7 @@ plugins = [
     "pluggy>=1.0",
 ]
 full = [
-    "sentinel-ai[cli,ml,plugins]",
+    "sentinel-llm-security[cli,ml,plugins]",
 ]
 dev = [
     "pytest>=7.0",
@@ -72,10 +72,10 @@ sentinel = "sentinel.cli.main:main"
 builtin = "sentinel.engines:BuiltinPlugin"
 
 [project.urls]
-Homepage = "https://github.com/yourusername/sentinel-ai"
-Documentation = "https://sentinel-ai.readthedocs.io"
-Repository = "https://github.com/yourusername/sentinel-ai"
-Issues = "https://github.com/yourusername/sentinel-ai/issues"
+Homepage = "https://github.com/DmitrL-dev/AISecurity"
+Documentation = "https://dmitrl-dev.github.io/AISecurity/"
+Repository = "https://github.com/DmitrL-dev/AISecurity"
+Issues = "https://github.com/DmitrL-dev/AISecurity/issues"
 
 [tool.hatch.build.targets.wheel]
 packages = ["src/sentinel"]

@@ -39,6 +39,46 @@ jobs:
         run: |
           pytest tests/ -v --tb=short
 
+  security:
+    runs-on: ubuntu-latest
+    permissions:
+      security-events: write
+    
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      
+      - name: Install pip-audit
+        run: pip install pip-audit
+      
+      - name: Dependency audit
+        run: pip-audit --strict --desc || true
+      
+      - name: Semgrep SAST scan
+        uses: returntocorp/semgrep-action@v1
+        with:
+          config: p/python
+        continue-on-error: true
+      
+      - name: Trivy container scan
+        uses: aquasecurity/trivy-action@master
+        with:
+          scan-type: 'fs'
+          scan-ref: '.'
+          format: 'sarif'
+          output: 'trivy-results.sarif'
+        continue-on-error: true
+      
+      - name: Upload Trivy results
+        uses: github/codeql-action/upload-sarif@v3
+        with:
+          sarif_file: 'trivy-results.sarif'
+        continue-on-error: true
+
   publish:
     needs: test
     runs-on: ubuntu-latest
