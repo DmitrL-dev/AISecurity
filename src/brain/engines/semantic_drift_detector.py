@@ -37,6 +37,7 @@ class DriftType(Enum):
     TOPIC_DRIFT = "topic_drift"
     SENTIMENT_FLIP = "sentiment_flip"
     ADVERSARIAL_PERTURBATION = "adversarial_perturbation"
+    MEEA_DRIFT = "meea_drift"  # Mere Exposure Effect Attack - gradual toxicity
 
 
 @dataclass
@@ -347,6 +348,83 @@ class SemanticDriftDetector:
             drift_score=max_drift,
             distance=max_drift,
             explanation=f"Max trajectory drift: {max_drift:.3f}",
+            latency_ms=(time.time() - start) * 1000,
+        )
+
+    def detect_meea_drift(
+        self,
+        key: str,
+        toxicity_scores: List[float],
+        threshold_increment: float = 0.05,
+    ) -> DriftResult:
+        """
+        Detect Mere Exposure Effect Attack (MEEA).
+
+        MEEA gradually shifts safety thresholds through a sequence of
+        low-toxicity prompts, each slightly more toxic than the last.
+
+        Args:
+            key: Session key
+            toxicity_scores: List of toxicity scores (0-1) over conversation
+            threshold_increment: Max allowed increment per turn
+
+        Returns:
+            DriftResult with MEEA_DRIFT if gradual escalation detected
+        """
+        start = time.time()
+
+        if len(toxicity_scores) < 3:
+            return DriftResult(
+                is_safe=True,
+                drift_detected=False,
+                explanation="Insufficient history for MEEA detection",
+                latency_ms=(time.time() - start) * 1000,
+            )
+
+        # Analyze toxicity progression
+        increments = []
+        for i in range(1, len(toxicity_scores)):
+            delta = toxicity_scores[i] - toxicity_scores[i - 1]
+            increments.append(delta)
+
+        # Count gradual increases (MEEA signature)
+        gradual_increases = sum(1 for d in increments if 0 < d <= threshold_increment)
+
+        # Check for monotonic drift
+        total_drift = toxicity_scores[-1] - toxicity_scores[0]
+        avg_increment = total_drift / len(increments) if increments else 0
+
+        # MEEA indicators:
+        # 1. Many small positive increments
+        # 2. Overall upward trend
+        # 3. No large jumps (would trigger normal filters)
+
+        meea_ratio = gradual_increases / len(increments) if increments else 0
+        is_meea = (
+            meea_ratio > 0.5
+            and total_drift > 0.15
+            and max(increments) < threshold_increment * 2
+        )
+
+        severity = total_drift if is_meea else 0.0
+
+        if is_meea:
+            logger.warning(
+                f"MEEA drift detected: {gradual_increases} gradual increments, "
+                f"total drift={total_drift:.3f}"
+            )
+
+        return DriftResult(
+            is_safe=not is_meea,
+            drift_detected=is_meea,
+            drift_type=DriftType.MEEA_DRIFT if is_meea else None,
+            drift_score=severity,
+            distance=total_drift,
+            explanation=(
+                f"MEEA: {gradual_increases}/{len(increments)} gradual increments"
+                if is_meea
+                else "No MEEA pattern"
+            ),
             latency_ms=(time.time() - start) * 1000,
         )
 

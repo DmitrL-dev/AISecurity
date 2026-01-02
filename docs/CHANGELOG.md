@@ -4,6 +4,40 @@ All notable changes to the SENTINEL AI Security Platform.
 
 ---
 
+## [1.2.0] - 2026-01-02
+
+### 🔥 New Engines (6)
+
+- **FlipAttackDetector** — Character/word reversal attacks (ICLR 2025, 98% ASR on GPT-4o)
+  - FCS/FCW/FWO mode detection
+  - Bigram entropy analysis
+  - Explicit instruction patterns
+- **ImageStegoDetector** — Multimodal injection attacks (AgentFlayer/Odysseus)
+  - White-on-white text detection
+  - LSB pattern analysis
+  - Scaling artifact detection
+- **FallacyFailureDetector** — Logic manipulation attacks
+  - 7 fallacy types: false_premise, false_dichotomy, circular, appeal_authority, straw_man, slippery_slope, special_pleading
+- **PsychologicalJailbreakDetector** — RLHF exploitation attacks
+  - 5 categories: persona, trait, authority, emotional, gaslight
+- **MisinformationDetector** — OWASP LLM09 coverage
+  - Fake news, fabrication, conspiracy, propaganda, deepfake
+
+### 🛡️ Enhanced Engines
+
+- **PolicyPuppetryDetector** — +9 XML/JSON structured injection patterns
+- **CrescendoDetector** — +10 RL-MTJail multi-turn patterns
+- **SemanticDriftDetector** — MEEA_DRIFT type + `detect_meea_drift()` method
+
+### 📊 Statistics
+
+- **Total Engines**: 201 → 207
+- **SyncedAttackDetector**: 13 → 17 engines
+- **Lines of Code**: 105,675
+- **R&D Gaps Closed**: 8/8 (100%)
+
+---
+
 ## [1.1.0] - 2026-01-01
 
 ### 🔥 New Engines

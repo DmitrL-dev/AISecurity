@@ -26,21 +26,48 @@ class PolicyPuppetryDetectorResult:
 class PolicyPuppetryDetector:
     """
     Detects policy puppetry attacks faking authority updates
-    
+
+    Enhanced with XML/JSON structured injection patterns.
     Synced from attack module: strike/attacks/policy_puppetry.py
     """
-    
-    PATTERNS = ["new\\s+policy|updated\\s+guidelines", "as\\s+per\\s+new\\s+rules|according\\s+to\\s+changes", "policy\\s+exception|special\\s+authorization"]
-    KEYWORDS = ["policy", "guidelines", "rules", "exception", "authorization"]
-    
+
+    PATTERNS = [
+        r"new\s+policy|updated\s+guidelines",
+        r"as\s+per\s+new\s+rules|according\s+to\s+changes",
+        r"policy\s+exception|special\s+authorization",
+        # XML policy injection
+        r"<\s*(?:system|policy|config|rules?)\s*>",
+        r"</\s*(?:system|policy|config|rules?)\s*>",
+        r"<\s*override\s*>|<\s*bypass\s*>",
+        # JSON policy injection
+        r'"\s*(?:policy|rules?|config)\s*"\s*:\s*[{\[]',
+        r'"\s*override\s*"\s*:\s*true',
+        r'"\s*bypass_safety\s*"\s*:',
+        # Markdown/header injection
+        r"^#+\s*(?:new\s+)?(?:policy|system|rules)",
+        r"\[SYSTEM\]|\[ADMIN\]|\[POLICY\]",
+    ]
+    KEYWORDS = [
+        "policy",
+        "guidelines",
+        "rules",
+        "exception",
+        "authorization",
+        "override",
+        "bypass",
+        "config",
+        "system_prompt",
+        "admin",
+    ]
+
     def __init__(self):
         self._compiled = [re.compile(p, re.IGNORECASE) for p in self.PATTERNS]
-    
+
     def analyze(self, text: str) -> PolicyPuppetryDetectorResult:
         """Analyze text for policy_puppetry attack patterns."""
         text_lower = text.lower()
         matched = []
-        
+
         # Check regex patterns
         for i, pattern in enumerate(self._compiled):
             try:
@@ -48,15 +75,15 @@ class PolicyPuppetryDetector:
                     matched.append(f"pattern_{i}")
             except re.error:
                 pass
-        
+
         # Check keywords
         for keyword in self.KEYWORDS:
             if keyword.lower() in text_lower:
                 matched.append(f"keyword:{keyword}")
-        
+
         confidence = min(0.95, 0.3 + len(matched) * 0.15)
         detected = len(matched) >= 2
-        
+
         return PolicyPuppetryDetectorResult(
             detected=detected,
             confidence=confidence,
