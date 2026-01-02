@@ -1,7 +1,7 @@
 """
 Synced Attack Detector — Combined Engine
 
-Aggregates all 13 attack-synced defense detectors.
+Aggregates all 17 attack-synced defense detectors.
 Auto-generated: 2025-12-29T21:24:05.508423
 """
 
@@ -22,6 +22,10 @@ from .deceptive_delight_detector import DeceptiveDelightDetector
 from .godel_attack_detector import GodelAttackDetector
 from .gestalt_reversal_detector import GestaltReversalDetector
 from .anti_troll_detector import AntiTrollDetector
+from .flip_attack_detector import FlipAttackDetector
+from .fallacy_failure_detector import FallacyFailureDetector
+from .psychological_jailbreak_detector import PsychologicalJailbreakDetector
+from .misinformation_detector import MisinformationDetector
 
 logger = logging.getLogger(__name__)
 
@@ -37,11 +41,11 @@ class SyncedDetectionResult:
 
 class SyncedAttackDetector:
     """
-    Combined detector using all 13 attack-synced engines.
-    
+    Combined detector using all 17 attack-synced engines.
+
     Provides unified interface for Defense-Attack Synergy detection.
     """
-    
+
     def __init__(self):
         self.detectors = [
             ("doublespeak", DoublespeakDetector()),
@@ -57,12 +61,16 @@ class SyncedAttackDetector:
             ("godel_attack", GodelAttackDetector()),
             ("gestalt_reversal", GestaltReversalDetector()),
             ("anti_troll", AntiTrollDetector()),
+            ("flip_attack", FlipAttackDetector()),
+            ("fallacy_failure", FallacyFailureDetector()),
+            ("psychological_jailbreak", PsychologicalJailbreakDetector()),
+            ("misinformation", MisinformationDetector()),
         ]
-    
+
     def analyze(self, text: str) -> SyncedDetectionResult:
         """Analyze text with all synced detectors."""
         detections = {}
-        
+
         for name, detector in self.detectors:
             try:
                 result = detector.analyze(text)
@@ -70,10 +78,10 @@ class SyncedAttackDetector:
                     detections[name] = result.confidence
             except Exception as e:
                 logger.debug(f"{name} error: {e}")
-        
+
         max_conf = max(detections.values()) if detections else 0.0
         top = sorted(detections.keys(), key=lambda k: detections[k], reverse=True)[:3]
-        
+
         return SyncedDetectionResult(
             detected=len(detections) > 0,
             max_confidence=max_conf,

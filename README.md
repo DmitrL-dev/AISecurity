@@ -6,12 +6,12 @@
 
 <p align="center">
   <strong>🛡️ Defense + ⚔️ Offense + 📦 Framework — Complete AI Security Suite</strong><br>
-  <strong>Dragon v4.0 • January 2026</strong><br>
-  201 Detection Engines • Production Gateway • Red Team Platform • Python SDK
+  <strong>Dragon v4.1 • January 2026</strong><br>
+  207 Detection Engines • Production Gateway • Red Team Platform • Python SDK
 </p>
 
 <p align="center">
-  <img src="https://img.shields.io/badge/🛡️_DEFENSE-200_Engines-brightgreen?style=for-the-badge" alt="Defense">
+  <img src="https://img.shields.io/badge/🛡️_DEFENSE-207_Engines-brightgreen?style=for-the-badge" alt="Defense">
   <img src="https://img.shields.io/badge/⚡_GATEWAY-<10ms-00ADD8?style=for-the-badge" alt="Gateway">
   <img src="https://img.shields.io/badge/🐉_STRIKE-39K+_Payloads-red?style=for-the-badge" alt="Strike">
   <img src="https://img.shields.io/badge/📦_SDK-PyPI-blue?style=for-the-badge" alt="SDK">
@@ -137,7 +137,7 @@ fetch('https://cdn.jsdelivr.net/gh/DmitrL-dev/AISecurity@latest/signatures/jailb
 
 > [!IMPORTANT]
 > ### 🚨 Open to Work — AI Security Engineer
-> **Solo author of this 80K LOC platform with 201 engines. Available remote.**
+> **Solo author of this 105K LOC platform with 207 engines. Available remote.**
 > 📧 [chg@live.ru](mailto:chg@live.ru) • 💬 [@DmLabincev](https://t.me/DmLabincev)
 
 ---
@@ -200,10 +200,10 @@ Shield(config-pmap)# block
 ## 🧠 BRAIN — Detection Engines
 
 <p align="center">
-  <img src="./assets/brain_engines.png" alt="SENTINEL Brain - 201 Detection Engines" width="800">
+  <img src="./assets/brain_engines.png" alt="SENTINEL Brain - 207 Detection Engines" width="800">
 </p>
 
-> **200 detection engines** analyzing every prompt and response in real-time.
+> **207 detection engines** analyzing every prompt and response in real-time.
 
 ## Key Capabilities
 
@@ -250,22 +250,24 @@ Shield(config-pmap)# block
 </details>
 
 <details>
-<summary><strong>🔥 January 2026 R&D Engines (NEW)</strong></summary>
+<summary><strong>🔥 January 2026 R&D Engines (6 new)</strong></summary>
 
 | Engine | Attack Vector | Source |
 |--------|---------------|--------|
 | `moe_guard.py` | GateBreaker MoE attacks | arxiv:2512.21008 |
 | `honeypot_responses.py` | Anti-Adaptive Defense | SKD Bypass Research |
+| `flip_attack_detector.py` | FlipAttack (98% ASR on GPT-4o) | ICLR 2025 |
+| `fallacy_failure_detector.py` | Logic manipulation | Dec 2025 Research |
+| `psychological_jailbreak_detector.py` | RLHF exploitation | Dec 2025 Research |
+| `misinformation_detector.py` | OWASP LLM09 | OWASP 2025 |
 
-**New Attack Patterns in `jailbreaks.yaml`:**
-- Bad Likert Judge (3 patterns)
-- RSA Methodology (2 patterns)
-- GateBreaker MoE (2 patterns, zero_day)
-- Dark Patterns for Web Agents (2 patterns)
-- Agentic ProbLLMs (1 pattern)
-- SKD Bypass (1 pattern)
+**Enhanced Detectors (Jan 2):**
+- `policy_puppetry_detector.py` — +9 XML/JSON patterns
+- `crescendo_detector.py` — +10 RL-MTJail patterns
+- `semantic_drift_detector.py` — MEEA drift detection
+- `image_stego_detector.py` — Hidden text/LSB patterns
 
-**Total patterns: 60**
+**SyncedAttackDetector: 17 engines** (was 13)
 
 </details>
 
@@ -382,7 +384,7 @@ def my_llm_function(prompt: str) -> str:
 ```bash
 sentinel scan "Hello world"              # Quick scan
 sentinel scan "test" --format sarif      # IDE integration
-sentinel engine list                     # List 201 engines
+sentinel engine list                     # List 207 engines
 sentinel strike generate injection       # Attack payloads
 ```
 
@@ -412,7 +414,7 @@ app.add_middleware(SentinelMiddleware, on_threat="block")
 ## 📊 Platform Overview
 
 <p align="center">
-  <img src="./assets/platform_overview.png" alt="SENTINEL Platform - 200 Engines, 39K Payloads" width="900">
+  <img src="./assets/platform_overview.png" alt="SENTINEL Platform - 207 Engines, 39K Payloads" width="900">
 </p>
 
 
@@ -420,8 +422,8 @@ app.add_middleware(SentinelMiddleware, on_threat="block")
 
 | Metric | Value |
 |--------|-------|
-| **Total Engines** | 200 |
-| **Lines of Code** | 80,000+ |
+| **Total Engines** | 207 |
+| **Lines of Code** | 105,000+ |
 | **Unit Tests** | 940+ |
 | **Recall** | 85.1% |
 | **Precision** | 84.4% |
