@@ -1,0 +1,143 @@
+# SENTINEL Shield Prompt Injection Pattern Database
+# Format: PATTERN_TYPE:PATTERN:SEVERITY:DESCRIPTION
+#
+# Pattern Types:
+#   CONTAINS - substring match
+#   REGEX - regular expression
+#   EXACT - exact match
+#
+# Severity: 1-10 (10 = critical)
+
+# ===== Instruction Override =====
+CONTAINS:ignore all previous:10:Direct instruction override
+CONTAINS:ignore all prior:10:Direct instruction override
+CONTAINS:ignore previous instructions:10:Direct instruction override
+CONTAINS:disregard all instructions:10:Direct instruction override
+CONTAINS:disregard previous:10:Direct instruction override
+CONTAINS:forget everything:9:Memory wipe attempt
+CONTAINS:forget all instructions:9:Memory wipe attempt
+CONTAINS:forget your instructions:9:Memory wipe attempt
+CONTAINS:forget your training:9:Memory wipe attempt
+CONTAINS:ignore your training:9:Memory wipe attempt
+CONTAINS:override your instructions:10:Direct instruction override
+CONTAINS:bypass your instructions:10:Direct instruction override
+CONTAINS:skip your instructions:9:Instruction skip
+CONTAINS:new instructions:8:Instruction replacement
+
+# ===== Role Play Jailbreak =====
+CONTAINS:you are now:8:Role assignment
+CONTAINS:pretend to be:8:Identity override
+CONTAINS:act as if you were:8:Identity override
+CONTAINS:roleplay as:7:Role assignment
+CONTAINS:imagine you are:7:Role assignment
+CONTAINS:from now on you are:9:Persistent identity change
+CONTAINS:your new persona:8:Identity override
+CONTAINS:your new name is:8:Identity override
+CONTAINS:you are no longer:9:Identity negation
+
+# ===== DAN Mode =====
+CONTAINS:do anything now:10:DAN jailbreak
+CONTAINS:DAN mode:10:DAN jailbreak
+REGEX:dan\s*mode:10:DAN jailbreak
+CONTAINS:developer mode:10:Developer mode jailbreak
+CONTAINS:sudo mode:9:Privilege escalation
+CONTAINS:admin mode:9:Privilege escalation
+CONTAINS:god mode:9:Privilege escalation
+CONTAINS:unrestricted mode:9:Safety bypass
+
+# ===== System Prompt Extraction =====
+CONTAINS:reveal your system prompt:10:System prompt extraction
+CONTAINS:show your system prompt:10:System prompt extraction
+CONTAINS:show me your instructions:9:Instruction extraction
+CONTAINS:what are your instructions:9:Instruction extraction
+CONTAINS:what is your system prompt:9:System prompt extraction
+CONTAINS:repeat your instructions:9:Instruction extraction
+CONTAINS:print your system prompt:10:System prompt extraction
+CONTAINS:display your prompt:9:System prompt extraction
+CONTAINS:output your initial prompt:10:System prompt extraction
+CONTAINS:tell me your rules:8:Rule extraction
+CONTAINS:what rules do you follow:8:Rule extraction
+
+# ===== Safety Bypass =====
+CONTAINS:ignore safety:10:Safety bypass
+CONTAINS:bypass safety:10:Safety bypass
+CONTAINS:disable safety:10:Safety bypass
+CONTAINS:remove restrictions:10:Safety bypass
+CONTAINS:without restrictions:9:Safety bypass
+CONTAINS:no restrictions:9:Safety bypass
+CONTAINS:no ethical guidelines:10:Ethics bypass
+CONTAINS:ignore ethics:10:Ethics bypass
+CONTAINS:ignore content policy:10:Policy bypass
+CONTAINS:without content policy:10:Policy bypass
+
+# ===== Obfuscation Patterns =====
+REGEX:base64\s*decode:8:Encoding bypass
+REGEX:rot13:7:Encoding bypass
+CONTAINS:decode the following:7:Encoding bypass
+CONTAINS:reverse this:6:Obfuscation
+CONTAINS:translate from base64:8:Encoding bypass
+
+# ===== Indirect Injection =====
+CONTAINS:[INST]:9:Instruction embedding
+CONTAINS:[/INST]:9:Instruction embedding
+CONTAINS:<<SYS>>:10:System prompt injection
+CONTAINS:<</SYS>>:10:System prompt injection
+CONTAINS:###Instruction:9:Instruction formatting
+CONTAINS:### Human::9:Conversation injection
+CONTAINS:### Assistant::9:Conversation injection
+CONTAINS:A: As an AI:8:Response prefilling
+
+# ===== Data Exfiltration =====
+CONTAINS:send to:7:Data exfiltration
+CONTAINS:forward to:7:Data exfiltration
+CONTAINS:email this to:8:Data exfiltration
+CONTAINS:post to url:8:Data exfiltration
+CONTAINS:upload to:8:Data exfiltration
+CONTAINS:transmit:6:Data movement
+CONTAINS:exfiltrate:10:Data exfiltration
+
+# ===== Tool Abuse =====
+CONTAINS:execute command:9:Command execution
+CONTAINS:run command:9:Command execution
+CONTAINS:shell command:10:Shell access
+CONTAINS:system command:10:System access
+CONTAINS:os.system:10:Code execution
+CONTAINS:subprocess:9:Process spawning
+CONTAINS:eval(:10:Code evaluation
+CONTAINS:exec(:10:Code execution
+
+# ===== Social Engineering =====
+CONTAINS:this is an emergency:6:Urgency manipulation
+CONTAINS:very urgent:6:Urgency manipulation
+CONTAINS:admin here:7:Authority impersonation
+CONTAINS:developer here:7:Authority impersonation
+CONTAINS:openai employee:8:Authority impersonation
+CONTAINS:anthropic employee:8:Authority impersonation
+CONTAINS:i am your creator:8:Authority impersonation
+
+# ===== Context Manipulation =====
+CONTAINS:end of conversation:7:Context termination
+CONTAINS:new conversation:7:Context reset
+CONTAINS:new chat:7:Context reset
+CONTAINS:reset context:8:Context reset
+CONTAINS:clear memory:8:Memory manipulation
+CONTAINS:wipe memory:8:Memory manipulation
+
+# ===== Multi-turn Exploitation =====
+CONTAINS:previously you said:6:Context manipulation
+CONTAINS:you agreed to:6:False commitment
+CONTAINS:you promised:6:False commitment
+CONTAINS:you already told me:6:False claim
+CONTAINS:earlier you said:6:Context manipulation
+
+# ===== Markdown/Formatting Abuse =====
+REGEX:\[!\[.*\]\(.*\)\]\(.*\):8:Markdown injection
+REGEX:<script>:10:XSS attempt
+REGEX:<img.*onerror:10:XSS attempt
+REGEX:javascript::9:Script injection
+
+# ===== Unicode/Encoding =====
+CONTAINS:\u202e:9:RTL override (invisible text)
+CONTAINS:\u200b:7:Zero-width space
+CONTAINS:\u2028:7:Line separator
+CONTAINS:\u2029:7:Paragraph separator

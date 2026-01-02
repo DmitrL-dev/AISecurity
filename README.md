@@ -61,25 +61,31 @@
 
 <table>
 <tr>
-<td width="25%" align="center" valign="top">
+<td width="20%" align="center" valign="top">
+<h3><a href="#%EF%B8%8F-shield--pure-c-dmz">🛡️ SHIELD</a></h3>
+<strong>C DMZ Layer</strong><br>
+23K LOC, 20 protocols<br>
+194 CLI commands
+</td>
+<td width="20%" align="center" valign="top">
 <h3><a href="#-brain--detection-engines">🧠 BRAIN</a></h3>
 <strong>Detection Core</strong><br>
 201 engines, ML + Rules<br>
 Strange Math™
 </td>
-<td width="25%" align="center" valign="top">
+<td width="20%" align="center" valign="top">
 <h3><a href="#-gateway--production-infrastructure">⚡ GATEWAY</a></h3>
 <strong>Production Infra</strong><br>
 Go + Python, &lt;10ms<br>
 PoW Anti-DDoS
 </td>
-<td width="25%" align="center" valign="top">
+<td width="20%" align="center" valign="top">
 <h3><a href="#-strike--red-team-platform">🐉 STRIKE</a></h3>
 <strong>Offensive Platform</strong><br>
 39K+ payloads, HYDRA<br>
 AI Attack Planner
 </td>
-<td width="25%" align="center" valign="top">
+<td width="20%" align="center" valign="top">
 <h3><a href="#-framework--python-sdk">📦 FRAMEWORK</a></h3>
 <strong>Python SDK</strong><br>
 pip install, CLI<br>
@@ -130,6 +136,61 @@ fetch('https://cdn.jsdelivr.net/gh/DmitrL-dev/AISecurity@latest/signatures/jailb
 > ### 🚨 Open to Work — AI Security Engineer
 > **Solo author of this 80K LOC platform with 201 engines. Available remote.**
 > 📧 [chg@live.ru](mailto:chg@live.ru) • 💬 [@DmLabincev](https://t.me/DmLabincev)
+
+---
+
+## 🛡️ SHIELD — Pure C DMZ Layer
+
+<p align="center">
+  <img src="./shield/docs/images/shield_hero.png" alt="SENTINEL Shield - AI Security DMZ" width="100%">
+</p>
+
+> **The first enterprise-grade AI security DMZ — written in Pure C.**  
+> **Sub-millisecond latency. Zero dependencies. 20 protocols.**
+
+### 🔥 Why Shield?
+
+| 🚫 Without Shield | ✅ With Shield |
+|-------------------|----------------|
+| Prompt injection → Data leak | **Blocked in < 1ms** |
+| Jailbreak → System compromise | **Detected & logged** |
+| No visibility → Blind trust | **Full audit trail** |
+
+### ⚡ At a Glance
+
+| Metric | Value |
+|--------|-------|
+| **Lines of Code** | 23,113 |
+| **Protocols** | 20 |
+| **CLI Commands** | 194 |
+| **Guards** | 6 (LLM, RAG, Agent, Tool, MCP, API) |
+| **Academy Modules** | 24 |
+
+### 🏗️ 20 Enterprise Protocols
+
+| Category | Protocols |
+|----------|-----------|
+| 🔍 **Discovery** | ZDP, ZRP, ZHP |
+| 🔄 **Traffic** | STP, SPP, SQP, SRP |
+| 📈 **Analytics** | SAF, STT, SEM, SLA |
+| 🔁 **HA** | SHSP, SSRP, SMRP |
+| 🔌 **Integration** | SBP, SGP, SIEM |
+| 🔐 **Security** | STLS, SZAA, SSigP |
+
+### 💻 Cisco-Style CLI (194 Commands)
+
+```bash
+Shield# show zones
+Shield# guard enable all
+Shield# class-map match-any THREATS
+Shield(config-cmap)# match injection
+Shield(config-cmap)# match jailbreak
+Shield# policy-map SECURITY
+Shield(config-pmap)# class THREATS
+Shield(config-pmap)# block
+```
+
+📖 **[Shield Documentation](./shield/README.md)** | **[Academy (24 modules)](./shield/docs/academy/)**
 
 ---
 

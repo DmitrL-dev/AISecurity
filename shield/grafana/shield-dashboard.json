@@ -1,0 +1,284 @@
+{
+  "annotations": {
+    "list": []
+  },
+  "editable": true,
+  "fiscalYearStartMonth": 0,
+  "graphTooltip": 0,
+  "id": null,
+  "links": [],
+  "liveNow": false,
+  "panels": [
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${DS_PROMETHEUS}"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {"mode": "palette-classic"},
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {"color": "green", "value": null}
+            ]
+          }
+        }
+      },
+      "gridPos": {"h": 6, "w": 6, "x": 0, "y": 0},
+      "id": 1,
+      "options": {"colorMode": "value", "graphMode": "area", "justifyMode": "auto", "orientation": "auto", "reduceOptions": {"calcs": ["lastNotNull"], "fields": "", "values": false}, "textMode": "auto"},
+      "pluginVersion": "9.0.0",
+      "targets": [
+        {
+          "expr": "rate(shield_requests_total[5m])",
+          "legendFormat": "Requests/s"
+        }
+      ],
+      "title": "Request Rate",
+      "type": "stat"
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${DS_PROMETHEUS}"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {"mode": "thresholds"},
+          "thresholds": {
+            "mode": "percentage",
+            "steps": [
+              {"color": "green", "value": null},
+              {"color": "yellow", "value": 5},
+              {"color": "red", "value": 10}
+            ]
+          },
+          "unit": "percentunit"
+        }
+      },
+      "gridPos": {"h": 6, "w": 6, "x": 6, "y": 0},
+      "id": 2,
+      "targets": [
+        {
+          "expr": "rate(shield_requests_blocked[5m]) / rate(shield_requests_total[5m])",
+          "legendFormat": "Block Rate"
+        }
+      ],
+      "title": "Block Rate",
+      "type": "stat"
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${DS_PROMETHEUS}"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {"mode": "thresholds"},
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {"color": "green", "value": null},
+              {"color": "yellow", "value": 0.001},
+              {"color": "red", "value": 0.01}
+            ]
+          },
+          "unit": "s"
+        }
+      },
+      "gridPos": {"h": 6, "w": 6, "x": 12, "y": 0},
+      "id": 3,
+      "targets": [
+        {
+          "expr": "histogram_quantile(0.99, rate(shield_request_duration_seconds_bucket[5m]))",
+          "legendFormat": "p99 Latency"
+        }
+      ],
+      "title": "Latency (p99)",
+      "type": "stat"
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${DS_PROMETHEUS}"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {"mode": "thresholds"},
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {"color": "green", "value": null},
+              {"color": "yellow", "value": 100},
+              {"color": "red", "value": 500}
+            ]
+          }
+        }
+      },
+      "gridPos": {"h": 6, "w": 6, "x": 18, "y": 0},
+      "id": 4,
+      "targets": [
+        {
+          "expr": "shield_alerts_firing",
+          "legendFormat": "Firing Alerts"
+        }
+      ],
+      "title": "Active Alerts",
+      "type": "stat"
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${DS_PROMETHEUS}"
+      },
+      "gridPos": {"h": 8, "w": 12, "x": 0, "y": 6},
+      "id": 5,
+      "targets": [
+        {
+          "expr": "rate(shield_requests_total[1m])",
+          "legendFormat": "Total"
+        },
+        {
+          "expr": "rate(shield_requests_blocked[1m])",
+          "legendFormat": "Blocked"
+        },
+        {
+          "expr": "rate(shield_requests_allowed[1m])",
+          "legendFormat": "Allowed"
+        }
+      ],
+      "title": "Request Traffic",
+      "type": "timeseries"
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${DS_PROMETHEUS}"
+      },
+      "gridPos": {"h": 8, "w": 12, "x": 12, "y": 6},
+      "id": 6,
+      "targets": [
+        {
+          "expr": "histogram_quantile(0.50, rate(shield_request_duration_seconds_bucket[1m]))",
+          "legendFormat": "p50"
+        },
+        {
+          "expr": "histogram_quantile(0.90, rate(shield_request_duration_seconds_bucket[1m]))",
+          "legendFormat": "p90"
+        },
+        {
+          "expr": "histogram_quantile(0.99, rate(shield_request_duration_seconds_bucket[1m]))",
+          "legendFormat": "p99"
+        }
+      ],
+      "title": "Latency Distribution",
+      "type": "timeseries"
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${DS_PROMETHEUS}"
+      },
+      "gridPos": {"h": 6, "w": 8, "x": 0, "y": 14},
+      "id": 7,
+      "targets": [
+        {
+          "expr": "sum by (zone) (rate(shield_requests_total[5m]))",
+          "legendFormat": "{{zone}}"
+        }
+      ],
+      "title": "Requests by Zone",
+      "type": "piechart"
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${DS_PROMETHEUS}"
+      },
+      "gridPos": {"h": 6, "w": 8, "x": 8, "y": 14},
+      "id": 8,
+      "targets": [
+        {
+          "expr": "sum by (rule) (rate(shield_rule_hits_total[5m]))",
+          "legendFormat": "Rule {{rule}}"
+        }
+      ],
+      "title": "Top Rules",
+      "type": "bargauge"
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${DS_PROMETHEUS}"
+      },
+      "gridPos": {"h": 6, "w": 8, "x": 16, "y": 14},
+      "id": 9,
+      "targets": [
+        {
+          "expr": "shield_sessions_active",
+          "legendFormat": "Active Sessions"
+        },
+        {
+          "expr": "shield_ratelimit_exceeded_total",
+          "legendFormat": "Rate Limited"
+        }
+      ],
+      "title": "Sessions & Rate Limits",
+      "type": "timeseries"
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${DS_PROMETHEUS}"
+      },
+      "gridPos": {"h": 6, "w": 12, "x": 0, "y": 20},
+      "id": 10,
+      "targets": [
+        {
+          "expr": "sum by (severity) (shield_alerts_total)",
+          "legendFormat": "{{severity}}"
+        }
+      ],
+      "title": "Alerts by Severity",
+      "type": "piechart"
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${DS_PROMETHEUS}"
+      },
+      "gridPos": {"h": 6, "w": 12, "x": 12, "y": 20},
+      "id": 11,
+      "targets": [
+        {
+          "expr": "shield_health_status",
+          "legendFormat": "Health"
+        },
+        {
+          "expr": "shield_ha_role",
+          "legendFormat": "HA Role"
+        }
+      ],
+      "title": "Health & HA Status",
+      "type": "timeseries"
+    }
+  ],
+  "refresh": "5s",
+  "schemaVersion": 36,
+  "style": "dark",
+  "tags": ["sentinel", "shield", "security"],
+  "templating": {
+    "list": []
+  },
+  "time": {
+    "from": "now-1h",
+    "to": "now"
+  },
+  "timepicker": {},
+  "timezone": "",
+  "title": "SENTINEL Shield Dashboard",
+  "uid": "sentinel-shield",
+  "version": 1,
+  "weekStart": ""
+}

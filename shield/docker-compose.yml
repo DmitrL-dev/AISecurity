@@ -1,0 +1,54 @@
+version: '3.8'
+
+services:
+  shield:
+    build: .
+    container_name: sentinel-shield
+    ports:
+      - "8080:8080"   # API
+      - "9090:9090"   # Metrics
+    volumes:
+      - ./config:/etc/shield:ro
+      - shield-data:/var/lib/shield
+    environment:
+      - SHIELD_LOG_LEVEL=info
+      - SHIELD_API_PORT=8080
+      - SHIELD_METRICS_PORT=9090
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "wget", "-q", "--spider", "http://localhost:8080/health"]
+      interval: 30s
+      timeout: 3s
+      retries: 3
+
+  prometheus:
+    image: prom/prometheus:latest
+    container_name: shield-prometheus
+    ports:
+      - "9091:9090"
+    volumes:
+      - ./config/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+    depends_on:
+      - shield
+
+  grafana:
+    image: grafana/grafana:latest
+    container_name: shield-grafana
+    ports:
+      - "3000:3000"
+    volumes:
+      - grafana-data:/var/lib/grafana
+    environment:
+      - GF_SECURITY_ADMIN_PASSWORD=shield123
+    depends_on:
+      - prometheus
+
+volumes:
+  shield-data:
+  grafana-data:
+
+networks:
+  default:
+    name: shield-network
