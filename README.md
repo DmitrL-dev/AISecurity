@@ -63,33 +63,33 @@
 <tr>
 <td width="20%" align="center" valign="top">
 <h3><a href="#%EF%B8%8F-shield--pure-c-dmz">🛡️ SHIELD</a></h3>
-<strong>C DMZ Layer</strong><br>
-23K LOC, 20 protocols<br>
-194 CLI commands
+<strong>C DMZ</strong><br>
+23K LOC • 20 proto<br>
+194 CLI
 </td>
 <td width="20%" align="center" valign="top">
 <h3><a href="#-brain--detection-engines">🧠 BRAIN</a></h3>
-<strong>Detection Core</strong><br>
-201 engines, ML + Rules<br>
+<strong>Detection</strong><br>
+201 engines<br>
 Strange Math™
 </td>
 <td width="20%" align="center" valign="top">
 <h3><a href="#-gateway--production-infrastructure">⚡ GATEWAY</a></h3>
-<strong>Production Infra</strong><br>
-Go + Python, &lt;10ms<br>
-PoW Anti-DDoS
+<strong>Production</strong><br>
+Go + Python<br>
+&lt;10ms • PoW
 </td>
 <td width="20%" align="center" valign="top">
 <h3><a href="#-strike--red-team-platform">🐉 STRIKE</a></h3>
-<strong>Offensive Platform</strong><br>
-39K+ payloads, HYDRA<br>
-AI Attack Planner
+<strong>Offense</strong><br>
+39K+ payloads<br>
+HYDRA
 </td>
 <td width="20%" align="center" valign="top">
-<h3><a href="#-framework--python-sdk">📦 FRAMEWORK</a></h3>
-<strong>Python SDK</strong><br>
-pip install, CLI<br>
-FastAPI integration
+<h3><a href="#-framework--python-sdk">🐍 SDK</a></h3>
+<strong>Python</strong><br>
+pip install<br>
+FastAPI
 </td>
 </tr>
 </table>
