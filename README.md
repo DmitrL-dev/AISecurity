@@ -59,37 +59,40 @@
 
 ## 🎮 CHOOSE YOUR PATH
 
+<!-- SHIELD FEATURED -->
+<p align="center">
+  <a href="#%EF%B8%8F-shield--pure-c-dmz">
+    <img src="https://img.shields.io/badge/🛡️_NEW!_SHIELD-Pure_C_DMZ-00ADD8?style=for-the-badge" alt="Shield">
+  </a>
+  <br>
+  <strong>23K LOC • 20 Protocols • 194 CLI Commands • 6 Guards</strong>
+</p>
+
 <table>
 <tr>
-<td width="20%" align="center" valign="top">
-<h3><a href="#%EF%B8%8F-shield--pure-c-dmz">🛡️ SHIELD</a></h3>
-<strong>C DMZ</strong><br>
-23K LOC • 20 proto<br>
-194 CLI
-</td>
-<td width="20%" align="center" valign="top">
+<td width="25%" align="center" valign="top">
 <h3><a href="#-brain--detection-engines">🧠 BRAIN</a></h3>
-<strong>Detection</strong><br>
-201 engines<br>
+<strong>Detection Core</strong><br>
+201 engines, ML + Rules<br>
 Strange Math™
 </td>
-<td width="20%" align="center" valign="top">
+<td width="25%" align="center" valign="top">
 <h3><a href="#-gateway--production-infrastructure">⚡ GATEWAY</a></h3>
-<strong>Production</strong><br>
-Go + Python<br>
-&lt;10ms • PoW
+<strong>Production Infra</strong><br>
+Go + Python, &lt;10ms<br>
+PoW Anti-DDoS
 </td>
-<td width="20%" align="center" valign="top">
+<td width="25%" align="center" valign="top">
 <h3><a href="#-strike--red-team-platform">🐉 STRIKE</a></h3>
-<strong>Offense</strong><br>
-39K+ payloads<br>
-HYDRA
+<strong>Offensive Platform</strong><br>
+39K+ payloads, HYDRA<br>
+AI Attack Planner
 </td>
-<td width="20%" align="center" valign="top">
-<h3><a href="#-framework--python-sdk">🐍 SDK</a></h3>
-<strong>Python</strong><br>
-pip install<br>
-FastAPI
+<td width="25%" align="center" valign="top">
+<h3><a href="#-framework--python-sdk">📦 FRAMEWORK</a></h3>
+<strong>Python SDK</strong><br>
+pip install, CLI<br>
+FastAPI integration
 </td>
 </tr>
 </table>
