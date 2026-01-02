@@ -190,7 +190,7 @@ Shield(config-pmap)# class THREATS
 Shield(config-pmap)# block
 ```
 
-📖 **[Shield Documentation](./shield/README.md)** | **[Academy (24 modules)](./shield/docs/academy/)**
+📖 **[Shield Documentation](./shield/README.md)** | **[Academy 🇷🇺](./shield/docs/academy/ru/)** | **[Academy 🇺🇸](./shield/docs/academy/en/)**
 
 ---
 

@@ -159,6 +159,8 @@ if (result.action == ACTION_BLOCK) {
 | **SSP** (Professional) | 6-10    | Guards, 20 Protocols, HA        |
 | **SSE** (Expert)       | 11-16   | Internals, Plugins, eBPF        |
 
+📚 **[Academy 🇷🇺 Русский](./docs/academy/ru/)** | **[Academy 🇺🇸 English](./docs/academy/en/)**       |
+
 ---
 
 ## 📦 What's Inside
