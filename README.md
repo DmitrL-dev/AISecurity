@@ -59,13 +59,18 @@
 
 ## 🎮 CHOOSE YOUR PATH
 
-<!-- SHIELD FEATURED -->
+<!-- SHIELD & IMMUNE FEATURED -->
 <p align="center">
   <a href="#%EF%B8%8F-shield--pure-c-dmz">
     <img src="https://img.shields.io/badge/🛡️_NEW!_SHIELD-Pure_C_DMZ-00ADD8?style=for-the-badge" alt="Shield">
   </a>
+  &nbsp;&nbsp;
+  <a href="./immune/">
+    <img src="https://img.shields.io/badge/🦠_NEW!_IMMUNE-EDR%2FXDR%2FMDR-FF6B6B?style=for-the-badge" alt="IMMUNE">
+  </a>
   <br>
-  <strong>23K LOC • 20 Protocols • 194 CLI Commands • 6 Guards</strong>
+  <strong>SHIELD:</strong> 23K LOC • 20 Protocols • 194 CLI Commands<br>
+  <strong>IMMUNE:</strong> Pure C Kernel Security • 24 Modules • DragonFlyBSD
 </p>
 
 <table>
