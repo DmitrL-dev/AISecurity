@@ -3,7 +3,7 @@ title: "IMMUNE: Building an EDR/XDR/MDR Security Platform in Pure C — Solo Dev
 published: false
 description: "Open source kernel-level security for DragonFlyBSD. What actually works today."
 tags: security, c, opensource, dragonflybsd
-cover_image:
+cover_image: ./docs/images/immune_hero.png
 ---
 
 # IMMUNE: Open Source EDR/XDR/MDR — Progress Report

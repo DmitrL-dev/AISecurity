@@ -153,6 +153,71 @@ fetch('https://cdn.jsdelivr.net/gh/DmitrL-dev/AISecurity@latest/signatures/jailb
 
 ---
 
+## 🦠 IMMUNE — EDR/XDR/MDR Security Stack
+
+<p align="center">
+  <img src="./immune/docs/images/immune_hero.png" alt="SENTINEL IMMUNE - Kernel Security" width="100%">
+</p>
+
+> **Kernel-level security for AI infrastructure — written in Pure C.**  
+> **DragonFlyBSD first. Zero Python. 6 syscall hooks.**
+
+### 🔥 Why IMMUNE?
+
+| 🚫 Without IMMUNE | ✅ With IMMUNE |
+|-------------------|----------------|
+| Userspace monitoring → Easily bypassed | **Kernel hooks → Cannot bypass** |
+| Python tools → Large attack surface | **Pure C → Minimal attack surface** |
+| Single endpoint → No correlation | **XDR → Cross-agent detection** |
+
+### ⚡ At a Glance
+
+| Metric | Value |
+|--------|-------|
+| **Hive Modules** | 24 |
+| **Hive Binary** | 110KB |
+| **Syscall Hooks** | 6 (execve, connect, bind, open, fork, setuid) |
+| **Platform** | DragonFlyBSD (Linux/Windows planned) |
+
+### 🏗️ Architecture
+
+```
+┌─────────────────────────────────────┐
+│            HIVE (110KB)             │
+│  sentinel | correlate | playbook   │
+└─────────────────┬───────────────────┘
+                  │ TCP
+┌─────────────────┴───────────────────┐
+│         AGENT (userspace)           │
+└─────────────────┬───────────────────┘
+                  │ sysctl
+┌─────────────────┴───────────────────┐
+│    KMOD (6 syscall hooks)           │
+└─────────────────────────────────────┘
+```
+
+### 💻 Tested Output
+
+```bash
+IMMUNE: [BLOCKED] exec /tmp/test.sh (pid=3158)
+IMMUNE: [BLOCKED] connect 127.0.0.1:4444 (pid=3159)
+IMMUNE: [AUDIT] open /etc/master.passwd (pid=3160)
+IMMUNE: [AUDIT] setuid 0->65534 (pid=3162)
+```
+
+### 🔗 Components
+
+| Component | Role |
+|-----------|------|
+| `sentinel.c` | SENTINEL AI Bridge |
+| `correlate.c` | XDR cross-agent correlation |
+| `playbook.c` | MDR automated responses |
+| `kmod` | Kernel syscall hooks |
+
+📖 **[IMMUNE Documentation](./immune/README.md)**
+
+---
+
 ## 🛡️ SHIELD — Pure C DMZ Layer
 
 <p align="center">
