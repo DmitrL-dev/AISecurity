@@ -1,0 +1,73 @@
+#!/bin/sh
+#
+# SENTINEL IMMUNE — Agent RC Script
+#
+# DragonFlyBSD service control script.
+#
+# PROVIDE: immuned
+# REQUIRE: NETWORKING
+# KEYWORD: shutdown
+#
+
+. /etc/rc.subr
+
+name="immuned"
+rcvar="immuned_enable"
+desc="SENTINEL IMMUNE Agent"
+
+command="/usr/local/sbin/immuned"
+pidfile="/var/run/immuned.pid"
+
+start_precmd="immuned_prestart"
+stop_postcmd="immuned_poststop"
+
+immuned_prestart()
+{
+    # Create directories
+    mkdir -p /var/immune/memory
+    mkdir -p /var/log/immune
+    
+    # Check config
+    if [ ! -f /etc/immune/agent.conf ]; then
+        warn "No config file, using defaults"
+    fi
+    
+    return 0
+}
+
+immuned_poststop()
+{
+    rm -f ${pidfile}
+    return 0
+}
+
+# Extra commands
+extra_commands="status reload"
+
+immuned_status_cmd()
+{
+    if [ -f ${pidfile} ]; then
+        pid=$(cat ${pidfile})
+        if kill -0 ${pid} 2>/dev/null; then
+            echo "${name} is running as pid ${pid}"
+            return 0
+        fi
+    fi
+    echo "${name} is not running"
+    return 1
+}
+
+immuned_reload_cmd()
+{
+    if [ -f ${pidfile} ]; then
+        pid=$(cat ${pidfile})
+        kill -HUP ${pid}
+        echo "Reloading ${name}"
+        return 0
+    fi
+    echo "${name} is not running"
+    return 1
+}
+
+load_rc_config ${name}
+run_rc_command "$1"

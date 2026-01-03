@@ -1,0 +1,58 @@
+{
+  "agent": {
+    "memory_path": "/var/immune/memory",
+    "log_path": "/var/log/immune/agent.log",
+    "syslog_enabled": true,
+    "patterns_path": "/etc/immune/patterns",
+    "max_memory_entries": 65536,
+    "scan_timeout_ms": 1
+  },
+  "hive": {
+    "data_path": "/var/immune/hive",
+    "listen_address": "0.0.0.0",
+    "listen_port": 9999,
+    "tls_enabled": true,
+    "tls_cert": "/etc/immune/cert.pem",
+    "tls_key": "/etc/immune/key.pem"
+  },
+  "discovery": {
+    "enabled": true,
+    "networks": ["192.168.0.0/16", "10.0.0.0/8"],
+    "scan_interval_hours": 24,
+    "timeout_seconds": 2.0,
+    "concurrent_scans": 100
+  },
+  "deploy": {
+    "agent_binary_path": "/opt/immune/agent",
+    "default_ssh_user": "root",
+    "default_ssh_key": "/etc/immune/deploy_key",
+    "auto_deploy": false,
+    "exploit_enabled": false
+  },
+  "offensive": {
+    "enabled": false,
+    "auto_patch": true,
+    "allowed_categories": ["ssh"],
+    "rate_limit_per_hour": 10
+  },
+  "response": {
+    "auto_isolate": true,
+    "auto_kill": true,
+    "auto_block": true,
+    "isolation_timeout_hours": 24
+  },
+  "herd": {
+    "enabled": true,
+    "peers": [],
+    "sync_interval_hours": 1,
+    "min_confidence": 0.5,
+    "global_feed_enabled": false,
+    "global_feed_api_key": null
+  },
+  "soc": {
+    "syslog_host": "localhost",
+    "syslog_port": 514,
+    "webhooks": [],
+    "alert_on_threat_level": 2
+  }
+}
