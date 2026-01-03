@@ -1,0 +1,26 @@
+# IMMUNE Agent Daemon Makefile for DragonFlyBSD
+
+CC = cc
+CFLAGS = -Wall -O2 -std=c11
+LDFLAGS =
+
+DAEMON_SRC = src/immune_daemon.c
+DAEMON_BIN = bin/immune_agent
+
+.PHONY: all clean daemon
+
+all: daemon
+
+daemon: $(DAEMON_BIN)
+
+$(DAEMON_BIN): $(DAEMON_SRC)
+	@mkdir -p bin
+	$(CC) $(CFLAGS) -o $@ $< $(LDFLAGS)
+	@echo "Built: $@"
+
+clean:
+	rm -f $(DAEMON_BIN)
+
+install: $(DAEMON_BIN)
+	install -m 755 $(DAEMON_BIN) /usr/local/sbin/
+	@echo "Installed to /usr/local/sbin/immune_agent"

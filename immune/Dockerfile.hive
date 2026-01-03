@@ -1,0 +1,58 @@
+#
+# SENTINEL IMMUNE — Hive Build & Test
+#
+# Multi-stage build for production Hive server
+#
+
+FROM alpine:3.19 AS builder
+
+# Install build tools
+RUN apk add --no-cache \
+    gcc \
+    musl-dev \
+    make \
+    openssl-dev \
+    linux-headers
+
+WORKDIR /build
+
+# Copy source
+COPY hive/include/ include/
+COPY hive/src/ src/
+COPY hive/Makefile .
+COPY hive/conf/ conf/
+
+# Build
+RUN make
+
+# ==================== Runtime ====================
+
+FROM alpine:3.19
+
+RUN apk add --no-cache \
+    openssl \
+    libgcc
+
+# Create user
+RUN adduser -D -H immune
+
+# Create directories
+RUN mkdir -p /var/immune/hive /var/log/immune /etc/immune && \
+    chown -R immune:immune /var/immune /var/log/immune
+
+# Copy binary
+COPY --from=builder /build/bin/hived /usr/local/sbin/hived
+COPY --from=builder /build/conf/hive.conf /etc/immune/hive.conf
+
+# Switch user
+USER immune
+
+# Ports
+EXPOSE 9998 9999
+
+# Health check
+HEALTHCHECK --interval=30s --timeout=3s \
+    CMD nc -z localhost 9999 || exit 1
+
+# Run
+CMD ["/usr/local/sbin/hived", "-f", "-c", "/etc/immune/hive.conf"]

@@ -1,0 +1,25 @@
+# SENTINEL IMMUNE — Prometheus Configuration
+
+global:
+  scrape_interval: 15s
+  evaluation_interval: 15s
+
+alerting:
+  alertmanagers:
+    - static_configs:
+        - targets: []
+
+rule_files: []
+
+scrape_configs:
+  # IMMUNE Hive metrics
+  - job_name: 'immune-hive'
+    static_configs:
+      - targets: ['hive:9999']
+    metrics_path: '/metrics'
+    scrape_interval: 10s
+
+  # Prometheus self-monitoring
+  - job_name: 'prometheus'
+    static_configs:
+      - targets: ['localhost:9090']

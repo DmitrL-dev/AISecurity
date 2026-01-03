@@ -1,0 +1,76 @@
+#
+# SENTINEL IMMUNE — Docker Compose
+#
+# Full testing environment
+#
+
+services:
+  # ==================== Hive ====================
+  hive:
+    build:
+      context: .
+      dockerfile: Dockerfile.hive
+    container_name: immune-hive
+    ports:
+      - "9998:9998"   # Agent port
+      - "9999:9999"   # API port
+    volumes:
+      - hive_data:/var/immune/hive
+      - hive_logs:/var/log/immune
+    environment:
+      - IMMUNE_LOG_LEVEL=debug
+    networks:
+      - immune-net
+    restart: unless-stopped
+
+  # ==================== Agent Test ====================
+  agent-test:
+    build:
+      context: .
+      dockerfile: Dockerfile.agent
+      target: tester
+    container_name: immune-agent-test
+    volumes:
+      - agent_data:/var/immune
+    command: ["./bin/test_agent"]
+    networks:
+      - immune-net
+
+  # ==================== Agent ====================
+  agent:
+    build:
+      context: .
+      dockerfile: Dockerfile.agent
+    container_name: immune-agent
+    depends_on:
+      - hive
+    environment:
+      - IMMUNE_HIVE_HOST=hive
+      - IMMUNE_HIVE_PORT=9998
+    volumes:
+      - agent_data:/var/immune
+    networks:
+      - immune-net
+
+  # ==================== Integration Tests ====================
+  integration:
+    build:
+      context: .
+      dockerfile: Dockerfile.hive
+    container_name: immune-integration
+    depends_on:
+      - hive
+    volumes:
+      - ./tests:/tests:ro
+    command: ["/bin/sh", "-c", "echo 'Integration tests would run here'"]
+    networks:
+      - immune-net
+
+volumes:
+  hive_data:
+  hive_logs:
+  agent_data:
+
+networks:
+  immune-net:
+    driver: bridge
