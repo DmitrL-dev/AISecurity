@@ -70,29 +70,35 @@
 
 <table>
 <tr>
-<td width="25%" align="center" valign="top">
+<td width="20%" align="center" valign="top">
 <h3><a href="#-brain--detection-engines">🧠 BRAIN</a></h3>
 <strong>Detection Core</strong><br>
 201 engines, ML + Rules<br>
 Strange Math™
 </td>
-<td width="25%" align="center" valign="top">
+<td width="20%" align="center" valign="top">
 <h3><a href="#-gateway--production-infrastructure">⚡ GATEWAY</a></h3>
 <strong>Production Infra</strong><br>
 Go + Python, &lt;10ms<br>
 PoW Anti-DDoS
 </td>
-<td width="25%" align="center" valign="top">
+<td width="20%" align="center" valign="top">
 <h3><a href="#-strike--red-team-platform">🐉 STRIKE</a></h3>
 <strong>Offensive Platform</strong><br>
 39K+ payloads, HYDRA<br>
 AI Attack Planner
 </td>
-<td width="25%" align="center" valign="top">
+<td width="20%" align="center" valign="top">
 <h3><a href="#-framework--python-sdk">📦 FRAMEWORK</a></h3>
 <strong>Python SDK</strong><br>
 pip install, CLI<br>
 FastAPI integration
+</td>
+<td width="20%" align="center" valign="top">
+<h3><a href="./immune/">🦠 IMMUNE</a></h3>
+<strong>EDR/XDR/MDR</strong><br>
+Pure C, Kernel-level<br>
+DragonFlyBSD
 </td>
 </tr>
 </table>

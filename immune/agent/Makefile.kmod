@@ -1,0 +1,74 @@
+# SENTINEL IMMUNE — Kernel Module Build
+#
+# DragonFlyBSD kernel module makefile
+# 
+# Usage:
+#   make -f Makefile.kmod        # Build module
+#   make -f Makefile.kmod clean  # Clean
+#   sudo kldload ./immune.ko     # Load module
+#   sudo kldunload immune        # Unload module
+
+KMOD = immune
+
+# Source files
+SRCS = kmod.c hooks.c memory.c output.c agent.c
+
+# ASM sources (need special handling)
+SRCS_ASM = innate.asm simd.asm
+
+# Include paths
+CFLAGS += -I${.CURDIR}/../include
+
+# Debug symbols
+.if defined(DEBUG)
+CFLAGS += -g -DDEBUG
+.endif
+
+# Optimization
+CFLAGS += -O2 -fno-omit-frame-pointer
+
+# Security hardening
+CFLAGS += -fstack-protector-strong
+CFLAGS += -D_FORTIFY_SOURCE=2
+
+# ASM object files
+OBJS_ASM = innate.o simd.o
+
+.include <bsd.kmod.mk>
+
+# Custom rule for NASM files
+.SUFFIXES: .asm
+.asm.o:
+	nasm -f elf64 -o ${.TARGET} ${.IMPSRC}
+
+# Add ASM objects to build
+OBJS += ${OBJS_ASM}
+
+# Pre-build: assemble ASM files
+beforebuild: ${OBJS_ASM}
+
+# Install to kernel modules directory
+install:
+	install -m 555 ${KMOD}.ko /boot/modules/
+
+# Load module
+load:
+	kldload ./${KMOD}.ko
+
+# Unload module
+unload:
+	kldunload ${KMOD}
+
+# Status check
+status:
+	kldstat | grep ${KMOD} || echo "Module not loaded"
+	sysctl -a | grep security.immune || echo "No sysctl entries"
+
+# Test (load, check, unload)
+test: ${KMOD}.ko
+	@echo "=== IMMUNE Module Test ==="
+	kldload ./${KMOD}.ko
+	sleep 1
+	sysctl security.immune
+	kldunload ${KMOD}
+	@echo "=== Test Complete ==="

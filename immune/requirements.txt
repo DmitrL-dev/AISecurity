@@ -1,0 +1,26 @@
+# SENTINEL IMMUNE — Python Dependencies
+
+# Core
+aiohttp>=3.9.0
+pydantic>=2.5.0
+
+# Hive
+redis>=5.0.0
+asyncio-redis>=0.16.0
+
+# Security
+cryptography>=41.0.0
+pynacl>=1.5.0
+
+# Monitoring
+prometheus-client>=0.19.0
+
+# Utilities
+python-json-logger>=2.0.0
+python-dateutil>=2.8.0
+
+# Development
+pytest>=7.4.0
+pytest-asyncio>=0.21.0
+black>=23.0.0
+mypy>=1.7.0
