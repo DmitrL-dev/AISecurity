@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="./assets/christmas_2025.png" alt="🎄 SENTINEL Christmas 2025 — FULL OPEN SOURCE RELEASE 🎄" width="100%">
+  <img src="./docs/images/sentinel_hero.png" alt="🐉 SENTINEL — AI Security Platform" width="100%">
 </p>
 
 <h1 align="center">SENTINEL — AI Security Platform</h1>
@@ -7,11 +7,11 @@
 <p align="center">
   <strong>🛡️ Defense + ⚔️ Offense + 📦 Framework — Complete AI Security Suite</strong><br>
   <strong>Dragon v4.1 • January 2026</strong><br>
-  207 Detection Engines • Production Gateway • Red Team Platform • Python SDK
+  209 Detection Engines • Production Gateway • Red Team Platform • Python SDK
 </p>
 
 <p align="center">
-  <img src="https://img.shields.io/badge/🛡️_DEFENSE-207_Engines-brightgreen?style=for-the-badge" alt="Defense">
+  <img src="https://img.shields.io/badge/🛡️_DEFENSE-209_Engines-brightgreen?style=for-the-badge" alt="Defense">
   <img src="https://img.shields.io/badge/⚡_GATEWAY-<10ms-00ADD8?style=for-the-badge" alt="Gateway">
   <img src="https://img.shields.io/badge/🐉_STRIKE-39K+_Payloads-red?style=for-the-badge" alt="Strike">
   <img src="https://img.shields.io/badge/📦_SDK-PyPI-blue?style=for-the-badge" alt="SDK">
