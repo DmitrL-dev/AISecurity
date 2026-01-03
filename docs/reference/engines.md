@@ -1,8 +1,8 @@
 # 🔬 SENTINEL — Справочник движков
 
-> **Общее количество:** 201 движков защиты (Jan 2026)  
+> **Общее количество:** 209 движков защиты (Jan 2026)  
 > **Benchmark Recall:** 85.1% | Precision: 84.4% | F1: 84.7%  
-> **Категории:** 16  
+> **Категории:** 17  
 > **Уровень покрытия:** OWASP LLM Top 10 + OWASP ASI Top 10
 
 ---
@@ -23,7 +23,8 @@
 12. [Advanced Research (9)](#advanced-research)
 13. [Deep Learning (6)](#deep-learning)
 14. [Meta-Judge + XAI (2)](#meta-judge--xai)
-15. [🧬 Research Inventions (49)](#research-inventions) ← **NEW!**
+15. [🧬 Research Inventions (49)](#research-inventions)
+16. [🆕 Jan 2026 R&D (2)](#jan-2026-rnd) ← **NEW!**
 
 ---
 
