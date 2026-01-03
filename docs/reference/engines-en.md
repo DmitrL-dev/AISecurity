@@ -1,8 +1,8 @@
 # 🔬 SENTINEL — Engine Reference Guide
 
-> **Total Engines:** 200 protection engines (Jan 2026)  
+> **Total Engines:** 209 protection engines (Jan 2026)  
 > **Benchmark Recall:** 85.1% | Precision: 84.4% | F1: 84.7%  
-> **Categories:** 18  
+> **Categories:** 19  
 > **Coverage:** OWASP LLM Top 10 + OWASP ASI Top 10
 
 ---
@@ -26,7 +26,8 @@
 15. [Adaptive Behavioral (2)](#adaptive-behavioral) 🆕
 16. [🔒 Supply Chain Security (3)](#supply-chain-security) ← **NEW!**
 17. [📋 Rule Engine (1)](#rule-engine) ← **NEW!**
-18. [🧬 Research Inventions (56)](#research-inventions) ← **EXPANDED!**
+18. [🧬 Research Inventions (56)](#research-inventions)
+19. [🆕 Jan 2026 R&D (2)](#jan-2026-rnd) ← **NEW!**
 
 ---
 

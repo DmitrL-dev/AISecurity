@@ -3,7 +3,6 @@ title: "IMMUNE: Building an EDR/XDR/MDR Security Platform in Pure C — Solo Dev
 published: false
 description: "Open source kernel-level security for DragonFlyBSD. What actually works today."
 tags: security, c, opensource, dragonflybsd
-cover_image: ./docs/images/immune_hero.png
 ---
 
 # IMMUNE: Open Source EDR/XDR/MDR — Progress Report
@@ -107,17 +106,83 @@ All components work together. Not 24 separate tools bolted together — **one or
 
 ---
 
-## Why Pure C on DragonFlyBSD
+## Why DragonFlyBSD as the Hive OS
 
-Honest answer: because I wanted to build something that can't be easily bypassed.
+This isn't just "we made an agent for DragonFlyBSD". **The Hive itself runs on DragonFlyBSD.**
 
-- **No runtime to exploit** — Python/Node security tools have their own attack surface
-- **Kernel-level hooks** — Can't be bypassed from userspace
-- **110KB binary** — vs 50MB+ for typical security tools
-- **DragonFlyBSD** — Clean kernel API, HAMMER2 filesystem, native jails
+The central security command — the brain of the entire operation — is built for and runs on DragonFlyBSD. Here's why:
+
+### HAMMER2 Filesystem
+- **Instant forensic snapshots** — When a threat is detected, we can snapshot the entire system state in milliseconds
+- **Copy-on-write** — Snapshots cost almost nothing, can keep hundreds
+- **Tamper evidence** — Attackers can't easily hide their tracks
+
+### Native Jails
+- **Process isolation** without Docker/container overhead
+- **Network-isolated quarantine** — Compromised processes can't phone home
+- **Kernel-level enforcement** — Not userspace fakery
+
+### Clean Kernel API
+- **Simple syscall hooking** — No fighting with kernel complexity
+- **LWKT tokens** — Deadlock-free locking primitives
+- **No systemd** — Direct control, predictable behavior
+
+### Minimal Attack Surface
+- Smaller codebase than Linux
+- Less widely targeted (security through obscurity as a bonus, not strategy)
+- BSD license allows full customization
+
+**The philosophy:** If the security command center itself can be compromised, everything downstream is worthless. So we put it on the most defensible OS we could find.
 
 Is this the fastest development path? No.  
 Is this the most secure? I believe so.
+
+---
+
+## Part of SENTINEL Ecosystem
+
+IMMUNE isn't a standalone project. It's the **kernel-level foundation** of the SENTINEL AI Security Platform.
+
+```
+┌─────────────────────────────────────────────────────────────┐
+│                    SENTINEL ECOSYSTEM                        │
+├─────────────────────────────────────────────────────────────┤
+│                                                              │
+│   🦠 IMMUNE          🛡️ SHIELD         🧠 BRAIN              │
+│   EDR/XDR/MDR        Pure C DMZ        207 Detection         │
+│   Kernel hooks       Pre-filter        Engines               │
+│        │                 │                 │                 │
+│        └────────────────┼─────────────────┘                 │
+│                         │                                    │
+│                    ⚡ GATEWAY                                │
+│                    Go + Python                               │
+│                    Production API                            │
+│                         │                                    │
+│                    🐉 STRIKE                                 │
+│                    39K+ Payloads                             │
+│                    Red Team Testing                          │
+│                                                              │
+└─────────────────────────────────────────────────────────────┘
+```
+
+### How They Connect
+
+| Component | Role | IMMUNE Integration |
+|-----------|------|-------------------|
+| **BRAIN** | 207 ML/Rule engines | IMMUNE sends events → Brain analyzes → verdict returns |
+| **SHIELD** | Request pre-filter | Shield blocks at API → IMMUNE blocks at kernel |
+| **GATEWAY** | Production API | Gateway routes traffic → IMMUNE monitors hosts |
+| **STRIKE** | Red team payloads | Strike tests → IMMUNE should detect and block |
+
+### The Multiplier Effect
+
+Each layer reinforces the others:
+
+1. **SHIELD** blocks 80% of attacks at the API edge
+2. **BRAIN** catches 15% more with ML analysis
+3. **IMMUNE** stops the remaining 5% that made it to the host
+
+**Result:** An attacker needs to bypass Pure C pre-filter, 207 detection engines, AND kernel syscall hooks. That's why we call it "defense in depth".
 
 ---
 
@@ -149,11 +214,11 @@ The code is at [GitHub repo]. No paid tiers, no "enterprise features". Everythin
 
 I work on this alone. That means:
 
-- Features ship when they're ready, not on a roadmap
+- Progress is steady, not rushed
 - Some days I fix one bug, other days I add whole modules
 - Quality over speed — I'd rather ship working code slowly
 
-If you want to contribute, the codebase is clean C with minimal dependencies. PRs welcome.
+There's a [roadmap in the README](https://github.com/DmitrL-dev/AISecurity/tree/main/sentinel-community/immune#roadmap) with quarterly milestones. PRs welcome.
 
 ---
 
@@ -161,7 +226,7 @@ If you want to contribute, the codebase is clean C with minimal dependencies. PR
 
 Code will be pushed to GitHub after this article goes live:
 
-**Repository:** [github.com/username/sentinel-community](https://github.com/username/sentinel-community)
+**Repository:** [github.com/DmitrL-dev/AISecurity](https://github.com/DmitrL-dev/AISecurity/tree/main/sentinel-community/immune)
 
 The `immune/` directory contains:
 
