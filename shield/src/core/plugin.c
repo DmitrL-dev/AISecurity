@@ -55,8 +55,8 @@ void plugin_manager_destroy(plugin_manager_t *mgr)
     while (plugin) {
         loaded_plugin_t *next = plugin->next;
         
-        if (plugin->initialized && plugin->interface.destroy) {
-            plugin->interface.destroy();
+        if (plugin->initialized && plugin->iface.destroy) {
+            plugin->iface.destroy();
         }
         
         if (plugin->handle) {
@@ -95,15 +95,15 @@ shield_err_t plugin_load(plugin_manager_t *mgr, const char *path)
         return SHIELD_ERR_INVALID;
     }
     
-    plugin_interface_t interface = get_interface();
+    plugin_interface_t iface = get_interface();
     
-    if (!interface.get_info) {
+    if (!iface.get_info) {
         LOG_ERROR("Plugin %s has no get_info function", path);
         dlclose(handle);
         return SHIELD_ERR_INVALID;
     }
     
-    plugin_info_t info = interface.get_info();
+    plugin_info_t info = iface.get_info();
     
     /* Check if already loaded */
     if (plugin_find(mgr, info.name)) {
@@ -122,12 +122,12 @@ shield_err_t plugin_load(plugin_manager_t *mgr, const char *path)
     strncpy(plugin->name, info.name, sizeof(plugin->name) - 1);
     strncpy(plugin->path, path, sizeof(plugin->path) - 1);
     plugin->handle = handle;
-    plugin->interface = interface;
+    plugin->iface = iface;
     plugin->info = info;
     
     /* Initialize */
-    if (interface.init) {
-        shield_err_t err = interface.init(NULL);
+    if (iface.init) {
+        shield_err_t err = iface.init(NULL);
         if (err != SHIELD_OK) {
             LOG_ERROR("Plugin %s init failed", info.name);
             dlclose(handle);
@@ -161,8 +161,8 @@ shield_err_t plugin_unload(plugin_manager_t *mgr, const char *name)
             loaded_plugin_t *plugin = *pp;
             *pp = plugin->next;
             
-            if (plugin->initialized && plugin->interface.destroy) {
-                plugin->interface.destroy();
+            if (plugin->initialized && plugin->iface.destroy) {
+                plugin->iface.destroy();
             }
             
             if (plugin->handle) {

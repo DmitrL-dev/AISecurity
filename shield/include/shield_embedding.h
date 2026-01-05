@@ -14,6 +14,7 @@ typedef struct embedding {
     float           *vector;
     int             dimension;
     char            model[64];
+    bool            normalized;
 } embedding_t;
 
 /* Embedding provider */

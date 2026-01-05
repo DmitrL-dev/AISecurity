@@ -2,76 +2,188 @@
 
 ## Capstone Project
 
-_SSE Level | Duration: 40 hours_
+_SSE Level | Duration: 8+ hours_
 
 ---
 
-## Overview
+## Introduction
 
-The capstone demonstrates mastery of Shield.
+This is the final SSE module.
 
----
-
-## Requirements
-
-### Implementation
-
-1. **Custom Guard** — Create a specialized guard
-2. **Custom Protocol** — Implement a new protocol
-3. **Plugin** — Build a production plugin
-4. **Integration** — Deploy in real environment
-
-### Documentation
-
-- Architecture document
-- API reference
-- Deployment guide
-- Performance report
-
-### Testing
-
-- Unit tests (80%+ coverage)
-- Integration tests
-- Performance benchmarks
-- Security audit
+You'll apply everything you've learned by creating a production-ready extension for Shield.
 
 ---
 
-## Deliverables
+## 15.1 Project Requirements
 
-| Item | Weight |
-|------|--------|
-| Custom Guard | 25% |
-| Custom Protocol | 25% |
-| Plugin | 20% |
-| Documentation | 15% |
-| Testing | 15% |
+### Scope
 
----
+Choose ONE of the projects:
 
-## Evaluation Criteria
+| Project | Description | Complexity |
+|---------|-------------|------------|
+| A | Custom Guard | Medium |
+| B | Custom Protocol | Hard |
+| C | Plugin System Extension | Medium |
+| D | Performance Optimization | Hard |
+| E | External System Integration | Medium |
 
-| Criterion | Points |
-|-----------|--------|
-| Code Quality | 25 |
-| Functionality | 25 |
-| Performance | 20 |
-| Documentation | 15 |
-| Security | 15 |
+### Deliverables
 
-### Passing Score: 80%
+1. **Code** — Production quality
+2. **Tests** — Unit + Integration
+3. **Documentation** — README + API docs
+4. **Presentation** — 10-15 minutes
 
 ---
 
-## Timeline
+## 15.2 Project A: Custom Guard
 
-| Week | Focus |
-|------|-------|
-| 1-2 | Design & Architecture |
-| 3-4 | Implementation |
-| 5-6 | Testing |
-| 7-8 | Documentation & Polish |
+### Requirements
+
+Create a Guard for a specific use case:
+
+**Examples:**
+- Code Injection Guard (code detection in prompts)
+- Language Guard (enforce response language)
+- Context Limit Guard (limit context size)
+- Compliance Guard (GDPR, HIPAA)
+
+### Criteria
+
+- [ ] Implements guard_vtable_t
+- [ ] Configurable via JSON
+- [ ] Thread-safe
+- [ ] < 1ms evaluation latency
+- [ ] Unit tests (80%+ coverage)
+- [ ] Documentation
 
 ---
 
-_"The capstone proves you're an expert."_
+## 15.3 Project B: Custom Protocol
+
+### Requirements
+
+Create a new protocol for Shield:
+
+**Examples:**
+- Audit Protocol (event auditing)
+- Notification Protocol (alerts)
+- Sync Protocol (alternative to SSRP)
+- External Integration Protocol
+
+### Criteria
+
+- [ ] Binary or text protocol
+- [ ] Message framing
+- [ ] Error handling
+- [ ] Reconnection logic
+- [ ] Performance: > 10K msg/sec
+
+---
+
+## 15.4 Evaluation Criteria
+
+### Code Quality (40%)
+
+| Criteria | Points |
+|----------|--------|
+| Clean architecture | 10 |
+| Error handling | 10 |
+| Thread safety | 10 |
+| No memory leaks | 10 |
+
+### Testing (20%)
+
+| Criteria | Points |
+|----------|--------|
+| Unit test coverage > 80% | 10 |
+| Integration tests | 5 |
+| Edge case handling | 5 |
+
+### Documentation (20%)
+
+| Criteria | Points |
+|----------|--------|
+| README with examples | 10 |
+| API documentation | 5 |
+| Configuration guide | 5 |
+
+### Performance (10%)
+
+| Criteria | Points |
+|----------|--------|
+| Meets latency requirements | 5 |
+| No performance regressions | 5 |
+
+### Presentation (10%)
+
+| Criteria | Points |
+|----------|--------|
+| Clear explanation | 5 |
+| Demo | 5 |
+
+### Total: 100 points
+
+**Pass: 70+**
+**Distinction: 90+**
+
+---
+
+## 15.5 Timeline
+
+| Week | Milestone |
+|------|-----------|
+| 1 | Project selection, design |
+| 2 | Core implementation |
+| 3 | Testing, documentation |
+| 4 | Polish, presentation prep |
+
+---
+
+## 🎉 Congratulations!
+
+After successfully completing the Capstone Project, you become a **SENTINEL Shield Expert (SSE)**.
+
+### What This Means
+
+- Deep understanding of Shield internals
+- Ability to extend and customize
+- Production deployment expertise
+- Performance engineering skills
+
+### What's Next
+
+- Contribute to Shield
+- Create plugins for the community
+- Help others learn
+- Advance the field of AI Security
+
+---
+
+## Certificate
+
+```
+╔══════════════════════════════════════════════════════════════╗
+║                                                              ║
+║                    SENTINEL ACADEMY                          ║
+║                                                              ║
+║                        certifies                             ║
+║                                                              ║
+║                    [YOUR NAME]                               ║
+║                                                              ║
+║            as a SENTINEL Shield Expert (SSE)                 ║
+║                                                              ║
+║         Having completed all modules and the                 ║
+║              Capstone Project with distinction               ║
+║                                                              ║
+║         Date: ____________    Score: _____/100              ║
+║                                                              ║
+╚══════════════════════════════════════════════════════════════╝
+```
+
+---
+
+_"The journey of a thousand miles begins with a single step. You've taken all the steps. Now lead others."_
+
+_— SENTINEL Academy_

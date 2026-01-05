@@ -10,6 +10,7 @@
 
 #include "shield_common.h"
 #include "shield_protocol.h"
+#include "shield_platform.h"
 
 /* SRP Message Types */
 typedef enum {
@@ -62,8 +63,8 @@ shield_err_t srp_add_redirect(srp_context_t *ctx, const char *source,
     
     uint8_t type = SRP_MSG_REDIRECT_ADD;
     if (ctx->socket >= 0) {
-        send(ctx->socket, &type, 1, 0);
-        send(ctx->socket, &rule, sizeof(rule), 0);
+        send(ctx->socket, (const char*)&type, 1, 0);
+        send(ctx->socket, (const char*)&rule, sizeof(rule), 0);
     }
     
     LOG_INFO("SRP: Added redirect %s -> %s", source, dest ? dest : "(block)");
@@ -86,7 +87,7 @@ shield_err_t srp_remove_redirect(srp_context_t *ctx, const char *source)
     strncpy(request.source, source, sizeof(request.source) - 1);
     
     if (ctx->socket >= 0) {
-        send(ctx->socket, &request, sizeof(request), 0);
+        send(ctx->socket, (const char*)&request, sizeof(request), 0);
     }
     
     return SHIELD_OK;
@@ -111,8 +112,8 @@ shield_err_t srp_mirror_traffic(srp_context_t *ctx, const char *zone,
     strncpy(header.zone, zone, sizeof(header.zone) - 1);
     
     if (ctx->socket >= 0) {
-        send(ctx->socket, &header, sizeof(header), 0);
-        send(ctx->socket, data, size, 0);
+        send(ctx->socket, (const char*)&header, sizeof(header), 0);
+        send(ctx->socket, (const char*)data, size, 0);
     }
     
     return SHIELD_OK;
@@ -138,7 +139,11 @@ void srp_destroy(srp_context_t *ctx)
 {
     if (ctx) {
         if (ctx->socket >= 0) {
-            close(ctx->socket);
+            #ifdef SHIELD_PLATFORM_WINDOWS
+        closesocket(ctx->socket);
+#else
+        close(ctx->socket);
+#endif
         }
         free(ctx->rules);
     }

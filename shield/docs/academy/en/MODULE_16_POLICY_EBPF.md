@@ -1,6 +1,6 @@
 # SENTINEL Academy — Module 16
 
-## Policy Engine & eBPF
+## Policy Engine and eBPF
 
 _SSE Level | Duration: 4 hours_
 
@@ -10,7 +10,7 @@ _SSE Level | Duration: 4 hours_
 
 Two advanced Shield components:
 
-1. **Policy Engine** — class-map/policy-map system (Cisco-style)
+1. **Policy Engine** — Cisco-style class-map/policy-map system
 2. **eBPF** — Kernel-level filtering
 
 ---
@@ -30,6 +30,23 @@ Two advanced Shield components:
 └─────────────────────────────────────────────────────────┘
 ```
 
+### Class-Map
+
+Defines matching conditions:
+
+```c
+typedef enum {
+    CLASS_MATCH_ANY,        /* match any (OR) */
+    CLASS_MATCH_ALL,        /* match all (AND) */
+} class_match_mode_t;
+
+typedef struct class_map {
+    char              name[64];
+    class_match_mode_t mode;
+    class_condition_t *conditions;
+} class_map_t;
+```
+
 ### Match Types
 
 | Type | Description |
@@ -40,7 +57,6 @@ Two advanced Shield components:
 | `MATCH_JAILBREAK` | Jailbreak detection |
 | `MATCH_PROMPT_INJECTION` | Injection detection |
 | `MATCH_ENTROPY_HIGH` | High entropy |
-| `MATCH_EXFILTRATION` | Data exfiltration |
 
 ---
 
@@ -88,18 +104,6 @@ action->log_enabled = true;
 service_policy_apply(&engine, "external", "SECURITY-POLICY", DIRECTION_INBOUND);
 ```
 
-### Evaluation
-
-```c
-policy_result_t result;
-policy_evaluate(&engine, "external", DIRECTION_INBOUND, 
-                data, data_len, &result);
-
-if (result.action == ACTION_BLOCK) {
-    printf("Blocked by policy: %s\n", result.matched_policy);
-}
-```
-
 ---
 
 ## 16.3 eBPF XDP Architecture
@@ -137,48 +141,40 @@ if (result.action == ACTION_BLOCK) {
                             └──────────────┘
 ```
 
-### BPF Maps
-
-```c
-/* Blocklist: IP -> blocked */
-struct {
-    __uint(type, BPF_MAP_TYPE_HASH);
-    __uint(max_entries, 10000);
-    __type(key, __u32);    /* IP address */
-    __type(value, __u8);   /* 1 = blocked */
-} blocklist SEC(".maps");
-
-/* Rate limiting per source IP */
-struct {
-    __uint(type, BPF_MAP_TYPE_LRU_HASH);
-    __uint(max_entries, 100000);
-    __type(key, __u32);
-    __type(value, struct rate_limit_state);
-} rate_limits SEC(".maps");
-```
-
 ---
 
 ## 16.4 XDP Program
+
+### Main Filter
 
 ```c
 SEC("xdp")
 int shield_xdp_filter(struct xdp_md *ctx)
 {
-    struct iphdr *ip = parse_ip(ctx);
+    void *data = (void *)(long)ctx->data;
+    void *data_end = (void *)(long)ctx->data_end;
+
+    struct ethhdr *eth = data;
+    if ((void*)(eth + 1) > data_end)
+        return XDP_PASS;
+
+    if (eth->h_proto != bpf_htons(ETH_P_IP))
+        return XDP_PASS;
+
+    struct iphdr *ip = (void*)(eth + 1);
     __u32 src_ip = ip->saddr;
-    
+
     /* Check blocklist */
     __u8 *blocked = bpf_map_lookup_elem(&blocklist, &src_ip);
     if (blocked && *blocked) {
-        return XDP_DROP;
+        return XDP_DROP;  /* Block! */
     }
-    
+
     /* Rate limiting */
     if (check_rate_limit(src_ip)) {
         return XDP_DROP;
     }
-    
+
     return XDP_PASS;
 }
 ```
@@ -187,6 +183,8 @@ int shield_xdp_filter(struct xdp_md *ctx)
 
 ## 16.5 Userspace Loader
 
+### Initialization
+
 ```c
 #include "ebpf/ebpf_loader.h"
 
@@ -194,14 +192,19 @@ ebpf_context_t ctx;
 ebpf_init(&ctx, "eth0");
 ebpf_load(&ctx, "/usr/lib/shield/shield_xdp.o");
 ebpf_attach(&ctx);
+```
 
+### Managing Blocklist
+
+```c
 // Block IP
 ebpf_block_ip(&ctx, inet_addr("192.168.1.100"));
 
-// Get stats
-ebpf_stats_t stats;
-ebpf_get_stats(&ctx, &stats);
-printf("Blocked: %lu packets\n", stats.packets_blocked);
+// Unblock
+ebpf_unblock_ip(&ctx, inet_addr("192.168.1.100"));
+
+// Whitelist port
+ebpf_whitelist_port(&ctx, 443);
 ```
 
 ---
@@ -224,7 +227,38 @@ Entropy Calculation                   0.15        0.25    6,666,666
 
 ---
 
-## Summary
+## Practice
+
+### Task 1: Policy Engine
+
+Create a policy:
+
+```
+class-map match-all CRITICAL-THREATS
+  match injection
+  match size greater-than 10000
+
+policy-map BLOCK-CRITICAL
+  class CRITICAL-THREATS
+    block
+    log
+    alert
+```
+
+### Task 2: eBPF
+
+Compile and load XDP program:
+
+```bash
+clang -O2 -target bpf -c shield_xdp.c -o shield_xdp.o
+./shield-ebpf load eth0 shield_xdp.o
+./shield-ebpf block 192.168.1.100
+./shield-ebpf stats
+```
+
+---
+
+## Module 16 Summary
 
 - **Policy Engine**: class-map, policy-map, service-policy
 - **eBPF XDP**: kernel-level filtering, < 1μs

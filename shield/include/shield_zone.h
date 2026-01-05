@@ -30,6 +30,7 @@ typedef struct shield_zone {
     uint32_t        timeout_ms;
     uint32_t        rate_limit;
     uint32_t        priority;
+    uint32_t        trust_level;    /* 0-100, higher = more trusted */
     
     struct shield_zone *next;
 } shield_zone_t;

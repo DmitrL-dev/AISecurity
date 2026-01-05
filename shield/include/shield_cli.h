@@ -7,60 +7,24 @@
 #ifndef SHIELD_CLI_H
 #define SHIELD_CLI_H
 
-#include "shield_common.h"
+#include "shield_context.h"
 
-/* Forward declarations */
-struct shield_context;
+/* CLI uses cli_context_t as alias for shield_context */
+typedef shield_context_t cli_context_t;
 
 /* Command handler function */
-typedef shield_err_t (*cli_handler_t)(struct shield_context *ctx, 
-                                       int argc, char **argv);
+typedef void (*cli_handler_t)(shield_context_t *ctx, 
+                               int argc, char **argv);
 
 /* CLI command definition */
 typedef struct cli_command {
     const char      *name;
-    const char      *help;
-    const char      *usage;
-    cli_mode_t      mode;           /* Which mode this command is available */
     cli_handler_t   handler;
-    struct cli_command *subcommands;
-    int             subcommand_count;
+    cli_mode_t      mode;           /* Which mode this command is available */
+    const char      *help;
 } cli_command_t;
 
-/* CLI state */
-typedef struct cli_state {
-    cli_mode_t      mode;
-    char            prompt[128];
-    char            hostname[64];
-    char            current_zone[SHIELD_MAX_NAME_LEN];
-    bool            enable_mode;
-    
-    /* History */
-    char            *history[SHIELD_MAX_HISTORY];
-    int             history_count;
-    int             history_pos;
-    
-    /* Output */
-    bool            pager_enabled;
-    int             terminal_width;
-    int             terminal_height;
-} cli_state_t;
-
-/* Shield context (global state) */
-typedef struct shield_context {
-    cli_state_t         cli;
-    struct zone_registry    *zones;
-    struct rule_engine      *rules;
-    struct guard_registry   *guards;
-    
-    /* Configuration */
-    char                config_file[256];
-    bool                modified;
-    
-    /* Runtime */
-    bool                running;
-    log_level_t         log_level;
-} shield_context_t;
+/* cli_state_t is defined in shield_context.h */
 
 /* CLI API */
 shield_err_t cli_init(shield_context_t *ctx);
@@ -76,14 +40,16 @@ void cli_print_separator(int width);
 
 /* Command execution */
 shield_err_t cli_execute(shield_context_t *ctx, const char *line);
+shield_err_t cli_execute_args(shield_context_t *ctx, int argc, char **argv);
 shield_err_t cli_execute_file(shield_context_t *ctx, const char *filename);
+shield_err_t cli_register_command(shield_context_t *ctx, const cli_command_t *cmd);
 
 /* Tab completion */
 char **cli_complete(shield_context_t *ctx, const char *text, int start, int end);
 
 /* History */
-void cli_add_history(cli_state_t *cli, const char *line);
-const char *cli_get_history(cli_state_t *cli, int offset);
+void cli_add_history(shield_context_t *ctx, const char *line);
+const char *cli_get_history(shield_context_t *ctx, int offset);
 
 /* REPL */
 void cli_repl(shield_context_t *ctx);

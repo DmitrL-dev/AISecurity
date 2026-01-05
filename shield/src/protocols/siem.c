@@ -10,6 +10,7 @@
 
 #include "shield_common.h"
 #include "shield_protocol.h"
+#include "shield_platform.h"
 
 /* SIEM Export Formats */
 typedef enum {
@@ -61,6 +62,9 @@ typedef struct {
     uint64_t        last_flush;
     uint64_t        events_sent;
 } siem_context_t;
+
+/* Forward declaration */
+shield_err_t siem_flush(siem_context_t *ctx);
 
 /* Format event as CEF */
 static int format_cef(const siem_event_t *event, char *buf, size_t size)
@@ -124,7 +128,7 @@ shield_err_t siem_send_event(siem_context_t *ctx, const siem_event_t *event)
     } else {
         /* Send immediately */
         if (ctx->socket >= 0) {
-            send(ctx->socket, buf, len, 0);
+            send(ctx->socket, (const char*)buf, len, 0);
             send(ctx->socket, "\n", 1, 0);
         }
     }
@@ -154,7 +158,7 @@ shield_err_t siem_flush(siem_context_t *ctx)
         }
         
         if (ctx->socket >= 0) {
-            send(ctx->socket, buf, len, 0);
+            send(ctx->socket, (const char*)buf, len, 0);
             send(ctx->socket, "\n", 1, 0);
         }
     }
@@ -189,7 +193,11 @@ void siem_destroy(siem_context_t *ctx)
     if (ctx) {
         siem_flush(ctx);
         if (ctx->socket >= 0) {
+#ifdef SHIELD_PLATFORM_WINDOWS
+            closesocket(ctx->socket);
+#else
             close(ctx->socket);
+#endif
         }
         free(ctx->batch_buffer);
     }

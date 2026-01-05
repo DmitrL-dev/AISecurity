@@ -16,6 +16,13 @@ typedef enum ha_role {
     HA_ROLE_STANDBY,
 } ha_role_t;
 
+/* HA mode */
+typedef enum ha_mode {
+    HA_MODE_STANDALONE,
+    HA_MODE_ACTIVE_STANDBY,
+    HA_MODE_ACTIVE_ACTIVE,
+} ha_mode_t;
+
 /* Node state */
 typedef enum ha_state {
     HA_STATE_UNKNOWN,
