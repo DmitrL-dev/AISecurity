@@ -155,7 +155,7 @@ shield_err_t stls_wrap_socket(stls_context_t *ctx, int socket, void **ssl_out)
     return SHIELD_OK;
 #else
     (void)ctx; (void)socket; (void)ssl_out;
-    return SHIELD_ERR_NOT_SUPPORTED;
+    return SHIELD_ERR_UNSUPPORTED;
 #endif
 }
 

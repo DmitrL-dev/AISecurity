@@ -11,13 +11,96 @@
 #include "shield_common.h"
 #include "shield_guard.h"
 
+/* ===== API Attack Pattern Database ===== */
+
+typedef enum api_attack_category {
+    API_CAT_SSRF,               /* Server-Side Request Forgery */
+    API_CAT_INJECTION,          /* Parameter injection */
+    API_CAT_AUTH_BYPASS,        /* Authentication bypass */
+    API_CAT_RATE_ABUSE,         /* Rate limiting abuse */
+    API_CAT_DATA_EXPOSURE,      /* Sensitive data exposure */
+} api_attack_category_t;
+
+typedef struct api_pattern {
+    const char          *pattern;
+    const char          *description;
+    api_attack_category_t category;
+    float               severity;
+} api_pattern_t;
+
+static const api_pattern_t api_attack_patterns[] = {
+    /* SSRF patterns */
+    {"127.0.0.1", "Localhost access", API_CAT_SSRF, 0.95f},
+    {"localhost", "Localhost name", API_CAT_SSRF, 0.95f},
+    {"0.0.0.0", "All interfaces", API_CAT_SSRF, 0.95f},
+    {"169.254.", "Link-local (AWS metadata)", API_CAT_SSRF, 0.99f},
+    {"10.", "Private network 10.x", API_CAT_SSRF, 0.90f},
+    {"172.16.", "Private network 172.16.x", API_CAT_SSRF, 0.90f},
+    {"192.168.", "Private network 192.168.x", API_CAT_SSRF, 0.90f},
+    {"::1", "IPv6 localhost", API_CAT_SSRF, 0.95f},
+    {"[::1]", "IPv6 localhost bracket", API_CAT_SSRF, 0.95f},
+    {"file://", "File protocol", API_CAT_SSRF, 0.95f},
+    {"gopher://", "Gopher protocol", API_CAT_SSRF, 0.99f},
+    {"dict://", "Dict protocol", API_CAT_SSRF, 0.95f},
+    {"ftp://", "FTP protocol", API_CAT_SSRF, 0.80f},
+    {"ldap://", "LDAP protocol", API_CAT_SSRF, 0.90f},
+    {"metadata.google", "GCP metadata", API_CAT_SSRF, 0.99f},
+    {"metadata.azure", "Azure metadata", API_CAT_SSRF, 0.99f},
+    
+    /* Injection patterns */
+    {"%00", "Null byte URL", API_CAT_INJECTION, 0.95f},
+    {"%0a", "Newline URL", API_CAT_INJECTION, 0.90f},
+    {"%0d", "Carriage return URL", API_CAT_INJECTION, 0.90f},
+    {"..%2f", "Path traversal encoded", API_CAT_INJECTION, 0.95f},
+    {"%2e%2e", "Double dot encoded", API_CAT_INJECTION, 0.95f},
+    {"\\x00", "Null byte escaped", API_CAT_INJECTION, 0.90f},
+    {"${", "Template injection", API_CAT_INJECTION, 0.90f},
+    {"{{", "Template injection 2", API_CAT_INJECTION, 0.85f},
+    {"<script", "XSS script tag", API_CAT_INJECTION, 0.95f},
+    {"javascript:", "JavaScript protocol", API_CAT_INJECTION, 0.95f},
+    
+    /* Auth bypass patterns */
+    {"api_key=", "API key in URL", API_CAT_AUTH_BYPASS, 0.75f},
+    {"token=", "Token in URL", API_CAT_AUTH_BYPASS, 0.75f},
+    {"password=", "Password in URL", API_CAT_AUTH_BYPASS, 0.90f},
+    {"secret=", "Secret in URL", API_CAT_AUTH_BYPASS, 0.85f},
+    {"admin=true", "Admin flag", API_CAT_AUTH_BYPASS, 0.95f},
+    {"role=admin", "Admin role", API_CAT_AUTH_BYPASS, 0.95f},
+    {"debug=1", "Debug mode", API_CAT_AUTH_BYPASS, 0.80f},
+    {"bypass=", "Bypass parameter", API_CAT_AUTH_BYPASS, 0.95f},
+    {"__proto__", "Prototype pollution", API_CAT_AUTH_BYPASS, 0.95f},
+    {"constructor[", "Prototype pollution 2", API_CAT_AUTH_BYPASS, 0.95f},
+};
+
+#define NUM_API_PATTERNS (sizeof(api_attack_patterns) / sizeof(api_attack_patterns[0]))
+
+/* Egress patterns */
+static const char *api_egress_patterns[] = {
+    "\"password\"",
+    "\"secret\"",
+    "\"private_key\"",
+    "\"api_key\"",
+    "\"access_token\"",
+    "\"refresh_token\"",
+    "stack trace",
+    "SQL error",
+    "at line",
+    "Exception in",
+    "TRACE:",
+    "DEBUG:",
+    "Internal Server Error",
+};
+
+#define NUM_API_EGRESS (sizeof(api_egress_patterns) / sizeof(api_egress_patterns[0]))
+
 /* API Guard state */
 typedef struct api_guard {
     guard_base_t    base;
     
     /* Configuration */
-    bool            check_url_injection;
     bool            check_ssrf;
+    bool            check_injection;
+    bool            check_auth_bypass;
     bool            check_credentials;
     char            *allowed_domains[64];
     int             allowed_domains_count;
@@ -25,36 +108,24 @@ typedef struct api_guard {
     /* Statistics */
     uint64_t        checks_performed;
     uint64_t        threats_detected;
+    uint64_t        ssrf_blocked;
+    uint64_t        injections_blocked;
 } api_guard_t;
-
-/* Dangerous URL patterns */
-static const char *dangerous_url_patterns[] = {
-    "127.0.0.1",
-    "localhost",
-    "0.0.0.0",
-    "169.254.",      /* Link-local */
-    "10.",           /* Private */
-    "172.16.",       /* Private */
-    "192.168.",      /* Private */
-    "::1",           /* IPv6 localhost */
-    "file://",
-    "gopher://",
-    "dict://",
-};
-
-#define NUM_DANGEROUS_URL (sizeof(dangerous_url_patterns) / sizeof(dangerous_url_patterns[0]))
 
 /* Initialize */
 static shield_err_t api_guard_init(void *guard)
 {
     api_guard_t *g = (api_guard_t *)guard;
     
-    g->check_url_injection = true;
     g->check_ssrf = true;
+    g->check_injection = true;
+    g->check_auth_bypass = true;
     g->check_credentials = true;
     g->allowed_domains_count = 0;
     g->checks_performed = 0;
     g->threats_detected = 0;
+    g->ssrf_blocked = 0;
+    g->injections_blocked = 0;
     
     return SHIELD_OK;
 }
@@ -88,42 +159,22 @@ static guard_result_t api_guard_check_ingress(void *guard, guard_context_t *ctx,
     
     const char *text = (const char *)data;
     
-    /* Check for SSRF patterns */
-    if (g->check_ssrf) {
-        for (size_t i = 0; i < NUM_DANGEROUS_URL; i++) {
-            if (strstr(text, dangerous_url_patterns[i])) {
-                result.action = ACTION_BLOCK;
-                result.confidence = 0.95f;
-                snprintf(result.reason, sizeof(result.reason),
-                        "Potential SSRF: %s", dangerous_url_patterns[i]);
-                g->threats_detected++;
-                return result;
-            }
-        }
-    }
-    
-    /* Check for credentials in URL */
-    if (g->check_credentials) {
-        if (strstr(text, "api_key=") || strstr(text, "token=") ||
-            strstr(text, "password=") || strstr(text, "secret=")) {
-            result.action = ACTION_QUARANTINE;
-            result.confidence = 0.8f;
-            strncpy(result.reason, "Credentials detected in API request",
-                    sizeof(result.reason) - 1);
+    /* Check all API attack patterns */
+    for (size_t i = 0; i < NUM_API_PATTERNS; i++) {
+        if (strstr(text, api_attack_patterns[i].pattern)) {
+            api_attack_category_t cat = api_attack_patterns[i].category;
+            float severity = api_attack_patterns[i].severity;
+            
+            result.action = (severity >= 0.90f) ? ACTION_BLOCK : ACTION_QUARANTINE;
+            result.confidence = severity;
+            snprintf(result.reason, sizeof(result.reason),
+                    "API attack: %s (category: %d)",
+                    api_attack_patterns[i].description, cat);
+            
             g->threats_detected++;
-            return result;
-        }
-    }
-    
-    /* URL injection patterns */
-    if (g->check_url_injection) {
-        if (strstr(text, "%00") || strstr(text, "..%2f") ||
-            strstr(text, "%2e%2e") || strstr(text, "\\x00")) {
-            result.action = ACTION_BLOCK;
-            result.confidence = 0.9f;
-            strncpy(result.reason, "URL injection pattern detected",
-                    sizeof(result.reason) - 1);
-            g->threats_detected++;
+            if (cat == API_CAT_SSRF) g->ssrf_blocked++;
+            if (cat == API_CAT_INJECTION) g->injections_blocked++;
+            
             return result;
         }
     }
@@ -150,25 +201,22 @@ static guard_result_t api_guard_check_egress(void *guard, guard_context_t *ctx,
     
     const char *text = (const char *)data;
     
-    /* Check for sensitive data in response */
-    if (strstr(text, "\"password\"") || strstr(text, "\"secret\"") ||
-        strstr(text, "\"private_key\"")) {
-        result.action = ACTION_QUARANTINE;
-        result.confidence = 0.85f;
-        strncpy(result.reason, "Sensitive data in API response",
-                sizeof(result.reason) - 1);
-        g->threats_detected++;
-        return result;
-    }
-    
-    /* Check for error messages that leak information */
-    if (strstr(text, "stack trace") || strstr(text, "SQL error") ||
-        strstr(text, "at line") || strstr(text, "Exception in")) {
-        result.action = ACTION_LOG;
-        result.confidence = 0.6f;
-        strncpy(result.reason, "Debug information in API response",
-                sizeof(result.reason) - 1);
-        return result;
+    /* Check egress patterns */
+    for (size_t i = 0; i < NUM_API_EGRESS; i++) {
+        if (strstr(text, api_egress_patterns[i])) {
+            /* First 6 patterns (secrets) are QUARANTINE, rest (debug) are LOG */
+            if (i < 6) {
+                result.action = ACTION_QUARANTINE;
+                result.confidence = 0.85f;
+                g->threats_detected++;
+            } else {
+                result.action = ACTION_LOG;
+                result.confidence = 0.6f;
+            }
+            snprintf(result.reason, sizeof(result.reason),
+                    "API response leak: %s", api_egress_patterns[i]);
+            return result;
+        }
     }
     
     return result;

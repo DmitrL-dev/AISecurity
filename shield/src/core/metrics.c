@@ -90,6 +90,18 @@ void metrics_add(metric_t *m, uint64_t value)
     }
 }
 
+/* Find metric by name and increment */
+void metrics_inc_by_name(metrics_registry_t *reg, const char *name, const char *labels)
+{
+    (void)labels;  /* TODO: support labels in future */
+    if (!reg || !name) return;
+    
+    metric_t *m = metrics_counter(reg, name, NULL);
+    if (m) {
+        m->value.counter++;
+    }
+}
+
 /* Gauge */
 metric_t *metrics_gauge(metrics_registry_t *reg, const char *name, const char *help)
 {

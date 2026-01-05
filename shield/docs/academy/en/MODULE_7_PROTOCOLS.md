@@ -8,10 +8,10 @@ _SSP Level | Duration: 5 hours_
 
 ## Introduction
 
-Shield uses 6 core protocols for enterprise features:
+Shield uses 6 specialized protocols for enterprise features:
 
 | Protocol | Purpose |
-| -------- | ------- |
+|----------|---------|
 | **STP** | Sentinel Transfer Protocol |
 | **SBP** | Shield-Brain Protocol |
 | **ZDP** | Zone Discovery Protocol |
@@ -54,9 +54,11 @@ Data transfer between Shield components with delivery guarantee.
 ```c
 #include "protocols/stp.h"
 
+// Create connection
 stp_conn_t *conn;
 stp_connect("192.168.1.2", 5001, &conn);
 
+// Send message
 stp_message_t msg = {
     .type = STP_MSG_EVALUATE,
     .payload = data,
@@ -64,11 +66,23 @@ stp_message_t msg = {
 };
 stp_send(conn, &msg);
 
+// Receive response
 stp_message_t response;
 stp_receive(conn, &response, 5000);  // 5s timeout
 
 stp_disconnect(conn);
 ```
+
+### Message Types
+
+| Type | Value | Description |
+|------|-------|-------------|
+| `STP_MSG_HANDSHAKE` | 0x01 | Initial handshake |
+| `STP_MSG_EVALUATE` | 0x02 | Evaluate request |
+| `STP_MSG_RESULT` | 0x03 | Evaluation result |
+| `STP_MSG_CONFIG` | 0x04 | Config update |
+| `STP_MSG_HEARTBEAT` | 0x05 | Keep-alive |
+| `STP_MSG_ACK` | 0x06 | Acknowledgement |
 
 ---
 
@@ -76,14 +90,23 @@ stp_disconnect(conn);
 
 ### Purpose
 
-Communication between Shield and Brain (analytics component).
+Connection between Shield and analytical component (Brain).
 
 Brain performs:
 - Semantic analysis
 - ML classification
 - Threat intelligence lookup
 
-### C API
+### Architecture
+
+```
+┌─────────────────┐         SBP          ┌─────────────────┐
+│     SHIELD      │◄───────────────────►│     BRAIN       │
+│   (Real-time)   │                      │   (Analysis)    │
+└─────────────────┘                      └─────────────────┘
+```
+
+### Usage
 
 ```c
 #include "protocols/sbp.h"
@@ -91,11 +114,15 @@ Brain performs:
 sbp_client_t *brain;
 sbp_connect(&brain, "brain.internal", 5002);
 
+// Semantic analysis
 sbp_semantic_result_t result;
 sbp_analyze_semantic(brain, input, &result);
 
 printf("Intent: %s (confidence: %.2f)\n",
        result.intent, result.confidence);
+
+// Async event reporting
+sbp_report_event_async(brain, &event);  // Non-blocking
 
 sbp_disconnect(brain);
 ```
@@ -108,24 +135,43 @@ sbp_disconnect(brain);
 
 Automatic zone discovery and configuration in cluster.
 
-### Use Cases
+### Protocol Flow
 
-- New node joins cluster
-- Dynamic zone creation
-- Zone migration between nodes
-- Zone health monitoring
+```
+1. New Node                    Cluster
+      │                           │
+      │──── ZDP_HELLO ───────────►│
+      │                           │
+      │◄─── ZDP_ZONE_LIST ────────│
+      │                           │
+      │──── ZDP_ZONE_CLAIM ──────►│  (request zone ownership)
+      │                           │
+      │◄─── ZDP_ZONE_GRANT ───────│
+      │                           │
+      │──── ZDP_ZONE_READY ──────►│
+      │                           │
+```
 
 ### C API
 
 ```c
 #include "protocols/zdp.h"
 
+// Start ZDP client
 zdp_client_t *zdp;
 zdp_init(&zdp, "node-3", "192.168.1.3");
 
+// Discover zones
 zone_list_t zones;
 zdp_discover_zones(zdp, &zones);
 
+for (int i = 0; i < zones.count; i++) {
+    printf("Zone: %s (owner: %s)\n",
+           zones.items[i].name,
+           zones.items[i].owner);
+}
+
+// Claim zone
 zdp_claim_zone(zdp, "external");
 
 zdp_destroy(zdp);
@@ -137,7 +183,7 @@ zdp_destroy(zdp);
 
 ### Purpose
 
-High Availability through Active-Standby failover.
+High Availability via Active-Standby failover.
 
 ### Features
 
@@ -147,6 +193,35 @@ High Availability through Active-Standby failover.
 - Failback support
 - Split-brain prevention
 
+### Configuration
+
+```json
+{
+  "ha": {
+    "enabled": true,
+    "protocol": "SHSP",
+    "mode": "active-standby",
+
+    "heartbeat": {
+      "interval_ms": 1000,
+      "timeout_ms": 3000,
+      "max_missed": 3
+    },
+
+    "failover": {
+      "delay_ms": 5000,
+      "auto_failback": true,
+      "failback_delay_ms": 30000
+    },
+
+    "split_brain": {
+      "prevention": "quorum",
+      "quorum_size": 2
+    }
+  }
+}
+```
+
 ### C API
 
 ```c
@@ -155,11 +230,14 @@ High Availability through Active-Standby failover.
 shsp_node_t *node;
 shsp_init(&node, "node-1", SHSP_ROLE_PRIMARY);
 
+// Register callbacks
 shsp_on_promoted(node, on_promoted_callback);
 shsp_on_demoted(node, on_demoted_callback);
 
+// Start protocol
 shsp_start(node);
 
+// Manual failover
 shsp_trigger_failover(node, "manual-maintenance");
 
 shsp_stop(node);
@@ -188,10 +266,14 @@ Streaming analytics data for monitoring.
 saf_publisher_t *pub;
 saf_publisher_init(&pub, "0.0.0.0", 5003);
 
+// Publish metric
 saf_metric_t metric = {
     .name = "requests_total",
     .type = SAF_METRIC_COUNTER,
-    .value = 1
+    .value = 1,
+    .labels = {"zone", "action"},
+    .values = {"external", "block"},
+    .label_count = 2
 };
 saf_publish(pub, &metric);
 
@@ -209,36 +291,65 @@ State replication between cluster nodes.
 ### What Gets Replicated
 
 | State | Description |
-| ----- | ----------- |
+|-------|-------------|
 | Sessions | Active session data |
 | Rate limits | Per-session counters |
 | Blocklists | Temporary blocks |
 | Context | Conversation history |
 | Metrics | Aggregated stats |
 
-### C API
+### Configuration
 
-```c
-#include "protocols/ssrp.h"
+```json
+{
+  "state_sync": {
+    "protocol": "SSRP",
+    "mode": "async",
 
-ssrp_node_t *node;
-ssrp_init(&node, "node-1");
+    "batch": {
+      "enabled": true,
+      "interval_ms": 100,
+      "max_items": 100
+    },
 
-ssrp_add_peer(node, "node-2", "192.168.1.2", 5004);
+    "compression": {
+      "enabled": true,
+      "algorithm": "lz4"
+    },
 
-ssrp_state_t state = {
-    .key = "session:abc123",
-    .value = session_data,
-    .value_len = sizeof(session_data)
-};
-ssrp_replicate(node, &state);
-
-ssrp_destroy(node);
+    "conflict_resolution": "last_write_wins"
+  }
+}
 ```
 
 ---
 
-## Summary
+## Practice
+
+### Task 1
+
+Configure SHSP for two nodes:
+- Heartbeat: 500ms
+- Failover after 3 missed
+- Auto-failback after 60 seconds
+
+### Task 2
+
+Write C code for SAF subscriber:
+- Connect to Shield
+- Receive metrics
+- Output in Prometheus format
+
+### Task 3
+
+Configure SSRP replication:
+- Async mode
+- Batch: 50ms, 50 items
+- LZ4 compression
+
+---
+
+## Module 7 Summary
 
 - 6 protocols for different tasks
 - Binary protocols for performance
@@ -252,7 +363,9 @@ ssrp_destroy(node);
 
 ## Next Module
 
-**Module 7B: Extended Protocols (14 more)**
+**Module 8: High Availability**
+
+Detailed HA cluster configuration.
 
 ---
 

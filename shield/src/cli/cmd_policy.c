@@ -14,7 +14,7 @@
 static void cmd_class_map_any(cli_context_t *ctx, int argc, char **argv)
 {
     if (argc < 3) {
-        cli_print(ctx, "%% Usage: class-map match-any <name>\n");
+        cli_print("%% Usage: class-map match-any <name>\n");
         return;
     }
     
@@ -22,7 +22,7 @@ static void cmd_class_map_any(cli_context_t *ctx, int argc, char **argv)
     shield_err_t err = class_map_create(ctx->policy_engine, argv[2], CLASS_MATCH_ANY, &cm);
     
     if (err == SHIELD_ERR_EXISTS) {
-        cli_print(ctx, "%% Class-map %s already exists\n", argv[2]);
+        cli_print("%% Class-map %s already exists\n", argv[2]);
     } else if (err == SHIELD_OK) {
         strncpy(ctx->current_class_map, argv[2], sizeof(ctx->current_class_map) - 1);
         cli_set_mode(ctx, CLI_MODE_CLASS_MAP);
@@ -34,7 +34,7 @@ static void cmd_class_map_any(cli_context_t *ctx, int argc, char **argv)
 static void cmd_class_map_all(cli_context_t *ctx, int argc, char **argv)
 {
     if (argc < 3) {
-        cli_print(ctx, "%% Usage: class-map match-all <name>\n");
+        cli_print("%% Usage: class-map match-all <name>\n");
         return;
     }
     
@@ -52,12 +52,12 @@ static void cmd_class_map_all(cli_context_t *ctx, int argc, char **argv)
 static void cmd_no_class_map(cli_context_t *ctx, int argc, char **argv)
 {
     if (argc < 3) {
-        cli_print(ctx, "%% Usage: no class-map <name>\n");
+        cli_print("%% Usage: no class-map <name>\n");
         return;
     }
     
     class_map_delete(ctx->policy_engine, argv[2]);
-    cli_print(ctx, "Class-map %s deleted\n", argv[2]);
+    cli_print("Class-map %s deleted\n", argv[2]);
     ctx->modified = true;
 }
 
@@ -68,7 +68,7 @@ static void cmd_match_injection(cli_context_t *ctx, int argc, char **argv)
     class_map_t *cm = class_map_find(ctx->policy_engine, ctx->current_class_map);
     if (cm) {
         class_map_add_match(cm, MATCH_PROMPT_INJECTION, "", false);
-        cli_print(ctx, "Match injection added\n");
+        cli_print("Match injection added\n");
         ctx->modified = true;
     }
 }
@@ -80,7 +80,7 @@ static void cmd_match_jailbreak(cli_context_t *ctx, int argc, char **argv)
     class_map_t *cm = class_map_find(ctx->policy_engine, ctx->current_class_map);
     if (cm) {
         class_map_add_match(cm, MATCH_JAILBREAK, "", false);
-        cli_print(ctx, "Match jailbreak added\n");
+        cli_print("Match jailbreak added\n");
         ctx->modified = true;
     }
 }
@@ -91,8 +91,8 @@ static void cmd_match_exfiltration(cli_context_t *ctx, int argc, char **argv)
     (void)argc; (void)argv;
     class_map_t *cm = class_map_find(ctx->policy_engine, ctx->current_class_map);
     if (cm) {
-        class_map_add_match(cm, MATCH_EXFILTRATION, "", false);
-        cli_print(ctx, "Match exfiltration added\n");
+        class_map_add_match(cm, MATCH_DATA_EXFIL, "", false);
+        cli_print("Match exfiltration added\n");
         ctx->modified = true;
     }
 }
@@ -101,13 +101,13 @@ static void cmd_match_exfiltration(cli_context_t *ctx, int argc, char **argv)
 static void cmd_match_pattern(cli_context_t *ctx, int argc, char **argv)
 {
     if (argc < 3) {
-        cli_print(ctx, "%% Usage: match pattern <regex>\n");
+        cli_print("%% Usage: match pattern <regex>\n");
         return;
     }
     class_map_t *cm = class_map_find(ctx->policy_engine, ctx->current_class_map);
     if (cm) {
         class_map_add_match(cm, MATCH_PATTERN, argv[2], false);
-        cli_print(ctx, "Match pattern added\n");
+        cli_print("Match pattern added\n");
         ctx->modified = true;
     }
 }
@@ -116,13 +116,13 @@ static void cmd_match_pattern(cli_context_t *ctx, int argc, char **argv)
 static void cmd_match_contains(cli_context_t *ctx, int argc, char **argv)
 {
     if (argc < 3) {
-        cli_print(ctx, "%% Usage: match contains <string>\n");
+        cli_print("%% Usage: match contains <string>\n");
         return;
     }
     class_map_t *cm = class_map_find(ctx->policy_engine, ctx->current_class_map);
     if (cm) {
         class_map_add_match(cm, MATCH_CONTAINS, argv[2], false);
-        cli_print(ctx, "Match contains added\n");
+        cli_print("Match contains added\n");
         ctx->modified = true;
     }
 }
@@ -131,13 +131,13 @@ static void cmd_match_contains(cli_context_t *ctx, int argc, char **argv)
 static void cmd_match_size_gt(cli_context_t *ctx, int argc, char **argv)
 {
     if (argc < 4) {
-        cli_print(ctx, "%% Usage: match size greater-than <bytes>\n");
+        cli_print("%% Usage: match size greater-than <bytes>\n");
         return;
     }
     class_map_t *cm = class_map_find(ctx->policy_engine, ctx->current_class_map);
     if (cm) {
         class_map_add_match(cm, MATCH_SIZE_GT, argv[3], false);
-        cli_print(ctx, "Match size > %s added\n", argv[3]);
+        cli_print("Match size > %s added\n", argv[3]);
         ctx->modified = true;
     }
 }
@@ -149,7 +149,7 @@ static void cmd_match_entropy(cli_context_t *ctx, int argc, char **argv)
     class_map_t *cm = class_map_find(ctx->policy_engine, ctx->current_class_map);
     if (cm) {
         class_map_add_match(cm, MATCH_ENTROPY_HIGH, "", false);
-        cli_print(ctx, "Match high entropy added\n");
+        cli_print("Match high entropy added\n");
         ctx->modified = true;
     }
 }
@@ -158,7 +158,7 @@ static void cmd_match_entropy(cli_context_t *ctx, int argc, char **argv)
 static void cmd_policy_map(cli_context_t *ctx, int argc, char **argv)
 {
     if (argc < 2) {
-        cli_print(ctx, "%% Usage: policy-map <name>\n");
+        cli_print("%% Usage: policy-map <name>\n");
         return;
     }
     
@@ -174,12 +174,12 @@ static void cmd_policy_map(cli_context_t *ctx, int argc, char **argv)
 static void cmd_no_policy_map(cli_context_t *ctx, int argc, char **argv)
 {
     if (argc < 3) {
-        cli_print(ctx, "%% Usage: no policy-map <name>\n");
+        cli_print("%% Usage: no policy-map <name>\n");
         return;
     }
     
     policy_map_delete(ctx->policy_engine, argv[2]);
-    cli_print(ctx, "Policy-map %s deleted\n", argv[2]);
+    cli_print("Policy-map %s deleted\n", argv[2]);
     ctx->modified = true;
 }
 
@@ -187,7 +187,7 @@ static void cmd_no_policy_map(cli_context_t *ctx, int argc, char **argv)
 static void cmd_pm_class(cli_context_t *ctx, int argc, char **argv)
 {
     if (argc < 2) {
-        cli_print(ctx, "%% Usage: class <class-name>\n");
+        cli_print("%% Usage: class <class-name>\n");
         return;
     }
     
@@ -196,7 +196,7 @@ static void cmd_pm_class(cli_context_t *ctx, int argc, char **argv)
         policy_class_t *pc = NULL;
         policy_map_add_class(pm, argv[1], &pc);
         strncpy(ctx->current_policy_class, argv[1], sizeof(ctx->current_policy_class) - 1);
-        cli_print(ctx, "Class %s added to policy\n", argv[1]);
+        cli_print("Class %s added to policy\n", argv[1]);
         ctx->modified = true;
     }
 }
@@ -210,7 +210,7 @@ static void cmd_action_block(cli_context_t *ctx, int argc, char **argv)
         policy_class_t *pc = policy_class_find(pm, ctx->current_policy_class);
         if (pc) {
             policy_class_add_action(pc, ACTION_BLOCK, NULL);
-            cli_print(ctx, "Action: block\n");
+            cli_print("Action: block\n");
             ctx->modified = true;
         }
     }
@@ -227,7 +227,7 @@ static void cmd_action_log(cli_context_t *ctx, int argc, char **argv)
             policy_action_t *pa = NULL;
             policy_class_add_action(pc, ACTION_LOG, &pa);
             if (pa) pa->log_enabled = true;
-            cli_print(ctx, "Action: log\n");
+            cli_print("Action: log\n");
             ctx->modified = true;
         }
     }
@@ -242,7 +242,7 @@ static void cmd_action_alert(cli_context_t *ctx, int argc, char **argv)
         policy_class_t *pc = policy_class_find(pm, ctx->current_policy_class);
         if (pc) {
             policy_class_add_action(pc, ACTION_ALERT, NULL);
-            cli_print(ctx, "Action: alert\n");
+            cli_print("Action: alert\n");
             ctx->modified = true;
         }
     }
@@ -252,7 +252,7 @@ static void cmd_action_alert(cli_context_t *ctx, int argc, char **argv)
 static void cmd_action_rate_limit(cli_context_t *ctx, int argc, char **argv)
 {
     if (argc < 2) {
-        cli_print(ctx, "%% Usage: rate-limit <pps>\n");
+        cli_print("%% Usage: rate-limit <pps>\n");
         return;
     }
     policy_map_t *pm = policy_map_find(ctx->policy_engine, ctx->current_policy_map);
@@ -262,7 +262,7 @@ static void cmd_action_rate_limit(cli_context_t *ctx, int argc, char **argv)
             policy_action_t *pa = NULL;
             policy_class_add_action(pc, ACTION_RATE_LIMIT, &pa);
             if (pa) pa->rate_limit = atoi(argv[1]);
-            cli_print(ctx, "Action: rate-limit %s\n", argv[1]);
+            cli_print("Action: rate-limit %s\n", argv[1]);
             ctx->modified = true;
         }
     }
@@ -272,12 +272,12 @@ static void cmd_action_rate_limit(cli_context_t *ctx, int argc, char **argv)
 static void cmd_service_policy_input(cli_context_t *ctx, int argc, char **argv)
 {
     if (argc < 3) {
-        cli_print(ctx, "%% Usage: service-policy input <policy-name>\n");
+        cli_print("%% Usage: service-policy input <policy-name>\n");
         return;
     }
     
-    service_policy_apply(ctx->policy_engine, ctx->current_zone, argv[2], DIRECTION_INBOUND);
-    cli_print(ctx, "Service policy %s applied (input)\n", argv[2]);
+    service_policy_apply(ctx->policy_engine, ctx->current_zone, argv[2], DIRECTION_INPUT);
+    cli_print("Service policy %s applied (input)\n", argv[2]);
     ctx->modified = true;
 }
 
@@ -285,12 +285,12 @@ static void cmd_service_policy_input(cli_context_t *ctx, int argc, char **argv)
 static void cmd_service_policy_output(cli_context_t *ctx, int argc, char **argv)
 {
     if (argc < 3) {
-        cli_print(ctx, "%% Usage: service-policy output <policy-name>\n");
+        cli_print("%% Usage: service-policy output <policy-name>\n");
         return;
     }
     
-    service_policy_apply(ctx->policy_engine, ctx->current_zone, argv[2], DIRECTION_OUTBOUND);
-    cli_print(ctx, "Service policy %s applied (output)\n", argv[2]);
+    service_policy_apply(ctx->policy_engine, ctx->current_zone, argv[2], DIRECTION_OUTPUT);
+    cli_print("Service policy %s applied (output)\n", argv[2]);
     ctx->modified = true;
 }
 

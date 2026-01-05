@@ -11,11 +11,22 @@
 #include "shield_common.h"
 #include "shield_cli.h"
 
+/* Local helper for log level parsing */
+static log_level_t log_level_from_string(const char *str)
+{
+    if (!str) return LOG_INFO;
+    if (strcasecmp(str, "debug") == 0 || strcasecmp(str, "trace") == 0) return LOG_DEBUG;
+    if (strcasecmp(str, "info") == 0) return LOG_INFO;
+    if (strcasecmp(str, "warn") == 0 || strcasecmp(str, "warning") == 0) return LOG_WARN;
+    if (strcasecmp(str, "error") == 0) return LOG_ERROR;
+    return LOG_INFO;
+}
+
 /* hostname */
 static void cmd_hostname(cli_context_t *ctx, int argc, char **argv)
 {
     if (argc < 2) {
-        cli_print(ctx, "Current hostname: %s\n", ctx->hostname);
+        cli_print("Current hostname: %s\n", ctx->hostname);
         return;
     }
     strncpy(ctx->hostname, argv[1], sizeof(ctx->hostname) - 1);
@@ -36,24 +47,22 @@ static void cmd_no_hostname(cli_context_t *ctx, int argc, char **argv)
 static void cmd_enable_secret(cli_context_t *ctx, int argc, char **argv)
 {
     if (argc < 2) {
-        cli_print(ctx, "%% Usage: enable secret <password>\n");
+        cli_print("%% Usage: enable secret <password>\n");
         return;
     }
-    /* Hash and store password */
     strncpy(ctx->enable_secret, argv[1], sizeof(ctx->enable_secret) - 1);
     ctx->modified = true;
-    cli_print(ctx, "Enable secret configured\n");
+    cli_print("Enable secret configured\n");
 }
 
 /* username */
 static void cmd_username(cli_context_t *ctx, int argc, char **argv)
 {
     if (argc < 4) {
-        cli_print(ctx, "%% Usage: username <name> password <password>\n");
+        cli_print("%% Usage: username <name> password <password>\n");
         return;
     }
-    /* Store username/password */
-    cli_print(ctx, "User %s configured\n", argv[1]);
+    cli_print("User %s configured\n", argv[1]);
     ctx->modified = true;
 }
 
@@ -61,11 +70,11 @@ static void cmd_username(cli_context_t *ctx, int argc, char **argv)
 static void cmd_logging_level(cli_context_t *ctx, int argc, char **argv)
 {
     if (argc < 3) {
-        cli_print(ctx, "%% Usage: logging level <debug|info|warn|error>\n");
+        cli_print("%% Usage: logging level <debug|info|warn|error>\n");
         return;
     }
     ctx->log_level = log_level_from_string(argv[2]);
-    cli_print(ctx, "Logging level set to %s\n", argv[2]);
+    cli_print("Logging level set to %s\n", argv[2]);
     ctx->modified = true;
 }
 
@@ -73,8 +82,8 @@ static void cmd_logging_level(cli_context_t *ctx, int argc, char **argv)
 static void cmd_logging_console(cli_context_t *ctx, int argc, char **argv)
 {
     (void)argc; (void)argv;
-    ctx->log_console = true;
-    cli_print(ctx, "Console logging enabled\n");
+    ctx->logging_console = true;
+    cli_print("Console logging enabled\n");
     ctx->modified = true;
 }
 
@@ -82,8 +91,8 @@ static void cmd_logging_console(cli_context_t *ctx, int argc, char **argv)
 static void cmd_no_logging_console(cli_context_t *ctx, int argc, char **argv)
 {
     (void)argc; (void)argv;
-    ctx->log_console = false;
-    cli_print(ctx, "Console logging disabled\n");
+    ctx->logging_console = false;
+    cli_print("Console logging disabled\n");
     ctx->modified = true;
 }
 
@@ -94,8 +103,8 @@ static void cmd_logging_buffered(cli_context_t *ctx, int argc, char **argv)
     if (argc >= 3) {
         size = atoi(argv[2]);
     }
-    ctx->log_buffer_size = size;
-    cli_print(ctx, "Logging buffer size set to %d\n", size);
+    ctx->logging_buffered_size = size;
+    cli_print("Logging buffer size set to %d\n", size);
     ctx->modified = true;
 }
 
@@ -103,11 +112,11 @@ static void cmd_logging_buffered(cli_context_t *ctx, int argc, char **argv)
 static void cmd_logging_host(cli_context_t *ctx, int argc, char **argv)
 {
     if (argc < 3) {
-        cli_print(ctx, "%% Usage: logging host <ip-address>\n");
+        cli_print("%% Usage: logging host <ip-address>\n");
         return;
     }
-    strncpy(ctx->syslog_host, argv[2], sizeof(ctx->syslog_host) - 1);
-    cli_print(ctx, "Syslog host set to %s\n", argv[2]);
+    strncpy(ctx->logging_host, argv[2], sizeof(ctx->logging_host) - 1);
+    cli_print("Syslog host set to %s\n", argv[2]);
     ctx->modified = true;
 }
 
@@ -115,11 +124,11 @@ static void cmd_logging_host(cli_context_t *ctx, int argc, char **argv)
 static void cmd_ntp_server(cli_context_t *ctx, int argc, char **argv)
 {
     if (argc < 3) {
-        cli_print(ctx, "%% Usage: ntp server <ip-address>\n");
+        cli_print("%% Usage: ntp server <ip-address>\n");
         return;
     }
     strncpy(ctx->ntp_server, argv[2], sizeof(ctx->ntp_server) - 1);
-    cli_print(ctx, "NTP server set to %s\n", argv[2]);
+    cli_print("NTP server set to %s\n", argv[2]);
     ctx->modified = true;
 }
 
@@ -127,11 +136,11 @@ static void cmd_ntp_server(cli_context_t *ctx, int argc, char **argv)
 static void cmd_clock_timezone(cli_context_t *ctx, int argc, char **argv)
 {
     if (argc < 3) {
-        cli_print(ctx, "%% Usage: clock timezone <zone>\n");
+        cli_print("%% Usage: clock timezone <zone>\n");
         return;
     }
     strncpy(ctx->timezone, argv[2], sizeof(ctx->timezone) - 1);
-    cli_print(ctx, "Timezone set to %s\n", argv[2]);
+    cli_print("Timezone set to %s\n", argv[2]);
     ctx->modified = true;
 }
 
@@ -139,12 +148,11 @@ static void cmd_clock_timezone(cli_context_t *ctx, int argc, char **argv)
 static void cmd_banner_motd(cli_context_t *ctx, int argc, char **argv)
 {
     if (argc < 3) {
-        cli_print(ctx, "%% Usage: banner motd <delimiter> <text> <delimiter>\n");
+        cli_print("%% Usage: banner motd <delimiter> <text> <delimiter>\n");
         return;
     }
-    /* Simple: just use everything after "banner motd " */
     strncpy(ctx->banner_motd, argv[2], sizeof(ctx->banner_motd) - 1);
-    cli_print(ctx, "MOTD banner configured\n");
+    cli_print("MOTD banner configured\n");
     ctx->modified = true;
 }
 
@@ -152,8 +160,8 @@ static void cmd_banner_motd(cli_context_t *ctx, int argc, char **argv)
 static void cmd_service_password_enc(cli_context_t *ctx, int argc, char **argv)
 {
     (void)argc; (void)argv;
-    ctx->password_encryption = true;
-    cli_print(ctx, "Password encryption enabled\n");
+    ctx->service_password_encryption = true;
+    cli_print("Password encryption enabled\n");
     ctx->modified = true;
 }
 
@@ -161,12 +169,12 @@ static void cmd_service_password_enc(cli_context_t *ctx, int argc, char **argv)
 static void cmd_snmp_community(cli_context_t *ctx, int argc, char **argv)
 {
     if (argc < 4) {
-        cli_print(ctx, "%% Usage: snmp-server community <string> <ro|rw>\n");
+        cli_print("%% Usage: snmp-server community <string> <ro|rw>\n");
         return;
     }
     strncpy(ctx->snmp_community, argv[2], sizeof(ctx->snmp_community) - 1);
     ctx->snmp_readonly = (strcmp(argv[3], "ro") == 0);
-    cli_print(ctx, "SNMP community configured\n");
+    cli_print("SNMP community configured\n");
     ctx->modified = true;
 }
 
@@ -174,11 +182,11 @@ static void cmd_snmp_community(cli_context_t *ctx, int argc, char **argv)
 static void cmd_snmp_host(cli_context_t *ctx, int argc, char **argv)
 {
     if (argc < 3) {
-        cli_print(ctx, "%% Usage: snmp-server host <ip-address>\n");
+        cli_print("%% Usage: snmp-server host <ip-address>\n");
         return;
     }
     strncpy(ctx->snmp_host, argv[2], sizeof(ctx->snmp_host) - 1);
-    cli_print(ctx, "SNMP host configured\n");
+    cli_print("SNMP host configured\n");
     ctx->modified = true;
 }
 
@@ -186,11 +194,11 @@ static void cmd_snmp_host(cli_context_t *ctx, int argc, char **argv)
 static void cmd_aaa_authentication(cli_context_t *ctx, int argc, char **argv)
 {
     if (argc < 4) {
-        cli_print(ctx, "%% Usage: aaa authentication login <name> <method>\n");
+        cli_print("%% Usage: aaa authentication login <name> <method>\n");
         return;
     }
     strncpy(ctx->aaa_method, argv[3], sizeof(ctx->aaa_method) - 1);
-    cli_print(ctx, "AAA authentication configured\n");
+    cli_print("AAA authentication configured\n");
     ctx->modified = true;
 }
 
@@ -198,11 +206,11 @@ static void cmd_aaa_authentication(cli_context_t *ctx, int argc, char **argv)
 static void cmd_ip_domain(cli_context_t *ctx, int argc, char **argv)
 {
     if (argc < 3) {
-        cli_print(ctx, "%% Usage: ip domain-name <domain>\n");
+        cli_print("%% Usage: ip domain-name <domain>\n");
         return;
     }
     strncpy(ctx->domain_name, argv[2], sizeof(ctx->domain_name) - 1);
-    cli_print(ctx, "Domain name set to %s\n", argv[2]);
+    cli_print("Domain name set to %s\n", argv[2]);
     ctx->modified = true;
 }
 
@@ -210,11 +218,11 @@ static void cmd_ip_domain(cli_context_t *ctx, int argc, char **argv)
 static void cmd_ip_nameserver(cli_context_t *ctx, int argc, char **argv)
 {
     if (argc < 3) {
-        cli_print(ctx, "%% Usage: ip name-server <ip-address>\n");
+        cli_print("%% Usage: ip name-server <ip-address>\n");
         return;
     }
     strncpy(ctx->dns_server, argv[2], sizeof(ctx->dns_server) - 1);
-    cli_print(ctx, "DNS server set to %s\n", argv[2]);
+    cli_print("DNS server set to %s\n", argv[2]);
     ctx->modified = true;
 }
 
@@ -223,7 +231,7 @@ static void cmd_api_enable(cli_context_t *ctx, int argc, char **argv)
 {
     (void)argc; (void)argv;
     ctx->api_enabled = true;
-    cli_print(ctx, "API enabled on port %d\n", ctx->api_port);
+    cli_print("API enabled on port %d\n", ctx->api_port);
     ctx->modified = true;
 }
 
@@ -232,7 +240,7 @@ static void cmd_no_api_enable(cli_context_t *ctx, int argc, char **argv)
 {
     (void)argc; (void)argv;
     ctx->api_enabled = false;
-    cli_print(ctx, "API disabled\n");
+    cli_print("API disabled\n");
     ctx->modified = true;
 }
 
@@ -240,11 +248,11 @@ static void cmd_no_api_enable(cli_context_t *ctx, int argc, char **argv)
 static void cmd_api_port(cli_context_t *ctx, int argc, char **argv)
 {
     if (argc < 3) {
-        cli_print(ctx, "API port: %d\n", ctx->api_port);
+        cli_print("API port: %d\n", ctx->api_port);
         return;
     }
     ctx->api_port = atoi(argv[2]);
-    cli_print(ctx, "API port set to %d\n", ctx->api_port);
+    cli_print("API port set to %d\n", ctx->api_port);
     ctx->modified = true;
 }
 
@@ -252,11 +260,11 @@ static void cmd_api_port(cli_context_t *ctx, int argc, char **argv)
 static void cmd_api_token(cli_context_t *ctx, int argc, char **argv)
 {
     if (argc < 3) {
-        cli_print(ctx, "%% Usage: api token <token>\n");
+        cli_print("%% Usage: api token <token>\n");
         return;
     }
     strncpy(ctx->api_token, argv[2], sizeof(ctx->api_token) - 1);
-    cli_print(ctx, "API token configured\n");
+    cli_print("API token configured\n");
     ctx->modified = true;
 }
 
@@ -265,7 +273,7 @@ static void cmd_metrics_enable(cli_context_t *ctx, int argc, char **argv)
 {
     (void)argc; (void)argv;
     ctx->metrics_enabled = true;
-    cli_print(ctx, "Metrics enabled on port %d\n", ctx->metrics_port);
+    cli_print("Metrics enabled on port %d\n", ctx->metrics_port);
     ctx->modified = true;
 }
 
@@ -273,11 +281,11 @@ static void cmd_metrics_enable(cli_context_t *ctx, int argc, char **argv)
 static void cmd_metrics_port(cli_context_t *ctx, int argc, char **argv)
 {
     if (argc < 3) {
-        cli_print(ctx, "Metrics port: %d\n", ctx->metrics_port);
+        cli_print("Metrics port: %d\n", ctx->metrics_port);
         return;
     }
     ctx->metrics_port = atoi(argv[2]);
-    cli_print(ctx, "Metrics port set to %d\n", ctx->metrics_port);
+    cli_print("Metrics port set to %d\n", ctx->metrics_port);
     ctx->modified = true;
 }
 
@@ -285,11 +293,11 @@ static void cmd_metrics_port(cli_context_t *ctx, int argc, char **argv)
 static void cmd_archive_path(cli_context_t *ctx, int argc, char **argv)
 {
     if (argc < 3) {
-        cli_print(ctx, "Archive path: %s\n", ctx->archive_path);
+        cli_print("Archive path: %s\n", ctx->archive_path);
         return;
     }
     strncpy(ctx->archive_path, argv[2], sizeof(ctx->archive_path) - 1);
-    cli_print(ctx, "Archive path set to %s\n", argv[2]);
+    cli_print("Archive path set to %s\n", argv[2]);
     ctx->modified = true;
 }
 
@@ -297,31 +305,24 @@ static void cmd_archive_path(cli_context_t *ctx, int argc, char **argv)
 static void cmd_archive_maximum(cli_context_t *ctx, int argc, char **argv)
 {
     if (argc < 3) {
-        cli_print(ctx, "Archive maximum: %d\n", ctx->archive_max);
+        cli_print("Archive maximum: %d\n", ctx->archive_max);
         return;
     }
     ctx->archive_max = atoi(argv[2]);
-    cli_print(ctx, "Archive maximum set to %d\n", ctx->archive_max);
+    cli_print("Archive maximum set to %d\n", ctx->archive_max);
     ctx->modified = true;
 }
 
-/* end */
-static void cmd_end(cli_context_t *ctx, int argc, char **argv)
-{
-    (void)argc; (void)argv;
-    ctx->current_zone[0] = '\0';
-    cli_set_mode(ctx, CLI_MODE_EXEC);
-}
+/* Note: cmd_end is implemented in commands.c */
 
 /* do */
 static void cmd_do(cli_context_t *ctx, int argc, char **argv)
 {
     if (argc < 2) {
-        cli_print(ctx, "%% Usage: do <exec-command>\n");
+        cli_print("%% Usage: do <exec-command>\n");
         return;
     }
-    /* Execute command in exec mode */
-    cli_execute(ctx, argc - 1, argv + 1);
+    cli_execute_args(ctx, argc - 1, argv + 1);
 }
 
 /* Config command table */
@@ -352,7 +353,7 @@ static cli_command_t config_commands[] = {
     {"metrics port", cmd_metrics_port, CLI_MODE_CONFIG, "Set metrics port"},
     {"archive path", cmd_archive_path, CLI_MODE_CONFIG, "Set archive path"},
     {"archive maximum", cmd_archive_maximum, CLI_MODE_CONFIG, "Set archive max"},
-    {"end", cmd_end, CLI_MODE_CONFIG, "Exit to exec mode"},
+    /* Note: cmd_end is handled in commands.c with correct return type */
     {"do", cmd_do, CLI_MODE_CONFIG, "Run exec command"},
     {NULL, NULL, 0, NULL}
 };

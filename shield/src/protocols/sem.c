@@ -10,6 +10,7 @@
 
 #include "shield_common.h"
 #include "shield_protocol.h"
+#include "shield_platform.h"
 
 /* SEM Message Types */
 typedef enum {
@@ -69,8 +70,8 @@ shield_err_t sem_send_event(sem_context_t *ctx, const sem_event_t *event)
     
     uint8_t type = SEM_MSG_EVENT;
     if (ctx->socket >= 0) {
-        send(ctx->socket, &type, 1, 0);
-        send(ctx->socket, event, sizeof(*event), 0);
+        send(ctx->socket, (const char*)&type, 1, 0);
+        send(ctx->socket, (const char*)event, sizeof(*event), 0);
     }
     
     ctx->event_count++;
@@ -93,8 +94,8 @@ shield_err_t sem_send_batch(sem_context_t *ctx, const sem_event_t *events, size_
     };
     
     if (ctx->socket >= 0) {
-        send(ctx->socket, &header, sizeof(header), 0);
-        send(ctx->socket, events, sizeof(sem_event_t) * count, 0);
+        send(ctx->socket, (const char*)&header, sizeof(header), 0);
+        send(ctx->socket, (const char*)events, sizeof(sem_event_t) * count, 0);
     }
     
     ctx->event_count += count;
@@ -124,7 +125,7 @@ shield_err_t sem_query(sem_context_t *ctx, const char *filter,
     }
     
     if (ctx->socket >= 0) {
-        send(ctx->socket, &query, sizeof(query), 0);
+        send(ctx->socket, (const char*)&query, sizeof(query), 0);
     }
     
     return SHIELD_OK;
@@ -139,8 +140,8 @@ shield_err_t sem_add_correlation(sem_context_t *ctx, const sem_correlation_rule_
     
     uint8_t type = SEM_MSG_CORRELATION;
     if (ctx->socket >= 0) {
-        send(ctx->socket, &type, 1, 0);
-        send(ctx->socket, rule, sizeof(*rule), 0);
+        send(ctx->socket, (const char*)&type, 1, 0);
+        send(ctx->socket, (const char*)rule, sizeof(*rule), 0);
     }
     
     return SHIELD_OK;

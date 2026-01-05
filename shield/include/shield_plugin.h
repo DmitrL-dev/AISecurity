@@ -46,7 +46,7 @@ typedef struct loaded_plugin {
     char                name[64];
     char                path[256];
     void                *handle;        /* dlopen handle */
-    plugin_interface_t  interface;
+    plugin_interface_t  iface;
     plugin_info_t       info;
     bool                initialized;
     struct loaded_plugin *next;

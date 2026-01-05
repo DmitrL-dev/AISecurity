@@ -23,15 +23,37 @@
 #include "shield_alert.h"
 #include "shield_pattern.h"
 
+/* CLI state (used by CLI subsystem) */
+typedef struct cli_state {
+    cli_mode_t      mode;
+    char            prompt[128];
+    char            hostname[64];
+    char            current_zone[SHIELD_MAX_NAME_LEN];
+    bool            enable_mode;
+    
+    /* History */
+    char            *history[SHIELD_MAX_HISTORY];
+    int             history_count;
+    int             history_pos;
+    
+    /* Output */
+    bool            pager_enabled;
+    int             terminal_width;
+    int             terminal_height;
+} cli_state_t;
+
 /* Shield main context */
 typedef struct shield_context {
+    /* CLI */
+    cli_state_t         cli;
+    
     /* Core components */
     zone_registry_t     *zones;
-    rule_registry_t     *rules;
+    rule_engine_t       *rules;
     guard_registry_t    *guards;
     
     /* Security */
-    rate_limiter_t      *rate_limiter;
+    ratelimiter_t       *rate_limiter;
     blocklist_t         *blocklist;
     session_manager_t   *sessions;
     canary_manager_t    *canaries;
@@ -52,9 +74,10 @@ typedef struct shield_context {
     /* Config */
     char                hostname[64];
     char                config_file[256];
-    bool                enable_api;
+    bool                api_enabled;
     uint16_t            api_port;
-    bool                enable_metrics;
+    char                api_token[128];
+    bool                metrics_enabled;
     uint16_t            metrics_port;
     
     /* State */
@@ -66,6 +89,112 @@ typedef struct shield_context {
     uint64_t            total_requests;
     uint64_t            blocked_requests;
     uint64_t            allowed_requests;
+    
+    /* System stats (for show commands) */
+    uint64_t            uptime_seconds;
+    uint64_t            memory_total;
+    uint64_t            memory_used;
+    float               cpu_1min;
+    float               cpu_5min;
+    float               cpu_15min;
+    uint32_t            cpu_cores;
+    char                os_name[64];
+    char                kernel_version[64];
+    
+    /* CLI state */
+    cli_mode_t          cli_mode;
+    char                cli_prompt[64];
+    char                current_zone[64];
+    char                current_class_map[64];
+    char                current_policy_map[64];
+    char                current_policy_class[64];
+    uint32_t            current_acl;
+    bool                modified;
+    log_level_t         log_level;
+    
+    /* Policy engine */
+    struct policy_engine *policy_engine;
+    
+    /* CLI config */
+    char                enable_secret[128];
+    char                domain_name[64];
+    char                name_server[64];
+    char                dns_server[64];
+    char                banner_motd[256];
+    char                archive_path[256];
+    uint32_t            archive_max;
+    bool                service_password_encryption;
+    
+    /* AAA */
+    char                aaa_method[32];
+    
+    /* Logging */
+    bool                logging_console;
+    uint32_t            logging_buffered_size;
+    char                logging_host[64];
+    
+    /* NTP */
+    char                ntp_server[64];
+    char                timezone[32];
+    
+    /* SNMP */
+    char                snmp_community[64];
+    char                snmp_host[64];
+    bool                snmp_readonly;
+    
+    /* Debug */
+    uint32_t            debug_flags;
+    bool                terminal_monitor;
+    uint64_t            counters[16];
+    uint32_t            log_count;
+    
+    /* Users */
+    struct {
+        char name[32];
+        char password[128];
+        uint8_t privilege;
+    } users[16];
+    int                 user_count;
+    
+    /* Signature database */
+    uint32_t            signature_count;
+    
+    /* Canary */
+    uint32_t            canary_count;
+    
+    /* Rate limiting */
+    bool                rate_limit_enabled;
+    uint32_t            rate_limit_requests;
+    uint32_t            rate_limit_window;
+    
+    /* Threat intelligence */
+    bool                threat_intel_enabled;
+    
+    /* Alerting */
+    char                alert_destination[256];
+    
+    /* SIEM */
+    bool                siem_enabled;
+    char                siem_host[64];
+    uint16_t            siem_port;
+    char                siem_format[16];
+    
+    /* HA config (embedded) */
+    struct {
+        bool            enabled;
+        char            virtual_ip[64];
+        uint8_t         priority;
+        bool            preempt;
+        uint32_t        hello_interval;
+        uint32_t        hold_time;
+        char            auth_key[64];
+        char            track_object[64];
+        uint32_t        track_decrement;
+        char            cluster_name[64];
+        int             mode;  /* ha_mode_t */
+        bool            failover_enabled;
+        char            failover_interface[64];
+    } ha;
 } shield_context_t;
 
 /* Global context */

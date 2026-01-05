@@ -11,6 +11,11 @@
 
 #include "shield_common.h"
 #include "shield_protocol.h"
+#include "shield_platform.h"
+#ifndef SHIELD_PLATFORM_WINDOWS
+#include <pthread.h>
+#include <unistd.h>
+#endif
 
 /* ZHP Message Types */
 typedef enum {
@@ -45,7 +50,11 @@ typedef struct {
     int         socket;
     uint32_t    check_interval_ms;
     bool        running;
+    #ifndef SHIELD_PLATFORM_WINDOWS
     pthread_t   thread;
+#else
+    HANDLE      thread;
+#endif
 } zhp_context_t;
 
 /* Check zone health */
@@ -66,13 +75,13 @@ shield_err_t zhp_check_zone(zhp_context_t *ctx, const char *zone_name,
     strncpy(request.zone, zone_name, sizeof(request.zone) - 1);
     
     if (ctx->socket >= 0) {
-        send(ctx->socket, &request, sizeof(request), 0);
+        send(ctx->socket, (const char*)&request, sizeof(request), 0);
         
         /* Wait for response */
         uint8_t resp_type;
-        recv(ctx->socket, &resp_type, 1, 0);
+        recv(ctx->socket, (char*)&resp_type, 1, 0);
         if (resp_type == ZHP_MSG_HEALTH_RESP) {
-            recv(ctx->socket, out, sizeof(*out), 0);
+            recv(ctx->socket, (char*)out, sizeof(*out), 0);
         }
     }
     
@@ -95,7 +104,7 @@ shield_err_t zhp_subscribe(zhp_context_t *ctx, const char *zone_name)
     strncpy(request.zone, zone_name, sizeof(request.zone) - 1);
     
     if (ctx->socket >= 0) {
-        send(ctx->socket, &request, sizeof(request), 0);
+        send(ctx->socket, (const char*)&request, sizeof(request), 0);
     }
     
     return SHIELD_OK;
@@ -124,7 +133,7 @@ shield_err_t zhp_send_alert(zhp_context_t *ctx, const char *zone_name,
     }
     
     if (ctx->socket >= 0) {
-        send(ctx->socket, &alert, sizeof(alert), 0);
+        send(ctx->socket, (const char*)&alert, sizeof(alert), 0);
     }
     
     LOG_INFO("ZHP: Alert for zone %s: status=%d, %s", zone_name, status, message);
@@ -138,7 +147,11 @@ static void* zhp_health_thread(void *arg)
     
     while (ctx->running) {
         /* Periodic health checks would go here */
+        #ifdef SHIELD_PLATFORM_WINDOWS
+        Sleep(ctx->check_interval_ms);
+#else
         usleep(ctx->check_interval_ms * 1000);
+#endif
     }
     
     return NULL;
@@ -156,7 +169,9 @@ shield_err_t zhp_init(zhp_context_t *ctx, uint32_t check_interval_ms)
     ctx->check_interval_ms = check_interval_ms > 0 ? check_interval_ms : 5000;
     ctx->running = true;
     
+    #ifndef SHIELD_PLATFORM_WINDOWS
     pthread_create(&ctx->thread, NULL, zhp_health_thread, ctx);
+#endif
     
     return SHIELD_OK;
 }
@@ -166,9 +181,15 @@ void zhp_destroy(zhp_context_t *ctx)
 {
     if (ctx) {
         ctx->running = false;
+        #ifndef SHIELD_PLATFORM_WINDOWS
         pthread_join(ctx->thread, NULL);
+#endif
         if (ctx->socket >= 0) {
-            close(ctx->socket);
+            #ifdef SHIELD_PLATFORM_WINDOWS
+        closesocket(ctx->socket);
+#else
+        close(ctx->socket);
+#endif
         }
     }
 }

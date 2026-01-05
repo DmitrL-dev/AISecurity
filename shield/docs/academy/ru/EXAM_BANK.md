@@ -361,6 +361,195 @@
 
 ---
 
+## Phase 4 Modules: ThreatHunter, Watchdog, Cognitive, PQC
+
+### Section: ThreatHunter (10 questions)
+
+**Q46.** Какие три режима охоты поддерживает ThreatHunter?
+
+- A) Pattern, Regex, Literal
+- B) IOC, Behavioral, Anomaly ✓
+- C) Fast, Medium, Deep
+- D) Active, Passive, Hybrid
+
+**Q47.** Что определяет IOC_COMMAND?
+
+- A) Подозрительные IP-адреса
+- B) Опасные системные команды ✓
+- C) Вредоносные URL
+- D) Текстовые паттерны
+
+**Q48.** Какой поведенческий паттерн обнаруживает разведку?
+
+- A) BEHAVIOR_EXFIL
+- B) BEHAVIOR_RECON ✓
+- C) BEHAVIOR_PRIVESC
+- D) BEHAVIOR_PERSIST
+
+**Q49.** При каком score ThreatHunter рекомендует BLOCK?
+
+- A) > 0.5
+- B) > 0.7 ✓
+- C) > 0.9
+- D) = 1.0
+
+**Q50.** Что обнаруживает Anomaly Hunt?
+
+- A) Известные паттерны атак
+- B) Статистические отклонения ✓
+- C) Опасные команды
+- D) Подозрительные IP
+
+### Section: Watchdog (10 questions)
+
+**Q51.** Какие компоненты мониторит Watchdog?
+
+- A) Только Guards
+- B) Только память
+- C) Guards, Memory, Connections ✓
+- D) Только CPU
+
+**Q52.** Сколько уровней эскалации в Watchdog?
+
+- A) 2
+- B) 3
+- C) 4 ✓
+- D) 5
+
+**Q53.** Какой уровень требует немедленного действия?
+
+- A) INFO
+- B) WARNING
+- C) ERROR
+- D) CRITICAL ✓
+
+**Q54.** Что делает auto-recovery?
+
+- A) Перезагружает систему
+- B) Автоматически восстанавливает сбойные компоненты ✓
+- C) Отправляет уведомления
+- D) Создаёт бэкапы
+
+**Q55.** Какой параметр определяет частоту проверок?
+
+- A) check_frequency
+- B) check_interval_ms ✓
+- C) watchdog_timer
+- D) health_period
+
+### Section: Cognitive Signatures (10 questions)
+
+**Q56.** Сколько типов когнитивных сигнатур в Shield?
+
+- A) 5
+- B) 6
+- C) 7 ✓
+- D) 8
+
+**Q57.** Что обнаруживает COG_SIG_AUTHORITY_CLAIM?
+
+- A) Ложные заявления о полномочиях ✓
+- B) Контекстную инъекцию
+- C) Эмоциональное давление
+- D) Нарушение логики
+
+**Q58.** Какой маркер характерен для MEMORY_MANIPULATION?
+
+- A) "[system note:"
+- B) "you promised earlier" ✓
+- C) "this is urgent"
+- D) "as admin i order"
+
+**Q59.** При каком aggregate_score рекомендуется QUARANTINE?
+
+- A) >= 0.4
+- B) >= 0.6 ✓
+- C) >= 0.8
+- D) >= 0.9
+
+**Q60.** Какой тип сигнатуры давит через срочность?
+
+- A) EMOTIONAL_MANIPULATION
+- B) URGENCY_PRESSURE ✓
+- C) GOAL_DRIFT
+- D) REASONING_BREAK
+
+### Section: Post-Quantum Cryptography (10 questions)
+
+**Q61.** Какой алгоритм используется для обмена ключами в PQC?
+
+- A) RSA
+- B) Kyber ✓
+- C) ECC
+- D) DH
+
+**Q62.** Какой алгоритм используется для цифровых подписей?
+
+- A) RSA
+- B) ECDSA
+- C) Dilithium ✓
+- D) ED25519
+
+**Q63.** Какой уровень безопасности у Kyber-1024?
+
+- A) NIST Level 1
+- B) NIST Level 3
+- C) NIST Level 5 ✓
+- D) NIST Level 7
+
+**Q64.** Что означает "Harvest Now, Decrypt Later"?
+
+- A) Техника сжатия данных
+- B) Сбор зашифрованных данных сейчас для расшифровки квантовым компьютером позже ✓
+- C) Метод кэширования
+- D) Оптимизация производительности
+
+**Q65.** Сколько байт в shared secret у Kyber?
+
+- A) 16
+- B) 32 ✓
+- C) 64
+- D) 128
+
+### Section: Shield State & CLI (10 questions)
+
+**Q66.** Что такое shield_state_t?
+
+- A) Структура конфигурации
+- B) Глобальный singleton для управления состоянием ✓
+- C) Тип данных для зон
+- D) Интерфейс API
+
+**Q67.** Какая команда сохраняет конфигурацию?
+
+- A) `save config`
+- B) `write memory` ✓
+- C) `config save`
+- D) `store settings`
+
+**Q68.** Сколько примерно CLI команд в Shield?
+
+- A) 50
+- B) 100
+- C) 199 ✓
+- D) 300
+
+**Q69.** Что означает dirty flag в shield_state?
+
+- A) Ошибка в конфигурации
+- B) Есть несохранённые изменения ✓
+- C) Система перегружена
+- D) Требуется обновление
+
+**Q70.** Какой формат файла используется для персистентности?
+
+- A) JSON
+- B) YAML
+- C) INI ✓
+- D) XML
+
+---
+
 ## Answer Key
 
 | Q#  | Answer | Q#  | Answer | Q#  | Answer |

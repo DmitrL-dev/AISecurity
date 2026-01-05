@@ -7,12 +7,12 @@
 <p align="center">
   <strong>🛡️ Defense + ⚔️ Offense + 📦 Framework — Complete AI Security Suite</strong><br>
   <strong>Dragon v4.1 • January 2026</strong><br>
-  209 Detection Engines • Production Gateway • Red Team Platform • Python SDK
+  209 Detection Engines • Pure C DMZ • Red Team Platform • Python SDK
 </p>
 
 <p align="center">
   <img src="https://img.shields.io/badge/🛡️_DEFENSE-209_Engines-brightgreen?style=for-the-badge" alt="Defense">
-  <img src="https://img.shields.io/badge/⚡_GATEWAY-<10ms-00ADD8?style=for-the-badge" alt="Gateway">
+  <img src="https://img.shields.io/badge/🛡️_SHIELD-<1ms_DMZ-00ADD8?style=for-the-badge" alt="Shield">
   <img src="https://img.shields.io/badge/🐉_STRIKE-39K+_Payloads-red?style=for-the-badge" alt="Strike">
   <img src="https://img.shields.io/badge/📦_SDK-PyPI-blue?style=for-the-badge" alt="SDK">
 </p>
@@ -69,7 +69,7 @@
     <img src="https://img.shields.io/badge/🦠_NEW!_IMMUNE-EDR%2FXDR%2FMDR-FF6B6B?style=for-the-badge" alt="IMMUNE">
   </a>
   <br>
-  <strong>SHIELD:</strong> 23K LOC • 20 Protocols • 194 CLI Commands<br>
+  <strong>SHIELD:</strong> 28K LOC • 20 Protocols • ~199 CLI Commands • Phase 4 Complete<br>
   <strong>IMMUNE:</strong> Pure C Kernel Security • 24 Modules • DragonFlyBSD
 </p>
 
@@ -82,10 +82,10 @@
 Strange Math™
 </td>
 <td width="20%" align="center" valign="top">
-<h3><a href="#-gateway--production-infrastructure">⚡ GATEWAY</a></h3>
-<strong>Production Infra</strong><br>
-Go + Python, &lt;10ms<br>
-PoW Anti-DDoS
+<h3><a href="#%EF%B8%8F-shield--pure-c-dmz">🛡️ SHIELD</a></h3>
+<strong>AI Security DMZ</strong><br>
+Pure C, <1ms latency<br>
+20 Protocols, Cisco CLI
 </td>
 <td width="20%" align="center" valign="top">
 <h3><a href="#-strike--red-team-platform">🐉 STRIKE</a></h3>
@@ -224,8 +224,10 @@ IMMUNE: [AUDIT] setuid 0->65534 (pid=3162)
   <img src="./shield/docs/images/shield_hero.png" alt="SENTINEL Shield - AI Security DMZ" width="100%">
 </p>
 
-> **The first enterprise-grade AI security DMZ — written in Pure C.**  
+> **Enterprise-grade AI security DMZ architecture — written in Pure C.**  
 > **Sub-millisecond latency. Zero dependencies. 20 protocols.**
+>
+> ⚠️ *Production architecture ready. ML integration and REST API in development.*
 
 ### 🔥 Why Shield?
 
@@ -239,11 +241,22 @@ IMMUNE: [AUDIT] setuid 0->65534 (pid=3162)
 
 | Metric | Value |
 |--------|-------|
-| **Lines of Code** | 23,113 |
+| **Lines of Code** | 28,000+ |
 | **Protocols** | 20 |
-| **CLI Commands** | 194 |
+| **CLI Commands** | ~199 (Cisco-style) |
 | **Guards** | 6 (LLM, RAG, Agent, Tool, MCP, API) |
-| **Academy Modules** | 24 |
+| **Academy Modules** | 22 (EN + RU) |
+
+### 🐉 Phase 4 — Dragon v4.1 (January 2026)
+
+| Module | Description |
+|--------|-------------|
+| 🔍 **ThreatHunter** | Proactive threat hunting (IOC, Behavioral, Anomaly) |
+| 🐕 **Watchdog** | System health monitoring with auto-recovery |
+| 🧠 **Cognitive Signatures** | 7 signature types for pattern detection |
+| 🔐 **PQC** | Post-Quantum Cryptography (Kyber, Dilithium) |
+| 💾 **Shield State** | Persistent configuration with save/load |
+| 🖥️ **Advanced CLI** | Dynamic mode management, session control |
 
 ### 🏗️ 20 Enterprise Protocols
 
@@ -256,17 +269,17 @@ IMMUNE: [AUDIT] setuid 0->65534 (pid=3162)
 | 🔌 **Integration** | SBP, SGP, SIEM |
 | 🔐 **Security** | STLS, SZAA, SSigP |
 
-### 💻 Cisco-Style CLI (194 Commands)
+### 💻 Cisco-Style CLI (~199 Commands)
 
 ```bash
 Shield# show zones
 Shield# guard enable all
-Shield# class-map match-any THREATS
-Shield(config-cmap)# match injection
-Shield(config-cmap)# match jailbreak
-Shield# policy-map SECURITY
-Shield(config-pmap)# class THREATS
-Shield(config-pmap)# block
+Shield# threat-hunter enable
+Shield# threat-hunter sensitivity 0.8
+Shield# watchdog enable
+Shield# watchdog auto-recovery enable
+Shield# pqc enable
+Shield# write memory
 ```
 
 📖 **[Shield Documentation](./shield/README.md)** | **[Academy 🇷🇺](./shield/docs/academy/ru/)** | **[Academy 🇺🇸](./shield/docs/academy/en/)**
@@ -348,44 +361,6 @@ Shield(config-pmap)# block
 </details>
 
 📖 **[Full Engine Documentation](./docs/reference/engines-en.md)** | **[R&D Changelog](./docs/CHANGELOG.md)**
-
----
-
-## ⚡ GATEWAY — Production Infrastructure
-
-<p align="center">
-  <img src="./assets/gateway_infrastructure.png" alt="Go + Python Gateway Architecture" width="800">
-</p>
-
-> **The only open-source AI security gateway ready for production traffic.**
-
-## Why Go + Python?
-
-| Metric | SENTINEL | Competitors |
-|--------|----------|-------------|
-| **Gateway Language** | Go (Fiber) | Python only |
-| **Latency** | <10ms | 50-200ms |
-| **Throughput** | 1000+ req/sec | 10-50 req/sec |
-| **Anti-DDoS** | PoW Challenge Layer | ❌ None |
-| **Cost Control** | Compute Guardian | ❌ None |
-
-### Architecture
-
-<p align="center">
-  <img src="./assets/gateway_flow.png" alt="Gateway Architecture Flow" width="600">
-</p>
-
-
-## Unique Components
-
-| Component | Purpose |
-|-----------|---------|
-| **PoW Challenge Layer** | Hashcash-style anti-DDoS |
-| **Compute Guardian** | Cost estimation BEFORE LLM call |
-| **Shapeshifter** | Polymorphic config per session |
-| **Differential Privacy Logging** | GDPR-compliant analytics |
-
-📖 **[Gateway Documentation](./src/gateway/README.md)** | **[Deployment Guide](./docs/guides/deployment-en.md)**
 
 ---
 

@@ -14,8 +14,8 @@
 #include "shield_guard.h"
 #include "shield_cli.h"
 
-/* Prompt templates */
-static const char *prompts[] = {
+/* Prompt templates - reserved for dynamic prompt generation */
+static const char *prompts[] __attribute__((unused)) = {
     "sentinel> ",           /* EXEC (not enabled) */
     "sentinel# ",           /* EXEC (enabled) */
     "sentinel(config)# ",   /* CONFIG */
@@ -202,43 +202,56 @@ shield_err_t cli_execute(shield_context_t *ctx, const char *line)
     
     /* Global commands */
     if (strcmp(cmd, "enable") == 0) {
-        return cmd_enable(ctx, argc, argv);
+        cmd_enable(ctx, argc, argv);
+        return SHIELD_OK;
     }
     if (strcmp(cmd, "disable") == 0) {
-        return cmd_disable(ctx, argc, argv);
+        cmd_disable(ctx, argc, argv);
+        return SHIELD_OK;
     }
     if (strcmp(cmd, "config") == 0 || strcmp(cmd, "configure") == 0) {
-        return cmd_config(ctx, argc, argv);
+        cmd_config(ctx, argc, argv);
+        return SHIELD_OK;
     }
     if (strcmp(cmd, "exit") == 0) {
-        return cmd_exit(ctx, argc, argv);
+        cmd_exit(ctx, argc, argv);
+        return SHIELD_OK;
     }
     if (strcmp(cmd, "end") == 0) {
-        return cmd_end(ctx, argc, argv);
+        cmd_end(ctx, argc, argv);
+        return SHIELD_OK;
     }
     if (strcmp(cmd, "help") == 0 || strcmp(cmd, "?") == 0) {
-        return cmd_help(ctx, argc, argv);
+        cmd_help(ctx, argc, argv);
+        return SHIELD_OK;
     }
     if (strcmp(cmd, "show") == 0) {
-        return cmd_show(ctx, argc, argv);
+        cmd_show(ctx, argc, argv);
+        return SHIELD_OK;
     }
     if (strcmp(cmd, "zone") == 0) {
-        return cmd_zone(ctx, argc, argv);
+        cmd_zone(ctx, argc, argv);
+        return SHIELD_OK;
     }
     if (strcmp(cmd, "shield-rule") == 0) {
-        return cmd_shield_rule(ctx, argc, argv);
+        cmd_shield_rule(ctx, argc, argv);
+        return SHIELD_OK;
     }
     if (strcmp(cmd, "apply") == 0) {
-        return cmd_apply(ctx, argc, argv);
+        cmd_apply(ctx, argc, argv);
+        return SHIELD_OK;
     }
     if (strcmp(cmd, "write") == 0) {
-        return cmd_write(ctx, argc, argv);
+        cmd_write(ctx, argc, argv);
+        return SHIELD_OK;
     }
     if (strcmp(cmd, "clear") == 0) {
-        return cmd_clear(ctx, argc, argv);
+        cmd_clear(ctx, argc, argv);
+        return SHIELD_OK;
     }
     if (strcmp(cmd, "debug") == 0) {
-        return cmd_debug(ctx, argc, argv);
+        cmd_debug(ctx, argc, argv);
+        return SHIELD_OK;
     }
     
     /* Zone mode commands */
@@ -287,11 +300,12 @@ shield_err_t cli_execute(shield_context_t *ctx, const char *line)
 }
 
 /* Add to history */
-void cli_add_history(cli_state_t *cli, const char *line)
+void cli_add_history(shield_context_t *ctx, const char *line)
 {
-    if (!cli || !line || strlen(line) == 0) {
+    if (!ctx || !line || strlen(line) == 0) {
         return;
     }
+    cli_state_t *cli = &ctx->cli;
     
     if (cli->history_count >= SHIELD_MAX_HISTORY) {
         /* Remove oldest */
@@ -302,6 +316,64 @@ void cli_add_history(cli_state_t *cli, const char *line)
     }
     
     cli->history[cli->history_count++] = strdup(line);
+}
+
+/* ===== Dynamic Command Registration ===== */
+
+/* Registered commands storage */
+static cli_command_t *registered_commands[256];
+static int registered_command_count = 0;
+
+/* Register a CLI command */
+shield_err_t cli_register_command(shield_context_t *ctx, const cli_command_t *cmd)
+{
+    (void)ctx;  /* Commands are stored globally */
+    
+    if (!cmd || !cmd->name || !cmd->handler) {
+        return SHIELD_ERR_INVALID;
+    }
+    
+    if (registered_command_count >= 256) {
+        return SHIELD_ERR_NOMEM;
+    }
+    
+    /* Duplicate to allow const input */
+    cli_command_t *copy = malloc(sizeof(cli_command_t));
+    if (!copy) return SHIELD_ERR_NOMEM;
+    
+    memcpy(copy, cmd, sizeof(cli_command_t));
+    registered_commands[registered_command_count++] = copy;
+    
+    return SHIELD_OK;
+}
+
+/* Execute command from parsed args */
+shield_err_t cli_execute_args(shield_context_t *ctx, int argc, char **argv)
+{
+    if (!ctx || argc < 1 || !argv || !argv[0]) {
+        return SHIELD_ERR_INVALID;
+    }
+    
+    const char *cmd_name = argv[0];
+    
+    /* Search registered commands */
+    for (int i = 0; i < registered_command_count; i++) {
+        cli_command_t *cmd = registered_commands[i];
+        if (!cmd) continue;
+        
+        /* Check mode */
+        if (cmd->mode != CLI_MODE_ANY && cmd->mode != ctx->cli.mode) {
+            continue;
+        }
+        
+        /* Match command name (prefix match) */
+        if (strncmp(cmd->name, cmd_name, strlen(cmd_name)) == 0) {
+            cmd->handler(ctx, argc, argv);
+            return SHIELD_OK;
+        }
+    }
+    
+    return SHIELD_ERR_NOTFOUND;
 }
 
 /* REPL */
@@ -329,7 +401,7 @@ void cli_repl(shield_context_t *ctx)
         }
         
         /* Add to history */
-        cli_add_history(&ctx->cli, line);
+        cli_add_history(ctx, line);
         
         /* Execute */
         cli_execute(ctx, line);

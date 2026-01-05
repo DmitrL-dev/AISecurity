@@ -10,6 +10,17 @@
 
 #include "shield_common.h"
 #include "shield_protocol.h"
+#include "shield_platform.h"
+
+/* STT Events */
+typedef enum {
+    STT_EVENT_THREAT,
+    STT_EVENT_IOC,
+    STT_EVENT_SIGNATURE,
+} stt_event_t;
+
+/* STT Callback type */
+typedef void (*stt_callback_fn)(stt_event_t event, const void *data, void *user_data);
 
 /* STT Message Types */
 typedef enum {
@@ -43,10 +54,10 @@ typedef struct {
 
 /* STT Context */
 typedef struct {
-    int             socket;
-    stt_callback_t  callback;
-    void           *user_data;
-    bool            subscribed;
+    int                socket;
+    stt_callback_fn    callback;
+    void              *user_data;
+    bool               subscribed;
 } stt_context_t;
 
 /* Report threat event */
@@ -58,8 +69,8 @@ shield_err_t stt_report_threat(stt_context_t *ctx, const stt_threat_event_t *eve
     
     uint8_t type = STT_MSG_THREAT_EVENT;
     if (ctx->socket >= 0) {
-        send(ctx->socket, &type, 1, 0);
-        send(ctx->socket, event, sizeof(*event), 0);
+        send(ctx->socket, (const char*)&type, 1, 0);
+        send(ctx->socket, (const char*)event, sizeof(*event), 0);
     }
     
     LOG_DEBUG("STT: Reported threat %s", event->event_id);
@@ -84,7 +95,7 @@ shield_err_t stt_subscribe(stt_context_t *ctx, const char *filter)
     }
     
     if (ctx->socket >= 0) {
-        send(ctx->socket, &request, sizeof(request), 0);
+        send(ctx->socket, (const char*)&request, sizeof(request), 0);
     }
     
     ctx->subscribed = true;
@@ -100,8 +111,8 @@ shield_err_t stt_push_ioc(stt_context_t *ctx, const stt_ioc_t *ioc)
     
     uint8_t type = STT_MSG_IOC_UPDATE;
     if (ctx->socket >= 0) {
-        send(ctx->socket, &type, 1, 0);
-        send(ctx->socket, ioc, sizeof(*ioc), 0);
+        send(ctx->socket, (const char*)&type, 1, 0);
+        send(ctx->socket, (const char*)ioc, sizeof(*ioc), 0);
     }
     
     return SHIELD_OK;
@@ -115,16 +126,16 @@ shield_err_t stt_process(stt_context_t *ctx)
     }
     
     uint8_t type;
-    if (recv(ctx->socket, &type, 1, MSG_PEEK) <= 0) {
+    if (recv(ctx->socket, (char*)&type, 1, MSG_PEEK) <= 0) {
         return SHIELD_ERR_IO;
     }
     
-    recv(ctx->socket, &type, 1, 0);
+    recv(ctx->socket, (char*)&type, 1, 0);
     
     switch (type) {
     case STT_MSG_THREAT_EVENT: {
         stt_threat_event_t event;
-        recv(ctx->socket, &event, sizeof(event), 0);
+        recv(ctx->socket, (char*)&event, sizeof(event), 0);
         if (ctx->callback) {
             ctx->callback(STT_EVENT_THREAT, &event, ctx->user_data);
         }
@@ -132,7 +143,7 @@ shield_err_t stt_process(stt_context_t *ctx)
     }
     case STT_MSG_IOC_UPDATE: {
         stt_ioc_t ioc;
-        recv(ctx->socket, &ioc, sizeof(ioc), 0);
+        recv(ctx->socket, (char*)&ioc, sizeof(ioc), 0);
         if (ctx->callback) {
             ctx->callback(STT_EVENT_IOC, &ioc, ctx->user_data);
         }

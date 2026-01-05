@@ -10,7 +10,18 @@
 
 #include "shield_common.h"
 #include "shield_protocol.h"
+#include "shield_platform.h"
 #include "shield_zone.h"
+
+/* ZRP Events */
+typedef enum {
+    ZRP_EVENT_ZONE_REGISTERED,
+    ZRP_EVENT_ZONE_DEREGISTERED,
+    ZRP_EVENT_ZONE_UPDATED,
+} zrp_event_t;
+
+/* ZRP Callback type */
+typedef void (*zrp_callback_fn)(zrp_event_t event, const char *zone_name, void *user_data);
 
 /* ZRP Message Types */
 typedef enum {
@@ -41,12 +52,18 @@ typedef struct {
     uint32_t capabilities;
 } zrp_register_msg_t;
 
+/* Zone List Response (for zrp_list_zones) */
+typedef struct {
+    uint32_t count;
+    char     zones[32][SHIELD_MAX_NAME_LEN];  /* Up to 32 zones max */
+} zrp_zone_list_t;
+
 /* ZRP Context */
 typedef struct {
     int                 socket;
     uint32_t            sequence;
     char                node_id[SHIELD_MAX_NAME_LEN];
-    zrp_callback_t      callback;
+    zrp_callback_fn     callback;
     void               *user_data;
 } zrp_context_t;
 
@@ -89,8 +106,8 @@ shield_err_t zrp_register(zrp_context_t *ctx, const shield_zone_t *zone)
     
     /* Send registration */
     if (ctx->socket >= 0) {
-        send(ctx->socket, &header, sizeof(header), 0);
-        send(ctx->socket, &msg, sizeof(msg), 0);
+        send(ctx->socket, (const char*)&header, sizeof(header), 0);
+        send(ctx->socket, (const char*)&msg, sizeof(msg), 0);
     }
     
     LOG_DEBUG("ZRP: Registered zone %s", zone->name);
@@ -116,8 +133,8 @@ shield_err_t zrp_deregister(zrp_context_t *ctx, const char *zone_name)
     strncpy(name, zone_name, sizeof(name) - 1);
     
     if (ctx->socket >= 0) {
-        send(ctx->socket, &header, sizeof(header), 0);
-        send(ctx->socket, name, sizeof(name), 0);
+        send(ctx->socket, (const char*)&header, sizeof(header), 0);
+        send(ctx->socket, (const char*)name, sizeof(name), 0);
     }
     
     LOG_DEBUG("ZRP: Deregistered zone %s", zone_name);
@@ -139,12 +156,12 @@ shield_err_t zrp_list_zones(zrp_context_t *ctx, zrp_zone_list_t *out)
     };
     
     if (ctx->socket >= 0) {
-        send(ctx->socket, &header, sizeof(header), 0);
+        send(ctx->socket, (const char*)&header, sizeof(header), 0);
         
         /* Wait for response */
-        recv(ctx->socket, &header, sizeof(header), 0);
+        recv(ctx->socket, (char*)&header, sizeof(header), 0);
         if (header.type == ZRP_MSG_LIST_RESP) {
-            recv(ctx->socket, out, sizeof(*out), 0);
+            recv(ctx->socket, (char*)out, sizeof(*out), 0);
         }
     }
     
@@ -159,17 +176,17 @@ shield_err_t zrp_process(zrp_context_t *ctx)
     }
     
     zrp_header_t header;
-    ssize_t n = recv(ctx->socket, &header, sizeof(header), MSG_PEEK);
+    ssize_t n = recv(ctx->socket, (char*)&header, sizeof(header), MSG_PEEK);
     if (n <= 0) {
         return SHIELD_ERR_IO;
     }
     
-    recv(ctx->socket, &header, sizeof(header), 0);
+    recv(ctx->socket, (char*)&header, sizeof(header), 0);
     
     switch (header.type) {
     case ZRP_MSG_REGISTER: {
         zrp_register_msg_t msg;
-        recv(ctx->socket, &msg, sizeof(msg), 0);
+        recv(ctx->socket, (char*)&msg, sizeof(msg), 0);
         
         if (ctx->callback) {
             ctx->callback(ZRP_EVENT_ZONE_REGISTERED, msg.zone_name, ctx->user_data);
@@ -177,13 +194,13 @@ shield_err_t zrp_process(zrp_context_t *ctx)
         
         /* Send ACK */
         zrp_header_t ack = {.version = 1, .type = ZRP_MSG_ACK, .sequence = header.sequence};
-        send(ctx->socket, &ack, sizeof(ack), 0);
+        send(ctx->socket, (const char*)&ack, sizeof(ack), 0);
         break;
     }
     
     case ZRP_MSG_DEREGISTER: {
         char name[SHIELD_MAX_NAME_LEN];
-        recv(ctx->socket, name, sizeof(name), 0);
+        recv(ctx->socket, (char*)name, sizeof(name), 0);
         
         if (ctx->callback) {
             ctx->callback(ZRP_EVENT_ZONE_DEREGISTERED, name, ctx->user_data);
@@ -203,7 +220,11 @@ shield_err_t zrp_process(zrp_context_t *ctx)
 void zrp_destroy(zrp_context_t *ctx)
 {
     if (ctx && ctx->socket >= 0) {
+        #ifdef SHIELD_PLATFORM_WINDOWS
+        closesocket(ctx->socket);
+#else
         close(ctx->socket);
+#endif
         ctx->socket = -1;
     }
 }

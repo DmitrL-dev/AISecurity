@@ -7,9 +7,19 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <math.h>
 
 #include "shield_common.h"
-#include "shield_policy.h"
+#include "shield_semantic.h"
+
+/* Static semantic detector for policy evaluation */
+static semantic_detector_t g_semantic_detector;
+static bool g_semantic_initialized = false;
+
+/* Forward declarations */
+float calculate_entropy(const void *data, size_t len);
+
+/* Note: policy_engine.c has its own type definitions, not using shield_policy.h */
 
 /* ===== Class Map ===== */
 
@@ -88,6 +98,34 @@ typedef struct policy_engine {
     } bindings[256];
     uint32_t binding_count;
 } policy_engine_t;
+
+/* Evaluation context for policy matching */
+typedef struct evaluation_context {
+    const char          *zone;
+    rule_direction_t    direction;
+    const char          *data;
+    size_t              data_len;
+    const char          *source_ip;
+    const char          *user_id;
+} evaluation_context_t;
+
+/* Policy result */
+typedef struct policy_result {
+    rule_action_t       action;
+    const char          *policy_name;
+    const char          *class_name;
+    const char          *reason;
+    char                matched_policy[SHIELD_MAX_NAME_LEN];
+    char                matched_class[SHIELD_MAX_NAME_LEN];
+    char                log_message[256];
+    uint32_t            rate_limit;
+    uint8_t             severity;
+    bool                log;
+} policy_result_t;
+
+/* Direction aliases (some code uses INBOUND/OUTBOUND) */
+#define DIRECTION_INBOUND  DIRECTION_INPUT
+#define DIRECTION_OUTBOUND DIRECTION_OUTPUT
 
 /* Initialize policy engine */
 shield_err_t policy_engine_init(policy_engine_t *engine)
@@ -175,7 +213,12 @@ bool class_map_evaluate(class_map_t *cm, const void *data, size_t len,
             
         case MATCH_JAILBREAK:
         case MATCH_PROMPT_INJECTION:
-            match = detect_injection((const char*)data, len);
+            /* Initialize semantic detector on first use */
+            if (!g_semantic_initialized) {
+                semantic_init(&g_semantic_detector);
+                g_semantic_initialized = true;
+            }
+            match = semantic_is_suspicious(&g_semantic_detector, (const char*)data, len);
             break;
             
         case MATCH_ENTROPY_HIGH:
@@ -201,6 +244,55 @@ bool class_map_evaluate(class_map_t *cm, const void *data, size_t len,
     
     if (result) cm->match_count++;
     return result;
+}
+
+/* Find class-map by name */
+class_map_t *class_map_find(policy_engine_t *engine, const char *name)
+{
+    if (!engine || !name) return NULL;
+    
+    class_map_t *cm = engine->class_maps;
+    while (cm) {
+        if (strcmp(cm->name, name) == 0) return cm;
+        cm = cm->next;
+    }
+    return NULL;
+}
+
+/* Delete class-map by name */
+shield_err_t class_map_delete(policy_engine_t *engine, const char *name)
+{
+    if (!engine || !name) return SHIELD_ERR_INVALID;
+    
+    class_map_t *prev = NULL;
+    class_map_t *cm = engine->class_maps;
+    
+    while (cm) {
+        if (strcmp(cm->name, name) == 0) {
+            /* Unlink from list */
+            if (prev) {
+                prev->next = cm->next;
+            } else {
+                engine->class_maps = cm->next;
+            }
+            engine->class_map_count--;
+            
+            /* Free conditions */
+            class_condition_t *cond = cm->conditions;
+            while (cond) {
+                class_condition_t *next = cond->next;
+                free(cond);
+                cond = next;
+            }
+            
+            free(cm);
+            return SHIELD_OK;
+        }
+        prev = cm;
+        cm = cm->next;
+    }
+    
+    return SHIELD_ERR_NOTFOUND;
 }
 
 /* ===== Policy Map Operations ===== */
@@ -268,6 +360,74 @@ shield_err_t policy_class_add_action(policy_class_t *pc, rule_action_t action,
     
     if (out) *out = pa;
     return SHIELD_OK;
+}
+
+/* Find policy-map by name */
+policy_map_t *policy_map_find(policy_engine_t *engine, const char *name)
+{
+    if (!engine || !name) return NULL;
+    
+    policy_map_t *pm = engine->policy_maps;
+    while (pm) {
+        if (strcmp(pm->name, name) == 0) return pm;
+        pm = pm->next;
+    }
+    return NULL;
+}
+
+/* Delete policy-map by name */
+shield_err_t policy_map_delete(policy_engine_t *engine, const char *name)
+{
+    if (!engine || !name) return SHIELD_ERR_INVALID;
+    
+    policy_map_t *prev = NULL;
+    policy_map_t *pm = engine->policy_maps;
+    
+    while (pm) {
+        if (strcmp(pm->name, name) == 0) {
+            /* Unlink from list */
+            if (prev) {
+                prev->next = pm->next;
+            } else {
+                engine->policy_maps = pm->next;
+            }
+            engine->policy_map_count--;
+            
+            /* Free classes and actions */
+            policy_class_t *pc = pm->classes;
+            while (pc) {
+                policy_class_t *next_pc = pc->next;
+                policy_action_t *pa = pc->actions;
+                while (pa) {
+                    policy_action_t *next_pa = pa->next;
+                    free(pa);
+                    pa = next_pa;
+                }
+                free(pc);
+                pc = next_pc;
+            }
+            
+            free(pm);
+            return SHIELD_OK;
+        }
+        prev = pm;
+        pm = pm->next;
+    }
+    
+    return SHIELD_ERR_NOTFOUND;
+}
+
+/* Find policy-class by name */
+policy_class_t *policy_class_find(policy_map_t *pm, const char *class_name)
+{
+    if (!pm || !class_name) return NULL;
+    
+    policy_class_t *pc = pm->classes;
+    while (pc) {
+        if (strcmp(pc->class_name, class_name) == 0) return pc;
+        pc = pc->next;
+    }
+    return NULL;
 }
 
 /* ===== Service Policy ===== */

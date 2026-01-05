@@ -10,7 +10,9 @@
 #include "shield_output_filter.h"
 #include "shield_string.h"
 
-/* PII regex patterns (simplified) */
+/* PII regex patterns - reserved for future regex engine */
+/* Currently using simpler is_ssn(), is_credit_card() functions */
+#if 0
 static const char *PII_PATTERNS[] = {
     "\\d{3}-\\d{2}-\\d{4}",           /* SSN */
     "\\d{4}[- ]?\\d{4}[- ]?\\d{4}[- ]?\\d{4}",  /* Credit card */
@@ -24,6 +26,7 @@ static const char *SECRET_PATTERNS[] = {
     "password[\"':]\\s*[\"'][^\"']+", /* Password in config */
     NULL
 };
+#endif
 
 /* Initialize */
 shield_err_t output_filter_init(output_filter_t *filter)

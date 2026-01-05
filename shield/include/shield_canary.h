@@ -12,6 +12,7 @@
 /* Canary token types */
 typedef enum canary_type {
     CANARY_TYPE_STRING,     /* Plain text marker */
+    CANARY_TYPE_TOKEN = CANARY_TYPE_STRING, /* Alias for TOKEN */
     CANARY_TYPE_UUID,       /* UUID format */
     CANARY_TYPE_EMAIL,      /* Email address */
     CANARY_TYPE_URL,        /* URL */

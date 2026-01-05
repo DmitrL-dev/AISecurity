@@ -53,6 +53,14 @@ typedef struct guard_base {
 typedef struct guard_registry {
     guard_base_t    *guards[SHIELD_MAX_GUARDS];
     uint32_t        count;
+    
+    /* Guard type enable flags */
+    bool            llm_enabled;
+    bool            rag_enabled;
+    bool            agent_enabled;
+    bool            tool_enabled;
+    bool            mcp_enabled;
+    bool            api_enabled;
 } guard_registry_t;
 
 /* API */

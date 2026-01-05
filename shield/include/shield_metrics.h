@@ -48,6 +48,9 @@ metric_t *metrics_counter(metrics_registry_t *reg, const char *name, const char 
 void metrics_inc(metric_t *m);
 void metrics_add(metric_t *m, uint64_t value);
 
+/* Find metric by name and increment */
+void metrics_inc_by_name(metrics_registry_t *reg, const char *name, const char *labels);
+
 /* Gauge operations */
 metric_t *metrics_gauge(metrics_registry_t *reg, const char *name, const char *help);
 void metrics_set(metric_t *m, double value);

@@ -282,3 +282,32 @@ shield_err_t config_save(shield_context_t *ctx, const char *filename)
     
     return SHIELD_OK;
 }
+
+/* ===== Wrapper Functions (declared in shield_context.h) ===== */
+
+/* Reload configuration from current config file */
+shield_err_t shield_reload_config(shield_context_t *ctx)
+{
+    if (!ctx || !ctx->config_file[0]) {
+        return SHIELD_ERR_INVALID;
+    }
+    
+    LOG_INFO("Reloading configuration from %s", ctx->config_file);
+    return config_load(ctx, ctx->config_file);
+}
+
+/* Save configuration to current config file (or path if specified) */
+shield_err_t shield_save_config(shield_context_t *ctx, const char *path)
+{
+    if (!ctx) {
+        return SHIELD_ERR_INVALID;
+    }
+    
+    const char *filename = path ? path : ctx->config_file;
+    if (!filename || !filename[0]) {
+        LOG_ERROR("No config file specified");
+        return SHIELD_ERR_INVALID;
+    }
+    
+    return config_save(ctx, filename);
+}

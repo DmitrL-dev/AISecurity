@@ -12,11 +12,7 @@
 #include <ws2tcpip.h>
 #pragma comment(lib, "ws2_32.lib")
 #else
-#include <sys/socket.h>
-#include <netinet/in.h>
-#include <arpa/inet.h>
 #include <netdb.h>
-#include <unistd.h>
 #include <fcntl.h>
 #include <poll.h>
 #endif

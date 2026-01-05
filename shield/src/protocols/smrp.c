@@ -10,6 +10,7 @@
 
 #include "shield_common.h"
 #include "shield_protocol.h"
+#include "shield_platform.h"
 
 /* SMRP Message Types */
 typedef enum {
@@ -60,9 +61,9 @@ shield_err_t smrp_broadcast_signature(smrp_context_t *ctx, const void *sig, size
     addr.sin_port = htons(ctx->mcast_port);
     inet_pton(AF_INET, ctx->mcast_group, &addr.sin_addr);
     
-    sendto(ctx->mcast_socket, &type, 1, 0, (struct sockaddr*)&addr, sizeof(addr));
-    sendto(ctx->mcast_socket, &len, 4, 0, (struct sockaddr*)&addr, sizeof(addr));
-    sendto(ctx->mcast_socket, sig, size, 0, (struct sockaddr*)&addr, sizeof(addr));
+    sendto(ctx->mcast_socket, (const char*)&type, 1, 0, (struct sockaddr*)&addr, sizeof(addr));
+    sendto(ctx->mcast_socket, (const char*)&len, 4, 0, (struct sockaddr*)&addr, sizeof(addr));
+    sendto(ctx->mcast_socket, (const char*)sig, size, 0, (struct sockaddr*)&addr, sizeof(addr));
     
     return SHIELD_OK;
 }
@@ -73,7 +74,11 @@ shield_err_t smrp_leave(smrp_context_t *ctx)
     if (!ctx) return SHIELD_ERR_INVALID;
     
     if (ctx->mcast_socket >= 0) {
+#ifdef SHIELD_PLATFORM_WINDOWS
+        closesocket(ctx->mcast_socket);
+#else
         close(ctx->mcast_socket);
+#endif
         ctx->mcast_socket = -1;
     }
     ctx->joined = false;

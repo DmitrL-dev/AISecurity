@@ -53,3 +53,6 @@ Testing/
 tmp/
 temp/
 *.tmp
+
+# Agent workspace
+.agent/
