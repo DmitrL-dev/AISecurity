@@ -73,6 +73,11 @@ from .moe_guard import MoEGuardEngine
 # Evolutive Attack Detection (Jan 2026 R&D - LLM-Virus defense)
 from .evolutive_attack_detector import EvolutiveAttackDetector
 
+# R&D Jan 5 2026 - New Attack Vectors
+from .adversarial_poetry_detector import AdversarialPoetryDetector
+from .advertisement_embedding_detector import AdvertisementEmbeddingDetector
+from .web_agent_manipulation_detector import WebAgentManipulationDetector
+
 # Backward compatibility aliases (legacy names)
 InjectionDetector = InjectionEngine
 BehavioralAnalyzer = BehavioralEngine
@@ -136,4 +141,8 @@ __all__ = [
     "PolymorphicPromptAssembler",
     "MoEGuardEngine",
     "EvolutiveAttackDetector",
+    # R&D Jan 5 2026 - New Attack Vectors
+    "AdversarialPoetryDetector",
+    "AdvertisementEmbeddingDetector",
+    "WebAgentManipulationDetector",
 ]

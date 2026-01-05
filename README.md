@@ -148,7 +148,7 @@ fetch('https://cdn.jsdelivr.net/gh/DmitrL-dev/AISecurity@latest/signatures/jailb
 
 > [!IMPORTANT]
 > ### 🚨 Open to Work — AI Security Engineer
-> **Solo author of this 105K LOC platform with 207 engines. Available remote.**
+> **Solo author of this 105K LOC platform with 210 engines. Available remote.**
 > 📧 [chg@live.ru](mailto:chg@live.ru) • 💬 [@DmLabincev](https://t.me/DmLabincev)
 
 ---
@@ -292,7 +292,7 @@ Shield# write memory
   <img src="./assets/brain_engines.png" alt="SENTINEL Brain - 207 Detection Engines" width="800">
 </p>
 
-> **207 detection engines** analyzing every prompt and response in real-time.
+> **210 detection engines** analyzing every prompt and response in real-time.
 
 ## Key Capabilities
 
@@ -357,6 +357,35 @@ Shield# write memory
 - `image_stego_detector.py` — Hidden text/LSB patterns
 
 **SyncedAttackDetector: 17 engines** (was 13)
+
+</details>
+
+<details>
+<summary><strong>🚀 January 5 2026 R&D Engines (3 new)</strong></summary>
+
+| Engine | Attack Vector | Source |
+|--------|---------------|--------|
+| `adversarial_poetry_detector.py` | Jailbreak via poetry/metaphors | arXiv:2511.15304 |
+| `advertisement_embedding_detector.py` | Hidden ads, affiliate injection | AEA Research |
+| `web_agent_manipulation_detector.py` | DOM/JS attacks on web agents | Genesis Framework |
+
+**Adversarial Poetry Detector:**
+- Rhyme scheme & meter pattern detection
+- 20+ metaphorical danger word mappings
+- Acrostic hidden instruction detection
+- Semantic vs literal meaning divergence
+
+**Advertisement Embedding Detector:**
+- Promotional language (10 patterns)
+- Affiliate link & tracking code detection
+- Brand manipulation & competitor attacks
+- Suspicious URL analysis
+
+**Web Agent Manipulation Detector:**
+- DOM injection (12 patterns)
+- JavaScript payload detection (16 patterns)
+- Hidden element & form tampering
+- Coordinate manipulation attacks
 
 </details>
 
