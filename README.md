@@ -7,11 +7,11 @@
 <p align="center">
   <strong>🛡️ Defense + ⚔️ Offense + 📦 Framework — Complete AI Security Suite</strong><br>
   <strong>Dragon v4.1 • January 2026</strong><br>
-  209 Detection Engines • Pure C DMZ • Red Team Platform • Python SDK
+  212 Detection Engines • Pure C DMZ • Red Team Platform • Python SDK
 </p>
 
 <p align="center">
-  <img src="https://img.shields.io/badge/🛡️_DEFENSE-209_Engines-brightgreen?style=for-the-badge" alt="Defense">
+  <img src="https://img.shields.io/badge/🛡️_DEFENSE-212_Engines-brightgreen?style=for-the-badge" alt="Defense">
   <img src="https://img.shields.io/badge/🛡️_SHIELD-<1ms_DMZ-00ADD8?style=for-the-badge" alt="Shield">
   <img src="https://img.shields.io/badge/🐉_STRIKE-39K+_Payloads-red?style=for-the-badge" alt="Strike">
   <img src="https://img.shields.io/badge/📦_SDK-PyPI-blue?style=for-the-badge" alt="SDK">
@@ -148,7 +148,7 @@ fetch('https://cdn.jsdelivr.net/gh/DmitrL-dev/AISecurity@latest/signatures/jailb
 
 > [!IMPORTANT]
 > ### 🚨 Open to Work — AI Security Engineer
-> **Solo author of this 105K LOC platform with 210 engines. Available remote.**
+> **Solo author of this 105K LOC platform with 212 engines. Available remote.**
 > 📧 [chg@live.ru](mailto:chg@live.ru) • 💬 [@DmLabincev](https://t.me/DmLabincev)
 
 ---
@@ -292,7 +292,7 @@ Shield# write memory
   <img src="./assets/brain_engines.png" alt="SENTINEL Brain - 207 Detection Engines" width="800">
 </p>
 
-> **210 detection engines** analyzing every prompt and response in real-time.
+> **212 detection engines** analyzing every prompt and response in real-time.
 
 ## Key Capabilities
 
