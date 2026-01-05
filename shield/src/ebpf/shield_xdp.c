@@ -3,7 +3,12 @@
  * 
  * Kernel-level packet filtering for AI security
  * Compile with: clang -O2 -target bpf -c shield_xdp.c -o shield_xdp.o
+ * 
+ * NOTE: This file requires BPF toolchain (clang with BPF target)
  */
+
+/* Guard: only compile with BPF-capable compiler */
+#if defined(__BPF__) || defined(SHIELD_COMPILE_XDP)
 
 #include <linux/bpf.h>
 #include <linux/if_ether.h>
@@ -297,3 +302,10 @@ int shield_tc_egress(struct __sk_buff *skb)
 }
 
 char LICENSE[] SEC("license") = "GPL";
+
+#else /* !__BPF__ && !SHIELD_COMPILE_XDP */
+
+/* Stub for non-BPF compilation */
+static void __shield_xdp_stub(void) { (void)0; }
+
+#endif /* __BPF__ || SHIELD_COMPILE_XDP */

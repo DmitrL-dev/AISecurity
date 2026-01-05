@@ -9,13 +9,11 @@
 #include <string.h>
 
 #include "shield_common.h"
+#include "shield_context.h"
 #include "shield_zone.h"
 #include "shield_rule.h"
 #include "shield_api.h"
 #include "shield_metrics.h"
-
-/* Context type (passed from main) */
-typedef struct shield_context shield_context_t;
 
 /* GET /health */
 void handler_health(const http_request_t *req, http_response_t *resp, void *ctx)
@@ -121,6 +119,7 @@ void handler_evaluate(const http_request_t *req, http_response_t *resp, void *ct
     /* Expected: {"zone": "name", "direction": "input", "data": "..."} */
     char zone_name[64] = "";
     char direction_str[16] = "input";
+    (void)direction_str; /* TODO: use for direction parsing */
     
     /* Extract zone */
     const char *zone_ptr = strstr(req->body, "\"zone\"");

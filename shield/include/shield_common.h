@@ -11,6 +11,7 @@
 #include <stdint.h>
 #include <stdbool.h>
 #include <stddef.h>
+#include <time.h>
 
 /* Version */
 #define SHIELD_VERSION_MAJOR 1
@@ -39,6 +40,13 @@ typedef enum {
     SHIELD_ERR_IO = -6,
     SHIELD_ERR_PARSE = -7,
     SHIELD_ERR_PERMISSION = -8,
+    SHIELD_ERR_TIMEOUT = -9,
+    SHIELD_ERR_NETWORK = -10,
+    SHIELD_ERR_RATELIMIT = -11,
+    SHIELD_ERR_UNSUPPORTED = -12,
+    SHIELD_ERR_DISCONNECTED = -13,
+    SHIELD_ERR_MEMORY = -14,
+    SHIELD_ERR_INTERNAL = -99,
 } shield_err_t;
 
 /* Zone types */
@@ -55,6 +63,7 @@ typedef enum {
 
 /* Rule actions */
 typedef enum {
+    ACTION_NONE = -1,       /* No action / any (for queries) */
     ACTION_ALLOW = 0,
     ACTION_BLOCK,
     ACTION_QUARANTINE,
@@ -63,6 +72,8 @@ typedef enum {
     ACTION_REDIRECT,
     ACTION_CHALLENGE,
     ACTION_TARPIT,
+    ACTION_ALERT,
+    ACTION_RATE_LIMIT,
 } rule_action_t;
 
 /* Rule directions */
@@ -104,11 +115,25 @@ typedef enum {
 
 /* CLI modes */
 typedef enum {
+    CLI_MODE_ANY = -1,      /* Available in all modes */
     CLI_MODE_EXEC = 0,      /* sentinel# */
+    CLI_MODE_PRIV = 0,      /* sentinel# (alias for privileged exec) */
     CLI_MODE_CONFIG,        /* sentinel(config)# */
     CLI_MODE_ZONE,          /* sentinel(config-zone)# */
     CLI_MODE_POLICY,        /* sentinel(config-policy)# */
+    CLI_MODE_HA,            /* sentinel(config-ha)# */
+    CLI_MODE_CLASS_MAP,     /* sentinel(config-cmap)# */
+    CLI_MODE_POLICY_MAP,    /* sentinel(config-pmap)# */
 } cli_mode_t;
+
+/* Debug flags */
+#define DEBUG_SHIELD    0x0001
+#define DEBUG_ZONE      0x0002
+#define DEBUG_RULE      0x0004
+#define DEBUG_GUARD     0x0008
+#define DEBUG_PROTOCOL  0x0010
+#define DEBUG_HA        0x0020
+#define DEBUG_ALL       0xFFFF
 
 /* Helper macros */
 #define ARRAY_SIZE(x) (sizeof(x) / sizeof((x)[0]))

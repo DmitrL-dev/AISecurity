@@ -11,6 +11,16 @@
 
 #include "shield_ebpf.h"
 
+/* Internal struct definition (opaque to users) */
+struct ebpf_context {
+    bool        initialized;
+    bool        enabled;
+    int         prog_fd;
+    int         map_fd;
+    char        interface[64];
+    ebpf_stats_t stats;
+};
+
 /* Check if eBPF is supported on this platform */
 bool ebpf_supported(void)
 {
@@ -30,21 +40,22 @@ bool ebpf_supported(void)
 }
 
 /* Initialize eBPF subsystem */
-shield_err_t ebpf_init(ebpf_context_t *ctx)
+shield_err_t ebpf_init(ebpf_context_t **ctx)
 {
     if (!ctx) return SHIELD_ERR_INVALID;
     
-    memset(ctx, 0, sizeof(*ctx));
+    *ctx = calloc(1, sizeof(ebpf_context_t));
+    if (!*ctx) return SHIELD_ERR_NOMEM;
     
     if (!ebpf_supported()) {
         LOG_WARN("eBPF not supported on this platform");
-        ctx->enabled = false;
+        (*ctx)->enabled = false;
         return SHIELD_OK;  /* Not an error, just not available */
     }
     
     /* TODO: Initialize libbpf */
     LOG_INFO("eBPF subsystem initialized (stub)");
-    ctx->initialized = true;
+    (*ctx)->initialized = true;
     
     return SHIELD_OK;
 }
@@ -59,94 +70,74 @@ void ebpf_destroy(ebpf_context_t *ctx)
     memset(ctx, 0, sizeof(*ctx));
 }
 
-/* Load eBPF program from object file */
-shield_err_t ebpf_load_program(ebpf_context_t *ctx, const char *path,
-                                 const char *prog_name, int *prog_fd)
+/* Load eBPF program */
+shield_err_t ebpf_load_program(ebpf_context_t *ctx, ebpf_prog_type_t type,
+                                const char *path)
 {
-    if (!ctx || !path || !prog_name || !prog_fd) {
+    if (!ctx || !path) {
         return SHIELD_ERR_INVALID;
     }
     
+    (void)type;
+    
     if (!ctx->initialized || !ebpf_supported()) {
-        LOG_WARN("eBPF not available, skipping program load: %s", prog_name);
-        *prog_fd = -1;
-        return SHIELD_ERR_UNSUPPORTED;
+        LOG_WARN("eBPF not available, skipping program load");
+        return SHIELD_ERR_IO;
     }
     
     /* TODO: Use libbpf to load program */
-    LOG_INFO("Would load eBPF program: %s from %s (stub)", prog_name, path);
-    *prog_fd = -1;
+    LOG_INFO("Would load eBPF program from %s (stub)", path);
     
-    return SHIELD_ERR_UNSUPPORTED;
+    return SHIELD_ERR_IO;
 }
 
-/* Attach eBPF program to hook */
-shield_err_t ebpf_attach(ebpf_context_t *ctx, int prog_fd,
-                           ebpf_hook_type_t hook, const char *interface)
+/* Attach to interface */
+shield_err_t ebpf_attach(ebpf_context_t *ctx, const char *interface)
 {
-    if (!ctx || prog_fd < 0) {
+    if (!ctx) {
         return SHIELD_ERR_INVALID;
     }
     
     if (!ctx->initialized || !ebpf_supported()) {
-        return SHIELD_ERR_UNSUPPORTED;
+        return SHIELD_ERR_IO;
     }
     
-    /* TODO: Attach program based on hook type */
-    switch (hook) {
-    case EBPF_HOOK_XDP:
-        LOG_INFO("Would attach XDP program to %s (stub)", interface ? interface : "default");
-        break;
-    case EBPF_HOOK_TC:
-        LOG_INFO("Would attach TC program (stub)");
-        break;
-    case EBPF_HOOK_KPROBE:
-        LOG_INFO("Would attach kprobe (stub)");
-        break;
-    case EBPF_HOOK_TRACEPOINT:
-        LOG_INFO("Would attach tracepoint (stub)");
-        break;
-    default:
-        return SHIELD_ERR_INVALID;
+    if (interface) {
+        strncpy(ctx->interface, interface, sizeof(ctx->interface) - 1);
     }
     
-    return SHIELD_ERR_UNSUPPORTED;
+    LOG_INFO("Would attach to interface %s (stub)", interface ? interface : "default");
+    
+    return SHIELD_ERR_IO;
 }
 
-/* Detach eBPF program */
-shield_err_t ebpf_detach(ebpf_context_t *ctx, int prog_fd)
+/* Detach from interface */
+shield_err_t ebpf_detach(ebpf_context_t *ctx, const char *interface)
 {
     if (!ctx) return SHIELD_ERR_INVALID;
     
-    /* TODO: Detach program */
+    (void)interface;
+    ctx->interface[0] = '\0';
     
     return SHIELD_OK;
 }
 
-/* Read value from eBPF map */
-shield_err_t ebpf_map_lookup(ebpf_context_t *ctx, int map_fd,
-                               const void *key, void *value)
-{
-    if (!ctx || map_fd < 0 || !key || !value) {
-        return SHIELD_ERR_INVALID;
-    }
-    
-    /* TODO: Use bpf_map_lookup_elem */
-    
-    return SHIELD_ERR_UNSUPPORTED;
-}
-
 /* Update value in eBPF map */
-shield_err_t ebpf_map_update(ebpf_context_t *ctx, int map_fd,
-                               const void *key, const void *value)
+shield_err_t ebpf_map_update(ebpf_context_t *ctx, const char *map_name,
+                              const void *key, size_t key_len,
+                              const void *value, size_t value_len)
 {
-    if (!ctx || map_fd < 0 || !key || !value) {
+    if (!ctx || !map_name || !key || !value) {
         return SHIELD_ERR_INVALID;
     }
+    
+    (void)key_len;
+    (void)value_len;
     
     /* TODO: Use bpf_map_update_elem */
+    LOG_INFO("Would update eBPF map %s (stub)", map_name);
     
-    return SHIELD_ERR_UNSUPPORTED;
+    return SHIELD_ERR_IO;
 }
 
 /* Delete key from eBPF map */
@@ -158,7 +149,7 @@ shield_err_t ebpf_map_delete(ebpf_context_t *ctx, int map_fd, const void *key)
     
     /* TODO: Use bpf_map_delete_elem */
     
-    return SHIELD_ERR_UNSUPPORTED;
+    return SHIELD_ERR_IO;
 }
 
 /* Get eBPF statistics */
@@ -171,16 +162,4 @@ shield_err_t ebpf_get_stats(ebpf_context_t *ctx, ebpf_stats_t *stats)
     /* TODO: Read stats from maps */
     
     return SHIELD_OK;
-}
-
-/* Get hook type name */
-const char *ebpf_hook_name(ebpf_hook_type_t hook)
-{
-    switch (hook) {
-    case EBPF_HOOK_XDP: return "XDP";
-    case EBPF_HOOK_TC: return "TC";
-    case EBPF_HOOK_KPROBE: return "kprobe";
-    case EBPF_HOOK_TRACEPOINT: return "tracepoint";
-    default: return "unknown";
-    }
 }

@@ -26,9 +26,9 @@ shield_err_t shield_context_init(shield_context_t *ctx)
     
     /* Allocate components */
     ctx->zones = calloc(1, sizeof(zone_registry_t));
-    ctx->rules = calloc(1, sizeof(rule_registry_t));
+    ctx->rules = calloc(1, sizeof(rule_engine_t));
     ctx->guards = calloc(1, sizeof(guard_registry_t));
-    ctx->rate_limiter = calloc(1, sizeof(rate_limiter_t));
+    ctx->rate_limiter = calloc(1, sizeof(ratelimiter_t));
     ctx->blocklist = calloc(1, sizeof(blocklist_t));
     ctx->sessions = calloc(1, sizeof(session_manager_t));
     ctx->canaries = calloc(1, sizeof(canary_manager_t));
@@ -52,16 +52,17 @@ shield_err_t shield_context_init(shield_context_t *ctx)
     err = zone_registry_init(ctx->zones);
     if (err != SHIELD_OK) goto error;
     
-    err = rule_registry_init(ctx->rules);
+    err = rule_engine_init(ctx->rules);
     if (err != SHIELD_OK) goto error;
     
     err = guard_registry_init(ctx->guards);
     if (err != SHIELD_OK) goto error;
     
-    err = ratelimit_init(ctx->rate_limiter, 100, 200);
+    ratelimit_config_t rl_config = {.requests_per_second = 100, .burst_size = 200};
+    err = ratelimiter_init(ctx->rate_limiter, &rl_config);
     if (err != SHIELD_OK) goto error;
     
-    err = blocklist_init(ctx->blocklist, 10000);
+    err = blocklist_init(ctx->blocklist, "default", 10000);
     if (err != SHIELD_OK) goto error;
     
     err = session_manager_init(ctx->sessions, 300);
@@ -120,7 +121,7 @@ void shield_context_destroy(shield_context_t *ctx)
         free(ctx->zones);
     }
     if (ctx->rules) {
-        rule_registry_destroy(ctx->rules);
+        rule_engine_destroy(ctx->rules);
         free(ctx->rules);
     }
     if (ctx->guards) {
@@ -128,7 +129,7 @@ void shield_context_destroy(shield_context_t *ctx)
         free(ctx->guards);
     }
     if (ctx->rate_limiter) {
-        ratelimit_destroy(ctx->rate_limiter);
+        ratelimiter_destroy(ctx->rate_limiter);
         free(ctx->rate_limiter);
     }
     if (ctx->blocklist) {
@@ -234,7 +235,7 @@ shield_err_t shield_evaluate(shield_context_t *ctx,
     response->confidence = 1.0f;
     
     /* Look up zone */
-    zone_t *zone = zone_lookup(ctx->zones, request->zone);
+    shield_zone_t *zone = zone_find_by_name(ctx->zones, request->zone);
     if (!zone) {
         snprintf(response->reason, sizeof(response->reason), "Unknown zone");
         response->action = ACTION_BLOCK;
@@ -261,7 +262,8 @@ shield_err_t shield_evaluate(shield_context_t *ctx,
     }
     
     /* Canary check */
-    if (request->data && canary_scan(ctx->canaries, request->data, request->data_len)) {
+    canary_result_t canary_result = canary_scan(ctx->canaries, request->data, request->data_len);
+    if (request->data && canary_result.detected) {
         /* Fire alert */
         alert_fire(ctx->alerts, ALERT_CRITICAL, "canary",
                    "Canary token detected", "Data exfiltration attempt",
@@ -276,7 +278,7 @@ shield_err_t shield_evaluate(shield_context_t *ctx,
     
     /* Rule evaluation */
     uint32_t acl_id = (request->direction == DIRECTION_INPUT) 
-                       ? zone->inbound_acl : zone->outbound_acl;
+                       ? zone->in_acl : zone->out_acl;
     
     if (acl_id > 0) {
         rule_verdict_t verdict = rule_evaluate(ctx->rules, acl_id,
@@ -284,7 +286,7 @@ shield_err_t shield_evaluate(shield_context_t *ctx,
             request->data, request->data_len);
         
         response->action = verdict.action;
-        response->rule_number = verdict.matched_rule;
+        response->rule_number = verdict.matched_rule ? verdict.matched_rule->number : 0;
         if (verdict.reason) {
             strncpy(response->reason, verdict.reason, sizeof(response->reason) - 1);
         }
@@ -307,9 +309,9 @@ shield_err_t shield_evaluate(shield_context_t *ctx,
     }
     
     /* Metrics */
-    metrics_inc(ctx->metrics, "shield_requests_total", NULL);
+    metrics_inc_by_name(ctx->metrics, "shield_requests_total", NULL);
     if (response->action == ACTION_BLOCK) {
-        metrics_inc(ctx->metrics, "shield_requests_blocked", NULL);
+        metrics_inc_by_name(ctx->metrics, "shield_requests_blocked", NULL);
     }
     
     response->latency_us = platform_time_us() - start;

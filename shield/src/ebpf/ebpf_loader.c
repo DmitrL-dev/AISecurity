@@ -18,10 +18,21 @@
 #endif
 
 #include "shield_common.h"
-#include "shield_ebpf.h"
+/* Note: ebpf_loader.c has its own extended API, not using shield_ebpf.h */
 
-/* eBPF Context */
+/* Local stats definition */
 typedef struct {
+    uint64_t    packets_in;
+    uint64_t    packets_out;
+    uint64_t    bytes_in;
+    uint64_t    bytes_out;
+    uint64_t    dropped;
+    uint64_t    errors;
+    uint64_t    events_received;
+} ebpf_stats_t;
+
+/* Local loader context (extended, not exported) */
+typedef struct ebpf_loader_ctx {
     char                interface[64];
     int                 ifindex;
     bool                loaded;
@@ -47,14 +58,14 @@ typedef struct {
     
     /* Statistics */
     uint64_t            events_received;
-} ebpf_context_t;
+} ebpf_loader_ctx_t;
 
 #ifdef SHIELD_USE_EBPF
 
 /* Event handler callback */
 static int handle_event(void *ctx, void *data, size_t data_sz)
 {
-    ebpf_context_t *ectx = (ebpf_context_t *)ctx;
+    ebpf_loader_ctx_t *ectx = (ebpf_loader_ctx_t *)ctx;
     struct shield_request *req = data;
     
     ectx->events_received++;
@@ -77,7 +88,7 @@ static int handle_event(void *ctx, void *data, size_t data_sz)
 #endif /* SHIELD_USE_EBPF */
 
 /* Initialize eBPF */
-shield_err_t ebpf_init(ebpf_context_t *ctx, const char *interface)
+shield_err_t ebpf_init(ebpf_loader_ctx_t *ctx, const char *interface)
 {
     if (!ctx || !interface) {
         return SHIELD_ERR_INVALID;
@@ -100,12 +111,12 @@ shield_err_t ebpf_init(ebpf_context_t *ctx, const char *interface)
     return SHIELD_OK;
 #else
     LOG_WARN("eBPF: Not supported (compile with SHIELD_USE_EBPF)");
-    return SHIELD_ERR_NOT_SUPPORTED;
+    return SHIELD_ERR_IO;
 #endif
 }
 
 /* Load eBPF program */
-shield_err_t ebpf_load(ebpf_context_t *ctx, const char *program_path)
+shield_err_t ebpf_load(ebpf_loader_ctx_t *ctx, const char *program_path)
 {
     if (!ctx) {
         return SHIELD_ERR_INVALID;
@@ -161,12 +172,12 @@ shield_err_t ebpf_load(ebpf_context_t *ctx, const char *program_path)
     return SHIELD_OK;
 #else
     (void)program_path;
-    return SHIELD_ERR_NOT_SUPPORTED;
+    return SHIELD_ERR_IO;
 #endif
 }
 
 /* Attach XDP program to interface */
-shield_err_t ebpf_attach(ebpf_context_t *ctx)
+shield_err_t ebpf_attach(ebpf_loader_ctx_t *ctx)
 {
     if (!ctx || !ctx->loaded) {
         return SHIELD_ERR_INVALID;
@@ -186,12 +197,12 @@ shield_err_t ebpf_attach(ebpf_context_t *ctx)
     LOG_INFO("eBPF: XDP attached to %s", ctx->interface);
     return SHIELD_OK;
 #else
-    return SHIELD_ERR_NOT_SUPPORTED;
+    return SHIELD_ERR_IO;
 #endif
 }
 
 /* Detach XDP program */
-shield_err_t ebpf_detach(ebpf_context_t *ctx)
+shield_err_t ebpf_detach(ebpf_loader_ctx_t *ctx)
 {
     if (!ctx) {
         return SHIELD_ERR_INVALID;
@@ -204,12 +215,12 @@ shield_err_t ebpf_detach(ebpf_context_t *ctx)
     }
     return SHIELD_OK;
 #else
-    return SHIELD_ERR_NOT_SUPPORTED;
+    return SHIELD_ERR_IO;
 #endif
 }
 
 /* Add IP to blocklist */
-shield_err_t ebpf_block_ip(ebpf_context_t *ctx, uint32_t ip)
+shield_err_t ebpf_block_ip(ebpf_loader_ctx_t *ctx, uint32_t ip)
 {
     if (!ctx) {
         return SHIELD_ERR_INVALID;
@@ -231,12 +242,12 @@ shield_err_t ebpf_block_ip(ebpf_context_t *ctx, uint32_t ip)
     return SHIELD_OK;
 #else
     (void)ip;
-    return SHIELD_ERR_NOT_SUPPORTED;
+    return SHIELD_ERR_IO;
 #endif
 }
 
 /* Remove IP from blocklist */
-shield_err_t ebpf_unblock_ip(ebpf_context_t *ctx, uint32_t ip)
+shield_err_t ebpf_unblock_ip(ebpf_loader_ctx_t *ctx, uint32_t ip)
 {
     if (!ctx) {
         return SHIELD_ERR_INVALID;
@@ -251,12 +262,12 @@ shield_err_t ebpf_unblock_ip(ebpf_context_t *ctx, uint32_t ip)
     return SHIELD_OK;
 #else
     (void)ip;
-    return SHIELD_ERR_NOT_SUPPORTED;
+    return SHIELD_ERR_IO;
 #endif
 }
 
 /* Add port to whitelist */
-shield_err_t ebpf_whitelist_port(ebpf_context_t *ctx, uint16_t port)
+shield_err_t ebpf_whitelist_port(ebpf_loader_ctx_t *ctx, uint16_t port)
 {
     if (!ctx) {
         return SHIELD_ERR_INVALID;
@@ -272,12 +283,12 @@ shield_err_t ebpf_whitelist_port(ebpf_context_t *ctx, uint16_t port)
     return SHIELD_OK;
 #else
     (void)port;
-    return SHIELD_ERR_NOT_SUPPORTED;
+    return SHIELD_ERR_IO;
 #endif
 }
 
 /* Get statistics */
-shield_err_t ebpf_get_stats(ebpf_context_t *ctx, ebpf_stats_t *stats)
+shield_err_t ebpf_get_stats(ebpf_loader_ctx_t *ctx, ebpf_stats_t *stats)
 {
     if (!ctx || !stats) {
         return SHIELD_ERR_INVALID;
@@ -303,12 +314,12 @@ shield_err_t ebpf_get_stats(ebpf_context_t *ctx, ebpf_stats_t *stats)
     stats->events_received = ctx->events_received;
     return SHIELD_OK;
 #else
-    return SHIELD_ERR_NOT_SUPPORTED;
+    return SHIELD_ERR_IO;
 #endif
 }
 
 /* Poll for events */
-shield_err_t ebpf_poll_events(ebpf_context_t *ctx, int timeout_ms)
+shield_err_t ebpf_poll_events(ebpf_loader_ctx_t *ctx, int timeout_ms)
 {
     if (!ctx) {
         return SHIELD_ERR_INVALID;
@@ -321,12 +332,12 @@ shield_err_t ebpf_poll_events(ebpf_context_t *ctx, int timeout_ms)
     return SHIELD_OK;
 #else
     (void)timeout_ms;
-    return SHIELD_ERR_NOT_SUPPORTED;
+    return SHIELD_ERR_IO;
 #endif
 }
 
 /* Update configuration */
-shield_err_t ebpf_set_config(ebpf_context_t *ctx, uint32_t rate_limit_pps,
+shield_err_t ebpf_set_config(ebpf_loader_ctx_t *ctx, uint32_t rate_limit_pps,
                               bool block_unknown, bool enabled)
 {
     if (!ctx) {
@@ -360,12 +371,12 @@ shield_err_t ebpf_set_config(ebpf_context_t *ctx, uint32_t rate_limit_pps,
     return SHIELD_OK;
 #else
     (void)enabled;
-    return SHIELD_ERR_NOT_SUPPORTED;
+    return SHIELD_ERR_IO;
 #endif
 }
 
 /* Destroy eBPF context */
-void ebpf_destroy(ebpf_context_t *ctx)
+void ebpf_destroy(ebpf_loader_ctx_t *ctx)
 {
     if (!ctx) {
         return;

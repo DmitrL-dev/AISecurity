@@ -132,6 +132,80 @@
 
 ---
 
+## Phase 4: ThreatHunter, Watchdog, Cognitive, PQC
+
+### ThreatHunter
+
+18. What three hunting modes does ThreatHunter support?
+    - A) Pattern, Regex, Literal
+    - B) IOC, Behavioral, Anomaly ✓
+    - C) Fast, Medium, Deep
+    - D) Active, Passive, Hybrid
+
+19. What does BEHAVIOR_RECON detect?
+    - A) Data exfiltration
+    - B) Reconnaissance activity ✓
+    - C) Privilege escalation
+    - D) Persistence mechanisms
+
+### Watchdog
+
+20. What does Watchdog auto-recovery do?
+    - A) Restart the system
+    - B) Automatically restore failed components ✓
+    - C) Send notifications only
+    - D) Create backups
+
+21. How many alert escalation levels?
+    - A) 2
+    - B) 3
+    - C) 4 ✓
+    - D) 5
+
+### Cognitive Signatures
+
+22. How many cognitive signature types in Shield?
+    - A) 5
+    - B) 6
+    - C) 7 ✓
+    - D) 8
+
+23. What does AUTHORITY_CLAIM detect?
+    - A) False authority claims ✓
+    - B) Context injection
+    - C) Emotional pressure
+    - D) Logic break
+
+### Post-Quantum Cryptography
+
+24. Which algorithm is used for key exchange in PQC?
+    - A) RSA
+    - B) Kyber ✓
+    - C) ECC
+    - D) DH
+
+25. What security level is Kyber-1024?
+    - A) NIST Level 1
+    - B) NIST Level 3
+    - C) NIST Level 5 ✓
+    - D) NIST Level 7
+
+### Shield State & CLI
+
+26. How many CLI commands are in Shield?
+    - A) 50
+    - B) 100
+    - C) 199 ✓
+    - D) 300
+
+27. What command saves configuration?
+    - A) save config
+    - B) write memory ✓
+    - C) config save
+    - D) store settings
+
+---
+
 ## Answers Quick Reference
 
 | Q | A | Q | A | Q | A |

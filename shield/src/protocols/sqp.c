@@ -10,7 +10,15 @@
 
 #include "shield_common.h"
 #include "shield_protocol.h"
+#include "shield_platform.h"
 #include "shield_quarantine.h"
+
+/* Local stub for UUID generation */
+static void generate_uuid(char *buf)
+{
+    static uint32_t counter = 0;
+    snprintf(buf, 64, "sqp-%08lx-%08x", (unsigned long)time(NULL), ++counter);
+}
 
 /* SQP Message Types */
 typedef enum {
@@ -61,9 +69,9 @@ shield_err_t sqp_quarantine(sqp_context_t *ctx, const char *zone,
     
     uint8_t type = SQP_MSG_QUARANTINE;
     if (ctx->socket >= 0) {
-        send(ctx->socket, &type, 1, 0);
-        send(ctx->socket, &entry, sizeof(entry), 0);
-        send(ctx->socket, data, size, 0);
+        send(ctx->socket, (const char*)&type, 1, 0);
+        send(ctx->socket, (const char*)&entry, sizeof(entry), 0);
+        send(ctx->socket, (const char*)data, size, 0);
     }
     
     LOG_INFO("SQP: Quarantined request from zone %s", zone);
@@ -86,7 +94,7 @@ shield_err_t sqp_release(sqp_context_t *ctx, const char *id)
     strncpy(request.id, id, sizeof(request.id) - 1);
     
     if (ctx->socket >= 0) {
-        send(ctx->socket, &request, sizeof(request), 0);
+        send(ctx->socket, (const char*)&request, sizeof(request), 0);
     }
     
     return SHIELD_OK;
@@ -108,15 +116,14 @@ shield_err_t sqp_delete(sqp_context_t *ctx, const char *id)
     strncpy(request.id, id, sizeof(request.id) - 1);
     
     if (ctx->socket >= 0) {
-        send(ctx->socket, &request, sizeof(request), 0);
+        send(ctx->socket, (const char*)&request, sizeof(request), 0);
     }
     
     return SHIELD_OK;
 }
 
-/* Request analysis */
-shield_err_t sqp_analyze(sqp_context_t *ctx, const char *id,
-                          sqp_verdict_callback_t callback, void *user_data)
+/* Request analysis (simplified - callback not implemented) */
+shield_err_t sqp_analyze(sqp_context_t *ctx, const char *id)
 {
     if (!ctx || !id) {
         return SHIELD_ERR_INVALID;
@@ -131,9 +138,10 @@ shield_err_t sqp_analyze(sqp_context_t *ctx, const char *id,
     strncpy(request.id, id, sizeof(request.id) - 1);
     
     if (ctx->socket >= 0) {
-        send(ctx->socket, &request, sizeof(request), 0);
+        send(ctx->socket, (const char*)&request, sizeof(request), 0);
     }
     
+    /* TODO: Implement async callback when received */
     return SHIELD_OK;
 }
 

