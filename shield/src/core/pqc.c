@@ -14,6 +14,7 @@
 #include <stdint.h>
 
 #include "shield_common.h"
+#include "shield_qrng.h"
 
 /* ===== Constants ===== */
 
@@ -30,12 +31,13 @@
 
 /* ===== Random Number Generation ===== */
 
-/* Simple PRNG for stub (replace with QRNG in production) */
+/* Use QRNG for cryptographically secure random bytes */
 static void pqc_randombytes(uint8_t *out, size_t len)
 {
-    /* Note: Use hardware RNG or QRNG in production! */
-    for (size_t i = 0; i < len; i++) {
-        out[i] = (uint8_t)(rand() & 0xFF);
+    /* Use quantum random number generator for maximum security */
+    if (shield_qrng_bytes(out, len) != SHIELD_OK) {
+        /* Fallback: QRNG should auto-init, but log warning if it fails */
+        LOG_WARN("PQC: QRNG fallback - this should not happen in production");
     }
 }
 

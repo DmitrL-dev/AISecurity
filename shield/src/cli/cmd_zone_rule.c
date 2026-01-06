@@ -14,11 +14,11 @@
 /* Note: cmd_zone is implemented in commands.c */
 
 /* no zone <name> */
-static void cmd_no_zone(cli_context_t *ctx, int argc, char **argv)
+static shield_err_t cmd_no_zone(cli_context_t *ctx, int argc, char **argv)
 {
     if (argc < 3) {
         cli_print("%% Usage: no zone <name>\n");
-        return;
+        return SHIELD_OK;
     }
     
     zone_delete(ctx->zones, argv[2]);
@@ -27,11 +27,11 @@ static void cmd_no_zone(cli_context_t *ctx, int argc, char **argv)
 }
 
 /* type (zone subcommand) */
-static void cmd_zone_type(cli_context_t *ctx, int argc, char **argv)
+static shield_err_t cmd_zone_type(cli_context_t *ctx, int argc, char **argv)
 {
     if (argc < 2) {
         cli_print("%% Usage: type <llm|rag|agent|tool|mcp|api>\n");
-        return;
+        return SHIELD_OK;
     }
     
     shield_zone_t *zone = zone_find_by_name(ctx->zones, ctx->current_zone);
@@ -43,11 +43,11 @@ static void cmd_zone_type(cli_context_t *ctx, int argc, char **argv)
 }
 
 /* provider (zone subcommand) */
-static void cmd_zone_provider(cli_context_t *ctx, int argc, char **argv)
+static shield_err_t cmd_zone_provider(cli_context_t *ctx, int argc, char **argv)
 {
     if (argc < 2) {
         cli_print("%% Usage: provider <name>\n");
-        return;
+        return SHIELD_OK;
     }
     
     shield_zone_t *zone = zone_find_by_name(ctx->zones, ctx->current_zone);
@@ -59,11 +59,11 @@ static void cmd_zone_provider(cli_context_t *ctx, int argc, char **argv)
 }
 
 /* description (zone subcommand) */
-static void cmd_zone_description(cli_context_t *ctx, int argc, char **argv)
+static shield_err_t cmd_zone_description(cli_context_t *ctx, int argc, char **argv)
 {
     if (argc < 2) {
         cli_print("%% Usage: description <text>\n");
-        return;
+        return SHIELD_OK;
     }
     
     shield_zone_t *zone = zone_find_by_name(ctx->zones, ctx->current_zone);
@@ -74,11 +74,11 @@ static void cmd_zone_description(cli_context_t *ctx, int argc, char **argv)
 }
 
 /* trust-level (zone subcommand) */
-static void cmd_zone_trust(cli_context_t *ctx, int argc, char **argv)
+static shield_err_t cmd_zone_trust(cli_context_t *ctx, int argc, char **argv)
 {
     if (argc < 2) {
         cli_print("%% Usage: trust-level <0-10>\n");
-        return;
+        return SHIELD_OK;
     }
     
     shield_zone_t *zone = zone_find_by_name(ctx->zones, ctx->current_zone);
@@ -90,7 +90,7 @@ static void cmd_zone_trust(cli_context_t *ctx, int argc, char **argv)
 }
 
 /* shutdown (zone subcommand) */
-static void cmd_zone_shutdown(cli_context_t *ctx, int argc, char **argv)
+static shield_err_t cmd_zone_shutdown(cli_context_t *ctx, int argc, char **argv)
 {
     (void)argc; (void)argv;
     
@@ -103,7 +103,7 @@ static void cmd_zone_shutdown(cli_context_t *ctx, int argc, char **argv)
 }
 
 /* no shutdown (zone subcommand) */
-static void cmd_zone_no_shutdown(cli_context_t *ctx, int argc, char **argv)
+static shield_err_t cmd_zone_no_shutdown(cli_context_t *ctx, int argc, char **argv)
 {
     (void)argc; (void)argv;
     
@@ -118,11 +118,11 @@ static void cmd_zone_no_shutdown(cli_context_t *ctx, int argc, char **argv)
 /* Note: cmd_shield_rule is implemented in commands.c */
 
 /* no shield-rule <num> */
-static void cmd_no_shield_rule(cli_context_t *ctx, int argc, char **argv)
+static shield_err_t cmd_no_shield_rule(cli_context_t *ctx, int argc, char **argv)
 {
     if (argc < 3) {
         cli_print("%% Usage: no shield-rule <num>\n");
-        return;
+        return SHIELD_OK;
     }
     
     uint32_t rule_num = atoi(argv[2]);
@@ -137,11 +137,11 @@ static void cmd_no_shield_rule(cli_context_t *ctx, int argc, char **argv)
 }
 
 /* access-list <num> */
-static void cmd_access_list(cli_context_t *ctx, int argc, char **argv)
+static shield_err_t cmd_access_list(cli_context_t *ctx, int argc, char **argv)
 {
     if (argc < 2) {
         cli_print("%% Usage: access-list <number>\n");
-        return;
+        return SHIELD_OK;
     }
     
     uint32_t num = atoi(argv[1]);
@@ -157,11 +157,11 @@ static void cmd_access_list(cli_context_t *ctx, int argc, char **argv)
 }
 
 /* no access-list <num> */
-static void cmd_no_access_list(cli_context_t *ctx, int argc, char **argv)
+static shield_err_t cmd_no_access_list(cli_context_t *ctx, int argc, char **argv)
 {
     if (argc < 3) {
         cli_print("%% Usage: no access-list <number>\n");
-        return;
+        return SHIELD_OK;
     }
     
     uint32_t num = atoi(argv[2]);
@@ -172,11 +172,11 @@ static void cmd_no_access_list(cli_context_t *ctx, int argc, char **argv)
 }
 
 /* apply zone <name> in <acl> out <acl> */
-static void cmd_apply_zone(cli_context_t *ctx, int argc, char **argv)
+static shield_err_t cmd_apply_zone(cli_context_t *ctx, int argc, char **argv)
 {
     if (argc < 4) {
         cli_print("%% Usage: apply zone <name> in <acl> [out <acl>]\n");
-        return;
+        return SHIELD_OK;
     }
     
     const char *zone_name = argv[2];
@@ -184,7 +184,7 @@ static void cmd_apply_zone(cli_context_t *ctx, int argc, char **argv)
     
     if (!zone) {
         cli_print("%% Zone %s not found\n", zone_name);
-        return;
+        return SHIELD_OK;
     }
     
     for (int i = 3; i < argc - 1; i += 2) {

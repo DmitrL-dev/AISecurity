@@ -1,0 +1,35 @@
+# SENTINEL Shield RBAC
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: sentinel-shield
+  labels:
+    app: sentinel-shield
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: sentinel-shield
+  labels:
+    app: sentinel-shield
+rules:
+  - apiGroups: [""]
+    resources: ["configmaps"]
+    verbs: ["get", "list", "watch"]
+  - apiGroups: [""]
+    resources: ["secrets"]
+    verbs: ["get"]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: sentinel-shield
+  labels:
+    app: sentinel-shield
+subjects:
+  - kind: ServiceAccount
+    name: sentinel-shield
+roleRef:
+  kind: Role
+  name: sentinel-shield
+  apiGroup: rbac.authorization.k8s.io

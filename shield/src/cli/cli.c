@@ -197,7 +197,13 @@ shield_err_t cli_execute(shield_context_t *ctx, const char *line)
         return SHIELD_OK;
     }
     
-    /* Find and execute command */
+    /* First try registered commands (for multi-word like "no guard enable llm") */
+    shield_err_t err = cli_execute_args(ctx, argc, argv);
+    if (err == SHIELD_OK) {
+        return SHIELD_OK;
+    }
+    
+    /* Fall back to built-in commands */
     const char *cmd = argv[0];
     
     /* Global commands */
@@ -354,23 +360,44 @@ shield_err_t cli_execute_args(shield_context_t *ctx, int argc, char **argv)
         return SHIELD_ERR_INVALID;
     }
     
-    const char *cmd_name = argv[0];
+    /* Build full command line from argv for matching */
+    char cmd_line[256] = {0};
+    for (int i = 0; i < argc && i < 8; i++) {
+        if (i > 0) strcat(cmd_line, " ");
+        strncat(cmd_line, argv[i], sizeof(cmd_line) - strlen(cmd_line) - 2);
+    }
     
-    /* Search registered commands */
+    /* Find longest matching command (priority to more specific commands) */
+    cli_command_t *best_match = NULL;
+    size_t best_len = 0;
+    
     for (int i = 0; i < registered_command_count; i++) {
         cli_command_t *cmd = registered_commands[i];
-        if (!cmd) continue;
+        if (!cmd || !cmd->name) continue;
         
         /* Check mode */
         if (cmd->mode != CLI_MODE_ANY && cmd->mode != ctx->cli.mode) {
             continue;
         }
         
-        /* Match command name (prefix match) */
-        if (strncmp(cmd->name, cmd_name, strlen(cmd_name)) == 0) {
-            cmd->handler(ctx, argc, argv);
-            return SHIELD_OK;
+        size_t cmd_len = strlen(cmd->name);
+        
+        /* Check if cmd_line starts with this command */
+        if (strncmp(cmd_line, cmd->name, cmd_len) == 0) {
+            /* Must be word boundary (space or end) */
+            char next = cmd_line[cmd_len];
+            if (next == '\0' || next == ' ') {
+                /* Prefer longer (more specific) matches */
+                if (cmd_len > best_len) {
+                    best_match = cmd;
+                    best_len = cmd_len;
+                }
+            }
         }
+    }
+    
+    if (best_match) {
+        return best_match->handler(ctx, argc, argv);
     }
     
     return SHIELD_ERR_NOTFOUND;

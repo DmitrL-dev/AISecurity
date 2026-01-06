@@ -12,8 +12,8 @@
 /* CLI uses cli_context_t as alias for shield_context */
 typedef shield_context_t cli_context_t;
 
-/* Command handler function */
-typedef void (*cli_handler_t)(shield_context_t *ctx, 
+/* Command handler function - returns shield_err_t for proper error handling */
+typedef shield_err_t (*cli_handler_t)(shield_context_t *ctx, 
                                int argc, char **argv);
 
 /* CLI command definition */

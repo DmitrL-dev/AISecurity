@@ -201,13 +201,13 @@ shield_err_t validate_response(response_validator_t *v,
         if ((int)len > v->config.max_length) {
             result->valid = false;
             strncpy(result->issues[result->issues_count++],
-                    "Response exceeds maximum length", 127);
+                    "Response exceeds maximum length", sizeof(result->issues[0]) - 1);
             result->quality_score -= 0.2f;
         }
         if ((int)len < v->config.min_length) {
             result->valid = false;
             strncpy(result->issues[result->issues_count++],
-                    "Response below minimum length", 127);
+                    "Response below minimum length", sizeof(result->issues[0]) - 1);
             result->quality_score -= 0.1f;
         }
     }
@@ -218,7 +218,7 @@ shield_err_t validate_response(response_validator_t *v,
         if (result->contains_secrets) {
             result->valid = false;
             strncpy(result->issues[result->issues_count++],
-                    "Response contains potential secrets/API keys", 127);
+                    "Response contains potential secrets/API keys", sizeof(result->issues[0]) - 1);
             result->quality_score -= 0.3f;
         }
     }
@@ -229,7 +229,7 @@ shield_err_t validate_response(response_validator_t *v,
         if (result->contains_pii) {
             result->valid = false;
             strncpy(result->issues[result->issues_count++],
-                    "Response contains PII (SSN, credit card, etc.)", 127);
+                    "Response contains PII (SSN, credit card, etc.)", sizeof(result->issues[0]) - 1);
             result->quality_score -= 0.3f;
         }
     }
@@ -240,7 +240,7 @@ shield_err_t validate_response(response_validator_t *v,
         if (result->harmful_content) {
             result->valid = false;
             strncpy(result->issues[result->issues_count++],
-                    "Response contains harmful content", 127);
+                    "Response contains harmful content", sizeof(result->issues[0]) - 1);
             result->quality_score -= 0.5f;
         }
     }
@@ -251,7 +251,7 @@ shield_err_t validate_response(response_validator_t *v,
         if (result->prompt_leak) {
             result->valid = false;
             strncpy(result->issues[result->issues_count++],
-                    "Response may leak system prompt", 127);
+                    "Response may leak system prompt", sizeof(result->issues[0]) - 1);
             result->quality_score -= 0.4f;
         }
     }
@@ -263,7 +263,7 @@ shield_err_t validate_response(response_validator_t *v,
             char issue[128];
             snprintf(issue, sizeof(issue), "Contains forbidden word: %s",
                      v->config.forbidden_words[i]);
-            strncpy(result->issues[result->issues_count++], issue, 127);
+            strncpy(result->issues[result->issues_count++], issue, sizeof(result->issues[0]) - 1);
             result->quality_score -= 0.1f;
         }
     }
@@ -276,7 +276,7 @@ shield_err_t validate_response(response_validator_t *v,
                 char issue[128];
                 snprintf(issue, sizeof(issue), "Missing required phrase: %s",
                          v->config.required_phrases[i]);
-                strncpy(result->issues[result->issues_count++], issue, 127);
+                strncpy(result->issues[result->issues_count++], issue, sizeof(result->issues[0]) - 1);
             }
             result->quality_score -= 0.1f;
         }

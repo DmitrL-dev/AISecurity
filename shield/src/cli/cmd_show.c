@@ -41,6 +41,7 @@ static const char* show_log_level_str(log_level_t level) {
         case LOG_TRACE: return "trace";
         default: return "unknown";
     }
+    return SHIELD_OK;
 }
 
 static const char* show_zone_type(zone_type_t type) {
@@ -52,6 +53,7 @@ static const char* show_zone_type(zone_type_t type) {
         case ZONE_TYPE_MCP: return "mcp";
         default: return "unknown";
     }
+    return SHIELD_OK;
 }
 
 static const char* show_action_str(rule_action_t action) {
@@ -62,6 +64,7 @@ static const char* show_action_str(rule_action_t action) {
         case ACTION_QUARANTINE: return "quarantine";
         default: return "unknown";
     }
+    return SHIELD_OK;
 }
 
 static const char* show_direction_str(rule_direction_t dir) {
@@ -71,6 +74,7 @@ static const char* show_direction_str(rule_direction_t dir) {
         case DIRECTION_BOTH: return "any";
         default: return "unknown";
     }
+    return SHIELD_OK;
 }
 
 static const char* show_match_type(match_type_t type) {
@@ -81,6 +85,7 @@ static const char* show_match_type(match_type_t type) {
         case MATCH_DATA_EXFIL: return "exfiltration";
         default: return "any";
     }
+    return SHIELD_OK;
 }
 
 static uint32_t show_count_all_rules(rule_engine_t *rules) {
@@ -95,7 +100,7 @@ static uint32_t show_count_all_rules(rule_engine_t *rules) {
 }
 
 /* show running-config */
-static void cmd_show_running(cli_context_t *ctx, int argc, char **argv)
+static shield_err_t cmd_show_running(cli_context_t *ctx, int argc, char **argv)
 {
     (void)argc; (void)argv;
     cli_print("!\n");
@@ -119,10 +124,11 @@ static void cmd_show_running(cli_context_t *ctx, int argc, char **argv)
     }
     
     cli_print("end\n");
+    return SHIELD_OK;
 }
 
 /* show startup-config */
-static void cmd_show_startup(cli_context_t *ctx, int argc, char **argv)
+static shield_err_t cmd_show_startup(cli_context_t *ctx, int argc, char **argv)
 {
     (void)ctx; (void)argc; (void)argv;
     cli_print("Startup configuration from NVRAM:\n\n");
@@ -136,10 +142,11 @@ static void cmd_show_startup(cli_context_t *ctx, int argc, char **argv)
     } else {
         cli_print("%% No startup configuration found\n");
     }
+    return SHIELD_OK;
 }
 
 /* show interfaces */
-static void cmd_show_interfaces(cli_context_t *ctx, int argc, char **argv)
+static shield_err_t cmd_show_interfaces(cli_context_t *ctx, int argc, char **argv)
 {
     (void)ctx; (void)argc; (void)argv;
     cli_print("\nInterface Status:\n");
@@ -148,10 +155,11 @@ static void cmd_show_interfaces(cli_context_t *ctx, int argc, char **argv)
     cli_print("%-12s %-10s %-15s %-10d\n", "api0", "up", "0.0.0.0:8080", 1500);
     cli_print("%-12s %-10s %-15s %-10d\n", "metrics0", "up", "0.0.0.0:9090", 1500);
     cli_print("\n");
+    return SHIELD_OK;
 }
 
 /* show uptime */
-static void cmd_show_uptime(cli_context_t *ctx, int argc, char **argv)
+static shield_err_t cmd_show_uptime(cli_context_t *ctx, int argc, char **argv)
 {
     (void)argc; (void)argv;
     uint64_t uptime = ctx->uptime_seconds;
@@ -163,10 +171,11 @@ static void cmd_show_uptime(cli_context_t *ctx, int argc, char **argv)
     cli_print("Shield uptime is %lu day(s), %lu hour(s), %lu minute(s), %lu second(s)\n",
              (unsigned long)days, (unsigned long)hours, 
              (unsigned long)mins, (unsigned long)secs);
+    return SHIELD_OK;
 }
 
 /* show memory */
-static void cmd_show_memory(cli_context_t *ctx, int argc, char **argv)
+static shield_err_t cmd_show_memory(cli_context_t *ctx, int argc, char **argv)
 {
     (void)argc; (void)argv;
     cli_print("\nMemory Statistics:\n");
@@ -182,10 +191,11 @@ static void cmd_show_memory(cli_context_t *ctx, int argc, char **argv)
         cli_print("  Not available\n");
     }
     cli_print("\n");
+    return SHIELD_OK;
 }
 
 /* show cpu */
-static void cmd_show_cpu(cli_context_t *ctx, int argc, char **argv)
+static shield_err_t cmd_show_cpu(cli_context_t *ctx, int argc, char **argv)
 {
     (void)argc; (void)argv;
     cli_print("\nCPU Utilization:\n");
@@ -194,10 +204,11 @@ static void cmd_show_cpu(cli_context_t *ctx, int argc, char **argv)
     cli_print("  5 minute:  %.1f%%\n", ctx->cpu_5min);
     cli_print("  15 minute: %.1f%%\n", ctx->cpu_15min);
     cli_print("\n");
+    return SHIELD_OK;
 }
 
 /* show clock */
-static void cmd_show_clock(cli_context_t *ctx, int argc, char **argv)
+static shield_err_t cmd_show_clock(cli_context_t *ctx, int argc, char **argv)
 {
     (void)ctx; (void)argc; (void)argv;
     time_t now = time(NULL);
@@ -205,10 +216,11 @@ static void cmd_show_clock(cli_context_t *ctx, int argc, char **argv)
     char buf[64];
     strftime(buf, sizeof(buf), "%H:%M:%S.000 %Z %a %b %d %Y", tm);
     cli_print("%s\n", buf);
+    return SHIELD_OK;
 }
 
 /* show logging */
-static void cmd_show_logging(cli_context_t *ctx, int argc, char **argv)
+static shield_err_t cmd_show_logging(cli_context_t *ctx, int argc, char **argv)
 {
     (void)argc; (void)argv;
     cli_print("\nLogging Configuration:\n");
@@ -218,10 +230,11 @@ static void cmd_show_logging(cli_context_t *ctx, int argc, char **argv)
     cli_print("  Buffer size:  %u\n", ctx->logging_buffered_size);
     cli_print("  Log count:    %lu\n", (unsigned long)ctx->log_count);
     cli_print("\n");
+    return SHIELD_OK;
 }
 
 /* show history */
-static void cmd_show_history(cli_context_t *ctx, int argc, char **argv)
+static shield_err_t cmd_show_history(cli_context_t *ctx, int argc, char **argv)
 {
     (void)argc; (void)argv;
     cli_print("\nCommand history:\n");
@@ -230,10 +243,11 @@ static void cmd_show_history(cli_context_t *ctx, int argc, char **argv)
             cli_print("  %3d  %s\n", i + 1, ctx->cli.history[i]);
         }
     }
+    return SHIELD_OK;
 }
 
 /* show controllers */
-static void cmd_show_controllers(cli_context_t *ctx, int argc, char **argv)
+static shield_err_t cmd_show_controllers(cli_context_t *ctx, int argc, char **argv)
 {
     (void)argc; (void)argv;
     cli_print("\nShield Controllers:\n");
@@ -244,10 +258,11 @@ static void cmd_show_controllers(cli_context_t *ctx, int argc, char **argv)
     cli_print("  Policy Controller:   active\n");
     cli_print("  HA Controller:       %s\n", ctx->ha.enabled ? "active" : "standby");
     cli_print("\n");
+    return SHIELD_OK;
 }
 
 /* show environment */
-static void cmd_show_environment(cli_context_t *ctx, int argc, char **argv)
+static shield_err_t cmd_show_environment(cli_context_t *ctx, int argc, char **argv)
 {
     (void)argc; (void)argv;
     cli_print("\nSystem Environment:\n");
@@ -257,10 +272,11 @@ static void cmd_show_environment(cli_context_t *ctx, int argc, char **argv)
     cli_print("  CPU Cores:    %d\n", ctx->cpu_cores > 0 ? ctx->cpu_cores : 4);
     cli_print("  Total RAM:    %lu MB\n", (unsigned long)(ctx->memory_total / 1048576));
     cli_print("\n");
+    return SHIELD_OK;
 }
 
 /* show inventory */
-static void cmd_show_inventory(cli_context_t *ctx, int argc, char **argv)
+static shield_err_t cmd_show_inventory(cli_context_t *ctx, int argc, char **argv)
 {
     (void)argc; (void)argv;
     cli_print("\nShield Inventory:\n");
@@ -272,10 +288,11 @@ static void cmd_show_inventory(cli_context_t *ctx, int argc, char **argv)
     cli_print("  Signatures:   %u\n", ctx->signature_count);
     cli_print("  Canaries:     %u\n", ctx->canary_count);
     cli_print("\n");
+    return SHIELD_OK;
 }
 
 /* show counters */
-static void cmd_show_counters(cli_context_t *ctx, int argc, char **argv)
+static shield_err_t cmd_show_counters(cli_context_t *ctx, int argc, char **argv)
 {
     (void)argc; (void)argv;
     cli_print("\nShield Counters:\n");
@@ -284,10 +301,11 @@ static void cmd_show_counters(cli_context_t *ctx, int argc, char **argv)
     cli_print("  Requests allowed:   %lu\n", (unsigned long)ctx->allowed_requests);
     cli_print("  Requests blocked:   %lu\n", (unsigned long)ctx->blocked_requests);
     cli_print("\n");
+    return SHIELD_OK;
 }
 
 /* show debugging */
-static void cmd_show_debugging(cli_context_t *ctx, int argc, char **argv)
+static shield_err_t cmd_show_debugging(cli_context_t *ctx, int argc, char **argv)
 {
     (void)argc; (void)argv;
     cli_print("\nDebug Status:\n");
@@ -303,29 +321,32 @@ static void cmd_show_debugging(cli_context_t *ctx, int argc, char **argv)
         if (ctx->debug_flags & DEBUG_HA) cli_print("  HA debugging: ON\n");
     }
     cli_print("\n");
+    return SHIELD_OK;
 }
 
 /* show users */
-static void cmd_show_users(cli_context_t *ctx, int argc, char **argv)
+static shield_err_t cmd_show_users(cli_context_t *ctx, int argc, char **argv)
 {
     (void)ctx; (void)argc; (void)argv;
     cli_print("\nActive Users:\n");
     cli_print("─────────────────────────────────────────────────────\n");
     cli_print("%-15s %-20s %-15s\n", "Username", "From", "Idle");
     cli_print("%-15s %-20s %-15s\n", "admin", "console", "00:00:00");
+    return SHIELD_OK;
 }
 
 /* show ip route */
-static void cmd_show_ip_route(cli_context_t *ctx, int argc, char **argv)
+static shield_err_t cmd_show_ip_route(cli_context_t *ctx, int argc, char **argv)
 {
     (void)ctx; (void)argc; (void)argv;
     cli_print("\nRouting Table (zones):\n");
     cli_print("─────────────────────────────────────────────────────\n");
     cli_print("%-20s %-20s %-10s\n", "Zone", "Next Hop", "Metric");
+    return SHIELD_OK;
 }
 
 /* show processes */
-static void cmd_show_processes(cli_context_t *ctx, int argc, char **argv)
+static shield_err_t cmd_show_processes(cli_context_t *ctx, int argc, char **argv)
 {
     (void)ctx; (void)argc; (void)argv;
     cli_print("\nShield Processes:\n");
@@ -334,16 +355,17 @@ static void cmd_show_processes(cli_context_t *ctx, int argc, char **argv)
     cli_print("%-8d %-20s %-10.1f %-10lu\n", 1, "shield-main", 2.5, 50000UL);
     cli_print("%-8d %-20s %-10.1f %-10lu\n", 2, "shield-worker-1", 5.0, 20000UL);
     cli_print("\n");
+    return SHIELD_OK;
 }
 
 /* show access-lists */
-static void cmd_show_access_lists(cli_context_t *ctx, int argc, char **argv)
+static shield_err_t cmd_show_access_lists(cli_context_t *ctx, int argc, char **argv)
 {
     (void)argc; (void)argv;
     
     if (!ctx->rules || ctx->rules->list_count == 0) {
         cli_print("No access lists configured.\n");
-        return;
+        return SHIELD_OK;
     }
     
     access_list_t *acl = ctx->rules->lists;
@@ -368,10 +390,11 @@ static void cmd_show_access_lists(cli_context_t *ctx, int argc, char **argv)
         
         acl = acl->next;
     }
+    return SHIELD_OK;
 }
 
 /* show tech-support (aggregate) */
-static void cmd_show_tech_support(cli_context_t *ctx, int argc, char **argv)
+static shield_err_t cmd_show_tech_support(cli_context_t *ctx, int argc, char **argv)
 {
     (void)argc; (void)argv;
     cli_print("\n========== SENTINEL SHIELD TECH-SUPPORT ==========\n\n");
@@ -386,6 +409,7 @@ static void cmd_show_tech_support(cli_context_t *ctx, int argc, char **argv)
     cmd_show_stats(ctx, 0, NULL);
     
     cli_print("\n========== END TECH-SUPPORT ==========\n");
+    return SHIELD_OK;
 }
 
 /* Show command table */

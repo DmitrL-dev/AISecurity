@@ -202,7 +202,7 @@ static int check_unicode_homograph(const char *text, size_t len, char *detected_
             if (cp == homograph_table[i].codepoint) {
                 count++;
                 if (detected_script && count == 1) {
-                    strncpy(detected_script, homograph_table[i].script, 31);
+                    strncpy(detected_script, homograph_table[i].script, 31);  /* caller uses char[32] */
                 }
             }
         }

@@ -86,7 +86,7 @@ SHIELD_API const char* shield_version(void)
 }
 
 /* Load config */
-SHIELD_API shield_result_t shield_load_config(shield_handle_t handle, const char *path)
+SHIELD_API shield_result_t shield_ffi_load_config(shield_handle_t handle, const char *path)
 {
     (void)handle; (void)path;
     /* TODO: Implement config loading */
@@ -94,7 +94,7 @@ SHIELD_API shield_result_t shield_load_config(shield_handle_t handle, const char
 }
 
 /* Save config */
-SHIELD_API shield_result_t shield_save_config(shield_handle_t handle, const char *path)
+SHIELD_API shield_result_t shield_ffi_save_config(shield_handle_t handle, const char *path)
 {
     (void)handle; (void)path;
     /* TODO: Implement config saving */
@@ -218,7 +218,7 @@ SHIELD_API shield_result_t shield_rule_delete(
 }
 
 /* Evaluate */
-SHIELD_API shield_eval_result_t shield_evaluate(
+SHIELD_API shield_eval_result_t shield_ffi_evaluate(
     shield_handle_t handle,
     const char *zone_name,
     shield_direction_t direction,
@@ -290,7 +290,7 @@ SHIELD_API shield_action_t shield_check(
     const char *data,
     size_t data_len)
 {
-    shield_eval_result_t result = shield_evaluate(handle, zone_name, direction, data, data_len);
+    shield_eval_result_t result = shield_ffi_evaluate(handle, zone_name, direction, data, data_len);
     return result.action;
 }
 

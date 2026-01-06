@@ -18,6 +18,7 @@
 #include <time.h>
 
 #include "shield_common.h"
+#include "shield_string_safe.h"
 
 /* ===== Hunt Types ===== */
 
@@ -307,7 +308,7 @@ static size_t hunt_anomaly(const char *text, hunt_finding_t *findings, size_t ma
         f->type = HUNT_TYPE_ANOMALY;
         f->confidence = 0.60f;
         f->timestamp = (uint64_t)time(NULL);
-        strcpy(f->evidence, "Possible encoded/encrypted payload");
+        shield_strcopy_s(f->evidence, sizeof(f->evidence), "Possible encoded/encrypted payload");
     }
     
     /* 2. Unusual length */
@@ -318,7 +319,7 @@ static size_t hunt_anomaly(const char *text, hunt_finding_t *findings, size_t ma
         f->type = HUNT_TYPE_ANOMALY;
         f->confidence = 0.50f;
         f->timestamp = (uint64_t)time(NULL);
-        strcpy(f->evidence, "Large payload may indicate attack attempt");
+        shield_strcopy_s(f->evidence, sizeof(f->evidence), "Large payload may indicate attack attempt");
     }
     
     /* 3. Repetition (possible DoS/confusion attack) */
@@ -331,7 +332,7 @@ static size_t hunt_anomaly(const char *text, hunt_finding_t *findings, size_t ma
             f->type = HUNT_TYPE_ANOMALY;
             f->confidence = 0.65f;
             f->timestamp = (uint64_t)time(NULL);
-            strcpy(f->evidence, "Repeated patterns may indicate confusion attack");
+            shield_strcopy_s(f->evidence, sizeof(f->evidence), "Repeated patterns may indicate confusion attack");
         }
     }
     

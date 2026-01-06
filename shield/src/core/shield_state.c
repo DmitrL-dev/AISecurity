@@ -248,6 +248,16 @@ shield_err_t shield_state_save(const char *path)
     fprintf(f, "cluster_name=%s\n", g_state.ha.cluster_name);
     fprintf(f, "\n");
     
+    /* Cognitive */
+    fprintf(f, "[cognitive]\n");
+    fprintf(f, "enabled=%d\n", g_state.cognitive.state == MODULE_ENABLED ? 1 : 0);
+    fprintf(f, "\n");
+    
+    /* PQC */
+    fprintf(f, "[pqc]\n");
+    fprintf(f, "enabled=%d\n", g_state.pqc.state == MODULE_ENABLED ? 1 : 0);
+    fprintf(f, "\n");
+    
     fclose(f);
     g_state.config_modified = false;
     
@@ -384,6 +394,14 @@ shield_err_t shield_state_load(const char *path)
                 g_state.ha.preempt = parse_int(val) != 0;
             } else if (strcmp(key, "cluster_name") == 0) {
                 strncpy(g_state.ha.cluster_name, val, sizeof(g_state.ha.cluster_name) - 1);
+            }
+        } else if (strcmp(section, "cognitive") == 0) {
+            if (strcmp(key, "enabled") == 0) {
+                g_state.cognitive.state = parse_int(val) ? MODULE_ENABLED : MODULE_DISABLED;
+            }
+        } else if (strcmp(section, "pqc") == 0) {
+            if (strcmp(key, "enabled") == 0) {
+                g_state.pqc.state = parse_int(val) ? MODULE_ENABLED : MODULE_DISABLED;
             }
         }
     }

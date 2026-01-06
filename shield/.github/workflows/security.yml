@@ -1,0 +1,95 @@
+name: Security Checks
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+  schedule:
+    # Run weekly on Sunday at midnight
+    - cron: '0 0 * * 0'
+
+jobs:
+  static-analysis:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Install analysis tools
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y cppcheck flawfinder
+    
+    - name: Run cppcheck (comprehensive)
+      working-directory: ./shield
+      run: |
+        cppcheck --enable=all \
+          --suppress=missingIncludeSystem \
+          --suppress=unusedFunction \
+          --xml --xml-version=2 \
+          -I include \
+          src/ 2> cppcheck-report.xml || true
+        
+        # Convert to human-readable
+        cppcheck --enable=all \
+          --suppress=missingIncludeSystem \
+          --suppress=unusedFunction \
+          -I include \
+          src/ 2>&1 | tee cppcheck-report.txt
+    
+    - name: Run flawfinder
+      working-directory: ./shield
+      run: |
+        flawfinder --html src/ > flawfinder-report.html || true
+        flawfinder --columns src/ | tee flawfinder-report.txt
+    
+    - name: Upload security reports
+      uses: actions/upload-artifact@v4
+      with:
+        name: security-reports
+        path: |
+          shield/cppcheck-report.xml
+          shield/cppcheck-report.txt
+          shield/flawfinder-report.html
+          shield/flawfinder-report.txt
+
+  dependency-check:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Check for hardcoded secrets
+      run: |
+        echo "Searching for potential secrets..."
+        if grep -rE "(password|secret|api_key|token)\s*=\s*[\"'][^\"']+[\"']" shield/src/ --include="*.c" --include="*.h"; then
+          echo "⚠️ Potential hardcoded secrets found"
+          exit 1
+        else
+          echo "✅ No hardcoded secrets detected"
+        fi
+    
+    - name: Check for TODO/FIXME in security-critical code
+      working-directory: ./shield
+      run: |
+        echo "Checking for security-related TODOs..."
+        grep -rn "TODO\|FIXME" src/guards/ src/core/pqc.c src/core/secure_comm.c || echo "No TODOs in security code"
+
+  license-check:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Check license headers
+      working-directory: ./shield
+      run: |
+        echo "Checking for SENTINEL headers..."
+        files_without_header=$(find src/ -name "*.c" -exec grep -L "SENTINEL" {} \;)
+        if [ -n "$files_without_header" ]; then
+          echo "Files without SENTINEL header:"
+          echo "$files_without_header"
+        else
+          echo "✅ All files have proper headers"
+        fi

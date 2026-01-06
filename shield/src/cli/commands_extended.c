@@ -27,13 +27,13 @@ extern canary_manager_t *g_canaries;
 /*
  * show ha
  */
-static void cmd_show_ha(cli_context_t *ctx, int argc, char **argv)
+static shield_err_t cmd_show_ha(cli_context_t *ctx, int argc, char **argv)
 {
     (void)argc; (void)argv;
     
     if (!g_cluster) {
         cli_print("HA not configured\n");
-        return;
+        return SHIELD_OK;
     }
     
     const char *role_str;
@@ -56,18 +56,19 @@ static void cmd_show_ha(cli_context_t *ctx, int argc, char **argv)
     cli_print("  Role:   %s\n", role_str);
     cli_print("  State:  %s\n", state_str);
     cli_print("  Peers:  %d\n", ha_get_peer_count(g_cluster));
+    return SHIELD_OK;
 }
 
 /*
  * show health
  */
-static void cmd_show_health(cli_context_t *ctx, int argc, char **argv)
+static shield_err_t cmd_show_health(cli_context_t *ctx, int argc, char **argv)
 {
     (void)argc; (void)argv;
     
     if (!g_health) {
         cli_print("Health monitoring not configured\n");
-        return;
+        return SHIELD_OK;
     }
     
     health_status_t status = health_get_status(g_health);
@@ -79,18 +80,19 @@ static void cmd_show_health(cli_context_t *ctx, int argc, char **argv)
         cli_print("%s\n", json);
         free(json);
     }
+    return SHIELD_OK;
 }
 
 /*
  * show metrics
  */
-static void cmd_show_metrics(cli_context_t *ctx, int argc, char **argv)
+static shield_err_t cmd_show_metrics(cli_context_t *ctx, int argc, char **argv)
 {
     (void)argc; (void)argv;
     
     if (!g_metrics) {
         cli_print("Metrics not configured\n");
-        return;
+        return SHIELD_OK;
     }
     
     char *metrics = metrics_export_prometheus(g_metrics);
@@ -98,18 +100,19 @@ static void cmd_show_metrics(cli_context_t *ctx, int argc, char **argv)
         cli_print("%s\n", metrics);
         free(metrics);
     }
+    return SHIELD_OK;
 }
 
 /*
  * show plugins
  */
-static void cmd_show_plugins(cli_context_t *ctx, int argc, char **argv)
+static shield_err_t cmd_show_plugins(cli_context_t *ctx, int argc, char **argv)
 {
     (void)argc; (void)argv;
     
     if (!g_plugins) {
         cli_print("Plugin system not configured\n");
-        return;
+        return SHIELD_OK;
     }
     
     cli_print("Loaded Plugins:\n");
@@ -119,25 +122,26 @@ static void cmd_show_plugins(cli_context_t *ctx, int argc, char **argv)
     
     if (count == 0) {
         cli_print("  (none)\n");
-        return;
+        return SHIELD_OK;
     }
     
     for (int i = 0; i < count; i++) {
         cli_print("  %s v%s - %s\n",
                   infos[i].name, infos[i].version, infos[i].description);
     }
+    return SHIELD_OK;
 }
 
 /*
  * show canary
  */
-static void cmd_show_canary(cli_context_t *ctx, int argc, char **argv)
+static shield_err_t cmd_show_canary(cli_context_t *ctx, int argc, char **argv)
 {
     (void)argc; (void)argv;
     
     if (!g_canaries) {
         cli_print("Canary tokens not configured\n");
-        return;
+        return SHIELD_OK;
     }
     
     cli_print("Canary Tokens: %u\n", g_canaries->count);
@@ -153,71 +157,75 @@ static void cmd_show_canary(cli_context_t *ctx, int argc, char **argv)
         token = token->next;
         i++;
     }
+    return SHIELD_OK;
 }
 
 /*
  * ha force active
  */
-static void cmd_ha_force_active(cli_context_t *ctx, int argc, char **argv)
+static shield_err_t cmd_ha_force_active(cli_context_t *ctx, int argc, char **argv)
 {
     (void)argc; (void)argv;
     
     if (!g_cluster) {
         cli_print("%% HA not configured\n");
-        return;
+        return SHIELD_OK;
     }
     
     ha_force_active(g_cluster);
     cli_print("Forced to ACTIVE\n");
+    return SHIELD_OK;
 }
 
 /*
  * ha force standby
  */
-static void cmd_ha_force_standby(cli_context_t *ctx, int argc, char **argv)
+static shield_err_t cmd_ha_force_standby(cli_context_t *ctx, int argc, char **argv)
 {
     (void)argc; (void)argv;
     
     if (!g_cluster) {
         cli_print("%% HA not configured\n");
-        return;
+        return SHIELD_OK;
     }
     
     ha_force_standby(g_cluster);
     cli_print("Forced to STANDBY\n");
+    return SHIELD_OK;
 }
 
 /*
  * ha sync
  */
-static void cmd_ha_sync(cli_context_t *ctx, int argc, char **argv)
+static shield_err_t cmd_ha_sync(cli_context_t *ctx, int argc, char **argv)
 {
     (void)argc; (void)argv;
     
     if (!g_cluster) {
         cli_print("%% HA not configured\n");
-        return;
+        return SHIELD_OK;
     }
     
     ha_sync_config(g_cluster);
     ha_sync_blocklist(g_cluster);
     ha_sync_sessions(g_cluster);
     cli_print("Sync initiated\n");
+    return SHIELD_OK;
 }
 
 /*
  * canary create <value> [description]
  */
-static void cmd_canary_create(cli_context_t *ctx, int argc, char **argv)
+static shield_err_t cmd_canary_create(cli_context_t *ctx, int argc, char **argv)
 {
     if (argc < 3) {
         cli_print("Usage: canary create <value> [description]\n");
-        return;
+        return SHIELD_OK;
     }
     
     if (!g_canaries) {
         cli_print("%% Canary system not configured\n");
-        return;
+        return SHIELD_OK;
     }
     
     canary_token_t *token = NULL;
@@ -229,18 +237,19 @@ static void cmd_canary_create(cli_context_t *ctx, int argc, char **argv)
     } else {
         cli_print("%% Failed to create canary token\n");
     }
+    return SHIELD_OK;
 }
 
 /*
  * canary generate
  */
-static void cmd_canary_generate(cli_context_t *ctx, int argc, char **argv)
+static shield_err_t cmd_canary_generate(cli_context_t *ctx, int argc, char **argv)
 {
     (void)argc; (void)argv;
     
     if (!g_canaries) {
         cli_print("%% Canary system not configured\n");
-        return;
+        return SHIELD_OK;
     }
     
     canary_token_t *token = NULL;
@@ -252,21 +261,22 @@ static void cmd_canary_generate(cli_context_t *ctx, int argc, char **argv)
     } else {
         cli_print("%% Failed to generate canary token\n");
     }
+    return SHIELD_OK;
 }
 
 /*
  * plugin load <path>
  */
-static void cmd_plugin_load(cli_context_t *ctx, int argc, char **argv)
+static shield_err_t cmd_plugin_load(cli_context_t *ctx, int argc, char **argv)
 {
     if (argc < 3) {
         cli_print("Usage: plugin load <path>\n");
-        return;
+        return SHIELD_OK;
     }
     
     if (!g_plugins) {
         cli_print("%% Plugin system not configured\n");
-        return;
+        return SHIELD_OK;
     }
     
     shield_err_t err = plugin_load(g_plugins, argv[2]);
@@ -275,21 +285,22 @@ static void cmd_plugin_load(cli_context_t *ctx, int argc, char **argv)
     } else {
         cli_print("%% Failed to load plugin: %d\n", err);
     }
+    return SHIELD_OK;
 }
 
 /*
  * plugin unload <name>
  */
-static void cmd_plugin_unload(cli_context_t *ctx, int argc, char **argv)
+static shield_err_t cmd_plugin_unload(cli_context_t *ctx, int argc, char **argv)
 {
     if (argc < 3) {
         cli_print("Usage: plugin unload <name>\n");
-        return;
+        return SHIELD_OK;
     }
     
     if (!g_plugins) {
         cli_print("%% Plugin system not configured\n");
-        return;
+        return SHIELD_OK;
     }
     
     shield_err_t err = plugin_unload(g_plugins, argv[2]);
@@ -298,16 +309,18 @@ static void cmd_plugin_unload(cli_context_t *ctx, int argc, char **argv)
     } else {
         cli_print("%% Plugin not found\n");
     }
+    return SHIELD_OK;
 }
 
 /*
  * debug event <type>
  */
-static void cmd_debug_event(cli_context_t *ctx, int argc, char **argv)
+static shield_err_t cmd_debug_event(cli_context_t *ctx, int argc, char **argv)
 {
     (void)argc; (void)argv;
     cli_print("Event system debug:\n");
     cli_print("  (implementation pending)\n");
+    return SHIELD_OK;
 }
 
 /* Command table for extended commands */

@@ -15,7 +15,7 @@
 
 /* ===== HA Standby Commands ===== */
 
-void cmd_standby_ip(cli_context_t *ctx, int argc, char **argv)
+shield_err_t cmd_standby_ip(cli_context_t *ctx, int argc, char **argv)
 {
     (void)ctx;
     shield_state_t *state = shield_state_get();
@@ -23,48 +23,52 @@ void cmd_standby_ip(cli_context_t *ctx, int argc, char **argv)
     if (argc < 1) {
         printf("Current virtual IP: %s\n", 
                state->ha.virtual_ip[0] ? state->ha.virtual_ip : "(none)");
-        return;
+        return SHIELD_OK;
     }
     
     strncpy(state->ha.virtual_ip, argv[0], sizeof(state->ha.virtual_ip) - 1);
     shield_state_mark_dirty();
     printf("Standby virtual IP set to %s\n", state->ha.virtual_ip);
+    return SHIELD_OK;
 }
 
-void cmd_standby_priority(cli_context_t *ctx, int argc, char **argv)
+shield_err_t cmd_standby_priority(cli_context_t *ctx, int argc, char **argv)
 {
     (void)ctx;
     shield_state_t *state = shield_state_get();
     
     if (argc < 1) {
         printf("Current priority: %u\n", state->ha.priority);
-        return;
+        return SHIELD_OK;
     }
     
     state->ha.priority = atoi(argv[0]);
     shield_state_mark_dirty();
     printf("Standby priority set to %u\n", state->ha.priority);
+    return SHIELD_OK;
 }
 
-void cmd_standby_preempt(cli_context_t *ctx, int argc, char **argv)
+shield_err_t cmd_standby_preempt(cli_context_t *ctx, int argc, char **argv)
 {
     (void)ctx; (void)argc; (void)argv;
     shield_state_t *state = shield_state_get();
     state->ha.preempt = true;
     shield_state_mark_dirty();
     printf("Standby preempt enabled\n");
+    return SHIELD_OK;
 }
 
-void cmd_no_standby_preempt(cli_context_t *ctx, int argc, char **argv)
+shield_err_t cmd_no_standby_preempt(cli_context_t *ctx, int argc, char **argv)
 {
     (void)ctx; (void)argc; (void)argv;
     shield_state_t *state = shield_state_get();
     state->ha.preempt = false;
     shield_state_mark_dirty();
     printf("Standby preempt disabled\n");
+    return SHIELD_OK;
 }
 
-void cmd_standby_timers(cli_context_t *ctx, int argc, char **argv)
+shield_err_t cmd_standby_timers(cli_context_t *ctx, int argc, char **argv)
 {
     (void)ctx;
     shield_state_t *state = shield_state_get();
@@ -72,7 +76,7 @@ void cmd_standby_timers(cli_context_t *ctx, int argc, char **argv)
     if (argc < 2) {
         printf("Current timers: hello=%u hold=%u\n",
                state->ha.hello_interval, state->ha.hold_time);
-        return;
+        return SHIELD_OK;
     }
     
     state->ha.hello_interval = atoi(argv[0]);
@@ -80,29 +84,32 @@ void cmd_standby_timers(cli_context_t *ctx, int argc, char **argv)
     shield_state_mark_dirty();
     printf("Standby timers: hello=%u hold=%u\n",
            state->ha.hello_interval, state->ha.hold_time);
+    return SHIELD_OK;
 }
 
-void cmd_standby_authentication(cli_context_t *ctx, int argc, char **argv)
+shield_err_t cmd_standby_authentication(cli_context_t *ctx, int argc, char **argv)
 {
     (void)ctx;
     if (argc < 1) {
         printf("Usage: standby authentication <key>\n");
-        return;
+        return SHIELD_OK;
     }
     printf("Standby authentication configured\n");
+    return SHIELD_OK;
 }
 
-void cmd_standby_track(cli_context_t *ctx, int argc, char **argv)
+shield_err_t cmd_standby_track(cli_context_t *ctx, int argc, char **argv)
 {
     (void)ctx;
     if (argc < 2) {
         printf("Usage: standby track <object> <decrement>\n");
-        return;
+        return SHIELD_OK;
     }
     printf("Standby tracking %s with decrement %s\n", argv[0], argv[1]);
+    return SHIELD_OK;
 }
 
-void cmd_standby_name(cli_context_t *ctx, int argc, char **argv)
+shield_err_t cmd_standby_name(cli_context_t *ctx, int argc, char **argv)
 {
     (void)ctx;
     shield_state_t *state = shield_state_get();
@@ -110,63 +117,69 @@ void cmd_standby_name(cli_context_t *ctx, int argc, char **argv)
     if (argc < 1) {
         printf("Current cluster name: %s\n",
                state->ha.cluster_name[0] ? state->ha.cluster_name : "(none)");
-        return;
+        return SHIELD_OK;
     }
     
     strncpy(state->ha.cluster_name, argv[0], sizeof(state->ha.cluster_name) - 1);
     shield_state_mark_dirty();
     printf("Standby cluster name set to %s\n", state->ha.cluster_name);
+    return SHIELD_OK;
 }
 
 /* ===== Redundancy Commands ===== */
 
-void cmd_redundancy(cli_context_t *ctx, int argc, char **argv)
+shield_err_t cmd_redundancy(cli_context_t *ctx, int argc, char **argv)
 {
     (void)ctx; (void)argc; (void)argv;
     printf("Entering redundancy configuration mode\n");
+    return SHIELD_OK;
 }
 
-void cmd_redundancy_mode(cli_context_t *ctx, int argc, char **argv)
+shield_err_t cmd_redundancy_mode(cli_context_t *ctx, int argc, char **argv)
 {
     (void)ctx;
     if (argc < 1) {
         printf("Usage: redundancy mode <active-standby|active-active>\n");
-        return;
+        return SHIELD_OK;
     }
     printf("Redundancy mode set to %s\n", argv[0]);
+    return SHIELD_OK;
 }
 
 /* ===== Failover Commands ===== */
 
-void cmd_failover_enable(cli_context_t *ctx, int argc, char **argv)
+shield_err_t cmd_failover_enable(cli_context_t *ctx, int argc, char **argv)
 {
     (void)ctx; (void)argc; (void)argv;
     shield_state_t *state = shield_state_get();
     state->ha.enabled = true;
     shield_state_mark_dirty();
     printf("Failover enabled\n");
+    return SHIELD_OK;
 }
 
-void cmd_failover_disable(cli_context_t *ctx, int argc, char **argv)
+shield_err_t cmd_failover_disable(cli_context_t *ctx, int argc, char **argv)
 {
     (void)ctx; (void)argc; (void)argv;
     shield_state_t *state = shield_state_get();
     state->ha.enabled = false;
     shield_state_mark_dirty();
     printf("Failover disabled\n");
+    return SHIELD_OK;
 }
 
-void cmd_failover_lan(cli_context_t *ctx, int argc, char **argv)
+shield_err_t cmd_failover_lan(cli_context_t *ctx, int argc, char **argv)
 {
     (void)ctx;
     if (argc < 1) {
         printf("Usage: failover lan interface <interface-name>\n");
-        return;
+        return SHIELD_OK;
     }
     printf("Failover LAN interface set to %s\n", argv[0]);
+    return SHIELD_OK;
 }
 
-void cmd_show_ha(cli_context_t *ctx, int argc, char **argv)
+shield_err_t cmd_show_ha(cli_context_t *ctx, int argc, char **argv)
 {
     (void)ctx; (void)argc; (void)argv;
     shield_state_t *state = shield_state_get();
@@ -180,29 +193,32 @@ void cmd_show_ha(cli_context_t *ctx, int argc, char **argv)
     printf("Timers:      hello=%u hold=%u\n", state->ha.hello_interval, state->ha.hold_time);
     printf("Cluster:     %s\n", state->ha.cluster_name[0] ? state->ha.cluster_name : "(none)");
     printf("Role:        %s\n", state->ha.is_active ? "ACTIVE" : "STANDBY");
+    return SHIELD_OK;
 }
 
 /* ===== Rate Limiting Commands ===== */
 
-void cmd_rate_limit_enable(cli_context_t *ctx, int argc, char **argv)
+shield_err_t cmd_rate_limit_enable(cli_context_t *ctx, int argc, char **argv)
 {
     (void)ctx; (void)argc; (void)argv;
     shield_state_t *state = shield_state_get();
     state->rate_limit.enabled = true;
     shield_state_mark_dirty();
     printf("Rate limiting enabled\n");
+    return SHIELD_OK;
 }
 
-void cmd_rate_limit_disable(cli_context_t *ctx, int argc, char **argv)
+shield_err_t cmd_rate_limit_disable(cli_context_t *ctx, int argc, char **argv)
 {
     (void)ctx; (void)argc; (void)argv;
     shield_state_t *state = shield_state_get();
     state->rate_limit.enabled = false;
     shield_state_mark_dirty();
     printf("Rate limiting disabled\n");
+    return SHIELD_OK;
 }
 
-void cmd_rate_limit_config(cli_context_t *ctx, int argc, char **argv)
+shield_err_t cmd_rate_limit_config(cli_context_t *ctx, int argc, char **argv)
 {
     (void)ctx;
     shield_state_t *state = shield_state_get();
@@ -212,7 +228,7 @@ void cmd_rate_limit_config(cli_context_t *ctx, int argc, char **argv)
                state->rate_limit.requests_per_window,
                state->rate_limit.window_seconds);
         printf("Usage: rate-limit requests <count> per <seconds>\n");
-        return;
+        return SHIELD_OK;
     }
     
     state->rate_limit.requests_per_window = atoi(argv[0]);
@@ -222,9 +238,10 @@ void cmd_rate_limit_config(cli_context_t *ctx, int argc, char **argv)
     printf("Rate limit: %u requests per %u seconds\n",
            state->rate_limit.requests_per_window,
            state->rate_limit.window_seconds);
+    return SHIELD_OK;
 }
 
-void cmd_show_rate_limit(cli_context_t *ctx, int argc, char **argv)
+shield_err_t cmd_show_rate_limit(cli_context_t *ctx, int argc, char **argv)
 {
     (void)ctx; (void)argc; (void)argv;
     shield_state_t *state = shield_state_get();
@@ -238,33 +255,35 @@ void cmd_show_rate_limit(cli_context_t *ctx, int argc, char **argv)
     printf("\nStatistics:\n");
     printf("  Allowed: %llu\n", (unsigned long long)state->rate_limit.requests_allowed);
     printf("  Blocked: %llu\n", (unsigned long long)state->rate_limit.requests_blocked);
+    return SHIELD_OK;
 }
 
 /* ===== Blocklist Commands ===== */
 
-void cmd_blocklist_ip_add(cli_context_t *ctx, int argc, char **argv)
+shield_err_t cmd_blocklist_ip_add(cli_context_t *ctx, int argc, char **argv)
 {
     (void)ctx;
     shield_state_t *state = shield_state_get();
     
     if (argc < 1) {
         printf("Usage: blocklist ip add <ip-address>\n");
-        return;
+        return SHIELD_OK;
     }
     
     state->blocklist.ip_count++;
     shield_state_mark_dirty();
     printf("Added %s to IP blocklist (total: %u)\n", argv[0], state->blocklist.ip_count);
+    return SHIELD_OK;
 }
 
-void cmd_blocklist_ip_remove(cli_context_t *ctx, int argc, char **argv)
+shield_err_t cmd_blocklist_ip_remove(cli_context_t *ctx, int argc, char **argv)
 {
     (void)ctx;
     shield_state_t *state = shield_state_get();
     
     if (argc < 1) {
         printf("Usage: no blocklist ip <ip-address>\n");
-        return;
+        return SHIELD_OK;
     }
     
     if (state->blocklist.ip_count > 0) {
@@ -272,25 +291,27 @@ void cmd_blocklist_ip_remove(cli_context_t *ctx, int argc, char **argv)
         shield_state_mark_dirty();
     }
     printf("Removed %s from IP blocklist\n", argv[0]);
+    return SHIELD_OK;
 }
 
-void cmd_blocklist_pattern_add(cli_context_t *ctx, int argc, char **argv)
+shield_err_t cmd_blocklist_pattern_add(cli_context_t *ctx, int argc, char **argv)
 {
     (void)ctx;
     shield_state_t *state = shield_state_get();
     
     if (argc < 1) {
         printf("Usage: blocklist pattern add <pattern>\n");
-        return;
+        return SHIELD_OK;
     }
     
     state->blocklist.pattern_count++;
     shield_state_mark_dirty();
     printf("Added pattern '%s' to blocklist (total: %u)\n", 
            argv[0], state->blocklist.pattern_count);
+    return SHIELD_OK;
 }
 
-void cmd_show_blocklist(cli_context_t *ctx, int argc, char **argv)
+shield_err_t cmd_show_blocklist(cli_context_t *ctx, int argc, char **argv)
 {
     (void)ctx; (void)argc; (void)argv;
     shield_state_t *state = shield_state_get();
@@ -301,33 +322,37 @@ void cmd_show_blocklist(cli_context_t *ctx, int argc, char **argv)
     printf("IP Entries:      %u\n", state->blocklist.ip_count);
     printf("Pattern Entries: %u\n", state->blocklist.pattern_count);
     printf("Total Blocks:    %llu\n", (unsigned long long)state->blocklist.blocks_total);
+    return SHIELD_OK;
 }
 
 /* ===== Threat Intelligence Commands ===== */
 
-void cmd_threat_intel_enable(cli_context_t *ctx, int argc, char **argv)
+shield_err_t cmd_threat_intel_enable(cli_context_t *ctx, int argc, char **argv)
 {
     (void)ctx; (void)argc; (void)argv;
     printf("Threat intelligence enabled\n");
+    return SHIELD_OK;
 }
 
-void cmd_threat_intel_disable(cli_context_t *ctx, int argc, char **argv)
+shield_err_t cmd_threat_intel_disable(cli_context_t *ctx, int argc, char **argv)
 {
     (void)ctx; (void)argc; (void)argv;
     printf("Threat intelligence disabled\n");
+    return SHIELD_OK;
 }
 
-void cmd_threat_intel_feed(cli_context_t *ctx, int argc, char **argv)
+shield_err_t cmd_threat_intel_feed(cli_context_t *ctx, int argc, char **argv)
 {
     (void)ctx;
     if (argc < 1) {
         printf("Usage: threat-intel feed add <url>\n");
-        return;
+        return SHIELD_OK;
     }
     printf("Added threat feed: %s\n", argv[0]);
+    return SHIELD_OK;
 }
 
-void cmd_show_threat_intel(cli_context_t *ctx, int argc, char **argv)
+shield_err_t cmd_show_threat_intel(cli_context_t *ctx, int argc, char **argv)
 {
     (void)ctx; (void)argc; (void)argv;
     printf("Threat Intelligence Status\n");
@@ -335,11 +360,12 @@ void cmd_show_threat_intel(cli_context_t *ctx, int argc, char **argv)
     printf("Enabled: NO\n");
     printf("Feeds: 0\n");
     printf("IOCs loaded: 0\n");
+    return SHIELD_OK;
 }
 
 /* ===== Alerting Commands ===== */
 
-void cmd_alert_destination(cli_context_t *ctx, int argc, char **argv)
+shield_err_t cmd_alert_destination(cli_context_t *ctx, int argc, char **argv)
 {
     (void)ctx;
     shield_state_t *state = shield_state_get();
@@ -348,7 +374,7 @@ void cmd_alert_destination(cli_context_t *ctx, int argc, char **argv)
         printf("Current destination: %s\n",
                state->alerting.destination[0] ? state->alerting.destination : "(none)");
         printf("Usage: alert destination <webhook|email|syslog> <target>\n");
-        return;
+        return SHIELD_OK;
     }
     
     snprintf(state->alerting.destination, sizeof(state->alerting.destination),
@@ -356,9 +382,10 @@ void cmd_alert_destination(cli_context_t *ctx, int argc, char **argv)
     state->alerting.enabled = true;
     shield_state_mark_dirty();
     printf("Alert destination set: %s -> %s\n", argv[0], argv[1]);
+    return SHIELD_OK;
 }
 
-void cmd_alert_threshold(cli_context_t *ctx, int argc, char **argv)
+shield_err_t cmd_alert_threshold(cli_context_t *ctx, int argc, char **argv)
 {
     (void)ctx;
     shield_state_t *state = shield_state_get();
@@ -366,15 +393,16 @@ void cmd_alert_threshold(cli_context_t *ctx, int argc, char **argv)
     if (argc < 1) {
         printf("Current threshold: %s\n", state->alerting.threshold);
         printf("Usage: alert threshold <info|warn|critical>\n");
-        return;
+        return SHIELD_OK;
     }
     
     strncpy(state->alerting.threshold, argv[0], sizeof(state->alerting.threshold) - 1);
     shield_state_mark_dirty();
     printf("Alert threshold set to %s\n", state->alerting.threshold);
+    return SHIELD_OK;
 }
 
-void cmd_show_alerts(cli_context_t *ctx, int argc, char **argv)
+shield_err_t cmd_show_alerts(cli_context_t *ctx, int argc, char **argv)
 {
     (void)ctx; (void)argc; (void)argv;
     shield_state_t *state = shield_state_get();
@@ -385,29 +413,32 @@ void cmd_show_alerts(cli_context_t *ctx, int argc, char **argv)
     printf("Destination: %s\n", state->alerting.destination[0] ? state->alerting.destination : "(none)");
     printf("Threshold:   %s\n", state->alerting.threshold);
     printf("Alerts Sent: %llu\n", (unsigned long long)state->alerting.alerts_sent);
+    return SHIELD_OK;
 }
 
 /* ===== SIEM Commands ===== */
 
-void cmd_siem_enable(cli_context_t *ctx, int argc, char **argv)
+shield_err_t cmd_siem_enable(cli_context_t *ctx, int argc, char **argv)
 {
     (void)ctx; (void)argc; (void)argv;
     shield_state_t *state = shield_state_get();
     state->siem.enabled = true;
     shield_state_mark_dirty();
     printf("SIEM export enabled\n");
+    return SHIELD_OK;
 }
 
-void cmd_siem_disable(cli_context_t *ctx, int argc, char **argv)
+shield_err_t cmd_siem_disable(cli_context_t *ctx, int argc, char **argv)
 {
     (void)ctx; (void)argc; (void)argv;
     shield_state_t *state = shield_state_get();
     state->siem.enabled = false;
     shield_state_mark_dirty();
     printf("SIEM export disabled\n");
+    return SHIELD_OK;
 }
 
-void cmd_siem_destination(cli_context_t *ctx, int argc, char **argv)
+shield_err_t cmd_siem_destination(cli_context_t *ctx, int argc, char **argv)
 {
     (void)ctx;
     shield_state_t *state = shield_state_get();
@@ -417,16 +448,17 @@ void cmd_siem_destination(cli_context_t *ctx, int argc, char **argv)
                state->siem.host[0] ? state->siem.host : "(none)",
                state->siem.port);
         printf("Usage: siem destination <host> <port>\n");
-        return;
+        return SHIELD_OK;
     }
     
     strncpy(state->siem.host, argv[0], sizeof(state->siem.host) - 1);
     state->siem.port = atoi(argv[1]);
     shield_state_mark_dirty();
     printf("SIEM destination: %s:%u\n", state->siem.host, state->siem.port);
+    return SHIELD_OK;
 }
 
-void cmd_siem_format(cli_context_t *ctx, int argc, char **argv)
+shield_err_t cmd_siem_format(cli_context_t *ctx, int argc, char **argv)
 {
     (void)ctx;
     shield_state_t *state = shield_state_get();
@@ -434,15 +466,16 @@ void cmd_siem_format(cli_context_t *ctx, int argc, char **argv)
     if (argc < 1) {
         printf("Current format: %s\n", state->siem.format);
         printf("Usage: siem format <cef|json|syslog>\n");
-        return;
+        return SHIELD_OK;
     }
     
     strncpy(state->siem.format, argv[0], sizeof(state->siem.format) - 1);
     shield_state_mark_dirty();
     printf("SIEM format set to %s\n", state->siem.format);
+    return SHIELD_OK;
 }
 
-void cmd_show_siem(cli_context_t *ctx, int argc, char **argv)
+shield_err_t cmd_show_siem(cli_context_t *ctx, int argc, char **argv)
 {
     (void)ctx; (void)argc; (void)argv;
     shield_state_t *state = shield_state_get();
@@ -456,39 +489,43 @@ void cmd_show_siem(cli_context_t *ctx, int argc, char **argv)
     printf("Format:      %s\n", state->siem.format);
     printf("Events Sent: %llu\n", (unsigned long long)state->siem.events_sent);
     printf("Failed:      %llu\n", (unsigned long long)state->siem.events_failed);
+    return SHIELD_OK;
 }
 
 /* ===== Signature Commands ===== */
 
-void cmd_signature_update(cli_context_t *ctx, int argc, char **argv)
+shield_err_t cmd_signature_update(cli_context_t *ctx, int argc, char **argv)
 {
     (void)ctx; (void)argc; (void)argv;
     printf("Checking for signature updates...\n");
     printf("Signatures are up to date\n");
+    return SHIELD_OK;
 }
 
-void cmd_signature_category_enable(cli_context_t *ctx, int argc, char **argv)
+shield_err_t cmd_signature_category_enable(cli_context_t *ctx, int argc, char **argv)
 {
     (void)ctx;
     if (argc < 1) {
         printf("Usage: signature-set category enable <category>\n");
         printf("Categories: injection, jailbreak, exfiltration, pii, secrets\n");
-        return;
+        return SHIELD_OK;
     }
     printf("Signature category '%s' enabled\n", argv[0]);
+    return SHIELD_OK;
 }
 
-void cmd_signature_category_disable(cli_context_t *ctx, int argc, char **argv)
+shield_err_t cmd_signature_category_disable(cli_context_t *ctx, int argc, char **argv)
 {
     (void)ctx;
     if (argc < 1) {
         printf("Usage: signature-set category disable <category>\n");
-        return;
+        return SHIELD_OK;
     }
     printf("Signature category '%s' disabled\n", argv[0]);
+    return SHIELD_OK;
 }
 
-void cmd_show_signatures(cli_context_t *ctx, int argc, char **argv)
+shield_err_t cmd_show_signatures(cli_context_t *ctx, int argc, char **argv)
 {
     (void)ctx; (void)argc; (void)argv;
     printf("Signature Database\n");
@@ -501,83 +538,90 @@ void cmd_show_signatures(cli_context_t *ctx, int argc, char **argv)
     printf("API Guard:   36 patterns\n");
     printf("-------------------\n");
     printf("Total:      253 patterns\n");
+    return SHIELD_OK;
 }
 
 /* ===== API Commands ===== */
 
-void cmd_api_enable(cli_context_t *ctx, int argc, char **argv)
+shield_err_t cmd_api_enable(cli_context_t *ctx, int argc, char **argv)
 {
     (void)ctx; (void)argc; (void)argv;
     shield_state_t *state = shield_state_get();
     state->api.enabled = true;
     shield_state_mark_dirty();
     printf("REST API enabled on port %u\n", state->api.port);
+    return SHIELD_OK;
 }
 
-void cmd_api_disable(cli_context_t *ctx, int argc, char **argv)
+shield_err_t cmd_api_disable(cli_context_t *ctx, int argc, char **argv)
 {
     (void)ctx; (void)argc; (void)argv;
     shield_state_t *state = shield_state_get();
     state->api.enabled = false;
     shield_state_mark_dirty();
     printf("REST API disabled\n");
+    return SHIELD_OK;
 }
 
-void cmd_api_port(cli_context_t *ctx, int argc, char **argv)
+shield_err_t cmd_api_port(cli_context_t *ctx, int argc, char **argv)
 {
     (void)ctx;
     shield_state_t *state = shield_state_get();
     
     if (argc < 1) {
         printf("Current API port: %u\n", state->api.port);
-        return;
+        return SHIELD_OK;
     }
     
     state->api.port = atoi(argv[0]);
     shield_state_mark_dirty();
     printf("API port set to %u\n", state->api.port);
+    return SHIELD_OK;
 }
 
-void cmd_api_token(cli_context_t *ctx, int argc, char **argv)
+shield_err_t cmd_api_token(cli_context_t *ctx, int argc, char **argv)
 {
     (void)ctx;
     shield_state_t *state = shield_state_get();
     
     if (argc < 1) {
         printf("API token: %s\n", state->api.token[0] ? "(configured)" : "(not set)");
-        return;
+        return SHIELD_OK;
     }
     
     strncpy(state->api.token, argv[0], sizeof(state->api.token) - 1);
     shield_state_mark_dirty();
     printf("API token configured\n");
+    return SHIELD_OK;
 }
 
-void cmd_metrics_enable(cli_context_t *ctx, int argc, char **argv)
+shield_err_t cmd_metrics_enable(cli_context_t *ctx, int argc, char **argv)
 {
     (void)ctx; (void)argc; (void)argv;
     shield_state_t *state = shield_state_get();
     state->api.metrics_enabled = true;
     shield_state_mark_dirty();
     printf("Metrics endpoint enabled on port %u\n", state->api.metrics_port);
+    return SHIELD_OK;
 }
 
-void cmd_metrics_port(cli_context_t *ctx, int argc, char **argv)
+shield_err_t cmd_metrics_port(cli_context_t *ctx, int argc, char **argv)
 {
     (void)ctx;
     shield_state_t *state = shield_state_get();
     
     if (argc < 1) {
         printf("Current metrics port: %u\n", state->api.metrics_port);
-        return;
+        return SHIELD_OK;
     }
     
     state->api.metrics_port = atoi(argv[0]);
     shield_state_mark_dirty();
     printf("Metrics port set to %u\n", state->api.metrics_port);
+    return SHIELD_OK;
 }
 
-void cmd_show_api(cli_context_t *ctx, int argc, char **argv)
+shield_err_t cmd_show_api(cli_context_t *ctx, int argc, char **argv)
 {
     (void)ctx; (void)argc; (void)argv;
     shield_state_t *state = shield_state_get();
@@ -591,37 +635,41 @@ void cmd_show_api(cli_context_t *ctx, int argc, char **argv)
     printf("\nMetrics Status\n");
     printf("Enabled: %s\n", state->api.metrics_enabled ? "YES" : "NO");
     printf("Port:    %u\n", state->api.metrics_port);
+    return SHIELD_OK;
 }
 
 /* ===== Canary Commands ===== */
 
-void cmd_canary_add(cli_context_t *ctx, int argc, char **argv)
+shield_err_t cmd_canary_add(cli_context_t *ctx, int argc, char **argv)
 {
     (void)ctx;
     if (argc < 1) {
         printf("Usage: canary token add <token>\n");
-        return;
+        return SHIELD_OK;
     }
     printf("Canary token added: %s\n", argv[0]);
+    return SHIELD_OK;
 }
 
-void cmd_canary_remove(cli_context_t *ctx, int argc, char **argv)
+shield_err_t cmd_canary_remove(cli_context_t *ctx, int argc, char **argv)
 {
     (void)ctx;
     if (argc < 1) {
         printf("Usage: no canary token <token>\n");
-        return;
+        return SHIELD_OK;
     }
     printf("Canary token removed: %s\n", argv[0]);
+    return SHIELD_OK;
 }
 
-void cmd_show_canary_tokens(cli_context_t *ctx, int argc, char **argv)
+shield_err_t cmd_show_canary_tokens(cli_context_t *ctx, int argc, char **argv)
 {
     (void)ctx; (void)argc; (void)argv;
     printf("Canary Tokens\n");
     printf("=============\n");
     printf("Active tokens: 0\n");
     printf("Triggered: 0\n");
+    return SHIELD_OK;
 }
 
 /* ===== Command Table ===== */

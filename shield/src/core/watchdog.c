@@ -20,6 +20,7 @@
 #include <stdbool.h>
 
 #include "shield_common.h"
+#include "shield_string_safe.h"
 
 /* ===== Watchdog Constants ===== */
 
@@ -188,7 +189,7 @@ static health_check_t default_check(void *ctx)
         .latency_us = 100,
         .last_check = get_time_ms(),
     };
-    strcpy(result.message, "OK");
+    shield_strcopy_s(result.message, sizeof(result.message), "OK");
     return result;
 }
 
@@ -207,11 +208,11 @@ static health_check_t memory_check(void *ctx)
     void *test = malloc(1024);
     if (test) {
         free(test);
-        strcpy(result.message, "Memory allocation OK");
+        shield_strcopy_s(result.message, sizeof(result.message), "Memory allocation OK");
     } else {
         result.status = COMP_STATUS_UNHEALTHY;
         result.health_score = 0.0f;
-        strcpy(result.message, "Memory allocation failed!");
+        shield_strcopy_s(result.message, sizeof(result.message), "Memory allocation failed!");
     }
     
     return result;
@@ -253,7 +254,7 @@ shield_err_t shield_watchdog_init(void)
     
     /* Memory subsystem */
     watchdog_component_t *mem = &g_watchdog.components[g_watchdog.component_count++];
-    strcpy(mem->name, "Memory");
+    shield_strcopy_s(mem->name, sizeof(mem->name), "Memory");
     mem->type = COMP_TYPE_CORE;
     mem->critical = true;
     mem->status = COMP_STATUS_UNKNOWN;

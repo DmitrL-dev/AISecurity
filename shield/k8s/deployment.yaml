@@ -1,0 +1,102 @@
+# SENTINEL Shield Kubernetes Deployment
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: sentinel-shield
+  labels:
+    app: sentinel-shield
+    component: security
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: sentinel-shield
+  template:
+    metadata:
+      labels:
+        app: sentinel-shield
+        component: security
+      annotations:
+        prometheus.io/scrape: "true"
+        prometheus.io/port: "9090"
+        prometheus.io/path: "/metrics"
+    spec:
+      serviceAccountName: sentinel-shield
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 1000
+        fsGroup: 1000
+      containers:
+        - name: shield
+          image: sentinel/shield:1.2.0
+          imagePullPolicy: IfNotPresent
+          ports:
+            - name: api
+              containerPort: 8080
+              protocol: TCP
+            - name: metrics
+              containerPort: 9090
+              protocol: TCP
+          env:
+            - name: SHIELD_LOG_LEVEL
+              valueFrom:
+                configMapKeyRef:
+                  name: sentinel-shield-config
+                  key: log_level
+            - name: BRAIN_URL
+              valueFrom:
+                configMapKeyRef:
+                  name: sentinel-shield-config
+                  key: brain_url
+            - name: TLS_ENABLED
+              value: "true"
+          volumeMounts:
+            - name: config
+              mountPath: /etc/shield
+              readOnly: true
+            - name: tls-certs
+              mountPath: /etc/shield/certs
+              readOnly: true
+          resources:
+            requests:
+              cpu: 100m
+              memory: 128Mi
+            limits:
+              cpu: 500m
+              memory: 512Mi
+          livenessProbe:
+            httpGet:
+              path: /health/live
+              port: api
+            initialDelaySeconds: 10
+            periodSeconds: 15
+            timeoutSeconds: 5
+          readinessProbe:
+            httpGet:
+              path: /health/ready
+              port: api
+            initialDelaySeconds: 5
+            periodSeconds: 10
+            timeoutSeconds: 3
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            capabilities:
+              drop:
+                - ALL
+      volumes:
+        - name: config
+          configMap:
+            name: sentinel-shield-config
+        - name: tls-certs
+          secret:
+            secretName: sentinel-shield-tls
+      affinity:
+        podAntiAffinity:
+          preferredDuringSchedulingIgnoredDuringExecution:
+            - weight: 100
+              podAffinityTerm:
+                labelSelector:
+                  matchLabels:
+                    app: sentinel-shield
+                topologyKey: kubernetes.io/hostname

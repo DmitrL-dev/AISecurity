@@ -9,6 +9,7 @@
 #include <math.h>
 
 #include "shield_ngram.h"
+#include "shield_string_safe.h"
 
 #define MAX_NGRAMS 1024
 
@@ -154,8 +155,8 @@ shield_err_t ngram_model_train_baseline(ngram_model_t *model,
     
     combined[0] = '\0';
     for (int i = 0; i < count; i++) {
-        strcat(combined, texts[i]);
-        strcat(combined, " ");
+        shield_strcat_s(combined, total_len, texts[i]);
+        shield_strcat_s(combined, total_len, " ");
     }
     
     shield_err_t err = ngram_profile_create(combined, strlen(combined), 3, &model->baseline);
@@ -180,8 +181,8 @@ shield_err_t ngram_model_train_attack(ngram_model_t *model,
     
     combined[0] = '\0';
     for (int i = 0; i < count; i++) {
-        strcat(combined, texts[i]);
-        strcat(combined, " ");
+        shield_strcat_s(combined, total_len, texts[i]);
+        shield_strcat_s(combined, total_len, " ");
     }
     
     shield_err_t err = ngram_profile_create(combined, strlen(combined), 3, &model->attack);

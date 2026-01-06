@@ -84,7 +84,7 @@ static int parse_args(int argc, char **argv, char *config_path, bool *daemon,
         }
         else if (strcmp(argv[i], "-c") == 0 || strcmp(argv[i], "--config") == 0) {
             if (i + 1 < argc) {
-                strncpy(config_path, argv[++i], 255);
+                strncpy(config_path, argv[++i], sizeof(config_path) - 1);
             } else {
                 fprintf(stderr, "Error: -c requires a file path\n");
                 return 1;

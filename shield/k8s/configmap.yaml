@@ -1,0 +1,43 @@
+# SENTINEL Shield ConfigMap
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: sentinel-shield-config
+  labels:
+    app: sentinel-shield
+data:
+  log_level: "info"
+  brain_url: "http://sentinel-brain:8000"
+  metrics_enabled: "true"
+  
+  # Shield configuration
+  shield.conf: |
+    [general]
+    log_level = info
+    metrics_port = 9090
+    api_port = 8080
+    
+    [brain]
+    url = http://sentinel-brain:8000
+    timeout_ms = 5000
+    retry_count = 3
+    
+    [tls]
+    enabled = true
+    cert_file = /etc/shield/certs/tls.crt
+    key_file = /etc/shield/certs/tls.key
+    min_version = TLS1.2
+    
+    [guard]
+    llm_enabled = true
+    input_guard = true
+    output_guard = true
+    
+    [ratelimit]
+    enabled = true
+    requests_per_minute = 1000
+    burst = 100
+    
+    [audit]
+    enabled = true
+    format = json

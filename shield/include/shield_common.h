@@ -46,6 +46,7 @@ typedef enum {
     SHIELD_ERR_UNSUPPORTED = -12,
     SHIELD_ERR_DISCONNECTED = -13,
     SHIELD_ERR_MEMORY = -14,
+    SHIELD_ERR_TLS = -15,
     SHIELD_ERR_INTERNAL = -99,
 } shield_err_t;
 

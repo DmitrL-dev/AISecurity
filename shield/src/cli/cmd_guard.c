@@ -20,11 +20,11 @@ static inline shield_err_t signature_update(shield_context_t *ctx) {
 }
 
 /* guard enable <type> */
-static void cmd_guard_enable(cli_context_t *ctx, int argc, char **argv)
+static shield_err_t cmd_guard_enable(cli_context_t *ctx, int argc, char **argv)
 {
     if (argc < 3) {
         cli_print("%% Usage: guard enable <llm|rag|agent|tool|mcp|api|all>\n");
-        return;
+        return SHIELD_OK;
     }
     
     shield_state_t *state = shield_state_get();
@@ -71,14 +71,15 @@ static void cmd_guard_enable(cli_context_t *ctx, int argc, char **argv)
     }
     ctx->modified = true;
     shield_state_mark_dirty();
+    return SHIELD_OK;
 }
 
 /* no guard enable <type> */
-static void cmd_no_guard_enable(cli_context_t *ctx, int argc, char **argv)
+static shield_err_t cmd_no_guard_enable(cli_context_t *ctx, int argc, char **argv)
 {
     if (argc < 4) {
         cli_print("%% Usage: no guard enable <llm|rag|agent|tool|mcp|api|all>\n");
-        return;
+        return SHIELD_OK;
     }
     
     shield_state_t *state = shield_state_get();
@@ -125,32 +126,35 @@ static void cmd_no_guard_enable(cli_context_t *ctx, int argc, char **argv)
     }
     ctx->modified = true;
     shield_state_mark_dirty();
+    return SHIELD_OK;
 }
 
 /* guard policy <type> <action> */
-static void cmd_guard_policy(cli_context_t *ctx, int argc, char **argv)
+static shield_err_t cmd_guard_policy(cli_context_t *ctx, int argc, char **argv)
 {
     if (argc < 4) {
         cli_print("%% Usage: guard policy <type> <block|log|alert>\n");
-        return;
+        return SHIELD_OK;
     }
     cli_print("Guard policy for %s set to %s\n", argv[2], argv[3]);
     ctx->modified = true;
+    return SHIELD_OK;
 }
 
 /* guard threshold <type> <value> */
-static void cmd_guard_threshold(cli_context_t *ctx, int argc, char **argv)
+static shield_err_t cmd_guard_threshold(cli_context_t *ctx, int argc, char **argv)
 {
     if (argc < 4) {
         cli_print("%% Usage: guard threshold <type> <0.0-1.0>\n");
-        return;
+        return SHIELD_OK;
     }
     cli_print("Guard %s threshold set to %s\n", argv[2], argv[3]);
     ctx->modified = true;
+    return SHIELD_OK;
 }
 
 /* signature-set update */
-static void cmd_signature_update(cli_context_t *ctx, int argc, char **argv)
+static shield_err_t cmd_signature_update(cli_context_t *ctx, int argc, char **argv)
 {
     (void)argc; (void)argv;
     cli_print("Updating signature database...\n");
@@ -159,185 +163,201 @@ static void cmd_signature_update(cli_context_t *ctx, int argc, char **argv)
     } else {
         cli_print("%% Update failed\n");
     }
+    return SHIELD_OK;
 }
 
 /* signature-set category enable <cat> */
-static void cmd_signature_category(cli_context_t *ctx, int argc, char **argv)
+static shield_err_t cmd_signature_category(cli_context_t *ctx, int argc, char **argv)
 {
     if (argc < 5) {
         cli_print("%% Usage: signature-set category enable <injection|jailbreak|...>\n");
-        return;
+        return SHIELD_OK;
     }
     cli_print("Signature category %s enabled\n", argv[4]);
     ctx->modified = true;
+    return SHIELD_OK;
 }
 
 /* canary token add <token> */
-static void cmd_canary_add(cli_context_t *ctx, int argc, char **argv)
+static shield_err_t cmd_canary_add(cli_context_t *ctx, int argc, char **argv)
 {
     if (argc < 4) {
         cli_print("%% Usage: canary token add <token>\n");
-        return;
+        return SHIELD_OK;
     }
     
     /* TODO: canary_add(ctx->canaries, argv[3], CANARY_TYPE_TOKEN); */
     cli_print("Canary token added: %s\n", argv[3]);
     ctx->canary_count++;
     ctx->modified = true;
+    return SHIELD_OK;
 }
 
 /* no canary token <token> */
-static void cmd_no_canary(cli_context_t *ctx, int argc, char **argv)
+static shield_err_t cmd_no_canary(cli_context_t *ctx, int argc, char **argv)
 {
     if (argc < 4) {
         cli_print("%% Usage: no canary token <token>\n");
-        return;
+        return SHIELD_OK;
     }
     
     /* TODO: canary_remove(ctx->canaries, argv[3]); */
     cli_print("Canary token removed\n");
     ctx->canary_count--;
     ctx->modified = true;
+    return SHIELD_OK;
 }
 
 /* blocklist ip add <ip> */
-static void cmd_blocklist_ip_add(cli_context_t *ctx, int argc, char **argv)
+static shield_err_t cmd_blocklist_ip_add(cli_context_t *ctx, int argc, char **argv)
 {
     if (argc < 4) {
         cli_print("%% Usage: blocklist ip add <ip-address>\n");
-        return;
+        return SHIELD_OK;
     }
     
     /* Use existing blocklist_add */
     blocklist_add(ctx->blocklist, argv[3], "CLI: IP block");
     cli_print("IP %s added to blocklist\n", argv[3]);
     ctx->modified = true;
+    return SHIELD_OK;
 }
 
 /* no blocklist ip <ip> */
-static void cmd_no_blocklist_ip(cli_context_t *ctx, int argc, char **argv)
+static shield_err_t cmd_no_blocklist_ip(cli_context_t *ctx, int argc, char **argv)
 {
     if (argc < 4) {
         cli_print("%% Usage: no blocklist ip <ip-address>\n");
-        return;
+        return SHIELD_OK;
     }
     
     blocklist_remove(ctx->blocklist, argv[3]);
     cli_print("IP %s removed from blocklist\n", argv[3]);
     ctx->modified = true;
+    return SHIELD_OK;
 }
 
 /* blocklist pattern add <pattern> */
-static void cmd_blocklist_pattern(cli_context_t *ctx, int argc, char **argv)
+static shield_err_t cmd_blocklist_pattern(cli_context_t *ctx, int argc, char **argv)
 {
     if (argc < 4) {
         cli_print("%% Usage: blocklist pattern add <pattern>\n");
-        return;
+        return SHIELD_OK;
     }
     
     blocklist_add(ctx->blocklist, argv[3], "CLI: pattern block");
     cli_print("Pattern added to blocklist\n");
     ctx->modified = true;
+    return SHIELD_OK;
 }
 
 /* rate-limit enable */
-static void cmd_rate_limit_enable(cli_context_t *ctx, int argc, char **argv)
+static shield_err_t cmd_rate_limit_enable(cli_context_t *ctx, int argc, char **argv)
 {
     (void)argc; (void)argv;
     ctx->rate_limit_enabled = true;
     cli_print("Rate limiting enabled\n");
     ctx->modified = true;
+    return SHIELD_OK;
 }
 
 /* rate-limit requests <count> per <seconds> */
-static void cmd_rate_limit_config(cli_context_t *ctx, int argc, char **argv)
+static shield_err_t cmd_rate_limit_config(cli_context_t *ctx, int argc, char **argv)
 {
     if (argc < 5) {
         cli_print("%% Usage: rate-limit requests <count> per <seconds>\n");
-        return;
+        return SHIELD_OK;
     }
     ctx->rate_limit_requests = atoi(argv[2]);
     ctx->rate_limit_window = atoi(argv[4]);
     cli_print("Rate limit: %d requests per %d seconds\n", 
              ctx->rate_limit_requests, ctx->rate_limit_window);
     ctx->modified = true;
+    return SHIELD_OK;
 }
 
 /* threat-intel enable */
-static void cmd_threat_intel_enable(cli_context_t *ctx, int argc, char **argv)
+static shield_err_t cmd_threat_intel_enable(cli_context_t *ctx, int argc, char **argv)
 {
     (void)argc; (void)argv;
     ctx->threat_intel_enabled = true;
     cli_print("Threat intelligence enabled\n");
     ctx->modified = true;
+    return SHIELD_OK;
 }
 
 /* threat-intel feed add <url> */
-static void cmd_threat_intel_feed(cli_context_t *ctx, int argc, char **argv)
+static shield_err_t cmd_threat_intel_feed(cli_context_t *ctx, int argc, char **argv)
 {
     if (argc < 5) {
         cli_print("%% Usage: threat-intel feed add <url>\n");
-        return;
+        return SHIELD_OK;
     }
     cli_print("Threat intel feed added: %s\n", argv[4]);
     ctx->modified = true;
+    return SHIELD_OK;
 }
 
 /* alert destination <type> <target> */
-static void cmd_alert_destination(cli_context_t *ctx, int argc, char **argv)
+static shield_err_t cmd_alert_destination(cli_context_t *ctx, int argc, char **argv)
 {
     if (argc < 4) {
         cli_print("%% Usage: alert destination <webhook|email|syslog> <target>\n");
-        return;
+        return SHIELD_OK;
     }
     strncpy(ctx->alert_destination, argv[3], sizeof(ctx->alert_destination) - 1);
     cli_print("Alert destination set\n");
     ctx->modified = true;
+    return SHIELD_OK;
 }
 
 /* alert threshold <severity> */
-static void cmd_alert_threshold(cli_context_t *ctx, int argc, char **argv)
+static shield_err_t cmd_alert_threshold(cli_context_t *ctx, int argc, char **argv)
 {
     if (argc < 3) {
         cli_print("%% Usage: alert threshold <info|warn|critical>\n");
-        return;
+        return SHIELD_OK;
     }
     cli_print("Alert threshold set to %s\n", argv[2]);
     ctx->modified = true;
+    return SHIELD_OK;
 }
 
 /* siem enable */
-static void cmd_siem_enable(cli_context_t *ctx, int argc, char **argv)
+static shield_err_t cmd_siem_enable(cli_context_t *ctx, int argc, char **argv)
 {
     (void)argc; (void)argv;
     ctx->siem_enabled = true;
     cli_print("SIEM export enabled\n");
     ctx->modified = true;
+    return SHIELD_OK;
 }
 
 /* siem destination <host> <port> */
-static void cmd_siem_destination(cli_context_t *ctx, int argc, char **argv)
+static shield_err_t cmd_siem_destination(cli_context_t *ctx, int argc, char **argv)
 {
     if (argc < 4) {
         cli_print("%% Usage: siem destination <host> <port>\n");
-        return;
+        return SHIELD_OK;
     }
     strncpy(ctx->siem_host, argv[2], sizeof(ctx->siem_host) - 1);
     ctx->siem_port = atoi(argv[3]);
     cli_print("SIEM destination: %s:%d\n", argv[2], ctx->siem_port);
     ctx->modified = true;
+    return SHIELD_OK;
 }
 
 /* siem format <cef|json|syslog> */
-static void cmd_siem_format(cli_context_t *ctx, int argc, char **argv)
+static shield_err_t cmd_siem_format(cli_context_t *ctx, int argc, char **argv)
 {
     if (argc < 3) {
         cli_print("%% Usage: siem format <cef|json|syslog>\n");
-        return;
+        return SHIELD_OK;
     }
     strncpy(ctx->siem_format, argv[2], sizeof(ctx->siem_format) - 1);
     cli_print("SIEM format: %s\n", argv[2]);
     ctx->modified = true;
+    return SHIELD_OK;
 }
 
 /* Guard command table */

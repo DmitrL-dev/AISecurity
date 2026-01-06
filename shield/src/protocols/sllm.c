@@ -26,6 +26,7 @@
 #endif
 
 #include "protocols/sllm.h"
+#include "shield_string_safe.h"
 
 /* Simple logging macros */
 #define SHIELD_LOG_INFO(...)  fprintf(stderr, "[INFO]  " __VA_ARGS__), fprintf(stderr, "\n")
@@ -560,7 +561,7 @@ shield_err_t sllm_forward_to_llm(const sllm_request_t *request,
         strncpy(path, slash, sizeof(path) - 1);
     } else {
         strncpy(host, url, sizeof(host) - 1);
-        strcpy(path, "/");
+        shield_strcopy_s(path, sizeof(path), "/");
     }
     
     /* Make request */

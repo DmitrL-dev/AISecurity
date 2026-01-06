@@ -1,0 +1,42 @@
+# SENTINEL Shield Kubernetes Service
+apiVersion: v1
+kind: Service
+metadata:
+  name: sentinel-shield
+  labels:
+    app: sentinel-shield
+spec:
+  type: ClusterIP
+  ports:
+    - name: api
+      port: 8080
+      targetPort: api
+      protocol: TCP
+    - name: metrics
+      port: 9090
+      targetPort: metrics
+      protocol: TCP
+  selector:
+    app: sentinel-shield
+---
+# Service for external access (optional)
+apiVersion: v1
+kind: Service
+metadata:
+  name: sentinel-shield-lb
+  labels:
+    app: sentinel-shield
+  annotations:
+    # For AWS
+    # service.beta.kubernetes.io/aws-load-balancer-type: nlb
+    # For GCP
+    # cloud.google.com/load-balancer-type: Internal
+spec:
+  type: LoadBalancer
+  ports:
+    - name: api
+      port: 443
+      targetPort: api
+      protocol: TCP
+  selector:
+    app: sentinel-shield

@@ -8,6 +8,7 @@
 #include <ctype.h>
 
 #include "shield_tokens.h"
+#include "shield_string_safe.h"
 
 /* Approximate tokens per character for different tokenizers */
 static const float TOKENS_PER_CHAR[] = {
@@ -143,7 +144,7 @@ char *truncate_to_tokens(const char *text, int max_tokens, tokenizer_type_t type
     if (!result) return NULL;
     
     memcpy(result, text, lo);
-    strcpy(result + lo, "...");
+    shield_strcopy_s(result + lo, 4, "...");
     
     return result;
 }

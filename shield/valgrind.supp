@@ -1,0 +1,40 @@
+# Valgrind suppressions for SENTINEL Shield
+# Suppress known false positives and external library issues
+
+# OpenSSL initialization (one-time allocations)
+{
+   openssl_init
+   Memcheck:Leak
+   ...
+   fun:OPENSSL_init_ssl
+}
+
+{
+   openssl_crypto
+   Memcheck:Leak
+   ...
+   fun:OPENSSL_init_crypto
+}
+
+# libc/glibc allocations
+{
+   glibc_getaddrinfo
+   Memcheck:Leak
+   ...
+   fun:getaddrinfo
+}
+
+{
+   glibc_dlopen
+   Memcheck:Leak
+   ...
+   fun:dlopen
+}
+
+# pthread allocations
+{
+   pthread_create
+   Memcheck:Leak
+   ...
+   fun:pthread_create
+}

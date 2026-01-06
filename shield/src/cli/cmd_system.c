@@ -15,7 +15,7 @@
 
 /* ===== Clear Commands ===== */
 
-void cmd_clear_counters(cli_context_t *ctx, int argc, char **argv)
+shield_err_t cmd_clear_counters(cli_context_t *ctx, int argc, char **argv)
 {
     (void)ctx; (void)argc; (void)argv;
     shield_state_t *state = shield_state_get();
@@ -29,15 +29,17 @@ void cmd_clear_counters(cli_context_t *ctx, int argc, char **argv)
     state->watchdog.alerts_raised = 0;
     
     printf("All counters cleared\n");
+    return SHIELD_OK;
 }
 
-void cmd_clear_logging(cli_context_t *ctx, int argc, char **argv)
+shield_err_t cmd_clear_logging(cli_context_t *ctx, int argc, char **argv)
 {
     (void)ctx; (void)argc; (void)argv;
     printf("Logging buffer cleared\n");
+    return SHIELD_OK;
 }
 
-void cmd_clear_statistics(cli_context_t *ctx, int argc, char **argv)
+shield_err_t cmd_clear_statistics(cli_context_t *ctx, int argc, char **argv)
 {
     (void)ctx; (void)argc; (void)argv;
     shield_state_t *state = shield_state_get();
@@ -57,23 +59,26 @@ void cmd_clear_statistics(cli_context_t *ctx, int argc, char **argv)
     state->guards.api.threats_blocked = 0;
     
     printf("Statistics cleared\n");
+    return SHIELD_OK;
 }
 
-void cmd_clear_sessions(cli_context_t *ctx, int argc, char **argv)
+shield_err_t cmd_clear_sessions(cli_context_t *ctx, int argc, char **argv)
 {
     (void)ctx; (void)argc; (void)argv;
     printf("All sessions cleared\n");
+    return SHIELD_OK;
 }
 
-void cmd_clear_alerts(cli_context_t *ctx, int argc, char **argv)
+shield_err_t cmd_clear_alerts(cli_context_t *ctx, int argc, char **argv)
 {
     (void)ctx; (void)argc; (void)argv;
     shield_state_t *state = shield_state_get();
     state->alerting.alerts_sent = 0;
     printf("Alerts cleared\n");
+    return SHIELD_OK;
 }
 
-void cmd_clear_blocklist(cli_context_t *ctx, int argc, char **argv)
+shield_err_t cmd_clear_blocklist(cli_context_t *ctx, int argc, char **argv)
 {
     (void)ctx; (void)argc; (void)argv;
     shield_state_t *state = shield_state_get();
@@ -81,17 +86,19 @@ void cmd_clear_blocklist(cli_context_t *ctx, int argc, char **argv)
     state->blocklist.pattern_count = 0;
     state->blocklist.blocks_total = 0;
     printf("Blocklist cleared\n");
+    return SHIELD_OK;
 }
 
-void cmd_clear_quarantine(cli_context_t *ctx, int argc, char **argv)
+shield_err_t cmd_clear_quarantine(cli_context_t *ctx, int argc, char **argv)
 {
     (void)ctx; (void)argc; (void)argv;
     printf("Quarantine cleared\n");
+    return SHIELD_OK;
 }
 
 /* ===== Copy/Write Commands ===== */
 
-void cmd_copy_run_start(cli_context_t *ctx, int argc, char **argv)
+shield_err_t cmd_copy_run_start(cli_context_t *ctx, int argc, char **argv)
 {
     (void)ctx; (void)argc; (void)argv;
     
@@ -101,9 +108,10 @@ void cmd_copy_run_start(cli_context_t *ctx, int argc, char **argv)
     } else {
         printf("[FAILED]\n");
     }
+    return SHIELD_OK;
 }
 
-void cmd_copy_start_run(cli_context_t *ctx, int argc, char **argv)
+shield_err_t cmd_copy_start_run(cli_context_t *ctx, int argc, char **argv)
 {
     (void)ctx; (void)argc; (void)argv;
     
@@ -113,9 +121,10 @@ void cmd_copy_start_run(cli_context_t *ctx, int argc, char **argv)
     } else {
         printf("No startup configuration found, using defaults\n");
     }
+    return SHIELD_OK;
 }
 
-void cmd_write_memory(cli_context_t *ctx, int argc, char **argv)
+shield_err_t cmd_write_memory(cli_context_t *ctx, int argc, char **argv)
 {
     (void)ctx; (void)argc; (void)argv;
     
@@ -125,9 +134,10 @@ void cmd_write_memory(cli_context_t *ctx, int argc, char **argv)
     } else {
         printf("[FAILED]\n");
     }
+    return SHIELD_OK;
 }
 
-void cmd_write_erase(cli_context_t *ctx, int argc, char **argv)
+shield_err_t cmd_write_erase(cli_context_t *ctx, int argc, char **argv)
 {
     (void)ctx; (void)argc; (void)argv;
     
@@ -135,57 +145,63 @@ void cmd_write_erase(cli_context_t *ctx, int argc, char **argv)
     shield_state_reset();
     printf("[OK]\n");
     printf("Erase complete\n");
+    return SHIELD_OK;
 }
 
-void cmd_write_terminal(cli_context_t *ctx, int argc, char **argv)
+shield_err_t cmd_write_terminal(cli_context_t *ctx, int argc, char **argv)
 {
     (void)ctx; (void)argc; (void)argv;
     char buffer[4096];
     shield_state_format_summary(buffer, sizeof(buffer));
     printf("%s", buffer);
+    return SHIELD_OK;
 }
 
 /* ===== Terminal Commands ===== */
 
-void cmd_terminal_monitor(cli_context_t *ctx, int argc, char **argv)
+shield_err_t cmd_terminal_monitor(cli_context_t *ctx, int argc, char **argv)
 {
     (void)ctx; (void)argc; (void)argv;
     shield_state_t *state = shield_state_get();
     state->debug.all = true;
     printf("Log monitoring enabled\n");
+    return SHIELD_OK;
 }
 
-void cmd_terminal_no_monitor(cli_context_t *ctx, int argc, char **argv)
+shield_err_t cmd_terminal_no_monitor(cli_context_t *ctx, int argc, char **argv)
 {
     (void)ctx; (void)argc; (void)argv;
     shield_state_t *state = shield_state_get();
     state->debug.all = false;
     printf("Log monitoring disabled\n");
+    return SHIELD_OK;
 }
 
-void cmd_terminal_length(cli_context_t *ctx, int argc, char **argv)
+shield_err_t cmd_terminal_length(cli_context_t *ctx, int argc, char **argv)
 {
     (void)ctx;
     if (argc < 1) {
         printf("Usage: terminal length <lines>\n");
-        return;
+        return SHIELD_OK;
     }
     printf("Terminal length set to %s lines\n", argv[0]);
+    return SHIELD_OK;
 }
 
-void cmd_terminal_width(cli_context_t *ctx, int argc, char **argv)
+shield_err_t cmd_terminal_width(cli_context_t *ctx, int argc, char **argv)
 {
     (void)ctx;
     if (argc < 1) {
         printf("Usage: terminal width <columns>\n");
-        return;
+        return SHIELD_OK;
     }
     printf("Terminal width set to %s columns\n", argv[0]);
+    return SHIELD_OK;
 }
 
 /* ===== System Commands ===== */
 
-void cmd_reload(cli_context_t *ctx, int argc, char **argv)
+shield_err_t cmd_reload(cli_context_t *ctx, int argc, char **argv)
 {
     (void)ctx; (void)argc; (void)argv;
     
@@ -202,106 +218,117 @@ void cmd_reload(cli_context_t *ctx, int argc, char **argv)
     shield_state_reset();
     shield_state_load("shield.conf");
     printf("System reloaded\n");
+    return SHIELD_OK;
 }
 
-void cmd_configure_terminal(cli_context_t *ctx, int argc, char **argv)
+shield_err_t cmd_configure_terminal(cli_context_t *ctx, int argc, char **argv)
 {
     (void)argc; (void)argv;
     if (ctx) {
         ctx->cli.mode = CLI_MODE_CONFIG;
         printf("Entering configuration mode\n");
     }
+    return SHIELD_OK;
 }
 
-void cmd_configure_memory(cli_context_t *ctx, int argc, char **argv)
+shield_err_t cmd_configure_memory(cli_context_t *ctx, int argc, char **argv)
 {
     (void)ctx; (void)argc; (void)argv;
     printf("Loading configuration from memory...\n");
     shield_state_load("shield.conf");
     printf("Configuration loaded\n");
+    return SHIELD_OK;
 }
 
 /* ===== Network Tools ===== */
 
-void cmd_ping(cli_context_t *ctx, int argc, char **argv)
+shield_err_t cmd_ping(cli_context_t *ctx, int argc, char **argv)
 {
     (void)ctx;
     if (argc < 1) {
         printf("Usage: ping <host>\n");
-        return;
+        return SHIELD_OK;
     }
     
     printf("Type escape sequence to abort.\n");
     printf("Sending 5, 100-byte ICMP Echos to %s, timeout is 2 seconds:\n", argv[0]);
     printf("!!!!!\n");
     printf("Success rate is 100 percent (5/5), round-trip min/avg/max = 1/1/2 ms\n");
+    return SHIELD_OK;
 }
 
-void cmd_traceroute(cli_context_t *ctx, int argc, char **argv)
+shield_err_t cmd_traceroute(cli_context_t *ctx, int argc, char **argv)
 {
     (void)ctx;
     if (argc < 1) {
         printf("Usage: traceroute <host>\n");
-        return;
+        return SHIELD_OK;
     }
     
     printf("Type escape sequence to abort.\n");
     printf("Tracing the route to %s\n", argv[0]);
     printf("  1 gateway (10.0.0.1) 1 msec 1 msec 1 msec\n");
     printf("  2 %s 2 msec 2 msec 2 msec\n", argv[0]);
+    return SHIELD_OK;
 }
 
 /* ===== Debug Commands ===== */
 
-void cmd_debug_shield(cli_context_t *ctx, int argc, char **argv)
+shield_err_t cmd_debug_shield(cli_context_t *ctx, int argc, char **argv)
 {
     (void)ctx; (void)argc; (void)argv;
     shield_state_t *state = shield_state_get();
     state->debug.shield = true;
     printf("Shield core debugging is on\n");
+    return SHIELD_OK;
 }
 
-void cmd_debug_zone(cli_context_t *ctx, int argc, char **argv)
+shield_err_t cmd_debug_zone(cli_context_t *ctx, int argc, char **argv)
 {
     (void)ctx; (void)argc; (void)argv;
     shield_state_t *state = shield_state_get();
     state->debug.zone = true;
     printf("Zone debugging is on\n");
+    return SHIELD_OK;
 }
 
-void cmd_debug_rule(cli_context_t *ctx, int argc, char **argv)
+shield_err_t cmd_debug_rule(cli_context_t *ctx, int argc, char **argv)
 {
     (void)ctx; (void)argc; (void)argv;
     shield_state_t *state = shield_state_get();
     state->debug.rule = true;
     printf("Rule debugging is on\n");
+    return SHIELD_OK;
 }
 
-void cmd_debug_guard(cli_context_t *ctx, int argc, char **argv)
+shield_err_t cmd_debug_guard(cli_context_t *ctx, int argc, char **argv)
 {
     (void)ctx; (void)argc; (void)argv;
     shield_state_t *state = shield_state_get();
     state->debug.guard = true;
     printf("Guard debugging is on\n");
+    return SHIELD_OK;
 }
 
-void cmd_debug_protocol(cli_context_t *ctx, int argc, char **argv)
+shield_err_t cmd_debug_protocol(cli_context_t *ctx, int argc, char **argv)
 {
     (void)ctx; (void)argc; (void)argv;
     shield_state_t *state = shield_state_get();
     state->debug.protocol = true;
     printf("Protocol debugging is on\n");
+    return SHIELD_OK;
 }
 
-void cmd_debug_ha(cli_context_t *ctx, int argc, char **argv)
+shield_err_t cmd_debug_ha(cli_context_t *ctx, int argc, char **argv)
 {
     (void)ctx; (void)argc; (void)argv;
     shield_state_t *state = shield_state_get();
     state->debug.ha = true;
     printf("HA debugging is on\n");
+    return SHIELD_OK;
 }
 
-void cmd_debug_all(cli_context_t *ctx, int argc, char **argv)
+shield_err_t cmd_debug_all(cli_context_t *ctx, int argc, char **argv)
 {
     (void)ctx; (void)argc; (void)argv;
     shield_state_t *state = shield_state_get();
@@ -313,9 +340,10 @@ void cmd_debug_all(cli_context_t *ctx, int argc, char **argv)
     state->debug.ha = true;
     state->debug.all = true;
     printf("All debugging is on\n");
+    return SHIELD_OK;
 }
 
-void cmd_undebug_all(cli_context_t *ctx, int argc, char **argv)
+shield_err_t cmd_undebug_all(cli_context_t *ctx, int argc, char **argv)
 {
     (void)ctx; (void)argc; (void)argv;
     shield_state_t *state = shield_state_get();
@@ -327,14 +355,16 @@ void cmd_undebug_all(cli_context_t *ctx, int argc, char **argv)
     state->debug.ha = false;
     state->debug.all = false;
     printf("All debugging is off\n");
+    return SHIELD_OK;
 }
 
-void cmd_no_debug_all(cli_context_t *ctx, int argc, char **argv)
+shield_err_t cmd_no_debug_all(cli_context_t *ctx, int argc, char **argv)
 {
     cmd_undebug_all(ctx, argc, argv);
+    return SHIELD_OK;
 }
 
-void cmd_show_debug(cli_context_t *ctx, int argc, char **argv)
+shield_err_t cmd_show_debug(cli_context_t *ctx, int argc, char **argv)
 {
     (void)ctx; (void)argc; (void)argv;
     shield_state_t *state = shield_state_get();
@@ -347,36 +377,39 @@ void cmd_show_debug(cli_context_t *ctx, int argc, char **argv)
     printf("Guard:    %s\n", state->debug.guard ? "ON" : "off");
     printf("Protocol: %s\n", state->debug.protocol ? "ON" : "off");
     printf("HA:       %s\n", state->debug.ha ? "ON" : "off");
+    return SHIELD_OK;
 }
 
 /* ===== Config Commands ===== */
 
-void cmd_hostname(cli_context_t *ctx, int argc, char **argv)
+shield_err_t cmd_hostname(cli_context_t *ctx, int argc, char **argv)
 {
     (void)ctx;
     shield_state_t *state = shield_state_get();
     
     if (argc < 1) {
         printf("Current hostname: %s\n", state->config.hostname);
-        return;
+        return SHIELD_OK;
     }
     
     strncpy(state->config.hostname, argv[0], sizeof(state->config.hostname) - 1);
     shield_state_mark_dirty();
     printf("Hostname set to %s\n", state->config.hostname);
+    return SHIELD_OK;
 }
 
-void cmd_banner_motd(cli_context_t *ctx, int argc, char **argv)
+shield_err_t cmd_banner_motd(cli_context_t *ctx, int argc, char **argv)
 {
     (void)ctx;
     if (argc < 1) {
         printf("Usage: banner motd <delimiter> <message> <delimiter>\n");
-        return;
+        return SHIELD_OK;
     }
     printf("MOTD banner configured\n");
+    return SHIELD_OK;
 }
 
-void cmd_ntp_server(cli_context_t *ctx, int argc, char **argv)
+shield_err_t cmd_ntp_server(cli_context_t *ctx, int argc, char **argv)
 {
     (void)ctx;
     shield_state_t *state = shield_state_get();
@@ -384,15 +417,16 @@ void cmd_ntp_server(cli_context_t *ctx, int argc, char **argv)
     if (argc < 1) {
         printf("Current NTP server: %s\n", 
                state->config.ntp_server[0] ? state->config.ntp_server : "(none)");
-        return;
+        return SHIELD_OK;
     }
     
     strncpy(state->config.ntp_server, argv[0], sizeof(state->config.ntp_server) - 1);
     shield_state_mark_dirty();
     printf("NTP server set to %s\n", state->config.ntp_server);
+    return SHIELD_OK;
 }
 
-void cmd_clock_timezone(cli_context_t *ctx, int argc, char **argv)
+shield_err_t cmd_clock_timezone(cli_context_t *ctx, int argc, char **argv)
 {
     (void)ctx;
     shield_state_t *state = shield_state_get();
@@ -400,15 +434,16 @@ void cmd_clock_timezone(cli_context_t *ctx, int argc, char **argv)
     if (argc < 1) {
         printf("Current timezone: %s\n",
                state->config.timezone[0] ? state->config.timezone : "UTC");
-        return;
+        return SHIELD_OK;
     }
     
     strncpy(state->config.timezone, argv[0], sizeof(state->config.timezone) - 1);
     shield_state_mark_dirty();
     printf("Timezone set to %s\n", state->config.timezone);
+    return SHIELD_OK;
 }
 
-void cmd_ip_domain_name(cli_context_t *ctx, int argc, char **argv)
+shield_err_t cmd_ip_domain_name(cli_context_t *ctx, int argc, char **argv)
 {
     (void)ctx;
     shield_state_t *state = shield_state_get();
@@ -416,15 +451,16 @@ void cmd_ip_domain_name(cli_context_t *ctx, int argc, char **argv)
     if (argc < 1) {
         printf("Current domain: %s\n",
                state->config.domain[0] ? state->config.domain : "(none)");
-        return;
+        return SHIELD_OK;
     }
     
     strncpy(state->config.domain, argv[0], sizeof(state->config.domain) - 1);
     shield_state_mark_dirty();
     printf("Domain name set to %s\n", state->config.domain);
+    return SHIELD_OK;
 }
 
-void cmd_ip_name_server(cli_context_t *ctx, int argc, char **argv)
+shield_err_t cmd_ip_name_server(cli_context_t *ctx, int argc, char **argv)
 {
     (void)ctx;
     shield_state_t *state = shield_state_get();
@@ -432,15 +468,16 @@ void cmd_ip_name_server(cli_context_t *ctx, int argc, char **argv)
     if (argc < 1) {
         printf("Current DNS server: %s\n",
                state->config.dns_server[0] ? state->config.dns_server : "(none)");
-        return;
+        return SHIELD_OK;
     }
     
     strncpy(state->config.dns_server, argv[0], sizeof(state->config.dns_server) - 1);
     shield_state_mark_dirty();
     printf("DNS server set to %s\n", state->config.dns_server);
+    return SHIELD_OK;
 }
 
-void cmd_logging_level(cli_context_t *ctx, int argc, char **argv)
+shield_err_t cmd_logging_level(cli_context_t *ctx, int argc, char **argv)
 {
     (void)ctx;
     shield_state_t *state = shield_state_get();
@@ -449,7 +486,7 @@ void cmd_logging_level(cli_context_t *ctx, int argc, char **argv)
         const char *levels[] = {"TRACE", "DEBUG", "INFO", "WARN", "ERROR"};
         printf("Current log level: %s\n", levels[state->config.log_level]);
         printf("Usage: logging level <trace|debug|info|warn|error>\n");
-        return;
+        return SHIELD_OK;
     }
     
     if (strcmp(argv[0], "trace") == 0) state->config.log_level = LOG_TRACE;
@@ -459,14 +496,15 @@ void cmd_logging_level(cli_context_t *ctx, int argc, char **argv)
     else if (strcmp(argv[0], "error") == 0) state->config.log_level = LOG_ERROR;
     else {
         printf("Invalid level. Use: trace, debug, info, warn, error\n");
-        return;
+        return SHIELD_OK;
     }
     
     shield_state_mark_dirty();
     printf("Logging level set to %s\n", argv[0]);
+    return SHIELD_OK;
 }
 
-void cmd_logging_host(cli_context_t *ctx, int argc, char **argv)
+shield_err_t cmd_logging_host(cli_context_t *ctx, int argc, char **argv)
 {
     (void)ctx;
     shield_state_t *state = shield_state_get();
@@ -474,67 +512,73 @@ void cmd_logging_host(cli_context_t *ctx, int argc, char **argv)
     if (argc < 1) {
         printf("Current syslog host: %s\n",
                state->config.syslog_host[0] ? state->config.syslog_host : "(none)");
-        return;
+        return SHIELD_OK;
     }
     
     strncpy(state->config.syslog_host, argv[0], sizeof(state->config.syslog_host) - 1);
     shield_state_mark_dirty();
     printf("Syslog host set to %s\n", state->config.syslog_host);
+    return SHIELD_OK;
 }
 
-void cmd_logging_buffered(cli_context_t *ctx, int argc, char **argv)
+shield_err_t cmd_logging_buffered(cli_context_t *ctx, int argc, char **argv)
 {
     (void)ctx;
     shield_state_t *state = shield_state_get();
     
     if (argc < 1) {
         printf("Current buffer size: %u bytes\n", state->config.log_buffer_size);
-        return;
+        return SHIELD_OK;
     }
     
     state->config.log_buffer_size = atoi(argv[0]);
     shield_state_mark_dirty();
     printf("Logging buffer set to %u bytes\n", state->config.log_buffer_size);
+    return SHIELD_OK;
 }
 
-void cmd_logging_console(cli_context_t *ctx, int argc, char **argv)
+shield_err_t cmd_logging_console(cli_context_t *ctx, int argc, char **argv)
 {
     (void)ctx; (void)argc; (void)argv;
     printf("Console logging enabled\n");
+    return SHIELD_OK;
 }
 
-void cmd_service_password_encryption(cli_context_t *ctx, int argc, char **argv)
+shield_err_t cmd_service_password_encryption(cli_context_t *ctx, int argc, char **argv)
 {
     (void)ctx; (void)argc; (void)argv;
     shield_state_t *state = shield_state_get();
     state->config.password_encryption = true;
     shield_state_mark_dirty();
     printf("Password encryption enabled\n");
+    return SHIELD_OK;
 }
 
-void cmd_archive_path(cli_context_t *ctx, int argc, char **argv)
+shield_err_t cmd_archive_path(cli_context_t *ctx, int argc, char **argv)
 {
     (void)ctx;
     if (argc < 1) {
         printf("Usage: archive path <path>\n");
-        return;
+        return SHIELD_OK;
     }
     printf("Archive path set to %s\n", argv[0]);
+    return SHIELD_OK;
 }
 
-void cmd_archive_maximum(cli_context_t *ctx, int argc, char **argv)
+shield_err_t cmd_archive_maximum(cli_context_t *ctx, int argc, char **argv)
 {
     (void)ctx;
     if (argc < 1) {
         printf("Usage: archive maximum <count>\n");
-        return;
+        return SHIELD_OK;
     }
     printf("Archive maximum set to %s\n", argv[0]);
+    return SHIELD_OK;
 }
 
 /* ===== Show System ===== */
 
-void cmd_show_running_config(cli_context_t *ctx, int argc, char **argv)
+shield_err_t cmd_show_running_config(cli_context_t *ctx, int argc, char **argv)
 {
     (void)ctx; (void)argc; (void)argv;
     shield_state_t *state = shield_state_get();
@@ -569,15 +613,17 @@ void cmd_show_running_config(cli_context_t *ctx, int argc, char **argv)
     }
     printf("!\n");
     printf("end\n");
+    return SHIELD_OK;
 }
 
-void cmd_show_startup_config(cli_context_t *ctx, int argc, char **argv)
+shield_err_t cmd_show_startup_config(cli_context_t *ctx, int argc, char **argv)
 {
     (void)ctx; (void)argc; (void)argv;
     printf("! Startup configuration not available, use 'copy running-config startup-config'\n");
+    return SHIELD_OK;
 }
 
-void cmd_show_version_info(cli_context_t *ctx, int argc, char **argv)
+shield_err_t cmd_show_version_info(cli_context_t *ctx, int argc, char **argv)
 {
     (void)ctx; (void)argc; (void)argv;
     shield_state_t *state = shield_state_get();
@@ -596,16 +642,18 @@ void cmd_show_version_info(cli_context_t *ctx, int argc, char **argv)
     printf("Guards: 6 (LLM, RAG, Agent, Tool, MCP, API)\n");
     printf("Protocols: 21\n");
     printf("Modules: ThreatHunter, Watchdog, Cognitive, PQC\n");
+    return SHIELD_OK;
 }
 
-void cmd_show_clock(cli_context_t *ctx, int argc, char **argv)
+shield_err_t cmd_show_clock(cli_context_t *ctx, int argc, char **argv)
 {
     (void)ctx; (void)argc; (void)argv;
     time_t now = time(NULL);
     printf("%s", ctime(&now));
+    return SHIELD_OK;
 }
 
-void cmd_show_processes(cli_context_t *ctx, int argc, char **argv)
+shield_err_t cmd_show_processes(cli_context_t *ctx, int argc, char **argv)
 {
     (void)ctx; (void)argc; (void)argv;
     printf("PID  Name              CPU   Memory\n");
@@ -613,9 +661,10 @@ void cmd_show_processes(cli_context_t *ctx, int argc, char **argv)
     printf("1    shield-core       0.5%%  12MB\n");
     printf("2    threat-hunter     0.2%%  8MB\n");
     printf("3    watchdog          0.1%%  4MB\n");
+    return SHIELD_OK;
 }
 
-void cmd_show_memory(cli_context_t *ctx, int argc, char **argv)
+shield_err_t cmd_show_memory(cli_context_t *ctx, int argc, char **argv)
 {
     (void)ctx; (void)argc; (void)argv;
     printf("Memory Statistics\n");
@@ -624,6 +673,7 @@ void cmd_show_memory(cli_context_t *ctx, int argc, char **argv)
     printf("Used:      48 MB (18%%)\n");
     printf("Free:      208 MB (82%%)\n");
     printf("Buffers:   8 MB\n");
+    return SHIELD_OK;
 }
 
 /* ===== Command Table ===== */
