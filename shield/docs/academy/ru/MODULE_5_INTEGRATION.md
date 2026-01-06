@@ -114,9 +114,13 @@ int main(void) {
 ### Компиляция
 
 ```bash
-gcc -I/path/to/shield/include \
-    -L/path/to/shield/lib \
-    -lsentinel-shield \
+# Сначала собери Shield:
+cd /path/to/shield && make clean && make
+
+# Затем скомпилируй приложение:
+gcc -Ipath/to/shield/include \
+    -Lpath/to/shield/build \
+    -lshield \
     my_app.c -o my_app
 ```
 

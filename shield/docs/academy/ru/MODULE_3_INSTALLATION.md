@@ -32,16 +32,17 @@ _SSA Level | Время: 3 часа_
 
 ```bash
 # Минимальные требования
-- CMake 3.14+
 - C11 компилятор (GCC 7+, Clang 8+, MSVC 2019+)
+- Make (GNU Make или совместимый)
 - Git
+- OpenSSL development libraries (опционально, для TLS)
 ```
 
 ### Проверка
 
 ```bash
-cmake --version    # >= 3.14
 gcc --version      # >= 7.0
+make --version     # любая
 git --version      # любая
 ```
 
@@ -58,12 +59,15 @@ cd shield
 
 ```
 shield/
-├── CMakeLists.txt       # Build конфигурация
-├── include/             # Заголовочные файлы
-├── src/                 # Исходный код
-├── tests/               # Тесты
-├── examples/            # Примеры
+├── Makefile             # Build конфигурация
+├── include/             # Заголовочные файлы (77 .h)
+├── src/                 # Исходный код (125 .c, ~36K LOC)
+├── tests/               # Тесты (94 CLI + 9 LLM)
 ├── config/              # Примеры конфигураций
+├── k8s/                 # Kubernetes манифесты
+├── Dockerfile           # Docker multi-stage build
+├── docker-compose.yml   # Full stack deployment
+├── .github/workflows/   # CI/CD pipeline
 └── docs/                # Документация
 ```
 
@@ -74,28 +78,29 @@ shield/
 ### Linux / macOS
 
 ```bash
-mkdir build
-cd build
-cmake -DCMAKE_BUILD_TYPE=Release ..
-make -j$(nproc)
+# Простая сборка
+make clean && make
+
+# Запуск всех тестов
+make test_all
 ```
 
-### Windows (MSVC)
+### Windows (MSYS2/MinGW)
 
-```powershell
-mkdir build
-cd build
-cmake -G "Visual Studio 17 2022" ..
-cmake --build . --config Release
+```bash
+# Сначала установи зависимости
+pacman -S mingw-w64-ucrt-x86_64-gcc mingw-w64-ucrt-x86_64-openssl make
+
+# Сборка
+make clean && make
 ```
 
-### Windows (MinGW)
+### Docker Build
 
-```powershell
-mkdir build
-cd build
-cmake -G "MinGW Makefiles" -DCMAKE_BUILD_TYPE=Release ..
-mingw32-make -j4
+```bash
+docker build -t sentinel/shield .
+# Или полный стек:
+docker-compose up --build
 ```
 
 ### Результат
@@ -104,11 +109,12 @@ mingw32-make -j4
 
 ```
 build/
-├── shield              # Основной бинарник
-├── shield-cli          # CLI интерфейс
-├── libsentinel-shield.so   # Shared library (Linux)
-├── libsentinel-shield.a    # Static library
-└── unit_tests          # Тесты
+├── libshield.so        # Shared library (Linux)
+├── libshield.a         # Static library
+├── test_cli            # CLI E2E тесты (94 теста)
+├── test_policy_engine  # Policy тесты
+├── test_guards         # Guard тесты
+└── test_llm            # LLM integration тесты
 ```
 
 ---
@@ -116,36 +122,32 @@ build/
 ## 3.4 Проверка сборки
 
 ```bash
-./shield --version
+# Проверка на ошибки/warnings
+make 2>&1 | grep -c warning  # Должно быть 0
+
+# Запуск всех тестов
+make test_all
 ```
 
 Ожидаемый вывод:
 
 ```
-╔══════════════════════════════════════════════════════════╗
-║                   SENTINEL SHIELD                         ║
-║                      v1.2.0                              ║
-╚══════════════════════════════════════════════════════════╝
-
-Build: Jan 02 2026 09:00:00
-Platform: Linux x86_64
-Compiler: GCC 11.4.0
-
-Components:
-  - 64 modules loaded
-  - 6 protocols available
-  - 6 guards ready
-
-"We're small, but WE CAN."
+═══════════════════════════════════════════════════════════════
+  Total Tests:  94
+  Passed:       94
+  Failed:       0
+═══════════════════════════════════════════════════════════════
+  ✅ ALL CLI E2E TESTS PASSED
+═══════════════════════════════════════════════════════════════
 ```
 
-### Запуск тестов
+### Запуск LLM Integration тестов
 
 ```bash
-./unit_tests
+make test_llm_mock
 ```
 
-Все тесты должны пройти.
+Ожидается: 9/9 тестов пройдено.
 
 ---
 

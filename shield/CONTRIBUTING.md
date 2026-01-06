@@ -6,25 +6,36 @@ Thank you for your interest in contributing to SENTINEL Shield!
 
 ### Prerequisites
 
-- GCC 9+ or Clang 10+ (Linux/macOS)
-- MSVC 2019+ (Windows)
-- CMake 3.16+
-- Python 3.8+ (for testing)
+- GCC 7+ or Clang 8+ (Linux/macOS)
+- GNU Make
+- OpenSSL development libraries (optional, for TLS)
+- Valgrind (optional, for memory testing)
 - Docker (optional)
 
 ### Building
 
 ```bash
-# Linux/macOS
-cmake -B build -DCMAKE_BUILD_TYPE=Debug
-cmake --build build
-
-# Windows
-cmake -B build -G "Visual Studio 16 2019"
-cmake --build build --config Debug
+# Clone and build
+git clone https://github.com/SENTINEL/shield.git
+cd shield
+make clean && make
 
 # Run tests
-cd build && ctest --output-on-failure
+make test_all        # 94 CLI tests
+make test_llm_mock   # 9 LLM integration tests
+
+# With Valgrind
+make test_valgrind
+
+# With AddressSanitizer (Linux only)
+make ASAN=1
+```
+
+### Windows (MSYS2/MinGW)
+
+```bash
+pacman -S mingw-w64-ucrt-x86_64-gcc mingw-w64-ucrt-x86_64-openssl make
+make clean && make
 ```
 
 ## Code Style
@@ -82,9 +93,10 @@ shield_err_t zone_create(zone_registry_t *reg, const char *name,
 1. Fork the repository
 2. Create feature branch: `git checkout -b feature/my-feature`
 3. Write tests for new functionality
-4. Ensure all tests pass: `ctest`
-5. Update documentation if needed
-6. Submit PR with clear description
+4. Ensure all tests pass: `make test_all && make test_llm_mock`
+5. Ensure 0 warnings: `make clean && make`
+6. Update documentation if needed
+7. Submit PR with clear description
 
 ## Testing
 
@@ -101,14 +113,16 @@ TEST(my_feature)
 ### Running Tests
 
 ```bash
-# All tests
-ctest
+# All CLI tests (94)
+make test_all
 
-# Specific test
-./build/test_core
+# LLM integration tests (9)
+make test_llm_mock
 
-# Benchmarks
-./build/bench_core
+# Memory leak check
+make test_valgrind
+
+# Total: 103 tests must pass
 ```
 
 ## Reporting Issues

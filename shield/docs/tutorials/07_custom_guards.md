@@ -154,12 +154,12 @@ int main(void) {
 
 ```bash
 # Compile guard as shared library
-gcc -shared -fPIC -I/path/to/shield/include \
+gcc -shared -fPIC -Ipath/to/shield/include \
     my_custom_guard.c -o libmy_guard.so
 
 # Link with your application
-gcc -I/path/to/shield/include \
-    -L/path/to/shield/lib -lsentinel-shield \
+gcc -Ipath/to/shield/include \
+    -Lpath/to/shield/build -lshield \
     -L. -lmy_guard \
     my_app.c -o my_app
 ```

@@ -49,8 +49,8 @@
 
 ```bash
 git clone https://github.com/SENTINEL/shield.git
-cd shield && mkdir build && cd build
-cmake .. && make -j$(nproc)
+cd shield
+make clean && make
 ```
 
 ---

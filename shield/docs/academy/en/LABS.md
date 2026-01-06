@@ -24,17 +24,13 @@ cd AISecurity/sentinel-community/shield
 
 2. Build
 ```bash
-mkdir build && cd build
-cmake ..
-make -j$(nproc)
+make clean && make
+make test_all  # Verify 94 tests pass
 ```
 
 3. Verify
 ```bash
-./shield --version
-./shield-cli
-Shield> show version
-Shield> exit
+make test_llm_mock  # LLM integration tests
 ```
 
 ---

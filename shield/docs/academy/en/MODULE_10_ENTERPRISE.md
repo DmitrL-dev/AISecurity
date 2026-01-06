@@ -55,29 +55,28 @@ This module — everything needed for enterprise deployment.
 ```dockerfile
 FROM alpine:3.19 AS builder
 
-RUN apk add --no-cache gcc musl-dev cmake make
+RUN apk add --no-cache gcc musl-dev make openssl-dev
 
 WORKDIR /build
 COPY . .
 
-RUN mkdir build && cd build && \
-    cmake -DCMAKE_BUILD_TYPE=Release .. && \
-    make -j$(nproc)
+RUN make clean && make
 
 FROM alpine:3.19
 
-RUN apk add --no-cache libgcc
+RUN apk add --no-cache libgcc libssl3
 
-COPY --from=builder /build/build/shield /usr/local/bin/
-COPY --from=builder /build/build/shield-cli /usr/local/bin/
+COPY --from=builder /build/build/libshield.so /usr/local/lib/
+COPY --from=builder /build/build/libshield.a /usr/local/lib/
+COPY --from=builder /build/include/ /usr/local/include/shield/
 
 EXPOSE 8080 9090 5001
 
 HEALTHCHECK --interval=5s --timeout=3s \
     CMD wget -q --spider http://localhost:8080/health || exit 1
 
-ENTRYPOINT ["shield"]
-CMD ["-c", "/etc/shield/config.json"]
+# Library deployment - apps link against libshield
+ENV LD_LIBRARY_PATH=/usr/local/lib
 ```
 
 ### docker-compose.yml

@@ -6,9 +6,10 @@ Get SENTINEL Shield running in 5 minutes.
 
 ## Prerequisites
 
-- CMake 3.14+
-- C11 compiler (GCC 7+, Clang 8+, MSVC 2019+)
+- C11 compiler (GCC 7+, Clang 8+)
+- Make (GNU Make)
 - Git
+- OpenSSL development libraries (optional, for TLS)
 
 ---
 
@@ -19,19 +20,17 @@ Get SENTINEL Shield running in 5 minutes.
 ```bash
 git clone https://github.com/SENTINEL/shield.git
 cd shield
-mkdir build && cd build
-cmake -DCMAKE_BUILD_TYPE=Release ..
-make -j$(nproc)
+make clean && make
+make test_all  # Verify 94 tests pass
 ```
 
-### Windows
+### Windows (MSYS2/MinGW)
 
-```powershell
+```bash
 git clone https://github.com/SENTINEL/shield.git
 cd shield
-mkdir build; cd build
-cmake -G "Visual Studio 17 2022" ..
-cmake --build . --config Release
+pacman -S mingw-w64-ucrt-x86_64-gcc mingw-w64-ucrt-x86_64-openssl make
+make clean && make
 ```
 
 ---
@@ -39,15 +38,19 @@ cmake --build . --config Release
 ## Step 2: Verify Installation
 
 ```bash
-./shield --version
+make test_llm_mock
 ```
 
 Expected output:
 
 ```
-SENTINEL Shield v1.2.0
-Build: Jan 01 2026 22:00:00
-Platform: Linux
+═══════════════════════════════════════════════════════════════
+  Total Tests:  9
+  Passed:       9
+  Failed:       0
+═══════════════════════════════════════════════════════════════
+  ✅ ALL LLM INTEGRATION TESTS PASSED
+═══════════════════════════════════════════════════════════════
 ```
 
 ---
@@ -159,9 +162,9 @@ int main(void) {
 Compile:
 
 ```bash
-gcc -I/path/to/shield/include \
-    -L/path/to/shield/lib \
-    -lsentinel-shield \
+gcc -Ipath/to/shield/include \
+    -Lpath/to/shield/build \
+    -lshield \
     my_app.c -o my_app
 ```
 

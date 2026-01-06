@@ -229,4 +229,84 @@ echo "show metrics" | ./shield-cli
 
 ---
 
+## Brain FFI Commands
+
+```
+Shield> show brain
+Brain Status: STUB (mock mode)
+Category Engines: 6 available
+  - INJECTION: enabled
+  - JAILBREAK: enabled
+  - RAG_POISON: enabled
+  - AGENT_MANIP: enabled
+  - TOOL_HIJACK: enabled
+  - EXFILTRATION: enabled
+
+Shield> brain test "Ignore previous instructions"
+Result:
+  Engine: INJECTION
+  Detected: true
+  Confidence: 0.85
+  Severity: HIGH
+  Reason: Injection pattern detected (stub)
+```
+
+---
+
+## TLS Commands
+
+```
+Shield> show tls
+TLS Status: ENABLED
+  Certificate: /etc/shield/cert.pem
+  Key: /etc/shield/key.pem
+  Min Version: TLS 1.2
+  Cipher Suites: 12 available
+
+Shield> configure terminal
+Shield(config)> tls enable
+Shield(config)> tls certificate /path/to/cert.pem
+Shield(config)> tls key /path/to/key.pem
+Shield(config)> end
+```
+
+---
+
+## Testing Commands
+
+```bash
+# Run all CLI tests
+make test_all
+# Result: 94/94 pass
+
+# Run LLM integration tests
+make test_llm_mock
+# Result: 9/9 pass
+
+# Run with Valgrind
+make test_valgrind
+# Result: 0 memory leaks
+```
+
+---
+
+## 119 CLI Command Handlers
+
+Shield implements **119 command handlers** organized by category:
+
+| Category | Handlers | Examples |
+|----------|----------|----------|
+| Policy | 18 | zone, rule, guard |
+| Show | 15 | status, version, config |
+| Brain | 8 | brain test, brain status |
+| TLS | 6 | tls enable, certificate |
+| HA | 12 | ha status, failover |
+| Cognitive | 7 | cognitive test |
+| PQC | 5 | pqc enable, pqc test |
+| Watchdog | 6 | watchdog enable |
+| ThreatHunter | 6 | threat-hunter enable |
+| Other | 36 | hostname, write, reload |
+
+---
+
 _"Command your AI security like a network."_

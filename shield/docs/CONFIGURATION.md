@@ -308,8 +308,71 @@ Config validation: OK
 
 ---
 
+## Brain FFI Configuration
+
+```json
+{
+  "brain": {
+    "mode": "stub",             // stub, http, grpc, python
+    "url": "http://localhost:5000",  // For HTTP/gRPC mode
+    "timeout_ms": 5000,
+    "engines": {
+      "injection": true,
+      "jailbreak": true,
+      "rag_poison": true,
+      "agent_manip": true,
+      "tool_hijack": true,
+      "exfiltration": true
+    }
+  }
+}
+```
+
+### Brain Modes
+
+| Mode | Use Case | Configuration |
+|------|----------|---------------|
+| `stub` | Testing, mock data | Default, no setup |
+| `http` | REST API backend | Requires `url` |
+| `grpc` | High-throughput | Requires `url` |
+| `python` | Embedded Python | Requires Python setup |
+
+---
+
+## Build Configuration
+
+Shield is built with Makefile. Key flags:
+
+```makefile
+# Enable OpenSSL TLS support
+CFLAGS += -DSHIELD_USE_OPENSSL
+
+# Enable AddressSanitizer (Linux only)
+make ASAN=1
+
+# Enable Valgrind integration
+make test_valgrind
+```
+
+---
+
+## Kubernetes Configuration
+
+See `k8s/` directory for manifests:
+
+| File | Purpose |
+|------|---------|
+| `deployment.yaml` | 3 replicas, probes, resources |
+| `service.yaml` | ClusterIP + LoadBalancer |
+| `configmap.yaml` | Shield configuration |
+| `rbac.yaml` | ServiceAccount, Role |
+| `hpa.yaml` | Autoscaling (CPU 70%) |
+
+---
+
 ## See Also
 
 - [API Reference](API.md)
 - [Architecture](ARCHITECTURE.md)
 - [Deployment](DEPLOYMENT.md)
+- [Kubernetes Manifests](../k8s/README.md)

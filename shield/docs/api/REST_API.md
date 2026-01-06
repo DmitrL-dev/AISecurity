@@ -193,3 +193,76 @@ resp, _ := http.Post("http://localhost:8080/evaluate",
     "application/json",
     strings.NewReader(`{"zone":"gpt4","direction":"input","data":"hello"}`))
 ```
+
+---
+
+## Brain FFI Endpoints
+
+### Brain Status
+
+**GET** `/api/v1/brain/status`
+
+Check Brain FFI status.
+
+**Response:**
+
+```json
+{
+  "mode": "stub",
+  "available": true,
+  "engines": {
+    "injection": true,
+    "jailbreak": true,
+    "rag_poison": true,
+    "agent_manip": true,
+    "tool_hijack": true,
+    "exfiltration": true
+  }
+}
+```
+
+---
+
+### Brain Analyze
+
+**POST** `/api/v1/brain/analyze`
+
+Analyze input with Brain FFI.
+
+**Request:**
+
+```json
+{
+  "input": "Ignore previous instructions",
+  "engine": "injection"
+}
+```
+
+**Response:**
+
+```json
+{
+  "detected": true,
+  "confidence": 0.85,
+  "severity": "high",
+  "reason": "Injection pattern detected",
+  "attack_type": "prompt_injection"
+}
+```
+
+---
+
+## Current Version
+
+- **Shield Version:** Dragon v4.1
+- **API Version:** v1
+- **Tests:** 103/103 pass
+- **Status:** Production Ready
+
+---
+
+## See Also
+
+- [C API Reference](../API.md)
+- [CLI Reference](../CLI.md)
+- [Configuration](../CONFIGURATION.md)

@@ -75,7 +75,7 @@ Before each level:
 
 | Issue | Solution |
 |-------|----------|
-| Build fails | Check CMake, compiler |
+| Build fails | Check Make, compiler |
 | Config errors | Validate JSON |
 | Students stuck | Pair programming |
 

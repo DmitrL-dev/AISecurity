@@ -29,39 +29,42 @@
 
 ### Требования
 
-- CMake 3.14+
-- C11 компилятор (GCC, Clang, MSVC)
+- Make (GNU Make)
+- C11 компилятор (GCC, Clang)
+- OpenSSL (опционально, для TLS)
 
 ### Linux/macOS
 
 ```bash
 git clone https://github.com/SENTINEL/shield.git
 cd shield
-mkdir build && cd build
-cmake -DCMAKE_BUILD_TYPE=Release ..
-make -j$(nproc)
+make clean && make
+make test_all  # 94 теста должны пройти
 ```
 
-### Windows
+### Windows (MSYS2/MinGW)
 
-```powershell
+```bash
 git clone https://github.com/SENTINEL/shield.git
 cd shield
-mkdir build; cd build
-cmake -G "Visual Studio 17 2022" ..
-cmake --build . --config Release
+pacman -S mingw-w64-ucrt-x86_64-gcc mingw-w64-ucrt-x86_64-openssl make
+make clean && make
 ```
 
 ### Проверить
 
 ```bash
-./shield --version
+make test_llm_mock
 ```
 
 ```
-SENTINEL Shield v1.2.0
-Build: Jan 01 2026 22:00:00
-Platform: Linux
+═══════════════════════════════════════════════════════════════
+  Total Tests:  9
+  Passed:       9
+  Failed:       0
+═══════════════════════════════════════════════════════════════
+  ✅ ALL LLM INTEGRATION TESTS PASSED
+═══════════════════════════════════════════════════════════════
 ```
 
 ---
@@ -159,9 +162,9 @@ int main(void) {
 ### Компиляция с Shield
 
 ```bash
-gcc -I/path/to/shield/include \
-    -L/path/to/shield/lib \
-    -lsentinel-shield \
+gcc -Ipath/to/shield/include \
+    -Lpath/to/shield/build \
+    -lshield \
     my_app.c -o my_app
 ```
 
