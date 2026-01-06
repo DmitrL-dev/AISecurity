@@ -17,7 +17,7 @@
 **Предварительные требования:**
 
 - Linux/macOS/Windows
-- CMake 3.14+
+- Make (GNU Make или совместимый)
 - Компилятор C11 (GCC/Clang/MSVC)
 - Git
 
@@ -37,18 +37,19 @@ ls -la
 ```
 
 ```
-├── include/       # 64 заголовочных файла
-├── src/           # 82 файла исходного кода
+├── include/       # 77 заголовочных файлов
+├── src/           # 125 файлов исходного кода (~36K LOC)
 │   ├── core/      # Ядро: zones, rules, guards
 │   ├── guards/    # 6 specialized guards
 │   ├── protocols/ # 6 custom protocols
 │   ├── cli/       # Cisco-style CLI
 │   ├── api/       # REST API
 │   └── utils/     # Утилиты
-├── tests/         # Unit и Integration тесты
-├── examples/      # Примеры использования
+├── tests/         # 94 CLI + 9 LLM тестов
+├── k8s/           # Kubernetes манифесты
+├── Dockerfile     # Multi-stage build
 ├── docs/          # Документация
-└── CMakeLists.txt # Build конфигурация
+└── Makefile       # Build конфигурация
 ```
 
 ---
@@ -56,12 +57,10 @@ ls -la
 #### Шаг 2: Сборка
 
 ```bash
-mkdir build
-cd build
-cmake -DCMAKE_BUILD_TYPE=Release ..
+make clean && make
 ```
 
-Изучи вывод CMake:
+Запусти тесты:
 
 ```
 ╔══════════════════════════════════════════════════════════╗
@@ -147,7 +146,7 @@ Components:
 Отметь выполненные пункты:
 
 - [ ] Исходники склонированы
-- [ ] CMake прошёл без ошибок
+- [ ] Make прошёл без ошибок
 - [ ] Make завершился успешно
 - [ ] `--version` показывает v1.2.0
 - [ ] Все unit тесты проходят

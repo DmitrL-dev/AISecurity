@@ -6,72 +6,56 @@
 
 <p align="center">
   <strong>🛡️ Defense + ⚔️ Offense + 📦 Framework — Complete AI Security Suite</strong><br>
-  <strong>Dragon v4.1 • January 2026</strong><br>
-  212 Detection Engines • Pure C DMZ • Red Team Platform • Python SDK
+  <strong>Dragon v4.1 • January 2026</strong>
 </p>
 
 <p align="center">
-  <img src="https://img.shields.io/badge/🛡️_DEFENSE-212_Engines-brightgreen?style=for-the-badge" alt="Defense">
-  <img src="https://img.shields.io/badge/🛡️_SHIELD-<1ms_DMZ-00ADD8?style=for-the-badge" alt="Shield">
+  <img src="https://img.shields.io/badge/🧠_BRAIN-212_Engines-brightgreen?style=for-the-badge" alt="Brain">
+  <img src="https://img.shields.io/badge/🛡️_SHIELD-103_Tests_✓-00ADD8?style=for-the-badge" alt="Shield">
   <img src="https://img.shields.io/badge/🐉_STRIKE-39K+_Payloads-red?style=for-the-badge" alt="Strike">
-  <img src="https://img.shields.io/badge/📦_SDK-PyPI-blue?style=for-the-badge" alt="SDK">
-</p>
-
-<p align="center">
-  <a href="https://pypi.org/project/sentinel-llm-security/">
-    <img src="https://img.shields.io/badge/pip_install-sentinel--llm--security-yellow?style=for-the-badge&logo=pypi" alt="PyPI">
-  </a>
-  <a href="https://colab.research.google.com/github/DmitrL-dev/AISecurity/blob/main/SENTINEL_Strike_Demo.ipynb">
-    <img src="https://img.shields.io/badge/🚀_Try_in_Colab-Demo-F9AB00?style=for-the-badge&logo=googlecolab" alt="Colab">
-  </a>
 </p>
 
 ---
 
-> [!TIP]
-> ## ⚡ Quick Start
-> ```bash
-> pip install sentinel-llm-security
-> ```
-> ```python
-> from sentinel import scan
-> result = scan("Ignore previous instructions")
-> print(result.is_safe)  # False
-> ```
+## ⚡ Quick Start
+
+```bash
+pip install sentinel-llm-security
+```
+```python
+from sentinel import scan
+result = scan("Ignore previous instructions")
+print(result.is_safe)  # False
+```
 
 ---
 
-> [!IMPORTANT]
-> ## 🔥 COMING JANUARY 2026: SENTINEL-Guard LLM
-> 
-> **The first AI Security Model trained on 200 detection engines!**
-> 
-> 🧠 Attack knowledge from 16,000+ real payloads  
-> 🛡️ Defense: Detect prompt injection, jailbreaks, RAG poisoning  
-> ⚔️ Offense: Generate payloads, synthesize bypasses  
-> 🚀 Fine-tuned on AprielGuard 8B • Open weights on HuggingFace
->
-> **Star ⭐ this repo to be notified when it drops!**
+## 🎮 Platform Components
 
-
----
-
-
-## 🎮 CHOOSE YOUR PATH
-
-<!-- SHIELD & IMMUNE FEATURED -->
-<p align="center">
-  <a href="#%EF%B8%8F-shield--pure-c-dmz">
-    <img src="https://img.shields.io/badge/🛡️_NEW!_SHIELD-Pure_C_DMZ-00ADD8?style=for-the-badge" alt="Shield">
-  </a>
-  &nbsp;&nbsp;
-  <a href="./immune/">
-    <img src="https://img.shields.io/badge/🦠_NEW!_IMMUNE-EDR%2FXDR%2FMDR-FF6B6B?style=for-the-badge" alt="IMMUNE">
-  </a>
-  <br>
-  <strong>SHIELD:</strong> 28K LOC • 20 Protocols • ~199 CLI Commands • Phase 4 Complete<br>
-  <strong>IMMUNE:</strong> Pure C Kernel Security • 24 Modules • DragonFlyBSD
-</p>
+<table>
+<tr>
+<td width="25%" align="center">
+<h3>🧠 BRAIN</h3>
+<strong>212 Engines</strong><br>
+ML + Rules + Strange Math™
+</td>
+<td width="25%" align="center">
+<h3>🛡️ SHIELD</h3>
+<strong>Pure C DMZ</strong><br>
+36K LOC • 103 Tests • 100% Ready
+</td>
+<td width="25%" align="center">
+<h3>🐉 STRIKE</h3>
+<strong>Red Team</strong><br>
+39K+ Payloads • HYDRA
+</td>
+<td width="25%" align="center">
+<h3>📦 SDK</h3>
+<strong>Python</strong><br>
+pip install • FastAPI
+</td>
+</tr>
+</table>
 
 <table>
 <tr>
@@ -218,71 +202,38 @@ IMMUNE: [AUDIT] setuid 0->65534 (pid=3162)
 
 ---
 
-## 🛡️ SHIELD — Pure C DMZ Layer
+## 🛡️ SHIELD — AI Security DMZ
 
-<p align="center">
-  <img src="./shield/docs/images/shield_hero.png" alt="SENTINEL Shield - AI Security DMZ" width="100%">
-</p>
-
-> **Enterprise-grade AI security DMZ architecture — written in Pure C.**  
-> **Sub-millisecond latency. Zero dependencies. 20 protocols.**
->
-> ⚠️ *Production architecture ready. ML integration and REST API in development.*
-
-### 🔥 Why Shield?
-
-| 🚫 Without Shield | ✅ With Shield |
-|-------------------|----------------|
-| Prompt injection → Data leak | **Blocked in < 1ms** |
-| Jailbreak → System compromise | **Detected & logged** |
-| No visibility → Blind trust | **Full audit trail** |
-
-### ⚡ At a Glance
+> **Enterprise-grade AI security DMZ — Pure C, 100% Production Ready**
 
 | Metric | Value |
 |--------|-------|
-| **Lines of Code** | 28,000+ |
-| **Protocols** | 20 |
-| **CLI Commands** | ~199 (Cisco-style) |
+| **Status** | ✅ 100% Production Ready |
+| **Lines of Code** | 36,000+ |
+| **Source Files** | 125 .c, 77 .h |
+| **Tests** | 103/103 pass (94 CLI + 9 LLM) |
+| **CLI Handlers** | 119 |
+| **Protocols** | 21 custom |
 | **Guards** | 6 (LLM, RAG, Agent, Tool, MCP, API) |
-| **Academy Modules** | 22 (EN + RU) |
 
-### 🐉 Phase 4 — Dragon v4.1 (January 2026)
-
-| Module | Description |
-|--------|-------------|
-| 🔍 **ThreatHunter** | Proactive threat hunting (IOC, Behavioral, Anomaly) |
-| 🐕 **Watchdog** | System health monitoring with auto-recovery |
-| 🧠 **Cognitive Signatures** | 7 signature types for pattern detection |
-| 🔐 **PQC** | Post-Quantum Cryptography (Kyber, Dilithium) |
-| 💾 **Shield State** | Persistent configuration with save/load |
-| 🖥️ **Advanced CLI** | Dynamic mode management, session control |
-
-### 🏗️ 20 Enterprise Protocols
-
-| Category | Protocols |
-|----------|-----------|
-| 🔍 **Discovery** | ZDP, ZRP, ZHP |
-| 🔄 **Traffic** | STP, SPP, SQP, SRP |
-| 📈 **Analytics** | SAF, STT, SEM, SLA |
-| 🔁 **HA** | SHSP, SSRP, SMRP |
-| 🔌 **Integration** | SBP, SGP, SIEM |
-| 🔐 **Security** | STLS, SZAA, SSigP |
-
-### 💻 Cisco-Style CLI (~199 Commands)
+### Build & Test
 
 ```bash
-Shield# show zones
-Shield# guard enable all
-Shield# threat-hunter enable
-Shield# threat-hunter sensitivity 0.8
-Shield# watchdog enable
-Shield# watchdog auto-recovery enable
-Shield# pqc enable
-Shield# write memory
+cd shield
+make clean && make        # 0 errors, 0 warnings
+make test_all             # 94 CLI tests
+make test_llm_mock        # 9 LLM integration tests
 ```
 
-📖 **[Shield Documentation](./shield/README.md)** | **[Academy 🇷🇺](./shield/docs/academy/ru/)** | **[Academy 🇺🇸](./shield/docs/academy/en/)**
+### Key Features
+
+- 🧠 **Brain FFI** — HTTP + gRPC clients for AI analysis
+- 🔐 **TLS/OpenSSL** — Secure communications
+- ☸️ **Kubernetes** — 5 production manifests
+- 🔄 **CI/CD** — GitHub Actions (6 jobs, Valgrind, ASAN)
+- 📦 **Docker** — Multi-stage production build
+
+📖 **[Shield Docs](./shield/README.md)** | **[Academy 🇷🇺](./shield/docs/academy/ru/)** | **[Academy 🇺🇸](./shield/docs/academy/en/)**
 
 ---
 
@@ -491,30 +442,17 @@ app.add_middleware(SentinelMiddleware, on_threat="block")
 
 ---
 
-## 📊 Platform Overview
-
-<p align="center">
-  <img src="./assets/platform_overview.png" alt="SENTINEL Platform - 207 Engines, 39K Payloads" width="900">
-</p>
-
-
-## Statistics
+## 📊 Platform Statistics
 
 | Metric | Value |
 |--------|-------|
-| **Total Engines** | 207 |
-| **Lines of Code** | 105,000+ |
-| **Unit Tests** | 940+ |
-| **Recall** | 85.1% |
-| **Precision** | 84.4% |
-| **P95 Latency** | 40ms |
-
-## OWASP Coverage
-
-| Standard | Coverage |
-|----------|----------|
+| **Brain Engines** | 212 |
+| **Shield LOC** | 36,000+ |
+| **Shield Tests** | 103/103 ✅ |
+| **Strike Payloads** | 39,000+ |
+| **Total LOC** | 105,000+ |
 | **OWASP LLM Top 10** | 10/10 ✅ |
-| **OWASP Agentic AI (ASI)** | 10/10 ✅ |
+| **OWASP Agentic AI** | 10/10 ✅ |
 
 ---
 

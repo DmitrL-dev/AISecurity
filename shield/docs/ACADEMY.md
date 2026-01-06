@@ -85,7 +85,7 @@ SENTINEL Academy — это не курсы "за 3 дня станешь экс
 
 **Модуль 1.4: Установка и Конфигурация**
 
-- Сборка из исходников (cmake, make)
+- Сборка из исходников (make)
 - Структура конфигурации JSON
 - Запуск и проверка
 - Использование API
@@ -391,8 +391,8 @@ _Даже если ты здесь случайно — прочитай это 
 
 ```bash
 git clone https://github.com/SENTINEL/shield.git
-cd shield && mkdir build && cd build
-cmake .. && make -j$(nproc)
+cd shield && make
+make test_all  # 94 tests должны пройти
 ```
 
 ### Шаг 2: Изучи основы

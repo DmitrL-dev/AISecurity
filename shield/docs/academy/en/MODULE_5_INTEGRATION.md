@@ -114,9 +114,13 @@ int main(void) {
 ### Compilation
 
 ```bash
-gcc -I/path/to/shield/include \
-    -L/path/to/shield/lib \
-    -lsentinel-shield \
+# First build Shield:
+cd /path/to/shield && make clean && make
+
+# Then compile your app:
+gcc -Ipath/to/shield/include \
+    -Lpath/to/shield/build \
+    -lshield \
     my_app.c -o my_app
 ```
 

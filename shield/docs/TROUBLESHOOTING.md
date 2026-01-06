@@ -242,12 +242,105 @@ Shield> debug on
 
 ---
 
+## Build Issues
+
+### Compilation Errors
+
+**Symptom:** `make` fails
+
+**Check:**
+
+```bash
+# Prerequisites
+gcc --version   # >= 7.0
+make --version  # any
+
+# Rebuild clean
+make clean && make
+```
+
+**Common Causes:**
+
+- Missing compiler
+- Old GCC version (< 7.0)
+- Missing OpenSSL headers (for TLS)
+
+**Solutions:**
+
+```bash
+# Ubuntu/Debian
+apt install build-essential libssl-dev
+
+# MSYS2/MinGW
+pacman -S mingw-w64-ucrt-x86_64-gcc mingw-w64-ucrt-x86_64-openssl make
+```
+
+---
+
+### Test Failures
+
+**Symptom:** Tests fail
+
+**Check:**
+
+```bash
+make test_all 2>&1 | tail -20
+```
+
+**Solutions:**
+
+1. Rebuild from clean
+2. Check for missing test files
+3. Verify test binary built correctly
+
+```bash
+make clean && make && make test_all
+```
+
+---
+
+## Brain FFI Issues
+
+### Brain Not Responding
+
+**Symptom:** Brain analysis returns empty or errors
+
+**Check:**
+
+```bash
+Shield> show brain
+```
+
+**Solutions:**
+
+1. Verify Brain mode in config:
+
+```json
+{ "brain": { "mode": "stub" } }
+```
+
+2. For HTTP mode, check Brain service:
+
+```bash
+curl http://localhost:5000/health
+```
+
+---
+
 ## Getting Help
 
 1. **Documentation:** docs/
 2. **Community:** GitHub Discussions
 3. **Academy:** docs/ACADEMY.md
-4. **Support:** support@sentinel.security
+4. **Issues:** https://github.com/SENTINEL/shield/issues
+
+---
+
+## See Also
+
+- [Performance Tuning](PERFORMANCE.md)
+- [Configuration](CONFIGURATION.md)
+- [Deployment](DEPLOYMENT.md)
 
 ---
 

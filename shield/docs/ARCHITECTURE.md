@@ -294,8 +294,122 @@ Custom guards can be registered for new AI component types.
 
 ---
 
+## Brain FFI Integration
+
+Shield communicates with external AI analysis engines via Brain FFI:
+
+```
+┌─────────────────┐     ┌─────────────────┐
+│     Shield      │────▶│      Brain      │
+│   (C Library)   │     │  (Python/AI)    │
+└────────┬────────┘     └─────────────────┘
+         │
+    ┌────┴────┐
+    │ FFI Mode│
+    └────┬────┘
+         │
+    ┌────┼────┬─────────┐
+    ▼    ▼    ▼         ▼
+  Stub  HTTP  gRPC   Python
+```
+
+### FFI Modes
+
+| Mode   | Use Case           | Performance |
+|--------|--------------------| ------------|
+| Stub   | Testing, mock data | Fastest     |
+| HTTP   | REST API backend   | Good        |
+| gRPC   | High-throughput    | Best        |
+| Python | Embedded inference | Flexible    |
+
+---
+
+## TLS/Security Layer
+
+Shield supports OpenSSL for secure communications:
+
+```
+┌─────────────────────────────────────────┐
+│              TLS Layer                   │
+│  OpenSSL │ Certificate validation        │
+│  TLS 1.2+ │ Mutual TLS support           │
+├─────────────────────────────────────────┤
+│          Post-Quantum Ready              │
+│  Kyber (KEM) │ Dilithium (Signatures)    │
+└─────────────────────────────────────────┘
+```
+
+---
+
+## Kubernetes Integration
+
+Cloud-native deployment architecture:
+
+```yaml
+k8s/
+├── deployment.yaml      # 3 replicas, resource limits
+├── service.yaml         # ClusterIP + LoadBalancer
+├── configmap.yaml       # Shield configuration
+├── rbac.yaml            # ServiceAccount, Role, RoleBinding
+├── hpa.yaml             # Horizontal Pod Autoscaler
+└── README.md            # Deployment guide
+```
+
+---
+
+## CI/CD Pipeline
+
+GitHub Actions workflow with quality gates:
+
+```
+┌──────────┐   ┌──────────┐   ┌──────────┐
+│  Build   │──▶│  Test    │──▶│ Quality  │
+│  Linux   │   │  94+9    │   │  Checks  │
+└──────────┘   └──────────┘   └──────────┘
+     │              │              │
+     ▼              ▼              ▼
+┌──────────┐   ┌──────────┐   ┌──────────┐
+│  Build   │   │ Valgrind │   │  Docker  │
+│ Windows  │   │   ASAN   │   │  Build   │
+└──────────┘   └──────────┘   └──────────┘
+```
+
+### Quality Gates
+
+- **103 tests** must pass (94 CLI + 9 LLM)
+- **0 warnings** build requirement
+- **0 memory leaks** Valgrind check
+- **Docker image** builds successfully
+
+---
+
+## Testing Architecture
+
+```
+tests/
+├── test_cli.c              # 94 CLI E2E tests
+├── test_llm_integration.c  # 9 LLM integration tests
+├── test_guards.c           # Guard unit tests
+├── test_policy_engine.c    # Policy engine tests
+└── test_protocols.c        # Protocol tests
+```
+
+### Test Categories
+
+| Category    | Tests | Focus                    |
+|-------------|-------|--------------------------|
+| CLI E2E     | 94    | Full system behavior     |
+| LLM         | 9     | Brain FFI, threat detect |
+| Guards      | 12    | Guard functionality      |
+| Policy      | 8     | Policy engine logic      |
+| Protocols   | 6     | Protocol correctness     |
+
+---
+
 ## See Also
 
 - [API Reference](API.md)
 - [Configuration](CONFIGURATION.md)
 - [Deployment](DEPLOYMENT.md)
+- [Kubernetes Manifests](../k8s/README.md)
+- [CI/CD Pipeline](../.github/workflows/shield-ci.yml)

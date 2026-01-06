@@ -4,16 +4,17 @@
 
 ### Standalone Binary
 
-Simplest deployment - single executable:
+Simplest deployment - library files:
 
 ```bash
 # Build
-cmake -B build -DCMAKE_BUILD_TYPE=Release
-cmake --build build
+make clean && make
 
 # Deploy
-cp build/sentinel-shield /usr/local/bin/
-cp data/blocklist.txt /etc/sentinel/
+cp build/libshield.so /usr/local/lib/
+cp build/libshield.a /usr/local/lib/
+cp -r include/* /usr/local/include/
+ldconfig
 ```
 
 ### Docker

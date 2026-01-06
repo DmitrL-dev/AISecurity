@@ -15,32 +15,31 @@ The primary integration method — link Shield as a static or shared library.
 #### Static Library
 
 ```bash
-# Build static library
-cmake -DBUILD_SHARED_LIBS=OFF ..
-make
+# Build (creates both static and shared)
+make clean && make
 
-# Link
-gcc -I/path/to/shield/include \
+# Link static
+gcc -Ipath/to/shield/include \
     my_app.c \
-    /path/to/shield/lib/libsentinel-shield.a \
+    path/to/shield/build/libshield.a \
+    -lssl -lcrypto -lm \
     -o my_app
 ```
 
 #### Shared Library
 
 ```bash
-# Build shared library
-cmake -DBUILD_SHARED_LIBS=ON ..
-make
+# Build
+make clean && make
 
-# Link
-gcc -I/path/to/shield/include \
-    -L/path/to/shield/lib \
-    -lsentinel-shield \
+# Link shared
+gcc -Ipath/to/shield/include \
+    -Lpath/to/shield/build \
+    -lshield \
     my_app.c -o my_app
 
 # Runtime
-export LD_LIBRARY_PATH=/path/to/shield/lib:$LD_LIBRARY_PATH
+export LD_LIBRARY_PATH=path/to/shield/build:$LD_LIBRARY_PATH
 ```
 
 ---

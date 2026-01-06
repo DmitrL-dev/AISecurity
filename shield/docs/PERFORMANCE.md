@@ -214,3 +214,57 @@ hey -z 30s -c 1000 http://localhost:8080/evaluate
 2. Reduce logging
 3. Increase rate limits
 4. Add more threads
+
+---
+
+## CI/CD Integration
+
+### GitHub Actions Quality Gates
+
+```yaml
+# .github/workflows/shield-ci.yml
+- Build: 0 errors, 0 warnings (mandatory)
+- Tests: 103/103 pass (94 CLI + 9 LLM)
+- Valgrind: 0 memory leaks
+- ASAN: 0 issues
+- Docker: Build must succeed
+```
+
+### Makefile Targets
+
+```bash
+make                 # Build library (0 warnings)
+make test_all        # Run 94 CLI tests
+make test_llm_mock   # Run 9 LLM tests
+make test_valgrind   # Memory leak check
+make ASAN=1          # AddressSanitizer build
+```
+
+---
+
+## Current Performance Metrics
+
+Verified on 2026-01-06:
+
+| Metric | Result |
+|--------|--------|
+| **Build** | 0 errors, 0 warnings |
+| **CLI Tests** | 94/94 pass |
+| **LLM Tests** | 9/9 pass |
+| **Total Tests** | 103/103 pass |
+| **Memory Leaks** | 0 (Valgrind CI) |
+| **Source Files** | 125 .c, 77 .h |
+| **Lines of Code** | ~36K LOC |
+| **CLI Handlers** | 119 |
+
+```
+Production Ready: ████████████████████ 100%
+```
+
+---
+
+## See Also
+
+- [Architecture](ARCHITECTURE.md)
+- [Deployment](DEPLOYMENT.md)
+- [Troubleshooting](TROUBLESHOOTING.md)

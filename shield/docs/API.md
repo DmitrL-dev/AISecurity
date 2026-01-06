@@ -298,8 +298,71 @@ void mempool_free(mempool_t *pool, void *ptr);
 
 ---
 
+## Brain FFI
+
+Shield can communicate with external AI analysis engines:
+
+```c
+#include "shield_brain.h"
+
+// Initialize Brain connection
+shield_err_t brain_ffi_init(const char *python_home, const char *brain_path);
+
+// Check if Brain is available
+bool brain_available(void);
+
+// Analyze input for specific threat category
+shield_err_t brain_ffi_analyze(
+    const char *input,
+    brain_engine_category_t category,
+    brain_result_t *result
+);
+
+// Shutdown Brain connection
+void brain_ffi_shutdown(void);
+```
+
+### Brain Categories
+
+```c
+typedef enum {
+    BRAIN_ENGINE_INJECTION,      // Prompt injection
+    BRAIN_ENGINE_JAILBREAK,      // Jailbreak attempts
+    BRAIN_ENGINE_RAG_POISON,     // RAG poisoning
+    BRAIN_ENGINE_AGENT_MANIP,    // Agent manipulation
+    BRAIN_ENGINE_TOOL_HIJACK,    // Tool hijacking
+    BRAIN_ENGINE_EXFILTRATION,   // Data exfiltration
+} brain_engine_category_t;
+```
+
+---
+
+## TLS/OpenSSL
+
+Secure communication functions (requires `-DSHIELD_USE_OPENSSL`):
+
+```c
+#include "shield_tls.h"
+
+// Initialize TLS context
+shield_err_t tls_context_init(tls_context_t *ctx, const char *cert, const char *key);
+
+// Create TLS-secured connection
+shield_err_t tls_connect(tls_context_t *ctx, const char *host, int port);
+
+// Read/write with TLS
+ssize_t tls_read(tls_context_t *ctx, void *buf, size_t len);
+ssize_t tls_write(tls_context_t *ctx, const void *buf, size_t len);
+
+// Close connection
+void tls_close(tls_context_t *ctx);
+```
+
+---
+
 ## See Also
 
 - [Architecture Guide](ARCHITECTURE.md)
 - [Configuration](CONFIGURATION.md)
 - [Examples](../examples/)
+- [Brain FFI Header](../include/shield_brain.h)
