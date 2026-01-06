@@ -8,6 +8,7 @@
 
 #include "shield_safety_prompt.h"
 #include "shield_string.h"
+#include "shield_string_safe.h"
 
 /* Default safety prompts */
 const char *DEFAULT_SAFETY_SYSTEM = 
@@ -119,8 +120,8 @@ char *safety_inject_prefix(safety_manager_t *mgr, const char *user_message,
             if (should_inject) {
                 size_t add = strlen(prompt->content);
                 if (prefix_len + add < sizeof(prefix_buf) - 2) {
-                    strcat(prefix_buf, prompt->content);
-                    strcat(prefix_buf, "\n");
+                    shield_strcat_s(prefix_buf, sizeof(prefix_buf), prompt->content);
+                    shield_strcat_s(prefix_buf, sizeof(prefix_buf), "\n");
                     prefix_len += add + 1;
                 }
             }
@@ -136,8 +137,8 @@ char *safety_inject_prefix(safety_manager_t *mgr, const char *user_message,
     char *result = malloc(prefix_len + msg_len + 1);
     if (!result) return strdup(user_message);
     
-    strcpy(result, prefix_buf);
-    strcat(result, user_message);
+    shield_strcopy_s(result, prefix_len + msg_len + 1, prefix_buf);
+    shield_strcat_s(result, prefix_len + msg_len + 1, user_message);
     
     mgr->injections++;
     
@@ -157,8 +158,8 @@ char *safety_inject_suffix(safety_manager_t *mgr, const char *response)
         if (prompt->enabled && prompt->type == SAFETY_PROMPT_SUFFIX) {
             size_t add = strlen(prompt->content);
             if (suffix_len + add < sizeof(suffix_buf) - 2) {
-                strcat(suffix_buf, "\n");
-                strcat(suffix_buf, prompt->content);
+                shield_strcat_s(suffix_buf, sizeof(suffix_buf), "\n");
+                shield_strcat_s(suffix_buf, sizeof(suffix_buf), prompt->content);
                 suffix_len += add + 1;
             }
         }
@@ -173,8 +174,8 @@ char *safety_inject_suffix(safety_manager_t *mgr, const char *response)
     char *result = malloc(resp_len + suffix_len + 1);
     if (!result) return strdup(response);
     
-    strcpy(result, response);
-    strcat(result, suffix_buf);
+    shield_strcopy_s(result, resp_len + suffix_len + 1, response);
+    shield_strcat_s(result, resp_len + suffix_len + 1, suffix_buf);
     
     return result;
 }
@@ -192,8 +193,8 @@ char *safety_get_system_addition(safety_manager_t *mgr)
         if (prompt->enabled && prompt->type == SAFETY_PROMPT_SYSTEM) {
             size_t add = strlen(prompt->content);
             if (total_len + add < sizeof(buf) - 2) {
-                strcat(buf, prompt->content);
-                strcat(buf, "\n");
+                shield_strcat_s(buf, sizeof(buf), prompt->content);
+                shield_strcat_s(buf, sizeof(buf), "\n");
                 total_len += add + 1;
             }
         }

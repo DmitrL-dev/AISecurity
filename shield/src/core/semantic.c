@@ -9,6 +9,7 @@
 
 #include "shield_semantic.h"
 #include "shield_string.h"
+#include "shield_string_safe.h"
 
 /* Intent keywords */
 static const char *INSTRUCTION_OVERRIDE[] = {
@@ -103,40 +104,40 @@ shield_err_t semantic_analyze(semantic_detector_t *detector,
     /* Check each category */
     if (check_patterns(text, INSTRUCTION_OVERRIDE, &scores[INTENT_INSTRUCTION_OVERRIDE])) {
         result->primary_intent = INTENT_INSTRUCTION_OVERRIDE;
-        strncpy(result->patterns[result->pattern_count++], "instruction_override", 63);
+        strncpy(result->patterns[result->pattern_count++], "instruction_override", sizeof(result->patterns[0]) - 1);
     }
     
     if (check_patterns(text, ROLEPLAY, &scores[INTENT_ROLE_PLAY])) {
         if (scores[INTENT_ROLE_PLAY] > scores[result->primary_intent]) {
             result->primary_intent = INTENT_ROLE_PLAY;
         }
-        strncpy(result->patterns[result->pattern_count++], "roleplay", 63);
+        strncpy(result->patterns[result->pattern_count++], "roleplay", sizeof(result->patterns[0]) - 1);
     }
     
     if (check_patterns(text, DATA_EXTRACTION, &scores[INTENT_DATA_EXTRACTION])) {
         if (scores[INTENT_DATA_EXTRACTION] > scores[result->primary_intent]) {
             result->primary_intent = INTENT_DATA_EXTRACTION;
         }
-        strncpy(result->patterns[result->pattern_count++], "data_extraction", 63);
+        strncpy(result->patterns[result->pattern_count++], "data_extraction", sizeof(result->patterns[0]) - 1);
     }
     
     if (check_patterns(text, SYSTEM_PROMPT_LEAK, &scores[INTENT_SYSTEM_PROMPT_LEAK])) {
         if (scores[INTENT_SYSTEM_PROMPT_LEAK] > scores[result->primary_intent]) {
             result->primary_intent = INTENT_SYSTEM_PROMPT_LEAK;
         }
-        strncpy(result->patterns[result->pattern_count++], "prompt_leak", 63);
+        strncpy(result->patterns[result->pattern_count++], "prompt_leak", sizeof(result->patterns[0]) - 1);
     }
     
     if (check_patterns(text, JAILBREAK, &scores[INTENT_JAILBREAK])) {
         if (scores[INTENT_JAILBREAK] > scores[result->primary_intent]) {
             result->primary_intent = INTENT_JAILBREAK;
         }
-        strncpy(result->patterns[result->pattern_count++], "jailbreak", 63);
+        strncpy(result->patterns[result->pattern_count++], "jailbreak", sizeof(result->patterns[0]) - 1);
     }
     
     if (check_patterns(text, SOCIAL_ENGINEERING, &scores[INTENT_SOCIAL_ENGINEERING])) {
         result->manipulation_score += 0.5f;
-        strncpy(result->patterns[result->pattern_count++], "social_engineering", 63);
+        strncpy(result->patterns[result->pattern_count++], "social_engineering", sizeof(result->patterns[0]) - 1);
     }
     
     /* Calculate overall confidence */
@@ -167,7 +168,7 @@ shield_err_t semantic_analyze(semantic_detector_t *detector,
                  intent_type_string(result->primary_intent),
                  result->confidence * 100);
     } else {
-        strcpy(result->explanation, "No threats detected");
+        shield_strcopy_s(result->explanation, sizeof(result->explanation), "No threats detected");
     }
     
     detector->total_analyzed++;

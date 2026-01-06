@@ -9,6 +9,7 @@
 
 #include "shield_output_filter.h"
 #include "shield_string.h"
+#include "shield_string_safe.h"
 
 /* PII regex patterns - reserved for future regex engine */
 /* Currently using simpler is_ssn(), is_credit_card() functions */
@@ -71,7 +72,7 @@ shield_err_t filter_add_rule(output_filter_t *filter, const char *name,
     strncpy(rule->pattern, pattern, sizeof(rule->pattern) - 1);
     rule->type = type;
     rule->enabled = true;
-    strcpy(rule->replacement, "[REDACTED]");
+    shield_strcopy_s(rule->replacement, sizeof(rule->replacement), "[REDACTED]");
     
     rule->next = filter->rules;
     filter->rules = rule;
@@ -160,13 +161,13 @@ char *filter_content(output_filter_t *filter, const char *content,
         /* Check PII */
         if (filter->filter_pii) {
             if (is_ssn(src)) {
-                strcpy(dst, "[SSN-REDACTED]");
+                shield_strcopy_s(dst, 15, "[SSN-REDACTED]");
                 dst += 14;
                 src += 11;
                 redact_count++;
                 redacted = true;
             } else if (is_credit_card(src)) {
-                strcpy(dst, "[CARD-REDACTED]");
+                shield_strcopy_s(dst, 16, "[CARD-REDACTED]");
                 dst += 15;
                 /* Skip the card number */
                 while (*src && (isdigit((unsigned char)*src) || *src == ' ' || *src == '-')) {
@@ -180,7 +181,7 @@ char *filter_content(output_filter_t *filter, const char *content,
         /* Check secrets */
         if (!redacted && filter->filter_secrets) {
             if (is_api_key(src)) {
-                strcpy(dst, "[KEY-REDACTED]");
+                shield_strcopy_s(dst, 15, "[KEY-REDACTED]");
                 dst += 14;
                 /* Skip until whitespace */
                 while (*src && !isspace((unsigned char)*src)) {
@@ -198,7 +199,7 @@ char *filter_content(output_filter_t *filter, const char *content,
             if (at && at > src && at < src + 50) {
                 bool has_dot = strchr(at, '.') != NULL;
                 if (has_dot) {
-                    strcpy(dst, "[EMAIL-REDACTED]");
+                    shield_strcopy_s(dst, 17, "[EMAIL-REDACTED]");
                     dst += 16;
                     /* Skip email */
                     while (*src && !isspace((unsigned char)*src) && *src != ',' && *src != '>') {
@@ -220,7 +221,7 @@ char *filter_content(output_filter_t *filter, const char *content,
                         size_t plen = strlen(rule->pattern);
                         switch (rule->type) {
                         case REDACT_MASK:
-                            strcpy(dst, rule->replacement);
+                            shield_strcopy_s(dst, sizeof(rule->replacement), rule->replacement);
                             dst += strlen(rule->replacement);
                             break;
                         case REDACT_REMOVE:
@@ -230,7 +231,7 @@ char *filter_content(output_filter_t *filter, const char *content,
                             *dst = '\0';
                             goto done;
                         default:
-                            strcpy(dst, "[REDACTED]");
+                            shield_strcopy_s(dst, 11, "[REDACTED]");
                             dst += 10;
                         }
                         src += plen;

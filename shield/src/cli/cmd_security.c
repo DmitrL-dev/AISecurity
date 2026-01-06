@@ -31,7 +31,7 @@ extern shield_err_t pqc_init(void);
 
 /* ===== ThreatHunter Commands ===== */
 
-void cmd_show_threat_hunter(cli_context_t *ctx, int argc, char **argv)
+shield_err_t cmd_show_threat_hunter(cli_context_t *ctx, int argc, char **argv)
 {
     (void)ctx; (void)argc; (void)argv;
     shield_state_t *state = shield_state_get();
@@ -46,9 +46,10 @@ void cmd_show_threat_hunter(cli_context_t *ctx, int argc, char **argv)
     printf("\nStatistics:\n");
     printf("  Hunts Completed: %llu\n", (unsigned long long)state->threat_hunter.hunts_completed);
     printf("  Threats Found:   %llu\n", (unsigned long long)state->threat_hunter.threats_found);
+    return SHIELD_OK;
 }
 
-void cmd_threat_hunter_enable(cli_context_t *ctx, int argc, char **argv)
+shield_err_t cmd_threat_hunter_enable(cli_context_t *ctx, int argc, char **argv)
 {
     (void)ctx; (void)argc; (void)argv;
     shield_state_t *state = shield_state_get();
@@ -61,9 +62,10 @@ void cmd_threat_hunter_enable(cli_context_t *ctx, int argc, char **argv)
         state->threat_hunter.state = MODULE_ERROR;
         printf("Failed to enable ThreatHunter\n");
     }
+    return SHIELD_OK;
 }
 
-void cmd_threat_hunter_disable(cli_context_t *ctx, int argc, char **argv)
+shield_err_t cmd_threat_hunter_disable(cli_context_t *ctx, int argc, char **argv)
 {
     (void)ctx; (void)argc; (void)argv;
     shield_state_t *state = shield_state_get();
@@ -72,22 +74,23 @@ void cmd_threat_hunter_disable(cli_context_t *ctx, int argc, char **argv)
     state->threat_hunter.state = MODULE_DISABLED;
     shield_state_mark_dirty();
     printf("ThreatHunter disabled\n");
+    return SHIELD_OK;
 }
 
-void cmd_threat_hunter_sensitivity(cli_context_t *ctx, int argc, char **argv)
+shield_err_t cmd_threat_hunter_sensitivity(cli_context_t *ctx, int argc, char **argv)
 {
     (void)ctx;
-    if (argc < 1) {
+    if (argc < 3) {
         shield_state_t *state = shield_state_get();
         printf("Current sensitivity: %.2f\n", state->threat_hunter.sensitivity);
         printf("Usage: threat-hunter sensitivity <0.0-1.0>\n");
-        return;
+        return SHIELD_ERR_INVALID;  /* Missing argument */
     }
     
-    float sens = (float)atof(argv[0]);
+    float sens = (float)atof(argv[2]);  /* argv[2] is the value after "threat-hunter sensitivity" */
     if (sens < 0.0f || sens > 1.0f) {
         printf("Error: Sensitivity must be between 0.0 and 1.0\n");
-        return;
+        return SHIELD_ERR_INVALID;  /* Out of range */
     }
     
     shield_state_t *state = shield_state_get();
@@ -95,20 +98,21 @@ void cmd_threat_hunter_sensitivity(cli_context_t *ctx, int argc, char **argv)
     threat_hunter_set_sensitivity(sens);
     shield_state_mark_dirty();
     printf("ThreatHunter sensitivity set to %.2f\n", sens);
+    return SHIELD_OK;
 }
 
-void cmd_threat_hunter_test(cli_context_t *ctx, int argc, char **argv)
+shield_err_t cmd_threat_hunter_test(cli_context_t *ctx, int argc, char **argv)
 {
     (void)ctx;
     if (argc < 1) {
         printf("Usage: threat-hunter test <text>\n");
-        return;
+        return SHIELD_OK;
     }
     
     shield_state_t *state = shield_state_get();
     if (state->threat_hunter.state != MODULE_ENABLED) {
         printf("Error: ThreatHunter is not enabled\n");
-        return;
+        return SHIELD_OK;
     }
     
     float score = threat_hunter_quick_check(argv[0]);
@@ -131,11 +135,12 @@ void cmd_threat_hunter_test(cli_context_t *ctx, int argc, char **argv)
     } else {
         printf("CLEAN\n");
     }
+    return SHIELD_OK;
 }
 
 /* ===== Watchdog Commands ===== */
 
-void cmd_show_watchdog(cli_context_t *ctx, int argc, char **argv)
+shield_err_t cmd_show_watchdog(cli_context_t *ctx, int argc, char **argv)
 {
     (void)ctx; (void)argc; (void)argv;
     shield_state_t *state = shield_state_get();
@@ -150,9 +155,10 @@ void cmd_show_watchdog(cli_context_t *ctx, int argc, char **argv)
     printf("  Checks Total:    %llu\n", (unsigned long long)state->watchdog.checks_total);
     printf("  Alerts Raised:   %llu\n", (unsigned long long)state->watchdog.alerts_raised);
     printf("  Recoveries:      %llu\n", (unsigned long long)state->watchdog.recoveries_attempted);
+    return SHIELD_OK;
 }
 
-void cmd_watchdog_enable(cli_context_t *ctx, int argc, char **argv)
+shield_err_t cmd_watchdog_enable(cli_context_t *ctx, int argc, char **argv)
 {
     (void)ctx; (void)argc; (void)argv;
     shield_state_t *state = shield_state_get();
@@ -165,9 +171,10 @@ void cmd_watchdog_enable(cli_context_t *ctx, int argc, char **argv)
         state->watchdog.state = MODULE_ERROR;
         printf("Failed to enable Watchdog\n");
     }
+    return SHIELD_OK;
 }
 
-void cmd_watchdog_disable(cli_context_t *ctx, int argc, char **argv)
+shield_err_t cmd_watchdog_disable(cli_context_t *ctx, int argc, char **argv)
 {
     (void)ctx; (void)argc; (void)argv;
     shield_state_t *state = shield_state_get();
@@ -176,16 +183,17 @@ void cmd_watchdog_disable(cli_context_t *ctx, int argc, char **argv)
     state->watchdog.state = MODULE_DISABLED;
     shield_state_mark_dirty();
     printf("Watchdog disabled\n");
+    return SHIELD_OK;
 }
 
-void cmd_watchdog_check(cli_context_t *ctx, int argc, char **argv)
+shield_err_t cmd_watchdog_check(cli_context_t *ctx, int argc, char **argv)
 {
     (void)ctx; (void)argc; (void)argv;
     shield_state_t *state = shield_state_get();
     
     if (state->watchdog.state != MODULE_ENABLED) {
         printf("Error: Watchdog is not enabled\n");
-        return;
+        return SHIELD_OK;
     }
     
     printf("Running health check...\n");
@@ -208,9 +216,10 @@ void cmd_watchdog_check(cli_context_t *ctx, int argc, char **argv)
     } else {
         printf("Error: Health check failed\n");
     }
+    return SHIELD_OK;
 }
 
-void cmd_watchdog_recovery(cli_context_t *ctx, int argc, char **argv)
+shield_err_t cmd_watchdog_recovery(cli_context_t *ctx, int argc, char **argv)
 {
     (void)ctx;
     shield_state_t *state = shield_state_get();
@@ -219,7 +228,7 @@ void cmd_watchdog_recovery(cli_context_t *ctx, int argc, char **argv)
         printf("Auto-recovery is currently %s\n", 
                state->watchdog.auto_recovery ? "ENABLED" : "DISABLED");
         printf("Usage: watchdog auto-recovery <enable|disable>\n");
-        return;
+        return SHIELD_OK;
     }
     
     if (strcmp(argv[0], "enable") == 0) {
@@ -235,11 +244,12 @@ void cmd_watchdog_recovery(cli_context_t *ctx, int argc, char **argv)
     } else {
         printf("Error: Invalid option '%s'. Use 'enable' or 'disable'\n", argv[0]);
     }
+    return SHIELD_OK;
 }
 
 /* ===== Cognitive Signatures Commands ===== */
 
-void cmd_show_cognitive(cli_context_t *ctx, int argc, char **argv)
+shield_err_t cmd_show_cognitive(cli_context_t *ctx, int argc, char **argv)
 {
     (void)ctx; (void)argc; (void)argv;
     shield_state_t *state = shield_state_get();
@@ -258,9 +268,10 @@ void cmd_show_cognitive(cli_context_t *ctx, int argc, char **argv)
     printf("\nStatistics:\n");
     printf("  Scans Performed: %llu\n", (unsigned long long)state->cognitive.scans_performed);
     printf("  Detections:      %llu\n", (unsigned long long)state->cognitive.detections);
+    return SHIELD_OK;
 }
 
-void cmd_cognitive_enable(cli_context_t *ctx, int argc, char **argv)
+shield_err_t cmd_cognitive_enable(cli_context_t *ctx, int argc, char **argv)
 {
     (void)ctx; (void)argc; (void)argv;
     shield_state_t *state = shield_state_get();
@@ -273,11 +284,12 @@ void cmd_cognitive_enable(cli_context_t *ctx, int argc, char **argv)
         state->cognitive.state = MODULE_ERROR;
         printf("Failed to enable Cognitive Signatures\n");
     }
+    return SHIELD_OK;
 }
 
 /* ===== PQC Commands ===== */
 
-void cmd_show_pqc(cli_context_t *ctx, int argc, char **argv)
+shield_err_t cmd_show_pqc(cli_context_t *ctx, int argc, char **argv)
 {
     (void)ctx; (void)argc; (void)argv;
     shield_state_t *state = shield_state_get();
@@ -298,9 +310,10 @@ void cmd_show_pqc(cli_context_t *ctx, int argc, char **argv)
     printf("\nStatistics:\n");
     printf("  Keys Generated:      %llu\n", (unsigned long long)state->pqc.keys_generated);
     printf("  Signatures Created:  %llu\n", (unsigned long long)state->pqc.signatures_created);
+    return SHIELD_OK;
 }
 
-void cmd_pqc_enable(cli_context_t *ctx, int argc, char **argv)
+shield_err_t cmd_pqc_enable(cli_context_t *ctx, int argc, char **argv)
 {
     (void)ctx; (void)argc; (void)argv;
     shield_state_t *state = shield_state_get();
@@ -313,16 +326,17 @@ void cmd_pqc_enable(cli_context_t *ctx, int argc, char **argv)
         state->pqc.state = MODULE_ERROR;
         printf("Failed to enable PQC module\n");
     }
+    return SHIELD_OK;
 }
 
-void cmd_pqc_test_kyber(cli_context_t *ctx, int argc, char **argv)
+shield_err_t cmd_pqc_test_kyber(cli_context_t *ctx, int argc, char **argv)
 {
     (void)ctx; (void)argc; (void)argv;
     shield_state_t *state = shield_state_get();
     
     if (state->pqc.state != MODULE_ENABLED) {
         printf("Error: PQC module is not enabled\n");
-        return;
+        return SHIELD_OK;
     }
     
     printf("Testing Kyber-1024 key encapsulation...\n");
@@ -332,16 +346,17 @@ void cmd_pqc_test_kyber(cli_context_t *ctx, int argc, char **argv)
     printf("  Shared secret:  Match\n");
     printf("\nTest PASSED\n");
     state->pqc.keys_generated++;
+    return SHIELD_OK;
 }
 
-void cmd_pqc_test_dilithium(cli_context_t *ctx, int argc, char **argv)
+shield_err_t cmd_pqc_test_dilithium(cli_context_t *ctx, int argc, char **argv)
 {
     (void)ctx; (void)argc; (void)argv;
     shield_state_t *state = shield_state_get();
     
     if (state->pqc.state != MODULE_ENABLED) {
         printf("Error: PQC module is not enabled\n");
-        return;
+        return SHIELD_OK;
     }
     
     printf("Testing Dilithium-5 signatures...\n");
@@ -351,11 +366,12 @@ void cmd_pqc_test_dilithium(cli_context_t *ctx, int argc, char **argv)
     printf("\nTest PASSED\n");
     state->pqc.keys_generated++;
     state->pqc.signatures_created++;
+    return SHIELD_OK;
 }
 
 /* ===== Secure Communication Commands ===== */
 
-void cmd_show_secure_comm(cli_context_t *ctx, int argc, char **argv)
+shield_err_t cmd_show_secure_comm(cli_context_t *ctx, int argc, char **argv)
 {
     (void)ctx; (void)argc; (void)argv;
     shield_state_t *state = shield_state_get();
@@ -375,11 +391,12 @@ void cmd_show_secure_comm(cli_context_t *ctx, int argc, char **argv)
     printf("\nStatistics:\n");
     printf("  Requests Sent:   %llu\n", (unsigned long long)state->brain.requests_sent);
     printf("  Requests Failed: %llu\n", (unsigned long long)state->brain.requests_failed);
+    return SHIELD_OK;
 }
 
 /* ===== Brain Integration Commands ===== */
 
-void cmd_show_brain(cli_context_t *ctx, int argc, char **argv)
+shield_err_t cmd_show_brain(cli_context_t *ctx, int argc, char **argv)
 {
     (void)ctx; (void)argc; (void)argv;
     shield_state_t *state = shield_state_get();
@@ -397,15 +414,16 @@ void cmd_show_brain(cli_context_t *ctx, int argc, char **argv)
     } else {
         printf("\nUse 'brain connect <host:port>' to connect\n");
     }
+    return SHIELD_OK;
 }
 
-void cmd_brain_connect(cli_context_t *ctx, int argc, char **argv)
+shield_err_t cmd_brain_connect(cli_context_t *ctx, int argc, char **argv)
 {
     (void)ctx;
     if (argc < 1) {
         printf("Usage: brain connect <host:port>\n");
         printf("Example: brain connect localhost:8000\n");
-        return;
+        return SHIELD_OK;
     }
     
     shield_state_t *state = shield_state_get();
@@ -429,9 +447,10 @@ void cmd_brain_connect(cli_context_t *ctx, int argc, char **argv)
     shield_state_mark_dirty();
     
     printf("Connected to Brain\n");
+    return SHIELD_OK;
 }
 
-void cmd_brain_disconnect(cli_context_t *ctx, int argc, char **argv)
+shield_err_t cmd_brain_disconnect(cli_context_t *ctx, int argc, char **argv)
 {
     (void)ctx; (void)argc; (void)argv;
     shield_state_t *state = shield_state_get();
@@ -439,16 +458,18 @@ void cmd_brain_disconnect(cli_context_t *ctx, int argc, char **argv)
     state->brain.connected = false;
     shield_state_mark_dirty();
     printf("Disconnected from Brain\n");
+    return SHIELD_OK;
 }
 
 /* ===== System Summary ===== */
 
-void cmd_show_shield(cli_context_t *ctx, int argc, char **argv)
+shield_err_t cmd_show_shield(cli_context_t *ctx, int argc, char **argv)
 {
     (void)ctx; (void)argc; (void)argv;
     char buffer[4096];
     shield_state_format_summary(buffer, sizeof(buffer));
     printf("%s", buffer);
+    return SHIELD_OK;
 }
 
 /* ===== Command Table ===== */
@@ -461,6 +482,7 @@ static cli_command_t security_commands[] = {
     {"show threat-hunter", cmd_show_threat_hunter, CLI_MODE_ANY, "Show ThreatHunter status"},
     {"threat-hunter enable", cmd_threat_hunter_enable, CLI_MODE_CONFIG, "Enable ThreatHunter"},
     {"threat-hunter disable", cmd_threat_hunter_disable, CLI_MODE_CONFIG, "Disable ThreatHunter"},
+    {"no threat-hunter enable", cmd_threat_hunter_disable, CLI_MODE_CONFIG, "Disable ThreatHunter"},
     {"threat-hunter sensitivity", cmd_threat_hunter_sensitivity, CLI_MODE_CONFIG, "Set sensitivity"},
     {"threat-hunter test", cmd_threat_hunter_test, CLI_MODE_PRIV, "Test text for threats"},
     

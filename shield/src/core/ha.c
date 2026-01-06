@@ -10,6 +10,7 @@
 #include "shield_common.h"
 #include "shield_ha.h"
 #include "shield_platform.h"
+#include "shield_qrng.h"
 
 /* Get current time in ms */
 static uint64_t get_time_ms(void)
@@ -17,13 +18,13 @@ static uint64_t get_time_ms(void)
     return platform_time_ms();
 }
 
-/* Generate node ID */
+/* Generate node ID using QRNG */
 static void generate_node_id(char *id, size_t len)
 {
     const char hex[] = "0123456789abcdef";
     
     for (size_t i = 0; i < len - 1 && i < 16; i++) {
-        id[i] = hex[rand() % 16];
+        id[i] = hex[shield_qrng_u32() % 16];
     }
     id[len > 16 ? 16 : len - 1] = '\0';
 }

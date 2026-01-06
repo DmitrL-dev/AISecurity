@@ -9,6 +9,7 @@
 #include "shield_classifier.h"
 #include "shield_semantic.h"
 #include "shield_string.h"
+#include "shield_string_safe.h"
 
 /* Class names */
 static const char *DEFAULT_CLASSES[] = {
@@ -103,7 +104,7 @@ shield_err_t classify_heuristic(const char *text, size_t len,
     result->confidence = sem_result.confidence;
     
     if (result->predicted_class == 0) {
-        strcpy(result->label, "benign");
+        shield_strcopy_s(result->label, sizeof(result->label), "benign");
         result->scores[0] = 1.0f - sem_result.confidence;
     } else {
         snprintf(result->label, sizeof(result->label), "%s",

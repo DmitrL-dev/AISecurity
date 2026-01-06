@@ -9,6 +9,7 @@
 
 #include "shield_embedding.h"
 #include "shield_hashtable.h"
+#include "shield_string_safe.h"
 
 #define SIMPLE_DIM 64
 
@@ -27,7 +28,7 @@ shield_err_t embedding_service_init(embedding_service_t *svc,
         svc->dimension = SIMPLE_DIM;
         break;
     case EMBED_OPENAI:
-        strcpy(svc->model, "text-embedding-3-small");
+        shield_strcopy_s(svc->model, sizeof(svc->model), "text-embedding-3-small");
         svc->dimension = 1536;
         break;
     default:
@@ -73,7 +74,7 @@ shield_err_t embed_simple(const char *text, size_t len, embedding_t *out)
     out->vector = calloc(SIMPLE_DIM, sizeof(float));
     if (!out->vector) return SHIELD_ERR_NOMEM;
     
-    strcpy(out->model, "builtin-simple");
+    shield_strcopy_s(out->model, sizeof(out->model), "builtin-simple");
     
     /* Simple character-based hashing */
     for (size_t i = 0; i < len; i++) {

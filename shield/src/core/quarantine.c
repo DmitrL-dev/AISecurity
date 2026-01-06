@@ -9,18 +9,18 @@
 
 #include "shield_common.h"
 #include "shield_quarantine.h"
+#include "shield_qrng.h"
 
-/* Generate UUID-like ID */
+/* Generate UUID-like ID using QRNG */
 static void generate_id(char *id, size_t len)
 {
     const char hex[] = "0123456789abcdef";
-    srand((unsigned int)time(NULL));
     
     for (size_t i = 0; i < len - 1 && i < 32; i++) {
         if (i == 8 || i == 12 || i == 16 || i == 20) {
             id[i] = '-';
         } else {
-            id[i] = hex[rand() % 16];
+            id[i] = hex[shield_qrng_u32() % 16];
         }
     }
     id[len > 36 ? 36 : len - 1] = '\0';

@@ -9,6 +9,7 @@
 
 #include "shield_batch.h"
 #include "shield_timer.h"
+#include "shield_string_safe.h"
 
 /* Generate batch item ID */
 static void generate_id(char *id, size_t size)
@@ -107,7 +108,7 @@ shield_err_t batch_process(batch_t *batch, void *context)
         /* For now, default to allow */
         item->action = ACTION_ALLOW;
         item->threat_score = 0;
-        strcpy(item->reason, "batch_processed");
+        shield_strcopy_s(item->reason, sizeof(item->reason), "batch_processed");
         item->processed = true;
         
         timer_stop(&timer);

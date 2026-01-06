@@ -8,6 +8,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include "shield_string_safe.h"
 
 #ifdef _WIN32
 #include <winsock2.h>
@@ -102,7 +103,7 @@ static shield_err_t parse_url(const char *url, char *host, size_t host_len,
         strncpy(path, path_start, path_len - 1);
         path[path_len - 1] = '\0';
     } else {
-        strcpy(path, "/");
+        shield_strcopy_s(path, path_len, "/");
     }
     
     return SHIELD_OK;
@@ -315,14 +316,14 @@ shield_err_t brain_analyze(const char *brain_url, const char *prompt,
         
         /* Determine verdict */
         if (result->risk_score >= 0.9f) {
-            strcpy(result->verdict, "BLOCK");
+            shield_strcopy_s(result->verdict, sizeof(result->verdict), "BLOCK");
             result->blocked = true;
         } else if (result->risk_score >= 0.7f) {
-            strcpy(result->verdict, "QUARANTINE");
+            shield_strcopy_s(result->verdict, sizeof(result->verdict), "QUARANTINE");
         } else if (result->risk_score >= 0.5f) {
-            strcpy(result->verdict, "WARN");
+            shield_strcopy_s(result->verdict, sizeof(result->verdict), "WARN");
         } else {
-            strcpy(result->verdict, "ALLOW");
+            shield_strcopy_s(result->verdict, sizeof(result->verdict), "ALLOW");
         }
     }
     
@@ -343,3 +344,85 @@ shield_err_t brain_analyze_egress(const char *brain_url, const char *response_te
 {
     return brain_analyze(brain_url, response_text, "egress", result);
 }
+
+/* ===== FFI Adapter Functions (for brain_ffi.c) ===== */
+
+#include "shield_brain.h"
+
+static char g_brain_endpoint[512] = {0};
+static bool g_http_client_initialized = false;
+
+int http_client_init(const char *endpoint)
+{
+    if (!endpoint) {
+        return -1;
+    }
+    
+    shield_strcopy_s(g_brain_endpoint, sizeof(g_brain_endpoint), endpoint);
+    g_http_client_initialized = true;
+    
+#ifdef _WIN32
+    WSADATA wsa;
+    if (WSAStartup(MAKEWORD(2, 2), &wsa) != 0) {
+        g_http_client_initialized = false;
+        return -1;
+    }
+#endif
+    
+    return 0;
+}
+
+void http_client_shutdown(void)
+{
+    g_http_client_initialized = false;
+    g_brain_endpoint[0] = '\0';
+    
+#ifdef _WIN32
+    WSACleanup();
+#endif
+}
+
+bool http_client_available(void)
+{
+    return g_http_client_initialized && g_brain_endpoint[0] != '\0';
+}
+
+int http_client_analyze(const char *input, const char *engine,
+                        brain_result_t *result)
+{
+    if (!g_http_client_initialized || !input || !result) {
+        return -1;
+    }
+    
+    memset(result, 0, sizeof(*result));
+    
+    /* Use internal brain_analyze */
+    brain_analyze_result_t internal_result;
+    shield_err_t err = brain_analyze(g_brain_endpoint, input, "ingress", &internal_result);
+    
+    if (err == SHIELD_OK) {
+        /* Map internal result to brain_result_t */
+        result->detected = internal_result.blocked || internal_result.risk_score >= 0.7f;
+        result->confidence = internal_result.risk_score;
+        
+        if (internal_result.risk_score >= 0.9f) {
+            result->severity = BRAIN_SEVERITY_CRITICAL;
+        } else if (internal_result.risk_score >= 0.7f) {
+            result->severity = BRAIN_SEVERITY_HIGH;
+        } else if (internal_result.risk_score >= 0.5f) {
+            result->severity = BRAIN_SEVERITY_MEDIUM;
+        } else if (internal_result.risk_score >= 0.3f) {
+            result->severity = BRAIN_SEVERITY_LOW;
+        } else {
+            result->severity = BRAIN_SEVERITY_NONE;
+        }
+        
+        result->engine_name = engine ? engine : "brain_http";
+        result->reason = internal_result.blocked ? "Blocked by Brain" : NULL;
+        
+        return 0;
+    }
+    
+    return -1;
+}
+

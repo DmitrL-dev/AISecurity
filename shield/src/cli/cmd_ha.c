@@ -9,114 +9,124 @@
 #include "shield_common.h"
 #include "shield_cli.h"
 #include "shield_ha.h"
+#include "shield_state.h"
 
 /* standby ip */
-static void cmd_standby_ip(cli_context_t *ctx, int argc, char **argv)
+static shield_err_t cmd_standby_ip(cli_context_t *ctx, int argc, char **argv)
 {
     if (argc < 3) {
         cli_print("%% Usage: standby ip <virtual-ip>\n");
-        return;
+        return SHIELD_OK;
     }
     strncpy(ctx->ha.virtual_ip, argv[2], sizeof(ctx->ha.virtual_ip) - 1);
     ctx->ha.enabled = true;
     cli_print("Standby IP set to %s\n", argv[2]);
     ctx->modified = true;
+    return SHIELD_OK;
 }
 
 /* standby priority */
-static void cmd_standby_priority(cli_context_t *ctx, int argc, char **argv)
+static shield_err_t cmd_standby_priority(cli_context_t *ctx, int argc, char **argv)
 {
     if (argc < 3) {
         cli_print("%% Usage: standby priority <0-255>\n");
-        return;
+        return SHIELD_OK;
     }
     ctx->ha.priority = atoi(argv[2]);
     cli_print("Standby priority set to %d\n", ctx->ha.priority);
     ctx->modified = true;
+    return SHIELD_OK;
 }
 
 /* standby preempt */
-static void cmd_standby_preempt(cli_context_t *ctx, int argc, char **argv)
+static shield_err_t cmd_standby_preempt(cli_context_t *ctx, int argc, char **argv)
 {
     (void)argc; (void)argv;
     ctx->ha.preempt = true;
     cli_print("Standby preempt enabled\n");
     ctx->modified = true;
+    return SHIELD_OK;
 }
 
 /* no standby preempt */
-static void cmd_no_standby_preempt(cli_context_t *ctx, int argc, char **argv)
+static shield_err_t cmd_no_standby_preempt(cli_context_t *ctx, int argc, char **argv)
 {
     (void)argc; (void)argv;
     ctx->ha.preempt = false;
     cli_print("Standby preempt disabled\n");
     ctx->modified = true;
+    return SHIELD_OK;
 }
 
 /* standby timers */
-static void cmd_standby_timers(cli_context_t *ctx, int argc, char **argv)
+static shield_err_t cmd_standby_timers(cli_context_t *ctx, int argc, char **argv)
 {
     if (argc < 4) {
         cli_print("%% Usage: standby timers <hello> <hold>\n");
-        return;
+        return SHIELD_OK;
     }
     ctx->ha.hello_interval = atoi(argv[2]);
     ctx->ha.hold_time = atoi(argv[3]);
     cli_print("Standby timers: hello=%d, hold=%d\n", 
              ctx->ha.hello_interval, ctx->ha.hold_time);
     ctx->modified = true;
+    return SHIELD_OK;
 }
 
 /* standby authentication */
-static void cmd_standby_auth(cli_context_t *ctx, int argc, char **argv)
+static shield_err_t cmd_standby_auth(cli_context_t *ctx, int argc, char **argv)
 {
     if (argc < 3) {
         cli_print("%% Usage: standby authentication <key>\n");
-        return;
+        return SHIELD_OK;
     }
     strncpy(ctx->ha.auth_key, argv[2], sizeof(ctx->ha.auth_key) - 1);
     cli_print("Standby authentication configured\n");
     ctx->modified = true;
+    return SHIELD_OK;
 }
 
 /* standby track */
-static void cmd_standby_track(cli_context_t *ctx, int argc, char **argv)
+static shield_err_t cmd_standby_track(cli_context_t *ctx, int argc, char **argv)
 {
     if (argc < 4) {
         cli_print("%% Usage: standby track <object> <decrement>\n");
-        return;
+        return SHIELD_OK;
     }
     strncpy(ctx->ha.track_object, argv[2], sizeof(ctx->ha.track_object) - 1);
     ctx->ha.track_decrement = atoi(argv[3]);
     cli_print("Standby tracking: %s, decrement=%d\n", argv[2], ctx->ha.track_decrement);
     ctx->modified = true;
+    return SHIELD_OK;
 }
 
 /* standby name */
-static void cmd_standby_name(cli_context_t *ctx, int argc, char **argv)
+static shield_err_t cmd_standby_name(cli_context_t *ctx, int argc, char **argv)
 {
     if (argc < 3) {
         cli_print("%% Usage: standby name <cluster-name>\n");
-        return;
+        return SHIELD_OK;
     }
     strncpy(ctx->ha.cluster_name, argv[2], sizeof(ctx->ha.cluster_name) - 1);
     cli_print("Standby cluster name: %s\n", argv[2]);
     ctx->modified = true;
+    return SHIELD_OK;
 }
 
 /* redundancy */
-static void cmd_redundancy(cli_context_t *ctx, int argc, char **argv)
+static shield_err_t cmd_redundancy(cli_context_t *ctx, int argc, char **argv)
 {
     (void)argc; (void)argv;
     cli_set_mode(ctx, CLI_MODE_HA);
+    return SHIELD_OK;
 }
 
 /* redundancy mode */
-static void cmd_redundancy_mode(cli_context_t *ctx, int argc, char **argv)
+static shield_err_t cmd_redundancy_mode(cli_context_t *ctx, int argc, char **argv)
 {
     if (argc < 3) {
         cli_print("%% Usage: redundancy mode <active-standby|active-active>\n");
-        return;
+        return SHIELD_OK;
     }
     if (strcmp(argv[2], "active-standby") == 0) {
         ctx->ha.mode = HA_MODE_ACTIVE_STANDBY;
@@ -125,40 +135,44 @@ static void cmd_redundancy_mode(cli_context_t *ctx, int argc, char **argv)
     }
     cli_print("Redundancy mode: %s\n", argv[2]);
     ctx->modified = true;
+    return SHIELD_OK;
 }
 
 /* failover */
-static void cmd_failover(cli_context_t *ctx, int argc, char **argv)
+static shield_err_t cmd_failover(cli_context_t *ctx, int argc, char **argv)
 {
     (void)argc; (void)argv;
     ctx->ha.failover_enabled = true;
     cli_print("Failover enabled\n");
     ctx->modified = true;
+    return SHIELD_OK;
 }
 
 /* no failover */
-static void cmd_no_failover(cli_context_t *ctx, int argc, char **argv)
+static shield_err_t cmd_no_failover(cli_context_t *ctx, int argc, char **argv)
 {
     (void)argc; (void)argv;
     ctx->ha.failover_enabled = false;
     cli_print("Failover disabled\n");
     ctx->modified = true;
+    return SHIELD_OK;
 }
 
 /* failover lan interface */
-static void cmd_failover_lan(cli_context_t *ctx, int argc, char **argv)
+static shield_err_t cmd_failover_lan(cli_context_t *ctx, int argc, char **argv)
 {
     if (argc < 4) {
         cli_print("%% Usage: failover lan interface <name>\n");
-        return;
+        return SHIELD_OK;
     }
     strncpy(ctx->ha.failover_interface, argv[3], sizeof(ctx->ha.failover_interface) - 1);
     cli_print("Failover LAN interface: %s\n", argv[3]);
     ctx->modified = true;
+    return SHIELD_OK;
 }
 
 /* ha sync start */
-static void cmd_ha_sync_start(cli_context_t *ctx, int argc, char **argv)
+static shield_err_t cmd_ha_sync_start(cli_context_t *ctx, int argc, char **argv)
 {
     (void)argc; (void)argv;
     if (ctx->ha.enabled) {
@@ -168,10 +182,69 @@ static void cmd_ha_sync_start(cli_context_t *ctx, int argc, char **argv)
     } else {
         cli_print("%% HA not enabled\n");
     }
+    return SHIELD_OK;
+}
+
+/* ha enable */
+static shield_err_t cmd_ha_enable(cli_context_t *ctx, int argc, char **argv)
+{
+    (void)argc; (void)argv;
+    ctx->ha.enabled = true;
+    
+    /* Sync with shield_state */
+    shield_state_t *state = shield_state_get();
+    if (state) {
+        state->ha.enabled = true;
+    }
+    
+    cli_print("HA enabled\n");
+    ctx->modified = true;
+    return SHIELD_OK;
+}
+
+/* no ha enable */
+static shield_err_t cmd_no_ha_enable(cli_context_t *ctx, int argc, char **argv)
+{
+    (void)argc; (void)argv;
+    ctx->ha.enabled = false;
+    
+    shield_state_t *state = shield_state_get();
+    if (state) {
+        state->ha.enabled = false;
+    }
+    
+    cli_print("HA disabled\n");
+    ctx->modified = true;
+    return SHIELD_OK;
+}
+
+/* ha mode <active-standby|active-active> */
+static shield_err_t cmd_ha_mode(cli_context_t *ctx, int argc, char **argv)
+{
+    if (argc < 3) {
+        cli_print("%% Usage: ha mode <active-standby|active-active>\n");
+        return SHIELD_OK;
+    }
+    
+    if (strcmp(argv[2], "active-standby") == 0) {
+        ctx->ha.mode = HA_MODE_ACTIVE_STANDBY;
+    } else if (strcmp(argv[2], "active-active") == 0) {
+        ctx->ha.mode = HA_MODE_ACTIVE_ACTIVE;
+    } else {
+        cli_print("%% Unknown HA mode: %s\n", argv[2]);
+        return SHIELD_OK;
+    }
+    
+    cli_print("HA mode set to %s\n", argv[2]);
+    ctx->modified = true;
+    return SHIELD_OK;
 }
 
 /* HA command table */
 static cli_command_t ha_commands[] = {
+    {"ha enable", cmd_ha_enable, CLI_MODE_CONFIG, "Enable HA"},
+    {"no ha enable", cmd_no_ha_enable, CLI_MODE_CONFIG, "Disable HA"},
+    {"ha mode", cmd_ha_mode, CLI_MODE_CONFIG, "Set HA mode"},
     {"standby ip", cmd_standby_ip, CLI_MODE_CONFIG, "Set standby IP"},
     {"standby priority", cmd_standby_priority, CLI_MODE_CONFIG, "Set standby priority"},
     {"standby preempt", cmd_standby_preempt, CLI_MODE_CONFIG, "Enable preempt"},

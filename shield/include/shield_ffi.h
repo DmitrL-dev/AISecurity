@@ -82,11 +82,11 @@ SHIELD_API const char* shield_version(void);
 
 /* ===== Configuration ===== */
 
-/* Load configuration from file */
-SHIELD_API shield_result_t shield_load_config(shield_handle_t handle, const char *path);
+/* Load configuration from file (FFI) */
+SHIELD_API shield_result_t shield_ffi_load_config(shield_handle_t handle, const char *path);
 
-/* Save configuration to file */
-SHIELD_API shield_result_t shield_save_config(shield_handle_t handle, const char *path);
+/* Save configuration to file (FFI) */
+SHIELD_API shield_result_t shield_ffi_save_config(shield_handle_t handle, const char *path);
 
 /* ===== Zone Management ===== */
 
@@ -133,8 +133,8 @@ SHIELD_API shield_result_t shield_rule_delete(
 
 /* ===== Evaluation ===== */
 
-/* Evaluate request */
-SHIELD_API shield_eval_result_t shield_evaluate(
+/* Evaluate request (FFI) */
+SHIELD_API shield_eval_result_t shield_ffi_evaluate(
     shield_handle_t handle,
     const char *zone_name,
     shield_direction_t direction,

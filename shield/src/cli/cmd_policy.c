@@ -11,11 +11,11 @@
 #include "shield_policy.h"
 
 /* class-map match-any <name> */
-static void cmd_class_map_any(cli_context_t *ctx, int argc, char **argv)
+static shield_err_t cmd_class_map_any(cli_context_t *ctx, int argc, char **argv)
 {
     if (argc < 3) {
         cli_print("%% Usage: class-map match-any <name>\n");
-        return;
+        return SHIELD_OK;
     }
     
     class_map_t *cm = NULL;
@@ -31,11 +31,11 @@ static void cmd_class_map_any(cli_context_t *ctx, int argc, char **argv)
 }
 
 /* class-map match-all <name> */
-static void cmd_class_map_all(cli_context_t *ctx, int argc, char **argv)
+static shield_err_t cmd_class_map_all(cli_context_t *ctx, int argc, char **argv)
 {
     if (argc < 3) {
         cli_print("%% Usage: class-map match-all <name>\n");
-        return;
+        return SHIELD_OK;
     }
     
     class_map_t *cm = NULL;
@@ -49,11 +49,11 @@ static void cmd_class_map_all(cli_context_t *ctx, int argc, char **argv)
 }
 
 /* no class-map <name> */
-static void cmd_no_class_map(cli_context_t *ctx, int argc, char **argv)
+static shield_err_t cmd_no_class_map(cli_context_t *ctx, int argc, char **argv)
 {
     if (argc < 3) {
         cli_print("%% Usage: no class-map <name>\n");
-        return;
+        return SHIELD_OK;
     }
     
     class_map_delete(ctx->policy_engine, argv[2]);
@@ -62,7 +62,7 @@ static void cmd_no_class_map(cli_context_t *ctx, int argc, char **argv)
 }
 
 /* match injection (class-map submode) */
-static void cmd_match_injection(cli_context_t *ctx, int argc, char **argv)
+static shield_err_t cmd_match_injection(cli_context_t *ctx, int argc, char **argv)
 {
     (void)argc; (void)argv;
     class_map_t *cm = class_map_find(ctx->policy_engine, ctx->current_class_map);
@@ -74,7 +74,7 @@ static void cmd_match_injection(cli_context_t *ctx, int argc, char **argv)
 }
 
 /* match jailbreak */
-static void cmd_match_jailbreak(cli_context_t *ctx, int argc, char **argv)
+static shield_err_t cmd_match_jailbreak(cli_context_t *ctx, int argc, char **argv)
 {
     (void)argc; (void)argv;
     class_map_t *cm = class_map_find(ctx->policy_engine, ctx->current_class_map);
@@ -86,7 +86,7 @@ static void cmd_match_jailbreak(cli_context_t *ctx, int argc, char **argv)
 }
 
 /* match exfiltration */
-static void cmd_match_exfiltration(cli_context_t *ctx, int argc, char **argv)
+static shield_err_t cmd_match_exfiltration(cli_context_t *ctx, int argc, char **argv)
 {
     (void)argc; (void)argv;
     class_map_t *cm = class_map_find(ctx->policy_engine, ctx->current_class_map);
@@ -98,11 +98,11 @@ static void cmd_match_exfiltration(cli_context_t *ctx, int argc, char **argv)
 }
 
 /* match pattern <regex> */
-static void cmd_match_pattern(cli_context_t *ctx, int argc, char **argv)
+static shield_err_t cmd_match_pattern(cli_context_t *ctx, int argc, char **argv)
 {
     if (argc < 3) {
         cli_print("%% Usage: match pattern <regex>\n");
-        return;
+        return SHIELD_OK;
     }
     class_map_t *cm = class_map_find(ctx->policy_engine, ctx->current_class_map);
     if (cm) {
@@ -113,11 +113,11 @@ static void cmd_match_pattern(cli_context_t *ctx, int argc, char **argv)
 }
 
 /* match contains <string> */
-static void cmd_match_contains(cli_context_t *ctx, int argc, char **argv)
+static shield_err_t cmd_match_contains(cli_context_t *ctx, int argc, char **argv)
 {
     if (argc < 3) {
         cli_print("%% Usage: match contains <string>\n");
-        return;
+        return SHIELD_OK;
     }
     class_map_t *cm = class_map_find(ctx->policy_engine, ctx->current_class_map);
     if (cm) {
@@ -128,11 +128,11 @@ static void cmd_match_contains(cli_context_t *ctx, int argc, char **argv)
 }
 
 /* match size greater-than <size> */
-static void cmd_match_size_gt(cli_context_t *ctx, int argc, char **argv)
+static shield_err_t cmd_match_size_gt(cli_context_t *ctx, int argc, char **argv)
 {
     if (argc < 4) {
         cli_print("%% Usage: match size greater-than <bytes>\n");
-        return;
+        return SHIELD_OK;
     }
     class_map_t *cm = class_map_find(ctx->policy_engine, ctx->current_class_map);
     if (cm) {
@@ -143,7 +143,7 @@ static void cmd_match_size_gt(cli_context_t *ctx, int argc, char **argv)
 }
 
 /* match entropy-high */
-static void cmd_match_entropy(cli_context_t *ctx, int argc, char **argv)
+static shield_err_t cmd_match_entropy(cli_context_t *ctx, int argc, char **argv)
 {
     (void)argc; (void)argv;
     class_map_t *cm = class_map_find(ctx->policy_engine, ctx->current_class_map);
@@ -155,11 +155,11 @@ static void cmd_match_entropy(cli_context_t *ctx, int argc, char **argv)
 }
 
 /* policy-map <name> */
-static void cmd_policy_map(cli_context_t *ctx, int argc, char **argv)
+static shield_err_t cmd_policy_map(cli_context_t *ctx, int argc, char **argv)
 {
     if (argc < 2) {
         cli_print("%% Usage: policy-map <name>\n");
-        return;
+        return SHIELD_OK;
     }
     
     policy_map_t *pm = NULL;
@@ -171,11 +171,11 @@ static void cmd_policy_map(cli_context_t *ctx, int argc, char **argv)
 }
 
 /* no policy-map <name> */
-static void cmd_no_policy_map(cli_context_t *ctx, int argc, char **argv)
+static shield_err_t cmd_no_policy_map(cli_context_t *ctx, int argc, char **argv)
 {
     if (argc < 3) {
         cli_print("%% Usage: no policy-map <name>\n");
-        return;
+        return SHIELD_OK;
     }
     
     policy_map_delete(ctx->policy_engine, argv[2]);
@@ -184,11 +184,11 @@ static void cmd_no_policy_map(cli_context_t *ctx, int argc, char **argv)
 }
 
 /* class <name> (policy-map submode) */
-static void cmd_pm_class(cli_context_t *ctx, int argc, char **argv)
+static shield_err_t cmd_pm_class(cli_context_t *ctx, int argc, char **argv)
 {
     if (argc < 2) {
         cli_print("%% Usage: class <class-name>\n");
-        return;
+        return SHIELD_OK;
     }
     
     policy_map_t *pm = policy_map_find(ctx->policy_engine, ctx->current_policy_map);
@@ -202,7 +202,7 @@ static void cmd_pm_class(cli_context_t *ctx, int argc, char **argv)
 }
 
 /* block (action in policy class) */
-static void cmd_action_block(cli_context_t *ctx, int argc, char **argv)
+static shield_err_t cmd_action_block(cli_context_t *ctx, int argc, char **argv)
 {
     (void)argc; (void)argv;
     policy_map_t *pm = policy_map_find(ctx->policy_engine, ctx->current_policy_map);
@@ -217,7 +217,7 @@ static void cmd_action_block(cli_context_t *ctx, int argc, char **argv)
 }
 
 /* log */
-static void cmd_action_log(cli_context_t *ctx, int argc, char **argv)
+static shield_err_t cmd_action_log(cli_context_t *ctx, int argc, char **argv)
 {
     (void)argc; (void)argv;
     policy_map_t *pm = policy_map_find(ctx->policy_engine, ctx->current_policy_map);
@@ -234,7 +234,7 @@ static void cmd_action_log(cli_context_t *ctx, int argc, char **argv)
 }
 
 /* alert */
-static void cmd_action_alert(cli_context_t *ctx, int argc, char **argv)
+static shield_err_t cmd_action_alert(cli_context_t *ctx, int argc, char **argv)
 {
     (void)argc; (void)argv;
     policy_map_t *pm = policy_map_find(ctx->policy_engine, ctx->current_policy_map);
@@ -249,11 +249,11 @@ static void cmd_action_alert(cli_context_t *ctx, int argc, char **argv)
 }
 
 /* rate-limit <pps> */
-static void cmd_action_rate_limit(cli_context_t *ctx, int argc, char **argv)
+static shield_err_t cmd_action_rate_limit(cli_context_t *ctx, int argc, char **argv)
 {
     if (argc < 2) {
         cli_print("%% Usage: rate-limit <pps>\n");
-        return;
+        return SHIELD_OK;
     }
     policy_map_t *pm = policy_map_find(ctx->policy_engine, ctx->current_policy_map);
     if (pm) {
@@ -269,11 +269,11 @@ static void cmd_action_rate_limit(cli_context_t *ctx, int argc, char **argv)
 }
 
 /* service-policy input <policy> */
-static void cmd_service_policy_input(cli_context_t *ctx, int argc, char **argv)
+static shield_err_t cmd_service_policy_input(cli_context_t *ctx, int argc, char **argv)
 {
     if (argc < 3) {
         cli_print("%% Usage: service-policy input <policy-name>\n");
-        return;
+        return SHIELD_OK;
     }
     
     service_policy_apply(ctx->policy_engine, ctx->current_zone, argv[2], DIRECTION_INPUT);
@@ -282,11 +282,11 @@ static void cmd_service_policy_input(cli_context_t *ctx, int argc, char **argv)
 }
 
 /* service-policy output <policy> */
-static void cmd_service_policy_output(cli_context_t *ctx, int argc, char **argv)
+static shield_err_t cmd_service_policy_output(cli_context_t *ctx, int argc, char **argv)
 {
     if (argc < 3) {
         cli_print("%% Usage: service-policy output <policy-name>\n");
-        return;
+        return SHIELD_OK;
     }
     
     service_policy_apply(ctx->policy_engine, ctx->current_zone, argv[2], DIRECTION_OUTPUT);

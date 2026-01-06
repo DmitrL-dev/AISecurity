@@ -10,6 +10,7 @@
 #include "shield_anomaly.h"
 #include "shield_timer.h"
 #include "shield_entropy.h"
+#include "shield_string_safe.h"
 
 /* Update statistics window */
 static void stat_update(stat_window_t *stat, double value)
@@ -95,7 +96,7 @@ shield_err_t anomaly_analyze(anomaly_detector_t *detector,
         /* Just record and return */
         float entropy = calculate_entropy((const uint8_t *)text, len);
         anomaly_record_request(detector, len, entropy);
-        strcpy(result->description, "Insufficient samples for detection");
+        shield_strcopy_s(result->description, sizeof(result->description), "Insufficient samples for detection");
         return SHIELD_OK;
     }
     
@@ -189,10 +190,10 @@ shield_err_t anomaly_analyze(anomaly_detector_t *detector,
                      "Unusual request timing");
             break;
         default:
-            strcpy(result->description, "Anomaly detected");
+            shield_strcopy_s(result->description, sizeof(result->description), "Anomaly detected");
         }
     } else {
-        strcpy(result->description, "Normal");
+        shield_strcopy_s(result->description, sizeof(result->description), "Normal");
     }
     
     return SHIELD_OK;

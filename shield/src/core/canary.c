@@ -9,14 +9,15 @@
 
 #include "shield_common.h"
 #include "shield_canary.h"
+#include "shield_qrng.h"
 
-/* Generate random hex string */
+/* Generate random hex string using QRNG */
 static void random_hex(char *buf, size_t len)
 {
     static const char hex[] = "0123456789abcdef";
     
     for (size_t i = 0; i < len; i++) {
-        buf[i] = hex[rand() % 16];
+        buf[i] = hex[shield_qrng_u32() % 16];
     }
     buf[len] = '\0';
 }
@@ -32,7 +33,7 @@ static void generate_uuid(char *buf)
     buf[14] = '4';
     random_hex(buf + 15, 3);
     buf[18] = '-';
-    buf[19] = "89ab"[rand() % 4];
+    buf[19] = "89ab"[shield_qrng_u32() % 4];
     random_hex(buf + 20, 3);
     buf[23] = '-';
     random_hex(buf + 24, 12);
@@ -49,8 +50,7 @@ shield_err_t canary_manager_init(canary_manager_t *mgr)
     memset(mgr, 0, sizeof(*mgr));
     mgr->alert_enabled = true;
     
-    /* Seed random */
-    srand((unsigned int)time(NULL));
+    /* QRNG auto-initializes on first use */
     
     return SHIELD_OK;
 }
