@@ -18,14 +18,25 @@
 
 ## ⚡ Option 1: One-Liner (Fastest)
 
+**Linux/macOS:**
 ```bash
-curl -sSL https://raw.githubusercontent.com/DmitrL-dev/AISecurity/main/install.sh | bash
+curl -sSL https://raw.githubusercontent.com/DmitrL-dev/AISecurity/main/sentinel-community/install.sh | bash
+```
+
+**Windows PowerShell:**
+```powershell
+irm https://raw.githubusercontent.com/DmitrL-dev/AISecurity/main/sentinel-community/install.ps1 | iex
+```
+
+**Python only (no Docker):**
+```bash
+curl -sSL .../install.sh | bash -s -- --lite
 ```
 
 This will:
 - Clone the repository
-- Create default configuration
-- Start all 5 services
+- Create default configuration  
+- Start all services
 - Open dashboard at http://localhost:3000
 
 ---
@@ -75,7 +86,7 @@ docker-compose -f docker-compose.full.yml ps
 curl http://localhost:8080/health
 
 # Expected response:
-# {"status":"healthy","engines":99,"version":"4.0.0"}
+# {"status":"healthy","engines":209,"version":"4.1.0"}
 ```
 
 ### Step 5: Access Dashboard
@@ -285,4 +296,4 @@ docker-compose -f docker-compose.full.yml ps brain
 
 **🎉 Welcome to SENTINEL!** 
 
-You're now protected by 99 detection engines with Strange Math™ technology.
+You're now protected by 209 detection engines with Strange Math™ technology.

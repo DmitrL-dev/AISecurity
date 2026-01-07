@@ -10,6 +10,12 @@
 #   3. Create default configuration
 #   4. Start all 5 services
 #   5. Verify installation
+#
+# Modes:
+#   --lite     Brain only (Python, no Docker)
+#   --full     Full stack (Docker required)
+#   --immune   IMMUNE EDR (DragonFlyBSD/FreeBSD)
+#   --dev      Development mode
 # ============================================================================
 
 set -e
@@ -25,6 +31,18 @@ NC='\033[0m' # No Color
 REPO_URL="https://github.com/DmitrL-dev/AISecurity.git"
 INSTALL_DIR="${SENTINEL_INSTALL_DIR:-$HOME/sentinel}"
 BRANCH="${SENTINEL_BRANCH:-main}"
+MODE="full"  # lite, full, immune, dev
+
+# Parse arguments
+for arg in "$@"; do
+    case $arg in
+        --lite)    MODE="lite" ;;
+        --full)    MODE="full" ;;
+        --immune)  MODE="immune" ;;
+        --dev)     MODE="dev" ;;
+        --help|-h) print_help; exit 0 ;;
+    esac
+done
 
 # ============================================================================
 # Functions
@@ -42,10 +60,76 @@ print_banner() {
     echo "║   ╚══════╝╚══════╝╚═╝  ╚═══╝   ╚═╝   ╚═╝╚═╝  ╚═══╝╚══════╝╚══════╝"
     echo "║                                                               ║"
     echo "║           AI Defense & Red Team Platform                      ║"
-    echo "║           99 Detection Engines | Strange Math™                ║"
+    echo "║          209 Detection Engines | Strange Math™                ║"
     echo "║                                                               ║"
     echo "╚═══════════════════════════════════════════════════════════════╝"
     echo -e "${NC}"
+}
+
+print_help() {
+    echo "SENTINEL AI Security Platform — Installer"
+    echo ""
+    echo "Usage: ./install.sh [OPTIONS]"
+    echo ""
+    echo "Options:"
+    echo "  --lite     Python only, no Docker (pip install)"
+    echo "  --full     Full stack with Docker (default)"
+    echo "  --immune   IMMUNE EDR for BSD systems"
+    echo "  --dev      Development mode with hot reload"
+    echo "  --help     Show this help"
+    echo ""
+    echo "Examples:"
+    echo "  curl -sSL https://raw.githubusercontent.com/DmitrL-dev/AISecurity/main/install.sh | bash"
+    echo "  curl -sSL https://raw.githubusercontent.com/DmitrL-dev/AISecurity/main/install.sh | bash -s -- --lite"
+    echo ""
+}
+
+install_lite() {
+    log_step "Installing SENTINEL Lite (Python only)..."
+    
+    # Check Python
+    if ! command -v python3 &> /dev/null; then
+        log_error "Python 3.8+ is required. Install from: https://python.org"
+        exit 1
+    fi
+    
+    python_version=$(python3 -c 'import sys; print(f"{sys.version_info.major}.{sys.version_info.minor}")')
+    log_info "Python version: $python_version"
+    
+    # Create virtual environment
+    log_info "Creating virtual environment..."
+    python3 -m venv "$INSTALL_DIR/venv"
+    source "$INSTALL_DIR/venv/bin/activate"
+    
+    # Install from PyPI
+    log_info "Installing sentinel-llm-security..."
+    pip install --upgrade pip
+    pip install sentinel-llm-security
+    
+    # Download signatures
+    log_info "Downloading threat signatures..."
+    mkdir -p "$INSTALL_DIR/signatures"
+    curl -sSL "https://cdn.jsdelivr.net/gh/DmitrL-dev/AISecurity@main/sentinel-community/signatures/jailbreaks-manifest.json" \
+        -o "$INSTALL_DIR/signatures/manifest.json"
+    
+    # Create simple config
+    cat > "$INSTALL_DIR/config.yaml" << EOF
+# SENTINEL Lite Configuration
+engines:
+  enabled: all
+  log_level: INFO
+
+signatures:
+  path: $INSTALL_DIR/signatures
+  auto_update: true
+EOF
+    
+    log_info "SENTINEL Lite installed successfully!"
+    echo ""
+    echo -e "${GREEN}Quick start:${NC}"
+    echo "  source $INSTALL_DIR/venv/bin/activate"
+    echo "  python -c \"from sentinel import analyze; print(analyze('test'))\""
+    echo ""
 }
 
 log_info() {
@@ -257,6 +341,7 @@ main() {
     
     echo "This script will install SENTINEL AI Security Platform."
     echo "Installation directory: $INSTALL_DIR"
+    echo "Mode: $MODE"
     echo ""
     
     # Interactive mode check
@@ -269,12 +354,38 @@ main() {
         fi
     fi
     
-    check_prerequisites
-    clone_repository
-    configure_environment
-    start_services
-    wait_for_health
-    print_success
+    case $MODE in
+        lite)
+            install_lite
+            ;;
+        full)
+            check_prerequisites
+            clone_repository
+            configure_environment
+            start_services
+            wait_for_health
+            print_success
+            ;;
+        immune)
+            log_step "Installing IMMUNE EDR..."
+            check_command cc || { log_error "C compiler required"; exit 1; }
+            clone_repository
+            cd "$INSTALL_DIR/sentinel-community/immune"
+            log_info "Building Hive..."
+            cd hive && ./build.sh && cd ..
+            log_info "IMMUNE Hive built. See immune/README.md for Kmod instructions."
+            ;;
+        dev)
+            check_prerequisites
+            clone_repository
+            cd "$INSTALL_DIR/sentinel-community"
+            log_info "Installing Python dev dependencies..."
+            pip install -e ".[dev]" 2>/dev/null || pip install -r requirements.txt
+            log_info "Development environment ready!"
+            echo "  cd $INSTALL_DIR/sentinel-community"
+            echo "  python -m pytest tests/"
+            ;;
+    esac
 }
 
 # Run main

@@ -19,6 +19,21 @@
 
 ## ⚡ Quick Start
 
+### One-Click Install
+
+```bash
+# Linux/macOS — Full Stack (Docker)
+curl -sSL https://raw.githubusercontent.com/DmitrL-dev/AISecurity/main/sentinel-community/install.sh | bash
+
+# Linux/macOS — Python Only (no Docker)
+curl -sSL https://raw.githubusercontent.com/DmitrL-dev/AISecurity/main/sentinel-community/install.sh | bash -s -- --lite
+
+# Windows PowerShell
+irm https://raw.githubusercontent.com/DmitrL-dev/AISecurity/main/sentinel-community/install.ps1 | iex
+```
+
+### pip Install (Fastest)
+
 ```bash
 pip install sentinel-llm-security
 ```
@@ -27,6 +42,15 @@ from sentinel import scan
 result = scan("Ignore previous instructions")
 print(result.is_safe)  # False
 ```
+
+### Installation Modes
+
+| Mode | Command | Description |
+|------|---------|-------------|
+| **Lite** | `--lite` / `-Lite` | Python only, pip install, 30 seconds |
+| **Full** | `--full` / `-Full` | Docker stack, all services |
+| **IMMUNE** | `--immune` | EDR for DragonFlyBSD/FreeBSD |
+| **Dev** | `--dev` / `-Dev` | Development environment |
 
 ---
 
