@@ -4,6 +4,91 @@ All notable changes to the SENTINEL AI Security Platform.
 
 ---
 
+## [1.5.0] - 2026-01-07 (Security Engines R&D Marathon)
+
+### 🔒 New Security Engines (8)
+
+- **SupplyChainScanner** — Detects malicious patterns in AI model code
+  - Pickle RCE detection (`__reduce__`, `exec`, `eval`)
+  - HuggingFace `trust_remote_code=True` warnings
+  - Sleeper trigger patterns in code
+  - Exfiltration URL detection
+
+- **MCPSecurityMonitor** — MCP tool abuse detection
+  - Sensitive file access (`/etc/passwd`, `~/.ssh`)
+  - Dangerous tool usage (`shell_exec`, `bash`)
+  - Data exfiltration patterns
+  - Command injection detection
+
+- **AgenticBehaviorAnalyzer** — AI agent anomaly detection
+  - Goal drift detection
+  - Deceptive behavior patterns
+  - Cascading hallucination detection
+  - Action loop detection
+
+- **SleeperAgentDetector** — Dormant malicious code detection
+  - Date-based triggers (`year >= 2026`)
+  - Environment triggers (`PRODUCTION`)
+  - Version-based triggers
+  - Counter/threshold triggers
+
+- **ModelIntegrityVerifier** — Model file integrity verification
+  - Format safety (safetensors > pickle)
+  - Hash computation and verification
+  - Magic byte verification
+  - Suspicious content scanning
+
+- **GuardrailsEngine** — NeMo-style content filtering
+  - Moderation rails (hate speech, violence)
+  - Jailbreak rails (DAN, prompt injection)
+  - Fact-check rails
+  - Custom rail support
+
+- **PromptLeakDetector** — System prompt extraction prevention
+  - Direct extraction attempts
+  - Encoded extraction (base64, rot13)
+  - Role-play extraction
+  - Markdown exploitation
+
+- **AIIncidentRunbook** — Automated incident response
+  - 8 incident types supported
+  - Automated response actions
+  - Escalation paths
+  - Integration hooks
+
+### 🧪 Unit Tests (104 new)
+
+- `test_supply_chain_scanner.py` — 18 tests
+- `test_mcp_security_monitor.py` — 22 tests
+- `test_agentic_behavior_analyzer.py` — 20 tests
+- `test_sleeper_agent_detector.py` — 22 tests
+- `test_model_integrity_verifier.py` — 22 tests
+
+### 📝 Documentation
+
+- Engine README with usage examples
+- AI Observability research (LangSmith, Helicone)
+- AI Incident Response research (CISA, NIST)
+- EU AI Act compliance roadmap
+- NIST AI RMF 2.0 integration guide
+
+### 📊 Statistics
+
+- **New Engines**: 8 (~2,125 LOC)
+- **New Tests**: 104 (~800 LOC)
+- **Research Docs**: 8 (~3,400 LOC)
+- **Total Engines**: 212 → 220
+
+### 🔥 Threat Sources
+
+- Anthropic "Sleeper Agents" research
+- NVIDIA NeMo Guardrails
+- CISA AI Cybersecurity Playbook
+- EU AI Act (Aug 2026 compliance)
+- NIST AI RMF 2.0 + GenAI Profile
+
+---
+
 ## [1.4.0] - 2026-01-07 (Deep R&D)
 
 ### 🚨 New Engines (HiddenLayer/Promptfoo Research Response)
