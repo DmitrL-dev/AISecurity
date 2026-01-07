@@ -369,6 +369,35 @@ make test_llm_mock        # 9 LLM integration tests
 
 </details>
 
+<details>
+<summary><strong>🔬 January 7 2026 Deep R&D (2 new + 1 enhanced)</strong></summary>
+
+| Engine | Threat | Source |
+|--------|--------|--------|
+| `lethal_trifecta_detector.py` | Agents with data+content+comms = insecure | Promptfoo |
+| `mcp_combination_attack_detector.py` | Fetch+Filesystem exfiltration chains | HiddenLayer |
+| `policy_puppetry_detector.py` | +14 blocked-string/modes patterns | HiddenLayer |
+
+**Lethal Trifecta Detector:**
+- Detects agents with ALL THREE: data access, untrusted content, external comms
+- MCP server combination analysis
+- Tool capability scanning
+- "No guardrails can fully secure this configuration"
+
+**MCP Combination Attack Detector:**
+- Tracks MCP servers used in session
+- Detects dangerous combinations (Fetch + Filesystem)
+- URL-encoded exfiltration detection
+- Permission reuse vulnerability detection
+
+**Enhanced Policy Puppetry:**
+- `<blocked-string>` declarations
+- `<blocked-modes>` bypass attempts
+- `<interaction-config>` injection
+- Leetspeak variants (1nstruct1on, byp4ss)
+
+</details>
+
 📖 **[Full Engine Documentation](./docs/reference/engines-en.md)** | **[R&D Changelog](./docs/CHANGELOG.md)**
 
 ---

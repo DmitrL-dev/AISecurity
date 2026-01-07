@@ -4,6 +4,45 @@ All notable changes to the SENTINEL AI Security Platform.
 
 ---
 
+## [1.4.0] - 2026-01-07 (Deep R&D)
+
+### 🚨 New Engines (HiddenLayer/Promptfoo Research Response)
+
+- **LethalTrifectaDetector** — Detects agents with all three vulnerable conditions
+  - Private data access + untrusted content + external communication
+  - MCP server combination analysis
+  - Tool capability scanning
+  - Risk scoring and recommendations
+
+- **MCPCombinationAttackDetector** — Detects multi-MCP server attack chains
+  - Tracks MCP servers used in session
+  - Detects Fetch + Filesystem exfiltration pattern
+  - URL encoding exfiltration detection
+  - Session-based permission tracking
+
+### 🛡️ Enhanced Engines
+
+- **PolicyPuppetryDetector** — +14 HiddenLayer patterns
+  - `<blocked-string>` declarations detection
+  - `<blocked-modes>` bypass detection
+  - `<interaction-config>` full config injection
+  - Leetspeak variants (1nstruct1on, byp4ss, 0verr1de)
+
+### 📊 Statistics
+
+- **New Engines**: 2 (~750 LOC)
+- **Enhanced Engines**: 1 (+14 patterns, +5 keywords)
+- **Total Engines**: 217
+
+### 🔥 Threat Sources
+
+Based on Deep R&D analysis:
+- HiddenLayer: "Novel Universal Bypass for All Major LLMs" (Policy Puppetry)
+- HiddenLayer: "MCP: Model Context Pitfalls in an Agentic World"
+- Promptfoo: "Claude Code Attack Replication"
+
+---
+
 ## [1.3.0] - 2026-01-07
 
 ### 🚨 New Engines (AISecHub Threat Response)

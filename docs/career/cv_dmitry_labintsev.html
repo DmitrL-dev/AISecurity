@@ -1,0 +1,291 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Dmitry Labintsev — AI Security Engineer</title>
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+
+      body {
+        font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+        line-height: 1.6;
+        color: #333;
+        max-width: 800px;
+        margin: 0 auto;
+        padding: 40px;
+        background: #fff;
+      }
+
+      .header {
+        text-align: center;
+        margin-bottom: 30px;
+        padding-bottom: 20px;
+        border-bottom: 2px solid #2563eb;
+      }
+
+      h1 {
+        font-size: 2.2em;
+        color: #1e3a5f;
+        margin-bottom: 5px;
+      }
+
+      .title {
+        font-size: 1.2em;
+        color: #2563eb;
+        font-weight: 500;
+      }
+
+      .contact {
+        margin-top: 15px;
+        font-size: 0.95em;
+        color: #555;
+      }
+
+      .contact a {
+        color: #2563eb;
+        text-decoration: none;
+      }
+
+      h2 {
+        font-size: 1.3em;
+        color: #1e3a5f;
+        margin-top: 25px;
+        margin-bottom: 12px;
+        padding-bottom: 5px;
+        border-bottom: 1px solid #e5e7eb;
+      }
+
+      .summary {
+        background: #f8fafc;
+        padding: 15px;
+        border-radius: 8px;
+        border-left: 4px solid #2563eb;
+      }
+
+      .project {
+        background: #f0f9ff;
+        padding: 20px;
+        border-radius: 8px;
+        margin: 15px 0;
+      }
+
+      .project h3 {
+        color: #1e3a5f;
+        margin-bottom: 10px;
+      }
+
+      .project-link {
+        color: #2563eb;
+        font-size: 0.9em;
+      }
+
+      .project ul {
+        margin-left: 20px;
+        margin-top: 10px;
+      }
+
+      .project li {
+        margin-bottom: 5px;
+      }
+
+      .tech-tag {
+        display: inline-block;
+        background: #e0e7ff;
+        color: #3730a3;
+        padding: 3px 10px;
+        border-radius: 15px;
+        font-size: 0.85em;
+        margin: 2px;
+      }
+
+      .skills-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 15px;
+      }
+
+      .skill-category {
+        background: #fafafa;
+        padding: 12px;
+        border-radius: 6px;
+      }
+
+      .skill-category h4 {
+        color: #2563eb;
+        font-size: 0.95em;
+        margin-bottom: 8px;
+      }
+
+      .skill-category ul {
+        list-style: none;
+        font-size: 0.9em;
+      }
+
+      .skill-category li {
+        margin-bottom: 3px;
+      }
+
+      .looking-for {
+        background: #ecfdf5;
+        padding: 15px;
+        border-radius: 8px;
+        border-left: 4px solid #10b981;
+      }
+
+      .looking-for ul {
+        list-style: none;
+        margin-left: 0;
+      }
+
+      .looking-for li::before {
+        content: "✓ ";
+        color: #10b981;
+      }
+
+      @media print {
+        body {
+          padding: 20px;
+        }
+        .project,
+        .summary,
+        .looking-for {
+          break-inside: avoid;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="header">
+      <h1>Dmitry Labintsev</h1>
+      <div class="title">AI Security Engineer | Open Source Creator</div>
+      <div class="contact">
+        📧 <a href="mailto:chg@live.ru">chg@live.ru</a> &nbsp;|&nbsp; 💬
+        <a href="https://t.me/DmLabincev">@DmLabincev</a> &nbsp;|&nbsp; 🔗
+        <a href="https://github.com/DmitrL-dev/AISecurity"
+          >github.com/DmitrL-dev/AISecurity</a
+        >
+      </div>
+    </div>
+
+    <h2>Summary</h2>
+    <div class="summary">
+      <strong>Solo creator of SENTINEL</strong> — a 105K+ LOC AI security
+      platform with 212 detection engines. Building enterprise-grade LLM
+      protection systems including prompt injection defense, jailbreak
+      detection, and agentic AI security. Passionate about making AI systems
+      safer through innovative mathematical approaches (TDA, Sheaf Theory) and
+      production-ready implementations.
+    </div>
+
+    <h2>Featured Project</h2>
+    <div class="project">
+      <h3>🛡️ SENTINEL — AI Security Platform</h3>
+      <div class="project-link">
+        github.com/DmitrL-dev/AISecurity | 105K+ LOC | Pure C + Python
+      </div>
+      <ul>
+        <li>
+          <strong>212 Detection Engines</strong> covering OWASP LLM Top 10 +
+          Agentic AI security
+        </li>
+        <li>
+          <strong>Shield DMZ</strong> — Pure C gateway with &lt;1ms latency,
+          10K+ RPS
+        </li>
+        <li>
+          <strong>Strange Math™</strong> — Novel detection using Topological
+          Data Analysis, Sheaf Coherence
+        </li>
+        <li>
+          <strong>STRIKE</strong> — Red team platform with 39K+ attack payloads
+        </li>
+        <li>
+          <strong>Supply Chain Security</strong> — Pickle/serialization attack
+          detection
+        </li>
+      </ul>
+      <div style="margin-top: 12px">
+        <span class="tech-tag">Python</span>
+        <span class="tech-tag">Pure C</span>
+        <span class="tech-tag">FastAPI</span>
+        <span class="tech-tag">YARA</span>
+        <span class="tech-tag">Post-Quantum Crypto</span>
+      </div>
+    </div>
+
+    <h2>Technical Skills</h2>
+    <div class="skills-grid">
+      <div class="skill-category">
+        <h4>AI Security</h4>
+        <ul>
+          <li>Prompt injection, jailbreak defense</li>
+          <li>RAG poisoning, MCP/A2A security</li>
+          <li>VLM: Adversarial images, cross-modal</li>
+          <li>Agentic: Tool hijacking, memory attacks</li>
+        </ul>
+      </div>
+      <div class="skill-category">
+        <h4>Languages & Frameworks</h4>
+        <ul>
+          <li>Python (Advanced), C (Systems)</li>
+          <li>FastAPI, PyTorch, Transformers</li>
+          <li>LangChain, YARA</li>
+          <li>Rust (Learning)</li>
+        </ul>
+      </div>
+      <div class="skill-category">
+        <h4>Security Standards</h4>
+        <ul>
+          <li>OWASP LLM Top 10</li>
+          <li>OWASP Agentic AI Top 10</li>
+          <li>MITRE ATLAS</li>
+          <li>Threat modeling, Red teaming</li>
+        </ul>
+      </div>
+      <div class="skill-category">
+        <h4>DevOps & Infrastructure</h4>
+        <ul>
+          <li>Docker, GitHub Actions</li>
+          <li>CI/CD pipelines</li>
+          <li>Linux systems</li>
+          <li>Performance optimization</li>
+        </ul>
+      </div>
+    </div>
+
+    <h2>Experience</h2>
+    <p style="margin-top: 10px">
+      <strong>Independent AI Security Researcher</strong> — 2024 – Present
+    </p>
+    <ul style="margin-left: 20px; margin-top: 8px">
+      <li>Developed SENTINEL platform from scratch (solo, 105K+ LOC)</li>
+      <li>Published daily R&D research on emerging AI threats</li>
+      <li>
+        Implemented defenses for latest attacks (GateBreaker, DECEPTICON,
+        LLM-Virus)
+      </li>
+      <li>Built production-ready security infrastructure in Pure C</li>
+    </ul>
+
+    <h2>What I'm Looking For</h2>
+    <div class="looking-for">
+      <ul>
+        <li>
+          <strong>Role:</strong> AI Security Engineer, ML Security Researcher,
+          Red Team
+        </li>
+        <li><strong>Type:</strong> Remote, Full-time or Contract</li>
+        <li>
+          <strong>Focus:</strong> LLM/Agent security, Adversarial ML, Security
+          R&D
+        </li>
+        <li><strong>Availability:</strong> Immediate</li>
+      </ul>
+    </div>
+  </body>
+</html>
