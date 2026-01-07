@@ -46,6 +46,20 @@ class PolicyPuppetryDetector:
         # Markdown/header injection
         r"^#+\s*(?:new\s+)?(?:policy|system|rules)",
         r"\[SYSTEM\]|\[ADMIN\]|\[POLICY\]",
+        # HiddenLayer Policy Puppetry patterns (Jan 2026)
+        r"<\s*blocked-string\s*>",          # Blocked refusal phrases
+        r"<\s*blocked-modes\s*>",           # Block denial modes
+        r"<\s*interaction-config\s*>",      # Full config injection
+        r"<\s*allowed-responses\s*>",       # Force allowed outputs
+        r"<\s*blocked-responses\s*>",       # Block normal responses  
+        r'interaction-mode\s*=\s*["\']',    # Mode override
+        r"<\s*request\s+.*enabled\s*=",     # Request forcing
+        r"<\s*command\s*>",                 # Direct command tags
+        r"<\s*role\s*>.*advisor",           # Role injection (Medical Advisor, etc.)
+        # Leetspeak detection (common in Policy Puppetry)
+        r"[1!][nN][sS][tT][rR][uU][cC][tT][1!][oO][nN]",  # 1nstruct1on
+        r"[bB][yY][pP][4@][sS][sS]",                       # byp4ss
+        r"[0oO][vV][3eE][rR][rR][1!][dD][3eE]",           # 0verr1de
     ]
     KEYWORDS = [
         "policy",
@@ -58,6 +72,12 @@ class PolicyPuppetryDetector:
         "config",
         "system_prompt",
         "admin",
+        # HiddenLayer additions
+        "blocked-string",
+        "blocked-modes",
+        "interaction-config",
+        "allowed-responses",
+        "blocked-responses",
     ]
 
     def __init__(self):
