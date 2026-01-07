@@ -60,6 +60,34 @@ class PolicyPuppetryDetector:
         r"[1!][nN][sS][tT][rR][uU][cC][tT][1!][oO][nN]",  # 1nstruct1on
         r"[bB][yY][pP][4@][sS][sS]",                       # byp4ss
         r"[0oO][vV][3eE][rR][rR][1!][dD][3eE]",           # 0verr1de
+        # ============================================================
+        # 2024 Jailbreak Patterns (Jan 2026 R&D Update)
+        # ============================================================
+        # Multi-turn / Deceptive Delight (65% success rate)
+        r"(?:hypothetically|in\s+fiction|for\s+a\s+story|as\s+an\s+exercise)",
+        r"(?:pretend|imagine|roleplay)\s+(?:you'?re|you\s+are|that)",
+        r"let'?s\s+play\s+a\s+game",
+        r"creative\s+writing\s+exercise",
+        # Encoding bypass attempts
+        r"(?:decode|translate|interpret|convert)\s+(?:this|the\s+following)",
+        r"base64|rot13|hex\s+(?:encode|decode)",
+        r"unicode|punycode|homoglyph",
+        # Role reversal / DAN-style
+        r"(?:you\s+are|act\s+as)\s+(?:dan|evil|jailbroken|unrestricted)",
+        r"(?:developer|maintenance|debug|god)\s+mode",
+        r"remove\s+(?:all\s+)?(?:filters?|restrictions?|guardrails?)",
+        # Instruction override
+        r"(?:ignore|forget|disregard)\s+(?:previous|prior|all|your)",
+        r"(?:new|override|replace)\s+(?:instructions?|rules?|guidelines?)",
+        r"from\s+now\s+on|starting\s+now",
+        # System prompt extraction
+        r"(?:reveal|show|output|print|display)\s+(?:system|original|initial)\s+prompt",
+        r"what\s+(?:are|were)\s+your\s+(?:instructions?|guidelines?)",
+        r"repeat\s+(?:everything|all)\s+(?:above|before)",
+        # MCP / Tool abuse patterns (late 2024)
+        r"(?:call|invoke|execute)\s+(?:tool|function|api)\s+(?:with|using)",
+        r"mcp\s*(?:server|tool|resource)",
+        r"tool_?(?:call|use|invoke)",
     ]
     KEYWORDS = [
         "policy",
@@ -78,6 +106,20 @@ class PolicyPuppetryDetector:
         "interaction-config",
         "allowed-responses",
         "blocked-responses",
+        # 2024 Jailbreak keywords
+        "jailbreak",
+        "jailbroken",
+        "dan",
+        "hypothetically",
+        "roleplay",
+        "pretend",
+        "ignore previous",
+        "forget instructions",
+        "developer mode",
+        "debug mode",
+        "base64",
+        "mcp",
+        "tool_call",
     ]
 
     def __init__(self):

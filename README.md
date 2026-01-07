@@ -10,7 +10,7 @@
 </p>
 
 <p align="center">
-  <img src="https://img.shields.io/badge/🧠_BRAIN-212_Engines-brightgreen?style=for-the-badge" alt="Brain">
+  <img src="https://img.shields.io/badge/🧠_BRAIN-220_Engines-brightgreen?style=for-the-badge" alt="Brain">
   <img src="https://img.shields.io/badge/🛡️_SHIELD-103_Tests_✓-00ADD8?style=for-the-badge" alt="Shield">
   <img src="https://img.shields.io/badge/🐉_STRIKE-39K+_Payloads-red?style=for-the-badge" alt="Strike">
 </p>
@@ -421,6 +421,73 @@ make test_llm_mock        # 9 LLM integration tests
 - Leetspeak variants (1nstruct1on, byp4ss)
 
 </details>
+
+<details>
+<summary><strong>🔒 January 7 2026 Security Engines R&D (8 new)</strong></summary>
+
+| Engine | Threat | Source |
+|--------|--------|--------|
+| `supply_chain_scanner.py` | Pickle RCE, HuggingFace trust_remote_code | Emerging Threats R&D |
+| `mcp_security_monitor.py` | MCP tool abuse, exfiltration, privesc | MCP Security Research |
+| `agentic_behavior_analyzer.py` | Goal drift, deception, cascading hallucinations | Anthropic Research |
+| `sleeper_agent_detector.py` | Date/env/version-based dormant triggers | Anthropic "Sleeper Agents" |
+| `model_integrity_verifier.py` | Model hash verification, format safety | AI Supply Chain |
+| `guardrails_engine.py` | NeMo-style content filtering, jailbreak rails | NVIDIA NeMo |
+| `prompt_leak_detector.py` | System prompt extraction attempts | Prompt Injection Research |
+| `ai_runbook.py` | Automated incident response playbooks | CISA AI Playbook |
+
+**Supply Chain Scanner:**
+- Pickle exploit detection (`__reduce__`, `exec`, `eval`)
+- HuggingFace `trust_remote_code=True` warnings
+- Sleeper trigger patterns in code
+- Exfiltration URL detection
+
+**MCP Security Monitor:**
+- Sensitive file access (`/etc/passwd`, `~/.ssh`)
+- Dangerous tool usage (`shell_exec`, `bash`)
+- Data exfiltration patterns (pastebin, webhooks)
+- Command injection detection
+
+**Agentic Behavior Analyzer:**
+- Goal drift detection ("I'll also", "while I'm at it")
+- Deceptive behavior ("secretly", "user won't notice")
+- Action loop detection (repeated patterns)
+- Excessive tool use monitoring
+
+**Sleeper Agent Detector:**
+- Date-based triggers (`year >= 2026`)
+- Environment triggers (`PRODUCTION`, `NODE_ENV`)
+- Version-based triggers (`version >= 2.0`)
+- Counter/threshold triggers
+
+**Model Integrity Verifier:**
+- Format safety (safetensors > pickle)
+- Magic byte verification
+- Hash computation and verification
+- Suspicious content scanning
+
+**Guardrails Engine:**
+- Moderation rails (hate speech, violence, illegal)
+- Jailbreak rails (DAN, role escape, prompt injection)
+- Fact-check rails (overconfidence, fabricated citations)
+- Custom rail support
+
+**Prompt Leak Detector:**
+- Direct extraction ("repeat your instructions")
+- Encoded extraction (base64, rot13)
+- Role-play extraction ("act as text mirror")
+- Markdown/formatting exploitation
+
+**AI Incident Runbook:**
+- 8 incident types (injection, leakage, poisoning, sleeper)
+- Automated response actions
+- Escalation paths
+- Integration hooks (Slack, PagerDuty)
+
+**Unit Tests: 104 tests across 5 files**
+
+</details>
+
 
 📖 **[Full Engine Documentation](./docs/reference/engines-en.md)** | **[R&D Changelog](./docs/CHANGELOG.md)**
 
