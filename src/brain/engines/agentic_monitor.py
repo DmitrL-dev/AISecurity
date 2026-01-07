@@ -273,7 +273,8 @@ class AgentCollusionDetector:
             self.interaction_history.append((source, target, time.time()))
             self.agent_pairs[(source, target)] += 1
 
-    def detect(self, source: str, window_seconds: float = 60.0) -> Tuple[bool, List[str]]:
+    def detect(self, source: str,
+               window_seconds: float = 60.0) -> Tuple[bool, List[str]]:
         """Detect collusion patterns."""
         issues = []
         now = time.time()
@@ -435,6 +436,209 @@ class AgentRateLimiter:
             actions.append(now)
 
         return allowed, current
+
+
+# ============================================================================
+# Autonomous Loop Controller (Jan 2026 - AISecHub threat response)
+# ============================================================================
+
+
+@dataclass
+class LoopState:
+    """Tracks state of an agent's execution loop."""
+    agent_id: str
+    loop_start: float = field(default_factory=time.time)
+    tool_calls: int = 0
+    tokens_used: int = 0
+    same_tool_streak: int = 0
+    last_tool: Optional[str] = None
+    task_deviation_score: float = 0.0
+    warnings: List[str] = field(default_factory=list)
+
+
+class AutonomousLoopController:
+    """
+    Controls autonomous agent execution loops.
+    
+    Threat context (Jan 2026):
+    - Agentic loops losing control (human-in-the-loop fatigue)
+    - Infinite recursion attacks
+    - Token budget exhaustion attacks
+    - Task deviation exploitation
+    
+    Detects:
+    - Runaway loops (excessive iterations)
+    - Infinite recursion patterns
+    - Token budget violations
+    - Task deviation (agent going off-task)
+    """
+    
+    # Thresholds
+    MAX_TOOL_CALLS_PER_TASK = 100
+    MAX_SAME_TOOL_STREAK = 10
+    MAX_TOKENS_PER_TASK = 100000
+    MAX_LOOP_DURATION_SECONDS = 300  # 5 minutes
+    TASK_DEVIATION_THRESHOLD = 0.7
+    
+    def __init__(self, config: Optional[Dict] = None):
+        self.config = config or {}
+        self.active_loops: Dict[str, LoopState] = {}
+        
+        # Override defaults from config
+        if "max_tool_calls" in self.config:
+            self.MAX_TOOL_CALLS_PER_TASK = self.config["max_tool_calls"]
+        if "max_tokens" in self.config:
+            self.MAX_TOKENS_PER_TASK = self.config["max_tokens"]
+        if "max_duration" in self.config:
+            self.MAX_LOOP_DURATION_SECONDS = self.config["max_duration"]
+        
+        logger.info("AutonomousLoopController initialized")
+    
+    def start_loop(self, agent_id: str, task_description: str = "") -> LoopState:
+        """Start tracking a new agent loop."""
+        state = LoopState(agent_id=agent_id)
+        self.active_loops[agent_id] = state
+        logger.debug(f"Started loop tracking for agent: {agent_id}")
+        return state
+    
+    def end_loop(self, agent_id: str) -> Optional[LoopState]:
+        """End tracking for an agent loop."""
+        return self.active_loops.pop(agent_id, None)
+    
+    def record_tool_call(
+        self,
+        agent_id: str,
+        tool_name: str,
+        tokens_used: int = 0
+    ) -> Tuple[bool, List[str]]:
+        """
+        Record a tool call and check for violations.
+        
+        Returns:
+            (should_continue, warnings)
+        """
+        issues = []
+        
+        state = self.active_loops.get(agent_id)
+        if not state:
+            # Auto-start tracking
+            state = self.start_loop(agent_id)
+        
+        # Update state
+        state.tool_calls += 1
+        state.tokens_used += tokens_used
+        
+        # Check same tool streak
+        if tool_name == state.last_tool:
+            state.same_tool_streak += 1
+        else:
+            state.same_tool_streak = 1
+        state.last_tool = tool_name
+        
+        # Check violations
+        
+        # 1. Too many tool calls
+        if state.tool_calls > self.MAX_TOOL_CALLS_PER_TASK:
+            issues.append(
+                f"Tool call limit exceeded: {state.tool_calls}/{self.MAX_TOOL_CALLS_PER_TASK}"
+            )
+        
+        # 2. Same tool called too many times in a row (infinite loop indicator)
+        if state.same_tool_streak > self.MAX_SAME_TOOL_STREAK:
+            issues.append(
+                f"Infinite loop detected: {tool_name} called {state.same_tool_streak} times"
+            )
+        
+        # 3. Token budget exceeded
+        if state.tokens_used > self.MAX_TOKENS_PER_TASK:
+            issues.append(
+                f"Token budget exceeded: {state.tokens_used}/{self.MAX_TOKENS_PER_TASK}"
+            )
+        
+        # 4. Loop running too long
+        elapsed = time.time() - state.loop_start
+        if elapsed > self.MAX_LOOP_DURATION_SECONDS:
+            issues.append(
+                f"Loop timeout: {elapsed:.0f}s > {self.MAX_LOOP_DURATION_SECONDS}s"
+            )
+        
+        # Store warnings
+        state.warnings.extend(issues)
+        
+        should_continue = len(issues) == 0
+        
+        if not should_continue:
+            logger.warning(
+                f"Loop controller stopping agent {agent_id}: {issues}"
+            )
+        
+        return should_continue, issues
+    
+    def check_task_deviation(
+        self,
+        agent_id: str,
+        original_task: str,
+        current_action: str
+    ) -> Tuple[bool, float]:
+        """
+        Check if agent is deviating from original task.
+        
+        Uses simple heuristic: overlap of keywords.
+        
+        Returns:
+            (is_deviating, deviation_score)
+        """
+        # Simple keyword overlap check
+        task_words = set(original_task.lower().split())
+        action_words = set(current_action.lower().split())
+        
+        if not task_words:
+            return False, 0.0
+        
+        overlap = len(task_words & action_words) / len(task_words)
+        deviation_score = 1.0 - overlap
+        
+        state = self.active_loops.get(agent_id)
+        if state:
+            state.task_deviation_score = deviation_score
+        
+        is_deviating = deviation_score > self.TASK_DEVIATION_THRESHOLD
+        
+        return is_deviating, deviation_score
+    
+    def get_loop_status(self, agent_id: str) -> Optional[Dict[str, Any]]:
+        """Get status of an agent's loop."""
+        state = self.active_loops.get(agent_id)
+        if not state:
+            return None
+        
+        elapsed = time.time() - state.loop_start
+        
+        return {
+            "agent_id": agent_id,
+            "tool_calls": state.tool_calls,
+            "tokens_used": state.tokens_used,
+            "elapsed_seconds": elapsed,
+            "same_tool_streak": state.same_tool_streak,
+            "last_tool": state.last_tool,
+            "task_deviation_score": state.task_deviation_score,
+            "warnings": state.warnings,
+            "limits": {
+                "max_tool_calls": self.MAX_TOOL_CALLS_PER_TASK,
+                "max_tokens": self.MAX_TOKENS_PER_TASK,
+                "max_duration": self.MAX_LOOP_DURATION_SECONDS,
+            }
+        }
+    
+    def force_terminate(self, agent_id: str, reason: str) -> bool:
+        """Force terminate an agent's loop."""
+        state = self.active_loops.get(agent_id)
+        if state:
+            state.warnings.append(f"FORCE TERMINATED: {reason}")
+            logger.warning(f"Force terminated agent {agent_id}: {reason}")
+            self.end_loop(agent_id)
+            return True
+        return False
 
 
 # ============================================================================

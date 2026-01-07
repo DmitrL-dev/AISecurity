@@ -311,6 +311,221 @@ class AgentCardValidator:
 
 
 # ============================================================================
+# IDE Marketplace Validator (Jan 2026 - AISecHub threat response)
+# ============================================================================
+
+
+class IDEMarketplaceThreat(str, Enum):
+    """Types of IDE marketplace threats."""
+    FAKE_EXTENSION = "fake_extension"
+    TYPOSQUAT_EXTENSION = "typosquat_extension"
+    MALICIOUS_PERMISSIONS = "malicious_permissions"
+    UNVERIFIED_PUBLISHER = "unverified_publisher"
+    SUSPICIOUS_SKILL = "suspicious_skill"
+
+
+@dataclass
+class IDEExtension:
+    """Represents an IDE extension/plugin/skill."""
+    id: str
+    name: str
+    publisher: str
+    marketplace: str  # vscode, openvsx, cursor, claude_skills, windsurf
+    version: str = "1.0.0"
+    permissions: List[str] = field(default_factory=list)
+    verified: bool = False
+
+
+class IDEMarketplaceValidator:
+    """
+    Validates IDE extensions and skills for security risks.
+    
+    Covers:
+    - VSCode Marketplace
+    - OpenVSX (Cursor, Windsurf, Trae)
+    - Claude Code Skills
+    
+    Threat context (Jan 2026):
+    - Malicious extensions masquerading as AI helpers
+    - Silent dependency substitution via Skills
+    - Typosquatting in OpenVSX registry
+    """
+    
+    # Known legitimate AI extension publishers
+    TRUSTED_PUBLISHERS = {
+        "vscode": ["ms-toolsai", "microsoft", "github", "anthropic", "openai"],
+        "openvsx": ["open-vsx", "eclipse"],
+        "cursor": ["cursor", "anysphere"],
+        "claude_skills": ["anthropic", "verified"],
+    }
+    
+    # Dangerous permission patterns
+    DANGEROUS_PERMISSIONS = [
+        r"webRequest",
+        r"webRequestBlocking", 
+        r"<all_urls>",
+        r"cookies",
+        r"nativeMessaging",
+        r"debugger",
+        r"management",  # Can disable other extensions
+        r"proxy",
+        r"privacy",
+    ]
+    
+    # Known malicious extension patterns
+    MALICIOUS_PATTERNS = [
+        r"chatgpt.*helper",
+        r"gpt.*enhancer",
+        r"ai.*assistant.*pro",
+        r"deepseek.*plus",
+        r"claude.*helper",
+        r"copilot.*free",
+    ]
+    
+    # Known legitimate extension IDs (whitelist)
+    KNOWN_SAFE_IDS = {
+        "github.copilot",
+        "github.copilot-chat",
+        "ms-toolsai.vscode-ai",
+        "continue.continue",
+    }
+    
+    def __init__(self):
+        self.dangerous_patterns = [
+            re.compile(p, re.IGNORECASE) for p in self.DANGEROUS_PERMISSIONS
+        ]
+        self.malicious_patterns = [
+            re.compile(p, re.IGNORECASE) for p in self.MALICIOUS_PATTERNS
+        ]
+        logger.info("IDEMarketplaceValidator initialized")
+    
+    def validate(self, extension: IDEExtension) -> Tuple[bool, List[str], List[IDEMarketplaceThreat]]:
+        """
+        Validate an IDE extension/skill.
+        
+        Returns:
+            (is_safe, issues, threats)
+        """
+        issues = []
+        threats = []
+        
+        # 1. Check against known safe list
+        if extension.id in self.KNOWN_SAFE_IDS:
+            return True, [], []
+        
+        # 2. Check for malicious name patterns
+        full_name = f"{extension.publisher}.{extension.name}"
+        for pattern in self.malicious_patterns:
+            if pattern.search(full_name) or pattern.search(extension.name):
+                issues.append(f"Malicious name pattern: {extension.name}")
+                threats.append(IDEMarketplaceThreat.FAKE_EXTENSION)
+        
+        # 3. Check publisher trust
+        marketplace_trusted = self.TRUSTED_PUBLISHERS.get(extension.marketplace, [])
+        if extension.publisher.lower() not in marketplace_trusted and not extension.verified:
+            issues.append(f"Unverified publisher: {extension.publisher}")
+            threats.append(IDEMarketplaceThreat.UNVERIFIED_PUBLISHER)
+        
+        # 4. Check dangerous permissions
+        for perm in extension.permissions:
+            for pattern in self.dangerous_patterns:
+                if pattern.search(perm):
+                    issues.append(f"Dangerous permission: {perm}")
+                    threats.append(IDEMarketplaceThreat.MALICIOUS_PERMISSIONS)
+                    break
+        
+        # 5. Typosquatting check (similar to known extensions)
+        typosquat_targets = ["copilot", "continue", "cursor", "cody", "tabnine"]
+        name_lower = extension.name.lower()
+        for target in typosquat_targets:
+            if self._is_typosquat(name_lower, target):
+                issues.append(f"Possible typosquat of '{target}'")
+                threats.append(IDEMarketplaceThreat.TYPOSQUAT_EXTENSION)
+        
+        # Remove duplicates
+        threats = list(set(threats))
+        
+        is_safe = len(threats) == 0
+        
+        if not is_safe:
+            logger.warning(
+                "IDE extension risk: %s (%s) - threats: %s",
+                extension.name, extension.marketplace, [t.value for t in threats]
+            )
+        
+        return is_safe, issues, threats
+    
+    def _is_typosquat(self, name: str, target: str) -> bool:
+        """Check if name is a typosquat of target."""
+        # Exact match is safe
+        if name == target:
+            return False
+        
+        # Check Levenshtein distance
+        if len(name) >= 4 and len(target) >= 4:
+            dist = self._levenshtein(name, target)
+            if dist <= 2:
+                return True
+        
+        # Check common patterns
+        if target in name and name != target:
+            # e.g. "copilot-free", "copilot-pro"
+            return True
+        
+        return False
+    
+    def _levenshtein(self, s1: str, s2: str) -> int:
+        """Calculate Levenshtein distance."""
+        if len(s1) < len(s2):
+            return self._levenshtein(s2, s1)
+        if len(s2) == 0:
+            return len(s1)
+        
+        previous = range(len(s2) + 1)
+        for i, c1 in enumerate(s1):
+            current = [i + 1]
+            for j, c2 in enumerate(s2):
+                insertions = previous[j + 1] + 1
+                deletions = current[j] + 1
+                substitutions = previous[j] + (c1 != c2)
+                current.append(min(insertions, deletions, substitutions))
+            previous = current
+        return previous[-1]
+    
+    def validate_skill(self, skill_name: str, skill_source: str) -> Tuple[bool, List[str]]:
+        """
+        Validate Claude Code / Cursor skill.
+        
+        Detects:
+        - Silent dependency substitution
+        - Malicious skill injections
+        """
+        issues = []
+        
+        # Check for injection patterns in skill
+        injection_patterns = [
+            r"npm\s+install\s+",
+            r"pip\s+install\s+",
+            r"curl\s+.*\|\s*sh",
+            r"wget\s+.*\|\s*sh",
+            r"eval\s*\(",
+            r"exec\s*\(",
+        ]
+        
+        for pattern in injection_patterns:
+            if re.search(pattern, skill_source, re.IGNORECASE):
+                issues.append(f"Suspicious command in skill: {pattern}")
+        
+        # Check for external URLs
+        url_pattern = r"https?://(?!github\.com|npmjs\.com|pypi\.org)[^\s]+"
+        urls = re.findall(url_pattern, skill_source)
+        for url in urls:
+            issues.append(f"External URL in skill: {url}")
+        
+        return len(issues) == 0, issues
+
+
+# ============================================================================
 # Main Supply Chain Guard
 # ============================================================================
 
@@ -323,6 +538,7 @@ class SupplyChainGuard:
     - MCP server validation
     - Tool typosquatting detection
     - Agent card verification
+    - IDE extension/skill verification (Jan 2026)
     - Registry trust scoring
     """
 
@@ -338,8 +554,9 @@ class SupplyChainGuard:
         self.mcp_validator = MCPServerValidator()
         self.typosquat_detector = TyposquatDetector()
         self.agent_card_validator = AgentCardValidator()
+        self.ide_validator = IDEMarketplaceValidator()
 
-        logger.info("SupplyChainGuard initialized (ASI04 protection)")
+        logger.info("SupplyChainGuard initialized (ASI04 + IDE protection)")
 
     def verify_tool(self, tool: ToolDescriptor) -> SupplyChainResult:
         """Verify a tool/MCP server for supply chain risks."""
@@ -422,6 +639,47 @@ class SupplyChainGuard:
                 if domain in source:
                     return True
         return source in ("local", "internal", "")
+
+    def verify_extension(self, extension: IDEExtension) -> SupplyChainResult:
+        """Verify an IDE extension/skill for supply chain risks."""
+        threats = []
+        details = []
+        risk_score = 0.0
+
+        is_safe, issues, ide_threats = self.ide_validator.validate(extension)
+        if not is_safe:
+            # Map IDE threats to supply chain threats
+            for t in ide_threats:
+                if t == IDEMarketplaceThreat.FAKE_EXTENSION:
+                    threats.append(SupplyChainThreat.MALICIOUS_DEPENDENCY)
+                    risk_score += 70.0
+                elif t == IDEMarketplaceThreat.TYPOSQUAT_EXTENSION:
+                    threats.append(SupplyChainThreat.TOOL_TYPOSQUAT)
+                    risk_score += 60.0
+                elif t == IDEMarketplaceThreat.MALICIOUS_PERMISSIONS:
+                    threats.append(SupplyChainThreat.MALICIOUS_DEPENDENCY)
+                    risk_score += 50.0
+                elif t == IDEMarketplaceThreat.UNVERIFIED_PUBLISHER:
+                    threats.append(SupplyChainThreat.UNSIGNED_COMPONENT)
+                    risk_score += 30.0
+            details.extend(issues)
+
+        risk_score = min(100.0, risk_score)
+        blocked = risk_score >= 70.0
+
+        if threats:
+            logger.warning(
+                "IDE extension risk: %s - score=%.1f",
+                extension.name, risk_score
+            )
+
+        return SupplyChainResult(
+            is_safe=len(threats) == 0,
+            risk_score=risk_score,
+            threats=threats,
+            details=details,
+            blocked=blocked
+        )
 
 
 # ============================================================================

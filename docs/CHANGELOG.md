@@ -4,6 +4,49 @@ All notable changes to the SENTINEL AI Security Platform.
 
 ---
 
+## [1.3.0] - 2026-01-07
+
+### 🚨 New Engines (AISecHub Threat Response)
+
+- **HITLFatigueDetector** — Human-in-the-loop oversight degradation detection
+  - Response time analysis (< 500ms = not reading)
+  - 100% approval rate = rubber-stamping
+  - Session duration > 4h = reduced attention
+  - Night-time operation risk scoring
+  - Recommendations for operator breaks
+
+### 🛡️ Enhanced Engines
+
+- **SupplyChainGuard** — +IDEMarketplaceValidator
+  - VSCode Marketplace & OpenVSX registry validation
+  - Claude Code Skills security checks
+  - Cursor/Windsurf/Trae extension validation
+  - Typosquatting detection for AI extensions
+  - Malicious permission detection (webRequest, cookies, etc.)
+
+- **AgenticMonitor** — +AutonomousLoopController
+  - Infinite loop detection (same tool > 10 times)
+  - Token budget enforcement (100K default)
+  - Loop timeout (5 min default)
+  - Task deviation monitoring
+  - Force termination capability
+
+### 📊 Statistics
+
+- **Total Engines**: 212 → 215
+- **supply_chain_guard.py**: 441 → ~700 LOC
+- **agentic_monitor.py**: 717 → ~920 LOC
+- **New file**: hitl_fatigue_detector.py (~400 LOC)
+
+### 🔥 Threat Source
+
+All engines added in response to AISecHub Telegram (Jan 7, 2026):
+- 900K users affected by malicious AI Chrome extensions
+- Claude Code "skill" injection attacks
+- Agentic loop human-in-the-loop fatigue
+
+---
+
 ## [1.2.0] - 2026-01-02
 
 ### 🔥 New Engines (6)
