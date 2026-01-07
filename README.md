@@ -340,6 +340,35 @@ make test_llm_mock        # 9 LLM integration tests
 
 </details>
 
+<details>
+<summary><strong>🚨 January 7 2026 R&D Engines (3 new + 2 enhanced)</strong></summary>
+
+| Engine | Threat | Source |
+|--------|--------|--------|
+| `hitl_fatigue_detector.py` | Human-in-the-loop rubber-stamping | AISecHub Jan 2026 |
+| `supply_chain_guard.py` | +IDEMarketplaceValidator (VSCode, Cursor, Claude Skills) | AISecHub Jan 2026 |
+| `agentic_monitor.py` | +AutonomousLoopController (runaway agents) | AISecHub Jan 2026 |
+
+**HITL Fatigue Detector:**
+- Response time analysis (<500ms = not reading)
+- 100% approval rate detection (rubber-stamping)
+- Session duration tracking (>4h = reduced attention)
+- Night-time operation risk scoring
+
+**IDE Marketplace Validator:**
+- VSCode Marketplace & OpenVSX registry
+- Claude Code Skills validation
+- Cursor/Windsurf/Trae extension checks
+- Typosquatting detection for AI extensions
+
+**Autonomous Loop Controller:**
+- Infinite loop detection (same tool >10 times)
+- Token budget enforcement (100K default)
+- Task deviation monitoring
+- Force termination capability
+
+</details>
+
 📖 **[Full Engine Documentation](./docs/reference/engines-en.md)** | **[R&D Changelog](./docs/CHANGELOG.md)**
 
 ---
