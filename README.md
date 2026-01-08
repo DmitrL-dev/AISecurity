@@ -474,6 +474,27 @@ POST /design-review/documents
 
 </details>
 
+<details>
+<summary><strong>🔐 January 9 2026 Lasso Security Integration (21 patterns)</strong></summary>
+
+Integrated prompt injection detection patterns from [lasso-security/claude-hooks](https://github.com/lasso-security/claude-hooks):
+
+| Category | Patterns | Detection |
+|----------|----------|-----------|
+| 🔐 **Encoding/Obfuscation** | 5 | Base64, Hex, Leetspeak, Homoglyphs, Zero-width |
+| 🎭 **Context Manipulation** | 5 | Fake admin claims, JSON role injection, conversation history |
+| 📦 **Instruction Smuggling** | 3 | HTML/C/Hash comment injection |
+| ⚡ **Extended Injection** | 4 | Delimiters, training forget, new system prompt |
+| 🎪 **Extended Roleplay** | 4 | Pretend you are, bypass restrictions, evil twin |
+
+**SDD Spec:** `.kiro/specs/lasso-patterns-integration/`
+
+**Test Suite:** `tests/test_lasso_patterns.py` (10 tests)
+
+**Source:** [Lasso Security Blog](https://www.lasso.security/blog/the-hidden-backdoor-in-claude-coding-assistant)
+
+</details>
+
 
 📖 **[Full Engine Documentation](./docs/reference/engines-en.md)** | **[R&D Changelog](./docs/CHANGELOG.md)**
 
