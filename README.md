@@ -62,7 +62,7 @@ print(result.is_safe)  # False
 | 🧠 **[BRAIN](#-brain--detection-engines)** | Detection Core — 258 engines, ML + Rules, Strange Math™ |
 | 🛡️ **[SHIELD](#%EF%B8%8F-shield--pure-c-dmz)** | AI Security DMZ — Pure C, <1ms latency, 20 Protocols, Cisco CLI |
 | 🐉 **[STRIKE](#-strike--red-team-platform)** | Offensive Platform — 39K+ payloads, HYDRA, AI Attack Planner |
-| 📦 **FRAMEWORK** | Python SDK — pip install, CLI, FastAPI integration |
+| 📦 **[FRAMEWORK](#-framework--python-sdk)** | Python SDK — pip install, CLI, FastAPI integration |
 | 🦠 **[IMMUNE](./immune/)** | EDR/XDR/MDR — Pure C, Kernel-level, DragonFlyBSD |
 
 
