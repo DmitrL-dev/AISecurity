@@ -1,0 +1,22 @@
+{
+  "feature_name": "shield-audit-logging",
+  "created_at": "2026-01-08T16:06:15+10:00",
+  "updated_at": "2026-01-08T16:21:56+10:00",
+  "language": "ru",
+  "phase": "tasks-generated",
+  "approvals": {
+    "requirements": {
+      "generated": true,
+      "approved": true
+    },
+    "design": {
+      "generated": true,
+      "approved": true
+    },
+    "tasks": {
+      "generated": true,
+      "approved": false
+    }
+  },
+  "ready_for_implementation": false
+}
