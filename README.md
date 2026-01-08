@@ -57,40 +57,13 @@ print(result.is_safe)  # False
 
 ## 🎮 Platform Components
 
-<table>
-<tr>
-<td width="20%" align="center" valign="top">
-<h3><a href="#-brain--detection-engines">🧠 BRAIN</a></h3>
-<strong>Detection Core</strong><br>
-258 engines, ML + Rules<br>
-Strange Math™
-</td>
-<td width="20%" align="center" valign="top">
-<h3><a href="#%EF%B8%8F-shield--pure-c-dmz">🛡️ SHIELD</a></h3>
-<strong>AI Security DMZ</strong><br>
-Pure C, <1ms latency<br>
-20 Protocols, Cisco CLI
-</td>
-<td width="20%" align="center" valign="top">
-<h3><a href="#-strike--red-team-platform">🐉 STRIKE</a></h3>
-<strong>Offensive Platform</strong><br>
-39K+ payloads, HYDRA<br>
-AI Attack Planner
-</td>
-<td width="20%" align="center" valign="top">
-<h3>📦 FRAMEWORK</h3>
-<strong>Python SDK</strong><br>
-pip install, CLI<br>
-FastAPI integration
-</td>
-<td width="20%" align="center" valign="top">
-<h3><a href="./immune/">🦠 IMMUNE</a></h3>
-<strong>EDR/XDR/MDR</strong><br>
-Pure C, Kernel-level<br>
-DragonFlyBSD
-</td>
-</tr>
-</table>
+| Component | Description |
+|-----------|-------------|
+| 🧠 **[BRAIN](#-brain--detection-engines)** | Detection Core — 258 engines, ML + Rules, Strange Math™ |
+| 🛡️ **[SHIELD](#%EF%B8%8F-shield--pure-c-dmz)** | AI Security DMZ — Pure C, <1ms latency, 20 Protocols, Cisco CLI |
+| 🐉 **[STRIKE](#-strike--red-team-platform)** | Offensive Platform — 39K+ payloads, HYDRA, AI Attack Planner |
+| 📦 **FRAMEWORK** | Python SDK — pip install, CLI, FastAPI integration |
+| 🦠 **[IMMUNE](./immune/)** | EDR/XDR/MDR — Pure C, Kernel-level, DragonFlyBSD |
 
 
 <p align="center">
