@@ -4,6 +4,41 @@ All notable changes to the SENTINEL AI Security Platform.
 
 ---
 
+## [1.6.1] - 2026-01-09 (Lasso Security Integration)
+
+### 🔐 New Jailbreak Patterns (21)
+
+Integrated prompt injection detection patterns from [lasso-security/claude-hooks](https://github.com/lasso-security/claude-hooks):
+
+| Category | Count | Detection |
+|----------|-------|-----------|
+| Encoding/Obfuscation | 5 | Base64, Hex, Leetspeak, Homoglyphs, Zero-width |
+| Context Manipulation | 5 | Fake admin claims, JSON role injection |
+| Instruction Smuggling | 3 | HTML/C/Hash comment injection |
+| Extended Injection | 4 | Delimiters, training forget |
+| Extended Roleplay | 4 | Pretend you are, evil twin |
+
+### 📝 Files Modified
+
+- `src/brain/config/jailbreaks.yaml` — +160 lines, 21 new patterns
+- `tests/test_lasso_patterns.py` — New test suite (10 tests)
+
+### 📊 Statistics
+
+- **Total Patterns**: 60 → 81
+- **Test Coverage**: +10 tests
+
+### 🔗 SDD Spec
+
+`.kiro/specs/lasso-patterns-integration/` — Full spec-driven development cycle
+
+### 🔥 Threat Source
+
+- [Lasso Security Blog](https://www.lasso.security/blog/the-hidden-backdoor-in-claude-coding-assistant)
+- AI Security Digest Week 1 2026
+
+---
+
 ## [1.6.0] - 2026-01-08 (AWS-Inspired Feature Sprint)
 
 ### 🚀 New Feature Modules
