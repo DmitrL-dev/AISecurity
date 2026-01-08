@@ -61,7 +61,7 @@ print(result.is_safe)  # False
 <tr>
 <td width="25%" align="center">
 <h3>🧠 BRAIN</h3>
-<strong>212 Engines</strong><br>
+<strong>258 Engines</strong><br>
 ML + Rules + Strange Math™
 </td>
 <td width="25%" align="center">
@@ -87,7 +87,7 @@ pip install • FastAPI
 <td width="20%" align="center" valign="top">
 <h3><a href="#-brain--detection-engines">🧠 BRAIN</a></h3>
 <strong>Detection Core</strong><br>
-201 engines, ML + Rules<br>
+258 engines, ML + Rules<br>
 Strange Math™
 </td>
 <td width="20%" align="center" valign="top">
