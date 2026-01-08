@@ -78,7 +78,7 @@ Pure C, <1ms latency<br>
 AI Attack Planner
 </td>
 <td width="20%" align="center" valign="top">
-<h3><a href="#-framework--python-sdk">📦 FRAMEWORK</a></h3>
+<h3>📦 FRAMEWORK</h3>
 <strong>Python SDK</strong><br>
 pip install, CLI<br>
 FastAPI integration
