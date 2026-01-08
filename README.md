@@ -585,11 +585,11 @@ app.add_middleware(SentinelMiddleware, on_threat="block")
 
 | Metric | Value |
 |--------|-------|
-| **Brain Engines** | 212 |
+| **Brain Engines** | 258 |
 | **Shield LOC** | 36,000+ |
 | **Shield Tests** | 103/103 ✅ |
 | **Strike Payloads** | 39,000+ |
-| **Total LOC** | 105,000+ |
+| **Total LOC** | 116,000+ |
 | **OWASP LLM Top 10** | 10/10 ✅ |
 | **OWASP Agentic AI** | 10/10 ✅ |
 
