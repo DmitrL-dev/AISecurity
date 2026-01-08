@@ -1,0 +1,312 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>IMMUNE Dashboard</title>
+    <script src="https://unpkg.com/htmx.org@1.9.10"></script>
+    <style>
+      :root {
+        --bg: #0d1117;
+        --bg-secondary: #161b22;
+        --text: #c9d1d9;
+        --text-muted: #8b949e;
+        --accent: #58a6ff;
+        --danger: #f85149;
+        --success: #3fb950;
+        --warning: #d29922;
+        --border: #30363d;
+      }
+
+      * {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+      }
+
+      body {
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica,
+          Arial, sans-serif;
+        background: var(--bg);
+        color: var(--text);
+        line-height: 1.5;
+      }
+
+      .container {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 2rem;
+      }
+
+      header {
+        background: var(--bg-secondary);
+        border-bottom: 1px solid var(--border);
+        padding: 1rem 2rem;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+      }
+
+      .logo {
+        font-size: 1.5rem;
+        font-weight: bold;
+        color: var(--accent);
+      }
+
+      .logo span {
+        color: var(--text-muted);
+        font-weight: normal;
+      }
+
+      .status-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        padding: 0.25rem 0.75rem;
+        border-radius: 2rem;
+        font-size: 0.875rem;
+      }
+
+      .status-badge.online {
+        background: rgba(63, 185, 80, 0.2);
+        color: var(--success);
+      }
+      .status-badge.offline {
+        background: rgba(248, 81, 73, 0.2);
+        color: var(--danger);
+      }
+
+      .grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        gap: 1.5rem;
+        margin-top: 2rem;
+      }
+
+      .card {
+        background: var(--bg-secondary);
+        border: 1px solid var(--border);
+        border-radius: 0.5rem;
+        overflow: hidden;
+      }
+
+      .card-header {
+        padding: 1rem;
+        border-bottom: 1px solid var(--border);
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+      }
+
+      .card-title {
+        font-size: 1rem;
+        font-weight: 600;
+      }
+
+      .card-body {
+        padding: 1rem;
+      }
+
+      .stat-grid {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 1.5rem;
+        margin-bottom: 2rem;
+      }
+
+      .stat-card {
+        background: var(--bg-secondary);
+        border: 1px solid var(--border);
+        border-radius: 0.5rem;
+        padding: 1.5rem;
+      }
+
+      .stat-value {
+        font-size: 2rem;
+        font-weight: bold;
+        color: var(--accent);
+      }
+
+      .stat-label {
+        color: var(--text-muted);
+        font-size: 0.875rem;
+        margin-top: 0.25rem;
+      }
+
+      table {
+        width: 100%;
+        border-collapse: collapse;
+      }
+
+      th,
+      td {
+        text-align: left;
+        padding: 0.75rem;
+        border-bottom: 1px solid var(--border);
+      }
+
+      th {
+        color: var(--text-muted);
+        font-weight: 500;
+      }
+
+      .agent-status {
+        display: inline-block;
+        width: 8px;
+        height: 8px;
+        border-radius: 50%;
+        margin-right: 0.5rem;
+      }
+
+      .agent-status.active {
+        background: var(--success);
+      }
+      .agent-status.inactive {
+        background: var(--text-muted);
+      }
+
+      .threat-high {
+        color: var(--danger);
+      }
+      .threat-medium {
+        color: var(--warning);
+      }
+      .threat-low {
+        color: var(--text-muted);
+      }
+
+      .btn {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        padding: 0.5rem 1rem;
+        border-radius: 0.375rem;
+        font-size: 0.875rem;
+        cursor: pointer;
+        border: none;
+        background: var(--accent);
+        color: white;
+        text-decoration: none;
+      }
+
+      .btn:hover {
+        opacity: 0.9;
+      }
+
+      .refresh-indicator {
+        color: var(--text-muted);
+        font-size: 0.75rem;
+      }
+
+      .htmx-settling {
+        opacity: 0.8;
+      }
+      .htmx-request {
+        opacity: 0.5;
+      }
+    </style>
+  </head>
+  <body>
+    <header>
+      <div class="logo">🦠 IMMUNE <span>Dashboard</span></div>
+      <div
+        class="status-badge online"
+        hx-get="/health"
+        hx-trigger="every 10s"
+        hx-swap="innerHTML"
+      >
+        ● Hive Online
+      </div>
+    </header>
+
+    <div class="container">
+      <!-- Statistics -->
+      <div
+        class="stat-grid"
+        hx-get="/stats"
+        hx-trigger="every 5s"
+        hx-swap="innerHTML"
+      >
+        <div class="stat-card">
+          <div class="stat-value" id="stat-agents">--</div>
+          <div class="stat-label">Connected Agents</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-value" id="stat-events">--</div>
+          <div class="stat-label">Events/min</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-value" id="stat-threats">--</div>
+          <div class="stat-label">Threats Today</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-value" id="stat-patterns">--</div>
+          <div class="stat-label">Active Patterns</div>
+        </div>
+      </div>
+
+      <!-- Main Grid -->
+      <div class="grid">
+        <!-- Agents -->
+        <div class="card">
+          <div class="card-header">
+            <span class="card-title">Agents</span>
+            <span class="refresh-indicator">Auto-refresh: 10s</span>
+          </div>
+          <div
+            class="card-body"
+            hx-get="/agents"
+            hx-trigger="load, every 10s"
+            hx-swap="innerHTML"
+          >
+            Loading...
+          </div>
+        </div>
+
+        <!-- Alerts -->
+        <div class="card">
+          <div class="card-header">
+            <span class="card-title">Recent Alerts</span>
+            <span class="refresh-indicator">Auto-refresh: 5s</span>
+          </div>
+          <div
+            class="card-body"
+            hx-get="/alerts"
+            hx-trigger="load, every 5s"
+            hx-swap="innerHTML"
+          >
+            Loading...
+          </div>
+        </div>
+      </div>
+
+      <!-- Pattern Management -->
+      <div class="card" style="margin-top: 1.5rem">
+        <div class="card-header">
+          <span class="card-title">Pattern Management</span>
+          <button class="btn" hx-get="/patterns/form" hx-target="#pattern-form">
+            + Add Pattern
+          </button>
+        </div>
+        <div class="card-body">
+          <div id="pattern-form"></div>
+          <div
+            id="pattern-list"
+            hx-get="/patterns"
+            hx-trigger="load"
+            hx-swap="innerHTML"
+          >
+            Loading patterns...
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      // Auto-hide loading after first load
+      document.body.addEventListener("htmx:afterSwap", function (evt) {
+        console.log("[HTMX] Updated:", evt.detail.target.id || "element");
+      });
+    </script>
+  </body>
+</html>
