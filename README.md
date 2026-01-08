@@ -105,7 +105,7 @@ fetch('https://cdn.jsdelivr.net/gh/DmitrL-dev/AISecurity@latest/signatures/jailb
 
 > [!IMPORTANT]
 > ### 🚨 Open to Work — AI Security Engineer
-> **Solo author of this 105K LOC platform with 212 engines. Available remote.**
+> **Solo author of this 116K LOC platform with 258 engines. Available remote.**
 > 📧 [chg@live.ru](mailto:chg@live.ru) • 💬 [@DmLabincev](https://t.me/DmLabincev)
 
 ---
@@ -213,10 +213,10 @@ make test_llm_mock        # 9 LLM integration tests
 ## 🧠 BRAIN — Detection Engines
 
 <p align="center">
-  <img src="./assets/brain_engines.png" alt="SENTINEL Brain - 207 Detection Engines" width="800">
+  <img src="./assets/brain_engines.png" alt="SENTINEL Brain - 258 Detection Engines" width="800">
 </p>
 
-> **212 detection engines** analyzing every prompt and response in real-time.
+> **258 detection engines** analyzing every prompt and response in real-time.
 
 ## Key Capabilities
 
