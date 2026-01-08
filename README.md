@@ -59,31 +59,6 @@ print(result.is_safe)  # False
 
 <table>
 <tr>
-<td width="25%" align="center">
-<h3>🧠 BRAIN</h3>
-<strong>258 Engines</strong><br>
-ML + Rules + Strange Math™
-</td>
-<td width="25%" align="center">
-<h3>🛡️ SHIELD</h3>
-<strong>Pure C DMZ</strong><br>
-36K LOC • 103 Tests • 100% Ready
-</td>
-<td width="25%" align="center">
-<h3>🐉 STRIKE</h3>
-<strong>Red Team</strong><br>
-39K+ Payloads • HYDRA
-</td>
-<td width="25%" align="center">
-<h3>📦 SDK</h3>
-<strong>Python</strong><br>
-pip install • FastAPI
-</td>
-</tr>
-</table>
-
-<table>
-<tr>
 <td width="20%" align="center" valign="top">
 <h3><a href="#-brain--detection-engines">🧠 BRAIN</a></h3>
 <strong>Detection Core</strong><br>
