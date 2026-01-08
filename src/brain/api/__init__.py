@@ -51,3 +51,22 @@ class APIGateway:
     def __init__(self):
         self.key_manager = APIKeyManager()
         self.rate_limiter = RateLimiter()
+
+
+# FastAPI app (2026-01-08 features)
+try:
+    from .main import app, create_app
+except ImportError:
+    app = None
+    create_app = None
+
+__all__ = [
+    "APITier",
+    "TIER_LIMITS",
+    "APIKeyManager",
+    "RateLimiter",
+    "APIGateway",
+    "app",
+    "create_app",
+]
+
