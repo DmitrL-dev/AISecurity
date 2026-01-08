@@ -60,7 +60,7 @@ print_banner() {
     echo "║   ╚══════╝╚══════╝╚═╝  ╚═══╝   ╚═╝   ╚═╝╚═╝  ╚═══╝╚══════╝╚══════╝"
     echo "║                                                               ║"
     echo "║           AI Defense & Red Team Platform                      ║"
-    echo "║          209 Detection Engines | Strange Math™                ║"
+    echo "║          258 Detection Engines | Strange Math™                ║"
     echo "║                                                               ║"
     echo "╚═══════════════════════════════════════════════════════════════╝"
     echo -e "${NC}"
