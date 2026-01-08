@@ -1,0 +1,8 @@
+{
+  "feature": "lasso-patterns-integration",
+  "description": "Интеграция 50+ паттернов детекции prompt injection от Lasso Security в SENTINEL IMMUNE engine",
+  "created": "2026-01-09T09:43:00+10:00",
+  "language": "ru",
+  "status": "implementation",
+  "phase": 1
+}
