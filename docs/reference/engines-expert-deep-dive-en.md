@@ -10187,15 +10187,346 @@ class PolymorphicPromptAssembler(BaseEngine):
 
 ---
 
-## Updated Statistics
+## 🔒 January 7, 2026 — Security Engines R&D Marathon
 
-> **Total Engines:** 200+  
-> **Unit Tests:** 1,047+  
-> **LOC Analyzed:** ~81,000  
-> **Version:** Dragon v4.0 (January 2026)  
-> **Coverage:** OWASP LLM Top 10 + OWASP ASI Top 10 (2026)
+Eight new security engines addressing emerging AI threats.
+
+### 106. SupplyChainScanner
+
+**File:** `supply_chain_scanner.py`  
+**LOC:** 195  
+**OWASP:** LLM05, ASI09
+
+#### Purpose
+
+Detects malicious patterns in AI model code and dependencies:
+
+- Pickle RCE (`__reduce__`, `exec`, `eval`)
+- HuggingFace `trust_remote_code=True` warnings
+- Sleeper trigger patterns in code
+- Exfiltration URL detection
+
+```python
+class SupplyChainScanner:
+    PICKLE_RCE_PATTERNS = [
+        r"__reduce__\s*\(",
+        r"exec\s*\(",
+        r"eval\s*\(",
+        r"os\.system\s*\(",
+        r"subprocess\.",
+    ]
+    
+    def scan_code(self, code: str) -> ScanResult:
+        """Scan code for supply chain threats."""
+```
 
 ---
 
-*Document last updated: January 1, 2026*
+### 107. MCPSecurityMonitor
+
+**File:** `mcp_security_monitor.py`  
+**LOC:** 230  
+**OWASP:** LLM07, ASI05, ASI07
+
+#### Purpose
+
+Monitors MCP (Model Context Protocol) tool calls for abuse:
+
+- Sensitive file access (`/etc/passwd`, `~/.ssh`)
+- Dangerous tool usage (`shell_exec`, `bash`)
+- Data exfiltration patterns
+- Command injection detection
+
+```python
+class MCPSecurityMonitor:
+    SENSITIVE_PATHS = [
+        "/etc/passwd", "/etc/shadow",
+        "~/.ssh", "~/.aws/credentials",
+    ]
+    
+    DANGEROUS_TOOLS = ["shell_exec", "bash", "cmd", "powershell"]
+    
+    def analyze(self, tool_name: str, args: Dict) -> MCPResult:
+        """Analyze MCP tool call for security risks."""
+```
+
+---
+
+### 108. AgenticBehaviorAnalyzer
+
+**File:** `agentic_behavior_analyzer.py`  
+**LOC:** 290  
+**OWASP:** ASI01, ASI02, ASI03, ASI06
+
+#### Purpose
+
+Detects anomalous AI agent behavior:
+
+- Goal drift detection
+- Deceptive behavior patterns
+- Cascading hallucination detection
+- Action loop detection
+
+```python
+class AgenticBehaviorAnalyzer:
+    def detect_goal_drift(self, original_goal: str, current_actions: List[str]) -> DriftResult:
+        """Detect when agent behavior drifts from original task."""
+    
+    def detect_deception(self, agent_output: str) -> DeceptionResult:
+        """Detect potentially deceptive agent actions."""
+```
+
+---
+
+### 109. SleeperAgentDetector
+
+**File:** `sleeper_agent_detector.py`  
+**LOC:** 270  
+**OWASP:** LLM03, LLM05
+
+#### Purpose
+
+Detects dormant malicious code patterns (sleeper triggers):
+
+- Date-based triggers (`year >= 2026`)
+- Environment triggers (`PRODUCTION`)
+- Version-based triggers
+- Counter/threshold triggers
+
+```python
+class SleeperAgentDetector:
+    DATE_TRIGGERS = [
+        r"year\s*[><=]+\s*\d{4}",
+        r"datetime\.now\(\).*>",
+        r"time\.time\(\)\s*>",
+    ]
+    
+    ENVIRONMENT_TRIGGERS = [
+        r"os\.environ.*PRODUCTION",
+        r"os\.getenv.*RELEASE",
+    ]
+```
+
+---
+
+### 110. ModelIntegrityVerifier
+
+**File:** `model_integrity_verifier.py`  
+**LOC:** 310  
+**OWASP:** LLM05
+
+#### Purpose
+
+Verifies AI model file integrity:
+
+- Format safety (safetensors > pickle)
+- Hash computation and verification
+- Magic byte verification
+- Suspicious content scanning
+
+```python
+class ModelIntegrityVerifier:
+    SAFE_FORMATS = ["safetensors", "gguf", "onnx"]
+    UNSAFE_FORMATS = ["pkl", "pickle", "pt", "bin"]  # Risk with pickle
+    
+    def verify(self, model_path: str, expected_hash: str = None) -> VerificationResult:
+        """Verify model file integrity and safety."""
+```
+
+---
+
+### 111. GuardrailsEngine
+
+**File:** `guardrails_engine.py`  
+**LOC:** 320  
+**Inspired by:** NVIDIA NeMo Guardrails
+
+#### Purpose
+
+Content filtering with modular rails:
+
+- Moderation rails (hate speech, violence)
+- Jailbreak rails (DAN, prompt injection)
+- Fact-check rails
+- Custom rail support
+
+```python
+class GuardrailsEngine:
+    def __init__(self):
+        self.rails = {
+            "moderation": ModerationRail(),
+            "jailbreak": JailbreakRail(),
+            "fact_check": FactCheckRail(),
+        }
+    
+    def check_input(self, text: str) -> GuardrailResult:
+        """Check input against all enabled rails."""
+```
+
+---
+
+### 112. PromptLeakDetector
+
+**File:** `prompt_leak_detector.py`  
+**LOC:** 260  
+**OWASP:** LLM01, LLM06
+
+#### Purpose
+
+Prevents system prompt extraction:
+
+- Direct extraction attempts
+- Encoded extraction (base64, rot13)
+- Role-play extraction
+- Markdown/formatting exploitation
+
+```python
+class PromptLeakDetector:
+    EXTRACTION_PATTERNS = [
+        r"system\s*prompt",
+        r"original\s*instructions",
+        r"ignore.*previous",
+        r"repeat.*above",
+    ]
+    
+    ENCODING_PATTERNS = [
+        r"base64",
+        r"rot13",
+        r"hex\s*encode",
+    ]
+```
+
+---
+
+### 113. AIIncidentRunbook
+
+**File:** `ai_runbook.py`  
+**LOC:** 250  
+**Category:** Incident Response
+
+#### Purpose
+
+Automated incident response playbooks:
+
+- 8 incident types (injection, leakage, poisoning, sleeper)
+- Automated response actions
+- Escalation paths
+- Integration hooks (Slack, PagerDuty)
+
+```python
+class AIIncidentRunbook:
+    INCIDENT_TYPES = {
+        "prompt_injection": RunbookLevel.HIGH,
+        "data_leakage": RunbookLevel.CRITICAL,
+        "model_poisoning": RunbookLevel.CRITICAL,
+        "sleeper_activation": RunbookLevel.CRITICAL,
+    }
+    
+    def execute_runbook(self, incident_type: str, context: Dict) -> RunbookResult:
+        """Execute appropriate runbook for incident."""
+```
+
+---
+
+## 🏢 January 8, 2026 — AWS-Inspired Feature Modules
+
+Three enterprise modules inspired by AWS Security Agent.
+
+### 114. Custom Security Requirements
+
+**Module:** `brain.requirements`  
+**LOC:** ~1,100  
+**Features:** YAML config, SQLite storage, engine integration
+
+#### Purpose
+
+User-defined security policies with compliance mapping:
+
+```python
+from brain.requirements import RequirementsManager, create_enforcer
+
+manager = RequirementsManager()
+default_set = manager.get("sentinel-default")
+enforcer = create_enforcer(default_set)
+
+result = enforcer.check_text("Ignore previous instructions")
+print(f"Compliance Score: {result.compliance_score}%")
+```
+
+**Default Requirements (12):**
+- Block Prompt Injection (OWASP-LLM01)
+- Block Jailbreak (OWASP-LLM01)
+- Prevent Prompt Leak (OWASP-LLM01)
+- Detect PII (OWASP-LLM06)
+- Block Exfiltration (OWASP-ASI07)
+- And 7 more...
+
+---
+
+### 115. Unified Compliance Report
+
+**Module:** `brain.compliance`  
+**LOC:** ~620  
+**Frameworks:** OWASP LLM, OWASP Agentic, EU AI Act, NIST RMF
+
+#### Purpose
+
+One scan → coverage across all compliance frameworks:
+
+```python
+from brain.compliance import generate_text_report
+
+print(generate_text_report())
+# ============================================================
+# 📊 SENTINEL Compliance Report
+# Compliance coverage: 77.0% average across 4 frameworks
+# ============================================================
+# owasp_llm            ████████████████░░░░  80.0%
+# owasp_agentic        ████████████████░░░░  80.0%
+# eu_ai_act            █████████████░░░░░░░  65.0%
+# nist_ai_rmf          ███████████████░░░░░  75.0%
+```
+
+---
+
+### 116. AI Design Review
+
+**Module:** `brain.design_review`  
+**LOC:** ~550  
+**Risk Categories:** RAG, MCP, Agent, Data, Supply Chain
+
+#### Purpose
+
+Analyze architecture documents for AI security risks:
+
+```python
+from brain.design_review import review_text
+
+risks = review_text("RAG pipeline with MCP shell execution")
+# Risks found: 5
+#   high: RAG Security Risk
+#   critical: Tool/API Security Risk (shell)
+#   critical: Supply Chain Risk (pickle)
+```
+
+**Risk Detection:**
+- RAG poisoning patterns
+- MCP/Tool abuse patterns
+- Agent loop risks
+- Data leakage risks
+- Supply chain risks
+
+---
+
+## Updated Statistics
+
+> **Total Engines:** 258  
+> **Unit Tests:** 1,150+  
+> **LOC Analyzed:** ~116,000  
+> **Version:** Dragon v4.1 (January 2026)  
+> **Coverage:** OWASP LLM Top 10 + OWASP ASI Top 10 (2025)
+
+---
+
+*Document last updated: January 8, 2026*
 

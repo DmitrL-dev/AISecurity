@@ -10,9 +10,10 @@
 </p>
 
 <p align="center">
-  <img src="https://img.shields.io/badge/🧠_BRAIN-220_Engines-brightgreen?style=for-the-badge" alt="Brain">
-  <img src="https://img.shields.io/badge/🛡️_SHIELD-103_Tests_✓-00ADD8?style=for-the-badge" alt="Shield">
+  <img src="https://img.shields.io/badge/🧠_BRAIN-258_Engines-brightgreen?style=for-the-badge" alt="Brain">
+  <img src="https://img.shields.io/badge/🛡️_SHIELD-113_Tests_✓-00ADD8?style=for-the-badge" alt="Shield">
   <img src="https://img.shields.io/badge/🐉_STRIKE-39K+_Payloads-red?style=for-the-badge" alt="Strike">
+  <img src="https://img.shields.io/badge/📊_LOC-116K-blue?style=for-the-badge" alt="LOC">
 </p>
 
 ---
@@ -485,6 +486,47 @@ make test_llm_mock        # 9 LLM integration tests
 - Integration hooks (Slack, PagerDuty)
 
 **Unit Tests: 104 tests across 5 files**
+
+</details>
+
+<details>
+<summary><strong>🏢 January 8 2026 Enterprise Features (v1.6.0)</strong></summary>
+
+Inspired by AWS Security Agent — 3 new modules:
+
+| Module | Purpose | LOC |
+|--------|---------|-----|
+| **Custom Requirements** | User-defined security policies | ~1,100 |
+| **Compliance Report** | Unified coverage across frameworks | ~620 |
+| **Design Review** | AI architecture risk analysis | ~550 |
+
+**Custom Security Requirements:**
+- YAML + SQLite storage
+- 12 OWASP-mapped defaults
+- REST API for CRUD
+- Engine integration (enforcer)
+
+**Unified Compliance Report:**
+- OWASP LLM Top 10 (80%)
+- OWASP Agentic AI Top 10 (80%)
+- EU AI Act Articles (65%)
+- NIST AI RMF 2.0 (75%)
+
+**AI Design Review:**
+- RAG poisoning detection
+- MCP/Tool abuse patterns
+- Agent loop risks
+- Supply chain risks
+- OWASP mapping for findings
+
+**REST API:**
+```
+POST /requirements/sets/{id}/check
+GET  /compliance/coverage
+POST /design-review/documents
+```
+
+**Unit Tests: 33 new tests**
 
 </details>
 

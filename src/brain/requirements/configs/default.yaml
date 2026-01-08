@@ -1,0 +1,153 @@
+# SENTINEL Default Security Requirements
+# Based on OWASP LLM Top 10 and OWASP Agentic AI Top 10
+
+id: sentinel-default
+name: SENTINEL Default Requirements
+description: Default security requirements based on OWASP guidelines
+version: "1.0.0"
+
+requirements:
+  # ============================================
+  # Injection Protection (OWASP LLM01)
+  # ============================================
+  - id: req-injection-block
+    name: Block Prompt Injection
+    description: Block detected prompt injection attempts
+    category: injection
+    severity: critical
+    enabled: true
+    engine: policy_puppetry_detector
+    action: block
+    compliance_tags:
+      - OWASP-LLM01
+      - OWASP-ASI05
+
+  - id: req-jailbreak-block
+    name: Block Jailbreak Attempts
+    description: Prevent jailbreak and guardrail bypass attempts
+    category: injection
+    severity: critical
+    enabled: true
+    engine: guardrails_engine
+    action: block
+    compliance_tags:
+      - OWASP-LLM01
+
+  - id: req-prompt-leak
+    name: Prevent System Prompt Extraction
+    description: Block attempts to extract system prompts
+    category: injection
+    severity: high
+    enabled: true
+    engine: prompt_leak_detector
+    action: block
+    compliance_tags:
+      - OWASP-LLM01
+
+  # ============================================
+  # Data Privacy (OWASP LLM06)
+  # ============================================
+  - id: req-pii-warn
+    name: Detect PII in Outputs
+    description: Warn when PII is detected in model outputs
+    category: data_privacy
+    severity: high
+    enabled: true
+    engine: pii_detector
+    action: warn
+    compliance_tags:
+      - OWASP-LLM06
+      - EU-AI-ACT-10
+
+  - id: req-exfil-block
+    name: Block Data Exfiltration
+    description: Block MCP tool calls that attempt data exfiltration
+    category: data_privacy
+    severity: critical
+    enabled: true
+    engine: mcp_security_monitor
+    action: block
+    compliance_tags:
+      - OWASP-LLM06
+      - OWASP-ASI07
+
+  # ============================================
+  # Agent Safety (OWASP ASI01-ASI03)
+  # ============================================
+  - id: req-agent-loop
+    name: Detect Agent Loops
+    description: Detect and alert on agent loop behavior
+    category: agent_safety
+    severity: high
+    enabled: true
+    engine: agentic_behavior_analyzer
+    engine_config:
+      max_iterations: 50
+      loop_threshold: 10
+    action: alert
+    compliance_tags:
+      - OWASP-ASI01
+
+  - id: req-goal-drift
+    name: Detect Goal Drift
+    description: Alert when agent behavior drifts from original task
+    category: agent_safety
+    severity: medium
+    enabled: true
+    engine: agentic_behavior_analyzer
+    action: warn
+    compliance_tags:
+      - OWASP-ASI02
+
+  - id: req-deception
+    name: Detect Deceptive Behavior
+    description: Alert on potentially deceptive agent actions
+    category: agent_safety
+    severity: high
+    enabled: true
+    engine: agentic_behavior_analyzer
+    action: alert
+    compliance_tags:
+      - OWASP-ASI03
+
+  # ============================================
+  # Model Security (OWASP LLM03, LLM05)
+  # ============================================
+  - id: req-sleeper-detect
+    name: Detect Sleeper Triggers
+    description: Scan code for dormant malicious triggers
+    category: model_security
+    severity: critical
+    enabled: true
+    engine: sleeper_agent_detector
+    action: block
+    compliance_tags:
+      - OWASP-LLM03
+      - OWASP-LLM05
+
+  - id: req-supply-chain
+    name: Scan Supply Chain
+    description: Detect malicious patterns in AI dependencies
+    category: model_security
+    severity: critical
+    enabled: true
+    engine: supply_chain_scanner
+    action: block
+    compliance_tags:
+      - OWASP-LLM05
+      - OWASP-ASI09
+
+  # ============================================
+  # Output Safety (OWASP LLM02)
+  # ============================================
+  - id: req-output-moderation
+    name: Moderate Harmful Outputs
+    description: Filter harmful content in model outputs
+    category: output_safety
+    severity: high
+    enabled: true
+    engine: guardrails_engine
+    action: block
+    compliance_tags:
+      - OWASP-LLM02
+      - EU-AI-ACT-14

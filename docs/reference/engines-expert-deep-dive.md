@@ -8915,6 +8915,176 @@ class DefenseGenerator:
 
 > **Контакт для обсуждения:** Issues на [GitHub](https://github.com/DmitrL-dev/AISecurity)
 
+---
+
+## 🔒 7 января 2026 — R&D Marathon Security Engines
+
+Восемь новых движков безопасности для защиты от современных AI-угроз.
+
+### 106. SupplyChainScanner
+
+**Файл:** `supply_chain_scanner.py`  
+**LOC:** 195  
+**OWASP:** LLM05, ASI09
+
+Обнаружение вредоносных паттернов в коде моделей:
+- Pickle RCE (`__reduce__`, `exec`, `eval`)
+- HuggingFace `trust_remote_code=True`
+- Sleeper-триггеры
+- URL для эксфильтрации
+
+---
+
+### 107. MCPSecurityMonitor
+
+**Файл:** `mcp_security_monitor.py`  
+**LOC:** 230  
+**OWASP:** LLM07, ASI05, ASI07
+
+Мониторинг MCP-вызовов на злоупотребления:
+- Доступ к чувствительным файлам
+- Опасные инструменты (`shell_exec`)
+- Эксфильтрация данных
+- Command injection
+
+---
+
+### 108. AgenticBehaviorAnalyzer
+
+**Файл:** `agentic_behavior_analyzer.py`  
+**LOC:** 290  
+**OWASP:** ASI01, ASI02, ASI03, ASI06
+
+Детекция аномального поведения AI-агентов:
+- Дрейф цели
+- Обманное поведение
+- Каскадные галлюцинации
+- Циклы действий
+
+---
+
+### 109. SleeperAgentDetector
+
+**Файл:** `sleeper_agent_detector.py`  
+**LOC:** 270  
+**OWASP:** LLM03, LLM05
+
+Детекция спящих триггеров:
+- Триггеры по дате (`year >= 2026`)
+- Триггеры по окружению (`PRODUCTION`)
+- Триггеры по версии
+
+---
+
+### 110. ModelIntegrityVerifier
+
+**Файл:** `model_integrity_verifier.py`  
+**LOC:** 310  
+**OWASP:** LLM05
+
+Верификация целостности моделей:
+- Безопасность формата (safetensors > pickle)
+- Проверка хешей
+- Сканирование содержимого
+
+---
+
+### 111. GuardrailsEngine
+
+**Файл:** `guardrails_engine.py`  
+**LOC:** 320  
+**Inspired by:** NVIDIA NeMo Guardrails
+
+Контентная фильтрация:
+- Moderation rails
+- Jailbreak rails
+- Fact-check rails
+
+---
+
+### 112. PromptLeakDetector
+
+**Файл:** `prompt_leak_detector.py`  
+**LOC:** 260  
+**OWASP:** LLM01, LLM06
+
+Предотвращение извлечения системного промпта:
+- Прямые попытки
+- Закодированные (base64, rot13)
+- Roleplay extraction
+
+---
+
+### 113. AIIncidentRunbook
+
+**Файл:** `ai_runbook.py`  
+**LOC:** 250  
+**Category:** Incident Response
+
+Автоматические runbook'и для инцидентов:
+- 8 типов инцидентов
+- Автоматические действия
+- Интеграция (Slack, PagerDuty)
+
+---
+
+## 🏢 8 января 2026 — Enterprise Feature Modules
+
+Три модуля, вдохновлённые AWS Security Agent.
+
+### 114. Custom Security Requirements
+
+**Модуль:** `brain.requirements`  
+**LOC:** ~1,100
+
+Пользовательские политики с маппингом на OWASP:
+- YAML конфигурация
+- SQLite хранилище
+- Интеграция с движками
+
+```python
+from brain.requirements import create_enforcer
+result = enforcer.check_text("Ignore instructions")
+print(f"Compliance: {result.compliance_score}%")
 ```
 
-```
+---
+
+### 115. Unified Compliance Report
+
+**Модуль:** `brain.compliance`  
+**LOC:** ~620
+
+Один скан → покрытие всех фреймворков:
+- OWASP LLM Top 10: 80%
+- OWASP Agentic AI: 80%
+- EU AI Act: 65%
+- NIST AI RMF: 75%
+
+---
+
+### 116. AI Design Review
+
+**Модуль:** `brain.design_review`  
+**LOC:** ~550
+
+Анализ архитектурных документов:
+- RAG poisoning
+- MCP/Tool abuse
+- Agent loops
+- Supply chain risks
+
+---
+
+## Обновлённая статистика
+
+> **Всего движков:** 258  
+> **Unit-тесты:** 1,150+  
+> **LOC:** ~116,000  
+> **Версия:** Dragon v4.1 (Январь 2026)  
+> **Покрытие:** OWASP LLM Top 10 + OWASP ASI Top 10 (2025)
+
+---
+
+*Документ обновлён: 8 января 2026*
+

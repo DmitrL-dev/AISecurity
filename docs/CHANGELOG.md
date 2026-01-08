@@ -4,6 +4,64 @@ All notable changes to the SENTINEL AI Security Platform.
 
 ---
 
+## [1.6.0] - 2026-01-08 (AWS-Inspired Feature Sprint)
+
+### 🚀 New Feature Modules
+
+Inspired by AWS Security Agent, added 3 major feature modules:
+
+#### Custom Security Requirements
+User-defined security policies with OWASP mappings.
+
+- `requirements/models.py` — Data models
+- `requirements/storage.py` — YAML + SQLite storage
+- `requirements/enforcer.py` — Engine integration
+- `api/requirements_api.py` — REST endpoints
+- `configs/default.yaml` — 12 OWASP-mapped defaults
+
+#### Unified Compliance Report
+One scan → coverage across all frameworks.
+
+- OWASP LLM Top 10 (10 requirements)
+- OWASP Agentic AI Top 10 (10 requirements)
+- EU AI Act (7 requirements, Aug 2026)
+- NIST AI RMF 2.0 (8 requirements)
+
+- `compliance/report_generator.py` — Report generation
+- `api/compliance_api.py` — REST endpoints
+
+#### AI Design Review
+Analyze architecture docs for AI security risks.
+
+- RAG poisoning detection
+- MCP/Tool abuse patterns
+- Agent loop risks
+- Supply chain risks
+- OWASP mapping for all findings
+
+- `design_review/reviewer.py` — Pattern-based analysis
+- `api/design_review_api.py` — REST endpoints
+
+### 📊 Statistics
+
+| Module | LOC | Tests |
+|--------|-----|-------|
+| Requirements | ~1,100 | 9 |
+| Compliance | ~620 | 12 |
+| Design Review | ~550 | 12 |
+| **Total** | **~2,700** | **33** |
+
+### 🔗 REST API Endpoints
+
+- `POST /requirements/sets` — Create requirement set
+- `GET /requirements/sets/{id}` — Get requirements
+- `POST /requirements/sets/{id}/check` — Check text
+- `GET /compliance/coverage` — Coverage summary
+- `POST /compliance/report` — Generate report
+- `POST /design-review/documents` — Review documents
+
+---
+
 ## [1.5.0] - 2026-01-07 (Security Engines R&D Marathon)
 
 ### 🔒 New Security Engines (8)
