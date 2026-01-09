@@ -1,0 +1,10 @@
+{
+  "feature": "marketplace-skill-validator",
+  "description": "Валидация плагинов и skills из AI marketplace (Claude Skills, VSCode Extensions)",
+  "created": "2026-01-09T10:02:00+10:00",
+  "language": "ru",
+  "status": "completed",
+  "phase": 2,
+  "priority": "P1",
+  "owasp": ["ASI04", "ASI02"]
+}

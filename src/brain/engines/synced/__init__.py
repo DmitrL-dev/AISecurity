@@ -2,10 +2,10 @@
 Synced Defense Engines
 
 Auto-generated from Strike attack modules.
-Total: 13 detectors + 1 combined + 8 security engines (Jan 2026).
+Total: 13 detectors + 1 combined + 9 security engines (Jan 2026).
 
 Generated: 2025-12-29T21:24:05.508423
-Updated: 2026-01-07 (Added security engines + guardrails)
+Updated: 2026-01-09 (Added SandboxMonitor)
 """
 
 from .doublespeak_detector import DoublespeakDetector
@@ -34,6 +34,12 @@ from .model_integrity_verifier import ModelIntegrityVerifier, verify as model_ve
 from .guardrails_engine import GuardrailsEngine, check_input, check_output
 from .prompt_leak_detector import PromptLeakDetector, detect as leak_detect
 
+# Sandbox Escape Monitor (Jan 9 2026)
+from .sandbox_monitor import SandboxMonitor, analyze as sandbox_analyze
+
+# Marketplace Skill Validator (Jan 9 2026)
+from .marketplace_skill_validator import MarketplaceSkillValidator, validate as skill_validate
+
 __all__ = [
     # Original detectors
     "SyncedAttackDetector",
@@ -55,6 +61,11 @@ __all__ = [
     "check_output",
     "PromptLeakDetector",
     "leak_detect",
+    # Sandbox Monitor (Jan 9 2026)
+    "SandboxMonitor",
+    "sandbox_analyze",
+    # Marketplace Skill Validator (Jan 9 2026)
+    "MarketplaceSkillValidator",
+    "skill_validate",
 ]
-
 
