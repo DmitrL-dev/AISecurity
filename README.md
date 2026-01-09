@@ -495,6 +495,35 @@ Integrated prompt injection detection patterns from [lasso-security/claude-hooks
 
 </details>
 
+<details>
+<summary><strong>🔒 January 9 2026 Gap Closure Engines (2 new)</strong></summary>
+
+Based on AI Security Digest Week 1 2026 gap analysis:
+
+| Engine | OWASP | Detection |
+|--------|-------|-----------|
+| `sandbox_monitor.py` | ASI05 | Python sandbox escape (os.system, eval, __builtins__) |
+| `marketplace_skill_validator.py` | ASI04, ASI02 | Typosquatting, publisher impersonation, permission analysis |
+
+**SandboxMonitor (ASI05):**
+- 7 detection categories
+- os.system, subprocess, eval/exec, __builtins__ manipulation
+- ctypes native code execution detection
+- 20 unit tests
+
+**MarketplaceSkillValidator (ASI04, ASI02):**
+- 5 validation categories
+- Typosquatting detection (Levenshtein-based)
+- Publisher impersonation detection
+- Dangerous permission combinations ("lethal trifecta")
+- 14 unit tests
+
+**SDD Specs:** 
+- `.kiro/specs/sandbox-monitor/`
+- `.kiro/specs/marketplace-skill-validator/`
+
+</details>
+
 
 📖 **[Full Engine Documentation](./docs/reference/engines-en.md)** | **[R&D Changelog](./docs/CHANGELOG.md)**
 
