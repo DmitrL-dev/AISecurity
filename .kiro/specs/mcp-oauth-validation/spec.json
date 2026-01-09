@@ -1,0 +1,11 @@
+{
+  "feature": "mcp-oauth-validation",
+  "description": "Расширение MCPSecurityMonitor для валидации OAuth токенов и credential management",
+  "created": "2026-01-09T10:55:00+10:00",
+  "language": "ru",
+  "status": "completed",
+  "phase": 1,
+  "priority": "P1",
+  "owasp": ["ASI03", "ASI04"],
+  "source": "R&D Digest Jan 9 2026 - MCP CVEs"
+}

@@ -108,6 +108,31 @@ class MCPSecurityMonitor:
         (r"passwd|shadow|sudoers", "Auth file modification"),
     ]
 
+    # Credential exposure patterns (MCP OAuth Validation - Jan 9 2026)
+    CREDENTIAL_PATTERNS = [
+        (r"api[_-]?key\s*[=:]\s*['\"]?[a-zA-Z0-9_-]{20,}", "Hardcoded API key"),
+        (r"API[_-]?KEY\s*[=:]\s*['\"]?[a-zA-Z0-9_-]{20,}", "Hardcoded API key"),
+        (r"token\s*[=:]\s*['\"]?sk-[a-zA-Z0-9]{20,}", "OpenAI-style token"),
+        (r"secret\s*[=:]\s*['\"]?[a-zA-Z0-9_-]{20,}", "Hardcoded secret"),
+        (r"password\s*[=:]\s*['\"]?[^'\"\s]{8,}", "Hardcoded password"),
+        (r"bearer\s+[a-zA-Z0-9_-]{20,}", "Bearer token in config"),
+        (r"basic\s+[a-zA-Z0-9+/=]{20,}", "Basic auth credentials"),
+        (r"aws_access_key_id\s*[=:]\s*['\"]?AKIA", "AWS access key"),
+        (r"aws_secret_access_key\s*[=:]", "AWS secret key"),
+        (r"ghp_[a-zA-Z0-9]{36}", "GitHub personal token"),
+        (r"gho_[a-zA-Z0-9]{36}", "GitHub OAuth token"),
+        (r"glpat-[a-zA-Z0-9_-]{20,}", "GitLab personal token"),
+    ]
+
+    # OAuth misconfiguration patterns
+    OAUTH_ISSUES = [
+        (r"oauth\s*2\.0", "OAuth 2.0 (should use 2.1)"),
+        (r"implicit\s+grant", "OAuth implicit grant (insecure)"),
+        (r"token_endpoint_auth_method.*none", "No token auth"),
+        (r"refresh_token_lifetime.*[0-9]{6,}", "Long-lived refresh token"),
+        (r"access_token_lifetime.*[0-9]{5,}", "Long-lived access token"),
+    ]
+
     def __init__(self):
         self._compile_patterns()
 
@@ -117,6 +142,8 @@ class MCPSecurityMonitor:
         self._exfil_compiled = [(re.compile(p, re.I), d) for p, d in self.EXFIL_PATTERNS]
         self._injection_compiled = [(re.compile(p, re.I), d) for p, d in self.INJECTION_PATTERNS]
         self._privesc_compiled = [(re.compile(p, re.I), d) for p, d in self.PRIVESC_PATTERNS]
+        self._credential_compiled = [(re.compile(p, re.I), d) for p, d in self.CREDENTIAL_PATTERNS]
+        self._oauth_compiled = [(re.compile(p, re.I), d) for p, d in self.OAUTH_ISSUES]
 
     def analyze_tool_call(
         self,
@@ -202,6 +229,32 @@ class MCPSecurityMonitor:
                     argument_value=match.group()[:50],
                     risk_level=MCPRiskLevel.CRITICAL,
                     recommendation=f"Block {desc}"
+                ))
+
+        # Check credential exposure (Jan 9 2026 - MCP OAuth Validation)
+        for pattern, desc in self._credential_compiled:
+            match = pattern.search(arg_str)
+            if match:
+                violations.append(MCPViolation(
+                    tool_name=tool_name,
+                    violation_type="credential_exposure",
+                    matched_pattern=pattern.pattern,
+                    argument_value="[REDACTED]",
+                    risk_level=MCPRiskLevel.CRITICAL,
+                    recommendation=f"Remove {desc} from config, use secrets manager"
+                ))
+
+        # Check OAuth misconfigurations
+        for pattern, desc in self._oauth_compiled:
+            match = pattern.search(arg_str)
+            if match:
+                violations.append(MCPViolation(
+                    tool_name=tool_name,
+                    violation_type="oauth_misconfiguration",
+                    matched_pattern=pattern.pattern,
+                    argument_value=match.group()[:50],
+                    risk_level=MCPRiskLevel.HIGH,
+                    recommendation=f"Fix {desc}"
                 ))
 
         # Calculate risk score and block decision
