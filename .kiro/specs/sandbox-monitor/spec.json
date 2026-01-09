@@ -1,0 +1,10 @@
+{
+  "feature": "sandbox-monitor",
+  "description": "Детекция Python sandbox escape техник в AI coding assistants (Copilot, Claude Code)",
+  "created": "2026-01-09T09:58:00+10:00",
+  "language": "ru",
+  "status": "completed",
+  "phase": 1,
+  "priority": "P1",
+  "owasp": "ASI05"
+}

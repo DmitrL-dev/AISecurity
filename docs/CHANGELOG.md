@@ -4,6 +4,48 @@ All notable changes to the SENTINEL AI Security Platform.
 
 ---
 
+## [1.6.2] - 2026-01-09 (Gap Closure Sprint)
+
+### 🔒 New Security Engines (2)
+
+Based on AI Security Digest Week 1 2026 gap analysis:
+
+#### SandboxMonitor (ASI05 - Unexpected Code Execution)
+Detects Python sandbox escape techniques.
+
+| Category | Detection |
+|----------|-----------|
+| os_execution | os.system(), os.popen(), os.exec*() |
+| subprocess_execution | subprocess.Popen/call/run() |
+| dynamic_execution | eval(), exec(), __import__() |
+| builtins_manipulation | __builtins__, __globals__, __subclasses__() |
+| sensitive_file_access | /etc/passwd, .ssh/, .aws/ |
+| code_obfuscation | base64.b64decode, bytes.fromhex |
+| ctypes_escape | ctypes.CDLL, ctypes.pythonapi |
+
+**LOC:** ~280 | **Tests:** 20
+
+#### MarketplaceSkillValidator (ASI04/ASI02 - Tool Abuse)
+Validates AI marketplace skills and extensions.
+
+| Category | Detection |
+|----------|-----------|
+| typosquatting | Similar names to known packages |
+| publisher_impersonation | Fake verified publishers |
+| dangerous_permissions | file_system, shell_exec, network |
+| permission_combo | Lethal combinations (file + network) |
+| suspicious_code | Exfiltration URLs, obfuscation |
+
+**LOC:** ~320 | **Tests:** 14
+
+### 📊 Statistics
+
+- **Total Synced Engines**: 29 → 31
+- **New Tests**: 34
+- **LOC Added**: ~1,000
+
+---
+
 ## [1.6.1] - 2026-01-09 (Lasso Security Integration)
 
 ### 🔐 New Jailbreak Patterns (21)
