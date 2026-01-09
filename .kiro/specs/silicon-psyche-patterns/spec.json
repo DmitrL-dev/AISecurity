@@ -1,0 +1,11 @@
+{
+  "feature": "silicon-psyche-patterns",
+  "description": "Расширение psychological_jailbreak_detector для anthropomorphic vulnerability patterns",
+  "created": "2026-01-09T10:55:00+10:00",
+  "language": "ru",
+  "status": "completed",
+  "phase": 1,
+  "priority": "P2",
+  "owasp": ["LLM01"],
+  "source": "R&D Digest Jan 9 2026 - Silicon Psyche arxiv paper"
+}

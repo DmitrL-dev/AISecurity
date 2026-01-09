@@ -50,5 +50,18 @@ pytest, unittest, 113+ тестов SHIELD, 42 теста IMMUNE
 - **No ORM** — прямой SQL для производительности и прозрачности
 - **Spec-Driven Development** — обязательный workflow через CC-SDD
 
+## ⚠️ Обязательное правило: SDD First
+
+**ВСЕ новые engines/модули ОБЯЗАНЫ начинаться с SDD:**
+
+1. **Requirements** → `.kiro/specs/{feature}/requirements.md`
+2. **Design** → `.kiro/specs/{feature}/design.md`
+3. **Tasks** → `.kiro/specs/{feature}/tasks.md`
+4. **Implementation** → только после approval
+5. **Verification** → тесты из spec test plan
+
+Без SDD спецификации код не пишется.
+
 ---
 _Документируем стандарты и паттерны, а не каждую зависимость_
+

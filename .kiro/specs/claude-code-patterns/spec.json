@@ -1,0 +1,11 @@
+{
+  "feature": "claude-code-patterns",
+  "description": "Паттерны детекции для CVE-2025-64755 и Claude Code специфичных bypass техник",
+  "created": "2026-01-09T10:55:00+10:00",
+  "language": "ru",
+  "status": "completed",
+  "phase": 1,
+  "priority": "P2",
+  "owasp": ["LLM01", "ASI05"],
+  "source": "R&D Digest Jan 9 2026 - Claude Code RCE, GTG-1002 APT"
+}

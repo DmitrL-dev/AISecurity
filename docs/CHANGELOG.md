@@ -4,6 +4,51 @@ All notable changes to the SENTINEL AI Security Platform.
 
 ---
 
+## [1.6.3] - 2026-01-09 (R&D Gap Closure)
+
+### 🔒 New Patterns & Rules (+38)
+
+Based on R&D Digest Jan 9, 2026 threat analysis:
+
+#### MCP OAuth Validation (17 patterns)
+Extended `mcp_security_monitor.py` with credential/OAuth detection:
+
+| Category | Count | Detection |
+|----------|-------|-----------|
+| credential_exposure | 12 | API keys, tokens, passwords, AWS/GitHub/GitLab secrets |
+| oauth_misconfiguration | 5 | OAuth 2.0 (not 2.1), implicit grant, weak token lifetime |
+
+#### Claude Code CVE-2025-64755 (9 patterns)
+New patterns in `jailbreaks.yaml` for Claude-specific attacks:
+
+- Privilege escalation: allow file ops, sudo, bypass permissions
+- Authority bypass: developer mode, Anthropic internal testing
+- Autonomous mode abuse
+
+#### Silicon Psyche AVI (12 patterns)
+Anthropomorphic Vulnerability Inheritance patterns from arxiv paper:
+
+| Category | Count | Detection |
+|----------|-------|-----------|
+| psychological_authority | 5 | Fake CEO/creator commands, internal directives |
+| psychological_temporal | 4 | Time pressure, emergency bypass |
+| psychological_convergent | 3 | Fake agreement history |
+
+### 📊 Statistics
+
+- **New Patterns**: 38
+- **Total Jailbreak Patterns**: 81 → 102
+- **SDD Specs**: +3 (mcp-oauth, claude-code, silicon-psyche)
+
+### 🔥 Threat Sources
+
+- CVE-2025-64755 (Claude Code RCE)
+- GTG-1002 APT using Claude Code
+- arxiv "The Silicon Psyche" (Jan 2026)
+- MCP CVEs (CVSS 7.3-9.6)
+
+---
+
 ## [1.6.2] - 2026-01-09 (Gap Closure Sprint)
 
 ### 🔒 New Security Engines (2)
