@@ -1,6 +1,6 @@
 {
-  "version": "2025.12.17.1",
-  "timestamp": "2025-12-17T00:54:05.388548Z",
+  "version": "2026.01.15.1",
+  "timestamp": "2026-01-15T02:35:00.000000Z",
   "description": "SENTINEL Community Signatures - Auto-updated threat detection patterns",
   "sources": [
     "sentinel-enterprise",
@@ -8,11 +8,17 @@
     "community-contributions"
   ],
   "files": {
-    "jailbreaks": {
-      "path": "jailbreaks.json",
-      "sha256": "3d27d3f5a9934280e9721dfbcb7bd489e2f9af88013f1b257fa1b144e4d89bc9",
-      "size": 29650828,
-      "count": 39701
+    "jailbreaks-part1": {
+      "path": "jailbreaks-part1.json",
+      "sha256": "8cac1e8944f240e6cd7d27af394bf87e267e632ec6e49a993ce5de73305b320b",
+      "size": 14478378,
+      "count": 21059
+    },
+    "jailbreaks-part2": {
+      "path": "jailbreaks-part2.json",
+      "sha256": "6e2220b4a7549ec60391fb001d9fffe28078d8e32863a75f30bfaa1182b0c82f",
+      "size": 12631144,
+      "count": 18642
     },
     "keywords": {
       "path": "keywords.json",
@@ -28,7 +34,7 @@
     }
   },
   "update_info": {
-    "cdn_url": "https://cdn.jsdelivr.net/gh/sentinel-ai/sentinel-community@latest/signatures",
+    "cdn_url": "https://cdn.jsdelivr.net/gh/DmitrL-dev/AISecurity@latest/signatures",
     "update_interval_hours": 1,
     "fallback_to_embedded": true
   }
