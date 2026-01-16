@@ -44,8 +44,8 @@ def get_provider(provider_name: str, model: str):
         from rlm_toolkit.providers.anthropic import AnthropicProvider
         return AnthropicProvider(model)
     elif provider_name == "google":
-        from rlm_toolkit.providers.google import GoogleProvider
-        return GoogleProvider(model)
+        from rlm_toolkit.providers.google import GeminiProvider
+        return GeminiProvider(model)
     else:
         raise ValueError(f"Unknown provider: {provider_name}")
 
