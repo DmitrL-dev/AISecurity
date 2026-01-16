@@ -4,6 +4,7 @@
 [![PyPI](https://img.shields.io/pypi/v/rlm-toolkit.svg)](https://pypi.org/project/rlm-toolkit/)
 [![Python](https://img.shields.io/pypi/pyversions/rlm-toolkit.svg)](https://pypi.org/project/rlm-toolkit/)
 [![License](https://img.shields.io/badge/license-Apache%202.0-blue.svg)](LICENSE)
+[![Integrations](https://img.shields.io/badge/integrations-287%2B-brightgreen.svg)](docs/INTEGRATIONS.md)
 
 **Recursive Language Models Toolkit** — библиотека для обработки контекстов произвольной длины (10M+ токенов) с использованием рекурсивных вызовов LLM.
 
@@ -31,10 +32,15 @@ print(result.answer)
 |---------|-------------|
 | **Infinite Context** | Process 10M+ tokens with O(1) memory |
 | **Secure REPL** | CIRCLE-compliant sandboxed code execution |
-| **Multi-Provider** | OpenAI, Anthropic, Google, Ollama |
+| **Multi-Provider** | 75 LLM providers (OpenAI, Anthropic, Google, Ollama, vLLM...) |
+| **Document Loaders** | 135+ sources (Slack, Jira, GitHub, S3, databases...) |
+| **Vector Stores** | 20+ stores (Pinecone, Chroma, Weaviate, pgvector...) |
+| **Embeddings** | 15+ providers (OpenAI, BGE, E5, Jina, Cohere...) |
 | **Cost Control** | Budget limits, cost tracking |
-| **Observability** | OpenTelemetry, Langfuse, LangSmith |
+| **Observability** | OpenTelemetry, Langfuse, LangSmith, W&B |
 | **Memory Systems** | Buffer, Episodic (EM-LLM inspired) |
+
+> 📋 **[Full Integration Catalog](docs/INTEGRATIONS.md)** — 287+ production-ready integrations
 
 ## 📦 Installation
 
