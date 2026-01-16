@@ -194,10 +194,10 @@ RULES:
             Configured RLM instance
         """
         from rlm_toolkit.providers.ollama import OllamaProvider
-        from rlm_toolkit.providers.base import ResilientProvider
+        from rlm_toolkit.providers.base import ResilientProvider, LLMProvider
         
-        root = OllamaProvider(model)
-        sub = OllamaProvider(sub_model) if sub_model else None
+        root: LLMProvider = OllamaProvider(model)
+        sub: Optional[LLMProvider] = OllamaProvider(sub_model) if sub_model else None
         
         if resilient:
             root = ResilientProvider(root)
@@ -226,10 +226,10 @@ RULES:
             Configured RLM instance
         """
         from rlm_toolkit.providers.openai import OpenAIProvider
-        from rlm_toolkit.providers.base import ResilientProvider
+        from rlm_toolkit.providers.base import ResilientProvider, LLMProvider
         
-        root = OpenAIProvider(root_model)
-        sub = OpenAIProvider(sub_model)
+        root: LLMProvider = OpenAIProvider(root_model)
+        sub: LLMProvider = OpenAIProvider(sub_model)
         
         if resilient:
             root = ResilientProvider(root)
@@ -253,10 +253,10 @@ RULES:
             resilient: Wrap with ResilientProvider for retry/rate limiting (default: True)
         """
         from rlm_toolkit.providers.anthropic import AnthropicProvider
-        from rlm_toolkit.providers.base import ResilientProvider
+        from rlm_toolkit.providers.base import ResilientProvider, LLMProvider
         
-        root = AnthropicProvider(root_model)
-        sub = AnthropicProvider(sub_model)
+        root: LLMProvider = AnthropicProvider(root_model)
+        sub: LLMProvider = AnthropicProvider(sub_model)
         
         if resilient:
             root = ResilientProvider(root)

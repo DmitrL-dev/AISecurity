@@ -8,7 +8,7 @@ Metrics for evaluating RLM outputs.
 from __future__ import annotations
 
 from abc import ABC, abstractmethod
-from typing import List, Optional
+from typing import Callable, List, Optional
 import re
 
 
@@ -91,7 +91,7 @@ class SemanticSimilarity(Metric):
     For more advanced similarity, use with embedding function.
     """
     
-    def __init__(self, embed_fn: Optional[callable] = None):
+    def __init__(self, embed_fn: Optional["Callable"] = None):
         """Initialize.
         
         Args:

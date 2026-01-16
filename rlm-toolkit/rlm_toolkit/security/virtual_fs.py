@@ -51,10 +51,10 @@ class VirtualFile:
             if "r" in mode or "a" in mode:
                 # Read existing content for read or append mode
                 try:
-                    content = fs.read_text(path)
+                    text_content = fs.read_text(path)
                 except FileNotFoundError:
-                    content = ""
-                self._buffer = io.StringIO(content)
+                    text_content = ""
+                self._buffer = io.StringIO(text_content)
                 if "a" in mode:
                     self._buffer.seek(0, 2)  # Seek to end for append
             else:
@@ -72,7 +72,15 @@ class VirtualFile:
     def write(self, data: Union[str, bytes]) -> int:
         if "r" in self._mode and "+" not in self._mode:
             raise IOError("File not open for writing")
-        return self._buffer.write(data)
+        # Type-safe write based on buffer type
+        if isinstance(self._buffer, io.BytesIO):
+            if isinstance(data, str):
+                data = data.encode()
+            return self._buffer.write(data)
+        else:
+            if isinstance(data, bytes):
+                data = data.decode()
+            return self._buffer.write(data)
     
     def close(self) -> None:
         if not self._closed:
@@ -136,7 +144,7 @@ class VirtualFS:
         if not path.startswith("/"):
             path = "/" + path
         # Resolve . and ..
-        parts = []
+        parts: list[str] = []
         for part in path.split("/"):
             if part == "..":
                 if parts:

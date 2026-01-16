@@ -11,7 +11,7 @@ import platform
 import sys
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
-from typing import Callable, Optional, TYPE_CHECKING
+from typing import Any, Callable, Optional, TYPE_CHECKING
 
 
 @dataclass
@@ -51,7 +51,7 @@ class PlatformGuards(ABC):
         timeout: float,
         *args, 
         **kwargs
-    ) -> tuple[bool, any]:
+    ) -> tuple[bool, Any]:
         """Execute function with timeout.
         
         Returns:
@@ -106,7 +106,7 @@ class LinuxGuards(PlatformGuards):
         timeout: float,
         *args, 
         **kwargs
-    ) -> tuple[bool, any]:
+    ) -> tuple[bool, Any]:
         import signal
         
         def handler(signum, frame):
@@ -158,7 +158,7 @@ class MacOSGuards(PlatformGuards):
         timeout: float,
         *args, 
         **kwargs
-    ) -> tuple[bool, any]:
+    ) -> tuple[bool, Any]:
         # Same as Linux
         import signal
         
@@ -212,7 +212,7 @@ class WindowsGuards(PlatformGuards):
         timeout: float,
         *args, 
         **kwargs
-    ) -> tuple[bool, any]:
+    ) -> tuple[bool, Any]:
         """Use threading for Windows timeout."""
         import threading
         import queue
@@ -272,7 +272,7 @@ class DockerGuards(PlatformGuards):
         timeout: float,
         *args, 
         **kwargs
-    ) -> tuple[bool, any]:
+    ) -> tuple[bool, Any]:
         # Use Linux-style signal timeout
         import signal
         
