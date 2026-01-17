@@ -1,0 +1,100 @@
+site_name: RLM-Toolkit Documentation
+site_url: https://rlm-toolkit.readthedocs.io/
+site_description: "The Self-Improving, Never-Forgetting, Infinitely-Scalable AI Framework"
+site_author: SENTINEL Team
+
+repo_name: sentinel-community/rlm-toolkit
+repo_url: https://github.com/sentinel-community/rlm-toolkit
+
+theme:
+  name: material
+  language: en
+  features:
+    - navigation.tabs
+    - navigation.sections
+    - navigation.expand
+    - navigation.top
+    - search.suggest
+    - search.highlight
+    - content.code.copy
+    - content.tabs.link
+  palette:
+    - scheme: slate
+      primary: deep purple
+      accent: amber
+      toggle:
+        icon: material/brightness-4
+        name: Switch to light mode
+    - scheme: default
+      primary: deep purple
+      accent: amber
+      toggle:
+        icon: material/brightness-7
+        name: Switch to dark mode
+
+plugins:
+  - search
+  - i18n:
+      default_language: en
+      languages:
+        - locale: en
+          name: English
+          build: true
+        - locale: ru
+          name: Русский
+          build: true
+
+nav:
+  - Home: index.md
+  - Quickstart: quickstart.md
+  - Tutorials:
+    - First Application: tutorials/01-first-app.md
+    - Build a Chatbot: tutorials/02-chatbot.md
+    - RAG Pipeline: tutorials/03-rag.md
+    - Agents: tutorials/04-agents.md
+    - Memory Systems: tutorials/05-memory.md
+    - InfiniRetri: tutorials/06-infiniretri.md
+    - Hierarchical Memory: tutorials/07-hmem.md
+    - Self-Evolving: tutorials/08-self-evolving.md
+    - Multi-Agent: tutorials/09-multiagent.md
+  - Concepts:
+    - Overview: concepts/overview.md
+    - Providers: concepts/providers.md
+    - Document Loaders: concepts/loaders.md
+    - Vector Stores: concepts/vectorstores.md
+    - Memory: concepts/memory.md
+    - Agents: concepts/agents.md
+    - InfiniRetri: concepts/infiniretri.md
+    - H-MEM: concepts/hmem.md
+    - Self-Evolving: concepts/self-evolving.md
+    - Security: concepts/security.md
+  - How-to Guides:
+    - Providers: how-to/providers.md
+    - Document Loading: how-to/loaders.md
+    - Vector Stores: how-to/vectorstores.md
+  - API Reference: api/index.md
+  - Integrations: integrations.md
+
+markdown_extensions:
+  - pymdownx.highlight:
+      anchor_linenums: true
+  - pymdownx.superfences
+  - pymdownx.tabbed:
+      alternate_style: true
+  - admonition
+  - pymdownx.details
+  - attr_list
+  - md_in_html
+  - tables
+
+extra:
+  social:
+    - icon: fontawesome/brands/github
+      link: https://github.com/sentinel-community/rlm-toolkit
+  alternate:
+    - name: English
+      link: /en/
+      lang: en
+    - name: Русский
+      link: /ru/
+      lang: ru
