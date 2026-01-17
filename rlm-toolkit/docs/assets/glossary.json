@@ -1,0 +1,164 @@
+{
+  "terms": {
+    "llm": {
+      "term": "LLM",
+      "full": "Large Language Model",
+      "short": "AI model trained on vast text data that can understand and generate human-like text",
+      "long": "A Large Language Model (LLM) is a type of artificial intelligence trained on massive amounts of text data. These models can understand context, answer questions, write code, and perform various language tasks. Examples include GPT-4, Claude, and Llama.",
+      "related": ["prompt", "token", "fine-tuning"],
+      "example": "rlm = RLM.from_openai('gpt-4o')"
+    },
+    "rag": {
+      "term": "RAG",
+      "full": "Retrieval-Augmented Generation",
+      "short": "Technique where LLM retrieves relevant documents before generating a response",
+      "long": "RAG combines the power of LLMs with external knowledge retrieval. Instead of relying only on training data, the model first searches a knowledge base for relevant information, then uses that context to generate more accurate, up-to-date responses.",
+      "related": ["vector-store", "embedding", "retriever"],
+      "example": "retriever = vectorstore.as_retriever()\nrlm.set_retriever(retriever)"
+    },
+    "embedding": {
+      "term": "Embedding",
+      "full": "Vector Embedding",
+      "short": "Numerical representation of text that captures semantic meaning",
+      "long": "Embeddings convert text into vectors (lists of numbers) where similar meanings are close together in vector space. This allows computers to understand semantic similarity between texts, enabling search, clustering, and recommendations.",
+      "related": ["vector-store", "similarity-search", "rag"],
+      "example": "embeddings = OpenAIEmbeddings()\nvector = embeddings.embed_query('Hello world')"
+    },
+    "vector-store": {
+      "term": "Vector Store",
+      "full": "Vector Database",
+      "short": "Database optimized for storing and searching vector embeddings",
+      "long": "Vector stores are specialized databases designed to efficiently store and query high-dimensional vectors. They enable fast similarity search, which is essential for RAG applications. Popular options include Chroma, Pinecone, Weaviate, and FAISS.",
+      "related": ["embedding", "similarity-search", "rag"],
+      "example": "vectorstore = ChromaVectorStore.from_documents(docs, embeddings)"
+    },
+    "agent": {
+      "term": "Agent",
+      "full": "AI Agent",
+      "short": "LLM that can use tools and take actions to accomplish tasks",
+      "long": "An AI Agent is an LLM enhanced with the ability to use external tools (search, calculators, APIs) and make decisions about which actions to take. Agents can break down complex tasks into steps and execute them autonomously.",
+      "related": ["tool", "react", "chain-of-thought"],
+      "example": "agent = ReActAgent.from_openai('gpt-4o', tools=[search, calculator])"
+    },
+    "tool": {
+      "term": "Tool",
+      "full": "Agent Tool",
+      "short": "Function that an agent can call to interact with external systems",
+      "long": "Tools are functions that agents can invoke to perform specific actions like web searches, database queries, calculations, or API calls. Each tool has a name, description, and implementation that the agent uses to decide when and how to use it.",
+      "related": ["agent", "function-calling"],
+      "example": "@Tool(name='search', description='Search the web')\ndef search(query: str) -> str:\n    return results"
+    },
+    "prompt": {
+      "term": "Prompt",
+      "full": "Prompt / System Prompt",
+      "short": "Text instruction given to an LLM to guide its behavior",
+      "long": "A prompt is the input text that tells the LLM what to do. System prompts set the overall behavior and personality, while user prompts contain the actual request. Good prompt engineering is crucial for getting quality outputs.",
+      "related": ["llm", "prompt-engineering", "template"],
+      "example": "rlm.set_system_prompt('You are a helpful coding assistant.')"
+    },
+    "token": {
+      "term": "Token",
+      "full": "Token",
+      "short": "Smallest unit of text that LLMs process (roughly 4 characters)",
+      "long": "Tokens are the basic units LLMs use to process text. One token is approximately 4 characters or 0.75 words in English. LLM pricing and context limits are measured in tokens. Understanding tokenization helps optimize costs and fit more context.",
+      "related": ["context-window", "llm", "cost"],
+      "example": "# 'Hello world' ≈ 2 tokens\n# 1000 tokens ≈ 750 words"
+    },
+    "context-window": {
+      "term": "Context Window",
+      "full": "Context Window / Context Length",
+      "short": "Maximum amount of text an LLM can process at once",
+      "long": "The context window is the maximum number of tokens an LLM can consider in a single request (input + output combined). GPT-4o has 128K tokens, Claude 3 has 200K. Larger contexts allow processing longer documents but cost more.",
+      "related": ["token", "infiniretri", "llm"],
+      "example": "# GPT-4o: 128K tokens ≈ 96K words\n# Claude 3: 200K tokens ≈ 150K words"
+    },
+    "memory": {
+      "term": "Memory",
+      "full": "Conversational Memory",
+      "short": "System for storing and recalling past conversation context",
+      "long": "Memory allows LLMs to remember previous messages in a conversation. Different memory types exist: Buffer (stores all messages), Summary (compresses old messages), and Hierarchical (multi-level storage). Good memory management is key for chatbots.",
+      "related": ["hmem", "buffer", "context-window"],
+      "example": "memory = BufferMemory(max_messages=20)\nrlm.set_memory(memory)"
+    },
+    "loader": {
+      "term": "Loader",
+      "full": "Document Loader",
+      "short": "Component that reads documents from various sources into the system",
+      "long": "Loaders extract text content from different file formats (PDF, DOCX, HTML, CSV) and sources (local files, URLs, databases, APIs). They handle the complexities of parsing and return standardized Document objects for further processing.",
+      "related": ["splitter", "document", "rag"],
+      "example": "loader = PDFLoader('document.pdf')\ndocs = loader.load()"
+    },
+    "splitter": {
+      "term": "Splitter",
+      "full": "Text Splitter",
+      "short": "Breaks large documents into smaller chunks for processing",
+      "long": "Splitters divide long documents into smaller, manageable chunks that fit within LLM context windows. Smart splitting preserves semantic meaning by splitting at natural boundaries (paragraphs, sentences) with overlap to maintain context.",
+      "related": ["loader", "chunk", "rag"],
+      "example": "splitter = RecursiveTextSplitter(chunk_size=1000)\nchunks = splitter.split_documents(docs)"
+    },
+    "retriever": {
+      "term": "Retriever",
+      "full": "Document Retriever",
+      "short": "Component that finds relevant documents for a query",
+      "long": "Retrievers search through document collections to find the most relevant pieces for a given query. They can use vector similarity, keyword matching, or hybrid approaches. The quality of retrieval directly impacts RAG performance.",
+      "related": ["rag", "vector-store", "similarity-search"],
+      "example": "retriever = vectorstore.as_retriever(k=5)\nrelevant_docs = retriever.get_relevant_documents(query)"
+    },
+    "callback": {
+      "term": "Callback",
+      "full": "Callback Handler",
+      "short": "Hook that runs during LLM operations for logging, monitoring, etc.",
+      "long": "Callbacks are functions triggered at specific points during LLM execution (start, end, error). They enable logging, monitoring, streaming output, cost tracking, and custom behavior without modifying core logic.",
+      "related": ["streaming", "observability", "logging"],
+      "example": "callback = TokenCounterCallback()\nrlm = RLM.from_openai('gpt-4o', callbacks=[callback])"
+    },
+    "infiniretri": {
+      "term": "InfiniRetri",
+      "full": "Infinite Retrieval",
+      "short": "RLM's technique for handling unlimited context through dynamic retrieval",
+      "long": "InfiniRetri is RLM-Toolkit's unique approach to overcoming context window limits. It dynamically retrieves and injects only the most relevant context for each query, allowing effective processing of documents far exceeding the model's native context.",
+      "related": ["rag", "context-window", "retriever"],
+      "example": "config = RLMConfig(enable_infiniretri=True)\nrlm = RLM.from_openai('gpt-4o', config=config)"
+    },
+    "hmem": {
+      "term": "H-MEM",
+      "full": "Hierarchical Memory",
+      "short": "Multi-level memory system inspired by human cognition",
+      "long": "H-MEM organizes memory into levels: working (immediate context), episodic (specific events), and semantic (distilled knowledge). This mirrors human memory and enables efficient long-term context management without context overflow.",
+      "related": ["memory", "context-window", "agent"],
+      "example": "memory = HierarchicalMemory()\nmemory.add_episode('User asked about Python')"
+    },
+    "self-evolving": {
+      "term": "Self-Evolving",
+      "full": "Self-Evolving LLM / R-Zero",
+      "short": "LLM that improves its own outputs through reflection",
+      "long": "Self-Evolving LLMs (R-Zero pattern) use a Challenger-Solver architecture where one model critiques outputs and another improves them iteratively. This leads to higher quality results without human intervention.",
+      "related": ["agent", "chain-of-thought", "reflection"],
+      "example": "evolving = SelfEvolvingRLM(challenger='claude-3', solver='gpt-4o')"
+    },
+    "multiagent": {
+      "term": "Multi-Agent",
+      "full": "Multi-Agent System",
+      "short": "Multiple AI agents collaborating to solve complex tasks",
+      "long": "Multi-Agent systems coordinate multiple specialized agents, each with different roles and capabilities. They can work in parallel, debate solutions, or form hierarchies with managers and workers for complex problem-solving.",
+      "related": ["agent", "meta-matrix", "orchestration"],
+      "example": "matrix = MetaMatrix(agents=[researcher, analyst, writer])"
+    },
+    "prompt-injection": {
+      "term": "Prompt Injection",
+      "full": "Prompt Injection Attack",
+      "short": "Security attack where malicious input hijacks LLM behavior",
+      "long": "Prompt injection is a security vulnerability where attackers craft inputs that override or bypass the system's instructions. Examples include 'ignore previous instructions' attacks. Defending against this requires input validation and output filtering.",
+      "related": ["security", "jailbreak", "guardrails"],
+      "example": "detector = PromptInjectionDetector()\nresult = detector.detect(user_input)"
+    },
+    "fine-tuning": {
+      "term": "Fine-tuning",
+      "full": "Model Fine-tuning",
+      "short": "Training an existing LLM on your specific data to customize it",
+      "long": "Fine-tuning adapts a pre-trained LLM to your specific domain or task by training it on custom examples. This can improve performance for specialized tasks, reduce prompt length, and lower inference costs compared to few-shot prompting.",
+      "related": ["llm", "training", "domain-adaptation"],
+      "example": "# Fine-tuning is done outside RLM\n# Then use: rlm = RLM.from_openai('ft:gpt-4o:my-model')"
+    }
+  }
+}

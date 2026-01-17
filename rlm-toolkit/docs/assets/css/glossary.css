@@ -1,0 +1,341 @@
+/* ===========================================
+   RLM Academy - Interactive Glossary Styles
+   =========================================== */
+
+/* Glossary term links in documentation */
+.glossary-term {
+  color: var(--md-accent-fg-color, #7c4dff);
+  text-decoration: underline dotted;
+  text-underline-offset: 2px;
+  cursor: help;
+  position: relative;
+  font-weight: 500;
+}
+
+.glossary-term:hover {
+  text-decoration: underline solid;
+  color: var(--md-accent-fg-color--light, #b388ff);
+}
+
+/* Tooltip container */
+.glossary-tooltip {
+  position: absolute;
+  bottom: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 1000;
+
+  /* Appearance */
+  background: linear-gradient(135deg, #2d2d3a 0%, #1a1a24 100%);
+  border: 1px solid rgba(124, 77, 255, 0.3);
+  border-radius: 12px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3), 0 0 0 1px rgba(124, 77, 255, 0.1);
+
+  /* Size */
+  width: 320px;
+  max-width: 90vw;
+  padding: 16px;
+  margin-bottom: 12px;
+
+  /* Animation */
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.2s ease, visibility 0.2s ease, transform 0.2s ease;
+  transform: translateX(-50%) translateY(8px);
+}
+
+.glossary-term:hover .glossary-tooltip,
+.glossary-term:focus .glossary-tooltip {
+  opacity: 1;
+  visibility: visible;
+  transform: translateX(-50%) translateY(0);
+}
+
+/* Tooltip arrow */
+.glossary-tooltip::after {
+  content: "";
+  position: absolute;
+  top: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+  border: 8px solid transparent;
+  border-top-color: #1a1a24;
+}
+
+/* Tooltip content */
+.glossary-tooltip__term {
+  font-size: 14px;
+  font-weight: 700;
+  color: #b388ff;
+  margin-bottom: 4px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.glossary-tooltip__term::before {
+  content: "📖";
+  font-size: 12px;
+}
+
+.glossary-tooltip__full {
+  font-size: 11px;
+  color: rgba(255, 255, 255, 0.5);
+  margin-bottom: 8px;
+  font-style: italic;
+}
+
+.glossary-tooltip__short {
+  font-size: 13px;
+  color: rgba(255, 255, 255, 0.9);
+  line-height: 1.5;
+  margin-bottom: 12px;
+}
+
+.glossary-tooltip__example {
+  background: rgba(0, 0, 0, 0.3);
+  border-radius: 6px;
+  padding: 8px 10px;
+  font-family: "Fira Code", "Consolas", monospace;
+  font-size: 11px;
+  color: #a8e6cf;
+  overflow-x: auto;
+  white-space: pre;
+}
+
+.glossary-tooltip__link {
+  display: block;
+  margin-top: 10px;
+  font-size: 11px;
+  color: #7c4dff;
+  text-decoration: none;
+}
+
+.glossary-tooltip__link:hover {
+  text-decoration: underline;
+}
+
+/* Related terms */
+.glossary-tooltip__related {
+  margin-top: 10px;
+  padding-top: 10px;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+  font-size: 11px;
+  color: rgba(255, 255, 255, 0.5);
+}
+
+.glossary-tooltip__related-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  margin-top: 4px;
+}
+
+.glossary-tooltip__related-tag {
+  background: rgba(124, 77, 255, 0.2);
+  color: #b388ff;
+  padding: 2px 8px;
+  border-radius: 10px;
+  font-size: 10px;
+  text-decoration: none;
+}
+
+.glossary-tooltip__related-tag:hover {
+  background: rgba(124, 77, 255, 0.4);
+}
+
+/* ===========================================
+   Glossary Page Styles
+   =========================================== */
+
+.glossary-page {
+  max-width: 900px;
+}
+
+.glossary-search {
+  width: 100%;
+  padding: 12px 16px;
+  border: 2px solid rgba(124, 77, 255, 0.3);
+  border-radius: 8px;
+  background: rgba(0, 0, 0, 0.2);
+  color: inherit;
+  font-size: 16px;
+  margin-bottom: 24px;
+  transition: border-color 0.2s ease;
+}
+
+.glossary-search:focus {
+  outline: none;
+  border-color: #7c4dff;
+}
+
+.glossary-search::placeholder {
+  color: rgba(255, 255, 255, 0.4);
+}
+
+.glossary-categories {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 24px;
+}
+
+.glossary-category-btn {
+  padding: 6px 14px;
+  border: 1px solid rgba(124, 77, 255, 0.3);
+  border-radius: 20px;
+  background: transparent;
+  color: rgba(255, 255, 255, 0.7);
+  font-size: 13px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.glossary-category-btn:hover,
+.glossary-category-btn.active {
+  background: rgba(124, 77, 255, 0.2);
+  border-color: #7c4dff;
+  color: #fff;
+}
+
+.glossary-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 16px;
+}
+
+.glossary-card {
+  background: linear-gradient(
+    135deg,
+    rgba(45, 45, 58, 0.8) 0%,
+    rgba(26, 26, 36, 0.8) 100%
+  );
+  border: 1px solid rgba(124, 77, 255, 0.2);
+  border-radius: 12px;
+  padding: 20px;
+  transition: all 0.2s ease;
+  cursor: pointer;
+}
+
+.glossary-card:hover {
+  border-color: rgba(124, 77, 255, 0.5);
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
+}
+
+.glossary-card__term {
+  font-size: 18px;
+  font-weight: 700;
+  color: #b388ff;
+  margin-bottom: 4px;
+}
+
+.glossary-card__full {
+  font-size: 12px;
+  color: rgba(255, 255, 255, 0.5);
+  margin-bottom: 12px;
+}
+
+.glossary-card__short {
+  font-size: 14px;
+  color: rgba(255, 255, 255, 0.85);
+  line-height: 1.5;
+}
+
+.glossary-card__expand {
+  display: none;
+  margin-top: 16px;
+  padding-top: 16px;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.glossary-card.expanded .glossary-card__expand {
+  display: block;
+}
+
+.glossary-card__long {
+  font-size: 14px;
+  color: rgba(255, 255, 255, 0.75);
+  line-height: 1.6;
+  margin-bottom: 12px;
+}
+
+.glossary-card__example-label {
+  font-size: 11px;
+  color: rgba(255, 255, 255, 0.5);
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  margin-bottom: 6px;
+}
+
+.glossary-card__example {
+  background: rgba(0, 0, 0, 0.3);
+  border-radius: 6px;
+  padding: 12px;
+  font-family: "Fira Code", "Consolas", monospace;
+  font-size: 12px;
+  color: #a8e6cf;
+  overflow-x: auto;
+  white-space: pre;
+}
+
+/* ===========================================
+   Mobile Responsive
+   =========================================== */
+
+@media (max-width: 768px) {
+  .glossary-tooltip {
+    width: 280px;
+    left: 0;
+    transform: translateX(0);
+  }
+
+  .glossary-tooltip::after {
+    left: 20px;
+    transform: translateX(0);
+  }
+
+  .glossary-term:hover .glossary-tooltip {
+    transform: translateX(0) translateY(0);
+  }
+
+  .glossary-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* ===========================================
+   Dark/Light Mode Support
+   =========================================== */
+
+[data-md-color-scheme="default"] .glossary-tooltip {
+  background: linear-gradient(135deg, #ffffff 0%, #f5f5f7 100%);
+  color: #1a1a24;
+  border-color: rgba(124, 77, 255, 0.2);
+}
+
+[data-md-color-scheme="default"] .glossary-tooltip::after {
+  border-top-color: #f5f5f7;
+}
+
+[data-md-color-scheme="default"] .glossary-tooltip__term {
+  color: #5e35b1;
+}
+
+[data-md-color-scheme="default"] .glossary-tooltip__short {
+  color: #333;
+}
+
+[data-md-color-scheme="default"] .glossary-tooltip__example {
+  background: rgba(0, 0, 0, 0.05);
+  color: #2e7d32;
+}
+
+[data-md-color-scheme="default"] .glossary-card {
+  background: linear-gradient(135deg, #ffffff 0%, #f8f8fa 100%);
+}
+
+[data-md-color-scheme="default"] .glossary-card__short,
+[data-md-color-scheme="default"] .glossary-card__long {
+  color: #333;
+}
