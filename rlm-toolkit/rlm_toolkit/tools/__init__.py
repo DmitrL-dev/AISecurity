@@ -230,24 +230,17 @@ class PythonREPLTool(Tool):
     
     def run(self, code: str) -> str:
         try:
-            # Use RLM's SecureREPL if available
+            # Use RLM's SecureREPL - the ONLY safe way to execute code
             from rlm_toolkit.core.repl import SecureREPL
             
             repl = SecureREPL(timeout=self.timeout)
             result = repl.execute(code)
             return str(result.get("result", result.get("error", "No output")))
         except ImportError:
-            # Fallback to basic exec (NOT SECURE)
-            import io
-            import contextlib
-            
-            stdout = io.StringIO()
-            try:
-                with contextlib.redirect_stdout(stdout):
-                    exec(code, {"__builtins__": {}})
-                return stdout.getvalue() or "Executed successfully."
-            except Exception as e:
-                return f"Error: {e}"
+            raise ImportError(
+                "SecureREPL is required for code execution. "
+                "Install with: pip install rlm-toolkit[all]"
+            )
 
 
 class ShellTool(Tool):
