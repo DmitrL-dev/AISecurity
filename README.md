@@ -1,4 +1,4 @@
-<p align="center">
+﻿<p align="center">
   <img src="./docs/images/sentinel_hero.png" alt="🐉 SENTINEL — AI Security Platform" width="100%">
 </p>
 
@@ -58,7 +58,7 @@ print(result.is_safe)  # False
 
 ---
 
-##  NEW: RLM-Toolkit v1.0.0  Production Release!
+## 🚀 NEW: RLM-Toolkit v1.0.0 — LangChain Killer is Here!
 
 <p align="center">
   <img src="https://img.shields.io/badge/RLM-v1.0.0-purple?style=for-the-badge" alt="RLM">
@@ -739,7 +739,7 @@ pip install -e ".[dev]"
 
 ---
 
-## ??? SuperClaude Shield � AI Coding Assistant Protection
+## ??? SuperClaude Shield � AI Coding Assistant Protection
 
 > **Security wrapper for SuperClaude-Org frameworks and popular AI coding assistants.**
 
