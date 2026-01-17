@@ -1,0 +1,419 @@
+<!DOCTYPE html>
+<html lang="ru">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="stylesheet" href="/src/styles.css" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>SENTINEL Desktop</title>
+    <script type="module" src="/src/main.ts" defer></script>
+  </head>
+
+  <body>
+    <div class="app-layout">
+      <!-- Sidebar -->
+      <aside class="sidebar">
+        <div class="sidebar-header">
+          <div class="logo">
+            <span class="logo-icon">🛡️</span>
+            <span class="logo-text">SENTINEL</span>
+          </div>
+        </div>
+
+        <nav class="sidebar-nav">
+          <a href="#" class="nav-item active" data-section="home">
+            <span class="nav-icon">🏠</span>
+            <span class="nav-text" data-i18n="nav.home">Главная</span>
+          </a>
+          <a href="#" class="nav-item" data-section="protection">
+            <span class="nav-icon">🔒</span>
+            <span class="nav-text" data-i18n="nav.protection">Защита</span>
+          </a>
+          <a href="#" class="nav-item" data-section="logs">
+            <span class="nav-icon">📋</span>
+            <span class="nav-text" data-i18n="nav.logs">Логи</span>
+          </a>
+          <a href="#" class="nav-item" data-section="stats">
+            <span class="nav-icon">📊</span>
+            <span class="nav-text" data-i18n="nav.stats">Статистика</span>
+          </a>
+          <a href="#" class="nav-item" data-section="settings">
+            <span class="nav-icon">⚙️</span>
+            <span class="nav-text" data-i18n="nav.settings">Настройки</span>
+          </a>
+        </nav>
+
+        <div class="sidebar-footer">
+          <select
+            id="language-selector"
+            class="language-select"
+            title="Language"
+          >
+            <option value="ru">🇷🇺 Русский</option>
+            <option value="en">🇬🇧 English</option>
+          </select>
+          <div class="version">v0.1.0</div>
+        </div>
+      </aside>
+
+      <!-- Main Content -->
+      <main class="main-content">
+        <!-- Home Section -->
+        <section class="section active" id="section-home">
+          <div class="status-hero">
+            <div class="status-shield" id="status-shield">
+              <div class="shield-icon">🛡️</div>
+              <div class="shield-pulse"></div>
+            </div>
+            <div class="status-info">
+              <h1 id="status-title" data-i18n="home.protectionOff">Защита выключена</h1>
+              <ul class="status-list">
+                <li class="status-item warning" id="protection-status">
+                  <span class="dot"></span>
+                  <span data-i18n="home.aiProtectionOff">AI защита выключена</span>
+                </li>
+                <li class="status-item success">
+                  <span class="dot"></span>
+                  <span data-i18n="home.brainAvailable">Brain API доступен</span>
+                </li>
+                <li class="status-item" id="connections-status">
+                  <span class="dot"></span>
+                  <span id="total-count">0</span> <span data-i18n="home.connectionsTracked">соединений отслежено</span>
+                </li>
+              </ul>
+              <button id="toggle-btn" class="btn-action" data-i18n="home.enableProtection">
+                Включить защиту
+              </button>
+            </div>
+          </div>
+
+          <!-- CDN Status Widget -->
+          <div class="cdn-widget">
+            <div class="cdn-status-row">
+              <span class="cdn-icon">🛡️</span>
+              <span class="cdn-label" data-i18n="settings.jailbreak">Jailbreak Database:</span>
+              <span class="cdn-count"><span id="jailbreak-home-count">7</span> <span data-i18n="settings.cdnPatterns">patterns</span></span>
+              <button class="btn-sync-mini" id="btn-sync-cdn-home">🔄 Sync</button>
+            </div>
+            <div class="cdn-sync-message" id="cdn-home-status"></div>
+          </div>
+        </section>
+
+        <!-- Protection Section -->
+        <section class="section" id="section-protection">
+          <h1 class="section-title" data-i18n="protection.title">Защита AI трафика</h1>
+
+          <div class="settings-grid">
+            <div class="setting-card">
+              <div class="setting-header">
+                <span class="setting-icon">🎯</span>
+                <div class="setting-info">
+                  <h3 data-i18n="protection.modeTitle">Режим работы</h3>
+                  <p data-i18n="protection.modeDesc">Выберите как обрабатывать AI запросы</p>
+                </div>
+              </div>
+              <div class="mode-selector">
+                <label class="mode-option">
+                  <input type="radio" name="mode" value="monitor" checked />
+                  <span class="mode-label" data-i18n="protection.monitor">Мониторинг</span>
+                  <span class="mode-desc" data-i18n="protection.monitorDesc">Отслеживать без блокировки</span>
+                </label>
+                <label class="mode-option">
+                  <input type="radio" name="mode" value="block" />
+                  <span class="mode-label" data-i18n="protection.block">Блокировка</span>
+                  <span class="mode-desc" data-i18n="protection.blockDesc">Блокировать весь AI трафик</span>
+                </label>
+              </div>
+            </div>
+
+
+          </div>
+        </section>
+
+        <!-- Logs Section -->
+        <section class="section" id="section-logs">
+          <div class="logs-header">
+            <h1 class="section-title" data-i18n="logs.title">Логи запросов</h1>
+            <div class="logs-controls">
+              <button class="btn-clear" id="clear-logs">🗑️ <span data-i18n="logs.clear">Очистить</span></button>
+              <span class="log-count"
+                ><span data-i18n="logs.total">Всего</span>: <span id="log-count">0</span></span
+              >
+            </div>
+
+            <!-- Log Filters -->
+            <div class="log-filters">
+              <select id="log-level-filter" class="log-filter-select">
+                <option value="" data-i18n="logs.allLevels">Все уровни</option>
+                <option value="debug">🔧 Debug</option>
+                <option value="info">ℹ️ Info</option>
+                <option value="warn">⚠️ Warn</option>
+                <option value="error">❌ Error</option>
+              </select>
+              <select id="log-category-filter" class="log-filter-select">
+                <option value="" data-i18n="logs.allCategories">Все категории</option>
+                <option value="system">🖥️ System</option>
+                <option value="network">🌐 Network</option>
+                <option value="proxy">🔒 Proxy</option>
+                <option value="security">🛡️ Security</option>
+                <option value="engine">⚙️ Engine</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="logs-container" id="logs-container">
+            <div class="log-empty">
+              <span class="log-empty-icon">📋</span>
+              <p data-i18n="logs.empty">Логи пусты. Включите защиту для начала мониторинга.</p>
+            </div>
+          </div>
+        </section>
+
+        <!-- Stats Section -->
+        <section class="section" id="section-stats">
+          <h1 class="section-title" data-i18n="stats.title">Статистика</h1>
+
+          <div class="stats-cards">
+            <div class="stat-big-card">
+              <span class="stat-big-value" id="stat-total">0</span>
+              <span class="stat-big-label" data-i18n="stats.totalConnections">Всего соединений</span>
+            </div>
+            <div class="stat-big-card danger">
+              <span class="stat-big-value" id="stat-blocked">0</span>
+              <span class="stat-big-label" data-i18n="stats.blocked">Заблокировано</span>
+            </div>
+            <div class="stat-big-card success">
+              <span class="stat-big-value" id="stat-allowed">0</span>
+              <span class="stat-big-label" data-i18n="stats.allowed">Разрешено</span>
+            </div>
+            <div class="stat-big-card">
+              <span class="stat-big-value" id="stat-bytes">0 B</span>
+              <span class="stat-big-label" data-i18n="stats.inspected">Проверено</span>
+            </div>
+          </div>
+        </section>
+
+        <!-- Settings Section -->
+        <section class="section" id="section-settings">
+          <h1 class="section-title" data-i18n="nav.settings">Настройки</h1>
+
+          <!-- Monitored Processes -->
+          <div class="settings-card">
+            <div class="card-header">
+              <h3>🎯 <span data-i18n="settings.monitoredApps">Отслеживаемые приложения</span></h3>
+              <span class="badge" id="monitored-count">0</span>
+            </div>
+
+            <div class="monitored-table" id="monitored-processes">
+              <div class="empty-state">
+                <span class="empty-icon">📭</span>
+                <p data-i18n="settings.addAppPlaceholder">Добавьте приложения для мониторинга</p>
+              </div>
+            </div>
+          </div>
+
+          <!-- Add Process -->
+          <div class="settings-card">
+            <div class="card-header">
+              <h3>➕ <span data-i18n="settings.addApp">Добавить приложение</span></h3>
+              <button
+                class="btn-icon"
+                id="refresh-processes"
+                data-i18n-title="settings.refreshList"
+                title="Обновить список"
+              >
+                🔄
+              </button>
+            </div>
+
+            <div class="process-search">
+              <input
+                type="text"
+                id="process-search"
+                data-i18n-placeholder="settings.searchPlaceholder"
+                placeholder="🔍 Поиск по имени..."
+              />
+            </div>
+
+            <div class="process-table" id="process-list">
+              <!-- Populated by JS -->
+            </div>
+          </div>
+
+          <!-- Detection Engines -->
+          <div class="settings-card">
+            <div class="card-header">
+              <h3>🛡️ <span data-i18n="settings.engines">Движки анализа</span></h3>
+            </div>
+
+            <div class="engine-list">
+              <div class="engine-row">
+                <div class="engine-info">
+                  <span class="engine-icon">🔑</span>
+                  <div class="engine-details">
+                    <div class="engine-name" data-i18n="settings.keywords">Keywords Detection</div>
+                    <div class="engine-desc" data-i18n="settings.keywordsDesc">
+                      Подозрительные ключевые слова (jailbreak, roleplay,
+                      extraction)
+                    </div>
+                  </div>
+                </div>
+                <label class="toggle">
+                  <input type="checkbox" id="engine-keywords" checked />
+                  <span class="slider"></span>
+                </label>
+              </div>
+
+              <div class="engine-row">
+                <div class="engine-info">
+                  <span class="engine-icon">🔐</span>
+                  <div class="engine-details">
+                    <div class="engine-name" data-i18n="settings.pii">PII & Secrets Detection</div>
+                    <div class="engine-desc" data-i18n="settings.piiDesc">
+                      API ключи, пароли, персональные данные
+                    </div>
+                  </div>
+                </div>
+                <label class="toggle">
+                  <input type="checkbox" id="engine-pii" checked />
+                  <span class="slider"></span>
+                </label>
+              </div>
+
+              <div class="engine-row">
+                <div class="engine-info">
+                  <span class="engine-icon">🧠</span>
+                  <div class="engine-details">
+                    <div class="engine-name" data-i18n="settings.jailbreak">Jailbreak Database</div>
+                    <div class="engine-desc">
+                      <span id="jailbreak-pattern-count">7</span> core + 
+                      <span id="jailbreak-cdn-count">0</span> <span data-i18n="settings.cdnPatterns">CDN patterns</span>
+                    </div>
+                  </div>
+                </div>
+                <label class="toggle">
+                  <input type="checkbox" id="engine-jailbreak" checked />
+                  <span class="slider"></span>
+                </label>
+              </div>
+
+              <!-- CDN Sync Status -->
+              <div class="engine-row cdn-sync-row">
+                <div class="engine-info">
+                  <span class="engine-icon">☁️</span>
+                  <div class="engine-details">
+                    <div class="engine-name">CDN Sync</div>
+                    <div class="engine-desc" id="cdn-sync-status">
+                      Проверка...
+                    </div>
+                  </div>
+                </div>
+                <button class="btn-sync" id="btn-sync-cdn">🔄 Sync</button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Deep Inspection -->
+          <div class="settings-card">
+            <div class="card-header">
+              <h3>🔍 <span data-i18n="settings.deepInspection">Deep Inspection (TLS)</span></h3>
+            </div>
+
+            <div class="deep-inspection-info">
+              <p class="info-text" data-i18n="settings.deepInspectionInfo">
+                Deep Inspection позволяет анализировать содержимое запросов к AI
+                API. Требуется установка SENTINEL CA сертификата.
+              </p>
+
+              <div class="ca-status" id="ca-status">
+                <span class="status-icon">⏳</span>
+                <span class="status-text">Проверка...</span>
+              </div>
+
+              <div class="ca-actions">
+                <button class="btn-primary" id="init-ca">
+                  🔐 <span data-i18n="settings.initCa">Инициализировать CA</span>
+                </button>
+                <button class="btn-secondary" id="open-ca-folder">
+                  📁 <span data-i18n="settings.openCaFolder">Открыть папку с сертификатом</span>
+                </button>
+              </div>
+
+              <!-- Enable Deep Inspection Toggle -->
+              <div
+                class="engine-row"
+                id="deep-inspection-toggle"
+                style="display: none"
+              >
+                <div class="engine-info">
+                  <span class="engine-icon">🔓</span>
+                  <div class="engine-details">
+                    <div class="engine-name" data-i18n="settings.enableDeepInspection">Включить Deep Inspection</div>
+                    <div class="engine-desc" data-i18n="settings.interceptHttps">
+                      Перехват и анализ HTTPS трафика
+                    </div>
+                  </div>
+                </div>
+                <label class="toggle">
+                  <input type="checkbox" id="enable-deep-inspection" />
+                  <span class="slider"></span>
+                </label>
+              </div>
+
+              <div class="install-steps">
+                <p><strong data-i18n="settings.installSteps">Для установки:</strong></p>
+                <ol>
+                  <li data-i18n="settings.step1">Нажмите "Инициализировать CA"</li>
+                  <li data-i18n="settings.step2">Откройте папку с сертификатом</li>
+                  <li data-i18n="settings.step3">Дважды кликните sentinel-ca.crt</li>
+                  <li data-i18n="settings.step4">Установите в "Доверенные корневые центры"</li>
+                </ol>
+              </div>
+            </div>
+          </div>
+
+          <!-- System Proxy Settings -->
+          <div class="settings-card">
+            <div class="card-header">
+              <h3>🌐 <span data-i18n="settings.systemProxy">System Proxy</span></h3>
+            </div>
+
+            <div class="deep-inspection-info">
+              <p class="info-text" data-i18n="settings.systemProxyInfo">
+                System Proxy направляет весь HTTPS трафик через SENTINEL для
+                анализа. Работает со всеми приложениями, использующими системные
+                настройки прокси.
+              </p>
+
+              <div class="ca-status" id="proxy-status">
+                <span class="status-icon" id="proxy-status-icon">⏳</span>
+                <span class="status-text" id="proxy-status-text" data-i18n="settings.checking"
+                  >Проверка...</span
+                >
+              </div>
+
+              <div class="engine-row">
+                <div class="engine-info">
+                  <span class="engine-icon">🔄</span>
+                  <div class="engine-details">
+                    <div class="engine-name" data-i18n="settings.enableSystemProxy">Включить System Proxy</div>
+                    <div class="engine-desc" data-i18n="settings.redirectTraffic">
+                      Перенаправить трафик через 127.0.0.1:18443
+                    </div>
+                  </div>
+                </div>
+                <label class="toggle">
+                  <input type="checkbox" id="enable-system-proxy" />
+                  <span class="slider"></span>
+                </label>
+              </div>
+
+              <p class="launch-hint">
+                ⚠️ <span data-i18n="settings.proxyWarning">При выключении прокси настройки Windows будут восстановлены</span>
+              </p>
+            </div>
+          </div>
+        </section>
+      </main>
+    </div>
+  </body>
+</html>

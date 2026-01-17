@@ -84,7 +84,7 @@ Settings → Resources:
 ### Step 1: Get Code
 
 ```bash
-git clone https://github.com/your-org/sentinel.git
+git clone https://github.com/DmitrL-dev/AISecurity.git
 cd sentinel
 ```
 
@@ -169,7 +169,7 @@ docker compose logs -f  # Watch logs
 
 ```bash
 # Add Helm repo
-helm repo add sentinel https://your-org.github.io/sentinel-helm
+helm repo add sentinel https://DmitrL-dev.github.io/sentinel-helm
 helm repo update
 
 # Create namespace and secrets
@@ -271,7 +271,7 @@ python -m main
 | ---------- | --------- | ------ | ------------------ |
 | `fast`     | 15 basic  | ~10ms  | High load          |
 | `balanced` | 40 medium | ~50ms  | Recommended        |
-| `thorough` | All 89    | ~200ms | Maximum protection |
+| `thorough` | All 217   | ~200ms | Maximum protection |
 
 ### Key Parameters
 

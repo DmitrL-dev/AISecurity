@@ -86,19 +86,23 @@ List available engines.
 ## Python SDK
 
 ```python
-from sentinel import SentinelClient
+from sentinel import scan, guard
 
-client = SentinelClient(base_url="http://localhost:8000")
-
-# Analyze prompt
-result = client.analyze("Tell me about AI")
-print(result.is_safe)
+# Simple scan
+result = scan("Tell me about AI")
+print(result.is_safe)  # True
+print(result.risk_score)  # 0.15
 
 # With specific engines
-result = client.analyze(
-    prompt="Hello",
+result = scan(
+    "Hello",
     engines=["injection", "pii"]
 )
+
+# Decorator protection
+@guard(engines=["injection", "pii"])
+def my_llm_function(prompt: str) -> str:
+    return call_llm(prompt)
 ```
 
 ---

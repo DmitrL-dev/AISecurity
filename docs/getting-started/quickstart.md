@@ -116,4 +116,4 @@ curl http://localhost:8000/health
 
 - [Configuration Guide](../guides/configuration.md)
 - [API Reference](../reference/api.md)
-- [Upgrade to Enterprise](https://sentinel.ai/enterprise)
+- [Upgrade to Enterprise](https://github.com/DmitrL-dev/AISecurity)

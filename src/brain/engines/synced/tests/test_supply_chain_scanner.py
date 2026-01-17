@@ -7,7 +7,7 @@ Generated: 2026-01-07
 """
 
 import pytest
-from supply_chain_scanner import SupplyChainScanner, scan, RiskLevel
+from ..supply_chain_scanner import SupplyChainScanner, scan, RiskLevel
 
 
 class TestSupplyChainScanner:

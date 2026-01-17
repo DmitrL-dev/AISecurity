@@ -1,0 +1,36 @@
+name: Lint
+
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+    branches: [main]
+
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install linters
+        run: |
+          pip install ruff black mypy
+
+      - name: Run ruff
+        run: |
+          ruff check src/ strike/ --output-format=github
+
+      - name: Check formatting with black
+        run: |
+          black --check src/ strike/
+
+      - name: Run mypy
+        run: |
+          mypy src/ strike/ --ignore-missing-imports --no-error-summary
+        continue-on-error: true

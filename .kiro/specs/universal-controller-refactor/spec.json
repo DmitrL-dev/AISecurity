@@ -1,0 +1,9 @@
+{
+  "name": "universal-controller-refactor",
+  "version": "1.0.0",
+  "language": "ru",
+  "status": "complete",
+  "created": "2026-01-09",
+  "completed": "2026-01-09",
+  "description": "Рефакторинг universal_controller.py — orchestrator/ и ctf/ packages"
+}

@@ -11,7 +11,7 @@
 
 ### 1.1 Purpose
 
-Bridge IMMUNE Hive with SENTINEL Brain for advanced AI-powered threat detection. Enables Hive to query Brain's 258 detection engines for complex analysis.
+Bridge IMMUNE Hive with SENTINEL Brain for advanced AI-powered threat detection. Enables Hive to query Brain's 217 detection engines for complex analysis.
 
 ### 1.2 Problem Statement
 

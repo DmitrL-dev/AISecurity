@@ -10,6 +10,7 @@
  */
 
 #include "http/http_server.h"
+#include "http/http_middleware.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -354,10 +355,21 @@ static int handle_connection(http_server_t *server, socket_t client_fd,
         return -1;
     }
     
+    /* Process through middleware (JWT auth, rate limiting) */
+    middleware_context_t mw_ctx;
+    http_response_t response = {0};
+    
+    middleware_result_t mw_result = http_middleware_process(&request, &response, &mw_ctx);
+    if (mw_result != MIDDLEWARE_OK) {
+        /* Middleware rejected request - response already set */
+        send_response(client_fd, &response);
+        free_request(&request);
+        free_response(&response);
+        return -1;
+    }
+    
     /* Find route */
     const http_route_t *route = find_route(server, request.method, request.path);
-    
-    http_response_t response = {0};
     
     if (route) {
         /* Call handler */
@@ -366,6 +378,9 @@ static int handle_connection(http_server_t *server, socket_t client_fd,
         /* 404 Not Found */
         http_response_error(&response, HTTP_STATUS_NOT_FOUND, "Not found");
     }
+    
+    /* Add rate limit headers to response */
+    http_middleware_add_headers(&response, &mw_ctx);
     
     /* Send response */
     send_response(client_fd, &response);

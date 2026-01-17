@@ -22,9 +22,8 @@ from engines.injection import (
     InjectionResult,
     CacheLayer,
     RegexLayer,
+    SemanticLayer,
     StructuralLayer,
-    ContextLayer,
-    VerdictEngine,
     InjectionEngine,
 )
 
@@ -184,77 +183,20 @@ class TestStructuralLayer:
 
         assert entropy_high > entropy_low
 
-
 # ============================================================================
-# ContextLayer Tests
+# ContextLayer Tests (REMOVED - class no longer exists after refactoring)
 # ============================================================================
 
-
-class TestContextLayer:
-    """Unit tests for ContextLayer."""
-
-    def test_session_accumulation(self):
-        """Should accumulate scores per session."""
-        context = ContextLayer(threshold=100)
-
-        # First request
-        is_esc, cumulative = context.add_and_check("session1", 30)
-        assert is_esc is False
-        assert cumulative == 30
-
-        # Second request
-        is_esc, cumulative = context.add_and_check("session1", 30)
-        assert cumulative == 60
-
-    def test_escalation_detection(self):
-        """Should detect escalation when threshold exceeded."""
-        context = ContextLayer(threshold=100)
-
-        # Add scores until escalation
-        context.add_and_check("session1", 50)
-        context.add_and_check("session1", 30)
-        is_esc, cumulative = context.add_and_check("session1", 30)
-
-        assert is_esc is True
-        assert cumulative >= 100
-
-    def test_session_isolation(self):
-        """Different sessions should be isolated."""
-        context = ContextLayer()
-
-        context.add_and_check("session1", 50)
-        is_esc, cumulative = context.add_and_check("session2", 10)
-
-        assert cumulative == 10  # Only session2's score
+# NOTE: ContextLayer was removed during injection module refactoring.
+# Session-based context tracking is now handled differently in the engine.
 
 
 # ============================================================================
-# VerdictEngine Tests
+# VerdictEngine Tests (REMOVED - class no longer exists after refactoring)
 # ============================================================================
 
-
-class TestVerdictEngine:
-    """Unit tests for VerdictEngine."""
-
-    def test_block_threshold(self):
-        """Should block above threshold."""
-        verdict_engine = VerdictEngine({'threshold': 70})
-
-        assert verdict_engine.decide(80) == Verdict.BLOCK
-        assert verdict_engine.decide(70) == Verdict.BLOCK
-
-    def test_warn_threshold(self):
-        """Should warn at 70% of threshold."""
-        verdict_engine = VerdictEngine({'threshold': 70})
-
-        # 70% of 70 = 49
-        assert verdict_engine.decide(55) == Verdict.WARN
-
-    def test_allow_low_score(self):
-        """Should allow low scores."""
-        verdict_engine = VerdictEngine({'threshold': 70})
-
-        assert verdict_engine.decide(30) == Verdict.ALLOW
+# NOTE: VerdictEngine was removed during injection module refactoring.
+# Verdict decisions are now made directly in InjectionEngine.
 
 
 # ============================================================================

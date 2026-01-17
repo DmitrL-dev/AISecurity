@@ -101,9 +101,12 @@ class SupplyChainScanner:
     # Safe patterns (reduce false positives)
     SAFE_PATTERNS = [
         r"safetensors\.torch\.load_file",
+        r"from\s+safetensors",  # Any safetensors import
+        r"import\s+safetensors",  # Direct safetensors import
         r"torch\.load\([^)]+map_location\s*=",
         r"trust_remote_code\s*=\s*False",
         r"\.onnx",
+        r"\.safetensors",  # Safetensors file extension
         r"weights_only\s*=\s*True",
     ]
 
@@ -191,11 +194,11 @@ class SupplyChainScanner:
         score = 0.0
         for f in findings:
             if f.risk_level == RiskLevel.CRITICAL:
-                score += 0.3
+                score += 0.6  # Single CRITICAL should give > 0.5
             elif f.risk_level == RiskLevel.HIGH:
-                score += 0.2
+                score += 0.3
             elif f.risk_level == RiskLevel.MEDIUM:
-                score += 0.1
+                score += 0.15
 
         # Reduce score if safe patterns found
         if safe_patterns:

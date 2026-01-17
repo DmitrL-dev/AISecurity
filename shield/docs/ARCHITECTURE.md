@@ -13,6 +13,12 @@ SENTINEL Shield implements a **layered security architecture** for AI systems, a
 │                        APPLICATION LAYER                         │
 │                   CLI │ REST API │ FFI Bindings                  │
 ├─────────────────────────────────────────────────────────────────┤
+│                      AUTHENTICATION LAYER                        │
+│  JWT (HS256/RS256) │ Rate Limiter │ Vault Client │ Middleware   │
+├─────────────────────────────────────────────────────────────────┤
+│                       COMMUNICATION LAYER                        │
+│  HTTP Server │ WebSocket (RFC 6455) │ Event Broadcasting        │
+├─────────────────────────────────────────────────────────────────┤
 │                        ANALYSIS LAYER                            │
 │  Semantic │ Encoding │ Signatures │ Anomaly │ Classifier        │
 │  N-gram │ Vectorizer │ Embedding │ Fingerprint                  │
@@ -409,7 +415,10 @@ tests/
 ## See Also
 
 - [API Reference](API.md)
+- [Authentication](AUTH.md)
+- [WebSocket](WEBSOCKET.md)
 - [Configuration](CONFIGURATION.md)
 - [Deployment](DEPLOYMENT.md)
 - [Kubernetes Manifests](../k8s/README.md)
 - [CI/CD Pipeline](../.github/workflows/shield-ci.yml)
+

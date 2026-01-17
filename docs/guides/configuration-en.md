@@ -226,7 +226,7 @@ LLM_DEFAULT_MODEL=llama2
 ### Thorough Mode
 
 - ~200ms latency
-- All 89+ engines
+- All 217 engines
 - Use: Critical systems
 
 ---

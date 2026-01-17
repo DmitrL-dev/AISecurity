@@ -192,6 +192,13 @@ class ImageStegoDetector:
         # Extract LSBs from each channel
         for channel_idx, channel_name in enumerate(['R', 'G', 'B']):
             channel = pixels[:, :, channel_idx]
+            
+            # Skip uniform/solid color images - they have no variance
+            # and naturally have LSB mean of 0 or 1
+            channel_std = channel.std()
+            if channel_std < 1.0:
+                continue  # Uniform color, skip LSB analysis
+            
             lsb = channel & 1  # Extract least significant bit
             
             # Calculate patterns in LSB

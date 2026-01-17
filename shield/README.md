@@ -73,8 +73,8 @@
 | Metric              | Value  |
 | ------------------- | ------ |
 | **Lines of Code**   | ~36,000 |
-| **Source Files**    | 125 .c, 77 .h |
-| **Protocols**       | 21     |
+| **Source Files**    | 131 .c, 80 .h |
+| **Protocols**       | 22     |
 | **CLI Handlers**    | 119    |
 | **Guards**          | 6      |
 | **Tests**           | 103 (94 CLI + 9 LLM) |
@@ -84,7 +84,7 @@
 
 ## 🏗️ Enterprise Features
 
-### 20 Protocols for Every Use Case
+### 22 Protocols for Every Use Case
 
 | Category           | Protocols          | Purpose                  |
 | ------------------ | ------------------ | ------------------------ |

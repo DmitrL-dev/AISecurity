@@ -9,7 +9,7 @@ Usage:
     python sentinel_demo.py
 
 Author: SENTINEL Team
-Date: 2025-12-13
+Date: 2026-01-14
 """
 
 import sys
@@ -237,7 +237,7 @@ def main():
 
     print_header("Demo Complete!")
     print("\n  SENTINEL is protecting your AI systems.")
-    print("  Visit: https://github.com/your-repo/sentinel")
+    print("  Visit: https://github.com/DmitrL-dev/AISecurity")
     print()
 
 

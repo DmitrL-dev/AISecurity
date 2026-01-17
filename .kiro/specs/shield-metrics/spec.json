@@ -1,0 +1,9 @@
+{
+  "name": "shield-metrics",
+  "version": "1.0.0",
+  "language": "ru",
+  "status": "complete",
+  "created": "2026-01-09",
+  "completed": "2026-01-09",
+  "description": "Shield C-proxy Prometheus metrics (/metrics, /health)"
+}

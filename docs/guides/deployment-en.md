@@ -56,7 +56,7 @@
                 ┌───────────────┐           ┌───────────────┐           ┌───────────────┐
                 │    BRAIN 1    │           │    BRAIN 2    │           │    BRAIN 3    │
                 │   (Python)    │           │   (Python)    │           │   (Python)    │
-                │  89 engines   │           │  89 engines   │           │  89 engines   │
+                │  217 engines  │           │  217 engines  │           │  217 engines  │
                 └───────────────┘           └───────────────┘           └───────────────┘
 ```
 

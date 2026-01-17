@@ -1,0 +1,9 @@
+{
+  "name": "db-migrations",
+  "version": "1.0.0",
+  "language": "ru",
+  "status": "complete",
+  "created": "2026-01-09",
+  "completed": "2026-01-09",
+  "description": "Backlog — Alembic + SQLAlchemy (6 files, 4 tables)"
+}

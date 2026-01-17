@@ -1,0 +1,47 @@
+[build-system]
+requires = ["setuptools>=61.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "superclaudeshield"
+version = "1.0.0"
+description = "Security wrapper for SuperClaude-Org frameworks (Claude, Gemini, Qwen, Codex)"
+readme = "README.md"
+license = {text = "Apache-2.0"}
+authors = [
+    {name = "SENTINEL Team", email = "security@sentinel.dev"}
+]
+keywords = ["ai-security", "superclaudeshield", "llm", "claude", "gemini", "prompt-injection"]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: Apache Software License",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Topic :: Security",
+    "Topic :: Software Development :: Libraries :: Python Modules",
+]
+requires-python = ">=3.10"
+dependencies = []
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=7.0",
+    "pytest-cov>=4.0",
+]
+
+[project.urls]
+"Homepage" = "https://github.com/chg/sentinel-community"
+"Bug Reports" = "https://github.com/chg/sentinel-community/issues"
+"Source" = "https://github.com/chg/sentinel-community"
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["superclaudeshield*"]
+
+[tool.pytest.ini_options]
+testpaths = ["superclaudeshield/tests"]
+python_files = "test_*.py"

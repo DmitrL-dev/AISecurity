@@ -10,7 +10,7 @@
 </p>
 
 <p align="center">
-  <img src="https://img.shields.io/badge/🧠_BRAIN-258_Engines-brightgreen?style=for-the-badge" alt="Brain">
+  <img src="https://img.shields.io/badge/🧠_BRAIN-217_Engines-brightgreen?style=for-the-badge" alt="Brain">
   <img src="https://img.shields.io/badge/🛡️_SHIELD-113_Tests_✓-00ADD8?style=for-the-badge" alt="Shield">
   <img src="https://img.shields.io/badge/🐉_STRIKE-39K+_Payloads-red?style=for-the-badge" alt="Strike">
   <img src="https://img.shields.io/badge/📊_LOC-116K-blue?style=for-the-badge" alt="LOC">
@@ -55,12 +55,71 @@ print(result.is_safe)  # False
 
 ---
 
+
+---
+
+##  NEW: RLM-Toolkit v1.0.0  Production Release!
+
+<p align="center">
+  <img src="https://img.shields.io/badge/RLM-v1.0.0-purple?style=for-the-badge" alt="RLM">
+  <img src="https://img.shields.io/badge/Tests-927_-brightgreen?style=for-the-badge" alt="Tests">
+  <img src="https://img.shields.io/badge/Docs-42K_Lines-blue?style=for-the-badge" alt="Docs">
+  <img src="https://img.shields.io/badge/Bilingual-EN/RU-orange?style=for-the-badge" alt="Bilingual">
+</p>
+
+> **The LangChain killer you've been waiting for.** Simpler API, built-in security, unlimited context.
+
+###  3 Lines to Start
+
+```python
+from rlm_toolkit import RLM
+
+rlm = RLM.from_openai("gpt-4o")
+response = rlm.run("Hello!")  # That's it.
+```
+
+###  Why RLM vs LangChain?
+
+| Feature | RLM-Toolkit | LangChain |
+|---------|-------------|-----------|
+| **Code complexity** |  3 lines |  20+ lines |
+| **Debugging** |  Easy |  Chain hell |
+| **Infinite context** |  InfiniRetri |  Manual |
+| **Human-like memory** |  H-MEM |  Basic |
+| **Security** |  Built-in |  Manual |
+| **Self-evolving AI** |  R-Zero |  None |
+
+###  Killer Features
+
+- **InfiniRetri**  Process 1000+ page documents without hitting context limits
+- **H-MEM**  Memory that works like human brain (Working  Episodic  Semantic)
+- **Self-Evolving LLMs**  AI that critiques and improves its own outputs
+- **Security-First**  Prompt injection detection, Trust Zones, Audit trails
+
+###  RLM Academy
+
+| Resource | Count |
+|----------|-------|
+|  Tutorials | 9 |
+|  Concept Pages | 8 |
+|  How-to Guides | 6 |
+|  Examples | 170+ |
+|  Integrations | 50+ |
+
+**[ Full Documentation](./rlm-toolkit/docs/)**  **[ Quickstart](./rlm-toolkit/docs/en/quickstart.md)**  **[ Examples](./rlm-toolkit/docs/en/examples/)**
+
+```bash
+pip install rlm-toolkit
+```
+
+---
+
 ## 🎮 Platform Components
 
 | Component | Description |
 |-----------|-------------|
-| 🧠 **[BRAIN](#-brain--detection-engines)** | Detection Core — 258 engines, ML + Rules, Strange Math™ |
-| 🛡️ **[SHIELD](#%EF%B8%8F-shield--pure-c-dmz)** | AI Security DMZ — Pure C, <1ms latency, 20 Protocols, Cisco CLI |
+| 🧠 **[BRAIN](#-brain--detection-engines)** | Detection Core — 217 Engines, ML + Rules, Strange Math™ |
+| 🛡️ **[SHIELD](#%EF%B8%8F-shield--pure-c-dmz)** | AI Security DMZ — Pure C, <1ms latency, 22 Protocols, Cisco CLI |
 | 🐉 **[STRIKE](#-strike--red-team-platform)** | Offensive Platform — 39K+ payloads, HYDRA, AI Attack Planner |
 | 📦 **[FRAMEWORK](#-framework--python-sdk)** | Python SDK — pip install, CLI, FastAPI integration |
 | 🦠 **[IMMUNE](./immune/)** | EDR/XDR/MDR — Pure C, Kernel-level, DragonFlyBSD |
@@ -105,7 +164,7 @@ fetch('https://cdn.jsdelivr.net/gh/DmitrL-dev/AISecurity@latest/signatures/jailb
 
 > [!IMPORTANT]
 > ### 🚨 Open to Work — AI Security Engineer
-> **Solo author of this 116K LOC platform with 258 engines. Available remote.**
+> **Solo author of this 116K LOC platform with 217 Engines. Available remote.**
 > 📧 [chg@live.ru](mailto:chg@live.ru) • 💬 [@DmLabincev](https://t.me/DmLabincev)
 
 ---
@@ -179,10 +238,10 @@ fetch('https://cdn.jsdelivr.net/gh/DmitrL-dev/AISecurity@latest/signatures/jailb
 |--------|-------|
 | **Status** | ✅ 100% Production Ready |
 | **Lines of Code** | 36,000+ |
-| **Source Files** | 125 .c, 77 .h |
+| **Source Files** | 131 .c, 80 .h |
 | **Tests** | 103/103 pass (94 CLI + 9 LLM) |
 | **CLI Handlers** | 119 |
-| **Protocols** | 21 custom |
+| **Protocols** | 22 custom |
 | **Guards** | 6 (LLM, RAG, Agent, Tool, MCP, API) |
 
 ### Build & Test
@@ -209,10 +268,10 @@ make test_llm_mock        # 9 LLM integration tests
 ## 🧠 BRAIN — Detection Engines
 
 <p align="center">
-  <img src="./assets/brain_engines.png" alt="SENTINEL Brain - 258 Detection Engines" width="800">
+  <img src="./assets/brain_engines.png" alt="SENTINEL Brain - 217 detection engines" width="800">
 </p>
 
-> **258 detection engines** analyzing every prompt and response in real-time.
+> **217 detection engines** analyzing every prompt and response in real-time.
 
 ## Key Capabilities
 
@@ -524,8 +583,23 @@ Based on AI Security Digest Week 1 2026 gap analysis:
 
 </details>
 
+<details>
+<summary><strong>January 15 2026 R&D Engines (4 new + SuperClaude Shield)</strong></summary>
 
-📖 **[Full Engine Documentation](./docs/reference/engines-en.md)** | **[R&D Changelog](./docs/CHANGELOG.md)**
+| Engine | Threat | Tests |
+|--------|--------|-------|
+| agentic_ide_attack_detector.py | CVE-2026-22708 Cursor RCE | 30 |
+| stac_detector.py | Sequential Tool Attack Chaining | 26 |
+| human_agent_trust_detector.py | OWASP ASI09 Trust Exploitation | 21 |
+| lrm_attack_detector.py | o1/o3/DeepSeek R1 attacks | 20 |
+| SuperClaude Shield | Multi-IDE security wrapper | 27 |
+
+Total: 124 new tests
+
+</details>
+
+
+?? **[Full Engine Documentation]](./docs/reference/engines-en.md)** | **[R&D Changelog](./docs/CHANGELOG.md)**
 
 ---
 
@@ -542,7 +616,7 @@ Based on AI Security Digest Week 1 2026 gap analysis:
 | Feature | Value |
 |---------|-------|
 | **Payloads** | 39,000+ (84 categories) |
-| **HYDRA Agents** | 9 parallel attack heads |
+| **HYDRA Agents** | 10 parallel attack heads |
 | **Crucible CTF** | 82/82 challenges ✅ |
 | **Jailbreak Vendors** | 33+ tested |
 
@@ -600,7 +674,7 @@ def my_llm_function(prompt: str) -> str:
 ```bash
 sentinel scan "Hello world"              # Quick scan
 sentinel scan "test" --format sarif      # IDE integration
-sentinel engine list                     # List 207 engines
+sentinel engine list                     # List 217 Engines
 sentinel strike generate injection       # Attack payloads
 ```
 
@@ -618,7 +692,7 @@ app.add_middleware(SentinelMiddleware, on_threat="block")
 
 | Feature | Description |
 |---------|-------------|
-| **BaseEngine** | Unified interface for all 201 engines |
+| **BaseEngine** | Unified interface for all 217 Engines |
 | **Plugin System** | pluggy-based hooks for extensions |
 | **Tiered Pipeline** | Parallel execution with early exit |
 | **SARIF Output** | IDE integration for VS Code, IntelliJ |
@@ -631,7 +705,7 @@ app.add_middleware(SentinelMiddleware, on_threat="block")
 
 | Metric | Value |
 |--------|-------|
-| **Brain Engines** | 258 |
+| **Brain Engines** | 217 |
 | **Shield LOC** | 36,000+ |
 | **Shield Tests** | 103/103 ✅ |
 | **Strike Payloads** | 39,000+ |
@@ -665,7 +739,50 @@ pip install -e ".[dev]"
 
 ---
 
-## 🤝 Contributing
+## ??? SuperClaude Shield � AI Coding Assistant Protection
+
+> **Security wrapper for SuperClaude-Org frameworks and popular AI coding assistants.**
+
+### Supported Platforms
+
+| Framework | IDE | Status |
+|-----------|-----|--------|
+| SuperClaude | Claude Code | ? |
+| SuperGemini | Gemini Code | ? |
+| SuperQwen | Qwen | ? |
+| SuperCodex | Codex | ? |
+| Cursor | VS Code fork | ? |
+| Windsurf | Codeium IDE | ? |
+| Continue | Extension | ? |
+| Cody | Sourcegraph | ? |
+
+### Installation
+
+```bash
+pip install -e ./superclaudeshield
+```
+
+### Quick Start
+
+```python
+from superclaudeshield import Shield, ShieldMode
+
+shield = Shield(mode=ShieldMode.STRICT)
+result = shield.validate_command("/research", {"query": "AI news"})
+```
+
+### Protection
+
+- ?? Command Injection (shell, path traversal)
+- ?? Prompt Injection (policy puppetry)
+- ?? Agent Hijacking (STAC detection)
+- ?? MCP Abuse (SSRF, 8 servers)
+
+?? **[SuperClaude Shield Docs](./superclaudeshield/README.md)** | Tests: 27/27 ?
+
+---
+
+## ?? Contributing
 
 We welcome contributions! See [CONTRIBUTING.md](./docs/CONTRIBUTING.md).
 

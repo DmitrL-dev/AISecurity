@@ -259,6 +259,13 @@ INPUT
   │
   ▼
 ┌─────────────────────────────────────┐
+│ Layer 0: AUTHENTICATION             │
+│ JWT verification, Rate limiting     │
+│ (HS256/RS256, Token bucket)         │
+└─────────────────────────────────────┘
+  │ ✓ Authenticated
+  ▼
+┌─────────────────────────────────────┐
 │ Layer 1: PATTERN MATCHING           │
 │ Fast check for known attacks        │
 │ (regex, literal patterns)           │
@@ -300,6 +307,7 @@ AI MODEL
 
 | Layer | Catches | Misses |
 |-------|---------|--------|
+| Auth | Unauthenticated, DDoS | Valid tokens |
 | Pattern | Known attacks | New variations |
 | Encoding | Obfuscation | Semantic attacks |
 | Semantic | New attacks | Weak obfuscation |

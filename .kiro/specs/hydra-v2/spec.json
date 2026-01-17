@@ -1,0 +1,9 @@
+{
+  "name": "hydra-v2",
+  "version": "2.0.0",
+  "language": "ru",
+  "status": "complete",
+  "created": "2026-01-09",
+  "completed": "2026-01-09",
+  "description": "Backlog — HYDRA v2 multi-model attack (engine_v2.py, ~350 LOC)"
+}

@@ -2,7 +2,7 @@
 
 ## Prerequisites
 
-- Python 3.10+
+- Python 3.11+
 - pip
 - Docker (optional)
 
@@ -15,7 +15,7 @@ pip install sentinel-community
 ## From Source
 
 ```bash
-git clone https://github.com/your-org/sentinel-community.git
+git clone https://github.com/DmitrL-dev/AISecurity.git
 cd sentinel-community
 pip install -r requirements.txt
 ```

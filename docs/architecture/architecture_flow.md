@@ -1,7 +1,7 @@
 # 🗺️ SENTINEL Architecture — Interactive Flow Diagram
 
-> **Версия:** 2.0 (Dec 2025)  
-> **Движков:** 187 | **Категорий:** 15 | **Research Inventions:** 56
+> **Версия:** Dragon v4.1 (Jan 2026)  
+> **Движков:** 217 | **Категорий:** 18 | **Research Inventions:** 88
 
 ---
 
@@ -58,7 +58,7 @@ flowchart TB
             ThreatModel["📈 Threat<br/>Modeler"]
         end
 
-        MetaJudge["⚖️ META-JUDGE<br/>187 engines → Verdict"]
+        MetaJudge["⚖️ META-JUDGE<br/>217 engines → Verdict"]
     end
 
     subgraph Decision["📍 DECISION POINT"]
@@ -193,21 +193,22 @@ sequenceDiagram
 
 | Category              | Count   | Examples                           |
 | --------------------- | ------- | ---------------------------------- |
-| Classic Detection     | 9       | injection, yara, pii, behavioral   |
-| NLP / LLM Guard       | 8       | qwen3_guard, hallucination, virtual_context |
-| Strange Math Core     | 21      | tda, sheaf, hyperbolic, morse, fractal |
-| TTPs.ai Defense       | 16      | rag_guard, tool_security, ai_c2, cog_load |
-| VLM Protection        | 4       | adversarial_image, cross_modal, ocr_injection |
-| Advanced 2025         | 10      | multi_agent, kill_chain, institutional_ai |
-| Protocol Security     | 5       | mcp_guard, a2a_security, nhi, endpoint_analyzer |
-| Proactive Engines     | 12      | zero_day_forge, attack_synth, immunity |
-| Data Poisoning        | 5       | bootstrap, temporal, multi_tenant  |
-| Deep Learning Forensics | 9     | activation_steering, hidden_state  |
-| Meta-Judge + XAI      | 3       | meta_judge, explainability, hierarch |
-| Adaptive Behavioral   | 3       | fingerprinting, adaptive_markov    |
-| MITRE ATT&CK          | 2       | mitre_engine, atlas_mapper         |
-| Research Inventions   | 49      | new R&D engines                    |
-| **TOTAL**             | **187** |                                    |
+| Classic Detection     | 12      | injection, yara, pii, behavioral   |
+| NLP / LLM Guard       | 15      | qwen3_guard, hallucination, doublespeak |
+| Strange Math Core     | 35      | tda, sheaf, hyperbolic, morse, fractal, wasserstein |
+| TTPs.ai Defense       | 22      | rag_guard, tool_security, ai_c2, cog_load |
+| VLM Protection        | 6       | adversarial_image, cross_modal, stego |
+| Advanced 2026         | 19      | multi_agent, kill_chain, agentic_monitor |
+| Protocol Security     | 12      | mcp_guard, a2a_security, nhi, agent_card |
+| Proactive Engines     | 18      | zero_day_forge, attack_synth, immunity |
+| Data Poisoning        | 8       | bootstrap, temporal, multi_tenant, sleeper |
+| Deep Learning Forensics | 12    | activation_steering, hidden_state  |
+| Meta-Judge + XAI      | 5       | meta_judge, explainability, hierarch |
+| Adaptive Behavioral   | 6       | fingerprinting, adaptive_markov    |
+| MITRE ATT&CK          | 4       | mitre_engine, atlas_mapper, attack_staging |
+| Infrastructure        | 23      | base, cache, models, patterns, utils |
+| Research Inventions   | 20      | new R&D engines (Jan 2026)         |
+| **TOTAL**             | **217** |                                    |
 
 ---
 

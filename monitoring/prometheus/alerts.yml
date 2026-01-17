@@ -1,0 +1,62 @@
+groups:
+  - name: sentinel_alerts
+    rules:
+      # High latency alert
+      - alert: HighRequestLatency
+        expr: histogram_quantile(0.95, rate(sentinel_request_duration_seconds_bucket[5m])) > 2
+        for: 2m
+        labels:
+          severity: warning
+        annotations:
+          summary: "High request latency detected"
+          description: "95th percentile latency is {{ $value }}s (threshold: 2s)"
+
+      # Error rate alert
+      - alert: HighErrorRate
+        expr: sum(rate(sentinel_requests_total{status="error"}[5m])) / sum(rate(sentinel_requests_total[5m])) > 0.05
+        for: 2m
+        labels:
+          severity: critical
+        annotations:
+          summary: "High error rate detected"
+          description: "Error rate is {{ $value | humanizePercentage }} (threshold: 5%)"
+
+      # Engine failure alert
+      - alert: EngineDown
+        expr: up{job=~"brain|shield"} == 0
+        for: 1m
+        labels:
+          severity: critical
+        annotations:
+          summary: "SENTINEL engine is down"
+          description: "{{ $labels.job }} at {{ $labels.instance }} is not responding"
+
+      # Too many blocked requests
+      - alert: HighBlockRate
+        expr: sum(rate(sentinel_detections_total{engine="injection"}[5m])) > 10
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "High injection block rate"
+          description: "Blocked {{ $value }} injection attempts in the last 5 minutes"
+
+      # Memory pressure
+      - alert: HighMemoryUsage
+        expr: process_resident_memory_bytes / 1024 / 1024 > 1024
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "High memory usage"
+          description: "Memory usage is {{ $value | humanize }}MB"
+
+      # Cache miss rate
+      - alert: HighCacheMissRate
+        expr: sum(rate(sentinel_cache_misses_total[5m])) / (sum(rate(sentinel_cache_hits_total[5m])) + sum(rate(sentinel_cache_misses_total[5m]))) > 0.5
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "High cache miss rate"
+          description: "Cache miss rate is {{ $value | humanizePercentage }}"

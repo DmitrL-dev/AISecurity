@@ -37,13 +37,13 @@ SENTINEL (Security ENhanced Threat Intelligence for Natural Language) is a secur
 │   User → [SENTINEL] → LLM → [SENTINEL] → Response to User              │
 │              ↑                   ↑                                      │
 │        Input Analysis      Output Analysis                              │
-│        (89 engines)        (PII, leaks)                                │
+│        (217 engines)        (PII, leaks)                                │
 └─────────────────────────────────────────────────────────────────────────┘
 ```
 
 SENTINEL works as a **proxy** between your application and LLM provider:
 
-1. **Incoming request** passes through 89 detection engines
+1. **Incoming request** passes through 217 detection engines
 2. If threat detected — request is blocked
 3. If request is safe — forwarded to LLM
 4. **LLM response** is checked for data leaks
@@ -68,7 +68,7 @@ SENTINEL works as a **proxy** between your application and LLM provider:
 
 | Component | Requirement          | Purpose                     |
 | --------- | -------------------- | --------------------------- |
-| **RAM**   | 16 GB+               | All 89 engines + Qwen Guard |
+| **RAM**   | 16 GB+               | All 217 engines + Qwen Guard |
 | **GPU**   | NVIDIA with 8GB VRAM | ML model acceleration       |
 | **CPU**   | 8+ cores             | High throughput             |
 | **Disk**  | SSD 50 GB+           | Fast I/O                    |
@@ -102,7 +102,7 @@ docker run hello-world
 ### Step 1: Clone Repository
 
 ```bash
-git clone https://github.com/your-org/sentinel.git
+git clone https://github.com/DmitrL-dev/AISecurity.git
 cd sentinel
 ls -la
 # Should see: docker-compose.yml, README.md, src/, docs/
@@ -246,7 +246,7 @@ docker compose restart brain
 
 ### Getting Help
 
-- **GitHub Issues:** [github.com/your-org/sentinel/issues](https://github.com/your-org/sentinel/issues)
+- **GitHub Issues:** [github.com/DmitrL-dev/AISecurity/issues](https://github.com/DmitrL-dev/AISecurity/issues)
 - **Telegram:** [@DmLabincev](https://t.me/DmLabincev)
 
 ---

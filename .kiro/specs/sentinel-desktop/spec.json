@@ -1,0 +1,8 @@
+{
+  "name": "sentinel-desktop",
+  "version": "1.0.0",
+  "language": "ru",
+  "status": "approved",
+  "created": "2026-01-10",
+  "description": "Windows desktop app с WinDivert для перехвата AI API трафика"
+}

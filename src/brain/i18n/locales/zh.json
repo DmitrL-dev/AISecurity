@@ -1,0 +1,49 @@
+{
+  "app": {
+    "name": "SENTINEL",
+    "description": "AI安全运营中心"
+  },
+  "verdicts": {
+    "allow": "允许",
+    "warn": "警告",
+    "block": "阻止"
+  },
+  "threats": {
+    "injection": "检测到提示注入",
+    "pii": "个人身份信息",
+    "jailbreak": "越狱尝试",
+    "hallucination": "可能的幻觉",
+    "behavioral": "异常行为"
+  },
+  "errors": {
+    "generic": "发生错误",
+    "validation": "验证错误: {details}",
+    "rate_limit": "请求频率超限。请在 {seconds} 秒后重试。",
+    "unauthorized": "未授权。请提供有效的API密钥。",
+    "forbidden": "访问被拒绝。权限不足。",
+    "not_found": "资源未找到: {resource}",
+    "engine_error": "引擎 '{engine}' 遇到错误",
+    "timeout": "请求超时: {seconds} 秒"
+  },
+  "messages": {
+    "analyzing": "正在分析文本...",
+    "complete": "分析完成",
+    "safe": "未检测到威胁",
+    "threats_found": "检测到 {count} 个威胁",
+    "blocked": "请求因安全问题被阻止"
+  },
+  "engines": {
+    "injection": "提示注入检测",
+    "pii": "PII检测",
+    "behavioral": "行为分析",
+    "yara": "模式匹配",
+    "hallucination": "幻觉检测"
+  },
+  "status": {
+    "healthy": "健康",
+    "degraded": "降级",
+    "unhealthy": "不健康",
+    "ready": "就绪",
+    "not_ready": "未就绪"
+  }
+}
