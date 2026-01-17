@@ -31,6 +31,7 @@ print(result.answer)
 | Feature | Description |
 |---------|-------------|
 | **Infinite Context** | Process 10M+ tokens with O(1) memory |
+| **InfiniRetri** | 🆕 Attention-based retrieval, 100% accuracy on 1M+ tokens |
 | **Secure REPL** | CIRCLE-compliant sandboxed code execution |
 | **Multi-Provider** | 75 LLM providers (OpenAI, Anthropic, Google, Ollama, vLLM...) |
 | **Document Loaders** | 135+ sources (Slack, Jira, GitHub, S3, databases...) |
@@ -41,6 +42,33 @@ print(result.answer)
 | **Memory Systems** | Buffer, Episodic (EM-LLM inspired) |
 
 > 📋 **[Full Integration Catalog](docs/INTEGRATIONS.md)** — 287+ production-ready integrations
+
+## 🔥 InfiniRetri (NEW)
+
+Attention-based infinite context retrieval — 100% accuracy on Needle-In-a-Haystack up to 1M+ tokens.
+
+```python
+from rlm_toolkit.retrieval import InfiniRetriever
+
+# Retrieve from 1M+ token documents
+retriever = InfiniRetriever("Qwen/Qwen2.5-0.5B-Instruct")
+answer = retriever.retrieve(
+    context=million_token_doc,
+    question="What is the secret code?"
+)
+
+# Or use automatic routing in RLM
+from rlm_toolkit import RLM, RLMConfig
+
+config = RLMConfig(
+    use_infiniretri=True,
+    infiniretri_threshold=100_000,  # Auto-switch at 100K tokens
+)
+rlm = RLM.from_ollama("llama3", config=config)
+result = rlm.run(huge_document, "Summarize")  # Automatically uses InfiniRetri
+```
+
+> Based on [arXiv:2502.12962](https://arxiv.org/abs/2502.12962) — requires `pip install infini-retri`
 
 ## 📦 Installation
 

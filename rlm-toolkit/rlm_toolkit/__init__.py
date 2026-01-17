@@ -7,6 +7,7 @@ using the Recursive Language Models paradigm (arxiv:2512.24601).
 
 Features:
 - 10M+ token processing without quality degradation
+- InfiniRetri: Attention-based infinite context retrieval (100% NIH accuracy)
 - 80-90% cost reduction vs direct processing
 - Security-first design (CIRCLE-based guards)
 - LangChain-competitive observability & callbacks
@@ -20,12 +21,18 @@ Quick Start:
 >>> result = rlm.run(huge_document, "Summarize all chapters")
 >>> print(result.answer)
 
+InfiniRetri (for 1M+ token contexts):
+-------------------------------------
+>>> from rlm_toolkit.retrieval import InfiniRetriever
+>>> retriever = InfiniRetriever("Qwen/Qwen2.5-0.5B-Instruct")
+>>> answer = retriever.retrieve(million_token_doc, "Find the key insight")
+
 Advanced Usage:
 --------------
 >>> from rlm_toolkit import RLM, RLMConfig
 >>> from rlm_toolkit.providers import OpenAIProvider, OllamaProvider
 >>>
->>> config = RLMConfig(max_cost=5.0, sandbox=True)
+>>> config = RLMConfig(max_cost=5.0, sandbox=True, use_infiniretri=True)
 >>> rlm = RLM(
 ...     root=OpenAIProvider("gpt-5.2"),
 ...     sub=OllamaProvider("qwen3:7b"),  # Free sub-calls
@@ -35,10 +42,10 @@ Advanced Usage:
 
 API Reference:
 -------------
-- RLM: Main engine class
-- RLMConfig: Configuration options
+- RLM: Main engine class (auto-routes to InfiniRetri for large contexts)
+- RLMConfig: Configuration options (includes infiniretri_threshold)
 - RLMResult: Execution result with answer, cost, iterations
-- LLMProvider: Base class for LLM providers
+- InfiniRetriever: Attention-based infinite context retrieval
 
 Version: 2.0.0a1
 License: Apache-2.0
@@ -54,6 +61,13 @@ from rlm_toolkit.core.state import RLMState
 from rlm_toolkit.core.repl import SecureREPL, SecurityViolation
 from rlm_toolkit.core.callbacks import RLMCallback, CallbackManager
 from rlm_toolkit.core.streaming import RLMStreamEvent
+
+# InfiniRetri (optional, requires infini-retri package)
+try:
+    from rlm_toolkit.retrieval import InfiniRetriever, INFINIRETRI_AVAILABLE
+except ImportError:
+    InfiniRetriever = None
+    INFINIRETRI_AVAILABLE = False
 
 # Type hints
 from typing import TYPE_CHECKING
@@ -83,4 +97,8 @@ __all__ = [
     "CallbackManager",
     # Streaming
     "RLMStreamEvent",
+    # InfiniRetri
+    "InfiniRetriever",
+    "INFINIRETRI_AVAILABLE",
 ]
+
