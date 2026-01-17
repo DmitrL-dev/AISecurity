@@ -10,6 +10,14 @@ from rlm_toolkit.memory.hierarchical import (
     MemoryEntry as HMEMEntry,
     create_hierarchical_memory,
 )
+from rlm_toolkit.memory.secure import (
+    SecureHierarchicalMemory,
+    SecurityPolicy,
+    TrustLevel,
+    AccessType,
+    AccessLogEntry,
+    create_secure_memory,
+)
 
 __all__ = [
     "Memory",
@@ -22,5 +30,12 @@ __all__ = [
     "MemoryLevel",
     "HMEMEntry",
     "create_hierarchical_memory",
+    # Secure H-MEM (Track B.4)
+    "SecureHierarchicalMemory",
+    "SecurityPolicy",
+    "TrustLevel",
+    "AccessType",
+    "AccessLogEntry",
+    "create_secure_memory",
 ]
 
