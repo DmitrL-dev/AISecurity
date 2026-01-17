@@ -34,13 +34,15 @@ print(result.answer)
 | **InfiniRetri** | 🆕 Attention-based retrieval, 100% accuracy on 1M+ tokens |
 | **H-MEM** | 🆕 4-level hierarchical memory with LLM consolidation |
 | **Self-Evolving** | 🆕 LLMs that improve through usage (R-Zero pattern) |
+| **Multi-Agent** | 🆕 Decentralized P2P agents with Trust Zones |
+| **DSPy Optimization** | 🆕 Automatic prompt optimization |
 | **Secure REPL** | CIRCLE-compliant sandboxed code execution |
 | **Multi-Provider** | 75 LLM providers (OpenAI, Anthropic, Google, Ollama, vLLM...) |
 | **Document Loaders** | 135+ sources (Slack, Jira, GitHub, S3, databases...) |
 | **Vector Stores** | 20+ stores (Pinecone, Chroma, Weaviate, pgvector...) |
 | **Embeddings** | 15+ providers (OpenAI, BGE, E5, Jina, Cohere...) |
 | **Cost Control** | Budget limits, cost tracking |
-| **Observability** | OpenTelemetry, Langfuse, LangSmith, W&B |
+| **Observability** | OpenTelemetry, Langfuse, LangSmith, W&B (12 backends) |
 | **Memory Systems** | Buffer, Episodic, Hierarchical (H-MEM) |
 
 > 📋 **[Full Integration Catalog](docs/INTEGRATIONS.md)** — 287+ production-ready integrations
@@ -135,6 +137,61 @@ print(f"Success rate: {metrics.success_rate}")
 - `EXPERIENCE_REPLAY` — Learn from past solutions
 
 > Based on R-Zero (arXiv:2508.05004)
+
+## 🤖 Multi-Agent Framework (NEW)
+
+Decentralized P2P agents inspired by Meta Matrix — no central orchestrator bottleneck.
+
+```python
+from rlm_toolkit.agents import MultiAgentRuntime, SecureAgent, EvolvingAgent
+
+# Create runtime
+runtime = MultiAgentRuntime()
+
+# Register agents with Trust Zones
+runtime.register(SecureAgent("analyst", "Data Analyst", trust_zone="internal"))
+runtime.register(EvolvingAgent("solver", "Problem Solver", llm_provider=provider))
+
+# Run message through agents
+from rlm_toolkit.agents import AgentMessage
+message = AgentMessage(content="Analyze this data", routing=["analyst", "solver"])
+result = runtime.run(message)
+```
+
+**Agent Types:**
+- `SecureAgent` — H-MEM Trust Zones integration
+- `EvolvingAgent` — Self-improving via R-Zero
+- `SecureEvolvingAgent` — Both combined
+
+> Based on Meta Matrix (arXiv 2025)
+
+## 🎯 DSPy-Style Optimization (NEW)
+
+Automatic prompt optimization — define what, not how.
+
+```python
+from rlm_toolkit.optimize import Signature, Predict, ChainOfThought, BootstrapFewShot
+
+# Define signature
+sig = Signature(
+    inputs=["question", "context"],
+    outputs=["answer"],
+    instructions="Answer based on context"
+)
+
+# Use with Chain of Thought
+cot = ChainOfThought(sig, provider)
+result = cot(question="What is X?", context="X is 42")
+
+# Auto-optimize with few-shot selection
+optimizer = BootstrapFewShot(metric=lambda p, g: p["answer"] == g["answer"])
+optimized = optimizer.compile(Predict(sig, provider), trainset=examples)
+```
+
+**Modules:** `Predict`, `ChainOfThought`, `SelfRefine`  
+**Optimizers:** `BootstrapFewShot`, `PromptOptimizer`
+
+> Inspired by Stanford DSPy
 
 ## 📦 Installation
 
