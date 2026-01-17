@@ -40,6 +40,9 @@ class RLMConfig:
         sandbox: Enable SecureREPL sandbox (default: True)
         truncate_output: Maximum output chars per execution (default: 10000)
         allowed_imports: Allowed import modules (default: re, json, math, datetime)
+        use_infiniretri: Enable InfiniRetri for large contexts (default: True)
+        infiniretri_threshold: Token count to trigger InfiniRetri (default: 100000)
+        infiniretri_model: Model for InfiniRetri (default: None, uses Qwen2.5-0.5B)
     """
     # Iteration limits
     max_iterations: int = 50
@@ -62,6 +65,11 @@ class RLMConfig:
     
     # Recovery (ADR-007)
     recovery: Optional["RecoveryConfig"] = None
+    
+    # InfiniRetri integration (Track A: R&D 2026)
+    use_infiniretri: bool = True
+    infiniretri_threshold: int = 100_000  # tokens (~400K chars)
+    infiniretri_model: Optional[str] = None  # Default: Qwen/Qwen2.5-0.5B-Instruct
 
 
 @dataclass
@@ -173,6 +181,17 @@ RULES:
                 max_memory_mb=self.config.max_memory_mb,
                 allowed_imports=self.config.allowed_imports,
             )
+        
+        # Initialize InfiniRetri for large context handling
+        self._infiniretri = None
+        if self.config.use_infiniretri:
+            try:
+                from rlm_toolkit.retrieval.infiniretri import InfiniRetriever, INFINIRETRI_AVAILABLE
+                if INFINIRETRI_AVAILABLE:
+                    model = self.config.infiniretri_model or "Qwen/Qwen2.5-0.5B-Instruct"
+                    self._infiniretri = InfiniRetriever(model_name_or_path=model)
+            except ImportError:
+                pass  # InfiniRetri not available, fallback to standard RLM
     
     @classmethod
     def from_ollama(
@@ -362,6 +381,30 @@ RULES:
         from rlm_toolkit.core.state import RLMState
         
         start_time = time.perf_counter()
+        
+        # Check if context exceeds InfiniRetri threshold
+        estimated_tokens = len(context) // 4  # Rough: 4 chars per token
+        if self._infiniretri and estimated_tokens > self.config.infiniretri_threshold:
+            # Use InfiniRetri for large context retrieval
+            self._fire_callback("on_infiniretri_start", context_tokens=estimated_tokens, threshold=self.config.infiniretri_threshold)
+            
+            try:
+                answer = self._infiniretri.retrieve(context=context, question=query)
+                
+                self._fire_callback("on_infiniretri_end", answer=answer[:200])
+                
+                return RLMResult(
+                    answer=answer,
+                    status='success',
+                    iterations=0,
+                    total_cost=0.0,  # InfiniRetri runs locally
+                    execution_time=time.perf_counter() - start_time,
+                    subcall_count=0,
+                    history=[(f"InfiniRetri ({estimated_tokens} tokens)", answer[:500])],
+                )
+            except Exception as e:
+                # Fallback to standard RLM on InfiniRetri failure
+                self._fire_callback("on_error", error=e, context={"method": "infiniretri"})
         
         # Initialize state
         state = RLMState(
