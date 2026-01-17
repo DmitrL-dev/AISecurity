@@ -33,6 +33,7 @@ print(result.answer)
 | **Infinite Context** | Process 10M+ tokens with O(1) memory |
 | **InfiniRetri** | 🆕 Attention-based retrieval, 100% accuracy on 1M+ tokens |
 | **H-MEM** | 🆕 4-level hierarchical memory with LLM consolidation |
+| **Self-Evolving** | 🆕 LLMs that improve through usage (R-Zero pattern) |
 | **Secure REPL** | CIRCLE-compliant sandboxed code execution |
 | **Multi-Provider** | 75 LLM providers (OpenAI, Anthropic, Google, Ollama, vLLM...) |
 | **Document Loaders** | 135+ sources (Slack, Jira, GitHub, S3, databases...) |
@@ -104,6 +105,36 @@ Level 0: EPISODE   → Raw interactions
 ```
 
 > Based on arXiv H-MEM paper (July 2025)
+
+## 🧬 Self-Evolving LLMs (NEW)
+
+LLMs that improve reasoning through usage — no human supervision required.
+
+```python
+from rlm_toolkit.evolve import SelfEvolvingRLM, EvolutionStrategy
+from rlm_toolkit.providers import OllamaProvider
+
+# Create self-evolving RLM
+evolve = SelfEvolvingRLM(
+    provider=OllamaProvider("llama3"),
+    strategy=EvolutionStrategy.CHALLENGER_SOLVER
+)
+
+# Solve with self-refinement
+answer = evolve.solve("What is 25 * 17?")
+print(f"Answer: {answer.answer}, Confidence: {answer.confidence}")
+
+# Run training loop (generates challenges → solves → improves)
+metrics = evolve.training_loop(iterations=10, domain="math")
+print(f"Success rate: {metrics.success_rate}")
+```
+
+**Strategies:**
+- `SELF_REFINE` — Iterative self-improvement
+- `CHALLENGER_SOLVER` — R-Zero co-evolutionary loop
+- `EXPERIENCE_REPLAY` — Learn from past solutions
+
+> Based on R-Zero (arXiv:2508.05004)
 
 ## 📦 Installation
 
