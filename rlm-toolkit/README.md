@@ -32,6 +32,7 @@ print(result.answer)
 |---------|-------------|
 | **Infinite Context** | Process 10M+ tokens with O(1) memory |
 | **InfiniRetri** | 🆕 Attention-based retrieval, 100% accuracy on 1M+ tokens |
+| **H-MEM** | 🆕 4-level hierarchical memory with LLM consolidation |
 | **Secure REPL** | CIRCLE-compliant sandboxed code execution |
 | **Multi-Provider** | 75 LLM providers (OpenAI, Anthropic, Google, Ollama, vLLM...) |
 | **Document Loaders** | 135+ sources (Slack, Jira, GitHub, S3, databases...) |
@@ -39,7 +40,7 @@ print(result.answer)
 | **Embeddings** | 15+ providers (OpenAI, BGE, E5, Jina, Cohere...) |
 | **Cost Control** | Budget limits, cost tracking |
 | **Observability** | OpenTelemetry, Langfuse, LangSmith, W&B |
-| **Memory Systems** | Buffer, Episodic (EM-LLM inspired) |
+| **Memory Systems** | Buffer, Episodic, Hierarchical (H-MEM) |
 
 > 📋 **[Full Integration Catalog](docs/INTEGRATIONS.md)** — 287+ production-ready integrations
 
@@ -69,6 +70,40 @@ result = rlm.run(huge_document, "Summarize")  # Automatically uses InfiniRetri
 ```
 
 > Based on [arXiv:2502.12962](https://arxiv.org/abs/2502.12962) — requires `pip install infini-retri`
+
+## 🧠 Hierarchical Memory (H-MEM) (NEW)
+
+Multi-level persistent memory with semantic consolidation — memories that learn and evolve.
+
+```python
+from rlm_toolkit.memory import HierarchicalMemory, SecureHierarchicalMemory
+
+# Basic H-MEM
+hmem = HierarchicalMemory()
+hmem.add_episode("User asked about weather")
+hmem.add_episode("AI responded with forecast")
+hmem.consolidate()  # Auto-creates traces, categories, domains
+
+results = hmem.retrieve("weather")
+
+# Secure H-MEM with encryption and trust zones
+smem = SecureHierarchicalMemory(
+    agent_id="agent-001",
+    trust_zone="zone-secure"
+)
+smem.add_episode("Confidential data")
+smem.grant_access("agent-002", "zone-secure")
+```
+
+**4-Level Architecture:**
+```
+Level 3: DOMAIN    → High-level knowledge
+Level 2: CATEGORY  → Semantic categories  
+Level 1: TRACE     → Consolidated memories
+Level 0: EPISODE   → Raw interactions
+```
+
+> Based on arXiv H-MEM paper (July 2025)
 
 ## 📦 Installation
 
