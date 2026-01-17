@@ -443,7 +443,7 @@ class HierarchicalMemory:
         Trigger manual consolidation across all levels.
         
         Args:
-            summarizer: Optional callable(texts) -> summary for LLM summarization
+            summarizer: Optional callable(texts: List[str]) -> str for LLM summarization
             
         Returns:
             Number of consolidations performed
@@ -453,14 +453,158 @@ class HierarchicalMemory:
             
             # Consolidate episodes → traces
             if len(self._memories[MemoryLevel.EPISODE]) >= 5:
-                self._consolidate_episodes()
-                count += 1
+                count += self._consolidate_episodes_to_traces(summarizer)
             
-            # Consolidate traces → categories (TODO: implement with semantic clustering)
-            # Consolidate categories → domains (TODO: implement)
+            # Consolidate traces → categories
+            if len(self._memories[MemoryLevel.TRACE]) >= self.config.trace_consolidation_threshold:
+                count += self._consolidate_traces_to_categories(summarizer)
+            
+            # Consolidate categories → domains
+            if len(self._memories[MemoryLevel.CATEGORY]) >= 5:
+                count += self._consolidate_categories_to_domains(summarizer)
             
             self._consolidation_count += count
             return count
+    
+    def _consolidate_episodes_to_traces(self, summarizer=None) -> int:
+        """Consolidate episodes into traces using LLM summarization."""
+        episodes = list(self._memories[MemoryLevel.EPISODE].values())
+        if len(episodes) < 5:
+            return 0
+        
+        # Group recent episodes into a trace
+        recent = sorted(episodes, key=lambda e: e.timestamp, reverse=True)[:10]
+        episode_ids = [e.id for e in recent]
+        episode_texts = [e.content for e in recent]
+        
+        # Use LLM summarizer if available, else simple concatenation
+        if summarizer:
+            summary = summarizer(episode_texts)
+        else:
+            summary = f"Conversation trace ({len(recent)} episodes): " + "; ".join(
+                t[:50] for t in episode_texts[:3]
+            ) + "..."
+        
+        self.add_trace(
+            content=summary,
+            episode_ids=episode_ids,
+            metadata={"auto_consolidated": True, "source_count": len(recent)},
+        )
+        
+        return 1
+    
+    def _consolidate_traces_to_categories(self, summarizer=None) -> int:
+        """Consolidate traces into categories using semantic clustering."""
+        traces = list(self._memories[MemoryLevel.TRACE].values())
+        if len(traces) < 3:
+            return 0
+        
+        # Simple keyword-based clustering (replace with embeddings for production)
+        clusters = self._cluster_by_keywords(traces)
+        count = 0
+        
+        for category_name, cluster_traces in clusters.items():
+            if len(cluster_traces) < 2:
+                continue
+            
+            trace_ids = [t.id for t in cluster_traces]
+            trace_texts = [t.content for t in cluster_traces]
+            
+            # Use LLM summarizer if available
+            if summarizer:
+                content = summarizer(trace_texts)
+            else:
+                content = f"Category '{category_name}' with {len(cluster_traces)} related memories"
+            
+            self.add_category(
+                content=content,
+                trace_ids=trace_ids,
+                category_name=category_name,
+                metadata={"auto_consolidated": True, "source_count": len(cluster_traces)},
+            )
+            count += 1
+        
+        return count
+    
+    def _consolidate_categories_to_domains(self, summarizer=None) -> int:
+        """Consolidate categories into high-level domain knowledge."""
+        categories = list(self._memories[MemoryLevel.CATEGORY].values())
+        if len(categories) < 2:
+            return 0
+        
+        # Group all categories into a domain (simplified)
+        category_ids = [c.id for c in categories[:10]]
+        category_texts = [c.content for c in categories[:10]]
+        
+        # Extract domain name from category names
+        domain_names = [c.metadata.get("category_name", "unknown") for c in categories[:10]]
+        domain_name = f"Knowledge Domain: {', '.join(set(domain_names)[:3])}"
+        
+        if summarizer:
+            content = summarizer(category_texts)
+        else:
+            content = f"Domain knowledge consolidating {len(categories)} categories"
+        
+        self.add_domain(
+            content=content,
+            category_ids=category_ids,
+            domain_name=domain_name,
+            metadata={"auto_consolidated": True, "source_count": len(categories)},
+        )
+        
+        return 1
+    
+    def _cluster_by_keywords(self, memories: List[MemoryEntry]) -> Dict[str, List[MemoryEntry]]:
+        """Simple keyword-based clustering for memories."""
+        # Common topic keywords
+        topic_keywords = {
+            "weather": ["weather", "temperature", "rain", "sunny", "forecast", "climate"],
+            "technology": ["code", "programming", "software", "computer", "ai", "llm"],
+            "business": ["meeting", "project", "deadline", "report", "client"],
+            "personal": ["feel", "think", "want", "like", "prefer"],
+            "general": [],  # catch-all
+        }
+        
+        clusters: Dict[str, List[MemoryEntry]] = {k: [] for k in topic_keywords}
+        
+        for mem in memories:
+            content_lower = mem.content.lower()
+            assigned = False
+            
+            for topic, keywords in topic_keywords.items():
+                if topic == "general":
+                    continue
+                if any(kw in content_lower for kw in keywords):
+                    clusters[topic].append(mem)
+                    assigned = True
+                    break
+            
+            if not assigned:
+                clusters["general"].append(mem)
+        
+        # Filter out empty clusters
+        return {k: v for k, v in clusters.items() if v}
+    
+    def consolidate_with_llm(self, llm_provider) -> int:
+        """
+        Convenience method for consolidation using RLM LLM provider.
+        
+        Args:
+            llm_provider: LLMProvider instance (e.g., from rlm_toolkit.providers)
+            
+        Returns:
+            Number of consolidations performed
+        """
+        def summarizer(texts: List[str]) -> str:
+            prompt = f"""Summarize the following {len(texts)} memory entries into a concise, coherent summary:
+
+{chr(10).join(f'{i+1}. {t}' for i, t in enumerate(texts))}
+
+Summary (1-2 sentences):"""
+            response = llm_provider.generate(prompt)
+            return response.content.strip()
+        
+        return self.consolidate(summarizer=summarizer)
     
     def get_stats(self) -> Dict[str, Any]:
         """Get memory statistics."""
