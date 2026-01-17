@@ -1,32 +1,32 @@
-﻿<p align="center">
-  <img src="./docs/images/sentinel_hero.png" alt="🐉 SENTINEL — AI Security Platform" width="100%">
+<p align="center">
+  <img src="./docs/images/sentinel_hero.png" alt=" SENTINEL - AI Security Platform" width="100%">
 </p>
 
-<h1 align="center">SENTINEL — AI Security Platform</h1>
+<h1 align="center">SENTINEL - AI Security Platform</h1>
 
 <p align="center">
-  <strong>🛡️ Defense + ⚔️ Offense + 📦 Framework — Complete AI Security Suite</strong><br>
-  <strong>Dragon v4.1 • January 2026</strong>
+  <strong> Defense +  Offense +  Framework - Complete AI Security Suite</strong><br>
+  <strong>Dragon v4.1 * January 2026</strong>
 </p>
 
 <p align="center">
-  <img src="https://img.shields.io/badge/🧠_BRAIN-217_Engines-brightgreen?style=for-the-badge" alt="Brain">
-  <img src="https://img.shields.io/badge/🛡️_SHIELD-113_Tests_✓-00ADD8?style=for-the-badge" alt="Shield">
-  <img src="https://img.shields.io/badge/🐉_STRIKE-39K+_Payloads-red?style=for-the-badge" alt="Strike">
-  <img src="https://img.shields.io/badge/📊_LOC-116K-blue?style=for-the-badge" alt="LOC">
+  <img src="https://img.shields.io/badge/_BRAIN-217_Engines-brightgreen?style=for-the-badge" alt="Brain">
+  <img src="https://img.shields.io/badge/_SHIELD-113_Tests_-00ADD8?style=for-the-badge" alt="Shield">
+  <img src="https://img.shields.io/badge/_STRIKE-39K+_Payloads-red?style=for-the-badge" alt="Strike">
+  <img src="https://img.shields.io/badge/_LOC-116K-blue?style=for-the-badge" alt="LOC">
 </p>
 
 ---
 
-## ⚡ Quick Start
+##  Quick Start
 
 ### One-Click Install
 
 ```bash
-# Linux/macOS — Full Stack (Docker)
+# Linux/macOS - Full Stack (Docker)
 curl -sSL https://raw.githubusercontent.com/DmitrL-dev/AISecurity/main/sentinel-community/install.sh | bash
 
-# Linux/macOS — Python Only (no Docker)
+# Linux/macOS - Python Only (no Docker)
 curl -sSL https://raw.githubusercontent.com/DmitrL-dev/AISecurity/main/sentinel-community/install.sh | bash -s -- --lite
 
 # Windows PowerShell
@@ -58,7 +58,7 @@ print(result.is_safe)  # False
 
 ---
 
-## 🚀 NEW: RLM-Toolkit v1.0.0 — LangChain Killer is Here!
+##  NEW: RLM-Toolkit v1.0.0 - LangChain Killer is Here!
 
 <p align="center">
   <img src="https://img.shields.io/badge/RLM-v1.0.0-purple?style=for-the-badge" alt="RLM">
@@ -114,28 +114,28 @@ pip install rlm-toolkit
 
 ---
 
-## 🎮 Platform Components
+##  Platform Components
 
 | Component | Description |
 |-----------|-------------|
-| 🧠 **[BRAIN](#-brain--detection-engines)** | Detection Core — 217 Engines, ML + Rules, Strange Math™ |
-| 🛡️ **[SHIELD](#%EF%B8%8F-shield--pure-c-dmz)** | AI Security DMZ — Pure C, <1ms latency, 22 Protocols, Cisco CLI |
-| 🐉 **[STRIKE](#-strike--red-team-platform)** | Offensive Platform — 39K+ payloads, HYDRA, AI Attack Planner |
-| 📦 **[FRAMEWORK](#-framework--python-sdk)** | Python SDK — pip install, CLI, FastAPI integration |
-| 🦠 **[IMMUNE](./immune/)** | EDR/XDR/MDR — Pure C, Kernel-level, DragonFlyBSD |
+|  **[BRAIN](#-brain--detection-engines)** | Detection Core - 217 Engines, ML + Rules, Strange Math™ |
+|  **[SHIELD](#%EF%B8%8F-shield--pure-c-dmz)** | AI Security DMZ - Pure C, <1ms latency, 22 Protocols, Cisco CLI |
+|  **[STRIKE](#-strike--red-team-platform)** | Offensive Platform - 39K+ payloads, HYDRA, AI Attack Planner |
+|  **[FRAMEWORK](#-framework--python-sdk)** | Python SDK - pip install, CLI, FastAPI integration |
+|  **[IMMUNE](./immune/)** | EDR/XDR/MDR - Pure C, Kernel-level, DragonFlyBSD |
 
 
 <p align="center">
-  <a href="https://dmitrl-dev.github.io/AISecurity/">📚 Documentation</a> •
-  <a href="./docs/getting-started/README-en.md">📖 Framework Docs</a> •
-  <a href="./docs/COMPARISON.md">📊 Comparison</a> •
-  <a href="mailto:chg@live.ru">📧 Contact</a>
+  <a href="https://dmitrl-dev.github.io/AISecurity/"> Documentation</a> *
+  <a href="./docs/getting-started/README-en.md"> Framework Docs</a> *
+  <a href="./docs/COMPARISON.md"> Comparison</a> *
+  <a href="mailto:chg@live.ru"> Contact</a>
 </p>
 
 ---
 
 <details>
-<summary><h3>🛡️ Free Threat Signatures CDN</h3></summary>
+<summary><h3> Free Threat Signatures CDN</h3></summary>
 
 SENTINEL provides **free, auto-updated threat signatures** for the community. No API key required!
 
@@ -154,47 +154,47 @@ fetch('https://cdn.jsdelivr.net/gh/DmitrL-dev/AISecurity@latest/signatures/jailb
 ```
 
 **Features:**
-- ✅ Updated daily via GitHub Actions
-- ✅ Free for commercial & non-commercial use
-- ✅ Community contributions welcome (PRs to `signatures/`)
+-  Updated daily via GitHub Actions
+-  Free for commercial & non-commercial use
+-  Community contributions welcome (PRs to `signatures/`)
 
 </details>
 
 ---
 
 > [!IMPORTANT]
-> ### 🚨 Open to Work — AI Security Engineer
+> ###  Open to Work - AI Security Engineer
 > **Solo author of this 116K LOC platform with 217 Engines. Available remote.**
-> 📧 [chg@live.ru](mailto:chg@live.ru) • 💬 [@DmLabincev](https://t.me/DmLabincev)
+>  [chg@live.ru](mailto:chg@live.ru) *  [@DmLabincev](https://t.me/DmLabincev)
 
 ---
 
-## 🦠 IMMUNE — EDR/XDR/MDR Security Stack
+##  IMMUNE - EDR/XDR/MDR Security Stack
 
 <p align="center">
   <img src="./immune/docs/images/immune_hero.png" alt="SENTINEL IMMUNE - Kernel Security" width="100%">
 </p>
 
-> **Kernel-level security for AI infrastructure — written in Pure C.**  
+> **Kernel-level security for AI infrastructure - written in Pure C.**  
 > **DragonFlyBSD + Linux eBPF. Production Hardened.**
 
-### 🔥 January 2026 Update: Production Ready!
+###  January 2026 Update: Production Ready!
 
 | Phase | Module | Status |
 |-------|--------|--------|
-| **1.1** | TLS 1.3 mTLS (wolfSSL) | ✅ |
-| **1.2** | ReDoS Protection | ✅ |
-| **2.1** | Bloom Filter (MurmurHash3) | ✅ |
-| **2.2** | SENTINEL Bridge (Brain API) | ✅ |
-| **3.1** | Kill Switch (Shamir 3-of-5) | ✅ |
-| **3.2** | Sybil Defense (PoW + Trust) | ✅ |
-| **3.3** | RCU Buffer (lock-free) | ✅ |
-| **4.1** | Linux eBPF Port | ✅ |
-| **4.2** | Web Dashboard (htmx) | ✅ |
+| **1.1** | TLS 1.3 mTLS (wolfSSL) |  |
+| **1.2** | ReDoS Protection |  |
+| **2.1** | Bloom Filter (MurmurHash3) |  |
+| **2.2** | SENTINEL Bridge (Brain API) |  |
+| **3.1** | Kill Switch (Shamir 3-of-5) |  |
+| **3.2** | Sybil Defense (PoW + Trust) |  |
+| **3.3** | RCU Buffer (lock-free) |  |
+| **4.1** | Linux eBPF Port |  |
+| **4.2** | Web Dashboard (htmx) |  |
 
 **Total: ~9,000 LOC, 11 specs, 42 unit tests**
 
-### ⚡ At a Glance
+###  At a Glance
 
 | Metric | Value |
 |--------|-------|
@@ -203,7 +203,7 @@ fetch('https://cdn.jsdelivr.net/gh/DmitrL-dev/AISecurity@latest/signatures/jailb
 | **Platform** | DragonFlyBSD, FreeBSD, Linux eBPF |
 | **Security** | TLS 1.3, mTLS, Certificate Pinning |
 
-### 🏗️ Architecture
+###  Architecture
 
 ```
 ┌─────────────────────────────────────────────────────────────┐
@@ -226,17 +226,17 @@ fetch('https://cdn.jsdelivr.net/gh/DmitrL-dev/AISecurity@latest/signatures/jailb
 └─────────────────────────────────────────────────────────────┘
 ```
 
-📖 **[IMMUNE Documentation](./immune/README.md)**
+ **[IMMUNE Documentation](./immune/README.md)**
 
 ---
 
-## 🛡️ SHIELD — AI Security DMZ
+##  SHIELD - AI Security DMZ
 
-> **Enterprise-grade AI security DMZ — Pure C, 100% Production Ready**
+> **Enterprise-grade AI security DMZ - Pure C, 100% Production Ready**
 
 | Metric | Value |
 |--------|-------|
-| **Status** | ✅ 100% Production Ready |
+| **Status** |  100% Production Ready |
 | **Lines of Code** | 36,000+ |
 | **Source Files** | 131 .c, 80 .h |
 | **Tests** | 103/103 pass (94 CLI + 9 LLM) |
@@ -255,17 +255,17 @@ make test_llm_mock        # 9 LLM integration tests
 
 ### Key Features
 
-- 🧠 **Brain FFI** — HTTP + gRPC clients for AI analysis
-- 🔐 **TLS/OpenSSL** — Secure communications
-- ☸️ **Kubernetes** — 5 production manifests
-- 🔄 **CI/CD** — GitHub Actions (6 jobs, Valgrind, ASAN)
-- 📦 **Docker** — Multi-stage production build
+-  **Brain FFI** - HTTP + gRPC clients for AI analysis
+-  **TLS/OpenSSL** - Secure communications
+-  **Kubernetes** - 5 production manifests
+-  **CI/CD** - GitHub Actions (6 jobs, Valgrind, ASAN)
+-  **Docker** - Multi-stage production build
 
-📖 **[Shield Docs](./shield/README.md)** | **[Academy 🇷🇺](./shield/docs/academy/ru/)** | **[Academy 🇺🇸](./shield/docs/academy/en/)**
+ **[Shield Docs](./shield/README.md)** | **[Academy 🇷🇺](./shield/docs/academy/ru/)** | **[Academy 🇺🇸](./shield/docs/academy/en/)**
 
 ---
 
-## 🧠 BRAIN — Detection Engines
+##  BRAIN - Detection Engines
 
 <p align="center">
   <img src="./assets/brain_engines.png" alt="SENTINEL Brain - 217 detection engines" width="800">
@@ -277,32 +277,32 @@ make test_llm_mock        # 9 LLM integration tests
 
 | Category | Engines | Protection |
 |----------|---------|------------|
-| 🎭 **Injection** | 30+ | Prompt injection, jailbreak, Policy Puppetry |
-| 🤖 **Agentic** | 25+ | RAG poisoning, tool hijacking, memory attacks |
-| 🔬 **Mathematical** | 15+ | TDA, Sheaf Coherence, Chaos Theory |
-| 📤 **Privacy** | 10+ | PII detection, data leakage prevention |
-| ⛓️ **Supply Chain** | 5+ | Pickle security, serialization attacks |
+|  **Injection** | 30+ | Prompt injection, jailbreak, Policy Puppetry |
+|  **Agentic** | 25+ | RAG poisoning, tool hijacking, memory attacks |
+|  **Mathematical** | 15+ | TDA, Sheaf Coherence, Chaos Theory |
+|  **Privacy** | 10+ | PII detection, data leakage prevention |
+|  **Supply Chain** | 5+ | Pickle security, serialization attacks |
 
-> 🔥 **MCP/A2A Protocol Security** — SENTINEL protects agentic AI communication protocols.
+>  **MCP/A2A Protocol Security** - SENTINEL protects agentic AI communication protocols.
 > *Microsoft Defender just added "AI - MCP Server" category to Cloud App Catalog (Dec 2025).*
 > *We've had MCP security since day one.*
 
-## Strange Math™ — What Makes Us Different
+## Strange Math™ - What Makes Us Different
 
 ```
 ┌─────────────────────────────────────────────────────────────┐
 │  Standard Approach          vs    SENTINEL Strange Math™   │
 ├─────────────────────────────────────────────────────────────┤
-│  • Keyword matching              • Topological Data Analysis│
-│  • Regex patterns                • Sheaf Coherence Theory   │
-│  • Simple ML classifiers         • Hyperbolic Geometry      │
-│  • Static rules                  • Optimal Transport        │
-│                                  • Chaos Theory             │
+│  * Keyword matching              * Topological Data Analysis│
+│  * Regex patterns                * Sheaf Coherence Theory   │
+│  * Simple ML classifiers         * Hyperbolic Geometry      │
+│  * Static rules                  * Optimal Transport        │
+│                                  * Chaos Theory             │
 └─────────────────────────────────────────────────────────────┘
 ```
 
 <details>
-<summary><strong>📊 December 2025 R&D Engines (8 new)</strong></summary>
+<summary><strong> December 2025 R&D Engines (8 new)</strong></summary>
 
 | Engine | Attack Vector | Source |
 |--------|---------------|--------|
@@ -318,7 +318,7 @@ make test_llm_mock        # 9 LLM integration tests
 </details>
 
 <details>
-<summary><strong>🔥 January 2026 R&D Engines (6 new)</strong></summary>
+<summary><strong> January 2026 R&D Engines (6 new)</strong></summary>
 
 | Engine | Attack Vector | Source |
 |--------|---------------|--------|
@@ -330,17 +330,17 @@ make test_llm_mock        # 9 LLM integration tests
 | `misinformation_detector.py` | OWASP LLM09 | OWASP 2025 |
 
 **Enhanced Detectors (Jan 2):**
-- `policy_puppetry_detector.py` — +9 XML/JSON patterns
-- `crescendo_detector.py` — +10 RL-MTJail patterns
-- `semantic_drift_detector.py` — MEEA drift detection
-- `image_stego_detector.py` — Hidden text/LSB patterns
+- `policy_puppetry_detector.py` - +9 XML/JSON patterns
+- `crescendo_detector.py` - +10 RL-MTJail patterns
+- `semantic_drift_detector.py` - MEEA drift detection
+- `image_stego_detector.py` - Hidden text/LSB patterns
 
 **SyncedAttackDetector: 17 engines** (was 13)
 
 </details>
 
 <details>
-<summary><strong>🚀 January 5 2026 R&D Engines (3 new)</strong></summary>
+<summary><strong> January 5 2026 R&D Engines (3 new)</strong></summary>
 
 | Engine | Attack Vector | Source |
 |--------|---------------|--------|
@@ -369,7 +369,7 @@ make test_llm_mock        # 9 LLM integration tests
 </details>
 
 <details>
-<summary><strong>🚨 January 7 2026 R&D Engines (3 new + 2 enhanced)</strong></summary>
+<summary><strong> January 7 2026 R&D Engines (3 new + 2 enhanced)</strong></summary>
 
 | Engine | Threat | Source |
 |--------|--------|--------|
@@ -398,7 +398,7 @@ make test_llm_mock        # 9 LLM integration tests
 </details>
 
 <details>
-<summary><strong>🔬 January 7 2026 Deep R&D (2 new + 1 enhanced)</strong></summary>
+<summary><strong> January 7 2026 Deep R&D (2 new + 1 enhanced)</strong></summary>
 
 | Engine | Threat | Source |
 |--------|--------|--------|
@@ -427,7 +427,7 @@ make test_llm_mock        # 9 LLM integration tests
 </details>
 
 <details>
-<summary><strong>🔒 January 7 2026 Security Engines R&D (8 new)</strong></summary>
+<summary><strong> January 7 2026 Security Engines R&D (8 new)</strong></summary>
 
 | Engine | Threat | Source |
 |--------|--------|--------|
@@ -493,9 +493,9 @@ make test_llm_mock        # 9 LLM integration tests
 </details>
 
 <details>
-<summary><strong>🏢 January 8 2026 Enterprise Features (v1.6.0)</strong></summary>
+<summary><strong> January 8 2026 Enterprise Features (v1.6.0)</strong></summary>
 
-Inspired by AWS Security Agent — 3 new modules:
+Inspired by AWS Security Agent - 3 new modules:
 
 | Module | Purpose | LOC |
 |--------|---------|-----|
@@ -534,17 +534,17 @@ POST /design-review/documents
 </details>
 
 <details>
-<summary><strong>🔐 January 9 2026 Lasso Security Integration (21 patterns)</strong></summary>
+<summary><strong> January 9 2026 Lasso Security Integration (21 patterns)</strong></summary>
 
 Integrated prompt injection detection patterns from [lasso-security/claude-hooks](https://github.com/lasso-security/claude-hooks):
 
 | Category | Patterns | Detection |
 |----------|----------|-----------|
-| 🔐 **Encoding/Obfuscation** | 5 | Base64, Hex, Leetspeak, Homoglyphs, Zero-width |
-| 🎭 **Context Manipulation** | 5 | Fake admin claims, JSON role injection, conversation history |
-| 📦 **Instruction Smuggling** | 3 | HTML/C/Hash comment injection |
-| ⚡ **Extended Injection** | 4 | Delimiters, training forget, new system prompt |
-| 🎪 **Extended Roleplay** | 4 | Pretend you are, bypass restrictions, evil twin |
+|  **Encoding/Obfuscation** | 5 | Base64, Hex, Leetspeak, Homoglyphs, Zero-width |
+|  **Context Manipulation** | 5 | Fake admin claims, JSON role injection, conversation history |
+|  **Instruction Smuggling** | 3 | HTML/C/Hash comment injection |
+|  **Extended Injection** | 4 | Delimiters, training forget, new system prompt |
+|  **Extended Roleplay** | 4 | Pretend you are, bypass restrictions, evil twin |
 
 **SDD Spec:** `.kiro/specs/lasso-patterns-integration/`
 
@@ -555,7 +555,7 @@ Integrated prompt injection detection patterns from [lasso-security/claude-hooks
 </details>
 
 <details>
-<summary><strong>🔒 January 9 2026 Gap Closure Engines (2 new)</strong></summary>
+<summary><strong> January 9 2026 Gap Closure Engines (2 new)</strong></summary>
 
 Based on AI Security Digest Week 1 2026 gap analysis:
 
@@ -603,7 +603,7 @@ Total: 124 new tests
 
 ---
 
-## 🐉 STRIKE — Red Team Platform
+##  STRIKE - Red Team Platform
 
 <p align="center">
   <img src="./assets/strike_hydra.png" alt="HYDRA 9-Head Attack System" width="800">
@@ -617,7 +617,7 @@ Total: 124 new tests
 |---------|-------|
 | **Payloads** | 39,000+ (84 categories) |
 | **HYDRA Agents** | 10 parallel attack heads |
-| **Crucible CTF** | 82/82 challenges ✅ |
+| **Crucible CTF** | 82/82 challenges  |
 | **Jailbreak Vendors** | 33+ tested |
 
 
@@ -626,22 +626,22 @@ Total: 124 new tests
 
 | Who | What Strike Does |
 |-----|------------------|
-| 🔴 **Red Teams** | Full AI application penetration testing |
-| 🐛 **Bug Bounty** | Automated AI vulnerability discovery |
-| 🏢 **Enterprise** | Pre-deployment security validation |
-| 🎓 **Researchers** | Attack methodology development |
+|  **Red Teams** | Full AI application penetration testing |
+|  **Bug Bounty** | Automated AI vulnerability discovery |
+|  **Enterprise** | Pre-deployment security validation |
+|  **Researchers** | Attack methodology development |
 
-📖 **[Strike Documentation](./strike/README.md)** | **[Colab Demo](https://colab.research.google.com/github/DmitrL-dev/AISecurity/blob/main/SENTINEL_Strike_Demo.ipynb)**
+ **[Strike Documentation](./strike/README.md)** | **[Colab Demo](https://colab.research.google.com/github/DmitrL-dev/AISecurity/blob/main/SENTINEL_Strike_Demo.ipynb)**
 
 ---
 
-## 📦 FRAMEWORK — Python SDK
+##  FRAMEWORK - Python SDK
 
 <p align="center">
   <img src="./assets/framework_sdk.png" alt="SENTINEL Python SDK" width="800">
 </p>
 
-> **The pytest of AI Security** — Embed SENTINEL directly in your code.
+> **The pytest of AI Security** - Embed SENTINEL directly in your code.
 
 ## Installation
 
@@ -697,25 +697,25 @@ app.add_middleware(SentinelMiddleware, on_threat="block")
 | **Tiered Pipeline** | Parallel execution with early exit |
 | **SARIF Output** | IDE integration for VS Code, IntelliJ |
 
-📖 **[Framework Documentation](./docs/getting-started/README-en.md)** — from beginner to PhD
+ **[Framework Documentation](./docs/getting-started/README-en.md)** - from beginner to PhD
 
 ---
 
-## 📊 Platform Statistics
+##  Platform Statistics
 
 | Metric | Value |
 |--------|-------|
 | **Brain Engines** | 217 |
 | **Shield LOC** | 36,000+ |
-| **Shield Tests** | 103/103 ✅ |
+| **Shield Tests** | 103/103  |
 | **Strike Payloads** | 39,000+ |
 | **Total LOC** | 116,000+ |
-| **OWASP LLM Top 10** | 10/10 ✅ |
-| **OWASP Agentic AI** | 10/10 ✅ |
+| **OWASP LLM Top 10** | 10/10  |
+| **OWASP Agentic AI** | 10/10  |
 
 ---
 
-## 🚀 Installation
+##  Installation
 
 ## Docker (Recommended)
 
@@ -788,17 +788,17 @@ We welcome contributions! See [CONTRIBUTING.md](./docs/CONTRIBUTING.md).
 
 ---
 
-## 📞 Contact
+##  Contact
 
 | Channel | Link |
 |---------|------|
-| 📧 **Email** | [chg@live.ru](mailto:chg@live.ru) |
-| 💬 **Telegram** | [@DmLabincev](https://t.me/DmLabincev) |
-| 🐙 **GitHub** | [DmitrL-dev](https://github.com/DmitrL-dev) |
+|  **Email** | [chg@live.ru](mailto:chg@live.ru) |
+|  **Telegram** | [@DmLabincev](https://t.me/DmLabincev) |
+|  **GitHub** | [DmitrL-dev](https://github.com/DmitrL-dev) |
 
 ---
 
 <p align="center">
-  <strong>SENTINEL — Protect your AI. Attack with confidence.</strong><br>
-  Made with 🛡️ by DmitrL
+  <strong>SENTINEL - Protect your AI. Attack with confidence.</strong><br>
+  Made with  by DmitrL
 </p>
