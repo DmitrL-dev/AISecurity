@@ -4,6 +4,39 @@ All notable changes to the SENTINEL AI Security Platform.
 
 ---
 
+## [1.7.0] - 2026-01-18 (CVE-2026-22812 + RLM v1.0.1 Security Fix)
+
+### 🎯 New STRIKE Payloads (24)
+
+**AI Coding Assistant RCE (CVE-2026-22812):**
+- OpenCode unauthenticated local HTTP API exploitation
+- Session hijacking, file read, reverse shell vectors
+- Browser-based CORS exploitation (pre-fix)
+- AI coding assistant port database (Cursor, Codeium, TabNine, Continue)
+
+### 🔐 RLM-Toolkit v1.0.1 Security Fix
+
+- Removed unsafe `exec()` fallback in `PythonREPLTool`
+- Expanded `BLOCKED_IMPORTS` from 22 to 38 modules
+- Added: `shelve`, `dill`, `cloudpickle`, `code`, `codeop`, `http`, `urllib`, `ftplib`, `telnetlib`, `smtplib`, `tempfile`, `glob`, `fnmatch`, `asyncio`, `webbrowser`, `platform`
+- Security audit: 25/25 tests passing
+
+### 🔬 R&D Intelligence (10 Sources)
+
+- ETSI EN 304 223 — First global AI security standard
+- arXiv:2510.26702 — Intent-Based Permissions
+- Anthropic Red Team — Claude 4.5 autonomous exploit
+- OpenA2A — ServiceNow AI vulnerability
+- CVE-2026-22812 — OpenCode RCE
+
+### 📊 Statistics
+
+- **New Payloads**: 24
+- **Blocked Modules**: 38
+- **RLM Tests**: 927 passing
+
+---
+
 ## [1.6.3] - 2026-01-09 (R&D Gap Closure)
 
 ### 🔒 New Patterns & Rules (+38)

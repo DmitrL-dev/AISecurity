@@ -61,7 +61,7 @@ print(result.is_safe)  # False
 ##  NEW: RLM-Toolkit v1.0.0 - The LangChain Killer
 
 <p align="center">
-  <img src="https://img.shields.io/badge/RLM-v1.0.0_PRODUCTION-blueviolet?style=for-the-badge" alt="RLM">
+  <img src="https://img.shields.io/badge/RLM-v1.0.1_SECURITY_FIX-blueviolet?style=for-the-badge" alt="RLM">
   <img src="https://img.shields.io/badge/Tests-927_PASS-success?style=for-the-badge" alt="Tests">
   <img src="https://img.shields.io/badge/Docs-42K_Lines-blue?style=for-the-badge" alt="Docs">
   <img src="https://img.shields.io/badge/EN%2FRU-100%25-orange?style=for-the-badge" alt="Bilingual">
@@ -607,6 +607,35 @@ Based on AI Security Digest Week 1 2026 gap analysis:
 | SuperClaude Shield | Multi-IDE security wrapper | 27 |
 
 Total: 124 new tests
+
+</details>
+
+<details>
+<summary><strong>January 18 2026 R&D (CVE-2026-22812 + Security Hardening)</strong></summary>
+
+| Change | Type | Impact |
+|--------|------|--------|
+| AI Coding Assistant RCE payloads | STRIKE | +24 payloads |
+| CVE-2026-22812 (OpenCode) vectors | STRIKE | Session hijack, reverse shell |
+| SecureREPL hardening | RLM | 38 blocked modules |
+| BeaverTail false positive fix | RLM | Remove unsafe `exec()` fallback |
+
+**AI Coding Assistant RCE (CVE-2026-22812):**
+- OpenCode unauthenticated local HTTP API exploitation
+- Session hijacking, file read, reverse shell vectors
+- Browser-based CORS exploitation
+- AI coding assistant port database (Cursor, Codeium, TabNine, Continue)
+
+**RLM-Toolkit v1.0.1 Security Fix:**
+- Removed unsafe `exec()` fallback in `PythonREPLTool`
+- Expanded `BLOCKED_IMPORTS` from 22 to 38 modules
+- Added: `shelve`, `dill`, `cloudpickle`, `code`, `codeop`, `http`, `urllib`, `ftplib`, `telnetlib`, `smtplib`, `tempfile`, `glob`, `fnmatch`, `asyncio`, `webbrowser`, `platform`
+
+**R&D Intelligence (10 sources):**
+- ETSI EN 304 223 — First global AI security standard
+- Intent-Based Permissions (arXiv:2510.26702)
+- Anthropic Claude 4.5 cyber capabilities (2/5 Equifax simulation)
+- ServiceNow AI vulnerability (OpenA2A)
 
 </details>
 

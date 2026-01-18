@@ -878,6 +878,58 @@ Query utilities.
 **Engine Reference Complete!**
 
 > **217 total engine files** = 206 detection engines + 9 utility modules + 2 in synced/
-> Verified: Jan 14, 2026
+> Verified: Jan 18, 2026
+
+---
+
+## 🔬 January 18, 2026 R&D Update
+
+### CVE-2026-22812 (OpenCode RCE)
+
+**Threat Vector:** Unauthenticated local HTTP API in AI coding assistants
+
+| Tool | Default Ports | Status |
+|------|---------------|--------|
+| OpenCode | 4096-4099 | Patched in v1.0.216 |
+| Cursor | 3000-3001 | Verify CORS |
+| GitHub Copilot | 8080 | Unknown |
+| Codeium | 3300 | Unknown |
+| TabNine | 9000 | Unknown |
+| Continue | 65432 | Unknown |
+
+**STRIKE Payloads Added:** 24 (session hijack, file read, reverse shell)
+
+### ETSI EN 304 223
+
+First globally applicable European Standard for AI cybersecurity (Jan 15, 2026).
+
+**13 Principles across 5 Phases:**
+- Secure Design
+- Secure Development
+- Secure Deployment
+- Secure Maintenance
+- Secure End of Life
+
+**AI-Specific Threats Addressed:**
+- Data poisoning
+- Model manipulation
+- Indirect prompt injection
+- Training data extraction
+
+### Intent-Based Permissions (arXiv:2510.26702)
+
+**Concept:** Authorization server semantically inspects access requests and issues tokens constrained to minimal scopes.
+
+**Key Components:**
+- NLP Semantic Matching Module
+- Dynamic scope provisioning
+- ASTRA benchmark dataset
+
+**SENTINEL Roadmap:**
+- P1: Intent detection in Trust Zones
+- P2: SemanticMatcher implementation
+- P3: ASTRA integration for testing
+
+---
 
 Next step: [Configuration Guide →](../guides/configuration.md)
