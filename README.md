@@ -25,13 +25,10 @@
 
 ---
 
-<h2 align="center">🎓 New to AI Security? / Новичок в AI Security?</h2>
+<h2 align="center">🎓 New to AI Security?</h2>
 
-<table>
-<tr>
-<td width="50%">
-
-### 🇺🇸 English
+<details open>
+<summary><h3>🇺🇸 English</h3></summary>
 
 | I want to... | Go to... |
 |--------------|----------|
@@ -40,31 +37,25 @@
 | **Learn OWASP LLM Top 10** | [OWASP Lesson](./docs/academy/beginners/en/03-owasp-llm-top10.md) |
 | **Protect my chatbot** | [Protection Guide](./docs/academy/beginners/en/05-protecting-chatbot.md) |
 
-📚 **[Beginner Academy](./docs/academy/beginners/en/)** — 11 lessons  
-📈 **[Mid-Level Academy](./docs/academy/mid-level/en/)** — 16 lessons  
-🎓 **[Expert Academy](./docs/academy/expert/en/)** — 21 lessons
+📚 **[Beginner](./docs/academy/beginners/en/)** (11) · 📈 **[Mid-Level](./docs/academy/mid-level/en/)** (16) · 🎓 **[Expert](./docs/academy/expert/en/)** (21)
 
-</td>
-<td width="50%">
+</details>
 
-### 🇷🇺 Русский
+<details>
+<summary><h3>🇷🇺 Русский</h3></summary>
 
 | Хочу... | Перейти... |
 |---------|------------|
 | **Понять основы** | [Что такое Prompt Injection?](./docs/academy/beginners/ru/01-prompt-injection.md) |
-| **Просканировать первый промпт** | [Быстрый старт (10 мин)](./docs/academy/beginners/ru/00-quickstart.md) |
-| **Изучить OWASP LLM Top 10** | [Урок OWASP](./docs/academy/beginners/ru/03-owasp-llm-top10.md) |
-| **Защитить чатбота** | [Руководство защиты](./docs/academy/beginners/ru/05-protecting-chatbot.md) |
+| **Первый промпт** | [Быстрый старт](./docs/academy/beginners/ru/00-quickstart.md) |
+| **OWASP LLM Top 10** | [Урок OWASP](./docs/academy/beginners/ru/03-owasp-llm-top10.md) |
+| **Защитить чатбота** | [Руководство](./docs/academy/beginners/ru/05-protecting-chatbot.md) |
 
-📚 **[Академия для начинающих](./docs/academy/beginners/ru/)** — 11 уроков  
-📈 **[Средний уровень](./docs/academy/mid-level/ru/)** — 16 уроков  
-🎓 **[Экспертный уровень](./docs/academy/expert/ru/)** — 21 урок
+📚 **[Начинающий](./docs/academy/beginners/ru/)** (11) · 📈 **[Средний](./docs/academy/mid-level/ru/)** (16) · 🎓 **[Эксперт](./docs/academy/expert/ru/)** (21)
 
-</td>
-</tr>
-</table>
+</details>
 
-🔒 **[Security Policy](./SECURITY.md)** | 🏗️ **[Architecture](./docs/ARCHITECTURE.md)** | 📋 **[Changelog](./docs/CHANGELOG.md)**
+🔒 **[Security](./SECURITY.md)** · 🏗️ **[Architecture](./docs/ARCHITECTURE.md)** · 📋 **[Changelog](./docs/CHANGELOG.md)**
 
 ---
 
