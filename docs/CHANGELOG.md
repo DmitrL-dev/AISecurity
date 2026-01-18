@@ -29,6 +29,17 @@ All notable changes to the SENTINEL AI Security Platform.
 - OpenA2A — ServiceNow AI vulnerability
 - CVE-2026-22812 — OpenCode RCE
 
+### 🧪 R&D Queue (Pending Review)
+
+| Paper | Topic | Priority |
+|-------|-------|----------|
+| [arXiv:2601.07891](https://arxiv.org/abs/2601.07891) | **NVIDIA KVzap** — 4x KV-cache compression | High |
+| [arXiv:2505.23416](https://arxiv.org/abs/2505.23416) | KVzip — Query-agnostic compression | Medium |
+
+**Potential integration:** RLM-Toolkit InfiniRetri, H-MEM scoring, SENTINEL Brain long-context engines
+
+📖 **[Full Analysis](../../../.gemini/antigravity/brain/c41f5779-6ac2-4e40-a956-367d7b1fd6ea/kvzap_research_analysis.md)**
+
 ### 📊 Statistics
 
 - **New Payloads**: 24
