@@ -125,3 +125,86 @@ def my_llm_function(prompt: str) -> str:
 | ---------- | ------------ |
 | Community  | 60           |
 | Enterprise | Unlimited    |
+
+---
+
+## Compliance Endpoints
+
+### GET /compliance/coverage
+
+Get coverage summary for all compliance frameworks.
+
+**Response:**
+
+```json
+{
+  "frameworks": {
+    "owasp_llm_top_10": {"covered": 10, "total": 10, "percent": 100},
+    "owasp_agentic_ai": {"covered": 10, "total": 10, "percent": 100},
+    "eu_ai_act": {"covered": 7, "total": 10, "percent": 70},
+    "nist_ai_rmf": {"covered": 8, "total": 10, "percent": 80}
+  }
+}
+```
+
+### POST /compliance/report
+
+Generate compliance report.
+
+**Request:**
+
+```json
+{
+  "frameworks": ["owasp_llm", "eu_ai_act"],
+  "format": "pdf",
+  "date_range": {"from": "2026-01-01", "to": "2026-01-31"}
+}
+```
+
+---
+
+## Requirements Endpoints
+
+### POST /requirements/sets
+
+Create custom security requirement set.
+
+### GET /requirements/sets/{id}
+
+Get requirements by ID.
+
+### POST /requirements/sets/{id}/check
+
+Check text against requirement set.
+
+---
+
+## Design Review Endpoints
+
+### POST /design-review/documents
+
+Analyze architecture documents for AI security risks.
+
+**Request:**
+
+```json
+{
+  "content": "## Architecture\nOur system uses RAG with external documents...",
+  "format": "markdown"
+}
+```
+
+**Response:**
+
+```json
+{
+  "risks": [
+    {
+      "category": "rag_poisoning",
+      "severity": "high",
+      "owasp": "LLM03",
+      "description": "External documents may contain hidden instructions"
+    }
+  ]
+}
+```

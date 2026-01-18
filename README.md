@@ -16,6 +16,13 @@
   <img src="https://img.shields.io/badge/_LOC-116K-blue?style=for-the-badge" alt="LOC">
 </p>
 
+<p align="center">
+  <a href="https://github.com/DmitrL-dev/AISecurity/actions"><img src="https://img.shields.io/github/actions/workflow/status/DmitrL-dev/AISecurity/ci.yml?branch=main&label=CI&style=flat-square" alt="CI"></a>
+  <a href="https://pypi.org/project/sentinel-llm-security/"><img src="https://img.shields.io/pypi/v/sentinel-llm-security?style=flat-square&label=PyPI" alt="PyPI"></a>
+  <a href="./LICENSE"><img src="https://img.shields.io/badge/License-Apache_2.0-blue?style=flat-square" alt="License"></a>
+  <a href="./docs/academy/beginners/en/"><img src="https://img.shields.io/badge/Academy-48_Lessons-orange?style=flat-square" alt="Academy"></a>
+</p>
+
 ---
 
 > [!IMPORTANT]
@@ -317,7 +324,7 @@ make test_llm_mock        # 9 LLM integration tests
 -  **CI/CD** - GitHub Actions (6 jobs, Valgrind, ASAN)
 -  **Docker** - Multi-stage production build
 
- **[Shield Docs](./shield/README.md)** | **[Academy 🇷🇺](./shield/docs/academy/ru/)** | **[Academy 🇺🇸](./shield/docs/academy/en/)**
+ **[Shield Docs](./shield/README.md)** | **[K8s YAMLs](./shield/k8s/)** | **[Academy 🇷🇺](./shield/docs/academy/ru/)** | **[Academy 🇺🇸](./shield/docs/academy/en/)**
 
 </details>
 
