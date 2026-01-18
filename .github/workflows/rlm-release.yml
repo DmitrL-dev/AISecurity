@@ -3,7 +3,7 @@ name: RLM-Toolkit Release
 on:
   push:
     tags:
-      - 'v*'
+      - 'rlm-v*'
 
 defaults:
   run:
