@@ -192,6 +192,12 @@ fetch('https://cdn.jsdelivr.net/gh/DmitrL-dev/AISecurity@latest/signatures/jailb
   <img src="https://img.shields.io/badge/EN%2FRU-100%25-orange?style=for-the-badge" alt="Bilingual">
 </p>
 
+<p align="center">
+  <a href="https://pepy.tech/project/rlm-toolkit"><img src="https://static.pepy.tech/badge/rlm-toolkit" alt="Downloads"></a>
+  <a href="https://pepy.tech/project/rlm-toolkit"><img src="https://static.pepy.tech/badge/rlm-toolkit/month" alt="Monthly"></a>
+  <a href="https://pypi.org/project/rlm-toolkit/"><img src="https://img.shields.io/pypi/v/rlm-toolkit?label=PyPI" alt="PyPI"></a>
+</p>
+
 ### Why Switch from LangChain?
 
 | Pain Point | LangChain | RLM-Toolkit |
