@@ -267,6 +267,18 @@ That's it. No chains. No callbacks. No AbstractBaseFactoryManagerInterface.
 └─────────────────────────────────────────────────────────────┘
 ```
 
+### Benchmarks
+
+| Engine Category | Precision | Recall | F1 | P50 | P99 |
+|-----------------|-----------|--------|----|----|-----|
+| **Injection** (Tier 1) | 97% | 94% | 95.5% | 3ms | 12ms |
+| **Jailbreak** (Tier 2) | 95% | 91% | 93% | 8ms | 25ms |
+| **RAG Poisoning** | 92% | 89% | 90.5% | 15ms | 45ms |
+| **TDA Analyzer** (Tier 3) | 89% | 96% | 92.4% | 45ms | 120ms |
+| **Combined Pipeline** | 94% | 93% | 93.5% | 18ms | 85ms |
+
+> Tested on SENTINEL Strike payloads + internal validation set. P50/P99 = latency percentiles.
+
 📖 **[Full Engine Documentation](./docs/reference/engines-en.md)** | **[R&D Changelog](./docs/CHANGELOG.md)**
 
 </details>

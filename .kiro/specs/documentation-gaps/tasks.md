@@ -29,7 +29,7 @@
 
 ### FR-5: Benchmarks (Optional)
 
-- [ ] 5.1 Добавить benchmarks table в BRAIN секцию README
+- [x] 5.1 Добавить benchmarks table в BRAIN секцию README
 
 ---
 
