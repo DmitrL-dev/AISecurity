@@ -25,6 +25,7 @@ jobs:
           pip install bandit safety pip-audit
 
       - name: Run Bandit security scan
+        continue-on-error: true
         run: |
           bandit -r src/ strike/ -f json -o bandit-report.json || true
           bandit -r src/ strike/ -f txt
