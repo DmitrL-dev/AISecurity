@@ -18,6 +18,21 @@
 
 ---
 
+## 🆕 New to AI Security?
+
+> **Never heard of prompt injection?** Start here!
+
+| I want to... | Go to... |
+|--------------|----------|
+| **Understand the basics** | [What is Prompt Injection?](./docs/academy/beginners/01-prompt-injection.md) |
+| **Scan my first prompt** | [Quickstart (10 min)](./docs/academy/beginners/00-quickstart.md) |
+| **Learn OWASP LLM Top 10** | [OWASP Lesson](./docs/academy/beginners/03-owasp-llm-top10.md) |
+| **Protect my chatbot** | [Protection Guide](./docs/academy/beginners/05-protecting-chatbot.md) |
+
+📚 **[Full Beginner Academy](./docs/academy/beginners/)** — 8 lessons, ~4 hours
+
+---
+
 ##  Quick Start
 
 ### One-Click Install
