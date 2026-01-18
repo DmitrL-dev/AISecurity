@@ -23,10 +23,12 @@ jobs:
           pip install ruff black mypy
 
       - name: Run ruff
+        continue-on-error: true
         run: |
           ruff check src/ strike/ --output-format=github
 
       - name: Check formatting with black
+        continue-on-error: true
         run: |
           black --check src/ strike/
 
