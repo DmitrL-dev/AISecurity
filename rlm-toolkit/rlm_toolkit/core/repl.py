@@ -43,13 +43,29 @@ class SecureREPL:
         >>> print(output)  # ""
     """
     
-    # CIRCLE-based blocked imports (FR-3.1)
+    # CIRCLE-based blocked imports (FR-3.1) - Enhanced 2026-01-18
     BLOCKED_IMPORTS: ClassVar[Set[str]] = {
+        # Core dangerous modules
         'os', 'subprocess', 'sys', 'socket', 'shutil',
         'pathlib', 'multiprocessing', 'threading', 'ctypes',
-        'pickle', 'marshal', 'builtins', 'importlib',
+        # Serialization (RCE vectors)
+        'pickle', 'marshal', 'shelve', 'dill', 'cloudpickle',
+        # Dynamic imports
+        'builtins', 'importlib', 'code', 'codeop',
+        # Unix-specific
         'pty', 'fcntl', 'resource', 'signal', 'posix',
-        'nt', 'msvcrt', 'winreg', 'mmap', 'crypt',
+        # Windows-specific
+        'nt', 'msvcrt', 'winreg',
+        # Memory/crypto
+        'mmap', 'crypt',
+        # Network (data exfiltration)
+        'http', 'urllib', 'ftplib', 'telnetlib', 'smtplib',
+        # File operations
+        'tempfile', 'glob', 'fnmatch',
+        # Async subprocess (CVE-2025 vectors)
+        'asyncio',
+        # Browser/system interaction
+        'webbrowser', 'platform',
     }
     
     # CIRCLE-based blocked builtins (FR-3.2)
