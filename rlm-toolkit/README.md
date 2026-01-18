@@ -6,7 +6,7 @@
 [![License](https://img.shields.io/badge/license-Apache%202.0-blue.svg)](LICENSE)
 [![Integrations](https://img.shields.io/badge/integrations-287%2B-brightgreen.svg)](docs/INTEGRATIONS.md)
 
-**Recursive Language Models Toolkit** — библиотека для обработки контекстов произвольной длины (10M+ токенов) с использованием рекурсивных вызовов LLM.
+**Recursive Language Models Toolkit** — A high-security LangChain alternative for processing unlimited context (10M+ tokens) using recursive LLM calls.
 
 ## 🚀 Quick Start
 
