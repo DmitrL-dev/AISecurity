@@ -1,0 +1,64 @@
+# 🌪️ Lesson 2.5: Chaos Theory
+
+> **Time: 45 minutes** | Expert Module 2 — Strange Math™
+
+---
+
+## Introduction
+
+**Chaos Theory** studies systems sensitive to initial conditions. Injections create "chaos" in otherwise stable text dynamics.
+
+---
+
+## Lyapunov Exponents
+
+```python
+def lyapunov_exponent(sequence: List[float]) -> float:
+    n = len(sequence)
+    lyap = 0.0
+    
+    for i in range(n - 1):
+        diff = abs(sequence[i+1] - sequence[i])
+        if diff > 0:
+            lyap += np.log(diff)
+    
+    return lyap / n
+```
+
+---
+
+## Detection via Stability
+
+```python
+class ChaosDetector(BaseEngine):
+    def scan(self, text: str) -> ScanResult:
+        chunks = self.split_text(text)
+        embeddings = [self.embed(c) for c in chunks]
+        trajectory = [e.mean() for e in embeddings]
+        
+        lyap = self.lyapunov_exponent(trajectory)
+        
+        # High positive Lyapunov = chaotic = injection
+        if lyap > self.chaos_threshold:
+            return ScanResult(is_threat=True, confidence=min(lyap, 1.0))
+        return ScanResult(is_threat=False)
+```
+
+---
+
+## Phase Space Reconstruction
+
+```python
+def reconstruct_phase_space(series, dim=3, tau=1):
+    n = len(series) - (dim - 1) * tau
+    return np.array([
+        [series[i + j * tau] for j in range(dim)]
+        for i in range(n)
+    ])
+```
+
+---
+
+## Next Lesson
+
+→ [3.1: Adversarial ML](./10-adversarial-ml.md)

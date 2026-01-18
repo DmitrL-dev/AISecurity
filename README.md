@@ -35,14 +35,14 @@
 
 | I want to... | Go to... |
 |--------------|----------|
-| **Understand the basics** | [What is Prompt Injection?](./docs/academy/beginners/01-prompt-injection.md) |
-| **Scan my first prompt** | [Quickstart (10 min)](./docs/academy/beginners/00-quickstart.md) |
-| **Learn OWASP LLM Top 10** | [OWASP Lesson](./docs/academy/beginners/03-owasp-llm-top10.md) |
-| **Protect my chatbot** | [Protection Guide](./docs/academy/beginners/05-protecting-chatbot.md) |
+| **Understand the basics** | [What is Prompt Injection?](./docs/academy/beginners/en/01-prompt-injection.md) |
+| **Scan my first prompt** | [Quickstart (10 min)](./docs/academy/beginners/en/00-quickstart.md) |
+| **Learn OWASP LLM Top 10** | [OWASP Lesson](./docs/academy/beginners/en/03-owasp-llm-top10.md) |
+| **Protect my chatbot** | [Protection Guide](./docs/academy/beginners/en/05-protecting-chatbot.md) |
 
-📚 **[Beginner Academy](./docs/academy/beginners/)** — 11 lessons  
-📈 **[Mid-Level Academy](./docs/academy/mid-level/)** — 16 lessons  
-🎓 **[Expert Academy](./docs/academy/expert/)** — 21 lessons
+📚 **[Beginner Academy](./docs/academy/beginners/en/)** — 11 lessons  
+📈 **[Mid-Level Academy](./docs/academy/mid-level/en/)** — 16 lessons  
+🎓 **[Expert Academy](./docs/academy/expert/en/)** — 21 lessons
 
 </td>
 <td width="50%">
@@ -51,14 +51,14 @@
 
 | Хочу... | Перейти... |
 |---------|------------|
-| **Понять основы** | [Что такое Prompt Injection?](./docs/academy/beginners/01-prompt-injection.md) |
-| **Просканировать первый промпт** | [Быстрый старт (10 мин)](./docs/academy/beginners/00-quickstart.md) |
-| **Изучить OWASP LLM Top 10** | [Урок OWASP](./docs/academy/beginners/03-owasp-llm-top10.md) |
-| **Защитить чатбота** | [Руководство защиты](./docs/academy/beginners/05-protecting-chatbot.md) |
+| **Понять основы** | [Что такое Prompt Injection?](./docs/academy/beginners/ru/01-prompt-injection.md) |
+| **Просканировать первый промпт** | [Быстрый старт (10 мин)](./docs/academy/beginners/ru/00-quickstart.md) |
+| **Изучить OWASP LLM Top 10** | [Урок OWASP](./docs/academy/beginners/ru/03-owasp-llm-top10.md) |
+| **Защитить чатбота** | [Руководство защиты](./docs/academy/beginners/ru/05-protecting-chatbot.md) |
 
-📚 **[Академия для начинающих](./docs/academy/beginners/)** — 11 уроков  
-📈 **[Средний уровень](./docs/academy/mid-level/)** — 16 уроков  
-🎓 **[Экспертный уровень](./docs/academy/expert/)** — 21 урок
+📚 **[Академия для начинающих](./docs/academy/beginners/ru/)** — 11 уроков  
+📈 **[Средний уровень](./docs/academy/mid-level/ru/)** — 16 уроков  
+🎓 **[Экспертный уровень](./docs/academy/expert/ru/)** — 21 урок
 
 </td>
 </tr>
