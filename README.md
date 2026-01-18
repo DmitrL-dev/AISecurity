@@ -29,7 +29,11 @@
 | **Learn OWASP LLM Top 10** | [OWASP Lesson](./docs/academy/beginners/03-owasp-llm-top10.md) |
 | **Protect my chatbot** | [Protection Guide](./docs/academy/beginners/05-protecting-chatbot.md) |
 
-📚 **[Full Beginner Academy](./docs/academy/beginners/)** — 8 lessons, ~4 hours
+📚 **[Full Beginner Academy](./docs/academy/beginners/)** — 11 lessons, ~4 hours  
+📈 **[Mid-Level Academy](./docs/academy/mid-level/)** — 16 lessons, ~17 hours  
+🎓 **[Expert Academy](./docs/academy/expert/)** — 21 lessons, ~35 hours
+
+🔒 **[Security Policy](./SECURITY.md)** | 🏗️ **[Architecture](./docs/ARCHITECTURE.md)**
 
 ---
 
