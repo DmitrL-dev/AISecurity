@@ -1,0 +1,8 @@
+{
+  "name": "RLM Security Audit",
+  "description": "Comprehensive security audit of RLM-Toolkit following antivirus false positive incident",
+  "language": "en",
+  "status": "requirements",
+  "created": "2026-01-18",
+  "priority": "high"
+}
