@@ -1,0 +1,21 @@
+# VS Code Extension Ignore
+
+# Source files (keep only compiled)
+src/
+
+# TypeScript config
+tsconfig.json
+
+# Node modules
+node_modules/
+
+# Git
+.git/
+.gitignore
+
+# Development
+*.map
+.vscode/
+
+# Package files
+*.vsix

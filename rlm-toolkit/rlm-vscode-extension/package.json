@@ -1,0 +1,85 @@
+{
+  "name": "rlm-toolkit",
+  "displayName": "RLM-Toolkit",
+  "description": "Recursive Language Models - Unlimited Context for Code Projects",
+  "version": "1.2.0",
+  "publisher": "sentinel-community",
+  "engines": {
+    "vscode": "^1.85.0"
+  },
+  "categories": ["Other", "Machine Learning"],
+  "keywords": ["rlm", "llm", "context", "memory", "ai"],
+  "activationEvents": ["onStartupFinished"],
+  "main": "./out/extension.js",
+  "contributes": {
+    "viewsContainers": {
+      "activitybar": [
+        {
+          "id": "rlm-sidebar",
+          "title": "RLM-Toolkit",
+          "icon": "media/rlm-icon.svg"
+        }
+      ]
+    },
+    "views": {
+      "rlm-sidebar": [
+        {
+          "type": "webview",
+          "id": "rlm.dashboard",
+          "name": "Dashboard"
+        }
+      ]
+    },
+    "commands": [
+      {
+        "command": "rlm.reindex",
+        "title": "RLM: Reindex Project"
+      },
+      {
+        "command": "rlm.validate",
+        "title": "RLM: Validate Index"
+      },
+      {
+        "command": "rlm.showStatus",
+        "title": "RLM: Show Status"
+      },
+      {
+        "command": "rlm.consolidateMemory",
+        "title": "RLM: Consolidate Memory"
+      }
+    ],
+    "configuration": {
+      "title": "RLM-Toolkit",
+      "properties": {
+        "rlm.projectRoot": {
+          "type": "string",
+          "default": "",
+          "description": "Project root for indexing"
+        },
+        "rlm.autoIndex": {
+          "type": "boolean",
+          "default": true,
+          "description": "Auto-index on file changes"
+        },
+        "rlm.encryption": {
+          "type": "boolean",
+          "default": true,
+          "description": "Enable AES-256 encryption"
+        }
+      }
+    }
+  },
+  "scripts": {
+    "vscode:prepublish": "npm run compile",
+    "compile": "tsc -p ./",
+    "watch": "tsc -watch -p ./",
+    "package": "vsce package"
+  },
+  "devDependencies": {
+    "@types/node": "^20.0.0",
+    "@types/vscode": "^1.85.0",
+    "typescript": "^5.3.0",
+    "@vscode/vsce": "^2.22.0"
+  },
+  "dependencies": {}
+}

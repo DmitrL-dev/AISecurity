@@ -70,6 +70,13 @@ agent = SecureAgent(
 )
 ```
 
+## Обновления безопасности (v1.2.1)
+
+- **AES-256-GCM обязателен** — XOR-fallback удалён
+- **Fail-closed шифрование** — без `cryptography` пакета система не запустится
+- **Rate limiting** — MCP reindex ограничен 1 раз в 60 секунд
+- **Защита ключей** — `.rlm/.encryption_key` исключён из git
+
 ## Связанное
 
 - [Туториал: Multi-Agent](../tutorials/09-multiagent.md)

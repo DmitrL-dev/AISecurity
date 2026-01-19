@@ -1,9 +1,13 @@
 # RLM-Toolkit
 
+[![Version](https://img.shields.io/badge/version-1.2.1-blueviolet)](CHANGELOG.md)
 [![CI](https://github.com/sentinel-community/rlm-toolkit/actions/workflows/ci.yml/badge.svg)](https://github.com/sentinel-community/rlm-toolkit/actions)
 [![PyPI](https://img.shields.io/pypi/v/rlm-toolkit.svg)](https://pypi.org/project/rlm-toolkit/)
 [![Python](https://img.shields.io/pypi/pyversions/rlm-toolkit.svg)](https://pypi.org/project/rlm-toolkit/)
 [![License](https://img.shields.io/badge/license-Apache%202.0-blue.svg)](LICENSE)
+[![Tests](https://img.shields.io/badge/tests-1030_pass-success)](tests/)
+[![Docs](https://img.shields.io/badge/docs-156_files-blue)](docs/)
+[![NIOKR](https://img.shields.io/badge/NIOKR-10%2F10-gold)](docs/en/certification/checklist.md)
 [![Integrations](https://img.shields.io/badge/integrations-287%2B-brightgreen.svg)](docs/INTEGRATIONS.md)
 
 **Recursive Language Models Toolkit** — A high-security LangChain alternative for processing unlimited context (10M+ tokens) using recursive LLM calls.
@@ -249,8 +253,11 @@ rlm = RLM.from_openai("gpt-4o", tracer=tracer, cost_tracker=cost_tracker)
 
 ## 🔒 Security
 
-RLM-Toolkit implements CIRCLE-compliant security:
+RLM-Toolkit implements CIRCLE-compliant security with v1.2.1 hardening:
 
+- **AES-256-GCM** — Mandatory authenticated encryption for all persistent data
+- **Fail-Closed** — No XOR fallback; raises error if cryptography unavailable
+- **Rate Limiting** — 60s cooldown on reindex to prevent I/O exhaustion
 - **AST Analysis** — Block dangerous imports before execution
 - **Sandboxed REPL** — Isolated code execution with timeouts
 - **Virtual Filesystem** — Quota-enforced file operations
@@ -292,10 +299,21 @@ rlm trace --session latest
 
 ## 📚 Documentation
 
-- [Getting Started](docs/getting_started.md)
-- [API Reference](docs/api/index.md)
-- [Security Guide](docs/security.md)
-- [Examples](examples/)
+**v1.2.1: 156 files (78 EN + 78 RU) — NIOKR 10/10**
+
+| Category | EN | RU |
+|----------|:--:|:--:|
+| Concepts | 25 | 25 |
+| Tutorials | 13 | 13 |
+| Examples | 10 | 10 |
+| How-To | 20 | 20 |
+| Reference | 3 | 3 |
+
+- [Quickstart](docs/en/quickstart.md) / [Быстрый старт](docs/ru/quickstart.md)
+- [Tutorials](docs/en/tutorials/) / [Туториалы](docs/ru/tutorials/)
+- [Security Guide](docs/en/concepts/security.md)
+- [Certification Checklist](docs/en/certification/checklist.md)
+- [Examples](docs/en/examples/)
 
 ## 🤝 Contributing
 

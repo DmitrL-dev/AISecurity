@@ -1,0 +1,63 @@
+# RLM-Toolkit .gitignore
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+
+# Virtual environments
+.venv/
+venv/
+ENV/
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+
+# Testing
+.tox/
+.coverage
+.coverage.*
+htmlcov/
+.pytest_cache/
+.mypy_cache/
+
+# RLM Runtime Data (NEVER COMMIT!)
+.rlm/
+*.rlm.db
+
+# VS Code Extension Build
+rlm-vscode-extension/node_modules/
+rlm-vscode-extension/out/
+rlm-vscode-extension/*.vsix
+
+# Secrets & Keys (CRITICAL!)
+*.key
+*.pem
+.encryption_key
+.env
+.env.local
+
+# OS
+.DS_Store
+Thumbs.db

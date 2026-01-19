@@ -75,7 +75,7 @@
 |  **[STRIKE](#-strike---red-team-platform)** | Offensive Platform - 39K+ payloads, HYDRA | [Details](#-strike---red-team-platform) |
 |  **[FRAMEWORK](#-framework---python-sdk)** | Python SDK - pip install, CLI, FastAPI | [Details](#-framework---python-sdk) |
 |  **[IMMUNE](#-immune---edrxdrmdr-security-stack)** | EDR/XDR/MDR - Pure C, Kernel-level | [Details](#-immune---edrxdrmdr-security-stack) |
-|  **[RLM-Toolkit](#-rlm-toolkit-v101---secure-langchain-alternative)** | Secure LangChain Replacement | [Details](#-rlm-toolkit-v101---secure-langchain-alternative) |
+|  **[RLM-Toolkit](#-rlm-toolkit-v121---secure-langchain-alternative)** | Secure LangChain Replacement | [Details](#-rlm-toolkit-v121---secure-langchain-alternative) |
 |  **[SuperClaude Shield](#-superclaudeshield---ai-coding-assistant-protection)** | AI Coding Assistant Protection | [Details](#-superclaudeshield---ai-coding-assistant-protection) |
 
 ---
@@ -183,13 +183,14 @@ fetch('https://cdn.jsdelivr.net/gh/DmitrL-dev/AISecurity@latest/signatures/jailb
 ---
 
 <details>
-<summary><h2> RLM-Toolkit v1.0.1 — Secure LangChain Alternative</h2></summary>
+<summary><h2> RLM-Toolkit v1.2.1 — Secure LangChain Alternative</h2></summary>
 
 <p align="center">
-  <img src="https://img.shields.io/badge/RLM-v1.0.1_SECURITY_FIX-blueviolet?style=for-the-badge" alt="RLM">
-  <img src="https://img.shields.io/badge/Tests-927_PASS-success?style=for-the-badge" alt="Tests">
-  <img src="https://img.shields.io/badge/Docs-42K_Lines-blue?style=for-the-badge" alt="Docs">
+  <img src="https://img.shields.io/badge/RLM-v1.2.1_PRODUCTION-blueviolet?style=for-the-badge" alt="RLM">
+  <img src="https://img.shields.io/badge/Tests-1030_PASS-success?style=for-the-badge" alt="Tests">
+  <img src="https://img.shields.io/badge/Docs-156_Files-blue?style=for-the-badge" alt="Docs">
   <img src="https://img.shields.io/badge/EN%2FRU-100%25-orange?style=for-the-badge" alt="Bilingual">
+  <img src="https://img.shields.io/badge/NIOKR-10%2F10-gold?style=for-the-badge" alt="NIOKR">
 </p>
 
 <p align="center">
@@ -197,6 +198,15 @@ fetch('https://cdn.jsdelivr.net/gh/DmitrL-dev/AISecurity@latest/signatures/jailb
   <a href="https://pepy.tech/project/rlm-toolkit"><img src="https://static.pepy.tech/badge/rlm-toolkit/month" alt="Monthly"></a>
   <a href="https://pypi.org/project/rlm-toolkit/"><img src="https://img.shields.io/pypi/v/rlm-toolkit?label=PyPI" alt="PyPI"></a>
 </p>
+
+### v1.2.1 Highlights
+
+| Feature | Description |
+|---------|-------------|
+| **Security** | AES-256-GCM encryption, rate limiting, no XOR fallback |
+| **Documentation** | 78 EN + 78 RU = 156 files (10/10 NIOKR) |
+| **Tutorials** | 13 step-by-step guides incl. DSPy, Observability, Callbacks |
+| **Modules** | 25 fully documented: C³ Crystal, H-MEM, InfiniRetri, MCP Server |
 
 ### Why Switch from LangChain?
 
@@ -226,19 +236,22 @@ That's it. No chains. No callbacks. No AbstractBaseFactoryManagerInterface.
 |---------|--------------|-------------|
 | **InfiniRetri** | 👷 DevOps | Read 1000+ page documents without hitting token limits |
 | **H-MEM** | 🔬 Researchers | 4-level hierarchical memory - works like human brain |
+| **C³ Crystal** | 🔬 Researchers | 56x context compression (98.2% savings) |
+| **MCP Server** | 🛠️ IDE Users | 10-tool integration for VS Code/Antigravity |
 | **R-Zero** | 🔬 Researchers | Challenger-Solver architecture auto-improves outputs |
 | **Security Suite** | 👶 Everyone | Prompt injection detection, Trust Zones, Full audit trail |
 
 ### Documentation
 
-**9 Tutorials** - From "Hello World" to production multi-agent systems  
+**13 Tutorials** - From "Hello World" to production multi-agent systems  
 **170+ Examples** - Battle-tested patterns ready to copy-paste  
 **50+ Integrations** - OpenAI, Anthropic, Ollama, all vector stores
 
 <p align="center">
   <a href="./rlm-toolkit/docs/en/quickstart.md"><strong>[Quickstart]</strong></a> |
   <a href="./rlm-toolkit/docs/en/examples/"><strong>[Examples]</strong></a> |
-  <a href="./rlm-toolkit/docs/"><strong>[Full Docs]</strong></a>
+  <a href="./rlm-toolkit/docs/"><strong>[Full Docs]</strong></a> |
+  <a href="./rlm-toolkit/docs/en/certification/checklist.md"><strong>[Certification]</strong></a>
 </p>
 
 </details>

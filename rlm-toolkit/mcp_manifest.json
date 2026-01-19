@@ -1,0 +1,61 @@
+{
+  "$schema": "https://modelcontextprotocol.io/schema/server.json",
+  "name": "rlm-toolkit",
+  "version": "1.2.0",
+  "description": "Recursive Language Models - Unlimited Context for Code Projects",
+  "author": "SENTINEL Project",
+  "license": "Apache-2.0",
+  "repository": "https://github.com/DmitrL-dev/rlm-toolkit",
+  "command": "python",
+  "args": ["-m", "rlm_toolkit.mcp.server"],
+  "env": {
+    "RLM_PROJECT_ROOT": "${workspaceFolder}",
+    "RLM_SECURE_MEMORY": "true"
+  },
+  "tools": [
+    {
+      "name": "rlm_load_context",
+      "description": "Load file or directory into context"
+    },
+    {
+      "name": "rlm_query",
+      "description": "Search in loaded context"
+    },
+    {
+      "name": "rlm_list_contexts",
+      "description": "List all loaded contexts"
+    },
+    {
+      "name": "rlm_analyze",
+      "description": "Deep analysis through C³ crystals"
+    },
+    {
+      "name": "rlm_memory",
+      "description": "H-MEM hierarchical memory operations"
+    },
+    {
+      "name": "rlm_status",
+      "description": "Get server status and index info"
+    },
+    {
+      "name": "rlm_reindex",
+      "description": "Reindex project files"
+    },
+    {
+      "name": "rlm_validate",
+      "description": "Validate index freshness"
+    },
+    {
+      "name": "rlm_settings",
+      "description": "Get or set RLM settings"
+    }
+  ],
+  "capabilities": {
+    "memory": true,
+    "indexing": true,
+    "encryption": true
+  },
+  "requirements": {
+    "python": ">=3.10"
+  }
+}

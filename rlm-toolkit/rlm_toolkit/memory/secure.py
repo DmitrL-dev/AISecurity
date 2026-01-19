@@ -15,11 +15,10 @@ from __future__ import annotations
 
 import time
 import hashlib
-import base64
-import json
 import threading
 from dataclasses import dataclass, field
 from typing import Any, Dict, List, Optional, Set, Callable
+from enum import Enum
 from enum import Enum
 
 from rlm_toolkit.memory.hierarchical import (
@@ -32,14 +31,16 @@ from rlm_toolkit.memory.hierarchical import (
 
 class TrustLevel(Enum):
     """Trust levels for memory access."""
-    PUBLIC = 0       # Any agent can access
-    INTERNAL = 1     # Same trust zone only
-    CONFIDENTIAL = 2 # Explicit grant required
-    SECRET = 3       # Single agent only, encrypted
+
+    PUBLIC = 0  # Any agent can access
+    INTERNAL = 1  # Same trust zone only
+    CONFIDENTIAL = 2  # Explicit grant required
+    SECRET = 3  # Single agent only, encrypted
 
 
 class AccessType(Enum):
     """Types of memory access."""
+
     READ = "read"
     WRITE = "write"
     DELETE = "delete"
@@ -49,6 +50,7 @@ class AccessType(Enum):
 @dataclass
 class AccessLogEntry:
     """Audit log entry for memory access."""
+
     timestamp: float
     agent_id: str
     access_type: AccessType
@@ -56,7 +58,7 @@ class AccessLogEntry:
     trust_zone: str
     success: bool
     details: Optional[str] = None
-    
+
     def to_dict(self) -> Dict[str, Any]:
         return {
             "timestamp": self.timestamp,
@@ -72,36 +74,39 @@ class AccessLogEntry:
 @dataclass
 class SecurityPolicy:
     """Security policy for memory access."""
+
     default_trust_level: TrustLevel = TrustLevel.INTERNAL
     encrypt_at_rest: bool = True
     log_all_access: bool = True
     max_access_log_entries: int = 10000
     require_agent_id: bool = True
     allowed_trust_zones: Optional[Set[str]] = None  # None = all zones
-    
+
     # Content filtering
     sanitize_content: bool = True
-    blocked_patterns: List[str] = field(default_factory=lambda: [
-        # Sensitive data patterns
-        r'\b\d{16}\b',  # Credit card numbers
-        r'\b\d{3}-\d{2}-\d{4}\b',  # SSN
-        r'password\s*[:=]\s*\S+',  # Passwords
-    ])
+    blocked_patterns: List[str] = field(
+        default_factory=lambda: [
+            # Sensitive data patterns
+            r"\b\d{16}\b",  # Credit card numbers
+            r"\b\d{3}-\d{2}-\d{4}\b",  # SSN
+            r"password\s*[:=]\s*\S+",  # Passwords
+        ]
+    )
 
 
 class SecureHierarchicalMemory(HierarchicalMemory):
     """
     Security-enhanced Hierarchical Memory.
-    
+
     Extends H-MEM with:
     - Trust zones for agent isolation
     - Memory encryption at rest
     - Access control and audit logging
     - Content sanitization
-    
+
     Example:
         >>> from rlm_toolkit.memory.secure import SecureHierarchicalMemory, SecurityPolicy
-        >>> 
+        >>>
         >>> policy = SecurityPolicy(encrypt_at_rest=True)
         >>> smem = SecureHierarchicalMemory(
         ...     agent_id="agent-001",
@@ -111,7 +116,7 @@ class SecureHierarchicalMemory(HierarchicalMemory):
         >>> smem.add_episode("User asked about secrets")
         >>> smem.get_access_log()  # Audit trail
     """
-    
+
     def __init__(
         self,
         agent_id: str,
@@ -122,7 +127,7 @@ class SecureHierarchicalMemory(HierarchicalMemory):
     ):
         """
         Initialize secure H-MEM.
-        
+
         Args:
             agent_id: Unique identifier for the agent
             trust_zone: Trust zone this memory belongs to
@@ -131,11 +136,11 @@ class SecureHierarchicalMemory(HierarchicalMemory):
             config: Standard HMEMConfig
         """
         super().__init__(config)
-        
+
         self.agent_id = agent_id
         self.trust_zone = trust_zone
         self.security_policy = security_policy or SecurityPolicy()
-        
+
         # Generate encryption key if not provided
         if encryption_key:
             self._encryption_key = encryption_key
@@ -143,14 +148,14 @@ class SecureHierarchicalMemory(HierarchicalMemory):
             # Simple key derivation (use proper KDF in production)
             key_material = f"{agent_id}:{trust_zone}:{time.time()}"
             self._encryption_key = hashlib.sha256(key_material.encode()).digest()
-        
+
         # Access control
         self._access_log: List[AccessLogEntry] = []
         self._access_log_lock = threading.Lock()
-        
+
         # Trust zone grants (agent_id -> granted trust zones)
         self._trust_grants: Dict[str, Set[str]] = {}
-    
+
     def _log_access(
         self,
         access_type: AccessType,
@@ -161,7 +166,7 @@ class SecureHierarchicalMemory(HierarchicalMemory):
         """Log memory access for audit."""
         if not self.security_policy.log_all_access:
             return
-        
+
         with self._access_log_lock:
             entry = AccessLogEntry(
                 timestamp=time.time(),
@@ -173,53 +178,62 @@ class SecureHierarchicalMemory(HierarchicalMemory):
                 details=details,
             )
             self._access_log.append(entry)
-            
+
             # Trim log if over limit
             if len(self._access_log) > self.security_policy.max_access_log_entries:
-                self._access_log = self._access_log[-self.security_policy.max_access_log_entries:]
-    
+                self._access_log = self._access_log[
+                    -self.security_policy.max_access_log_entries :
+                ]
+
     def _encrypt_content(self, content: str) -> str:
-        """Encrypt content using XOR cipher (use AES in production)."""
+        """Encrypt content using AES-256-GCM."""
         if not self.security_policy.encrypt_at_rest:
             return content
-        
-        # Simple XOR encryption (replace with AES for production)
-        key_bytes = self._encryption_key
-        content_bytes = content.encode('utf-8')
-        encrypted = bytes(
-            b ^ key_bytes[i % len(key_bytes)]
-            for i, b in enumerate(content_bytes)
-        )
-        return base64.b64encode(encrypted).decode('ascii')
-    
+
+        # Use AES-256-GCM from crypto module (REQUIRED)
+        from .crypto import SecureEncryption, is_aes_available
+
+        if not is_aes_available():
+            raise RuntimeError(
+                "cryptography package required for encryption. "
+                "Install with: pip install cryptography"
+            )
+
+        crypto = SecureEncryption(self._encryption_key)
+        return crypto.encrypt_string(content)
+
     def _decrypt_content(self, encrypted: str) -> str:
         """Decrypt content."""
         if not self.security_policy.encrypt_at_rest:
             return encrypted
-        
-        try:
-            encrypted_bytes = base64.b64decode(encrypted.encode('ascii'))
-            key_bytes = self._encryption_key
-            decrypted = bytes(
-                b ^ key_bytes[i % len(key_bytes)]
-                for i, b in enumerate(encrypted_bytes)
+
+        from .crypto import SecureEncryption, is_aes_available
+
+        if not is_aes_available():
+            raise RuntimeError(
+                "cryptography package required for decryption. "
+                "Install with: pip install cryptography"
             )
-            return decrypted.decode('utf-8')
-        except Exception:
-            return encrypted  # Return as-is if decryption fails
-    
+
+        crypto = SecureEncryption(self._encryption_key)
+        return crypto.decrypt_string(encrypted)
+
+    # XOR fallback methods REMOVED (Security Audit T5.1)
+    # These triggered AV heuristics and were never used in production
+
     def _sanitize_content(self, content: str) -> str:
         """Remove sensitive patterns from content."""
         if not self.security_policy.sanitize_content:
             return content
-        
+
         import re
+
         sanitized = content
         for pattern in self.security_policy.blocked_patterns:
-            sanitized = re.sub(pattern, '[REDACTED]', sanitized, flags=re.IGNORECASE)
-        
+            sanitized = re.sub(pattern, "[REDACTED]", sanitized, flags=re.IGNORECASE)
+
         return sanitized
-    
+
     def _check_access(
         self,
         access_type: AccessType,
@@ -227,23 +241,23 @@ class SecureHierarchicalMemory(HierarchicalMemory):
     ) -> bool:
         """Check if current agent can perform access."""
         target = target_zone or self.trust_zone
-        
+
         # Check allowed zones
         if self.security_policy.allowed_trust_zones:
             if target not in self.security_policy.allowed_trust_zones:
                 return False
-        
+
         # Same zone always allowed
         if target == self.trust_zone:
             return True
-        
+
         # Check explicit grants
         if self.agent_id in self._trust_grants:
             if target in self._trust_grants[self.agent_id]:
                 return True
-        
+
         return False
-    
+
     def add_episode(
         self,
         content: str,
@@ -253,23 +267,23 @@ class SecureHierarchicalMemory(HierarchicalMemory):
         """Add episode with security features."""
         # Sanitize content
         sanitized = self._sanitize_content(content)
-        
+
         # Encrypt for storage
         encrypted = self._encrypt_content(sanitized)
-        
+
         # Add security metadata
         sec_metadata = metadata or {}
         sec_metadata["_trust_level"] = self.security_policy.default_trust_level.value
         sec_metadata["_trust_zone"] = self.trust_zone
         sec_metadata["_agent_id"] = self.agent_id
         sec_metadata["_encrypted"] = self.security_policy.encrypt_at_rest
-        
+
         # Log access
         entry_id = super().add_episode(encrypted, sec_metadata, embedding)
         self._log_access(AccessType.WRITE, entry_id, True)
-        
+
         return entry_id
-    
+
     def retrieve(
         self,
         query: str,
@@ -283,47 +297,47 @@ class SecureHierarchicalMemory(HierarchicalMemory):
         if not self._check_access(AccessType.READ):
             self._log_access(AccessType.READ, None, False, "Access denied")
             return []
-        
+
         # Retrieve entries
         entries = super().retrieve(query, levels, top_k, include_children)
-        
+
         # Decrypt content
         if decrypt:
             for entry in entries:
                 if entry.metadata.get("_encrypted"):
                     entry.content = self._decrypt_content(entry.content)
-        
+
         # Log access
         for entry in entries:
             self._log_access(AccessType.READ, entry.id, True)
-        
+
         return entries
-    
+
     def grant_access(self, agent_id: str, trust_zone: str) -> None:
         """Grant an agent access to a trust zone."""
         if agent_id not in self._trust_grants:
             self._trust_grants[agent_id] = set()
         self._trust_grants[agent_id].add(trust_zone)
-        
+
         self._log_access(
             AccessType.WRITE,
             None,
             True,
-            f"Granted {agent_id} access to zone {trust_zone}"
+            f"Granted {agent_id} access to zone {trust_zone}",
         )
-    
+
     def revoke_access(self, agent_id: str, trust_zone: str) -> None:
         """Revoke an agent's access to a trust zone."""
         if agent_id in self._trust_grants:
             self._trust_grants[agent_id].discard(trust_zone)
-            
+
         self._log_access(
             AccessType.DELETE,
             None,
             True,
-            f"Revoked {agent_id} access to zone {trust_zone}"
+            f"Revoked {agent_id} access to zone {trust_zone}",
         )
-    
+
     def get_access_log(
         self,
         limit: Optional[int] = None,
@@ -332,15 +346,15 @@ class SecureHierarchicalMemory(HierarchicalMemory):
         """Get access audit log."""
         with self._access_log_lock:
             entries = self._access_log.copy()
-            
+
             if access_type:
                 entries = [e for e in entries if e.access_type == access_type]
-            
+
             if limit:
                 entries = entries[-limit:]
-            
+
             return entries
-    
+
     def get_security_stats(self) -> Dict[str, Any]:
         """Get security statistics."""
         with self._access_log_lock:
@@ -348,55 +362,55 @@ class SecureHierarchicalMemory(HierarchicalMemory):
                 "agent_id": self.agent_id,
                 "trust_zone": self.trust_zone,
                 "total_access_events": len(self._access_log),
-                "failed_access_events": sum(1 for e in self._access_log if not e.success),
+                "failed_access_events": sum(
+                    1 for e in self._access_log if not e.success
+                ),
                 "encryption_enabled": self.security_policy.encrypt_at_rest,
                 "trust_grants": {k: list(v) for k, v in self._trust_grants.items()},
                 "memory_stats": self.get_stats(),
             }
-    
+
     def clear_with_audit(self, levels: Optional[List[MemoryLevel]] = None) -> int:
         """Clear memories with audit logging."""
         stats_before = self.get_stats()
         self.clear(levels)
         stats_after = self.get_stats()
-        
+
         cleared = sum(
-            stats_before["level_counts"][level] - stats_after["level_counts"].get(level, 0)
+            stats_before["level_counts"][level]
+            - stats_after["level_counts"].get(level, 0)
             for level in stats_before["level_counts"]
         )
-        
+
         self._log_access(
             AccessType.DELETE,
             None,
             True,
-            f"Cleared {cleared} memories from levels {levels or 'all'}"
+            f"Cleared {cleared} memories from levels {levels or 'all'}",
         )
-        
+
         return cleared
 
 
 # Convenience factory
 def create_secure_memory(
-    agent_id: str,
-    trust_zone: str = "default",
-    encrypt: bool = True,
-    **config_kwargs
+    agent_id: str, trust_zone: str = "default", encrypt: bool = True, **config_kwargs
 ) -> SecureHierarchicalMemory:
     """
     Create secure H-MEM with sensible defaults.
-    
+
     Args:
         agent_id: Agent identifier
         trust_zone: Trust zone name
         encrypt: Enable encryption at rest
         **config_kwargs: Additional HMEMConfig options
-        
+
     Returns:
         Configured SecureHierarchicalMemory
     """
     policy = SecurityPolicy(encrypt_at_rest=encrypt)
     config = HMEMConfig(**config_kwargs) if config_kwargs else None
-    
+
     return SecureHierarchicalMemory(
         agent_id=agent_id,
         trust_zone=trust_zone,

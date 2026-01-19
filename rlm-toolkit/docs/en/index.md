@@ -1,5 +1,7 @@
 # RLM-Toolkit
 
+![Version](https://img.shields.io/badge/version-1.2.1-blue)
+
 > **The Self-Improving, Never-Forgetting, Infinitely-Scalable AI Framework**
 
 Welcome to RLM-Toolkit — a modern alternative to LangChain with breakthrough capabilities.

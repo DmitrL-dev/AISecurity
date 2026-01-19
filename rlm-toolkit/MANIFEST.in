@@ -1,0 +1,20 @@
+include README.md
+include CHANGELOG.md
+include LICENSE
+include pyproject.toml
+
+recursive-include rlm_toolkit *.py
+recursive-include rlm_toolkit *.pyi
+
+# Exclude tests and docs from package (available on GitHub/readthedocs)
+prune tests
+prune docs
+prune benchmarks
+prune rlm-vscode-extension
+
+# Exclude cache and build artifacts
+global-exclude __pycache__
+global-exclude *.py[cod]
+global-exclude *.so
+global-exclude .git*
+global-exclude .DS_Store

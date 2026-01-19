@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "rlm-toolkit"
-version = "1.0.1"
+version = "1.2.1"
 description = "Recursive Language Models Toolkit for processing unlimited context"
 readme = "README.md"
 license = { text = "Apache-2.0" }
@@ -30,6 +30,11 @@ google = ["google-generativeai>=0.5"]
 ollama = ["ollama>=0.1"]
 langfuse = ["langfuse>=2.0"]
 langsmith = ["langsmith>=0.1"]
+mcp = ["mcp>=1.0", "httpx>=0.25"]
+# v1.1 semantic and security
+semantic = ["sentence-transformers>=2.2.0", "spacy>=3.7.0"]
+security = ["cryptography>=41.0.0"]
+full = ["sentence-transformers>=2.2.0", "cryptography>=41.0.0", "spacy>=3.7.0"]
 all = [
     "openai>=1.0",
     "anthropic>=0.20",
@@ -37,6 +42,11 @@ all = [
     "ollama>=0.1",
     "langfuse>=2.0",
     "langsmith>=0.1",
+    "mcp>=1.0",
+    "httpx>=0.25",
+    "sentence-transformers>=2.2.0",
+    "cryptography>=41.0.0",
+    "spacy>=3.7.0",
 ]
 dev = [
     "pytest>=7.0",
@@ -51,6 +61,8 @@ dev = [
 
 [project.scripts]
 rlm = "rlm_toolkit.cli.main:main"
+rlm-mcp = "rlm_toolkit.mcp.server:run_server"
+rlm-install = "install_antigravity:main"
 
 [project.urls]
 Homepage = "https://github.com/sentinel-community/rlm-toolkit"

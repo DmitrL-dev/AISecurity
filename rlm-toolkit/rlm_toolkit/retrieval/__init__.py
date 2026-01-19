@@ -1,20 +1,15 @@
 """
-RLM-Toolkit Retrieval Module
-============================
+RLM-Toolkit Retrieval Module.
 
-Advanced retrieval methods for infinite context processing.
+Provides embedding-based and hybrid retrieval.
 """
 
-from rlm_toolkit.retrieval.infiniretri import (
-    InfiniRetriever,
-    InfiniRetriRLM,
-    create_infinite_retriever,
-    INFINIRETRI_AVAILABLE,
-)
+from .embeddings import EmbeddingRetriever, RetrievalResult, create_retriever
 
 __all__ = [
-    "InfiniRetriever",
-    "InfiniRetriRLM", 
-    "create_infinite_retriever",
-    "INFINIRETRI_AVAILABLE",
+    "EmbeddingRetriever",
+    "RetrievalResult",
+    "create_retriever",
 ]
+
+__version__ = "1.1.0"

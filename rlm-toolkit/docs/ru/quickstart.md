@@ -93,9 +93,46 @@ rlm = RLM.from_openai("gpt-4o", config=config)
 result = rlm.run("Найди бюджет за Q3", context=massive_document)
 ```
 
+## VS Code Extension (v1.2.1)
+
+Установите расширение RLM-Toolkit для отслеживания экономии токенов:
+
+1. Откройте VS Code Extensions
+2. Поиск "RLM-Toolkit"
+3. Install → Reload
+
+**Функции Sidebar:**
+- Статус сервера
+- Трекер экономии токенов
+- Быстрая переиндексация
+
+## MCP Server
+
+Для интеграции с IDE (Antigravity, Cursor, Claude Desktop):
+
+```bash
+pip install rlm-toolkit[mcp]
+```
+
+Настройте в `mcp_config.json`:
+```json
+{
+  "mcpServers": {
+    "rlm-toolkit": {
+      "command": "python",
+      "args": ["-m", "rlm_toolkit.mcp.server"]
+    }
+  }
+}
+```
+
+→ [Полный туториал MCP](tutorials/10-mcp-server.md)
+
 ## Следующие шаги
 
 - [Туториал: Создание чат-бота](tutorials/02-chatbot.md)
 - [Туториал: RAG Pipeline](tutorials/03-rag.md)
+- [Туториал: MCP Server](tutorials/10-mcp-server.md)
+- [Концепция: C³ Crystal](concepts/crystal.md)
 - [Концепция: InfiniRetri](concepts/infiniretri.md)
 - [Концепция: H-MEM](concepts/hmem.md)

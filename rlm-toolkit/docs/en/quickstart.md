@@ -93,9 +93,46 @@ rlm = RLM.from_openai("gpt-4o", config=config)
 result = rlm.run("Find the budget for Q3", context=massive_document)
 ```
 
+## VS Code Extension (v1.2.1)
+
+Install the RLM-Toolkit extension for real-time token savings:
+
+1. Open VS Code Extensions
+2. Search "RLM-Toolkit"
+3. Install → Reload
+
+**Sidebar Features:**
+- Server status
+- Token savings tracker
+- Quick reindex
+
+## MCP Server
+
+For IDE integration (Antigravity, Cursor, Claude Desktop):
+
+```bash
+pip install rlm-toolkit[mcp]
+```
+
+Configure in `mcp_config.json`:
+```json
+{
+  "mcpServers": {
+    "rlm-toolkit": {
+      "command": "python",
+      "args": ["-m", "rlm_toolkit.mcp.server"]
+    }
+  }
+}
+```
+
+→ [Full MCP Tutorial](tutorials/10-mcp-server.md)
+
 ## Next Steps
 
 - [Tutorial: Build a Chatbot](tutorials/02-chatbot.md)
 - [Tutorial: RAG Pipeline](tutorials/03-rag.md)
+- [Tutorial: MCP Server](tutorials/10-mcp-server.md)
+- [Concept: C³ Crystal](concepts/crystal.md)
 - [Concept: InfiniRetri](concepts/infiniretri.md)
 - [Concept: H-MEM](concepts/hmem.md)

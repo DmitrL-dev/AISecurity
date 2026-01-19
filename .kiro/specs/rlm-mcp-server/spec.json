@@ -1,0 +1,9 @@
+{
+  "name": "rlm-mcp-server",
+  "description": "MCP Server для интеграции RLM-Toolkit в Antigravity IDE и другие MCP-совместимые клиенты",
+  "language": "ru",
+  "phase": "implementation",
+  "created": "2026-01-19",
+  "approved": "2026-01-19",
+  "status": "in_progress"
+}
