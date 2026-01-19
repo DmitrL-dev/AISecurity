@@ -16,8 +16,8 @@ Get RLM-Toolkit running in 5 minutes.
 
 === "Development"
     ```bash
-    git clone https://github.com/sentinel-community/rlm-toolkit
-    cd rlm-toolkit
+    git clone https://github.com/DmitrL-dev/AISecurity.git
+    cd AISecurity/sentinel-community/rlm-toolkit
     pip install -e ".[dev]"
     ```
 

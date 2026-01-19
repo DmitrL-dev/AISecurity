@@ -1,7 +1,7 @@
 # RLM-Toolkit
 
 [![Version](https://img.shields.io/badge/version-1.2.1-blueviolet)](CHANGELOG.md)
-[![CI](https://github.com/sentinel-community/rlm-toolkit/actions/workflows/ci.yml/badge.svg)](https://github.com/sentinel-community/rlm-toolkit/actions)
+[![CI](https://github.com/DmitrL-dev/AISecurity/actions/workflows/ci.yml/badge.svg)](https://github.com/DmitrL-dev/AISecurity/actions)
 [![PyPI](https://img.shields.io/pypi/v/rlm-toolkit.svg)](https://pypi.org/project/rlm-toolkit/)
 [![Python](https://img.shields.io/pypi/pyversions/rlm-toolkit.svg)](https://pypi.org/project/rlm-toolkit/)
 [![License](https://img.shields.io/badge/license-Apache%202.0-blue.svg)](LICENSE)
@@ -319,8 +319,8 @@ rlm trace --session latest
 
 ```bash
 # Clone repo
-git clone https://github.com/sentinel-community/rlm-toolkit.git
-cd rlm-toolkit
+git clone https://github.com/DmitrL-dev/AISecurity.git
+cd AISecurity/sentinel-community/rlm-toolkit
 
 # Install dev dependencies
 pip install -e ".[dev]"
