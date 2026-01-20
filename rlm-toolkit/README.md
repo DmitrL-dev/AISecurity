@@ -338,6 +338,9 @@ Apache 2.0 — see [LICENSE](LICENSE)
 
 ## 🙏 Acknowledgments
 
-- [RLM Paper](https://arxiv.org/abs/2410.XXXXX) by Zhang, Kraska, Khattab
-- [CIRCLE Benchmark](https://arxiv.org/abs/2507.19399)
-- SENTINEL Community
+- **Alex Zhang** — Original RLM concept author ([Blog](https://alexzhang13.github.io/blog/2025/rlm/), [arXiv:2512.24601](https://arxiv.org/abs/2512.24601), October 2025)
+- **[Prime Intellect](https://www.primeintellect.ai/)** — RLM research and [verifiers implementation](https://github.com/PrimeIntellect-ai/verifiers/)
+- [CIRCLE Benchmark](https://arxiv.org/abs/2507.19399) — Security evaluation methodology
+- [InfiniRetri](https://arxiv.org/abs/2502.12962) — Attention-based infinite context retrieval
+- [H-MEM](https://arxiv.org/abs/2507.XXXXX) — Hierarchical memory architecture
+- SENTINEL Community — Security-first implementation and documentation
