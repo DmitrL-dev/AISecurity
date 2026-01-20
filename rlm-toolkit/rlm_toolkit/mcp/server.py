@@ -16,14 +16,15 @@ from typing import Any, Dict, List, Optional
 
 # MCP SDK imports (will need to be installed)
 try:
-    from mcp.server import Server
+    # FastMCP is the recommended API for MCP SDK 1.25+
+    from mcp.server.fastmcp import FastMCP
     from mcp.server.stdio import stdio_server
     from mcp.types import Tool, TextContent
 
     MCP_AVAILABLE = True
 except ImportError:
     MCP_AVAILABLE = False
-    Server = None
+    FastMCP = None
 
 from .contexts import ContextManager
 from .providers import ProviderRouter
@@ -100,17 +101,18 @@ class RLMServer:
         else:
             self.memory = HierarchicalMemory(
                 HMEMConfig(
-                    persistence_path=str(memory_file) if memory_file.exists() else None,
+                    persistence_path=str(
+                        memory_file) if memory_file.exists() else None,
                     auto_persist=True,
                 )
             )
             logger.warning("Using non-secure memory (RLM_SECURE_MEMORY=false)")
 
         if MCP_AVAILABLE:
-            self.server = Server("rlm-toolkit")
+            self.mcp = FastMCP("rlm-toolkit")
             self._register_tools()
         else:
-            self.server = None
+            self.mcp = None
             logger.warning("MCP SDK not installed. Run: pip install mcp")
 
     def _persist_session_stats(self):
@@ -130,7 +132,7 @@ class RLMServer:
     def _register_tools(self):
         """Register all MCP tools."""
 
-        @self.server.tool("rlm_load_context")
+        @self.mcp.tool("rlm_load_context")
         async def load_context(path: str, name: Optional[str] = None) -> Dict[str, Any]:
             """
             Load a file or directory into context.
@@ -152,7 +154,7 @@ class RLMServer:
                 logger.error(f"Failed to load context: {e}")
                 return {"success": False, "error": str(e)}
 
-        @self.server.tool("rlm_query")
+        @self.mcp.tool("rlm_query")
         async def query(
             question: str, context_name: Optional[str] = None
         ) -> Dict[str, Any]:
@@ -188,7 +190,8 @@ class RLMServer:
                 chunks = self._keyword_search(context["content"], question)
 
                 # Calculate served tokens (compressed response)
-                served_tokens = sum(len(c.get("content", "")) for c in chunks) // 4
+                served_tokens = sum(len(c.get("content", ""))
+                                    for c in chunks) // 4
                 saved_tokens = raw_tokens - served_tokens
 
                 # Update session stats
@@ -213,7 +216,7 @@ class RLMServer:
                 logger.error(f"Query failed: {e}")
                 return {"success": False, "error": str(e)}
 
-        @self.server.tool("rlm_list_contexts")
+        @self.mcp.tool("rlm_list_contexts")
         async def list_contexts() -> Dict[str, Any]:
             """
             List all loaded contexts.
@@ -224,7 +227,7 @@ class RLMServer:
             contexts = self.context_manager.list_all()
             return {"success": True, "contexts": contexts, "count": len(contexts)}
 
-        @self.server.tool("rlm_analyze")
+        @self.mcp.tool("rlm_analyze")
         async def analyze(
             goal: str, context_name: Optional[str] = None
         ) -> Dict[str, Any]:
@@ -287,7 +290,7 @@ class RLMServer:
                 logger.error(f"Analysis failed: {e}")
                 return {"success": False, "error": str(e)}
 
-        @self.server.tool("rlm_memory")
+        @self.mcp.tool("rlm_memory")
         async def memory(
             action: str, content: Optional[str] = None, topic: Optional[str] = None
         ) -> Dict[str, Any]:
@@ -383,7 +386,7 @@ class RLMServer:
                 logger.error(f"Memory operation failed: {e}")
                 return {"success": False, "error": str(e)}
 
-        @self.server.tool("rlm_status")
+        @self.mcp.tool("rlm_status")
         async def status() -> Dict[str, Any]:
             """
             Get RLM server status and index info.
@@ -422,7 +425,7 @@ class RLMServer:
                 logger.error(f"Status check failed: {e}")
                 return {"success": False, "error": str(e)}
 
-        @self.server.tool("rlm_session_stats")
+        @self.mcp.tool("rlm_session_stats")
         async def session_stats(reset: bool = False) -> Dict[str, Any]:
             """
             Get real-time session statistics showing token savings.
@@ -453,7 +456,8 @@ class RLMServer:
 
             # Calculate savings percentage
             total_requested = (
-                self.session_stats["tokens_served"] + self.session_stats["tokens_saved"]
+                self.session_stats["tokens_served"] +
+                self.session_stats["tokens_saved"]
             )
             savings_percent = 0
             if total_requested > 0:
@@ -473,7 +477,7 @@ class RLMServer:
                 },
             }
 
-        @self.server.tool("rlm_reindex")
+        @self.mcp.tool("rlm_reindex")
         async def reindex(
             path: Optional[str] = None, force: bool = False
         ) -> Dict[str, Any]:
@@ -509,7 +513,8 @@ class RLMServer:
                     }
                 self._last_reindex_time = current_time
 
-                project_root = path or os.getenv("RLM_PROJECT_ROOT", os.getcwd())
+                project_root = path or os.getenv(
+                    "RLM_PROJECT_ROOT", os.getcwd())
                 indexer = AutoIndexer(Path(project_root))
 
                 if force:
@@ -544,7 +549,7 @@ class RLMServer:
                 logger.error(f"Reindex failed: {e}")
                 return {"success": False, "error": str(e)}
 
-        @self.server.tool("rlm_validate")
+        @self.mcp.tool("rlm_validate")
         async def validate() -> Dict[str, Any]:
             """
             Validate index freshness and cross-references.
@@ -583,7 +588,7 @@ class RLMServer:
                 logger.error(f"Validation failed: {e}")
                 return {"success": False, "error": str(e)}
 
-        @self.server.tool("rlm_settings")
+        @self.mcp.tool("rlm_settings")
         async def settings(
             action: str = "get", key: Optional[str] = None, value: Optional[str] = None
         ) -> Dict[str, Any]:
@@ -711,7 +716,8 @@ class RLMServer:
         dangerous_patterns = [
             ("eval(", "code_injection", "Use of eval() is dangerous"),
             ("exec(", "code_injection", "Use of exec() is dangerous"),
-            ("subprocess", "command_injection", "Subprocess usage - verify inputs"),
+            ("subprocess", "command_injection",
+             "Subprocess usage - verify inputs"),
             ("os.system", "command_injection", "os.system usage - verify inputs"),
             ("pickle", "deserialization", "Pickle usage may be unsafe"),
             ("SQL", "sql_injection", "SQL detected - verify parameterization"),
@@ -776,15 +782,14 @@ class RLMServer:
     async def run(self):
         """Run the MCP server."""
         if not MCP_AVAILABLE:
-            logger.error("MCP SDK not available. Install with: pip install mcp")
+            logger.error(
+                "MCP SDK not available. Install with: pip install mcp")
             return
 
         logger.info("Starting RLM MCP Server...")
 
-        async with stdio_server() as (read_stream, write_stream):
-            await self.server.run(
-                read_stream, write_stream, self.server.create_initialization_options()
-            )
+        # FastMCP handles stdio internally
+        await self.mcp.run()
 
 
 def create_server() -> RLMServer:
@@ -795,7 +800,8 @@ def create_server() -> RLMServer:
 def run_server():
     """Run the MCP server (blocking)."""
     server = create_server()
-    asyncio.run(server.run())
+    # FastMCP.run() handles its own event loop via anyio
+    server.mcp.run()
 
 
 if __name__ == "__main__":
