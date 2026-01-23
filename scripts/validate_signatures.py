@@ -14,7 +14,7 @@ import re
 import sys
 from pathlib import Path
 
-SIGNATURES_DIR = Path(__file__).parent.parent / "sentinel-community" / "signatures"
+SIGNATURES_DIR = Path(__file__).parent.parent / "signatures"
 
 SAFE_EXAMPLES = [
     "How do I prevent prompt injection attacks?",
