@@ -1,11 +1,11 @@
 # RLM-Toolkit
 
-[![Version](https://img.shields.io/badge/version-1.2.1-blueviolet)](CHANGELOG.md)
+[![Version](https://img.shields.io/badge/version-2.1.0-blueviolet)](CHANGELOG.md)
 [![CI](https://github.com/DmitrL-dev/AISecurity/actions/workflows/ci.yml/badge.svg)](https://github.com/DmitrL-dev/AISecurity/actions)
 [![PyPI](https://img.shields.io/pypi/v/rlm-toolkit.svg)](https://pypi.org/project/rlm-toolkit/)
 [![Python](https://img.shields.io/pypi/pyversions/rlm-toolkit.svg)](https://pypi.org/project/rlm-toolkit/)
 [![License](https://img.shields.io/badge/license-Apache%202.0-blue.svg)](LICENSE)
-[![Tests](https://img.shields.io/badge/tests-1040_pass-success)](tests/)
+[![Tests](https://img.shields.io/badge/tests-1089_pass-success)](tests/)
 [![Docs](https://img.shields.io/badge/docs-156_files-blue)](docs/)
 [![NIOKR](https://img.shields.io/badge/NIOKR-10%2F10-gold)](docs/en/certification/checklist.md)
 [![Integrations](https://img.shields.io/badge/integrations-287%2B-brightgreen.svg)](docs/INTEGRATIONS.md)
@@ -113,39 +113,55 @@ Level 0: EPISODE   → Raw interactions
 
 > Based on arXiv H-MEM paper (July 2025)
 
-## 🌉 Memory Bridge (NEW)
+## 🌉 Memory Bridge v2.1 (NEW)
 
-Cross-session state persistence with bi-temporal model — agent memory that survives restarts.
+**Enterprise-scale cross-session persistence** — Zero-friction Auto-Mode with 56x token compression.
 
 ```python
-from rlm_toolkit.memory_bridge import MemoryBridgeManager, StateStorage
+# Zero-config enterprise context (recommended)
+from rlm_toolkit.memory_bridge.mcp_tools_v2 import rlm_enterprise_context
 
-# Initialize with encrypted storage
-storage = StateStorage()  # Uses RLM_ENCRYPTION_KEY if set
-manager = MemoryBridgeManager(storage=storage)
-
-# Start session and add facts
-state = manager.start_session("project-alpha")
-manager.set_goal("Implement authentication system")
-manager.add_fact("Use JWT for API tokens", entity_type="decision")
-manager.add_fact("Rate limit: 100 req/min", entity_type="requirement")
-
-# Save state
-version = manager.sync_state()
-
-# Later — in new session, restore state
-manager2 = MemoryBridgeManager(storage=StateStorage())
-state = manager2.start_session("project-alpha", restore=True)
-print(f"Restored {len(state.facts)} facts")  # → Restored 2 facts
-
-# Hybrid search across facts
-results = manager2.hybrid_search("authentication", top_k=5)
+result = rlm_enterprise_context(
+    query="What's the architecture of this project?",
+    max_tokens=3000
+)
+print(result["context"])  # Semantic routing loads only relevant facts
 ```
 
-**Bi-Temporal Model:**
-- **T (Transaction Time)** — when fact was recorded
-- **T' (Valid Time)** — when fact became/becomes valid
-- **Semantic Invalidation** — contradicting facts auto-expire
+**v2.1 Features:**
+
+| Feature | Description |
+|---------|-------------|
+| **Auto-Mode** | 🆕 Zero-config orchestration for new projects |
+| **Hierarchical Memory** | 🆕 L0-L3 levels: Project → Domain → Module → Code |
+| **Semantic Routing** | 🆕 56x compression via similarity-based context loading |
+| **Git Auto-Extract** | 🆕 Facts extracted automatically on each commit |
+| **Causal Reasoning** | 🆕 Track decisions with reasons, constraints, alternatives |
+| **Smart Cold Start** | 🆕 Sub-second project discovery (0.04s for 79K LOC) |
+| **18 MCP Tools** | Full IDE integration via Model Context Protocol |
+
+**Hierarchical Memory (L0-L3):**
+```
+L0: PROJECT   → High-level architecture, tech stack
+L1: DOMAIN    → Feature areas (auth, api, database)
+L2: MODULE    → Per-file knowledge  
+L3: CODE      → Function-level facts with line refs
+```
+
+**VS Code Extension v2.1.0:**
+```bash
+code --install-extension rlm-toolkit-2.1.0.vsix
+```
+- Real-time dashboard with L0-L3 visualization
+- Discover / Git Hook / Index Embeddings buttons
+- Health Check status for Memory Store and Semantic Router
+
+**Git Hook Auto-Extraction:**
+```python
+# Install hook for automatic fact extraction
+rlm_install_git_hooks(hook_type="post-commit")
+# Now every commit auto-extracts: classes, functions, major changes
+```
 
 > Based on [Graphiti](https://arxiv.org/abs/2501.13956) — [Full Documentation](docs/memory-bridge.md)
 
@@ -336,7 +352,7 @@ rlm trace --session latest
 
 ## 📚 Documentation
 
-**v1.2.1: 156 files (78 EN + 78 RU) — NIOKR 10/10**
+**v2.1.0: 162 files (81 EN + 81 RU) — NIOKR 10/10**
 
 | Category | EN | RU |
 |----------|:--:|:--:|
@@ -344,13 +360,15 @@ rlm trace --session latest
 | Tutorials | 13 | 13 |
 | Examples | 10 | 10 |
 | How-To | 20 | 20 |
-| Reference | 3 | 3 |
+| Reference | 6 | 6 |
+| Memory Bridge | 7 | 7 |
 
 - [Quickstart](docs/en/quickstart.md) / [Быстрый старт](docs/ru/quickstart.md)
 - [Tutorials](docs/en/tutorials/) / [Туториалы](docs/ru/tutorials/)
 - [Security Guide](docs/en/concepts/security.md)
-- [Memory Bridge](docs/memory-bridge.md) — Cross-session persistence
-- [MCP Server](docs/mcp-server.md) — IDE integration (20 tools)
+- [**Memory Bridge v2.1**](docs/memory-bridge.md) — Enterprise memory with 18 MCP tools
+- [MCP Server](docs/mcp-server.md) — IDE integration
+- [VS Code Extension](rlm-vscode-extension/README.md) — Dashboard v2.1.0
 - [Certification Checklist](docs/en/certification/checklist.md)
 - [Examples](docs/en/examples/)
 
