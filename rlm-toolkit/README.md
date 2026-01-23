@@ -5,7 +5,7 @@
 [![PyPI](https://img.shields.io/pypi/v/rlm-toolkit.svg)](https://pypi.org/project/rlm-toolkit/)
 [![Python](https://img.shields.io/pypi/pyversions/rlm-toolkit.svg)](https://pypi.org/project/rlm-toolkit/)
 [![License](https://img.shields.io/badge/license-Apache%202.0-blue.svg)](LICENSE)
-[![Tests](https://img.shields.io/badge/tests-1030_pass-success)](tests/)
+[![Tests](https://img.shields.io/badge/tests-1040_pass-success)](tests/)
 [![Docs](https://img.shields.io/badge/docs-156_files-blue)](docs/)
 [![NIOKR](https://img.shields.io/badge/NIOKR-10%2F10-gold)](docs/en/certification/checklist.md)
 [![Integrations](https://img.shields.io/badge/integrations-287%2B-brightgreen.svg)](docs/INTEGRATIONS.md)
@@ -37,6 +37,7 @@ print(result.answer)
 | **Infinite Context** | Process 10M+ tokens with O(1) memory |
 | **InfiniRetri** | 🆕 Attention-based retrieval, 100% accuracy on 1M+ tokens |
 | **H-MEM** | 🆕 4-level hierarchical memory with LLM consolidation |
+| **Memory Bridge** | 🆕 Bi-temporal cross-session persistence (Graphiti-inspired) |
 | **Self-Evolving** | 🆕 LLMs that improve through usage (R-Zero pattern) |
 | **Multi-Agent** | 🆕 Decentralized P2P agents with Trust Zones |
 | **DSPy Optimization** | 🆕 Automatic prompt optimization |
@@ -47,7 +48,7 @@ print(result.answer)
 | **Embeddings** | 15+ providers (OpenAI, BGE, E5, Jina, Cohere...) |
 | **Cost Control** | Budget limits, cost tracking |
 | **Observability** | OpenTelemetry, Langfuse, LangSmith, W&B (12 backends) |
-| **Memory Systems** | Buffer, Episodic, Hierarchical (H-MEM) |
+| **Memory Systems** | Buffer, Episodic, Hierarchical (H-MEM), Memory Bridge |
 
 > 📋 **[Full Integration Catalog](docs/INTEGRATIONS.md)** — 287+ production-ready integrations
 
@@ -111,6 +112,42 @@ Level 0: EPISODE   → Raw interactions
 ```
 
 > Based on arXiv H-MEM paper (July 2025)
+
+## 🌉 Memory Bridge (NEW)
+
+Cross-session state persistence with bi-temporal model — agent memory that survives restarts.
+
+```python
+from rlm_toolkit.memory_bridge import MemoryBridgeManager, StateStorage
+
+# Initialize with encrypted storage
+storage = StateStorage()  # Uses RLM_ENCRYPTION_KEY if set
+manager = MemoryBridgeManager(storage=storage)
+
+# Start session and add facts
+state = manager.start_session("project-alpha")
+manager.set_goal("Implement authentication system")
+manager.add_fact("Use JWT for API tokens", entity_type="decision")
+manager.add_fact("Rate limit: 100 req/min", entity_type="requirement")
+
+# Save state
+version = manager.sync_state()
+
+# Later — in new session, restore state
+manager2 = MemoryBridgeManager(storage=StateStorage())
+state = manager2.start_session("project-alpha", restore=True)
+print(f"Restored {len(state.facts)} facts")  # → Restored 2 facts
+
+# Hybrid search across facts
+results = manager2.hybrid_search("authentication", top_k=5)
+```
+
+**Bi-Temporal Model:**
+- **T (Transaction Time)** — when fact was recorded
+- **T' (Valid Time)** — when fact became/becomes valid
+- **Semantic Invalidation** — contradicting facts auto-expire
+
+> Based on [Graphiti](https://arxiv.org/abs/2501.13956) — [Full Documentation](docs/memory-bridge.md)
 
 ## 🧬 Self-Evolving LLMs (NEW)
 
@@ -312,6 +349,8 @@ rlm trace --session latest
 - [Quickstart](docs/en/quickstart.md) / [Быстрый старт](docs/ru/quickstart.md)
 - [Tutorials](docs/en/tutorials/) / [Туториалы](docs/ru/tutorials/)
 - [Security Guide](docs/en/concepts/security.md)
+- [Memory Bridge](docs/memory-bridge.md) — Cross-session persistence
+- [MCP Server](docs/mcp-server.md) — IDE integration (20 tools)
 - [Certification Checklist](docs/en/certification/checklist.md)
 - [Examples](docs/en/examples/)
 

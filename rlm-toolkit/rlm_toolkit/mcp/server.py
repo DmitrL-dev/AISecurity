@@ -12,6 +12,7 @@ import asyncio
 import logging
 import os
 import sys
+from pathlib import Path
 from typing import Any, Dict, List, Optional
 
 # MCP SDK imports (will need to be installed)
@@ -35,6 +36,13 @@ from ..crystal import HPEExtractor, CrystalIndexer, ProjectCrystal, ModuleCrysta
 # H-MEM imports for memory integration
 from ..memory.hierarchical import HierarchicalMemory, HMEMConfig, MemoryLevel
 from ..memory.secure import SecureHierarchicalMemory, SecurityPolicy
+
+# Memory Bridge imports for bi-temporal cognitive state
+from ..memory_bridge import (
+    MemoryBridgeManager,
+    StateStorage,
+    register_memory_bridge_tools,
+)
 
 # Configure logging
 logging.basicConfig(
@@ -101,16 +109,47 @@ class RLMServer:
         else:
             self.memory = HierarchicalMemory(
                 HMEMConfig(
-                    persistence_path=str(
-                        memory_file) if memory_file.exists() else None,
+                    persistence_path=str(memory_file) if memory_file.exists() else None,
                     auto_persist=True,
                 )
             )
             logger.warning("Using non-secure memory (RLM_SECURE_MEMORY=false)")
 
+        # Initialize Memory Bridge (bi-temporal cognitive state)
+        memory_bridge_db = (
+            self.context_manager.storage_dir / "memory" / "memory_bridge.db"
+        )
+        memory_bridge_storage = StateStorage(db_path=memory_bridge_db)
+        self.memory_bridge = MemoryBridgeManager(storage=memory_bridge_storage)
+        logger.info(f"Memory Bridge initialized at {memory_bridge_db}")
+
+        # Initialize Memory Bridge v2.0 (enterprise hierarchical memory)
+        from ..memory_bridge.v2.hierarchical import HierarchicalMemoryStore
+        from ..memory_bridge.mcp_tools_v2 import register_memory_bridge_v2_tools
+
+        memory_bridge_v2_db = (
+            self.context_manager.storage_dir / "memory" / "memory_bridge_v2.db"
+        )
+        self.memory_bridge_v2_store = HierarchicalMemoryStore(
+            db_path=memory_bridge_v2_db
+        )
+        logger.info(f"Memory Bridge v2.0 initialized at {memory_bridge_v2_db}")
+
         if MCP_AVAILABLE:
             self.mcp = FastMCP("rlm-toolkit")
             self._register_tools()
+            # Register Memory Bridge v1 tools (10 tools)
+            register_memory_bridge_tools(self.mcp, self.memory_bridge)
+            logger.info("Memory Bridge v1 tools registered")
+
+            # Register Memory Bridge v2 tools (15 tools for enterprise features)
+            project_root = Path(os.getenv("RLM_PROJECT_ROOT", os.getcwd()))
+            self.memory_bridge_v2_components = register_memory_bridge_v2_tools(
+                self.mcp,
+                self.memory_bridge_v2_store,
+                project_root=project_root,
+            )
+            logger.info("Memory Bridge v2.0 enterprise tools registered")
         else:
             self.mcp = None
             logger.warning("MCP SDK not installed. Run: pip install mcp")
@@ -190,8 +229,7 @@ class RLMServer:
                 chunks = self._keyword_search(context["content"], question)
 
                 # Calculate served tokens (compressed response)
-                served_tokens = sum(len(c.get("content", ""))
-                                    for c in chunks) // 4
+                served_tokens = sum(len(c.get("content", "")) for c in chunks) // 4
                 saved_tokens = raw_tokens - served_tokens
 
                 # Update session stats
@@ -456,8 +494,7 @@ class RLMServer:
 
             # Calculate savings percentage
             total_requested = (
-                self.session_stats["tokens_served"] +
-                self.session_stats["tokens_saved"]
+                self.session_stats["tokens_served"] + self.session_stats["tokens_saved"]
             )
             savings_percent = 0
             if total_requested > 0:
@@ -513,8 +550,7 @@ class RLMServer:
                     }
                 self._last_reindex_time = current_time
 
-                project_root = path or os.getenv(
-                    "RLM_PROJECT_ROOT", os.getcwd())
+                project_root = path or os.getenv("RLM_PROJECT_ROOT", os.getcwd())
                 indexer = AutoIndexer(Path(project_root))
 
                 if force:
@@ -716,8 +752,7 @@ class RLMServer:
         dangerous_patterns = [
             ("eval(", "code_injection", "Use of eval() is dangerous"),
             ("exec(", "code_injection", "Use of exec() is dangerous"),
-            ("subprocess", "command_injection",
-             "Subprocess usage - verify inputs"),
+            ("subprocess", "command_injection", "Subprocess usage - verify inputs"),
             ("os.system", "command_injection", "os.system usage - verify inputs"),
             ("pickle", "deserialization", "Pickle usage may be unsafe"),
             ("SQL", "sql_injection", "SQL detected - verify parameterization"),
@@ -782,8 +817,7 @@ class RLMServer:
     async def run(self):
         """Run the MCP server."""
         if not MCP_AVAILABLE:
-            logger.error(
-                "MCP SDK not available. Install with: pip install mcp")
+            logger.error("MCP SDK not available. Install with: pip install mcp")
             return
 
         logger.info("Starting RLM MCP Server...")

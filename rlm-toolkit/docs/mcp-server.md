@@ -125,6 +125,84 @@ rlm_settings(action="set", key="ttl_hours", value="48")
 
 ---
 
+## Memory Bridge Tools (NEW)
+
+Cross-session state persistence с bi-temporal моделью. [Подробнее](./memory-bridge.md)
+
+### rlm_sync_state
+Сохранить текущее состояние агента.
+
+```
+rlm_sync_state()
+# Returns: {"version": 5, "session_id": "abc123"}
+```
+
+### rlm_restore_state
+Восстановить состояние сессии.
+
+```
+rlm_restore_state(session_id="abc123")
+rlm_restore_state(session_id="abc123", version=3)  # Конкретная версия
+```
+
+### rlm_get_state
+Получить текущее состояние как JSON.
+
+```
+rlm_get_state()
+```
+
+### rlm_list_sessions
+Список сохранённых сессий.
+
+```
+rlm_list_sessions()
+```
+
+### rlm_add_fact
+Добавить факт с bi-temporal tracking.
+
+```
+rlm_add_fact(content="API limit is 100 req/min", entity_type="fact", confidence=0.95)
+```
+
+### rlm_search_facts
+Hybrid search по фактам (semantic + keyword + recency).
+
+```
+rlm_search_facts(query="rate limit", top_k=10)
+```
+
+### rlm_build_communities
+Кластеризация фактов (требует sklearn).
+
+```
+rlm_build_communities(min_cluster_size=3)
+```
+
+### rlm_update_goals
+Установить/обновить цель.
+
+```
+rlm_update_goals(goal_description="Implement auth", progress=0.5)
+```
+
+### rlm_record_decision
+Записать архитектурное решение.
+
+```
+rlm_record_decision(description="Use JWT", rationale="Industry standard")
+```
+
+### rlm_add_hypothesis
+Добавить гипотезу для проверки.
+
+```
+rlm_add_hypothesis(statement="Caching reduces latency by 50%")
+```
+
+---
+
 ## Конфигурация
 
 ### Переменные окружения
@@ -193,7 +271,9 @@ export RLM_SECURE_MEMORY=false
 
 v1.2.1 — January 2026
 
-**MCP Tools (9 total):**
+**MCP Tools (20 total):**
+
+*Core Tools (10):*
 1. `rlm_load_context` — Load file/directory
 2. `rlm_query` — Search in context
 3. `rlm_list_contexts` — List contexts
@@ -205,7 +285,20 @@ v1.2.1 — January 2026
 9. `rlm_validate` — Check freshness
 10. `rlm_settings` — Get/set settings
 
+*Memory Bridge Tools (10):*
+11. `rlm_sync_state` — Save agent state
+12. `rlm_restore_state` — Restore session
+13. `rlm_get_state` — Get current state
+14. `rlm_list_sessions` — List all sessions
+15. `rlm_add_fact` — Add bi-temporal fact
+16. `rlm_search_facts` — Hybrid fact search
+17. `rlm_build_communities` — Cluster facts
+18. `rlm_update_goals` — Set/update goals
+19. `rlm_record_decision` — Record decisions
+20. `rlm_add_hypothesis` — Add hypothesis
+
 **Security (v1.2.1):**
 - AES-256-GCM fail-closed (no XOR fallback)
 - Rate limiting on reindex
 - .gitignore for encryption keys
+

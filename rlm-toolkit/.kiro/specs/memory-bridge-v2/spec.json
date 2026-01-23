@@ -1,0 +1,73 @@
+{
+  "name": "memory-bridge-v2",
+  "description": "Memory Bridge v2.0: Enterprise Amnesia Elimination",
+  "version": "2.0.0",
+  "language": "ru",
+  "status": "planning",
+  "created": "2026-01-22T09:40:00+10:00",
+  "phases": [
+    {
+      "id": 1,
+      "name": "Foundation & Migration",
+      "status": "pending",
+      "priority": "critical",
+      "estimate_days": "2-3"
+    },
+    {
+      "id": 2,
+      "name": "Hierarchical Memory",
+      "status": "pending",
+      "priority": "critical",
+      "estimate_days": "3-4"
+    },
+    {
+      "id": 3,
+      "name": "Semantic Routing",
+      "status": "pending",
+      "priority": "critical",
+      "estimate_days": "2-3"
+    },
+    {
+      "id": 4,
+      "name": "Auto-Extraction",
+      "status": "pending",
+      "priority": "high",
+      "estimate_days": "2-3"
+    },
+    {
+      "id": 5,
+      "name": "TTL Management",
+      "status": "pending",
+      "priority": "high",
+      "estimate_days": "1-2"
+    },
+    {
+      "id": 6,
+      "name": "Causal Chains",
+      "status": "pending",
+      "priority": "medium",
+      "estimate_days": "2-3"
+    },
+    {
+      "id": 7,
+      "name": "Cold Start Optimizer",
+      "status": "pending",
+      "priority": "medium",
+      "estimate_days": "2-3"
+    },
+    {
+      "id": 8,
+      "name": "Integration & Testing",
+      "status": "pending",
+      "priority": "critical",
+      "estimate_days": "3-4"
+    }
+  ],
+  "targets": {
+    "amnesia_elimination": "95%+",
+    "enterprise_scale": "1M+ LOC",
+    "cold_start_tokens": "3-10K",
+    "routing_latency": "<200ms"
+  },
+  "total_estimate_days": "17-25"
+}

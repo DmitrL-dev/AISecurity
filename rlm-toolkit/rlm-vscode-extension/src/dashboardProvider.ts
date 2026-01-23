@@ -41,6 +41,19 @@ export class RLMDashboardProvider implements vscode.WebviewViewProvider {
                 case 'refresh':
                     this.refresh();
                     break;
+                // v2.1 Enterprise commands
+                case 'discover':
+                    await vscode.commands.executeCommand('rlm.discoverProject');
+                    this.refresh();
+                    break;
+                case 'gitHook':
+                    await vscode.commands.executeCommand('rlm.installGitHook');
+                    this.refresh();
+                    break;
+                case 'indexEmbeddings':
+                    await vscode.commands.executeCommand('rlm.indexEmbeddings');
+                    this.refresh();
+                    break;
                 // TODO: Multi-project support - deferred to backlog
                 // case 'switchProject':
                 //     if (message.path) {
@@ -59,24 +72,55 @@ export class RLMDashboardProvider implements vscode.WebviewViewProvider {
     private async updateContent() {
         if (!this._view) return;
         
-        // Get status from MCP
+        // Get status from MCP (v1.x)
         const status = await this.mcpClient.getStatus();
         const validation = await this.mcpClient.validate();
         const sessionStats = await this.mcpClient.getSessionStats();
         const workspaceFolders = this.mcpClient.getWorkspaceFolders();
         const currentProject = this.mcpClient.getProjectRoot();
         
-        this._view.webview.html = this.getHtml(status, validation, sessionStats, workspaceFolders, currentProject);
+        // Get v2.1 data
+        const healthCheck = await this.mcpClient.healthCheck();
+        const hierarchyStats = await this.mcpClient.getHierarchyStats();
+        
+        this._view.webview.html = this.getHtml(
+            status, validation, sessionStats, 
+            workspaceFolders, currentProject,
+            healthCheck, hierarchyStats
+        );
     }
     
-    private getHtml(status: any, validation: any, sessionStats: any, workspaceFolders: {name: string, path: string}[] = [], currentProject: string = ''): string {
+    private getHtml(
+        status: any, validation: any, sessionStats: any, 
+        workspaceFolders: {name: string, path: string}[] = [], 
+        currentProject: string = '',
+        healthCheck: any = {},
+        hierarchyStats: any = {}
+    ): string {
         const crystals = status.success ? status.index?.crystals || 0 : 0;
         const tokens = status.success ? status.index?.tokens || 0 : 0;
-        const version = status.success ? status.version || '1.2.0' : '1.2.0';
+        const version = '2.1.0';
         const symbols = validation.success ? validation.symbols?.total_symbols || 0 : 0;
         const relations = validation.success ? validation.symbols?.defined_functions || 0 : 0;
         const health = validation.success ? validation.health : 'unknown';
         const staleFiles = validation.success ? validation.stale_files || 0 : 0;
+        
+        // v2.1 data extraction - healthCheck uses 'status' not 'success'
+        const hcOk = healthCheck.status === 'healthy' || healthCheck.success;
+        const hcComponents = hcOk ? healthCheck.components || {} : {};
+        const storeHealth = hcComponents.store?.status || 'unknown';
+        const routerHealth = hcComponents.router?.status || 'unknown';
+        const factsCount = hcComponents.store?.facts_count || 0;
+        const domainsCount = hcComponents.store?.domains || 0;
+        
+        // hierarchyStats uses 'status' not 'success'
+        const hsOk = hierarchyStats.status === 'success' || hierarchyStats.success;
+        const hierarchy = hsOk ? hierarchyStats.memory_store || {} : {};
+        const l0Facts = hierarchy.by_level?.L0_PROJECT || 0;
+        const l1Facts = hierarchy.by_level?.L1_DOMAIN || 0;
+        const l2Facts = hierarchy.by_level?.L2_MODULE || 0;
+        const l3Facts = hierarchy.by_level?.L3_CODE || 0;
+        const totalFacts = hierarchy.total_facts || 0;
         
         // Calculate compression (estimated)
         const rawTokens = tokens * 56; // Assuming 56x compression
@@ -240,7 +284,7 @@ export class RLMDashboardProvider implements vscode.WebviewViewProvider {
         </div>
     </div>
     ` : ''}
-    -->
+    --> 
     
     ${staleFiles > 0 ? `
     <div class="warning-banner">
@@ -249,6 +293,67 @@ export class RLMDashboardProvider implements vscode.WebviewViewProvider {
         <button onclick="reindex()" class="warning-btn">Update</button>
     </div>
     ` : ''}
+    
+    <!-- v2.1 Enterprise Section -->
+    <div class="section">
+        <div class="section-title">
+            <span class="icon">🏗️</span> Enterprise v2.1
+        </div>
+        <div class="stat-row">
+            <span class="stat-label">Total Facts</span>
+            <span class="stat-value">${totalFacts}</span>
+        </div>
+        <div class="stat-row">
+            <span class="stat-label">Domains</span>
+            <span class="stat-value">${domainsCount}</span>
+        </div>
+        <div class="button-row">
+            <button onclick="discover()">🚀 Discover</button>
+            <button onclick="gitHook()">🪝 Git Hook</button>
+        </div>
+    </div>
+    
+    <!-- Health Check Section -->
+    <div class="section">
+        <div class="section-title">
+            <span class="icon">🔒</span> Health Check
+        </div>
+        <div class="stat-row">
+            <span class="stat-label">Store</span>
+            <span class="stat-value ${storeHealth === 'healthy' ? 'success' : ''}">${storeHealth === 'healthy' ? '✅' : '⚠️'} ${factsCount} facts</span>
+        </div>
+        <div class="stat-row">
+            <span class="stat-label">Router</span>
+            <span class="stat-value ${routerHealth === 'healthy' ? 'success' : ''}">${routerHealth === 'healthy' ? '✅ embeddings' : '⚠️ ' + routerHealth}</span>
+        </div>
+    </div>
+    
+    <!-- Hierarchical Memory Section -->
+    <div class="section">
+        <div class="section-title">
+            <span class="icon">📊</span> Hierarchical Memory (L0-L3)
+        </div>
+        <div class="stat-row">
+            <span class="stat-label">L0 Project</span>
+            <span class="stat-value">${l0Facts}</span>
+        </div>
+        <div class="stat-row">
+            <span class="stat-label">L1 Domain</span>
+            <span class="stat-value">${l1Facts}</span>
+        </div>
+        <div class="stat-row">
+            <span class="stat-label">L2 Module</span>
+            <span class="stat-value">${l2Facts}</span>
+        </div>
+        <div class="stat-row">
+            <span class="stat-label">L3 Code</span>
+            <span class="stat-value">${l3Facts}</span>
+        </div>
+        <div class="button-row">
+            <button onclick="indexEmbeddings()">💉 Index Embeddings</button>
+        </div>
+    </div>
+    
     <div class="section">
         <div class="section-title">
             <span class="icon">📊</span> Project Index
@@ -372,6 +477,19 @@ export class RLMDashboardProvider implements vscode.WebviewViewProvider {
         
         function consolidate() {
             vscode.postMessage({ command: 'consolidate' });
+        }
+        
+        // v2.1 Enterprise handlers
+        function discover() {
+            vscode.postMessage({ command: 'discover' });
+        }
+        
+        function gitHook() {
+            vscode.postMessage({ command: 'gitHook' });
+        }
+        
+        function indexEmbeddings() {
+            vscode.postMessage({ command: 'indexEmbeddings' });
         }
         
         // TODO: Multi-project support - deferred to backlog

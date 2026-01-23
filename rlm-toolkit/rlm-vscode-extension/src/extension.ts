@@ -74,6 +74,95 @@ export function activate(context: vscode.ExtensionContext) {
         vscode.commands.registerCommand('rlm.consolidateMemory', async () => {
             const result = await mcpClient.consolidateMemory();
             vscode.window.showInformationMessage('RLM: Memory consolidated');
+        }),
+        
+        // v2.1 Enterprise commands
+        vscode.commands.registerCommand('rlm.discoverProject', async () => {
+            await vscode.window.withProgress({
+                location: vscode.ProgressLocation.Notification,
+                title: "RLM: Discovering project...",
+                cancellable: false
+            }, async (progress) => {
+                progress.report({ increment: 0, message: "Cold start analysis..." });
+                
+                const result = await mcpClient.discoverProject();
+                
+                if (result.success) {
+                    progress.report({ increment: 100, message: "Done!" });
+                    const facts = result.facts_created || 0;
+                    const domains = result.suggested_domains?.length || 0;
+                    vscode.window.showInformationMessage(
+                        `RLM: Discovered ${facts} facts, ${domains} domains`
+                    );
+                    dashboardProvider.refresh();
+                } else {
+                    vscode.window.showErrorMessage(`RLM: ${result.error}`);
+                }
+            });
+        }),
+        
+        vscode.commands.registerCommand('rlm.enterpriseQuery', async () => {
+            const query = await vscode.window.showInputBox({
+                prompt: 'Enter your query for enterprise context',
+                placeHolder: 'e.g., Explain the authentication architecture'
+            });
+            
+            if (query) {
+                const result = await mcpClient.enterpriseContext(query);
+                if (result.success) {
+                    const doc = await vscode.workspace.openTextDocument({
+                        content: result.context || 'No context found',
+                        language: 'markdown'
+                    });
+                    await vscode.window.showTextDocument(doc);
+                }
+            }
+        }),
+        
+        vscode.commands.registerCommand('rlm.healthCheck', async () => {
+            const result = await mcpClient.healthCheck();
+            if (result.success) {
+                const components = result.components || {};
+                const store = components.store?.status || 'unknown';
+                const router = components.router?.status || 'unknown';
+                vscode.window.showInformationMessage(
+                    `RLM Health: Store=${store}, Router=${router}`
+                );
+            } else {
+                vscode.window.showErrorMessage(`RLM: ${result.error}`);
+            }
+        }),
+        
+        vscode.commands.registerCommand('rlm.installGitHook', async () => {
+            const result = await mcpClient.installGitHook();
+            if (result.success) {
+                vscode.window.showInformationMessage('RLM: Git hook installed for auto-extraction');
+            } else {
+                vscode.window.showErrorMessage(`RLM: ${result.error}`);
+            }
+        }),
+        
+        vscode.commands.registerCommand('rlm.indexEmbeddings', async () => {
+            await vscode.window.withProgress({
+                location: vscode.ProgressLocation.Notification,
+                title: "RLM: Indexing embeddings...",
+                cancellable: false
+            }, async (progress) => {
+                progress.report({ increment: 0, message: "Generating embeddings..." });
+                
+                const result = await mcpClient.indexEmbeddings();
+                
+                if (result.success) {
+                    progress.report({ increment: 100, message: "Done!" });
+                    const indexed = result.indexed_count || 0;
+                    vscode.window.showInformationMessage(
+                        `RLM: Indexed ${indexed} embeddings for semantic routing`
+                    );
+                    dashboardProvider.refresh();
+                } else {
+                    vscode.window.showErrorMessage(`RLM: ${result.error}`);
+                }
+            });
         })
     );
     

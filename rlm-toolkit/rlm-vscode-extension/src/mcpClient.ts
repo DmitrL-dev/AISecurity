@@ -101,6 +101,126 @@ export class RLMMcpClient {
         return this.callRlm('session_stats');
     }
     
+    // ========== v2.1 Enterprise Features ==========
+    
+    public async discoverProject(): Promise<RLMResponse> {
+        return this.callRlmV2('rlm_discover_project', {});
+    }
+    
+    public async enterpriseContext(query: string): Promise<RLMResponse> {
+        return this.callRlmV2('rlm_enterprise_context', { 
+            query, 
+            max_tokens: 3000,
+            include_causal: true 
+        });
+    }
+    
+    public async healthCheck(): Promise<RLMResponse> {
+        return this.callRlmV2('rlm_health_check', {});
+    }
+    
+    public async getHierarchyStats(): Promise<RLMResponse> {
+        return this.callRlmV2('rlm_get_hierarchy_stats', {});
+    }
+    
+    public async indexEmbeddings(): Promise<RLMResponse> {
+        return this.callRlmV2('rlm_index_embeddings', {});
+    }
+    
+    public async installGitHook(): Promise<RLMResponse> {
+        return this.callRlmV2('rlm_install_git_hooks', { hook_type: 'post-commit' });
+    }
+    
+    // v2.1 MCP tool caller (uses mcp_tools_v2)
+    private async callRlmV2(tool: string, params: any): Promise<RLMResponse> {
+        return new Promise((resolve) => {
+            const script = `
+import json
+import sys
+import os
+import asyncio
+sys.path.insert(0, r'${this.projectRoot}')
+os.environ['RLM_PROJECT_ROOT'] = r'${this.projectRoot}'
+
+async def main():
+    try:
+        from pathlib import Path
+        from rlm_toolkit.memory_bridge.v2.hierarchical import HierarchicalMemoryStore
+        from rlm_toolkit.memory_bridge.mcp_tools_v2 import register_memory_bridge_v2_tools
+        
+        # Create mock server with tool capture
+        class MockServer:
+            def __init__(self):
+                self.tools = {}
+            def tool(self, name=None, description=None):
+                def decorator(func):
+                    self.tools[name] = func
+                    return func
+                return decorator
+        
+        server = MockServer()
+        project_root = Path(r'${this.projectRoot}')
+        db_path = project_root / '.rlm' / 'memory' / 'memory_bridge_v2.db'
+        db_path.parent.mkdir(parents=True, exist_ok=True)
+        store = HierarchicalMemoryStore(db_path=str(db_path))
+        
+        register_memory_bridge_v2_tools(server, store, project_root)
+        
+        tool_name = '${tool}'
+        params = ${JSON.stringify(params)}
+        
+        if tool_name in server.tools:
+            result = await server.tools[tool_name](**params)
+            print(json.dumps({'success': True, **result}))
+        else:
+            print(json.dumps({'success': False, 'error': f'Tool {tool_name} not found'}))
+    except Exception as e:
+        import traceback
+        print(json.dumps({'success': False, 'error': str(e), 'trace': traceback.format_exc()}))
+
+asyncio.run(main())
+`;
+            
+            const env = { ...process.env };
+            env['RLM_PROJECT_ROOT'] = this.projectRoot;
+            
+            const proc = spawn(this.pythonPath, ['-c', script], {
+                cwd: this.projectRoot,
+                env: env
+            });
+            
+            let stdout = '';
+            let stderr = '';
+            
+            proc.stdout?.on('data', (data: Buffer) => {
+                stdout += data.toString();
+            });
+            
+            proc.stderr?.on('data', (data: Buffer) => {
+                stderr += data.toString();
+            });
+            
+            proc.on('close', (code: number | null) => {
+                try {
+                    const result = JSON.parse(stdout.trim());
+                    resolve(result);
+                } catch (e) {
+                    resolve({
+                        success: false,
+                        error: stderr || stdout || 'Failed to parse RLM v2 response'
+                    });
+                }
+            });
+            
+            proc.on('error', (err: Error) => {
+                resolve({
+                    success: false,
+                    error: `RLM v2 spawn failed: ${err.message}`
+                });
+            });
+        });
+    }
+    
     private async callRlm(command: string, args: any = {}): Promise<RLMResponse> {
         return new Promise((resolve) => {
             const script = `

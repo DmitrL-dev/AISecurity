@@ -2,13 +2,13 @@
   "name": "rlm-toolkit",
   "displayName": "RLM-Toolkit",
   "description": "Recursive Language Models - Unlimited Context for Code Projects",
-  "version": "1.2.0",
+  "version": "2.1.0",
   "publisher": "sentinel-community",
   "engines": {
     "vscode": "^1.85.0"
   },
   "categories": ["Other", "Machine Learning"],
-  "keywords": ["rlm", "llm", "context", "memory", "ai"],
+  "keywords": ["rlm", "llm", "context", "memory", "ai", "mcp"],
   "activationEvents": ["onStartupFinished"],
   "main": "./out/extension.js",
   "contributes": {
@@ -46,6 +46,26 @@
       {
         "command": "rlm.consolidateMemory",
         "title": "RLM: Consolidate Memory"
+      },
+      {
+        "command": "rlm.discoverProject",
+        "title": "RLM: Discover Project (Cold Start)"
+      },
+      {
+        "command": "rlm.enterpriseQuery",
+        "title": "RLM: Enterprise Context Query"
+      },
+      {
+        "command": "rlm.healthCheck",
+        "title": "RLM: Health Check"
+      },
+      {
+        "command": "rlm.installGitHook",
+        "title": "RLM: Install Git Hook (Auto-Extract)"
+      },
+      {
+        "command": "rlm.indexEmbeddings",
+        "title": "RLM: Index Embeddings (Semantic Routing)"
       }
     ],
     "configuration": {
@@ -65,6 +85,11 @@
           "type": "boolean",
           "default": true,
           "description": "Enable AES-256 encryption"
+        },
+        "rlm.autoDiscovery": {
+          "type": "boolean",
+          "default": true,
+          "description": "Auto-discover project on first load (v2.1)"
         }
       }
     }
