@@ -83,15 +83,12 @@ class AutoExtractionEngine:
     """
 
     # Patterns for extracting information from diffs
+    # Note: additions are already stripped of + prefix by _parse_diff
     NEW_FILE_PATTERN = re.compile(r"^diff --git a/.+ b/(.+)$", re.MULTILINE)
-    FUNCTION_PATTERN = re.compile(r"^\+\s*(async\s+)?def\s+(\w+)\s*\(", re.MULTILINE)
-    CLASS_PATTERN = re.compile(r"^\+\s*class\s+(\w+)", re.MULTILINE)
-    METHOD_PATTERN = re.compile(
-        r"^\+\s+(?:async\s+)?def\s+(\w+)\s*\(self", re.MULTILINE
-    )
-    IMPORT_PATTERN = re.compile(
-        r"^\+\s*(?:from\s+(\S+)\s+)?import\s+(.+)$", re.MULTILINE
-    )
+    FUNCTION_PATTERN = re.compile(r"^\s*(async\s+)?def\s+(\w+)\s*\(", re.MULTILINE)
+    CLASS_PATTERN = re.compile(r"^\s*class\s+(\w+)", re.MULTILINE)
+    METHOD_PATTERN = re.compile(r"^\s+(?:async\s+)?def\s+(\w+)\s*\(self", re.MULTILINE)
+    IMPORT_PATTERN = re.compile(r"^\s*(?:from\s+(\S+)\s+)?import\s+(.+)$", re.MULTILINE)
 
     # Templates for generating facts
     TEMPLATES = {
