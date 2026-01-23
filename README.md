@@ -19,6 +19,7 @@
 <p align="center">
   <a href="https://github.com/DmitrL-dev/AISecurity/actions"><img src="https://img.shields.io/github/actions/workflow/status/DmitrL-dev/AISecurity/ci.yml?branch=main&label=CI&style=flat-square" alt="CI"></a>
   <a href="https://pypi.org/project/sentinel-llm-security/"><img src="https://img.shields.io/pypi/v/sentinel-llm-security?style=flat-square&label=PyPI" alt="PyPI"></a>
+  <a href="https://pypi.org/project/rlm-toolkit/"><img src="https://img.shields.io/pypi/dm/rlm-toolkit?style=flat-square&label=RLM%20Downloads" alt="RLM Downloads"></a>
   <a href="./LICENSE"><img src="https://img.shields.io/badge/License-Apache_2.0-blue?style=flat-square" alt="License"></a>
   <a href="./docs/academy/beginners/en/"><img src="https://img.shields.io/badge/Academy-48_Lessons-orange?style=flat-square" alt="Academy"></a>
 </p>
