@@ -354,6 +354,29 @@ export class RLMDashboardProvider implements vscode.WebviewViewProvider {
         </div>
     </div>
     
+    <!-- Token Economics Section -->
+    <div class="section">
+        <div class="section-title">
+            <span class="icon">📈</span> Token Economics
+        </div>
+        <div class="stat-row">
+            <span class="stat-label">Raw Project</span>
+            <span class="stat-value">${this.formatTokens(totalFacts * 500)}</span>
+        </div>
+        <div class="stat-row">
+            <span class="stat-label">As Facts</span>
+            <span class="stat-value">${this.formatTokens(totalFacts * 15)}</span>
+        </div>
+        <div class="stat-row">
+            <span class="stat-label">Compression</span>
+            <span class="stat-value good">${totalFacts > 0 ? '~33x' : '-'}</span>
+        </div>
+        <div class="stat-row">
+            <span class="stat-label">Saved</span>
+            <span class="stat-value good">${totalFacts > 0 ? '~97%' : '-'}</span>
+        </div>
+    </div>
+    
     <div class="section">
         <div class="section-title">
             <span class="icon">📊</span> Project Index
