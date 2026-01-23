@@ -10,9 +10,10 @@ _SSE Level | Duration: 6 hours_
 
 Welcome to SSE.
 
-You'll learn how Shield works from the inside.
+You will learn how Shield works internally.
 
-This gives understanding for:
+This will give you the understanding for:
+
 - Performance optimization
 - Custom development
 - Debugging deep issues
@@ -42,6 +43,32 @@ This gives understanding for:
 └─────────────────────────────────────────────────────────────┘
 ```
 
+### Component Diagram
+
+```
+┌──────────────────────────────────────────────────────────────┐
+│                         SHIELD                                │
+│                                                              │
+│  ┌───────────┐  ┌───────────┐  ┌───────────┐  ┌───────────┐  │
+│  │  Config   │  │  Logging  │  │  Metrics  │  │  Tracing  │  │
+│  │  Manager  │  │  System   │  │  System   │  │  System   │  │
+│  └─────┬─────┘  └─────┬─────┘  └─────┬─────┘  └─────┬─────┘  │
+│        │              │              │              │        │
+│  ┌─────▼──────────────▼──────────────▼──────────────▼─────┐  │
+│  │                    CONTEXT MANAGER                       │  │
+│  │   (Session, Zone, Config, State)                        │  │
+│  └────────────────────────┬────────────────────────────────┘  │
+│                           │                                  │
+│  ┌────────────────────────▼────────────────────────────────┐  │
+│  │                   EVALUATION PIPELINE                   │  │
+│  │                                                        │  │
+│  │   ┌──────────┐   ┌──────────┐   ┌──────────┐          │  │
+│  │   │Preprocessor│→│Rule Match │→│  Guards  │→ Result  │  │
+│  │   └──────────┘   └──────────┘   └──────────┘          │  │
+│  └────────────────────────────────────────────────────────┘  │
+└──────────────────────────────────────────────────────────────┘
+```
+
 ---
 
 ## 11.2 Memory Management
@@ -49,6 +76,7 @@ This gives understanding for:
 ### Memory Pools
 
 Shield uses memory pools instead of malloc/free for:
+
 - Preventing fragmentation
 - Improving cache locality
 - Predictable latency
@@ -73,6 +101,11 @@ void *ptr = memory_pool_alloc(pool);
 
 // Free
 memory_pool_free(pool, ptr);
+
+// Stats
+memory_pool_stats_t stats;
+memory_pool_get_stats(pool, &stats);
+printf("Used: %zu/%zu\n", stats.used, stats.total);
 ```
 
 ### Arena Allocator
@@ -86,9 +119,23 @@ arena_init(&arena, 64 * 1024);  // 64KB
 
 // All allocations during request use arena
 char *copy = arena_strdup(&arena, input);
+rule_result_t *results = arena_alloc(&arena, sizeof(rule_result_t) * 10);
 
 // One free at end
 arena_destroy(&arena);  // Frees everything
+```
+
+### Zero-Copy I/O
+
+```c
+// Buffer view without copying
+typedef struct {
+    const char *data;
+    size_t len;
+} buffer_view_t;
+
+// Parse without copy
+buffer_view_t get_json_field(buffer_view_t json, const char *key);
 ```
 
 ---
@@ -132,6 +179,19 @@ result_t result;
 future_get(&future, &result, timeout);
 ```
 
+### Lock-Free Structures
+
+```c
+// Lock-free queue for work distribution
+typedef struct {
+    _Atomic(node_t*) head;
+    _Atomic(node_t*) tail;
+} lockfree_queue_t;
+
+void queue_push(lockfree_queue_t *q, void *data);
+void* queue_pop(lockfree_queue_t *q);
+```
+
 ---
 
 ## 11.4 Pattern Matching Engine
@@ -148,6 +208,8 @@ typedef struct {
         regex_t regex;         // REGEX
         semantic_model_t *ml;  // SEMANTIC
     } compiled;
+    uint32_t id;
+    uint8_t priority;
 } compiled_pattern_t;
 ```
 
@@ -165,6 +227,21 @@ typedef struct {
 
 // Single pass matching
 void ac_search(aho_corasick_t *ac, const char *text, match_callback cb);
+```
+
+### Pattern Cache
+
+```c
+// LRU cache for compiled patterns
+typedef struct {
+    hash_table_t *table;
+    lru_list_t *lru;
+    size_t max_size;
+    pthread_rwlock_t lock;
+} pattern_cache_t;
+
+// Get or compile
+compiled_pattern_t* cache_get(pattern_cache_t *cache, const char *pattern);
 ```
 
 ---
@@ -185,9 +262,32 @@ typedef struct {
     action_t action;
     uint8_t severity;
 
+    // Conditions
+    char zones[MAX_ZONES][64];
+    int zone_count;
+    direction_t direction;
+
     // Statistics
     _Atomic(uint64_t) match_count;
+    _Atomic(uint64_t) eval_time_ns;
 } rule_t;
+```
+
+### Rule Index
+
+Fast lookup by zone:
+
+```c
+// Hash table: zone -> rule list
+typedef struct {
+    hash_table_t *zone_index;  // zone -> [rule_ids]
+    rule_t *rules;             // rule array
+    size_t rule_count;
+} rule_index_t;
+
+// Get rules for zone
+void index_get_rules(rule_index_t *idx, const char *zone,
+                     rule_t **rules, size_t *count);
 ```
 
 ### Evaluation
@@ -206,14 +306,21 @@ shield_err_t evaluate_rules(shield_context_t *ctx,
     for (size_t i = 0; i < count; i++) {
         match_result_t match;
         if (pattern_match(rules[i].pattern, input, len, &match)) {
+            // Rule matched
+            atomic_fetch_add(&rules[i].match_count, 1);
+
             if (rules[i].action == ACTION_BLOCK) {
                 result->action = ACTION_BLOCK;
+                result->threat_score = rules[i].severity / 10.0f;
+                snprintf(result->reason, sizeof(result->reason),
+                         "Rule: %s", rules[i].name);
                 return SHIELD_OK;
             }
         }
     }
 
     result->action = ACTION_ALLOW;
+    result->threat_score = 0.0f;
     return SHIELD_OK;
 }
 ```
@@ -233,7 +340,14 @@ typedef enum {
     EVENT_GUARD_TRIGGERED,
     EVENT_HA_FAILOVER,
     EVENT_CONFIG_RELOAD,
+    EVENT_ERROR,
 } event_type_t;
+
+typedef struct {
+    event_type_t type;
+    uint64_t timestamp;
+    char data[EVENT_DATA_SIZE];
+} event_t;
 ```
 
 ### Event Bus
@@ -252,6 +366,142 @@ event_t event = {
 };
 event_bus_publish(bus, &event);
 ```
+
+### Ring Buffer for Events
+
+```c
+typedef struct {
+    event_t *buffer;
+    size_t size;
+    _Atomic(size_t) head;
+    _Atomic(size_t) tail;
+} event_ring_t;
+
+// Lock-free push
+bool ring_push(event_ring_t *ring, const event_t *event);
+
+// Lock-free pop
+bool ring_pop(event_ring_t *ring, event_t *event);
+```
+
+---
+
+## 11.7 Configuration System
+
+### Config Loading
+
+```c
+// JSON parsing with arena allocator
+config_t* config_load(const char *path, arena_t *arena) {
+    // Read file
+    char *json = read_file(path);
+
+    // Parse
+    json_value_t *root = json_parse(json, arena);
+
+    // Validate
+    if (!config_validate(root)) {
+        return NULL;
+    }
+
+    // Convert to config struct
+    config_t *config = arena_alloc(arena, sizeof(config_t));
+    config_from_json(root, config);
+
+    return config;
+}
+```
+
+### Hot Reload
+
+```c
+// Watch config file
+void config_watch(shield_context_t *ctx, const char *path) {
+    int fd = inotify_init();
+    inotify_add_watch(fd, path, IN_MODIFY);
+
+    // In event loop
+    if (event.type == INOTIFY_EVENT && event.mask & IN_MODIFY) {
+        config_t *new_config = config_load(path, &arena);
+        if (new_config) {
+            config_swap(ctx, new_config);
+            log_info("Config reloaded");
+        }
+    }
+}
+```
+
+---
+
+## 11.8 I/O Subsystem
+
+### HTTP Server
+
+```c
+// Lightweight HTTP server
+typedef struct {
+    int fd;
+    event_loop_t *loop;
+    http_handler_t handler;
+} http_server_t;
+
+void http_server_start(http_server_t *server, int port) {
+    server->fd = socket_listen(port);
+    event_loop_add(server->loop, server->fd, EVENT_READ, on_accept);
+}
+
+static void on_accept(int fd, void *data) {
+    http_server_t *server = data;
+    int client = accept(fd, NULL, NULL);
+
+    // Add to event loop
+    http_conn_t *conn = pool_alloc(conn_pool);
+    conn->fd = client;
+    event_loop_add(server->loop, client, EVENT_READ, on_read);
+}
+```
+
+### Request Parsing
+
+```c
+// Zero-copy HTTP parsing
+typedef struct {
+    buffer_view_t method;
+    buffer_view_t path;
+    buffer_view_t version;
+    header_t headers[MAX_HEADERS];
+    size_t header_count;
+    buffer_view_t body;
+} http_request_t;
+
+int http_parse(const char *data, size_t len, http_request_t *req);
+```
+
+---
+
+## Practice
+
+### Exercise 1
+
+Implement a memory pool:
+
+- Fixed block size
+- Bitmap for tracking
+- Thread-safe
+
+### Exercise 2
+
+Write Aho-Corasick for multiple pattern matching:
+
+- Build automaton
+- Search in O(n + m)
+
+### Exercise 3
+
+Create a ring buffer:
+
+- Lock-free push/pop
+- Power-of-2 size
 
 ---
 

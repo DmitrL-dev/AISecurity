@@ -10,16 +10,16 @@ _SSA Level | Duration: 3 hours_
 
 Shield CLI contains **194 commands** in Cisco IOS style, organized by categories:
 
-| Category | Commands | Description |
-|----------|----------|-------------|
-| **show** | 19 | Display status |
-| **config** | 28 | Configuration |
-| **debug** | 28 | Debugging & diagnostics |
-| **ha** | 14 | High Availability |
-| **zone/rule** | 13 | Zones and rules |
-| **guard** | 20 | Guards & security |
-| **policy** | 19 | Policy Engine |
-| **extended** | ~50 | Extended commands |
+| Category      | Commands | Description                |
+| ------------- | -------- | -------------------------- |
+| **show**      | 19       | Display state              |
+| **config**    | 28       | Configuration              |
+| **debug**     | 28       | Debugging and diagnostics  |
+| **ha**        | 14       | High Availability          |
+| **zone/rule** | 13       | Zones and rules            |
+| **guard**     | 20       | Guards and security        |
+| **policy**    | 19       | Policy Engine              |
+| **extended**  | ~50      | Extended commands          |
 
 ---
 
@@ -30,7 +30,7 @@ Shield CLI contains **194 commands** in Cisco IOS style, organized by categories
 ```
 show version              # Version and build info
 show version detailed     # Extended information
-show uptime               # System uptime
+show uptime               # Uptime
 show clock                # System time
 show environment          # CPU, RAM, OS
 ```
@@ -62,7 +62,7 @@ show sessions             # Active sessions
 show alerts               # Alerts
 show metrics              # Metrics
 show counters             # Counters
-show access-lists         # ACLs
+show access-lists         # ACL
 show logging              # Logs
 show debugging            # Debug status
 show tech-support         # Full dump for support
@@ -125,6 +125,13 @@ metrics enable            # Enable /metrics
 metrics port <port>       # Metrics port
 ```
 
+### Archiving
+
+```
+archive path <path>       # Archive path
+archive maximum <count>   # Max copies
+```
+
 ### Navigation
 
 ```
@@ -147,6 +154,14 @@ debug protocol            # Protocol messages
 debug ha                  # HA events
 debug all                 # All debug
 undebug all               # Disable debug
+no debug all              # Same
+```
+
+### Terminal
+
+```
+terminal monitor          # Enable monitoring
+terminal no monitor       # Disable monitoring
 ```
 
 ### Clear Commands
@@ -164,10 +179,24 @@ clear quarantine          # Clear quarantine
 ### System
 
 ```
-reload                    # Reload system
+reload                    # Reload
 configure terminal        # Enter config mode
+configure memory          # Load startup-config
+```
+
+### Copy/Write
+
+```
 copy running-config startup-config   # Save
+copy startup-config running-config   # Load
 write memory              # = copy run start
+write erase               # Erase startup
+write terminal            # = show running
+```
+
+### Network Tools
+
+```
 ping <host>               # Ping
 traceroute <host>         # Traceroute
 ```
@@ -181,9 +210,10 @@ traceroute <host>         # Traceroute
 ```
 standby ip <virtual-ip>   # Virtual IP
 standby priority <0-255>  # Priority
-standby preempt           # Enable preempt
+standby preempt           # Preempt enable
+no standby preempt        # Preempt disable
 standby timers <hello> <hold>  # Timers
-standby authentication <key>   # Auth key
+standby authentication <key>   # Key
 standby track <object> <decr>  # Tracking
 standby name <cluster>    # Cluster name
 ```
@@ -191,10 +221,17 @@ standby name <cluster>    # Cluster name
 ### Redundancy
 
 ```
+redundancy                # Enter redundancy mode
 redundancy mode <active-standby|active-active>
+```
+
+### Failover
+
+```
 failover                  # Enable failover
+no failover               # Disable failover
 failover lan interface <name>  # Failover interface
-ha sync start             # Force sync
+ha sync start             # Force synchronization
 ```
 
 ---
@@ -225,6 +262,7 @@ no shutdown               # Enable zone
 shield-rule <num> <action> <direction> <zone-type> [match...]
 no shield-rule <num>      # Delete rule
 access-list <num>         # Create ACL
+no access-list <num>      # Delete ACL
 apply zone <name> in <acl> [out <acl>]  # Apply ACL
 ```
 
@@ -237,6 +275,11 @@ apply zone <name> in <acl> [out <acl>]  # Apply ACL
 ```
 guard enable <llm|rag|agent|tool|mcp|api|all>
 no guard enable <type>    # Disable guard
+```
+
+### Configuration
+
+```
 guard policy <type> <block|log|alert>
 guard threshold <type> <0.0-1.0>
 ```
@@ -244,20 +287,50 @@ guard threshold <type> <0.0-1.0>
 ### Signatures
 
 ```
-signature-set update      # Update signature DB
+signature-set update      # Update signature base
 signature-set category enable <cat>  # Enable category
 ```
 
-### Security
+### Canary Tokens
 
 ```
 canary token add <token>  # Add canary
+no canary token <token>   # Remove canary
+```
+
+### Blocklist
+
+```
 blocklist ip add <ip>     # Add IP to blocklist
+no blocklist ip <ip>      # Remove IP
+blocklist pattern add <pattern>  # Add pattern
+```
+
+### Rate Limiting
+
+```
 rate-limit enable         # Enable rate limiting
-rate-limit requests <count> per <seconds>
+rate-limit requests <count> per <seconds>  # Configure
+```
+
+### Threat Intelligence
+
+```
 threat-intel enable       # Enable threat intel
-alert destination <type> <target>
-siem enable               # Enable SIEM
+threat-intel feed add <url>  # Add feed
+```
+
+### Alerting
+
+```
+alert destination <webhook|email|syslog> <target>
+alert threshold <info|warn|critical>
+```
+
+### SIEM
+
+```
+siem enable               # Enable SIEM export
 siem destination <host> <port>
 siem format <cef|json|syslog>
 ```
@@ -271,9 +344,10 @@ siem format <cef|json|syslog>
 ```
 class-map match-any <name>   # Create class-map (OR)
 class-map match-all <name>   # Create class-map (AND)
+no class-map <name>          # Delete class-map
 ```
 
-#### Match Conditions
+#### Match Conditions (in class-map)
 
 ```
 match injection           # Prompt injection
@@ -289,18 +363,24 @@ match entropy-high        # High entropy
 
 ```
 policy-map <name>         # Create policy-map
+no policy-map <name>      # Delete policy-map
+```
+
+#### Policy Actions (in policy-map)
+
+```
 class <class-name>        # Add class
-block                     # Block action
-log                       # Log action
-alert                     # Alert action
+block                     # Block
+log                       # Log
+alert                     # Alert
 rate-limit <pps>          # Rate limit
 ```
 
 ### Service Policy
 
 ```
-service-policy input <policy>   # Apply inbound
-service-policy output <policy>  # Apply outbound
+service-policy input <policy>   # Apply to input
+service-policy output <policy>  # Apply to output
 ```
 
 ---
@@ -308,69 +388,151 @@ service-policy output <policy>  # Apply outbound
 ## Full Configuration Example
 
 ```
+! SENTINEL Shield Configuration
+
 hostname SENTINEL-PROD-1
 enable secret $6$encrypted
 
+! Logging
 logging level info
 logging host 192.168.1.100
+logging buffered 8192
 
+! API
 api enable
 api port 8080
+api token secret-token-123
 
+! Metrics
+metrics enable
+metrics port 9090
+
+! HA
 standby ip 10.0.0.100
 standby priority 100
 standby preempt
 failover
+failover lan interface eth1
 
+! Guards
 guard enable all
 guard threshold llm 0.7
+guard policy llm block
 
+! Signatures
+signature-set update
+signature-set category enable injection
+signature-set category enable jailbreak
+
+! Zones
 zone external
   type api
   provider openai
   trust-level 3
+  no shutdown
+!
+zone internal
+  type llm
+  trust-level 8
 !
 
+! Class Maps
 class-map match-any THREATS
   match injection
   match jailbreak
+  match exfiltration
 !
 
+! Policy Maps
 policy-map SECURITY-POLICY
   class THREATS
     block
     log
+    alert
 !
 
+! Rules
+shield-rule 10 deny inbound any match injection
+shield-rule 20 permit inbound llm
+shield-rule 100 permit any any
+
+! Apply
 zone external
   service-policy input SECURITY-POLICY
 !
+
+! SIEM
+siem enable
+siem destination splunk.company.com 514
+siem format cef
 
 end
 ```
 
 ---
 
-## CLI Modes
+## CLI Navigation
 
-| Mode | Prompt | How to Enter |
-|------|--------|--------------|
-| User EXEC | `Shield>` | Default |
-| Privileged EXEC | `Shield#` | `enable` |
-| Global Config | `Shield(config)#` | `configure terminal` |
-| Zone Config | `Shield(config-zone)#` | `zone <name>` |
-| Class-map | `Shield(config-cmap)#` | `class-map ...` |
-| Policy-map | `Shield(config-pmap)#` | `policy-map ...` |
+| Shortcut | Action                       |
+| -------- | ---------------------------- |
+| `?`      | Help on available commands   |
+| `Tab`    | Auto-completion              |
+| `Ctrl+C` | Interrupt command            |
+| `Ctrl+Z` | Exit to exec mode            |
+| `exit`   | Exit current mode            |
+| `end`    | Exit to exec (from any level)|
 
 ---
 
-## Summary
+## CLI Modes
+
+| Mode            | Prompt                 | How to Enter          |
+| --------------- | ---------------------- | --------------------- |
+| User EXEC       | `Shield>`              | Default               |
+| Privileged EXEC | `Shield#`              | `enable`              |
+| Global Config   | `Shield(config)#`      | `configure terminal`  |
+| Zone Config     | `Shield(config-zone)#` | `zone <name>`         |
+| Class-map       | `Shield(config-cmap)#` | `class-map ...`       |
+| Policy-map      | `Shield(config-pmap)#` | `policy-map ...`      |
+
+---
+
+## Practice
+
+### Exercise 1: Basic Setup
+
+Configure Shield:
+
+- hostname: SHIELD-LAB-1
+- API on port 8080
+- Logging to 192.168.1.50
+
+### Exercise 2: Security Policy
+
+Create a policy:
+
+- class-map for injection + jailbreak
+- policy-map with block + alert
+- Apply to zone external
+
+### Exercise 3: HA Configuration
+
+Configure HA cluster:
+
+- Virtual IP: 10.0.0.100
+- Priority: 150
+- Preempt enabled
+- Hello: 1s, Hold: 3s
+
+---
+
+## Module 5B Summary
 
 - **194 commands** in Cisco IOS style
 - 7 categories: show, config, debug, ha, zone, guard, policy
-- Full Policy Engine (class-map + policy-map)
+- Full-featured Policy Engine (class-map + policy-map)
 - Production-ready CLI
 
 ---
 
-_"194 commands = full control over Shield."_
+_"194 commands = complete control over Shield."_

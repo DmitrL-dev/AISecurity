@@ -10,7 +10,7 @@ _SSP Level | Duration: 5 hours_
 
 You're ready for production.
 
-This module — everything needed for enterprise deployment.
+This module — everything you need for enterprise deployment.
 
 ---
 
@@ -46,6 +46,23 @@ This module — everything needed for enterprise deployment.
 
 **Use case:** Production, critical workloads.
 
+### Multi-Region
+
+```
+           ┌───────────────────┐
+           │   GLOBAL LB       │
+           └─────────┬─────────┘
+                     │
+    ┌────────────────┼────────────────┐
+    │                │                │
+┌───▼───┐       ┌───▼───┐        ┌───▼───┐
+│ US-EAST│       │ EU-WEST│        │ APAC  │
+│Cluster │       │Cluster │        │Cluster│
+└────────┘       └────────┘        └────────┘
+```
+
+**Use case:** Global apps, low latency requirements.
+
 ---
 
 ## 10.2 Docker Deployment
@@ -75,7 +92,7 @@ EXPOSE 8080 9090 5001
 HEALTHCHECK --interval=5s --timeout=3s \
     CMD wget -q --spider http://localhost:8080/health || exit 1
 
-# Library deployment - apps link against libshield
+# Library deployment - applications link with libshield
 ENV LD_LIBRARY_PATH=/usr/local/lib
 ```
 
@@ -93,9 +110,15 @@ services:
       - "9090:9090"
     volumes:
       - ./config/primary.json:/etc/shield/config.json:ro
+      - shield-logs:/var/log/shield
     environment:
       - SHIELD_NODE_ID=node-1
       - SHIELD_HA_ROLE=primary
+    healthcheck:
+      test: ["CMD", "wget", "-q", "--spider", "http://localhost:8080/health"]
+      interval: 5s
+      timeout: 3s
+      retries: 3
     restart: unless-stopped
 
   shield-standby:
@@ -103,6 +126,10 @@ services:
     hostname: shield-standby
     ports:
       - "8081:8080"
+      - "9091:9090"
+    volumes:
+      - ./config/standby.json:/etc/shield/config.json:ro
+      - shield-logs:/var/log/shield
     environment:
       - SHIELD_NODE_ID=node-2
       - SHIELD_HA_ROLE=standby
@@ -116,17 +143,30 @@ services:
       - "80:80"
     volumes:
       - ./nginx.conf:/etc/nginx/nginx.conf:ro
+    depends_on:
+      - shield-primary
+      - shield-standby
     restart: unless-stopped
 
   prometheus:
     image: prom/prometheus:latest
     ports:
       - "9092:9090"
+    volumes:
+      - ./prometheus.yml:/etc/prometheus/prometheus.yml:ro
+    restart: unless-stopped
 
   grafana:
     image: grafana/grafana:latest
     ports:
       - "3000:3000"
+    volumes:
+      - grafana-data:/var/lib/grafana
+    restart: unless-stopped
+
+volumes:
+  shield-logs:
+  grafana-data:
 ```
 
 ---
@@ -140,6 +180,8 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: shield
+  labels:
+    app: shield
 spec:
   replicas: 3
   selector:
@@ -149,13 +191,20 @@ spec:
     metadata:
       labels:
         app: shield
+      annotations:
+        prometheus.io/scrape: "true"
+        prometheus.io/port: "9090"
     spec:
       containers:
         - name: shield
           image: sentinel/shield:1.2.0
           ports:
             - containerPort: 8080
+              name: api
             - containerPort: 9090
+              name: metrics
+            - containerPort: 5001
+              name: cluster
           resources:
             requests:
               memory: "256Mi"
@@ -167,10 +216,102 @@ spec:
             httpGet:
               path: /health
               port: 8080
+            initialDelaySeconds: 10
+            periodSeconds: 10
           readinessProbe:
             httpGet:
               path: /health/ready
               port: 8080
+            initialDelaySeconds: 5
+            periodSeconds: 5
+          volumeMounts:
+            - name: config
+              mountPath: /etc/shield
+              readOnly: true
+      volumes:
+        - name: config
+          configMap:
+            name: shield-config
+```
+
+### Service
+
+```yaml
+apiVersion: v1
+kind: Service
+metadata:
+  name: shield
+spec:
+  selector:
+    app: shield
+  ports:
+    - name: api
+      port: 8080
+      targetPort: 8080
+    - name: metrics
+      port: 9090
+      targetPort: 9090
+  type: ClusterIP
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: shield-headless
+spec:
+  selector:
+    app: shield
+  clusterIP: None
+  ports:
+    - name: cluster
+      port: 5001
+```
+
+### ConfigMap
+
+```yaml
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: shield-config
+data:
+  config.json: |
+    {
+      "version": "1.2.0",
+      "name": "shield-k8s",
+      "zones": [
+        {"name": "external", "trust_level": 1}
+      ],
+      "rules": [
+        {"name": "block_injection", "pattern": "ignore.*previous", "action": "block"}
+      ],
+      "api": {"enabled": true, "port": 8080},
+      "metrics": {"prometheus": {"enabled": true, "port": 9090}}
+    }
+```
+
+### Ingress
+
+```yaml
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: shield-ingress
+  annotations:
+    nginx.ingress.kubernetes.io/proxy-read-timeout: "5"
+    nginx.ingress.kubernetes.io/proxy-connect-timeout: "2"
+spec:
+  rules:
+    - host: shield.example.com
+      http:
+        paths:
+          - path: /api
+            pathType: Prefix
+            backend:
+              service:
+                name: shield
+                port:
+                  number: 8080
 ```
 
 ### HorizontalPodAutoscaler
@@ -194,6 +335,13 @@ spec:
         target:
           type: Utilization
           averageUtilization: 70
+    - type: Pods
+      pods:
+        metric:
+          name: shield_request_rate
+        target:
+          type: AverageValue
+          averageValue: "100"
 ```
 
 ---
@@ -213,13 +361,51 @@ spec:
     },
     "api_auth": {
       "enabled": true,
-      "type": "bearer"
+      "type": "bearer",
+      "token_validation": "jwt",
+      "jwt_secret_file": "/etc/shield/jwt-secret"
+    },
+    "admin_auth": {
+      "enabled": true,
+      "users": [{ "username": "admin", "password_hash": "$2a$..." }]
     },
     "rate_limiting": {
       "enabled": true,
       "global_rps": 10000,
       "per_ip_rps": 100
     }
+  }
+}
+```
+
+### Performance Tuning
+
+```json
+{
+  "performance": {
+    "threads": 0,
+    "max_connections": 10000,
+    "connection_timeout_ms": 5000,
+    "request_timeout_ms": 1000,
+    "memory_pool_mb": 256,
+    "pattern_cache_size": 10000
+  }
+}
+```
+
+### Logging for Production
+
+```json
+{
+  "logging": {
+    "level": "info",
+    "format": "json",
+    "sampling": {
+      "enabled": true,
+      "rate": 0.01
+    },
+    "fields_to_redact": ["input", "output"],
+    "include_stack_trace": false
   }
 }
 ```
@@ -231,11 +417,25 @@ spec:
 ### Sizing Guidelines
 
 | Requests/sec | CPU Cores | Memory | Instances |
-|--------------|-----------|--------|-----------|
-| < 100 | 1 | 256MB | 1 |
-| 100 - 1K | 2 | 512MB | 2 (HA) |
-| 1K - 10K | 4 | 1GB | 3+ |
-| > 10K | 8+ | 2GB+ | 5+ |
+| ------------ | --------- | ------ | --------- |
+| < 100        | 1         | 256MB  | 1         |
+| 100 - 1K     | 2         | 512MB  | 2 (HA)    |
+| 1K - 10K     | 4         | 1GB    | 3+        |
+| > 10K        | 8+        | 2GB+   | 5+        |
+
+### Key Metrics for Scaling
+
+```yaml
+# Scale up when:
+cpu_utilization > 70%
+memory_utilization > 80%
+request_latency_p99 > 10ms
+request_queue_size > 100
+
+# Scale down when:
+cpu_utilization < 30%
+request_latency_p99 < 1ms
+```
 
 ---
 
@@ -251,6 +451,16 @@ shield-cli config export > config_backup_$(date +%Y%m%d).json
 shield-cli config import < config_backup.json
 ```
 
+### State Backup
+
+```bash
+# Backup state (sessions, blocklists)
+shield-cli state export > state_backup_$(date +%Y%m%d).json
+
+# Restore state
+shield-cli state import < state_backup.json
+```
+
 ### Disaster Recovery
 
 ```
@@ -262,12 +472,49 @@ Procedure:
 2. Failover to standby (automatic via SHSP)
 3. Verify service restored
 4. Replace failed node
-5. Resume normal operation
+5. Sync state to new node
+6. Resume normal operation
 ```
 
 ---
 
-## 10.7 Operational Runbook
+## 10.7 Upgrade Strategy
+
+### Rolling Upgrade
+
+```bash
+# For Kubernetes
+kubectl set image deployment/shield shield=sentinel/shield:1.2.1
+
+# Rolling update with max 1 unavailable
+kubectl rollout status deployment/shield
+```
+
+### Blue-Green Deployment
+
+```
+1. Deploy v1.2.1 (green) alongside v1.2.0 (blue)
+2. Test green deployment
+3. Switch traffic from blue to green
+4. Verify
+5. Tear down blue
+```
+
+### Canary Deployment
+
+```yaml
+# 10% traffic to canary
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  annotations:
+    nginx.ingress.kubernetes.io/canary: "true"
+    nginx.ingress.kubernetes.io/canary-weight: "10"
+```
+
+---
+
+## 10.8 Operational Runbook
 
 ### Daily Checks
 
@@ -275,6 +522,15 @@ Procedure:
 - [ ] Block rate: Within expected range
 - [ ] Latency P99: < 10ms
 - [ ] Error rate: < 0.1%
+- [ ] Disk usage: < 80%
+
+### Weekly Checks
+
+- [ ] Review blocked requests
+- [ ] Update threat patterns
+- [ ] Check log rotation
+- [ ] Verify backups
+- [ ] Review alerts
 
 ### Incident Response
 
@@ -286,6 +542,45 @@ Procedure:
 5. RESOLVE: Permanent fix
 6. POSTMORTEM: Document learnings
 ```
+
+---
+
+## Practice
+
+### Exercise 1
+
+Deploy Shield in Docker Compose:
+
+- Primary + Standby
+- Nginx load balancer
+- Prometheus + Grafana
+
+### Exercise 2
+
+Create Kubernetes deployment:
+
+- 3 replicas
+- HPA
+- Ingress
+
+### Exercise 3
+
+Write a runbook:
+
+- Daily checks
+- Incident response
+- Rollback procedure
+
+---
+
+## Module 10 Summary
+
+- Docker and Kubernetes deployment
+- Production hardening
+- Capacity planning
+- Backup & recovery
+- Upgrade strategies
+- Operational runbooks
 
 ---
 

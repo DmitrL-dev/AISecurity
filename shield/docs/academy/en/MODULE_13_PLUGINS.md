@@ -10,10 +10,11 @@ _SSE Level | Duration: 5 hours_
 
 Guards are built into Shield.
 
-Plugins are external modules loaded dynamically.
+Plugins — are external modules loaded dynamically.
 
-Benefits:
-- Update without recompiling Shield
+Advantages:
+
+- Updates without recompiling Shield
 - Third-party extensions
 - Modular architecture
 
@@ -23,12 +24,12 @@ Benefits:
 
 ### Plugin Types
 
-| Type | Description |
-|------|-------------|
-| **Guard Plugin** | Custom guard implementation |
-| **Protocol Plugin** | Custom protocol handler |
-| **Filter Plugin** | Pre/post processing |
-| **Output Plugin** | Custom output destinations |
+| Type                | Description                 |
+| ------------------- | --------------------------- |
+| **Guard Plugin**    | Custom guard implementation |
+| **Protocol Plugin** | Custom protocol handler     |
+| **Filter Plugin**   | Pre/post processing         |
+| **Output Plugin**   | Custom output destinations  |
 
 ### Loading Mechanism
 
@@ -95,6 +96,7 @@ typedef struct {
 
     // Metrics
     void (*metric_inc)(const char *name, double value);
+    void (*metric_set)(const char *name, double value);
 } shield_plugin_ctx_t;
 ```
 
@@ -115,6 +117,35 @@ my-plugin/
     └── test_my_plugin.c
 ```
 
+### CMakeLists.txt
+
+```cmake
+cmake_minimum_required(VERSION 3.14)
+project(my_plugin VERSION 1.0.0)
+
+# Find Shield SDK
+find_package(SentinelShield REQUIRED)
+
+# Create shared library
+add_library(my_plugin SHARED
+    src/my_plugin.c
+)
+
+target_include_directories(my_plugin PRIVATE
+    include
+    ${SENTINEL_SHIELD_INCLUDE_DIRS}
+)
+
+# Set output name
+set_target_properties(my_plugin PROPERTIES
+    OUTPUT_NAME "shield_my_plugin"
+    PREFIX ""
+)
+
+# Install
+install(TARGETS my_plugin DESTINATION lib/shield/plugins)
+```
+
 ### Implementation
 
 ```c
@@ -123,7 +154,34 @@ my-plugin/
 #include "plugin/plugin_interface.h"
 #include "guards/guard_interface.h"
 
+// Plugin context (set during load)
 static shield_plugin_ctx_t *g_ctx;
+
+// Guard context
+typedef struct {
+    char keyword[64];
+} my_guard_ctx_t;
+
+// === Guard Implementation ===
+
+static shield_err_t my_guard_init(const char *config, void **ctx) {
+    my_guard_ctx_t *my = g_ctx->alloc(sizeof(my_guard_ctx_t));
+    if (!my) return SHIELD_ERR_MEMORY;
+
+    // Parse config
+    const char *keyword = g_ctx->get_config("keyword");
+    strncpy(my->keyword, keyword ? keyword : "blocked", sizeof(my->keyword));
+
+    g_ctx->log_info("MyPlugin: initialized with keyword=%s", my->keyword);
+
+    *ctx = my;
+    return SHIELD_OK;
+}
+
+static void my_guard_destroy(void *ctx) {
+    my_guard_ctx_t *my = ctx;
+    g_ctx->free(my);
+}
 
 static shield_err_t my_guard_evaluate(void *ctx,
                                        const guard_event_t *event,
@@ -133,9 +191,12 @@ static shield_err_t my_guard_evaluate(void *ctx,
     if (strstr(event->input, my->keyword)) {
         result->action = ACTION_BLOCK;
         result->threat_score = 0.8f;
+        snprintf(result->reason, sizeof(result->reason),
+                 "Keyword '%s' detected", my->keyword);
         g_ctx->metric_inc("my_plugin_blocks", 1);
     } else {
         result->action = ACTION_ALLOW;
+        result->threat_score = 0.0f;
     }
 
     return SHIELD_OK;
@@ -144,10 +205,23 @@ static shield_err_t my_guard_evaluate(void *ctx,
 static const guard_vtable_t my_guard_vtable = {
     .name = "my_guard",
     .version = "1.0.0",
+    .type = GUARD_TYPE_CUSTOM,
     .init = my_guard_init,
     .destroy = my_guard_destroy,
     .evaluate = my_guard_evaluate,
 };
+
+// === Plugin Entry ===
+
+static shield_err_t plugin_load(shield_plugin_ctx_t *ctx) {
+    g_ctx = ctx;
+    ctx->log_info("MyPlugin: loading...");
+    return SHIELD_OK;
+}
+
+static void plugin_unload(void) {
+    g_ctx->log_info("MyPlugin: unloading...");
+}
 
 static shield_plugin_t my_plugin = {
     .api_version = SHIELD_PLUGIN_API_VERSION,
@@ -165,7 +239,19 @@ SHIELD_PLUGIN_EXPORT(my_plugin);
 
 ---
 
-## 13.4 Loading Plugins
+## 13.4 Building the Plugin
+
+```bash
+mkdir build && cd build
+cmake -DCMAKE_PREFIX_PATH=/path/to/shield ..
+make
+```
+
+Output: `shield_my_plugin.so` (Linux) or `shield_my_plugin.dll` (Windows)
+
+---
+
+## 13.5 Loading Plugins
 
 ### Configuration
 
@@ -188,9 +274,132 @@ SHIELD_PLUGIN_EXPORT(my_plugin);
 }
 ```
 
+### Programmatic Loading
+
+```c
+// Load plugin
+plugin_handle_t handle;
+shield_err_t err = plugin_load("/path/to/shield_my_plugin.so", &handle);
+if (err != SHIELD_OK) {
+    log_error("Failed to load plugin: %d", err);
+    return err;
+}
+
+// Get plugin info
+shield_plugin_t *plugin = plugin_get_info(handle);
+log_info("Loaded plugin: %s v%s by %s",
+         plugin->name, plugin->version, plugin->author);
+
+// Register guard
+if (plugin->vtable) {
+    guard_registry_add(&registry, plugin->vtable);
+}
+```
+
 ---
 
-## 13.5 CLI Commands
+## 13.6 Plugin Manager
+
+### Implementation
+
+```c
+// src/plugin/plugin_manager.c
+
+typedef struct {
+    char path[PATH_MAX];
+    void *handle;  // dlopen handle
+    shield_plugin_t *plugin;
+} loaded_plugin_t;
+
+typedef struct {
+    loaded_plugin_t plugins[MAX_PLUGINS];
+    size_t count;
+    const char *plugin_dir;
+} plugin_manager_t;
+
+shield_err_t plugin_manager_load_all(plugin_manager_t *pm) {
+    DIR *dir = opendir(pm->plugin_dir);
+    if (!dir) return SHIELD_ERR_IO;
+
+    struct dirent *entry;
+    while ((entry = readdir(dir)) != NULL) {
+        // Check for .so/.dll extension
+        if (!is_plugin_file(entry->d_name)) continue;
+
+        char path[PATH_MAX];
+        snprintf(path, sizeof(path), "%s/%s", pm->plugin_dir, entry->d_name);
+
+        shield_err_t err = plugin_manager_load_one(pm, path);
+        if (err != SHIELD_OK) {
+            log_warn("Failed to load plugin %s: %d", path, err);
+        }
+    }
+
+    closedir(dir);
+    return SHIELD_OK;
+}
+
+shield_err_t plugin_manager_load_one(plugin_manager_t *pm, const char *path) {
+    if (pm->count >= MAX_PLUGINS) {
+        return SHIELD_ERR_LIMIT;
+    }
+
+    // dlopen
+    void *handle = dlopen(path, RTLD_NOW);
+    if (!handle) {
+        log_error("dlopen failed: %s", dlerror());
+        return SHIELD_ERR_PLUGIN;
+    }
+
+    // Get entry point
+    typedef shield_plugin_t* (*get_info_fn)(void);
+    get_info_fn get_info = dlsym(handle, "shield_plugin_get_info");
+    if (!get_info) {
+        dlclose(handle);
+        return SHIELD_ERR_PLUGIN;
+    }
+
+    shield_plugin_t *plugin = get_info();
+
+    // Version check
+    if (plugin->api_version != SHIELD_PLUGIN_API_VERSION) {
+        log_error("Plugin API version mismatch: %d != %d",
+                  plugin->api_version, SHIELD_PLUGIN_API_VERSION);
+        dlclose(handle);
+        return SHIELD_ERR_VERSION;
+    }
+
+    // Call load
+    shield_plugin_ctx_t ctx = create_plugin_context();
+    shield_err_t err = plugin->load(&ctx);
+    if (err != SHIELD_OK) {
+        dlclose(handle);
+        return err;
+    }
+
+    // Store
+    loaded_plugin_t *lp = &pm->plugins[pm->count++];
+    strncpy(lp->path, path, sizeof(lp->path));
+    lp->handle = handle;
+    lp->plugin = plugin;
+
+    log_info("Loaded plugin: %s v%s", plugin->name, plugin->version);
+    return SHIELD_OK;
+}
+
+void plugin_manager_unload_all(plugin_manager_t *pm) {
+    for (size_t i = 0; i < pm->count; i++) {
+        loaded_plugin_t *lp = &pm->plugins[i];
+        lp->plugin->unload();
+        dlclose(lp->handle);
+    }
+    pm->count = 0;
+}
+```
+
+---
+
+## 13.7 CLI Commands
 
 ```bash
 Shield> show plugins
@@ -204,6 +413,7 @@ Shield> show plugins
 ├────────────────┼─────────┼──────────────┼─────────────────┤
 │ my_plugin      │ 1.0.0   │ Your Name    │ guard           │
 │ geo_blocker    │ 2.1.0   │ ACME Inc     │ guard           │
+│ json_logger    │ 1.2.0   │ Community    │ output          │
 └────────────────┴─────────┴──────────────┴─────────────────┘
 
 Shield> plugin load /path/to/new_plugin.so
@@ -217,28 +427,63 @@ Unloaded: my_plugin
 
 ---
 
-## 13.6 Security Considerations
+## 13.8 Security Considerations
 
 ### Plugin Isolation
 
 ```c
+// Limit what plugins can do
 typedef struct {
     bool allow_network;
     bool allow_file_io;
     bool allow_exec;
     size_t max_memory;
 } plugin_sandbox_t;
+
+// Validate before loading
+shield_err_t plugin_validate(const char *path, plugin_sandbox_t *sandbox);
 ```
 
 ### Signature Verification
 
 ```c
+// Verify plugin signature
 shield_err_t plugin_verify_signature(const char *path, const char *pubkey) {
+    // Load signature file
     char sig_path[PATH_MAX];
     snprintf(sig_path, sizeof(sig_path), "%s.sig", path);
+
+    // Verify with public key
     return crypto_verify_file(path, sig_path, pubkey);
 }
 ```
+
+---
+
+## Practice
+
+### Exercise 1
+
+Create a Filter Plugin:
+
+- Pre-process: lowercase all input
+- Post-process: add metadata to result
+
+### Exercise 2
+
+Create an Output Plugin:
+
+- Send events to Webhook URL
+- Batching
+- Retry logic
+
+### Exercise 3
+
+Add signature verification:
+
+- Key generation
+- Sign plugin
+- Verify on load
 
 ---
 

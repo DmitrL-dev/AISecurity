@@ -26,7 +26,7 @@ shield_requests_total{zone="external",action="allow"} 15234
 
 ### Logs
 
-**What:** Event records with context.
+**What:** Records of events with context.
 
 ```json
 {
@@ -101,6 +101,11 @@ shield_rules_loaded 35
 shield_request_duration_seconds_bucket{le="0.001"} 12345
 shield_request_duration_seconds_bucket{le="0.005"} 14000
 shield_request_duration_seconds_bucket{le="0.01"} 15000
+
+# Threat score distribution
+shield_threat_score_bucket{le="0.1"} 14000
+shield_threat_score_bucket{le="0.5"} 14800
+shield_threat_score_bucket{le="0.9"} 15000
 ```
 
 ---
@@ -109,12 +114,50 @@ shield_request_duration_seconds_bucket{le="0.01"} 15000
 
 ### Essential Panels
 
-| Panel | Query | Purpose |
-|-------|-------|---------|
-| Request Rate | `rate(shield_requests_total[5m])` | Throughput |
-| Block Rate | `rate(shield_requests_total{action="block"}[5m]) / rate(shield_requests_total[5m])` | Security effectiveness |
-| P99 Latency | `histogram_quantile(0.99, rate(shield_request_duration_seconds_bucket[5m]))` | Performance |
-| Error Rate | `rate(shield_errors_total[5m])` | Health |
+| Panel           | Query                                                                               | Purpose                |
+| --------------- | ----------------------------------------------------------------------------------- | ---------------------- |
+| Request Rate    | `rate(shield_requests_total[5m])`                                                   | Throughput             |
+| Block Rate      | `rate(shield_requests_total{action="block"}[5m]) / rate(shield_requests_total[5m])` | Security effectiveness |
+| P99 Latency     | `histogram_quantile(0.99, rate(shield_request_duration_seconds_bucket[5m]))`        | Performance            |
+| Error Rate      | `rate(shield_errors_total[5m])`                                                     | Health                 |
+| Active Sessions | `shield_active_sessions`                                                            | Load                   |
+
+### Grafana Dashboard JSON
+
+```json
+{
+  "panels": [
+    {
+      "title": "Request Rate",
+      "type": "graph",
+      "targets": [
+        {
+          "expr": "rate(shield_requests_total[5m])",
+          "legendFormat": "{{zone}} - {{action}}"
+        }
+      ]
+    },
+    {
+      "title": "Block Rate %",
+      "type": "gauge",
+      "targets": [
+        {
+          "expr": "sum(rate(shield_requests_total{action='block'}[5m])) / sum(rate(shield_requests_total[5m])) * 100"
+        }
+      ]
+    },
+    {
+      "title": "Latency Heatmap",
+      "type": "heatmap",
+      "targets": [
+        {
+          "expr": "rate(shield_request_duration_seconds_bucket[5m])"
+        }
+      ]
+    }
+  ]
+}
+```
 
 ---
 
@@ -136,6 +179,7 @@ groups:
           severity: warning
         annotations:
           summary: "Block rate above 30%"
+          description: "Current: {{ $value | humanizePercentage }}"
 
       # High latency
       - alert: ShieldHighLatency
@@ -147,6 +191,7 @@ groups:
           severity: warning
         annotations:
           summary: "P99 latency above 10ms"
+          description: "Current: {{ $value | humanizeDuration }}"
 
       # Shield down
       - alert: ShieldDown
@@ -156,6 +201,25 @@ groups:
           severity: critical
         annotations:
           summary: "Shield instance down"
+
+      # HA failover
+      - alert: ShieldHAFailover
+        expr: changes(shield_ha_is_primary[5m]) > 0
+        labels:
+          severity: warning
+        annotations:
+          summary: "HA failover occurred"
+
+      # No recent blocks (anomaly)
+      - alert: ShieldNoBlocks
+        expr: |
+          rate(shield_requests_total{action="block"}[1h]) == 0 
+          and rate(shield_requests_total[1h]) > 0
+        for: 1h
+        labels:
+          severity: info
+        annotations:
+          summary: "No blocks in 1 hour - verify rules"
 ```
 
 ---
@@ -185,20 +249,68 @@ groups:
           "compress": true
         }
       }
-    ]
+    ],
+
+    "fields": {
+      "service": "shield",
+      "environment": "production"
+    },
+
+    "sampling": {
+      "enabled": true,
+      "rate": 0.1
+    }
   }
 }
 ```
 
 ### Log Levels
 
-| Level | Use |
-|-------|-----|
-| `debug` | Development only |
-| `info` | Normal operations |
-| `warn` | Issues needing attention |
-| `error` | Failures |
-| `fatal` | Critical failures |
+| Level   | Use                      |
+| ------- | ------------------------ |
+| `debug` | Development only         |
+| `info`  | Normal operations        |
+| `warn`  | Issues needing attention |
+| `error` | Failures                 |
+| `fatal` | Critical failures        |
+
+### Structured Log Format
+
+```json
+{
+  "timestamp": "2026-01-02T09:30:00.123Z",
+  "level": "info",
+  "logger": "shield.guard.llm",
+  "message": "Request blocked",
+  "fields": {
+    "zone": "external",
+    "action": "block",
+    "rule": "block_injection",
+    "threat_score": 0.95,
+    "processing_time_ms": 0.45,
+    "session_id": "sess-abc123",
+    "input_hash": "sha256:abc..."
+  }
+}
+```
+
+### Log Aggregation
+
+**Filebeat → Elasticsearch:**
+
+```yaml
+filebeat.inputs:
+  - type: log
+    enabled: true
+    paths:
+      - /var/log/shield/*.log
+    json.keys_under_root: true
+    json.overwrite_keys: true
+
+output.elasticsearch:
+  hosts: ["elasticsearch:9200"]
+  index: "shield-%{+yyyy.MM.dd}"
+```
 
 ---
 
@@ -229,9 +341,54 @@ groups:
     └── [shield:build_response] ──
 ```
 
+### C API
+
+```c
+#include "tracing.h"
+
+void handle_request(const char *input) {
+    // Start span
+    span_t *span = span_start("shield:evaluate");
+    span_set_tag(span, "zone", "external");
+
+    // Child span
+    span_t *child = span_start_child(span, "shield:guard:llm");
+    // ... guard evaluation ...
+    span_finish(child);
+
+    span_finish(span);
+}
+```
+
 ---
 
-## 9.7 CLI Monitoring
+## 9.7 Custom Metrics
+
+### C API
+
+```c
+#include "metrics.h"
+
+// Counter
+metric_counter_t *requests;
+metric_counter_create("custom_requests_total", "Custom request counter", &requests);
+metric_counter_inc(requests, labels);
+
+// Gauge
+metric_gauge_t *active;
+metric_gauge_create("custom_active", "Active items", &active);
+metric_gauge_set(active, 42.5, labels);
+
+// Histogram
+metric_histogram_t *latency;
+double buckets[] = {0.001, 0.005, 0.01, 0.05, 0.1};
+metric_histogram_create("custom_latency", "Custom latency", buckets, 5, &latency);
+metric_histogram_observe(latency, 0.003, labels);
+```
+
+---
+
+## 9.8 CLI Monitoring
 
 ```bash
 Shield> show metrics
@@ -263,15 +420,22 @@ Guards:
 Sessions:
   Active: 127
   Peak (24h): 342
+
+Shield> show metrics --live
+     Requests/s  Block%  P99 Latency
+09:30:00    23.4    18.2%     0.98ms
+09:30:05    25.1    19.5%     1.12ms
+09:30:10    22.8    17.9%     0.89ms
 ```
 
 ---
 
-## 9.8 Health Checks
+## 9.9 Health Checks
 
 ### Endpoints
 
 **Basic:**
+
 ```bash
 curl http://localhost:8080/health
 ```
@@ -281,6 +445,7 @@ curl http://localhost:8080/health
 ```
 
 **Detailed:**
+
 ```bash
 curl http://localhost:8080/health/detailed
 ```
@@ -299,26 +464,37 @@ curl http://localhost:8080/health/detailed
 }
 ```
 
+**Ready:**
+
+```bash
+curl http://localhost:8080/health/ready
+```
+
+For Kubernetes readiness probe.
+
 ---
 
 ## Practice
 
-### Task 1
+### Exercise 1
 
-Configure Prometheus + Grafana:
+Set up Prometheus + Grafana:
+
 - Scrape Shield metrics
 - Dashboard with 5 main panels
 
-### Task 2
+### Exercise 2
 
 Create alert rules:
+
 - Block rate > 40%
 - P99 latency > 5ms
 - Instance down
 
-### Task 3
+### Exercise 3
 
-Configure JSON logging:
+Set up JSON logging:
+
 - Rotation 100MB
 - 10 files
 - Compression

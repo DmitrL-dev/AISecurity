@@ -44,19 +44,44 @@ typedef struct class_map {
     char              name[64];
     class_match_mode_t mode;
     class_condition_t *conditions;
+    uint64_t          match_count;
 } class_map_t;
 ```
 
 ### Match Types
 
-| Type | Description |
-|------|-------------|
-| `MATCH_PATTERN` | Regex pattern |
-| `MATCH_CONTAINS` | Contains string |
-| `MATCH_SIZE_GT` | Size > N bytes |
-| `MATCH_JAILBREAK` | Jailbreak detection |
+| Type                     | Description         |
+| ------------------------ | ------------------- |
+| `MATCH_PATTERN`          | Regex pattern       |
+| `MATCH_CONTAINS`         | Contains string     |
+| `MATCH_SIZE_GT`          | Size > N bytes      |
+| `MATCH_SIZE_LT`          | Size < N bytes      |
+| `MATCH_JAILBREAK`        | Jailbreak detection |
 | `MATCH_PROMPT_INJECTION` | Injection detection |
-| `MATCH_ENTROPY_HIGH` | High entropy |
+| `MATCH_ENTROPY_HIGH`     | High entropy        |
+| `MATCH_EXFILTRATION`     | Data exfiltration   |
+
+### Policy-Map
+
+Defines actions:
+
+```c
+typedef struct policy_action {
+    rule_action_t   action;       // BLOCK, LOG, ALERT, ALLOW
+    uint32_t        rate_limit;   // Packets per second
+    char            redirect_zone[64];
+    uint8_t         set_severity;
+    bool            log_enabled;
+} policy_action_t;
+```
+
+### Service-Policy
+
+Binding to zones:
+
+```c
+service_policy_apply(engine, "external", "SECURITY-POLICY", DIRECTION_INBOUND);
+```
 
 ---
 
@@ -87,12 +112,15 @@ class_map_add_match(threats, MATCH_EXFILTRATION, "", false);
 ### Creating Policy-Map
 
 ```c
+// Policy map
 policy_map_t *security;
 policy_map_create(&engine, "SECURITY-POLICY", &security);
 
+// Add class
 policy_class_t *pc;
 policy_map_add_class(security, "THREATS", &pc);
 
+// Add actions
 policy_action_t *action;
 policy_class_add_action(pc, ACTION_BLOCK, &action);
 action->log_enabled = true;
@@ -102,6 +130,19 @@ action->log_enabled = true;
 
 ```c
 service_policy_apply(&engine, "external", "SECURITY-POLICY", DIRECTION_INBOUND);
+```
+
+### Evaluation
+
+```c
+policy_result_t result;
+policy_evaluate(&engine, "external", DIRECTION_INBOUND,
+                data, data_len, &result);
+
+if (result.action == ACTION_BLOCK) {
+    printf("Blocked by policy: %s, class: %s\n",
+           result.matched_policy, result.matched_class);
+}
 ```
 
 ---
@@ -133,12 +174,44 @@ service_policy_apply(&engine, "external", "SECURITY-POLICY", DIRECTION_INBOUND);
 │  └─────────────────────────────────────────────────┘    │
 │              │                    │                      │
 │         XDP_DROP              XDP_PASS                   │
+│              │                    │                      │
 └──────────────┼────────────────────┼──────────────────────┘
                │                    │
                ▼                    ▼
           (dropped)         ┌──────────────┐
                             │ TCP/IP Stack │
                             └──────────────┘
+                                   │
+                                   ▼
+                            ┌──────────────┐
+                            │Shield Daemon │
+                            └──────────────┘
+```
+
+### BPF Maps
+
+```c
+/* Blocklist: IP -> blocked */
+struct {
+    __uint(type, BPF_MAP_TYPE_HASH);
+    __uint(max_entries, 10000);
+    __type(key, __u32);    /* IP address */
+    __type(value, __u8);   /* 1 = blocked */
+} blocklist SEC(".maps");
+
+/* Rate limiting per source IP */
+struct {
+    __uint(type, BPF_MAP_TYPE_LRU_HASH);
+    __uint(max_entries, 100000);
+    __type(key, __u32);    /* Source IP */
+    __type(value, struct rate_limit_state);
+} rate_limits SEC(".maps");
+
+/* Ring buffer for events */
+struct {
+    __uint(type, BPF_MAP_TYPE_RINGBUF);
+    __uint(max_entries, 256 * 1024);
+} events SEC(".maps");
 ```
 
 ---
@@ -154,14 +227,20 @@ int shield_xdp_filter(struct xdp_md *ctx)
     void *data = (void *)(long)ctx->data;
     void *data_end = (void *)(long)ctx->data_end;
 
+    /* Parse Ethernet */
     struct ethhdr *eth = data;
     if ((void*)(eth + 1) > data_end)
         return XDP_PASS;
 
+    /* Only IPv4 */
     if (eth->h_proto != bpf_htons(ETH_P_IP))
         return XDP_PASS;
 
+    /* Parse IP */
     struct iphdr *ip = (void*)(eth + 1);
+    if ((void*)(ip + 1) > data_end)
+        return XDP_PASS;
+
     __u32 src_ip = ip->saddr;
 
     /* Check blocklist */
@@ -172,10 +251,31 @@ int shield_xdp_filter(struct xdp_md *ctx)
 
     /* Rate limiting */
     if (check_rate_limit(src_ip)) {
-        return XDP_DROP;
+        return XDP_DROP;  /* Rate limited */
     }
 
+    /* Send event to userspace */
+    send_event(src_ip, dst_ip, dst_port);
+
     return XDP_PASS;
+}
+```
+
+### TC Egress
+
+```c
+SEC("tc")
+int shield_tc_egress(struct __sk_buff *skb)
+{
+    /* Check outbound connections to blocked IPs */
+    __u32 dst_ip = get_dst_ip(skb);
+
+    __u8 *blocked = bpf_map_lookup_elem(&blocklist, &dst_ip);
+    if (blocked && *blocked) {
+        return TC_ACT_SHOT;  /* Block outbound */
+    }
+
+    return TC_ACT_OK;
 }
 ```
 
@@ -194,7 +294,7 @@ ebpf_load(&ctx, "/usr/lib/shield/shield_xdp.o");
 ebpf_attach(&ctx);
 ```
 
-### Managing Blocklist
+### Blocklist Management
 
 ```c
 // Block IP
@@ -207,9 +307,48 @@ ebpf_unblock_ip(&ctx, inet_addr("192.168.1.100"));
 ebpf_whitelist_port(&ctx, 443);
 ```
 
+### Getting Statistics
+
+```c
+ebpf_stats_t stats;
+ebpf_get_stats(&ctx, &stats);
+
+printf("Packets: total=%lu, allowed=%lu, blocked=%lu\n",
+       stats.packets_total,
+       stats.packets_allowed,
+       stats.packets_blocked);
+```
+
+### Event Polling
+
+```c
+// Poll events from ring buffer
+while (running) {
+    ebpf_poll_events(&ctx, 100);  // 100ms timeout
+}
+```
+
 ---
 
 ## 16.6 Benchmark Suite
+
+Shield includes performance benchmark:
+
+```c
+#include "tests/bench_core.h"
+
+bench_config_t config = {
+    .iterations = 100000,
+    .warmup_iterations = 1000,
+};
+
+shield_context_t ctx;
+shield_init(&ctx);
+
+run_benchmarks(&ctx, &config);
+```
+
+### Results
 
 ```
 ╔══════════════════════════════════════════════════════════════════╗
@@ -229,7 +368,7 @@ Entropy Calculation                   0.15        0.25    6,666,666
 
 ## Practice
 
-### Task 1: Policy Engine
+### Exercise 1: Policy Engine
 
 Create a policy:
 
@@ -245,7 +384,7 @@ policy-map BLOCK-CRITICAL
     alert
 ```
 
-### Task 2: eBPF
+### Exercise 2: eBPF
 
 Compile and load XDP program:
 
@@ -255,6 +394,20 @@ clang -O2 -target bpf -c shield_xdp.c -o shield_xdp.o
 ./shield-ebpf block 192.168.1.100
 ./shield-ebpf stats
 ```
+
+### Exercise 3: Benchmark
+
+Run benchmarks:
+
+```bash
+./shield-bench -n 100000 -v
+```
+
+Analyze:
+
+- Which test is slowest?
+- Why?
+- How to optimize?
 
 ---
 
@@ -267,4 +420,4 @@ clang -O2 -target bpf -c shield_xdp.c -o shield_xdp.o
 
 ---
 
-_"Policy Engine + eBPF = impenetrable defense."_
+_"Policy Engine + eBPF = impenetrable protection."_

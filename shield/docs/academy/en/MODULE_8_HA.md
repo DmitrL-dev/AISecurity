@@ -10,7 +10,7 @@ _SSP Level | Duration: 5 hours_
 
 Production = High Availability.
 
-Downtime = lost money and trust.
+Downtime = loss of money and trust.
 
 ---
 
@@ -18,13 +18,13 @@ Downtime = lost money and trust.
 
 ### Availability Levels
 
-| Level | Downtime/Year | Uptime % |
-|-------|---------------|----------|
-| One Nine | 36.5 days | 90% |
-| Two Nines | 3.65 days | 99% |
-| Three Nines | 8.76 hours | 99.9% |
-| Four Nines | 52.6 minutes | 99.99% |
-| Five Nines | 5.26 minutes | 99.999% |
+| Level       | Downtime/Year | Uptime % |
+| ----------- | ------------- | -------- |
+| One Nine    | 36.5 days     | 90%      |
+| Two Nines   | 3.65 days     | 99%      |
+| Three Nines | 8.76 hours    | 99.9%    |
+| Four Nines  | 52.6 minutes  | 99.99%   |
+| Five Nines  | 5.26 minutes  | 99.999%  |
 
 ### Shield Target: 99.99% (Four Nines)
 
@@ -50,11 +50,13 @@ Downtime = lost money and trust.
 ```
 
 **Pros:**
+
 - Simple
 - Clear ownership
 - Easy debugging
 
 **Cons:**
+
 - 50% capacity unused
 - Failover delay
 
@@ -74,13 +76,36 @@ Downtime = lost money and trust.
 ```
 
 **Pros:**
+
 - Full capacity
 - No failover delay
 - Better load distribution
 
 **Cons:**
+
 - State sync complexity
 - Split-brain risk
+
+### N+1 Cluster
+
+```
+     ┌─────────────────┐
+     │  LOAD BALANCER  │
+     └────────┬────────┘
+              │
+    ┌─────────┼─────────┐
+    │         │         │
+┌───▼───┐ ┌───▼───┐ ┌───▼───┐
+│ NODE1 │ │ NODE2 │ │ NODE3 │
+│(Active)│ │(Active)│ │(Spare)│
+└───────┘ └───────┘ └───────┘
+```
+
+**Pros:**
+
+- N nodes working
+- 1 ready to take over
+- Handles 1 failure
 
 ---
 
@@ -124,7 +149,44 @@ Downtime = lost money and trust.
       "delay_ms": 5000,
       "auto_failback": true,
       "failback_delay_ms": 60000
+    },
+
+    "state_sync": {
+      "enabled": true,
+      "mode": "async",
+      "batch_interval_ms": 100
     }
+  }
+}
+```
+
+### Standby Node
+
+```json
+{
+  "version": "1.2.0",
+  "name": "shield-standby",
+
+  "ha": {
+    "enabled": true,
+    "mode": "active-standby",
+    "role": "standby",
+    "node_id": "node-2",
+
+    "cluster": {
+      "name": "prod-cluster",
+      "bind_address": "0.0.0.0",
+      "bind_port": 5001,
+      "advertise_address": "192.168.1.2"
+    },
+
+    "peers": [
+      {
+        "node_id": "node-1",
+        "address": "192.168.1.1",
+        "port": 5001
+      }
+    ]
   }
 }
 ```
@@ -149,6 +211,15 @@ T=9s    Traffic flows to new primary
 ```
 
 **Total failover time: ~9 seconds**
+
+### Failover Triggers
+
+| Trigger             | Description                   |
+| ------------------- | ----------------------------- |
+| Heartbeat timeout   | No heartbeat for 3+ intervals |
+| Health check fail   | API returns error             |
+| Manual trigger      | Operator command              |
+| Resource exhaustion | OOM, disk full                |
 
 ---
 
@@ -184,6 +255,8 @@ T=9s    Traffic flows to new primary
 }
 ```
 
+Need majority to become primary.
+
 **2. Fencing:**
 
 ```json
@@ -195,6 +268,8 @@ T=9s    Traffic flows to new primary
   }
 }
 ```
+
+Shutdown the other node before becoming primary.
 
 **3. Witness/Arbiter:**
 
@@ -208,9 +283,64 @@ T=9s    Traffic flows to new primary
 }
 ```
 
+Third party decides who is primary.
+
 ---
 
-## 8.6 Load Balancer Configuration
+## 8.6 State Synchronization
+
+### What to Sync
+
+| State       | Priority | Sync Mode |
+| ----------- | -------- | --------- |
+| Sessions    | High     | Async     |
+| Rate limits | Medium   | Async     |
+| Blocklists  | High     | Sync      |
+| Config      | High     | Sync      |
+| Metrics     | Low      | Batch     |
+
+### Configuration
+
+```json
+{
+  "state_sync": {
+    "enabled": true,
+    "protocol": "SSRP",
+
+    "categories": {
+      "sessions": {
+        "enabled": true,
+        "mode": "async",
+        "ttl_seconds": 3600
+      },
+      "rate_limits": {
+        "enabled": true,
+        "mode": "async",
+        "ttl_seconds": 60
+      },
+      "blocklists": {
+        "enabled": true,
+        "mode": "sync"
+      }
+    },
+
+    "batch": {
+      "enabled": true,
+      "interval_ms": 100,
+      "max_items": 100
+    },
+
+    "compression": {
+      "enabled": true,
+      "algorithm": "lz4"
+    }
+  }
+}
+```
+
+---
+
+## 8.7 Load Balancer Configuration
 
 ### Nginx
 
@@ -251,7 +381,91 @@ backend shield_backend
 
 ---
 
-## 8.7 CLI Commands
+## 8.8 Health Checks
+
+### Shield Health Endpoint
+
+```bash
+curl http://localhost:8080/health
+```
+
+```json
+{
+  "status": "healthy",
+  "version": "1.2.0",
+  "uptime_seconds": 86400,
+  "ha": {
+    "role": "primary",
+    "peer_status": "connected",
+    "sync_lag": 0
+  },
+  "components": {
+    "api": "healthy",
+    "guards": "healthy",
+    "rules": "healthy"
+  }
+}
+```
+
+### Deep Health Check
+
+```bash
+curl http://localhost:8080/health/deep
+```
+
+Checks:
+
+- All guards initialized
+- All rules loaded
+- Database connectivity
+- Peer connectivity
+
+---
+
+## 8.9 Monitoring HA
+
+### Key Metrics
+
+```prometheus
+# HA state (1=primary, 0=standby)
+shield_ha_is_primary{node="node-1"} 1
+
+# Peer status
+shield_ha_peer_connected{peer="node-2"} 1
+
+# Heartbeat latency
+shield_ha_heartbeat_latency_ms{peer="node-2"} 5
+
+# Failover count
+shield_ha_failovers_total{node="node-1"} 2
+
+# Sync lag (items behind)
+shield_ha_sync_lag{node="node-1"} 0
+```
+
+### Alerts
+
+```yaml
+- alert: ShieldHAPeerDisconnected
+  expr: shield_ha_peer_connected == 0
+  for: 1m
+  labels:
+    severity: critical
+  annotations:
+    summary: "HA peer disconnected"
+
+- alert: ShieldHASyncLag
+  expr: shield_ha_sync_lag > 100
+  for: 5m
+  labels:
+    severity: warning
+  annotations:
+    summary: "HA sync lag detected"
+```
+
+---
+
+## 8.10 CLI Commands
 
 ```bash
 Shield> show ha status
@@ -277,29 +491,37 @@ Shield> ha failover
 Initiating manual failover...
 Demoting to STANDBY...
 Failover complete. New primary: node-2
+
+Shield> ha failback
+Initiating failback...
+Resuming as PRIMARY...
+Failback complete.
 ```
 
 ---
 
 ## Practice
 
-### Task 1
+### Exercise 1
 
 Deploy Active-Standby cluster:
+
 - 2 nodes
 - Heartbeat 500ms
 - Auto-failback
 
-### Task 2
+### Exercise 2
 
 Test failover:
+
 - Stop primary
 - Measure failover time
 - Verify standby became primary
 
-### Task 3
+### Exercise 3
 
-Configure monitoring:
+Set up monitoring:
+
 - Prometheus metrics
 - Alert on peer disconnect
 
@@ -308,7 +530,7 @@ Configure monitoring:
 ## Module 8 Summary
 
 - HA = mandatory for production
-- Active-Standby simpler, Active-Active more powerful
+- Active-Standby is simpler, Active-Active is more powerful
 - Split-brain = serious problem
 - State sync = consistency
 - Monitoring = visibility

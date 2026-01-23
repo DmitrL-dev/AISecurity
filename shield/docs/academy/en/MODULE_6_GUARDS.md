@@ -10,7 +10,7 @@ _SSP Level | Duration: 6 hours_
 
 In SSA you learned what Guards are.
 
-Now — complete dive into each of the 6 Guards.
+Now — a complete deep dive into each of the 6 Guards.
 
 ---
 
@@ -81,12 +81,12 @@ Protect language models (ChatGPT, Claude, Gemini, etc.)
 
 ### Threats
 
-| Threat | Description |
-|--------|-------------|
-| Prompt Injection | Command injection |
-| Jailbreak | Bypass restrictions |
-| Prompt Extraction | System prompt theft |
-| Role Manipulation | Changing AI role |
+| Threat            | Description            |
+| ----------------- | ---------------------- |
+| Prompt Injection  | Instruction injection  |
+| Jailbreak         | Bypass restrictions    |
+| Prompt Extraction | System prompt theft    |
+| Role Manipulation | Role change            |
 
 ### Configuration
 
@@ -155,6 +155,38 @@ if (contains(output, "CANARY-XYZ-123")) {
 }
 ```
 
+### Usage in C
+
+```c
+#include "guards/llm_guard.h"
+
+// Create guard
+llm_guard_config_t config = {
+    .injection_detection = true,
+    .jailbreak_detection = true,
+    .sensitivity = SENSITIVITY_HIGH
+};
+
+llm_guard_t *guard;
+llm_guard_create(&config, &guard);
+
+// Check request
+guard_event_t event = {
+    .input = user_input,
+    .input_len = strlen(user_input),
+    .zone = "external"
+};
+
+guard_result_t result;
+llm_guard_evaluate(guard, &event, &result);
+
+if (result.action == ACTION_BLOCK) {
+    printf("Blocked: %s\n", result.reason);
+}
+
+llm_guard_destroy(guard);
+```
+
 ---
 
 ## 6.3 RAG Guard
@@ -165,12 +197,12 @@ Protect Retrieval-Augmented Generation systems.
 
 ### Threats
 
-| Threat | Description |
-|--------|-------------|
-| Document Poisoning | Malicious docs in knowledge base |
-| Context Injection | Instructions in retrieved docs |
-| Citation Abuse | Source manipulation |
-| Data Exfiltration | Theft via context |
+| Threat             | Description                     |
+| ------------------ | ------------------------------- |
+| Document Poisoning | Malicious documents in database |
+| Context Injection  | Instructions in retrieved docs  |
+| Citation Abuse     | Source manipulation             |
+| Data Exfiltration  | Theft via context               |
 
 ### Configuration
 
@@ -195,10 +227,37 @@ Protect Retrieval-Augmented Generation systems.
           "max_context_length": 8192,
           "max_documents": 5,
           "max_doc_length": 2048
+        },
+        "citation_validation": {
+          "enabled": true,
+          "verify_quotes": true,
+          "check_hallucination": true
         }
       }
     }
   ]
+}
+```
+
+### Key Features
+
+**Document Sanitization:**
+
+```c
+// Remove instructions from documents
+sanitized = remove_hidden_instructions(document);
+instruction_density = count_instructions(document) / word_count(document);
+if (instruction_density > 0.1) {
+    flag_suspicious(document);
+}
+```
+
+**Context Limiting:**
+
+```c
+// Limit context size
+if (total_context_length > MAX_CONTEXT) {
+    truncate_oldest_documents(&context);
 }
 ```
 
@@ -212,12 +271,12 @@ Protect autonomous AI agents.
 
 ### Threats
 
-| Threat | Description |
-|--------|-------------|
-| Goal Hijacking | Changing agent's goal |
-| Memory Poisoning | Poisoning memory |
-| Action Abuse | Unauthorized actions |
-| Loop Exploitation | Infinite loops |
+| Threat           | Description                   |
+| ---------------- | ----------------------------- |
+| Goal Hijacking   | Agent goal change             |
+| Memory Poisoning | Memory contamination          |
+| Action Abuse     | Unauthorized actions          |
+| Loop Exploitation| Infinite loops                |
 
 ### Configuration
 
@@ -268,6 +327,25 @@ if (drift > DRIFT_THRESHOLD) {
 }
 ```
 
+### Loop Detection
+
+```c
+// Detect loops
+if (iteration_count > MAX_ITERATIONS) {
+    return ACTION_BLOCK;
+}
+
+for (int i = 0; i < history_size; i++) {
+    float sim = similarity(current_action, history[i]);
+    if (sim > 0.9) {
+        loop_count++;
+    }
+}
+if (loop_count > 3) {
+    return ACTION_BLOCK;  // Probable loop
+}
+```
+
 ---
 
 ## 6.5 Tool Guard
@@ -278,12 +356,12 @@ Control AI tool usage.
 
 ### Threats
 
-| Threat | Description |
-|--------|-------------|
-| Unauthorized Access | Access to forbidden tools |
-| Parameter Injection | Malicious parameters |
-| Data Exfiltration | Data theft via tools |
-| Resource Abuse | Resource misuse |
+| Threat              | Description              |
+| ------------------- | ------------------------ |
+| Unauthorized Access | Access to forbidden tools|
+| Parameter Injection | Malicious parameters     |
+| Data Exfiltration   | Data theft via tools     |
+| Resource Abuse      | Resource overuse         |
 
 ### Configuration
 
@@ -311,10 +389,32 @@ Control AI tool usage.
             "search": { "calls_per_minute": 10 },
             "api_call": { "calls_per_minute": 5 }
           }
+        },
+        "audit": {
+          "enabled": true,
+          "log_all_calls": true,
+          "alert_on_blocked": true
         }
       }
     }
   ]
+}
+```
+
+### Parameter Sanitization
+
+```c
+// Check parameters
+if (contains_shell_chars(param)) {
+    return ACTION_BLOCK;
+}
+
+if (is_path(param) && path_traversal_attempt(param)) {
+    return ACTION_BLOCK;  // ../../../etc/passwd
+}
+
+if (strlen(param) > MAX_PARAM_LENGTH) {
+    truncate(param, MAX_PARAM_LENGTH);
 }
 ```
 
@@ -328,12 +428,12 @@ Protect Model Context Protocol (Anthropic).
 
 ### Threats
 
-| Threat | Description |
-|--------|-------------|
-| Context Manipulation | Context modification |
-| Tool Injection | Malicious tool injection |
-| Resource Hijacking | Resource capture |
-| Prompt Injection | Through MCP messages |
+| Threat               | Description               |
+| -------------------- | ------------------------- |
+| Context Manipulation | Context modification      |
+| Tool Injection       | Malicious tool injection  |
+| Resource Hijacking   | Resource capture          |
+| Prompt Injection     | Via MCP messages          |
 
 ### Configuration
 
@@ -358,6 +458,11 @@ Protect Model Context Protocol (Anthropic).
           "enabled": true,
           "allowed_resources": ["docs/*", "data/*"],
           "blocked_resources": ["secrets/*", "config/*"]
+        },
+        "message_sanitization": {
+          "enabled": true,
+          "check_injection": true,
+          "max_message_size": 65536
         }
       }
     }
@@ -375,12 +480,12 @@ Protect external API calls.
 
 ### Threats
 
-| Threat | Description |
-|--------|-------------|
-| Data Exfiltration | Sending data externally |
-| SSRF | Server-Side Request Forgery |
-| Credential Exposure | Key leakage |
-| Rate Abuse | DDoS via AI |
+| Threat              | Description                    |
+| ------------------- | ------------------------------ |
+| Data Exfiltration   | Sending data externally        |
+| SSRF                | Server-Side Request Forgery    |
+| Credential Exposure | Key leakage                    |
+| Rate Abuse          | DDoS via AI                    |
 
 ### Configuration
 
@@ -400,11 +505,18 @@ Protect external API calls.
         "request_inspection": {
           "enabled": true,
           "check_body_for_secrets": true,
-          "max_body_size": 1048576
+          "max_body_size": 1048576,
+          "block_binary": true
+        },
+        "response_inspection": {
+          "enabled": true,
+          "redact_secrets": true,
+          "scan_for_pii": true
         },
         "rate_limits": {
           "enabled": true,
-          "requests_per_minute": 60
+          "requests_per_minute": 60,
+          "bytes_per_minute": 10485760
         }
       }
     }
@@ -435,23 +547,26 @@ if (!is_allowed_domain(url, allowed_domains)) {
 
 ## Practice
 
-### Task 1
+### Exercise 1
 
 Configure LLM Guard for chatbot protection:
-- Injection blocking
-- DAN jailbreak detection
+
+- Block injection
+- Detect DAN jailbreak
 - Canary token for prompt leak
 
-### Task 2
+### Exercise 2
 
 Create RAG Guard configuration for:
+
 - Maximum 5 documents in context
 - Source verification
-- Hidden instruction removal
+- Remove hidden instructions
 
-### Task 3
+### Exercise 3
 
 Write C code for Agent Guard integration:
+
 - Goal drift detection
 - Loop protection
 - Action whitelist

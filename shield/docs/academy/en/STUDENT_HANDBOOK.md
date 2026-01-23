@@ -2,7 +2,7 @@
 
 ## Welcome
 
-You're starting your journey in AI Security.
+You're starting your journey into AI Security.
 
 This handbook is your guide.
 
@@ -35,25 +35,25 @@ This handbook is your guide.
 
 - Developers
 - Junior security engineers
-- Anyone wanting to understand AI Security
+- Those who want to understand AI Security
 
-### Prerequisites
+### Requirements
 
 - Basic C knowledge
-- Understanding of HTTP/REST
+- HTTP/REST understanding
 - Linux/CLI experience
 
 ### Learning Path
 
-| Module | Topic | Duration |
-| ------ | ----- | -------- |
-| 0 | Why AI is Unsafe | 1 hour |
-| 1 | Attacks on AI | 4 hours |
-| 2 | Shield Architecture | 4 hours |
-| 3 | Installation | 3 hours |
-| 4 | Rules and Patterns | 4 hours |
-| 5 | Code Integration | 4 hours |
-| **5B** | **CLI Reference (194 cmd)** | **3 hours** |
+| Module | Topic                       | Duration   |
+| ------ | --------------------------- | ---------- |
+| 0      | Why AI is Unsafe            | 1 hour     |
+| 1      | Attacks on AI               | 4 hours    |
+| 2      | Shield Architecture         | 4 hours    |
+| 3      | Installation                | 3 hours    |
+| 4      | Rules and Patterns          | 4 hours    |
+| 5      | Code Integration            | 4 hours    |
+| **5B** | **CLI Reference (194 cmd)** | **3 hours**|
 
 **Total: ~23 hours**
 
@@ -61,10 +61,10 @@ This handbook is your guide.
 
 - LAB-101: Shield Installation
 - LAB-102: Basic Configuration
-- LAB-103: Blocking Injection
+- LAB-103: Injection Blocking
 - LAB-104: Docker Deployment
 
-### Exam SSA-100
+### SSA-100 Exam
 
 - 60 questions
 - 90 minutes
@@ -80,7 +80,7 @@ This handbook is your guide.
 - DevSecOps
 - Architects
 
-### Prerequisites
+### Requirements
 
 - SSA certification
 - C/C++ experience
@@ -90,14 +90,14 @@ This handbook is your guide.
 
 - Advanced Architecture
 - Guards Deep Dive
-- Protocols (6 base)
+- Protocols (6 core)
 - **Protocols Extended (14 additional) — 7B**
 - High Availability
 - Monitoring
 
 **Total: ~90 hours (4-5 weeks)**
 
-### Exam SSP-200
+### SSP-200 Exam
 
 - 80 questions
 - 120 minutes
@@ -111,9 +111,9 @@ This handbook is your guide.
 
 - Senior architects
 - Security leads
-- Those wanting to contribute
+- Those who want to contribute
 
-### Prerequisites
+### Requirements
 
 - SSP certification
 - 6+ months working with Shield
@@ -130,7 +130,7 @@ This handbook is your guide.
 
 **Total: ~180 hours (8-10 weeks)**
 
-### Exam SSE-300
+### SSE-300 Exam
 
 - Theory: 60 questions
 - Practice: 4 hours hands-on
@@ -142,7 +142,7 @@ This handbook is your guide.
 
 ### SRTS (Red Team)
 
-After SSP. Focus on offense:
+After SSP. Attack focus:
 
 - Offensive AI Security
 - Attack Methodology
@@ -151,7 +151,7 @@ After SSP. Focus on offense:
 
 ### SBTS (Blue Team)
 
-After SSP. Focus on defense:
+After SSP. Defense focus:
 
 - Defensive AI Security
 - Threat Detection
@@ -164,11 +164,11 @@ After SSP. Focus on defense:
 
 ### Golden Rules
 
-1. **Read the module fully** — don't skip
+1. **Read the module completely** — don't skip
 2. **Do the labs** — practice matters more than theory
 3. **Experiment** — change parameters
-4. **Document** — write down what you learn
-5. **Ask questions** — in the community
+4. **Document** — write down what you learned
+5. **Ask questions** — in community
 
 ### Order
 
@@ -186,18 +186,18 @@ After SSP. Focus on defense:
 
 ### Documentation
 
-| File | Purpose |
-| ---- | ------- |
-| `docs/academy/en/MODULE_*.md` | Training modules |
-| `docs/academy/en/LABS.md` | Laboratories |
-| `docs/academy/en/EXAM_BANK.md` | Prep questions |
-| `docs/tutorials/*.md` | Practical tutorials |
+| File                        | Purpose                |
+| --------------------------- | ---------------------- |
+| `docs/academy/MODULE_*.md`  | Learning modules       |
+| `docs/academy/LABS.md`      | Labs                   |
+| `docs/academy/EXAM_BANK.md` | Prep questions         |
+| `docs/tutorials/*.md`       | Practical tutorials    |
 
 ### API Reference
 
 ```
-docs/API.md
-docs/CLI.md
+docs/API_REFERENCE.md
+docs/CLI_REFERENCE.md
 ```
 
 ### Community
@@ -209,17 +209,17 @@ docs/CLI.md
 
 ## FAQ
 
-**Q: Do I need Python experience?**
+**Q: Is Python experience needed?**
 A: No. Shield is written in pure C. Python is not used.
 
-**Q: How long for SSA?**
+**Q: How long does SSA take?**
 A: 2-3 weeks at 2-3 hours per day.
 
 **Q: Can I skip levels?**
 A: No. Each level builds on the previous.
 
 **Q: Where to take the exam?**
-A: Online through SENTINEL Academy Portal (coming soon).
+A: Online via SENTINEL Academy Portal (coming soon).
 
 ---
 
