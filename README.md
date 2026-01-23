@@ -66,22 +66,74 @@
 
 ---
 
-##  Platform Components
+## 🏗️ Platform Architecture
 
-| Component | Description | Docs |
-|-----------|-------------|------|
-|  **[BRAIN](#-brain---detection-engines)** | Detection Core - 217 Engines, ML + Rules, Strange Math™ | [Details](#-brain---detection-engines) |
-|  **[SHIELD](#%EF%B8%8F-shield---ai-security-dmz)** | AI Security DMZ - Pure C, <1ms latency, 22 Protocols | [Details](#%EF%B8%8F-shield---ai-security-dmz) |
-|  **[STRIKE](#-strike---red-team-platform)** | Offensive Platform - 39K+ payloads, HYDRA | [Details](#-strike---red-team-platform) |
-|  **[FRAMEWORK](#-framework---python-sdk)** | Python SDK - pip install, CLI, FastAPI | [Details](#-framework---python-sdk) |
-|  **[IMMUNE](#-immune---edrxdrmdr-security-stack)** | EDR/XDR/MDR - Pure C, Kernel-level | [Details](#-immune---edrxdrmdr-security-stack) |
-| 🔮 **[RLM-Toolkit](#-rlm-toolkit-v210---secure-langchain-alternative)** | Secure LangChain Replacement | [Details](#-rlm-toolkit-v210---secure-langchain-alternative) |
-|  **[SuperClaude Shield](#-superclaudeshield---ai-coding-assistant-protection)** | AI Coding Assistant Protection | [Details](#-superclaudeshield---ai-coding-assistant-protection) |
+```mermaid
+graph TB
+    subgraph DEFENSE["🛡️ DEFENSE"]
+        BRAIN["🧠 BRAIN<br/>217 Engines"]
+        SHIELD["🛡️ SHIELD<br/>< 1ms latency"]
+        IMMUNE["🔬 IMMUNE<br/>EDR/XDR/MDR"]
+    end
+    
+    subgraph OFFENSE["⚔️ OFFENSE"]
+        STRIKE["💥 STRIKE<br/>39K+ payloads"]
+    end
+    
+    subgraph DEV["🛠️ DEVELOPMENT"]
+        FRAMEWORK["📦 FRAMEWORK<br/>Python SDK"]
+        RLM["🔮 RLM-Toolkit<br/>Memory Bridge v2.1"]
+    end
+    
+    INPUT(["📥 User Input"]) --> BRAIN
+    BRAIN --> SHIELD
+    SHIELD --> LLM(["🤖 LLM"])
+    LLM --> BRAIN
+    STRIKE -.->|tests| BRAIN
+    FRAMEWORK --> BRAIN
+    RLM --> FRAMEWORK
+    
+    style BRAIN fill:#4CAF50,color:#fff
+    style SHIELD fill:#00ADD8,color:#fff
+    style STRIKE fill:#f44336,color:#fff
+    style RLM fill:#9C27B0,color:#fff
+```
 
 ---
 
-<details>
-<summary><h2> Quick Start / Быстрый старт</h2></summary>
+##  Platform Components
+
+<table>
+<tr>
+<td width="50%" valign="top">
+
+### 🛡️ Defense
+
+| | Component | Highlight |
+|--|-----------|----------|
+| 🧠 | **[BRAIN](#-brain---detection-engines)** | 217 Engines, Strange Math™ |
+| 🛡️ | **[SHIELD](#%EF%B8%8F-shield---ai-security-dmz)** | Pure C, <1ms latency |
+| 🔬 | **[IMMUNE](#-immune---edrxdrmdr-security-stack)** | EDR/XDR, Kernel-level |
+
+</td>
+<td width="50%" valign="top">
+
+### ⚔️ Offense + Dev
+
+| | Component | Highlight |
+|--|-----------|----------|
+| 💥 | **[STRIKE](#-strike---red-team-platform)** | 39K+ payloads, HYDRA |
+| 📦 | **[FRAMEWORK](#-framework---python-sdk)** | Python SDK, FastAPI |
+| 🔮 | **[RLM-Toolkit](#-rlm-toolkit-v210---secure-langchain-alternative)** | Memory Bridge v2.1 |
+
+</td>
+</tr>
+</table>
+
+---
+
+<details open>
+<summary><h2>🚀 Quick Start / Быстрый старт</h2></summary>
 
 ### pip Install (Fastest / Самый быстрый)
 
