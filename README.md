@@ -104,18 +104,11 @@ graph TB
 ##  Platform Components
 
 <p align="center">
-  <a href="./src/brain/"><img src="./assets/cards/brain.png" alt="BRAIN" width="400"></a>
-  <a href="./shield/"><img src="./assets/cards/shield.png" alt="SHIELD" width="400"></a>
+  <a href="./src/brain/"><img src="./assets/cards/brain.png" alt="BRAIN" width="280"></a><a href="./shield/"><img src="./assets/cards/shield.png" alt="SHIELD" width="280"></a><a href="./strike/"><img src="./assets/cards/strike.png" alt="STRIKE" width="280"></a>
 </p>
 
 <p align="center">
-  <a href="./strike/"><img src="./assets/cards/strike.png" alt="STRIKE" width="400"></a>
-  <a href="./src/sentinel/"><img src="./assets/cards/framework.png" alt="FRAMEWORK" width="400"></a>
-</p>
-
-<p align="center">
-  <a href="./rlm-toolkit/"><img src="./assets/cards/rlm.png" alt="RLM-Toolkit" width="400"></a>
-  <a href="./immune/"><img src="./assets/cards/immune.png" alt="IMMUNE" width="400"></a>
+  <a href="./src/sentinel/"><img src="./assets/cards/framework.png" alt="FRAMEWORK" width="280"></a><a href="./rlm-toolkit/"><img src="./assets/cards/rlm.png" alt="RLM-Toolkit" width="280"></a><a href="./immune/"><img src="./assets/cards/immune.png" alt="IMMUNE" width="280"></a>
 </p>
 
 
