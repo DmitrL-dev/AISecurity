@@ -103,32 +103,21 @@ graph TB
 
 ##  Platform Components
 
-<table>
-<tr>
-<td width="50%" valign="top">
+<p align="center">
+  <a href="#-brain---detection-engines"><img src="./assets/cards/brain.png" alt="BRAIN" width="400"></a>
+  <a href="#%EF%B8%8F-shield---ai-security-dmz"><img src="./assets/cards/shield.png" alt="SHIELD" width="400"></a>
+</p>
 
-### 🛡️ Defense
+<p align="center">
+  <a href="#-strike---red-team-platform"><img src="./assets/cards/strike.png" alt="STRIKE" width="400"></a>
+  <a href="#-framework---python-sdk"><img src="./assets/cards/framework.png" alt="FRAMEWORK" width="400"></a>
+</p>
 
-| | Component | Highlight |
-|--|-----------|----------|
-| 🧠 | **[BRAIN](#-brain---detection-engines)** | 217 Engines, Strange Math™ |
-| 🛡️ | **[SHIELD](#%EF%B8%8F-shield---ai-security-dmz)** | Pure C, <1ms latency |
-| 🔬 | **[IMMUNE](#-immune---edrxdrmdr-security-stack)** | EDR/XDR, Kernel-level |
+<p align="center">
+  <a href="#-rlm-toolkit-v210---secure-langchain-alternative"><img src="./assets/cards/rlm.png" alt="RLM-Toolkit" width="400"></a>
+  <a href="#-immune---edrxdrmdr-security-stack"><img src="./assets/cards/immune.png" alt="IMMUNE" width="400"></a>
+</p>
 
-</td>
-<td width="50%" valign="top">
-
-### ⚔️ Offense + Dev
-
-| | Component | Highlight |
-|--|-----------|----------|
-| 💥 | **[STRIKE](#-strike---red-team-platform)** | 39K+ payloads, HYDRA |
-| 📦 | **[FRAMEWORK](#-framework---python-sdk)** | Python SDK, FastAPI |
-| 🔮 | **[RLM-Toolkit](#-rlm-toolkit-v210---secure-langchain-alternative)** | Memory Bridge v2.1 |
-
-</td>
-</tr>
-</table>
 
 ---
 
