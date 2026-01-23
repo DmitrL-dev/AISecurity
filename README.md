@@ -75,7 +75,7 @@
 |  **[STRIKE](#-strike---red-team-platform)** | Offensive Platform - 39K+ payloads, HYDRA | [Details](#-strike---red-team-platform) |
 |  **[FRAMEWORK](#-framework---python-sdk)** | Python SDK - pip install, CLI, FastAPI | [Details](#-framework---python-sdk) |
 |  **[IMMUNE](#-immune---edrxdrmdr-security-stack)** | EDR/XDR/MDR - Pure C, Kernel-level | [Details](#-immune---edrxdrmdr-security-stack) |
-|  **[RLM-Toolkit](#-rlm-toolkit-v121---secure-langchain-alternative)** | Secure LangChain Replacement | [Details](#-rlm-toolkit-v121---secure-langchain-alternative) |
+| 🔮 **[RLM-Toolkit](#-rlm-toolkit-v210---secure-langchain-alternative)** | Secure LangChain Replacement | [Details](#-rlm-toolkit-v210---secure-langchain-alternative) |
 |  **[SuperClaude Shield](#-superclaudeshield---ai-coding-assistant-protection)** | AI Coding Assistant Protection | [Details](#-superclaudeshield---ai-coding-assistant-protection) |
 
 ---
@@ -183,12 +183,12 @@ fetch('https://cdn.jsdelivr.net/gh/DmitrL-dev/AISecurity@latest/signatures/jailb
 ---
 
 <details>
-<summary><h2> RLM-Toolkit v1.2.1 — Secure LangChain Alternative</h2></summary>
+<summary><h2>🔮 RLM-Toolkit v2.1.0 — Secure LangChain Alternative</h2></summary>
 
 <p align="center">
-  <img src="https://img.shields.io/badge/RLM-v1.2.1_PRODUCTION-blueviolet?style=for-the-badge" alt="RLM">
-  <img src="https://img.shields.io/badge/Tests-1030_PASS-success?style=for-the-badge" alt="Tests">
-  <img src="https://img.shields.io/badge/Docs-156_Files-blue?style=for-the-badge" alt="Docs">
+  <img src="https://img.shields.io/badge/RLM-v2.1.0_PRODUCTION-blueviolet?style=for-the-badge" alt="RLM">
+  <img src="https://img.shields.io/badge/Tests-1089_PASS-success?style=for-the-badge" alt="Tests">
+  <img src="https://img.shields.io/badge/Docs-162_Files-blue?style=for-the-badge" alt="Docs">
   <img src="https://img.shields.io/badge/EN%2FRU-100%25-orange?style=for-the-badge" alt="Bilingual">
   <img src="https://img.shields.io/badge/NIOKR-10%2F10-gold?style=for-the-badge" alt="NIOKR">
 </p>
@@ -199,14 +199,17 @@ fetch('https://cdn.jsdelivr.net/gh/DmitrL-dev/AISecurity@latest/signatures/jailb
   <a href="https://pypi.org/project/rlm-toolkit/"><img src="https://img.shields.io/pypi/v/rlm-toolkit?label=PyPI" alt="PyPI"></a>
 </p>
 
-### v1.2.1 Highlights
+### v2.1.0 Highlights
 
 | Feature | Description |
 |---------|-------------|
+| **Memory Bridge v2.1** | 🆕 Enterprise cross-session persistence with 56x compression |
+| **18 MCP Tools** | 🆕 Full IDE integration (VS Code, Antigravity) |
+| **Auto-Mode** | 🆕 Zero-config project discovery and fact extraction |
+| **Git Hooks** | 🆕 Automatic fact extraction on every commit |
+| **Token Economics** | 🆕 Real-time compression metrics in dashboard |
 | **Security** | AES-256-GCM encryption, rate limiting, no XOR fallback |
-| **Documentation** | 78 EN + 78 RU = 156 files (10/10 NIOKR) |
-| **Tutorials** | 13 step-by-step guides incl. DSPy, Observability, Callbacks |
-| **Modules** | 25 fully documented: C³ Crystal, H-MEM, InfiniRetri, MCP Server |
+| **Documentation** | 81 EN + 81 RU = 162 files (10/10 NIOKR) |
 
 ### Why Switch from LangChain?
 
@@ -215,7 +218,7 @@ fetch('https://cdn.jsdelivr.net/gh/DmitrL-dev/AISecurity@latest/signatures/jailb
 | **Verbosity** | 20+ lines for basic RAG | 3-5 lines |
 | **Debugging** | Chain abstraction hell | Clear stack traces |
 | **Context limits** | Manual chunking nightmare | InfiniRetri (unlimited) |
-| **Memory** | Simple buffer | H-MEM (brain-like) |
+| **Memory** | Simple buffer | Memory Bridge (enterprise) |
 | **Self-improvement** | None | R-Zero auto-optimization |
 | **Security** | Add-on afterthought | Built-in from day 1 |
 
@@ -234,16 +237,17 @@ That's it. No chains. No callbacks. No AbstractBaseFactoryManagerInterface.
 
 | Feature | Who Benefits | Description |
 |---------|--------------|-------------|
+| **Memory Bridge** | 🏢 Enterprise | Cross-session persistence, 56x compression, L0-L3 hierarchy |
 | **InfiniRetri** | 👷 DevOps | Read 1000+ page documents without hitting token limits |
 | **H-MEM** | 🔬 Researchers | 4-level hierarchical memory - works like human brain |
 | **C³ Crystal** | 🔬 Researchers | 56x context compression (98.2% savings) |
-| **MCP Server** | 🛠️ IDE Users | 10-tool integration for VS Code/Antigravity |
+| **MCP Server** | 🛠️ IDE Users | 18-tool integration for VS Code/Antigravity |
 | **R-Zero** | 🔬 Researchers | Challenger-Solver architecture auto-improves outputs |
 | **Security Suite** | 👶 Everyone | Prompt injection detection, Trust Zones, Full audit trail |
 
 ### Documentation
 
-**13 Tutorials** - From "Hello World" to production multi-agent systems  
+**14 Tutorials** - From "Hello World" to Memory Bridge enterprise  
 **170+ Examples** - Battle-tested patterns ready to copy-paste  
 **50+ Integrations** - OpenAI, Anthropic, Ollama, all vector stores
 
