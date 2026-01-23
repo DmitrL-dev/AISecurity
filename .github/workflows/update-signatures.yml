@@ -33,7 +33,7 @@ jobs:
 
       - name: Install dependencies
         run: |
-          pip install requests pyyaml
+          pip install requests pyyaml pyarrow
 
       - name: Fetch external sources
         run: |
@@ -62,13 +62,13 @@ jobs:
           # Count actual patterns in jailbreaks.json
           JAILBREAK_COUNT=$(python -c "import json; f=open('signatures/jailbreaks.json'); d=json.load(f); print(len(d))")
           echo "Found $JAILBREAK_COUNT jailbreak patterns"
-          
+
           # Update README badge with actual count
           sed -i "s/Dataset-[0-9,]*-orange/Dataset-${JAILBREAK_COUNT}-orange/g" README.md
-          
+
           # Update jailbreaks count in CDN table
           sed -i "s/\*\*[0-9,]*\*\* jailbreak patterns/**${JAILBREAK_COUNT}** jailbreak patterns/g" README.md
-          
+
           git config user.name "SENTINEL Bot"
           git config user.email "sentinel-bot@users.noreply.github.com"
           git add signatures/ README.md
