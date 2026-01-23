@@ -1,18 +1,18 @@
 {
   "version": "2026.01.23.1",
-  "timestamp": "2026-01-23T00:59:24.791377Z",
-  "total_patterns": 39701,
+  "timestamp": "2026-01-23T04:47:01.275870Z",
+  "total_patterns": 39708,
   "split": true,
   "parts": [
     {
       "file": "jailbreaks-part1.json",
-      "patterns_count": 21059,
-      "size": 14478378
+      "patterns_count": 21061,
+      "size": 14479721
     },
     {
       "file": "jailbreaks-part2.json",
-      "patterns_count": 18642,
-      "size": 12631144
+      "patterns_count": 18647,
+      "size": 12631709
     }
   ]
 }
