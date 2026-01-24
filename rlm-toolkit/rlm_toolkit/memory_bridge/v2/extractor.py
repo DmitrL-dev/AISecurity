@@ -497,3 +497,152 @@ class AutoExtractionEngine:
         union = len(words_a | words_b)
 
         return intersection / union if union > 0 else 0.0
+
+
+class ConversationExtractor:
+    """
+    Extract facts from agent conversation trajectories.
+
+    Detects Significant Factual Shifts (SFS):
+    - Decisions: "decided to", "chose", "will use"
+    - Implementations: "implemented", "added", "created"
+    - Discoveries: "found that", "discovered", "realized"
+    - Fixes: "fixed", "resolved", "corrected"
+    """
+
+    # SFS detection patterns with confidence scores
+    SFS_PATTERNS = {
+        # Decisions (high confidence)
+        r"decided to\s+(.+?)(?:\.|$)": ("decision", 0.9),
+        r"chose\s+(.+?)\s+(?:over|instead|because)": ("decision", 0.85),
+        r"will use\s+(.+?)\s+for": ("decision", 0.85),
+        r"going with\s+(.+?)(?:\.|$)": ("decision", 0.8),
+        # Implementations
+        r"implemented\s+(.+?)(?:\.|$)": ("implementation", 0.9),
+        r"added\s+(.+?)\s+(?:to|for|in)": ("implementation", 0.85),
+        r"created\s+(.+?)(?:\.|$)": ("implementation", 0.85),
+        # Discoveries
+        r"found that\s+(.+?)(?:\.|$)": ("discovery", 0.8),
+        r"discovered\s+(.+?)(?:\.|$)": ("discovery", 0.8),
+        r"realized\s+(.+?)(?:\.|$)": ("discovery", 0.75),
+        # Fixes
+        r"fixed\s+(.+?)(?:\.|$)": ("fix", 0.9),
+        r"resolved\s+(.+?)(?:\.|$)": ("fix", 0.9),
+        r"bug\s+(?:was|in)\s+(.+?)(?:\.|$)": ("fix", 0.8),
+        # Architectural
+        r"architecture\s+(?:is|uses|follows)\s+(.+?)(?:\.|$)": ("architecture", 0.9),
+        r"pattern\s+(?:is|we use)\s+(.+?)(?:\.|$)": ("architecture", 0.85),
+    }
+
+    # Compiled patterns
+    _compiled_patterns = None
+
+    def __init__(self, min_confidence: float = 0.7):
+        self.min_confidence = min_confidence
+        if ConversationExtractor._compiled_patterns is None:
+            ConversationExtractor._compiled_patterns = {
+                re.compile(pattern, re.IGNORECASE): meta
+                for pattern, meta in self.SFS_PATTERNS.items()
+            }
+
+    def extract_from_text(self, text: str) -> ExtractionResult:
+        """
+        Extract facts from conversation text.
+
+        Args:
+            text: Agent response or conversation chunk
+
+        Returns:
+            ExtractionResult with candidate facts
+        """
+        candidates: List[CandidateFact] = []
+
+        for pattern, (sfs_type, confidence) in self._compiled_patterns.items():
+            for match in pattern.finditer(text):
+                if confidence < self.min_confidence:
+                    continue
+
+                content = match.group(1).strip()
+                if len(content) < 10 or len(content) > 200:
+                    continue  # Skip too short or too long
+
+                # Determine memory level based on SFS type
+                level = self._sfs_type_to_level(sfs_type)
+
+                candidates.append(
+                    CandidateFact(
+                        content=f"[{sfs_type.upper()}] {content}",
+                        confidence=confidence,
+                        source="conversation",
+                        suggested_level=level,
+                        requires_approval=confidence < 0.85,
+                    )
+                )
+
+        # Dedupe by content similarity
+        unique = self._dedupe_candidates(candidates)
+
+        auto_approved = sum(1 for c in unique if not c.requires_approval)
+        pending = sum(1 for c in unique if c.requires_approval)
+
+        return ExtractionResult(
+            candidates=unique,
+            auto_approved=auto_approved,
+            pending_approval=pending,
+            total_changes=len(unique),
+        )
+
+    def extract_from_messages(self, messages: List[Dict[str, str]]) -> ExtractionResult:
+        """
+        Extract facts from a list of conversation messages.
+
+        Args:
+            messages: List of {"role": "...", "content": "..."} dicts
+
+        Returns:
+            ExtractionResult with candidate facts
+        """
+        all_candidates: List[CandidateFact] = []
+
+        for msg in messages:
+            if msg.get("role") == "assistant":
+                result = self.extract_from_text(msg.get("content", ""))
+                all_candidates.extend(result.candidates)
+
+        unique = self._dedupe_candidates(all_candidates)
+
+        auto_approved = sum(1 for c in unique if not c.requires_approval)
+        pending = sum(1 for c in unique if c.requires_approval)
+
+        return ExtractionResult(
+            candidates=unique,
+            auto_approved=auto_approved,
+            pending_approval=pending,
+            total_changes=len(unique),
+        )
+
+    def _sfs_type_to_level(self, sfs_type: str) -> MemoryLevel:
+        """Map SFS type to memory level."""
+        mapping = {
+            "decision": MemoryLevel.L1_DOMAIN,
+            "architecture": MemoryLevel.L0_PROJECT,
+            "implementation": MemoryLevel.L2_MODULE,
+            "fix": MemoryLevel.L2_MODULE,
+            "discovery": MemoryLevel.L1_DOMAIN,
+        }
+        return mapping.get(sfs_type, MemoryLevel.L2_MODULE)
+
+    def _dedupe_candidates(
+        self, candidates: List[CandidateFact]
+    ) -> List[CandidateFact]:
+        """Remove duplicate candidates by content similarity."""
+        seen_contents: set = set()
+        unique: List[CandidateFact] = []
+
+        for c in candidates:
+            content_key = c.content.lower()[:50]
+            if content_key not in seen_contents:
+                seen_contents.add(content_key)
+                unique.append(c)
+
+        return unique

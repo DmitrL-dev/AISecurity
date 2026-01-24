@@ -4,14 +4,14 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "rlm-toolkit"
-version = "2.1.0"
+version = "2.3.0"
 description = "Recursive Language Models Toolkit for processing unlimited context"
 readme = "README.md"
 license = { text = "Apache-2.0" }
 authors = [{ name = "SENTINEL Community", email = "rlm@sentinel.dev" }]
 keywords = ["llm", "recursive", "language-models", "long-context", "rlm"]
 classifiers = [
-    "Development Status :: 4 - Beta",
+    "Development Status :: 5 - Production/Stable",
     "Intended Audience :: Developers",
     "License :: OSI Approved :: Apache Software License",
     "Programming Language :: Python :: 3",

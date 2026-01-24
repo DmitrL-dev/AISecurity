@@ -2,6 +2,30 @@
 
 All notable changes to RLM-Toolkit will be documented in this file.
 
+## [2.3.0] - 2026-01-24 🎉 STABLE RELEASE
+
+### 🚀 Major Features
+- **Production/Stable Status** - Graduated from Beta
+- **ConversationExtractor** - SFS detection (15 patterns)
+- **FactConsolidator** - L3→L2→L1 aggregation
+- **TTL Auto-Processor** - Background job (6h interval)
+- **FileWatcher Auto-Start** - Server init integration
+- **Active TDD Enforcement** - Constitutional headers in L0
+
+### MCP Tools (26 total)
+- `rlm_extract_from_conversation` - Extract facts from dialogues
+- `rlm_consolidate_facts` - Aggregate granular facts
+- `rlm_check_enforcement` - TDD compliance check
+
+### Memory Lifecycle
+- **Default TTL**: L2=30 days, L3=7 days, L0/L1=permanent
+- **Causal Decision Logging** (C⁴) - Reasons/consequences/alternatives
+
+### Tests
+- **21+ tests** with TDD coverage for all new features
+
+---
+
 ## [1.2.1] - 2026-01-19
 
 ### Security

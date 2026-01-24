@@ -135,6 +135,19 @@ class RLMServer:
         )
         logger.info(f"Memory Bridge v2.0 initialized at {memory_bridge_v2_db}")
 
+        # Initialize default embedder for auto-embedding (v2.1 fix)
+        try:
+            from sentence_transformers import SentenceTransformer
+
+            embedder = SentenceTransformer("all-MiniLM-L6-v2")
+            self.memory_bridge_v2_store.set_embedder(embedder)
+            logger.info("Default embedder (all-MiniLM-L6-v2) initialized")
+        except ImportError:
+            logger.warning(
+                "sentence-transformers not installed. "
+                "Auto-embedding disabled. Install: pip install sentence-transformers"
+            )
+
         if MCP_AVAILABLE:
             self.mcp = FastMCP("rlm-toolkit")
             self._register_tools()
@@ -150,9 +163,43 @@ class RLMServer:
                 project_root=project_root,
             )
             logger.info("Memory Bridge v2.0 enterprise tools registered")
+
+            # Start background processors (v2.3)
+            self._start_background_processors(project_root)
         else:
             self.mcp = None
             logger.warning("MCP SDK not installed. Run: pip install mcp")
+
+    def _start_background_processors(self, project_root: Path):
+        """Start background processors for TTL and FileWatcher."""
+        import asyncio
+
+        # Get TTL manager from v2 components
+        ttl_manager = self.memory_bridge_v2_components.get("ttl_manager")
+        if ttl_manager:
+            # Start FileWatcher
+            try:
+                ttl_manager.start_file_watcher()
+                logger.info("FileWatcher started")
+            except Exception as e:
+                logger.warning(f"FileWatcher not started: {e}")
+
+            # Schedule TTL processor (every 6 hours)
+            async def ttl_processor_loop():
+                while True:
+                    await asyncio.sleep(6 * 3600)  # 6 hours
+                    try:
+                        report = ttl_manager.process_expired()
+                        logger.info(f"TTL auto-process: {report.to_dict()}")
+                    except Exception as e:
+                        logger.error(f"TTL auto-process error: {e}")
+
+            try:
+                loop = asyncio.get_event_loop()
+                loop.create_task(ttl_processor_loop())
+                logger.info("TTL auto-processor scheduled (6h interval)")
+            except RuntimeError:
+                logger.warning("No event loop for TTL scheduler")
 
     def _persist_session_stats(self):
         """Persist session stats to SQLite for Dashboard access."""
@@ -458,6 +505,10 @@ class RLMServer:
                     },
                     "memory": memory_stats,
                     "secure_mode": isinstance(self.memory, SecureHierarchicalMemory),
+                    # L0 Context Auto-Injection (v2.1 fix)
+                    "l0_context": self.memory_bridge_v2_store.get_l0_context(
+                        max_tokens=500
+                    ),
                 }
             except Exception as e:
                 logger.error(f"Status check failed: {e}")

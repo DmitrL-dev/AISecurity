@@ -178,6 +178,8 @@ class HierarchicalMemoryStore:
             self.db_path = Path(db_path) if isinstance(db_path, str) else db_path
             self.db_path.parent.mkdir(parents=True, exist_ok=True)
         self._init_db()
+        # Embedder for auto-embedding generation (v2.1 fix for Gap 2)
+        self._embedder: Optional[Any] = None
 
     def _init_db(self) -> None:
         """Initialize database schema."""
@@ -284,6 +286,17 @@ class HierarchicalMemoryStore:
         """
         fact_id = str(uuid.uuid4())
         now = datetime.now()
+
+        # Default TTL for L2/L3 facts (v2.1 memory lifecycle)
+        if ttl_config is None:
+            if level == MemoryLevel.L2_MODULE:
+                ttl_config = TTLConfig(ttl_seconds=30 * 24 * 3600)  # 30 days
+            elif level == MemoryLevel.L3_CODE:
+                ttl_config = TTLConfig(ttl_seconds=7 * 24 * 3600)  # 7 days
+
+        # Auto-generate embedding if embedder is available and not provided
+        if embedding is None and self._embedder is not None:
+            embedding = self._generate_embedding(content)
 
         with sqlite3.connect(self.db_path) as conn:
             conn.execute(
@@ -643,3 +656,156 @@ class HierarchicalMemoryStore:
             confidence=row["confidence"],
             source=row["source"],
         )
+
+    # =========================================================================
+    # L0 Auto-Injection Methods (v2.1 fix for Gap 1)
+    # =========================================================================
+
+    def get_l0_context(self, max_tokens: int = 2000) -> str:
+        """
+        Get all L0 (Project-level) facts formatted for context injection.
+
+        This method provides the key facts that should be injected at the
+        start of every agent session to ensure critical rules are always present.
+
+        Args:
+            max_tokens: Maximum token budget for L0 context
+
+        Returns:
+            Formatted string with L0 facts for injection
+        """
+        l0_facts = self.get_facts_by_level(
+            MemoryLevel.L0_PROJECT,
+            include_stale=False,
+            include_archived=False,
+        )
+
+        if not l0_facts:
+            return ""
+
+        # Active TDD Enforcement Header
+        lines = [
+            "## ⚠️ ACTIVE ENFORCEMENT ⚠️",
+            "",
+            "**TDD IRON LAW**: Before writing ANY implementation code:",
+            "1. Write tests FIRST",
+            "2. Run tests (expect RED)",
+            "3. Implement code",
+            "4. Run tests (expect GREEN)",
+            "",
+            "**VIOLATION = BLOCKED**",
+            "",
+            "---",
+            "",
+            "## Project Rules (L0)",
+        ]
+        total_tokens = 50  # header overhead
+
+        for fact in l0_facts:
+            fact_tokens = fact.token_estimate()
+            if total_tokens + fact_tokens > max_tokens:
+                break
+
+            domain_tag = f"[{fact.domain}]" if fact.domain else ""
+            lines.append(f"- {domain_tag} {fact.content}")
+            total_tokens += fact_tokens
+
+        return "\n".join(lines)
+
+    # =========================================================================
+    # Auto-Embedding Support (v2.1 fix for Gap 2)
+    # =========================================================================
+
+    def set_embedder(self, embedder: Any) -> None:
+        """
+        Set the embedder for automatic embedding generation.
+
+        When set, new facts will automatically have embeddings generated.
+
+        Args:
+            embedder: Object with encode(text) -> List[float] method
+        """
+        self._embedder = embedder
+        logger.info("Embedder set for auto-embedding generation")
+
+    def _generate_embedding(self, content: str) -> Optional[List[float]]:
+        """
+        Generate embedding for content using the configured embedder.
+
+        Args:
+            content: Text to embed
+
+        Returns:
+            Embedding vector or None if embedder not configured
+        """
+        if not self._embedder:
+            return None
+
+        try:
+            embedding = self._embedder.encode(content)
+            if isinstance(embedding, list):
+                return embedding
+            # Handle numpy arrays or tensors
+            return list(embedding)
+        except Exception as e:
+            logger.warning(f"Failed to generate embedding: {e}")
+            return None
+
+    # =========================================================================
+    # Enforcement Hook (v2.1 fix for Gap 3)
+    # =========================================================================
+
+    def check_before_implementation(
+        self,
+        task_description: str,
+    ) -> List[str]:
+        """
+        Check L0 rules and return warnings before implementation.
+
+        This enforcement hook scans L0 facts for rules that might be
+        violated by the proposed task and returns warning messages.
+
+        Args:
+            task_description: Description of the task to implement
+
+        Returns:
+            List of warning messages (empty if no violations)
+        """
+        warnings: List[str] = []
+
+        l0_facts = self.get_facts_by_level(
+            MemoryLevel.L0_PROJECT,
+            include_stale=False,
+            include_archived=False,
+        )
+
+        task_lower = task_description.lower()
+
+        # Check for TDD violations
+        implementation_keywords = [
+            "implement",
+            "add",
+            "create",
+            "build",
+            "develop",
+            "write",
+            "code",
+            "feature",
+            "module",
+            "function",
+        ]
+        test_keywords = ["test", "spec", "verify", "check", "validate"]
+
+        is_implementation_task = any(kw in task_lower for kw in implementation_keywords)
+        is_test_task = any(kw in task_lower for kw in test_keywords)
+
+        for fact in l0_facts:
+            content_lower = fact.content.lower()
+
+            # TDD enforcement
+            if "tdd" in content_lower or "test" in content_lower:
+                if is_implementation_task and not is_test_task:
+                    if "must" in content_lower or "iron law" in content_lower:
+                        warnings.append(f"⚠️ TDD WARNING: {fact.content}")
+
+        return warnings

@@ -649,8 +649,71 @@ if prompt := st.chat_input("Напишите что-нибудь..."):
 
 ---
 
+## Memory Bridge v2.3 (НОВОЕ!)
+
+### Извлечение из диалогов (SFS)
+
+```python
+# Извлечение фактов через SFS (Significant Factual Shifts)
+result = await rlm_extract_from_conversation(
+    text="Мы решили использовать FastAPI для бэкенда. Исправили баг авторизации.",
+    auto_approve=True
+)
+# Результат: [DECISION] использовать FastAPI, [FIX] баг авторизации
+```
+
+### Консолидация фактов
+
+```python
+# Агрегация гранулярных фактов в высокоуровневые саммари
+result = await rlm_consolidate_facts(min_facts=5)
+# Консолидирует L3→L2→L1, дедуплицирует похожие факты
+```
+
+### Жизненный цикл TTL
+
+```python
+from rlm_toolkit.memory_bridge.v2.hierarchical import HierarchicalMemoryStore
+
+store = HierarchicalMemoryStore()
+
+# L2 факты: 30-дневный TTL
+store.add_fact("Модульный факт", level=MemoryLevel.L2_MODULE)
+
+# L3 факты: 7-дневный TTL
+store.add_fact("Код-факт", level=MemoryLevel.L3_CODE)
+
+# L0/L1: Бессрочные (без TTL)
+store.add_fact("Проектное правило", level=MemoryLevel.L0_PROJECT)
+```
+
+### Каузальное логирование решений
+
+```python
+# Запись решений с полной цепочкой рассуждений
+result = await rlm_record_causal_decision(
+    decision="Выбрал FastAPI вместо Flask",
+    reasons=["Async поддержка", "Лучшая производительность"],
+    consequences=["Нужен async DB драйвер"],
+    alternatives=["Flask", "Django"]
+)
+```
+
+### Активное TDD Enforcement
+
+```python
+# Проверка соблюдения правил перед реализацией
+result = await rlm_check_enforcement(
+    task_description="Реализовать user service"
+)
+# Возвращает: {"status": "blocked", "warnings": ["TDD: Сначала напиши тесты"]}
+```
+
+---
+
 ## Дальнейшие шаги
 
 - [Туториалы](../tutorials/) - Пошаговые руководства
 - [Концепции](../concepts/) - Глубокие погружения
 - [How-to](../how-to/) - Конкретные рецепты
+

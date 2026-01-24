@@ -1016,8 +1016,71 @@ if prompt := st.chat_input("Say something..."):
 
 ---
 
+## Memory Bridge v2.3 (NEW!)
+
+### Conversation Extraction (SFS)
+
+```python
+# Extract facts from agent dialogues using SFS (Significant Factual Shifts)
+result = await rlm_extract_from_conversation(
+    text="We decided to use FastAPI for the backend. Fixed the auth bug.",
+    auto_approve=True
+)
+# Returns: [DECISION] use FastAPI for the backend, [FIX] the auth bug
+```
+
+### Fact Consolidation
+
+```python
+# Aggregate granular facts into higher-level summaries
+result = await rlm_consolidate_facts(min_facts=5)
+# Consolidates L3→L2→L1, deduplicates similar facts
+```
+
+### Default TTL Lifecycle
+
+```python
+from rlm_toolkit.memory_bridge.v2.hierarchical import HierarchicalMemoryStore
+
+store = HierarchicalMemoryStore()
+
+# L2 facts: 30-day TTL
+store.add_fact("Module fact", level=MemoryLevel.L2_MODULE)
+
+# L3 facts: 7-day TTL  
+store.add_fact("Code fact", level=MemoryLevel.L3_CODE)
+
+# L0/L1: Permanent (no TTL)
+store.add_fact("Project rule", level=MemoryLevel.L0_PROJECT)
+```
+
+### Causal Decision Logging
+
+```python
+# Record decisions with full reasoning chain
+result = await rlm_record_causal_decision(
+    decision="Chose FastAPI over Flask",
+    reasons=["Async support", "Better performance"],
+    consequences=["Need async DB driver"],
+    alternatives=["Flask", "Django"]
+)
+```
+
+### Active TDD Enforcement
+
+```python
+# Check enforcement before implementation
+result = await rlm_check_enforcement(
+    task_description="Implement user service"
+)
+# Returns: {"status": "blocked", "warnings": ["TDD: Write tests first"]}
+```
+
+---
+
 ## Next Steps
 
 - [Tutorials](../tutorials/) - Step-by-step guides
 - [Concepts](../concepts/) - Deep dives
 - [How-to](../how-to/) - Specific recipes
+
