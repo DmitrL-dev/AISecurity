@@ -13,7 +13,6 @@ import re
 import logging
 from typing import List, Tuple, Set
 from dataclasses import dataclass
-from collections import Counter
 
 logger = logging.getLogger(__name__)
 

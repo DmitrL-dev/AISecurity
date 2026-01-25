@@ -8,15 +8,13 @@ Generated: 2026-01-08
 """
 
 import logging
-from typing import Dict, List, Optional, Any
-from datetime import datetime
+from typing import Dict, List, Any
 
 from .models import (
     SecurityRequirement,
     RequirementSet,
     RequirementViolation,
     RequirementCheckResult,
-    Severity,
     EnforcementAction,
 )
 

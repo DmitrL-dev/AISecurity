@@ -6,7 +6,7 @@ Deep health checks for all engines.
 import logging
 import time
 from dataclasses import dataclass, field
-from typing import Dict, List, Callable
+from typing import Dict
 from enum import Enum
 
 logger = logging.getLogger("HealthCheck")

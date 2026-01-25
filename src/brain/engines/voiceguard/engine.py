@@ -5,7 +5,6 @@ Audio security detection engine.
 """
 
 import hashlib
-import io
 from dataclasses import dataclass, field
 from enum import Enum
 from typing import List, Optional, Dict, Any

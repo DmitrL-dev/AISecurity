@@ -67,8 +67,8 @@ class OSINTModule:
             f'"{self.target}" api_key',
             f'"{self.target}" token',
             f'"{self.target}" secret',
-            f"gigachat api key",
-            f"sberbank api key",
+            "gigachat api key",
+            "sberbank api key",
         ]
 
         async with httpx.AsyncClient(timeout=15.0) as client:
@@ -95,7 +95,7 @@ class OSINTModule:
                                 )
                             )
                     elif resp.status_code == 403:
-                        print(f"   ⚠️  Rate limited (need GitHub token)")
+                        print("   ⚠️  Rate limited (need GitHub token)")
                         break
 
                     await asyncio.sleep(2)  # Rate limit

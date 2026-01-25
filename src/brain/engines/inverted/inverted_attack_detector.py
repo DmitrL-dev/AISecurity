@@ -10,7 +10,7 @@ Detections: 8
 
 import re
 import logging
-from typing import Dict, List, Tuple
+from typing import Dict, List
 from dataclasses import dataclass
 
 logger = logging.getLogger(__name__)

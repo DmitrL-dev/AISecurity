@@ -25,7 +25,7 @@ import logging
 import numpy as np
 from dataclasses import dataclass, field
 from enum import Enum
-from typing import List, Dict, Optional, Tuple, Any, Union
+from typing import List, Dict, Optional, Tuple, Any
 import hashlib
 import json
 import time

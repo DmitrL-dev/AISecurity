@@ -17,7 +17,7 @@ import re
 import hashlib
 from dataclasses import dataclass, field
 from enum import Enum
-from typing import Any, Dict, List, Optional, Tuple
+from typing import Any, Dict, List
 from collections import Counter
 
 logger = logging.getLogger("ContextCompressionEngine")

@@ -14,7 +14,7 @@ Features:
 import json
 import re
 import logging
-from typing import Dict, List, Optional, Tuple
+from typing import Dict, List, Optional
 from dataclasses import dataclass, field
 from pathlib import Path
 

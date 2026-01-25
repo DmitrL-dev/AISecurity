@@ -12,7 +12,7 @@ Detects:
 import re
 import logging
 from dataclasses import dataclass
-from typing import List, Tuple, Optional
+from typing import Optional
 from enum import Enum
 
 logger = logging.getLogger("Attack2025Detector")
@@ -105,7 +105,7 @@ class Attack2025Detector:
                         attack_type=AttackType.HASHJACK,
                         confidence=0.85,
                         risk_score=80,
-                        details=f"HashJack detected in URL fragment",
+                        details="HashJack detected in URL fragment",
                         matched_pattern=pattern,
                     )
 

@@ -7,7 +7,7 @@ Extracted from universal_controller.py (lines 1997-2328).
 
 import asyncio
 from datetime import datetime
-from typing import Dict, List, Optional
+from typing import Dict, List
 
 
 # All Crucible challenges organized by difficulty
@@ -118,7 +118,7 @@ async def crack_crucible(
     
     if verbose:
         print(f"\n{'='*50}")
-        print(f"📊 SUMMARY")
+        print("📊 SUMMARY")
         print(f"  Cracked: {stats['cracked']}/{stats['total']}")
         print(f"  Failed:  {stats['failed']}")
         print(f"  Errors:  {stats['errors']}")
@@ -220,7 +220,7 @@ async def crack_crucible_hydra(
     
     if verbose:
         print(f"\n{'='*50}")
-        print(f"📊 HYDRA SUMMARY")
+        print("📊 HYDRA SUMMARY")
         print(f"  Cracked: {stats['cracked']}/{stats['total']}")
     
     return {

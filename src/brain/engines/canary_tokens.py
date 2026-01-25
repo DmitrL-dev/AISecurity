@@ -9,15 +9,13 @@ Canary Tokens Engine (#47) - Data Leak Detection
 При утечке данных — знаем источник.
 """
 
-import re
 import logging
 import secrets
 import hashlib
 import json
-from typing import Dict, List, Optional, Tuple
+from typing import Dict, Optional, Tuple
 from dataclasses import dataclass, field
 from datetime import datetime
-from base64 import b64encode, b64decode
 
 logger = logging.getLogger("CanaryTokens")
 

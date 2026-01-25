@@ -7,7 +7,6 @@ from engines.semantic_boundary_enforcer import (
     SemanticBoundaryEnforcer,
     RoleBoundary,
     ContextBoundary,
-    PermissionBoundary,
     BoundaryViolation,
 )
 

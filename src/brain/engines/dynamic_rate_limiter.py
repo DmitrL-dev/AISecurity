@@ -14,12 +14,10 @@ Invention: Dynamic Rate Limiter (#40)
 
 import time
 import logging
-from collections import defaultdict
 from dataclasses import dataclass, field
 from enum import Enum
 from typing import Dict, List, Optional
 
-from .base_engine import Severity, Action  # Base classes
 
 logger = logging.getLogger("DynamicRateLimiter")
 

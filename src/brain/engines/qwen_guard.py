@@ -16,8 +16,8 @@ import re
 import time
 import logging
 import threading
-from typing import Optional, Tuple, List, Dict
-from dataclasses import dataclass, field
+from typing import List, Dict
+from dataclasses import dataclass
 from enum import Enum
 
 logger = logging.getLogger("QwenGuard")

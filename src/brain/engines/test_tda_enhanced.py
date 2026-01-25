@@ -12,8 +12,6 @@ from engines.tda_enhanced import (
     PersistenceDistance,
     PersistenceDiagram,
     PersistencePair,
-    ZigzagPersistence,
-    TopologicalFingerprint,
 )
 
 

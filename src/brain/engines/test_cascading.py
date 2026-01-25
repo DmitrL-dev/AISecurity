@@ -15,10 +15,7 @@ from typing import List
 
 from engines.cascading_guard import (
     CircuitState,
-    PropagationType,
     AgentAction,
-    CircuitBreaker,
-    FeedbackLoop,
     FanoutResult,
     RollbackPlan,
     CascadeAnalysisResult,

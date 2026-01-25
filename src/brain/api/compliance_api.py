@@ -8,7 +8,7 @@ Generated: 2026-01-08
 
 from typing import List, Optional
 from fastapi import APIRouter, HTTPException
-from fastapi.responses import PlainTextResponse, JSONResponse
+from fastapi.responses import PlainTextResponse
 from pydantic import BaseModel
 
 from ..compliance import (

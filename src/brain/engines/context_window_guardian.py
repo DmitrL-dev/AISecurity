@@ -12,15 +12,13 @@ Research: context_window_security_deep_dive.md
 Invention: Context Window Guardian (#42)
 """
 
-import re
 import logging
 import time
 from collections import Counter
 from dataclasses import dataclass, field
 from enum import Enum
-from typing import Dict, List, Optional, Tuple
+from typing import List, Optional, Tuple
 
-from .base_engine import Severity, Action  # Base classes
 
 logger = logging.getLogger("ContextWindowGuardian")
 

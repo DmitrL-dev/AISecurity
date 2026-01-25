@@ -22,7 +22,6 @@ from typing import Dict, List, Optional, Set, Any, Tuple
 from dataclasses import dataclass, field
 from enum import Enum
 from collections import defaultdict
-import statistics
 
 logger = logging.getLogger("AgentAnomaly")
 

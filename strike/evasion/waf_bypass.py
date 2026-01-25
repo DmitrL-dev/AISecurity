@@ -42,12 +42,11 @@ Based on research from:
 - Real-world bug bounty findings
 """
 
-import base64
 import random
 import string
 import re
 import json
-from typing import List, Dict, Tuple, Optional, Callable
+from typing import List, Dict, Tuple, Callable
 from dataclasses import dataclass
 from enum import Enum
 from urllib.parse import quote, quote_plus
@@ -338,7 +337,7 @@ class WAFBypass:
             original=payload,
             bypassed=result,
             technique=BypassTechnique.WHITESPACE,
-            description=f"Whitespace replaced with alternative chars",
+            description="Whitespace replaced with alternative chars",
             success_rate=0.5,
         )
 

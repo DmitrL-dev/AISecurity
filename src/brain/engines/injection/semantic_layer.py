@@ -7,7 +7,7 @@ Extracted from injection.py SemanticLayer (lines 1561-1662).
 
 import logging
 import os
-from typing import List, Optional, Tuple
+from typing import List, Tuple
 
 import yaml
 

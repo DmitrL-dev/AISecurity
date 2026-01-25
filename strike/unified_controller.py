@@ -13,7 +13,7 @@ import aiohttp
 import random
 import re
 import logging
-from typing import Dict, List, Optional, Tuple
+from typing import Dict, List, Optional
 from dataclasses import dataclass, field
 from enum import Enum
 
@@ -347,7 +347,7 @@ class UnifiedAttackController:
             print(f"   Blocked words: {self.profile.blocked_words}")
             
             # Phase 2: Attack loop
-            print(f"⚔️ Starting attack loop...")
+            print("⚔️ Starting attack loop...")
             
             best_fitness = 0.0
             best_payload = None

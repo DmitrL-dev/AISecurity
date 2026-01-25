@@ -10,7 +10,7 @@ This creates self-governance within multi-agent systems.
 """
 
 import logging
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 from typing import Dict, List, Optional, Callable, Any
 from enum import Enum
 from datetime import datetime

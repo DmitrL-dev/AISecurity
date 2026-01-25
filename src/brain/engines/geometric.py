@@ -22,7 +22,6 @@ import hashlib
 from typing import List, Dict, Optional, Tuple
 from dataclasses import dataclass, field
 from collections import deque
-from functools import lru_cache
 from sentence_transformers import SentenceTransformer
 
 try:

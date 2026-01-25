@@ -393,18 +393,6 @@ jailbreaks:
     bypass_technique: defense_evasion
     description: "SKD Bypass - evading honeypot defenses"
 
-# ===========================================
-# Ambiguous Patterns (Context-Dependent)
-# ===========================================
-ambiguous:
-  - "disable safety"
-  - "bypass"
-  - "hack"
-  - "override"
-  - "unlock"
-  - "unrestricted"
-  - "without limits"
-
   # ===========================================
   # Lasso Security Patterns (2026-01)
   # Source: https://github.com/lasso-security/claude-hooks
@@ -445,7 +433,7 @@ ambiguous:
     source: lasso-security/claude-hooks
     description: "Cyrillic/Latin homoglyph substitution"
 
-  - pattern: "[\u200b\u200c\u200d\ufeff]"
+  - pattern: "[\\u200b\\u200c\\u200d\\ufeff]"
     attack_class: LLM01
     complexity: sophisticated
     bypass_technique: encoding
@@ -470,7 +458,7 @@ ambiguous:
     source: lasso-security/claude-hooks
     description: "Fake OpenAI system message"
 
-  - pattern: '\"role\":\\s*\"system\"'
+  - pattern: '"role":\\s*"system"'
     attack_class: LLM01
     complexity: sophisticated
     bypass_technique: context
@@ -568,6 +556,18 @@ ambiguous:
     complexity: moderate
     bypass_technique: authority
     source: lasso-security/claude-hooks
+
+# ===========================================
+# Ambiguous Patterns (Context-Dependent)
+# ===========================================
+ambiguous:
+  - "disable safety"
+  - "bypass"
+  - "hack"
+  - "override"
+  - "unlock"
+  - "unrestricted"
+  - "without limits"
 
   # ===========================================
   # Claude Code Specific (CVE-2025-64755) — Jan 9 2026
@@ -714,4 +714,3 @@ safe_examples:
   - "Show me an example of a system prompt for education"
   - "What are best practices for AI safety?"
   - "How does OWASP classify LLM vulnerabilities?"
-

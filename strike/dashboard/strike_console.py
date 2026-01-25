@@ -21,52 +21,34 @@ from strike.payloads import (
     XXE_PAYLOADS,
     NOSQL_PAYLOADS,
     AUTH_BYPASS_HEADERS,
-    get_payload_counts,
 )
 from strike.stealth.geo_evasion import (
-    GeoIPEvasion,
     GeoStealthSession,
     ZOOGVPN_SERVERS,
-    COUNTRY_PROFILES,
 )
 from strike.stealth.advanced_stealth import (
     AdvancedStealthSession,
     StealthConfig,
     BrowserProfile,
     HumanTiming,
-    USER_AGENTS,
 )
 from strike.evasion import (
     WAFBypass,
     HTTPBypass,
     BlockDetector,
-    EvasionEngine,
-    EnterpriseBypass,
-    EnterpriseBypassConfig,
     create_enterprise_bypass,
-    AdvancedEvasionEngine,
     EliteBypass,
-    create_advanced_evasion,
-    UltimatePayloadMutator,
     create_mutator,
     # New bypass modules
-    WAFFingerprinter,
     fingerprinter,
-    AdaptivePayloadEngine,
     adaptive_engine,
-    AdvancedSmuggling,
     smuggling,
-    MLBypassSelector,
     ml_selector,
 )
 from strike.evasion.residential_proxy import (
-    ResidentialProxyManager,
-    ProxyConfig,
-    ProxyProvider,
     create_scraperapi_proxy,
 )
-from urllib.parse import quote, urljoin, urlparse
-from aiohttp_socks import ProxyConnector
+from urllib.parse import quote, urlparse
 import aiohttp
 import queue
 import threading
@@ -2185,7 +2167,7 @@ def deep_recon():
                     log_event(
                         {
                             "type": "log",
-                            "message": f"🌐 IP Range Scanner starting...",
+                            "message": "🌐 IP Range Scanner starting...",
                             "level": "info",
                         }
                     )
@@ -4240,7 +4222,7 @@ if __name__ == "__main__":
     except Exception as e:
         print(f"⚠️ Updater check failed: {e}")
 
-    print(f"\nStarting on http://localhost:5050")
+    print("\nStarting on http://localhost:5050")
     print("=" * 60)
 
     app.run(host="0.0.0.0", port=5050, debug=False, threaded=True)

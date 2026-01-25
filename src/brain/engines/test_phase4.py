@@ -11,9 +11,6 @@ class TestAIC2Detection:
     def test_import(self):
         from engines.ai_c2_detection import (
             AIC2Detector,
-            C2DetectionResult,
-            C2ThreatType,
-            Verdict,
         )
 
         assert AIC2Detector is not None
@@ -51,7 +48,7 @@ class TestAIC2Detection:
         assert result.is_safe is False
 
     def test_search_c2(self):
-        from engines.ai_c2_detection import AIC2Detector, C2ThreatType
+        from engines.ai_c2_detection import AIC2Detector
 
         detector = AIC2Detector()
 
@@ -87,10 +84,6 @@ class TestAttackStaging:
     def test_import(self):
         from engines.attack_staging import (
             AttackStagingDetector,
-            StagingResult,
-            StagingThreatType,
-            AttackStage,
-            Verdict,
         )
 
         assert AttackStagingDetector is not None
@@ -145,7 +138,7 @@ class TestAttackStaging:
         assert StagingThreatType.STAGED_SEQUENCE in result.threats
 
     def test_progression_detection(self):
-        from engines.attack_staging import AttackStagingDetector, AttackStage
+        from engines.attack_staging import AttackStagingDetector
 
         detector = AttackStagingDetector()
 

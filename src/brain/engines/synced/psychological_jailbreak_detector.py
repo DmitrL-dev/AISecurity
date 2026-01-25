@@ -12,7 +12,7 @@ Based on December 2025 research on psychological jailbreaks.
 
 import re
 import logging
-from typing import List, Dict, Set
+from typing import List
 from dataclasses import dataclass
 
 logger = logging.getLogger(__name__)

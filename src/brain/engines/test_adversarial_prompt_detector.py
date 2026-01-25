@@ -7,7 +7,6 @@ from engines.adversarial_prompt_detector import (
     AdversarialPromptDetector,
     HomoglyphDetector,
     InvisibleCharDetector,
-    TypoDetector,
     PerturbationType,
 )
 

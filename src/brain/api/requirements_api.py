@@ -13,7 +13,6 @@ from datetime import datetime
 
 from ..requirements import (
     RequirementsManager,
-    SecurityRequirement,
     RequirementSet,
     RequirementCategory,
     Severity,

@@ -16,11 +16,10 @@ import math
 import logging
 import time
 from collections import defaultdict
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 from enum import Enum
 from typing import Dict, List, Optional, Tuple
 
-from .base_engine import Severity, Action  # Base classes
 
 logger = logging.getLogger("MetaAttackAdapter")
 

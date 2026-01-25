@@ -13,14 +13,12 @@ Invention: GAN-Based Adversarial Defense (#33)
 """
 
 import random
-import math
 import logging
 import time
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 from enum import Enum
-from typing import Dict, List, Optional, Tuple
+from typing import List, Optional, Tuple
 
-from .base_engine import Severity, Action  # Base classes
 
 logger = logging.getLogger("GANAdversarialDefense")
 

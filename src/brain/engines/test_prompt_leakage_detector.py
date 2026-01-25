@@ -7,7 +7,6 @@ from engines.prompt_leakage_detector import (
     PromptLeakageDetector,
     ExtractionDetector,
     LeakageScanner,
-    FingerprintManager,
     LeakageType,
 )
 

@@ -6,7 +6,6 @@ Enumerate DNS records for target domain.
 
 import asyncio
 import socket
-from typing import Optional
 from dataclasses import dataclass, field
 
 

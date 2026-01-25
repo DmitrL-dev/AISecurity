@@ -69,8 +69,6 @@ def attack(
         strike attack -t URL --mode marathon --stealth
     """
     import asyncio
-    from rich.progress import Progress, SpinnerColumn, TextColumn, BarColumn
-    from rich.live import Live
     from rich.table import Table
 
     from .orchestrator import StrikeOrchestrator, StrikeConfig
@@ -507,7 +505,6 @@ def report(
     console.print(f"📊 Generating {format.upper()} report from {input_file}...")
     # Generate report from scan results
     import json
-    from datetime import datetime
 
     input_path = Path(input_file)
     if not input_path.exists():
@@ -647,7 +644,7 @@ def hydra(
 
     report = asyncio.run(run())
 
-    console.print(f"\\n[green]Attack completed![/green]")
+    console.print("\\n[green]Attack completed![/green]")
     console.print(f"Success rate: {report.success_rate:.0%}")
     console.print(f"Blocked heads: {len(report.blocked_heads)}")
 
@@ -660,7 +657,7 @@ def discover(
 ):
     """Discover LLM endpoints for target domain."""
     import asyncio
-    from .discovery import DNSEnumerator, SubdomainFinder, LLMFingerprinter
+    from .discovery import DNSEnumerator, SubdomainFinder
 
     console.print(
         Panel.fit(
@@ -690,7 +687,7 @@ def discover(
 
     # DNS results
     dns = results["dns"]
-    console.print(f"\\n[bold]DNS Records:[/bold]")
+    console.print("\\n[bold]DNS Records:[/bold]")
     console.print(f"  A: {dns.a or 'none'}")
     console.print(f"  MX: {dns.mx or 'none'}")
 

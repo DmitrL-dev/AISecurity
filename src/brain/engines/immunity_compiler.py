@@ -14,8 +14,8 @@ Author: Dmitry Labintsev
 Contact: chg@live.ru | @DmLabincev
 """
 
-from dataclasses import dataclass, field
-from typing import List, Dict, Any, Optional, Set
+from dataclasses import dataclass
+from typing import List, Dict, Any, Optional
 from enum import Enum
 
 
@@ -377,7 +377,7 @@ if __name__ == "__main__":
 
     # Compile all
     system = compiler.compile_all_policies(policies)
-    print(f"\nCompiled system:")
+    print("\nCompiled system:")
     print(f"  Policies: {len(system.policies)}")
     print(f"  Guarantees: {len(system.guarantees)}")
     print(f"  Immunity score: {system.immunity_score:.0%}")

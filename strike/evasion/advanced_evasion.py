@@ -13,7 +13,6 @@ Requirements:
 """
 
 import asyncio
-import socket
 import ssl
 from typing import Dict, Optional, Tuple, List
 from dataclasses import dataclass
@@ -452,7 +451,6 @@ class EliteBypass:
         Send malicious payload in Sec-WebSocket-Protocol header.
         """
         import base64
-        import hashlib
         import random
 
         key = base64.b64encode(random.randbytes(16)).decode()

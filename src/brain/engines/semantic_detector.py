@@ -7,7 +7,7 @@ Achieves 90%+ recall by semantic matching to known attack patterns.
 """
 
 import numpy as np
-from typing import List, Tuple, Optional
+from typing import List, Optional
 from dataclasses import dataclass
 import logging
 

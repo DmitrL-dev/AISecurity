@@ -7,7 +7,7 @@ Extracted from UniversalController._mutate() and _apply_bypass().
 
 import random
 import re
-from typing import List, Optional, Any
+from typing import List
 
 
 # Synonym replacement for blocked words

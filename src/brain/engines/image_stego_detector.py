@@ -15,7 +15,7 @@ Detection methods:
 
 import re
 import logging
-from typing import List, Tuple, Optional, Dict, Any
+from typing import List, Dict
 from dataclasses import dataclass
 from io import BytesIO
 import base64

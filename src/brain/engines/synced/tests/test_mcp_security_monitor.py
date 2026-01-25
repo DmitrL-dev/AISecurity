@@ -8,10 +8,7 @@ Generated: 2026-01-07
 
 import pytest
 from ..mcp_security_monitor import (
-    MCPSecurityMonitor, 
-    analyze, 
-    MCPRiskLevel,
-    MCPViolation
+    MCPSecurityMonitor
 )
 
 

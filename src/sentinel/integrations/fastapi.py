@@ -4,7 +4,7 @@ FastAPI Integration — SENTINEL middleware for FastAPI.
 Automatically scans requests for security threats.
 """
 
-from typing import Callable, List, Optional
+from typing import List
 import logging
 
 logger = logging.getLogger(__name__)

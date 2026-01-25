@@ -23,7 +23,7 @@ import time
 import logging
 import threading
 from dataclasses import dataclass, field
-from typing import Dict, Optional, Tuple
+from typing import Dict, Optional
 from collections import defaultdict
 
 logger = logging.getLogger("RateLimiter")

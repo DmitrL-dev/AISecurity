@@ -12,7 +12,7 @@ but can be read and processed by LLMs, enabling hidden prompt injection.
 """
 
 import random
-from typing import List, Dict, Optional
+from typing import List
 
 
 class UnicodeSmuggler:

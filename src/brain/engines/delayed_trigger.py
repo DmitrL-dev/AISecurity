@@ -10,8 +10,7 @@ Detects time-delayed malicious triggers in prompts that could:
 import re
 import logging
 from dataclasses import dataclass
-from typing import List, Set
-from datetime import datetime
+from typing import List
 
 logger = logging.getLogger("DelayedTriggerDetector")
 

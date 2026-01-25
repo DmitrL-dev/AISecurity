@@ -7,7 +7,6 @@ from engines.transformer_attention_shield import (
     TransformerAttentionShield,
     AttentionAnalyzer,
     FocusHijackDetector,
-    AttentionAnomalyDetector,
     AttentionPattern,
     AttentionThreat,
 )

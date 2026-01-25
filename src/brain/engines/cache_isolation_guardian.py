@@ -16,11 +16,10 @@ import hashlib
 import hmac
 import logging
 import time
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 from enum import Enum
-from typing import Dict, List, Optional, Set, Tuple
+from typing import Dict, Optional, Set, Tuple
 
-from .base_engine import Severity, Action  # Base classes
 
 logger = logging.getLogger("CacheIsolationGuardian")
 

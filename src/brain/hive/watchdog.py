@@ -8,9 +8,9 @@ import asyncio
 import logging
 import time
 import os
-from dataclasses import dataclass, field
-from typing import Dict, List, Optional, Callable
-from datetime import datetime, timedelta
+from dataclasses import dataclass
+from typing import Dict, Optional, Callable
+from datetime import datetime
 import redis
 
 logger = logging.getLogger("Watchdog")

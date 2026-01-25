@@ -8,7 +8,6 @@ from engines.activation_steering import (
     ActivationSteeringEngine,
     SteeringVector,
     SteeringVectorFactory,
-    SteeringProfile,
     SafetyProfileLibrary,
     SafetyBehavior,
     SteeringDirection,

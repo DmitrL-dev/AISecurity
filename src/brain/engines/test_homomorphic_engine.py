@@ -13,7 +13,6 @@ from engines.homomorphic_engine import (
     EncryptedPromptAnalyzer,
     HEScheme,
     SecurityLevel,
-    EncryptedVector,
 )
 
 

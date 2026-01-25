@@ -14,7 +14,7 @@ Automatically discovers hidden chatbot endpoints through:
 import re
 import asyncio
 import aiohttp
-from typing import List, Dict, Optional, Tuple
+from typing import List, Dict, Optional
 from dataclasses import dataclass
 from urllib.parse import urljoin, urlparse
 import logging

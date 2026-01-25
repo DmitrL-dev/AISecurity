@@ -7,7 +7,7 @@ Implements circuit breaker pattern for fault tolerance.
 import asyncio
 import logging
 import time
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 from enum import Enum
 from functools import wraps
 from typing import Any, Callable, Optional, TypeVar
@@ -137,7 +137,7 @@ class CircuitBreaker:
             
             return result
             
-        except Exception as e:
+        except Exception:
             async with self._lock:
                 self._record_failure()
             raise

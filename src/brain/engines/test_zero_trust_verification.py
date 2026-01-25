@@ -8,7 +8,6 @@ from engines.zero_trust_verification import (
     ZeroTrustVerification,
     IdentityVerifier,
     PolicyEngine,
-    ContextAnalyzer,
     Identity,
     AccessRequest,
     AccessLevel,

@@ -10,9 +10,7 @@ import pytest
 from ..agentic_behavior_analyzer import (
     AgenticBehaviorAnalyzer,
     AgentAction,
-    BehaviorAnomaly,
-    analyze,
-    record
+    BehaviorAnomaly
 )
 
 

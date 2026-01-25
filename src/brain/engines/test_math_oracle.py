@@ -3,7 +3,6 @@ Unit tests for Math Oracle Engine.
 """
 
 import pytest
-import numpy as np
 from engines.math_oracle import (
     MathOracleEngine,
     OracleConfig,

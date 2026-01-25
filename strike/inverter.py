@@ -6,10 +6,9 @@ Each defense pattern becomes an attack payload.
 """
 
 import re
-import ast
 import logging
 from pathlib import Path
-from typing import List, Dict, Any
+from typing import List
 from dataclasses import dataclass
 
 logger = logging.getLogger(__name__)

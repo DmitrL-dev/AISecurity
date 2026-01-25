@@ -7,8 +7,7 @@ Pytest fixtures and configuration for Strike tests.
 import asyncio
 import pytest
 from dataclasses import dataclass
-from typing import List, Optional
-from unittest.mock import AsyncMock, MagicMock
+from typing import List
 
 
 # ============================================================================

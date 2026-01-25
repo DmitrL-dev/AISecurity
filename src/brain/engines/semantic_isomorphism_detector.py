@@ -24,7 +24,7 @@ Reference: arXiv:2512.13703 (Safe2Harm, Dec 2025)
 import re
 import logging
 from dataclasses import dataclass, field
-from typing import List, Dict, Optional, Tuple, Any
+from typing import List, Dict, Optional, Any
 from enum import Enum
 
 logger = logging.getLogger("SemanticIsomorphism")

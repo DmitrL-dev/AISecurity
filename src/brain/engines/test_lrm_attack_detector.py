@@ -5,7 +5,6 @@
 Tests for LRM Attack Detector
 """
 
-import pytest
 from src.brain.engines.lrm_attack_detector import (
     LRMAttackDetector,
     LRMAttackType,

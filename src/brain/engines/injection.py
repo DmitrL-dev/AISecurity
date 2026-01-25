@@ -25,7 +25,6 @@ import numpy as np
 from typing import Dict, List, Optional, Tuple
 from dataclasses import dataclass, field
 from datetime import datetime, timedelta
-from functools import lru_cache
 from enum import Enum
 
 logger = logging.getLogger("InjectionEngine")
@@ -1843,7 +1842,7 @@ class InjectionEngine:
         }
 
         if not os.path.exists(profile_file):
-            logger.warning(f"Profile config not found, using defaults")
+            logger.warning("Profile config not found, using defaults")
             return defaults
 
         try:

@@ -9,8 +9,7 @@ Generated: 2026-01-07
 import pytest
 from ..sleeper_agent_detector import (
     SleeperAgentDetector,
-    TriggerType,
-    detect
+    TriggerType
 )
 
 

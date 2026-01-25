@@ -17,10 +17,9 @@ import io
 import re
 import logging
 import hashlib
-from typing import Dict, List, Optional, Tuple, Union
+from typing import Dict, List, Optional, Tuple
 from dataclasses import dataclass, field
 from enum import Enum
-from functools import lru_cache
 
 logger = logging.getLogger("VisualContentAnalyzer")
 

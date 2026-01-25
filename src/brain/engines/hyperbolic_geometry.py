@@ -28,7 +28,7 @@ import logging
 import numpy as np
 from dataclasses import dataclass, field
 from enum import Enum
-from typing import List, Dict, Optional, Tuple, Any
+from typing import Dict, Optional, Any
 
 logger = logging.getLogger("HyperbolicGeometry")
 

@@ -7,7 +7,7 @@ Detects chaotic vs structured behavior in user interactions.
 import logging
 import math
 from dataclasses import dataclass
-from typing import List, Optional, Tuple
+from typing import List, Optional
 import numpy as np
 from collections import deque
 

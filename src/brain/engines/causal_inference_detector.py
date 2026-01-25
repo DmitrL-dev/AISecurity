@@ -17,9 +17,8 @@ import time
 from collections import defaultdict
 from dataclasses import dataclass, field
 from enum import Enum
-from typing import Dict, List, Optional, Set, Tuple
+from typing import Dict, List, Optional, Tuple
 
-from .base_engine import Severity, Action  # Base classes
 
 logger = logging.getLogger("CausalInferenceDetector")
 

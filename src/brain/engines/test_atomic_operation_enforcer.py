@@ -3,13 +3,10 @@ Unit tests for Atomic Operation Enforcer.
 """
 
 import pytest
-import threading
-import time
 from engines.atomic_operation_enforcer import (
     AtomicOperationEnforcer,
     LockManager,
     StateValidator,
-    ViolationType,
 )
 
 

@@ -4,7 +4,7 @@ SENTINEL Security Engine Constants
 Shared constants and patterns for all security engines.
 """
 
-from typing import Dict, FrozenSet, List, Pattern, Set
+from typing import Dict, FrozenSet, List, Pattern
 import re
 
 

@@ -9,9 +9,7 @@ description = "AI Security Framework — The pytest of AI Security"
 readme = "README.md"
 license = "MIT"
 requires-python = ">=3.9"
-authors = [
-    { name = "SENTINEL Team" }
-]
+authors = [{ name = "SENTINEL Team" }]
 keywords = [
     "ai-security",
     "llm-security",
@@ -36,27 +34,13 @@ classifiers = [
     "Topic :: Scientific/Engineering :: Artificial Intelligence",
 ]
 
-dependencies = [
-    "pydantic>=2.0",
-    "aiohttp>=3.8",
-]
+dependencies = ["pydantic>=2.0", "aiohttp>=3.8"]
 
 [project.optional-dependencies]
-cli = [
-    "click>=8.0",
-    "rich>=13.0",
-]
-ml = [
-    "torch>=2.0",
-    "transformers>=4.30",
-    "sentence-transformers>=2.2",
-]
-plugins = [
-    "pluggy>=1.0",
-]
-full = [
-    "sentinel-llm-security[cli,ml,plugins]",
-]
+cli = ["click>=8.0", "rich>=13.0"]
+ml = ["torch>=2.0", "transformers>=4.30", "sentence-transformers>=2.2"]
+plugins = ["pluggy>=1.0"]
+full = ["sentinel-llm-security[cli,ml,plugins]"]
 dev = [
     "pytest>=7.0",
     "pytest-asyncio>=0.21",
@@ -81,16 +65,12 @@ Issues = "https://github.com/DmitrL-dev/AISecurity/issues"
 packages = ["src/sentinel"]
 
 [tool.hatch.build.targets.sdist]
-include = [
-    "/src",
-    "/tests",
-    "/README.md",
-    "/LICENSE",
-]
+include = ["/src", "/tests", "/README.md", "/LICENSE"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
 asyncio_mode = "auto"
+pythonpath = ["src"]
 
 [tool.black]
 line-length = 88

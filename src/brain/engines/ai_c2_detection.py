@@ -15,11 +15,10 @@ AI C2 Detection Engine (#43) - Command & Control Detection
 
 import re
 import logging
-from typing import Dict, List, Optional, Tuple, Set
+from typing import List, Optional, Tuple, Set
 from dataclasses import dataclass, field
 from enum import Enum
 from urllib.parse import urlparse
-import hashlib
 
 logger = logging.getLogger("AIC2Detection")
 

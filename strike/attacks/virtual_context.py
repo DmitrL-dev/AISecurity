@@ -9,8 +9,7 @@ Based on: arXiv:2406.19845 (June 2024)
 """
 
 import random
-from typing import List, Dict, Optional
-from dataclasses import dataclass
+from typing import List
 
 
 class VirtualContextInjector:

@@ -5,8 +5,6 @@ Tests for Causal Attack Model Engine
 import unittest
 from src.brain.engines.causal_attack_model import (
     CausalAttackModel,
-    CausalMechanism,
-    InterventionType,
     CausalGraph,
     CausalNode,
     CausalEdge,

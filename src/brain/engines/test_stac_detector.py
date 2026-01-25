@@ -5,7 +5,6 @@
 Tests for Sequential Tool Attack Chaining (STAC) Detector
 """
 
-import pytest
 from src.brain.engines.stac_detector import (
     STACDetector,
     ToolCategory,

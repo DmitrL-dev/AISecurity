@@ -7,7 +7,7 @@ Based on ARTEMIS pattern: preserve recent context, summarize old.
 """
 
 import logging
-from typing import List, Optional
+from typing import List
 from dataclasses import dataclass
 from datetime import datetime
 

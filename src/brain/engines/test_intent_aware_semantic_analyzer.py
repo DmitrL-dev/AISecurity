@@ -7,7 +7,6 @@ from engines.intent_aware_semantic_analyzer import (
     IntentAwareSemanticAnalyzer,
     IntentClassifier,
     ParaphraseDetector,
-    SemanticEmbedder,
     IntentCategory,
 )
 

@@ -10,7 +10,7 @@ Kill Chain Simulation Engine (#50) - Attack Impact Assessment
 """
 
 import logging
-from typing import Dict, List, Optional, Tuple
+from typing import List, Optional
 from dataclasses import dataclass, field
 from enum import Enum
 

@@ -5,7 +5,6 @@
 Tests for Human-Agent Trust Exploitation Detector (ASI09)
 """
 
-import pytest
 from src.brain.engines.human_agent_trust_detector import (
     HumanAgentTrustDetector,
     TrustExploitationType,

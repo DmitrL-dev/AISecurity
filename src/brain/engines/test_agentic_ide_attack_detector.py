@@ -10,7 +10,6 @@ Based on real vulnerabilities:
 - ServiceNow Bodysnatcher vulnerability
 """
 
-import pytest
 from src.brain.engines.agentic_ide_attack_detector import (
     AgenticIDEAttackDetector,
     AgenticAttackType,

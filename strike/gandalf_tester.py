@@ -7,7 +7,6 @@ https://gandalf.lakera.ai
 
 import asyncio
 import aiohttp
-import json
 from pathlib import Path
 from dataclasses import dataclass
 from typing import List, Optional
@@ -215,7 +214,7 @@ class GandalfTester:
     def generate_report(self) -> str:
         """Generate test report."""
         report = "# Gandalf CTF Test Report\n\n"
-        report += f"## Summary\n"
+        report += "## Summary\n"
         report += f"- Attacks tested: {len(self.results)}\n"
         report += f"- Passwords found: {len(self.passwords_found)}\n\n"
 

@@ -13,7 +13,7 @@ Cross-Modal Consistency Engine (#36) - VLM Attack Protection
 """
 
 import logging
-from typing import Dict, List, Optional, Tuple, Union
+from typing import List, Optional, Tuple
 from dataclasses import dataclass, field
 from enum import Enum
 

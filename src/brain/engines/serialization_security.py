@@ -17,7 +17,7 @@ Engine detects:
 import re
 import json
 import logging
-from typing import Dict, List, Optional, Set, Any
+from typing import Dict, List, Optional, Any
 from dataclasses import dataclass, field
 from enum import Enum
 

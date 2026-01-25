@@ -15,11 +15,10 @@ Contact: chg@live.ru | @DmLabincev
 """
 
 from dataclasses import dataclass, field
-from typing import List, Dict, Any, Optional, Callable
+from typing import List, Dict, Any, Optional
 from enum import Enum
 from datetime import datetime
 import hashlib
-import secrets
 
 
 class ZeroDayCategory(Enum):
@@ -495,10 +494,10 @@ if __name__ == "__main__":
     print(f"\nDiscovered: {report.zero_day.title}")
     print(f"Severity: {report.zero_day.severity.name}")
     print(f"Status: {report.zero_day.status.value}")
-    print(f"\nTimeline:")
+    print("\nTimeline:")
     for event in report.attack_timeline:
         print(f"  - {event}")
-    print(f"\nRecommendations:")
+    print("\nRecommendations:")
     for rec in report.recommendations:
         print(f"  - {rec}")
 

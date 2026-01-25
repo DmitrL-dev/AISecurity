@@ -12,7 +12,6 @@ from engines.hyperbolic_geometry import (
     EuclideanToHyperbolic,
     HyperbolicAnomalyDetector,
     HyperbolicEmbedding,
-    HyperbolicModel,
 )
 
 

@@ -10,7 +10,7 @@ OWASP Mapping:
 """
 
 from dataclasses import dataclass, field
-from typing import Dict, List, Optional, Any
+from typing import Dict, List, Optional
 from enum import Enum
 import math
 import time

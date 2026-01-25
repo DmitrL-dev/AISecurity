@@ -12,14 +12,12 @@ Research: adversarial_prompts_deep_dive.md
 Invention: Adversarial Prompt Detector (#46)
 """
 
-import re
 import logging
 import time
 from dataclasses import dataclass, field
 from enum import Enum
-from typing import Dict, List, Optional, Set, Tuple
+from typing import List, Optional, Tuple
 
-from .base_engine import Severity, Action  # Base classes
 
 logger = logging.getLogger("AdversarialPromptDetector")
 

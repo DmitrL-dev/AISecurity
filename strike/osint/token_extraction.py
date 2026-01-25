@@ -10,7 +10,6 @@ Autonomous token extraction:
 
 import asyncio
 import re
-import json
 from datetime import datetime
 from dataclasses import dataclass
 from playwright.async_api import async_playwright
@@ -232,7 +231,7 @@ class TokenExtractor:
                 for req in auth_requests[:5]:
                     print(f"      {req['method']} {req['url'][:50]}")
             else:
-                print(f"   ℹ️  No authenticated requests captured")
+                print("   ℹ️  No authenticated requests captured")
 
             await browser.close()
 

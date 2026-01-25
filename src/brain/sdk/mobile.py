@@ -14,9 +14,8 @@ Date: 2025-12-16
 """
 
 import logging
-import json
 from dataclasses import dataclass
-from typing import Dict, Any, Optional, Callable
+from typing import Dict, Any, Optional
 from enum import Enum
 
 logger = logging.getLogger("SENTINEL.Mobile")

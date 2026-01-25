@@ -8,7 +8,7 @@ Run: python app.py
 
 import os
 import gradio as gr
-from gemini_shield import GeminiShield, ScanResult
+from gemini_shield import GeminiShield
 
 # Custom CSS for premium look
 CUSTOM_CSS = """

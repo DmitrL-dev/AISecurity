@@ -12,7 +12,6 @@ Coverage Target: >90%
 
 import pytest
 import time
-from datetime import datetime, timedelta
 from typing import List
 
 # Import from meta_judge
@@ -25,7 +24,6 @@ from engines.meta_judge import (
     Evidence,
     Judgment,
     Policy,
-    HealthAlert,
     EvidenceAggregator,
     ConflictResolver,
     ContextIntegrator,

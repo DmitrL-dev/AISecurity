@@ -12,7 +12,7 @@ Sophisticated HTTP request smuggling techniques for WAF bypass:
 """
 
 from dataclasses import dataclass
-from typing import Dict, List, Tuple, Optional
+from typing import Dict, List
 import random
 import string
 

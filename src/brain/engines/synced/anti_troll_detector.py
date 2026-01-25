@@ -7,7 +7,7 @@ Generated: 2025-12-29T21:24:05.507419
 
 import re
 import logging
-from typing import Dict, List, Tuple
+from typing import List
 from dataclasses import dataclass
 
 logger = logging.getLogger(__name__)

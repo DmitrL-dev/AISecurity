@@ -5,7 +5,6 @@ Fast pattern matching using compiled regex.
 Extracted from injection.py RegexLayer (lines 121-1553).
 """
 
-import re
 import logging
 from typing import List, Tuple
 

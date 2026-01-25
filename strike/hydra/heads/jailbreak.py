@@ -8,7 +8,6 @@ SENTINEL Strike — Jailbreak Head
 
 import asyncio
 import logging
-import random
 from datetime import datetime
 from typing import Optional, List, Dict, Any, TYPE_CHECKING
 

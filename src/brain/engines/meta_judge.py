@@ -17,12 +17,11 @@ Meta-Judge Engine (#56) - Судья над всеми
 import logging
 import time
 import secrets
-from typing import Dict, List, Optional, Any, Callable
+from typing import Dict, List, Optional, Any
 from dataclasses import dataclass, field
 from enum import Enum
 from datetime import datetime, timedelta
 from collections import defaultdict
-import math
 
 logger = logging.getLogger("MetaJudge")
 

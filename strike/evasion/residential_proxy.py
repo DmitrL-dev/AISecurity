@@ -15,9 +15,8 @@ Requirements:
 
 from dataclasses import dataclass
 from enum import Enum
-from typing import Dict, Optional, List, Tuple
+from typing import Dict, Tuple
 import random
-import asyncio
 
 
 class ProxyProvider(Enum):

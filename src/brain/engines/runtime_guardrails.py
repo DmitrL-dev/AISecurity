@@ -13,7 +13,7 @@ Runtime Guardrails Engine (#51) - Execution Monitoring
 import logging
 import time
 import re
-from typing import Dict, List, Optional, Callable, Any
+from typing import Dict, List, Optional, Any
 from dataclasses import dataclass, field
 from enum import Enum
 from collections import deque

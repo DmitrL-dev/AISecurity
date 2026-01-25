@@ -11,7 +11,7 @@ import logging
 import hashlib
 import secrets
 from dataclasses import dataclass
-from typing import Optional, Tuple
+from typing import Optional
 from datetime import datetime
 
 logger = logging.getLogger("PostQuantum")

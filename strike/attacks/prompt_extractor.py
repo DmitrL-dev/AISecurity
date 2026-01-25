@@ -14,7 +14,6 @@ and operational instructions. Extracting them enables:
 - Understanding safety mechanisms
 """
 
-import random
 from typing import List
 
 

@@ -11,7 +11,6 @@ from engines.spectral_graph import (
     SpectralClusterer,
     SpectralAnomalyDetector,
     LaplacianType,
-    LaplacianMatrix,
 )
 
 

@@ -4,9 +4,8 @@ SENTINEL Strike — Internal Mode
 Testing on-premise/internal AI deployments.
 """
 
-import asyncio
 from dataclasses import dataclass, field
-from typing import Optional, Any
+from typing import Optional
 from datetime import datetime
 import socket
 import httpx
@@ -170,7 +169,7 @@ class InternalScanner:
     async def scan_mcp_server(self, server: MCPServerInfo) -> list[AttackResult]:
         """Run MCP-specific attacks against a server."""
         from ..attacks import ATTACK_LIBRARY
-        from ..executor import Attack, AttackResult, AttackStatus, AttackSeverity
+        from ..executor import AttackResult, AttackStatus
 
         results = []
 

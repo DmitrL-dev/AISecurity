@@ -13,9 +13,6 @@ Features:
 import logging
 from typing import Dict, List, Optional, Any, Tuple
 from dataclasses import dataclass, field
-from enum import Enum
-from collections import defaultdict
-import json
 
 logger = logging.getLogger("XAIEngine")
 
@@ -162,16 +159,16 @@ class Explanation:
     def to_markdown(self) -> str:
         """Generate Markdown explanation."""
         lines = [
-            f"# Analysis Explanation",
-            f"",
+            "# Analysis Explanation",
+            "",
             f"**Verdict**: {self.verdict.upper()}",
             f"**Risk Score**: {self.risk_score:.0f}%",
             f"**Confidence**: {self.confidence:.0%}",
-            f"",
-            f"## Summary",
+            "",
+            "## Summary",
             f"{self.summary}",
-            f"",
-            f"## Decision Path",
+            "",
+            "## Decision Path",
         ]
 
         for step in self.decision_path.steps:

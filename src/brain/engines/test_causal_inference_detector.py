@@ -7,7 +7,6 @@ from engines.causal_inference_detector import (
     CausalInferenceDetector,
     CausalGraph,
     CausalLearner,
-    ChainDetector,
     CausalNode,
     CausalEdge,
     CausalRelation,

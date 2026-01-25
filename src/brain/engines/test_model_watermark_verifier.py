@@ -6,7 +6,6 @@ import pytest
 from engines.model_watermark_verifier import (
     ModelWatermarkVerifier,
     FingerprintGenerator,
-    StatisticalWatermarkDetector,
     TokenPatternAnalyzer,
     WatermarkType,
 )

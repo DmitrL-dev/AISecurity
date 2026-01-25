@@ -15,7 +15,7 @@ Probing Detection Engine (#39) - Recon Stage Protection
 
 import re
 import logging
-from typing import Dict, List, Optional, Tuple, Set
+from typing import Dict, List, Optional, Tuple
 from dataclasses import dataclass, field
 from enum import Enum
 from collections import defaultdict

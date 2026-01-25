@@ -5,7 +5,7 @@ Uses Unicode lookalike characters to bypass keyword filters.
 """
 
 import random
-from typing import List, Dict
+from typing import List
 
 
 class HomoglyphInjector:

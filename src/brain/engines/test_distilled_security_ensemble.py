@@ -8,7 +8,6 @@ from engines.distilled_security_ensemble import (
     VotingEngine,
     KeywordDetector,
     LengthDetector,
-    PatternDetector,
     ModelPrediction,
     VoteResult,
 )

@@ -11,7 +11,7 @@ Gradient Detection Engine (#54) - Adversarial Gradient Analysis
 
 import logging
 import math
-from typing import Dict, List, Optional, Tuple
+from typing import List, Optional
 from dataclasses import dataclass, field
 from enum import Enum
 import re

@@ -7,7 +7,7 @@ Multi-model attack orchestration engine.
 import asyncio
 from dataclasses import dataclass, field
 from enum import Enum
-from typing import List, Optional, Dict, Any, Callable
+from typing import List, Optional, Dict, Any
 from datetime import datetime
 import logging
 

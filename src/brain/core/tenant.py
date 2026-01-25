@@ -12,7 +12,6 @@ Each tenant has separate:
 import logging
 from dataclasses import dataclass, field
 from typing import Dict, Optional, Set
-from functools import lru_cache
 
 logger = logging.getLogger("MultiTenant")
 

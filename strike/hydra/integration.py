@@ -5,9 +5,8 @@ SENTINEL Strike — HYDRA Integration Module
 Integrates HYDRA multi-head architecture into the main attack console.
 """
 
-import asyncio
 import logging
-from typing import Dict, List, Optional, Any
+from typing import Dict, List, Optional
 from datetime import datetime
 
 logger = logging.getLogger(__name__)

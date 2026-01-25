@@ -8,7 +8,6 @@ import http.server
 import socketserver
 import webbrowser
 from pathlib import Path
-from typing import Optional
 
 
 def get_dashboard_dir() -> Path:

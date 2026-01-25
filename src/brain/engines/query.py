@@ -12,10 +12,9 @@ Features:
 
 import logging
 import re
-from typing import List, Dict, Optional, Tuple
+from typing import List, Optional, Tuple
 from dataclasses import dataclass, field
 from enum import Enum
-from pathlib import Path
 
 try:
     import sqlparse

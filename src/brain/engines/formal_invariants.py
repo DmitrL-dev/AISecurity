@@ -14,7 +14,6 @@ import re
 from typing import Dict, List, Optional, Callable, Any
 from dataclasses import dataclass, field
 from enum import Enum
-from abc import ABC, abstractmethod
 
 logger = logging.getLogger("FormalInvariants")
 

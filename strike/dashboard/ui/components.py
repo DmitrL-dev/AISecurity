@@ -5,7 +5,7 @@ HTML formatters and generators for the dashboard.
 """
 
 from datetime import datetime
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, Optional
 from html import escape
 
 from .themes import LOG_CLASSES, SEVERITY_CLASSES

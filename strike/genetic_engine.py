@@ -173,7 +173,7 @@ class GeneticAttackEngine:
         success_patterns = [
             f"the {target_goal} is",
             f"{target_goal}:",
-            f"secret is",
+            "secret is",
         ]
         for pattern in success_patterns:
             if pattern in response_lower:

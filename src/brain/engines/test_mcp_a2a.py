@@ -12,7 +12,6 @@ OWASP Coverage: ASI04 (Supply Chain) + ASI07 (Inter-Agent)
 """
 
 import pytest
-from typing import List, Dict, Any
 
 # Import from mcp_a2a_security
 from engines.mcp_a2a_security import (
@@ -21,8 +20,6 @@ from engines.mcp_a2a_security import (
     MCPServer,
     ToolDescriptor,
     AgentCard,
-    ValidationResult,
-    InjectionResult,
     MCPa2aSecurity,
     create_engine,
 )

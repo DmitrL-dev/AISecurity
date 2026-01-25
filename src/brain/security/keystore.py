@@ -8,7 +8,6 @@ AES-256-GCM encrypted storage for Ed25519 private keys.
 from pathlib import Path
 from typing import Optional
 import os
-import json
 
 try:
     from cryptography.hazmat.primitives.ciphers.aead import AESGCM

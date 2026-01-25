@@ -19,13 +19,11 @@ from enum import Enum
 
 from .fingerprinter import (
     LLMProcessFingerprinter,
-    AIProcess,
     ProcessRiskLevel,
 )
 from .traffic_analyzer import (
     AITrafficAnalyzer,
     TrafficSummary,
-    AIProvider,
 )
 from .saas_connector import (
     SaaSAIConnector,

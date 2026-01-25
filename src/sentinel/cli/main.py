@@ -8,9 +8,8 @@ Commands:
   sentinel config                - Configuration
 """
 
-import sys
 import json
-from typing import Optional, List
+from typing import Optional
 
 # Try to use Click, fall back to argparse
 try:

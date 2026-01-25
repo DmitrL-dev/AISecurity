@@ -12,7 +12,7 @@ Safety alignments focus on "superficial" harmful prompts with single intent.
 """
 
 import random
-from typing import List, Tuple
+from typing import List
 
 
 class CompositionalInstructionAttack:

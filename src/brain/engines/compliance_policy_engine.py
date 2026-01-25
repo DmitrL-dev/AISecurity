@@ -16,9 +16,8 @@ import logging
 import time
 from dataclasses import dataclass, field
 from enum import Enum
-from typing import Dict, List, Optional, Set
+from typing import Dict, List, Optional
 
-from .base_engine import Severity, Action  # Base classes
 
 logger = logging.getLogger("CompliancePolicyEngine")
 

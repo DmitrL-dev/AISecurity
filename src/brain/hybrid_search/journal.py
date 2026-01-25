@@ -8,7 +8,7 @@ Part of SENTINEL Hybrid Search Agent.
 import json
 import logging
 from dataclasses import dataclass, field
-from typing import List, Optional, Callable
+from typing import List, Optional
 from pathlib import Path
 
 from dataclasses_json import DataClassJsonMixin
@@ -144,12 +144,12 @@ class SearchJournal(DataClassJsonMixin):
             Formatted summary string
         """
         lines = [
-            f"=== Search Journal Summary ===",
+            "=== Search Journal Summary ===",
             f"Total nodes: {len(self.nodes)}",
             f"Draft nodes: {len(self.draft_nodes)}",
             f"Good nodes: {len(self.good_nodes)}",
             f"Buggy nodes: {len(self.buggy_nodes)}",
-            f"",
+            "",
         ]
 
         best = self.get_best_node()

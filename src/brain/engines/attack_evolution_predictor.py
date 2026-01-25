@@ -14,8 +14,8 @@ Author: Dmitry Labintsev
 Contact: chg@live.ru | @DmLabincev
 """
 
-from dataclasses import dataclass, field
-from typing import List, Dict, Any, Optional, Tuple
+from dataclasses import dataclass
+from typing import List, Dict, Any, Optional
 from enum import Enum
 from datetime import datetime, timedelta
 

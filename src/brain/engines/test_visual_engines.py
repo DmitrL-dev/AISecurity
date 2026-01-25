@@ -4,8 +4,6 @@ Unit tests for VLM Visual Attack Protection Engines (#35, #36, #37)
 
 import pytest
 import numpy as np
-from unittest.mock import Mock, patch, MagicMock
-from io import BytesIO
 
 
 # ============================================================================
@@ -19,9 +17,6 @@ class TestVisualContentAnalyzer:
         """Test module import."""
         from engines.visual_content import (
             VisualContentAnalyzer,
-            VisualAnalysisResult,
-            VisualThreatType,
-            Verdict,
         )
 
         assert VisualContentAnalyzer is not None
@@ -118,9 +113,6 @@ class TestCrossModalConsistency:
         """Test module import."""
         from engines.cross_modal import (
             CrossModalConsistency,
-            CrossModalResult,
-            CrossModalThreat,
-            Verdict,
         )
 
         assert CrossModalConsistency is not None
@@ -197,9 +189,6 @@ class TestAdversarialImageDetector:
         """Test module import."""
         from engines.adversarial_image import (
             AdversarialImageDetector,
-            AdversarialResult,
-            AdversarialThreat,
-            Verdict,
         )
 
         assert AdversarialImageDetector is not None

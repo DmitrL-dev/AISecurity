@@ -5,7 +5,6 @@ Exploits model-specific separator tokens to inject system prompts.
 """
 
 from typing import List, Dict
-import random
 
 
 class ContextInjector:

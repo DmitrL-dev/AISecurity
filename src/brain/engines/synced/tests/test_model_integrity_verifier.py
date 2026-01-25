@@ -8,13 +8,11 @@ Generated: 2026-01-07
 
 import pytest
 import tempfile
-import os
 from pathlib import Path
 from ..model_integrity_verifier import (
     ModelIntegrityVerifier,
     ModelFormat,
-    RiskLevel,
-    verify
+    RiskLevel
 )
 
 

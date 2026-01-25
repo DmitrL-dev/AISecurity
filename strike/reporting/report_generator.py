@@ -17,10 +17,9 @@ from typing import List, Dict, Optional
 from pathlib import Path
 from collections import Counter
 import html
-import re
 
 # i18n support
-from strike.reporting.i18n import get_vuln_field, get_string, VULNERABILITY_DB as I18N_VULN_DB
+from strike.reporting.i18n import get_string
 
 logger = logging.getLogger(__name__)
 

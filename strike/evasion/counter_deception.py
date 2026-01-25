@@ -9,7 +9,6 @@ Anti-honeypot techniques to evade deception technology:
 
 import random
 import string
-import hashlib
 from typing import List, Dict, Tuple
 from datetime import datetime
 

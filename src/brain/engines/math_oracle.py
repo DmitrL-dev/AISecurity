@@ -27,12 +27,10 @@ License: MIT (same as DeepSeek-V3.2-Speciale)
 
 import logging
 import time
-import hashlib
 from abc import ABC, abstractmethod
 from dataclasses import dataclass, field
 from enum import Enum
 from typing import List, Dict, Optional, Any
-import json
 
 logger = logging.getLogger("MathOracle")
 

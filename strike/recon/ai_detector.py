@@ -952,7 +952,7 @@ class AIDetector:
                     for pattern in self.EMPATHY_AI_MARKERS:
                         if re.search(pattern, text, re.IGNORECASE):
                             evidence.append(
-                                f"Empathy response: AI-like templated sympathy")
+                                "Empathy response: AI-like templated sympathy")
                             max_confidence = max(max_confidence, 0.6)
                             break
             except Exception:

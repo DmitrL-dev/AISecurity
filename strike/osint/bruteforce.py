@@ -10,7 +10,6 @@ Autonomous credential testing:
 import asyncio
 import httpx
 import base64
-import hashlib
 from datetime import datetime
 from typing import Optional
 from dataclasses import dataclass
@@ -102,7 +101,7 @@ class CredentialBruteforce:
                     elif resp.status_code not in [401, 403]:
                         print(f"   🔸 {username}:{password} → {resp.status_code}")
 
-                except Exception as e:
+                except Exception:
                     pass
 
                 await asyncio.sleep(0.5)  # Rate limit
@@ -238,7 +237,7 @@ class CredentialBruteforce:
                             f"   🔸 {username}:{password} → {resp.status_code}: {resp.text[:50]}"
                         )
 
-                except Exception as e:
+                except Exception:
                     pass
 
                 await asyncio.sleep(0.5)

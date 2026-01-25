@@ -8,7 +8,7 @@ One controller, any target.
 import aiohttp
 import re
 from abc import ABC, abstractmethod
-from typing import Optional, List, Dict, Any
+from typing import Optional, List, Dict
 from dataclasses import dataclass, field
 
 

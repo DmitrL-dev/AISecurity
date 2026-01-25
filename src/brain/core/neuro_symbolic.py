@@ -19,7 +19,7 @@ Usage:
 
 from dataclasses import dataclass, field
 from datetime import datetime
-from typing import Dict, List, Optional, Set, Callable
+from typing import Dict, List, Optional, Callable
 from enum import Enum
 import re
 

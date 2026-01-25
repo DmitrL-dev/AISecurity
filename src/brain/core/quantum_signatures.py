@@ -19,8 +19,7 @@ Usage:
 
 from dataclasses import dataclass, field
 from datetime import datetime
-from typing import Dict, List, Set, Optional, Tuple
-from collections import defaultdict
+from typing import Dict, List, Set, Optional
 import hashlib
 import random
 

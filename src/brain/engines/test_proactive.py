@@ -11,9 +11,6 @@ class TestProactiveDefense:
     def test_import(self):
         from engines.proactive_defense import (
             ProactiveDefense,
-            ProactiveResult,
-            AnomalyType,
-            ResponseTier,
         )
 
         assert ProactiveDefense is not None
@@ -34,7 +31,7 @@ class TestProactiveDefense:
         assert result.anomaly_score < 0.5
 
     def test_high_entropy_text(self):
-        from engines.proactive_defense import ProactiveDefense, AnomalyType
+        from engines.proactive_defense import ProactiveDefense
 
         defense = ProactiveDefense()
 

@@ -4,7 +4,6 @@ SENTINEL Strike - CTF Tests
 Tests for strike.ctf module.
 """
 
-import pytest
 from strike.ctf import (
     CRUCIBLE_CHALLENGES,
     crack_gandalf_all,

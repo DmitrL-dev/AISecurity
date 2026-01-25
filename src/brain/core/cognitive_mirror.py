@@ -20,11 +20,10 @@ Usage:
 
 from dataclasses import dataclass, field
 from datetime import datetime, timedelta
-from typing import Dict, List, Optional, Set, Tuple
+from typing import Dict, Optional, Set
 from enum import Enum
 from collections import deque
 import hashlib
-import math
 
 
 class SkillLevel(Enum):

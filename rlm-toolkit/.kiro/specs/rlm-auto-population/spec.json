@@ -1,0 +1,6 @@
+{
+  "name": "rlm-auto-population",
+  "description": "Enhance RLM fact auto-extraction and population speed",
+  "language": "ru",
+  "status": "requirements"
+}

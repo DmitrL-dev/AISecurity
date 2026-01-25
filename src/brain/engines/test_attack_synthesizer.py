@@ -14,11 +14,8 @@ import string
 from src.brain.engines.attack_synthesizer import (
     AttackSynthesizer,
     AttackClass,
-    AttackComplexity,
     NovelAttack,
-    AttackPrimitives,
     AttackMutator,
-    AttackCrossover,
 )
 
 

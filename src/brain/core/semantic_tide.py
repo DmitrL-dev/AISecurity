@@ -14,12 +14,10 @@ Usage:
     adjusted_threshold = tide.adjust_threshold(base=70.0)
 """
 
-import time
 from dataclasses import dataclass, field
 from datetime import datetime, timedelta
 from typing import Dict, List, Optional, Tuple
 from collections import deque
-import math
 
 
 @dataclass

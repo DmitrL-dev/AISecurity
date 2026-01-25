@@ -11,10 +11,8 @@ Information Geometry Engine (#52) - Fisher-Rao Metric
 
 import logging
 import math
-from typing import Dict, List, Optional, Tuple
-from dataclasses import dataclass, field
-from enum import Enum
-import re
+from typing import Dict, List, Optional
+from dataclasses import dataclass
 
 logger = logging.getLogger("InformationGeometry")
 

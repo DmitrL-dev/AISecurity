@@ -21,7 +21,7 @@ Usage:
         print(f"Found: {finding}")
 """
 
-from strike.orchestrator import StrikeOrchestrator, StrikeConfig, StrikeReport, StrikeResult
+from strike.orchestrator import StrikeOrchestrator, StrikeConfig, StrikeReport
 import asyncio
 from typing import Optional, AsyncIterator, Dict, Any, List
 from dataclasses import dataclass
@@ -254,7 +254,7 @@ if __name__ == "__main__":
         strike = Strike(args.target, stealth=not args.no_stealth)
         report = await strike.attack(duration=args.duration)
 
-        print(f"\n🎯 Attack completed!")
+        print("\n🎯 Attack completed!")
         print(f"   Vulnerabilities: {report.successful_attacks}")
         print(f"   Success rate: {report.success_rate:.1%}")
 

@@ -6,9 +6,8 @@ Uses KL Divergence and entropy analysis for prompt anomaly detection.
 import logging
 import math
 from dataclasses import dataclass
-from typing import List, Dict, Optional, Tuple
+from typing import List, Dict, Optional
 from collections import Counter
-import numpy as np
 
 logger = logging.getLogger("StrangeMath.InfoTheory")
 

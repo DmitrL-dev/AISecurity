@@ -9,9 +9,8 @@ import json
 import logging
 import time
 from dataclasses import dataclass
-from typing import Any, AsyncGenerator, Callable, Optional
+from typing import Any, AsyncGenerator, Optional
 
-from fastapi import Response
 from fastapi.responses import StreamingResponse
 
 logger = logging.getLogger(__name__)

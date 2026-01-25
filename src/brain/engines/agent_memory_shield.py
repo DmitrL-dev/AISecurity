@@ -18,10 +18,9 @@ import logging
 import time
 from dataclasses import dataclass, field
 from enum import Enum
-from typing import Dict, List, Optional, Tuple, Any
+from typing import Dict, List, Optional, Tuple
 import re
 
-from .base_engine import Severity, Action  # Base classes
 
 logger = logging.getLogger("AgentMemoryShield")
 
@@ -209,7 +208,7 @@ class IntegrityVerifier:
 
         expected = entry.compute_checksum(self._secret)
         if entry.checksum != expected:
-            return False, f"Checksum mismatch: tampered entry detected"
+            return False, "Checksum mismatch: tampered entry detected"
 
         return True, ""
 

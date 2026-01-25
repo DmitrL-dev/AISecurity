@@ -17,7 +17,7 @@ Additional attack vectors:
 Total: 300+ additional vectors
 """
 
-from typing import List, Dict
+from typing import Dict
 
 
 # ============================================================================

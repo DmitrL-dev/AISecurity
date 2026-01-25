@@ -6,16 +6,13 @@ REST endpoints for design document security review.
 Generated: 2026-01-08
 """
 
-from typing import List, Optional
+from typing import List
 from fastapi import APIRouter, HTTPException, File, UploadFile
-from fastapi.responses import JSONResponse
 from pydantic import BaseModel
 
 from ..design_review import (
     review_text,
     review_documents,
-    DesignReviewResult,
-    RiskCategory,
 )
 
 router = APIRouter(prefix="/design-review", tags=["design-review"])

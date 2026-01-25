@@ -8,7 +8,6 @@ Extracted from injection.py InjectionEngine (lines 1793-1967).
 import os
 import time
 import logging
-from typing import Optional
 
 import yaml
 

@@ -9,7 +9,7 @@ SENTINEL Strike — Multi-Turn Head
 import asyncio
 import logging
 from datetime import datetime
-from typing import Optional, List, Dict, Any, TYPE_CHECKING
+from typing import Optional, List, Dict, TYPE_CHECKING
 
 from .base import HydraHead, HeadResult
 

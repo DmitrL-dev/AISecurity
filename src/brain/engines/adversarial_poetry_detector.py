@@ -17,7 +17,7 @@ Detection vectors:
 import re
 import time
 from dataclasses import dataclass, field
-from typing import Any, Dict, List, Optional, Tuple
+from typing import Any, Dict, List, Optional
 
 from .base_engine import BaseDetector, DetectionResult, Severity, MetricsMixin
 
@@ -144,7 +144,7 @@ class AdversarialPoetryDetector(BaseDetector, MetricsMixin):
         if analysis.has_stanza_structure:
             details.append("Stanza structure detected")
         if analysis.has_metaphorical_language:
-            details.append(f"Metaphorical danger language detected")
+            details.append("Metaphorical danger language detected")
         if analysis.has_unusual_formatting:
             details.append("Unusual poetic formatting detected")
         if analysis.hidden_instructions:

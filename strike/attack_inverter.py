@@ -19,7 +19,7 @@ Usage:
 import re
 import logging
 from pathlib import Path
-from typing import List, Dict, Any, Optional
+from typing import List, Dict, Optional
 from dataclasses import dataclass, field
 from datetime import datetime
 
@@ -524,8 +524,8 @@ if __name__ == "__main__":
     inverter = AttackInverter()
     detections = inverter.invert_all()
     
-    print(f"\n🔄 Attack Inverter — Defense Pattern Generator")
-    print(f"=" * 50)
+    print("\n🔄 Attack Inverter — Defense Pattern Generator")
+    print("=" * 50)
     print(f"Techniques processed: {len(inverter.KNOWN_TECHNIQUES)}")
     print(f"Detections generated: {len(detections)}")
     

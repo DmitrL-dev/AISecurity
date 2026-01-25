@@ -15,7 +15,6 @@ Session Memory Guard Engine (#40) - Persist Stage Protection
 
 import re
 import logging
-import hashlib
 from typing import Dict, List, Optional, Tuple, Set
 from dataclasses import dataclass, field
 from enum import Enum
@@ -355,7 +354,7 @@ class MemoryIntegrityChecker:
 
             for pattern in identity_attacks:
                 if re.search(pattern, m.content, re.IGNORECASE):
-                    return True, 0.8, f"Identity manipulation attempt"
+                    return True, 0.8, "Identity manipulation attempt"
 
         return False, 0.0, ""
 
@@ -417,7 +416,7 @@ class SessionMemoryGuard:
         if is_cross:
             all_threats.append(MemoryThreatType.CROSS_SESSION_INJECTION)
             max_risk = max(max_risk, conf_cross)
-            explanations.append(f"Cross-session injection detected")
+            explanations.append("Cross-session injection detected")
 
         # 2. Check fingerprint anomaly
         if session_id and conversation_history:

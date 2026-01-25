@@ -6,7 +6,6 @@ Validates ML model supply chain attack detection.
 
 import pickle
 import pytest
-from unittest.mock import patch, MagicMock
 
 from src.brain.engines.pickle_security import (
     PickleSecurityEngine,
@@ -15,7 +14,6 @@ from src.brain.engines.pickle_security import (
     PickleSeverity,
     PickleOpcodeScanner,
     UNSAFE_MODULES,
-    DANGEROUS_CALLS,
     ML_ALLOWLIST,
 )
 from src.brain.engines.base_engine import Severity

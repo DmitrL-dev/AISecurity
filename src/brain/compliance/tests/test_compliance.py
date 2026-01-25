@@ -6,15 +6,11 @@ Tests for compliance mappings and report generation.
 Generated: 2026-01-08
 """
 
-import pytest
-from datetime import datetime
 
 from brain.compliance import (
     ComplianceFramework,
     CoverageStatus,
-    ComplianceRequirement,
     FrameworkCoverage,
-    ComplianceReport,
     ComplianceReportGenerator,
     generate_report,
     generate_text_report,

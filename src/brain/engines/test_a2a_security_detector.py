@@ -5,7 +5,6 @@
 Tests for A2A Security Detector
 """
 
-import pytest
 from src.brain.engines.a2a_security_detector import (
     A2ASecurityDetector,
     A2AThreatType,

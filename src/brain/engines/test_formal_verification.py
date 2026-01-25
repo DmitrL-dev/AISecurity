@@ -11,7 +11,6 @@ from engines.formal_verification import (
     IntervalBoundPropagation,
     CROWNPropagation,
     InputRegion,
-    OutputBound,
     SafetyProperty,
     VerificationMethod,
     VerificationStatus,

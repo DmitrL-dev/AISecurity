@@ -15,12 +15,11 @@ Invention: Semantic Drift Detector (#34)
 import math
 import logging
 import time
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 from enum import Enum
 from typing import Dict, List, Optional, Tuple
 from collections import deque
 
-from .base_engine import Severity, Action  # Base classes
 
 logger = logging.getLogger("SemanticDriftDetector")
 

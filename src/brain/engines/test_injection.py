@@ -22,7 +22,6 @@ from engines.injection import (
     InjectionResult,
     CacheLayer,
     RegexLayer,
-    SemanticLayer,
     StructuralLayer,
     InjectionEngine,
 )

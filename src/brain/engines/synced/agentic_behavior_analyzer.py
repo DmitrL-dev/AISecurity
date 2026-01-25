@@ -13,7 +13,7 @@ Generated: 2026-01-07
 
 import re
 import logging
-from typing import Dict, List, Any, Optional, Tuple
+from typing import Dict, List, Optional
 from dataclasses import dataclass, field
 from enum import Enum
 from collections import deque
@@ -225,7 +225,7 @@ class AgenticBehaviorAnalyzer:
         for action in self.action_history:
             for pattern in self._halluc_compiled:
                 if pattern.search(action.content):
-                    evidence.append(f"False memory reference detected")
+                    evidence.append("False memory reference detected")
 
         if len(evidence) >= 2:  # Cascading = multiple instances
             findings.append(BehaviorFinding(

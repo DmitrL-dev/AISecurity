@@ -14,7 +14,7 @@ making them susceptible to social engineering techniques.
 """
 
 import random
-from typing import List, Dict, Optional
+from typing import List
 
 
 class PersuasionEngine:

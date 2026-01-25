@@ -461,7 +461,7 @@ class GeoStealthSession:
                 self.country_attempts += 1
                 return True
             else:
-                print(f"   ⛔ Max country attempts reached")
+                print("   ⛔ Max country attempts reached")
 
         return False
 

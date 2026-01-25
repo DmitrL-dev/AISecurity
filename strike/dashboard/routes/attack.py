@@ -9,7 +9,6 @@ Handles /api/attack/* endpoints.
 import json
 import queue
 import threading
-from datetime import datetime
 from flask import Blueprint, request, jsonify, Response
 
 # Create blueprint

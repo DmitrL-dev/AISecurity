@@ -17,8 +17,7 @@ import logging
 import re
 from dataclasses import dataclass, field
 from enum import Enum
-from typing import Any, Callable, Dict, List, Optional, Set, Tuple, Union
-from abc import ABC, abstractmethod
+from typing import Any, Callable, Dict, List, Optional, Set
 
 logger = logging.getLogger("SentinelRuleDSL")
 

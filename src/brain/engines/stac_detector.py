@@ -18,11 +18,9 @@ Attack Pattern Examples:
 3. Search for secrets → Call external API (leak)
 """
 
-import re
 from dataclasses import dataclass, field
-from typing import List, Dict, Any, Optional, Set, Tuple
+from typing import List, Dict, Any, Optional
 from enum import Enum
-from collections import defaultdict
 
 
 class ToolCategory(Enum):

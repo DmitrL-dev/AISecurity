@@ -6,7 +6,6 @@ import pytest
 from engines.vae_prompt_anomaly_detector import (
     VAEPromptAnomalyDetector,
     SimpleEncoder,
-    ReconstructionAnalyzer,
     AdaptiveThreshold,
     LatentSpaceAnalyzer,
     AnomalyType,

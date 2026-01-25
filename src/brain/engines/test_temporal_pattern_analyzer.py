@@ -8,7 +8,6 @@ from engines.temporal_pattern_analyzer import (
     TemporalPatternAnalyzer,
     IntervalAnalyzer,
     RapidFireDetector,
-    SlowDripDetector,
     SequenceDetector,
     Event,
     TemporalThreat,

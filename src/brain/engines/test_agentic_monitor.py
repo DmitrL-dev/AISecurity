@@ -3,13 +3,11 @@ Unit tests for Agentic AI Monitor.
 """
 
 import pytest
-import time
 from engines.agentic_monitor import (
     AgenticMonitor,
     AgentProfile,
     AgentRole,
     ThreatCategory,
-    RiskLevel,
     MemoryPoisoningDetector,
     ToolAbuseDetector,
     PrivilegeEscalationDetector,

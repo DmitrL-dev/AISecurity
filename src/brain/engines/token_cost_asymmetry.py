@@ -18,10 +18,10 @@ Mitigation strategies:
 import re
 import time
 import logging
-from typing import Dict, List, Tuple, Optional
+from typing import Dict, Tuple, Optional
 from dataclasses import dataclass, field
 from collections import defaultdict
-from datetime import datetime, timedelta
+from datetime import datetime
 
 logger = logging.getLogger("TokenCostAsymmetry")
 
@@ -194,7 +194,7 @@ class TokenCostAsymmetryDetector:
             # Check session limits
             if session.total_defense_cost > self.session_cost_limit:
                 is_suspicious = True
-                reasons.append(f"Session cost limit exceeded")
+                reasons.append("Session cost limit exceeded")
         
         # Calculate risk score
         risk_score = min(1.0, (

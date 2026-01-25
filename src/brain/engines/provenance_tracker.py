@@ -21,7 +21,6 @@ from enum import Enum
 from typing import Dict, List, Optional, Set, Tuple
 from collections import defaultdict
 
-from .base_engine import Severity, Action  # Base classes
 
 logger = logging.getLogger("ProvenanceTracker")
 
@@ -467,9 +466,9 @@ class ProvenanceChainTracker:
 
         violations = []
         if hop_count > self.max_hops:
-            violations.append(f"Hop count exceeds limit")
+            violations.append("Hop count exceeds limit")
         if min_trust.value < self.min_trust.value:
-            violations.append(f"Trust below threshold")
+            violations.append("Trust below threshold")
 
         return ProvenanceResult(
             is_safe=len(violations) == 0,

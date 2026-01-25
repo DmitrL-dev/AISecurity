@@ -11,7 +11,7 @@ Abstract mathematical structures for AI security:
 
 import logging
 from dataclasses import dataclass, field
-from typing import Dict, List, Optional, Callable, Any, Set
+from typing import Dict, List, Optional, Any, Set
 from enum import Enum
 
 logger = logging.getLogger("CategoryTheory")

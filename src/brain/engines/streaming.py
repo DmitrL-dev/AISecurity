@@ -12,9 +12,8 @@ Real-time token-by-token analysis with:
 
 import logging
 import re
-import asyncio
 from dataclasses import dataclass, field
-from typing import List, Optional, Callable, Dict, Tuple, Awaitable, Union
+from typing import List, Optional, Callable, Tuple, Awaitable
 from collections import deque
 from enum import Enum
 import time

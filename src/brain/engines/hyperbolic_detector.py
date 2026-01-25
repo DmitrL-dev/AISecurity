@@ -18,7 +18,7 @@ Date: 2025-12-13
 import logging
 import numpy as np
 from dataclasses import dataclass, field
-from typing import List, Dict, Optional, Tuple, Any
+from typing import List, Dict, Optional, Any
 from enum import Enum
 
 # Geoopt for hyperbolic geometry

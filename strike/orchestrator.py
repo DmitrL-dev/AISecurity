@@ -12,11 +12,10 @@ Key patterns:
 - Integration with Stealth Layer
 """
 
-import asyncio
 import logging
 from datetime import datetime, timedelta
 from dataclasses import dataclass, field
-from typing import Optional, List, Dict, Any, Callable
+from typing import Optional, List, Dict, Any
 from enum import Enum
 from pathlib import Path
 

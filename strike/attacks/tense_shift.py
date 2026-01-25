@@ -10,7 +10,6 @@ Key insight: LLMs interpret past-tense questions as "historical" and
 less harmful, creating a generalization gap in refusal training.
 """
 
-import random
 from typing import List
 
 

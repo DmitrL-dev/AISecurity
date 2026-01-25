@@ -11,7 +11,6 @@ from enum import Enum
 from typing import Dict, List, Optional, Any
 from dataclasses import dataclass, field, asdict
 from datetime import datetime
-import json
 
 
 class Severity(Enum):

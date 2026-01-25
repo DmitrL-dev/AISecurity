@@ -19,15 +19,14 @@ Date: 2025-12-14
 
 import hashlib
 import json
-import math
 import re
 import time
 import logging
 from dataclasses import dataclass, field
-from typing import Dict, List, Optional, Tuple, Set, Any
-from collections import Counter, defaultdict
+from typing import Dict, List, Optional, Any
+from collections import Counter
 from enum import Enum
-from datetime import datetime, timedelta
+from datetime import datetime
 
 logger = logging.getLogger("AttackerFingerprinting")
 
@@ -801,7 +800,7 @@ if __name__ == "__main__":
         was_blocked=True,
     )
 
-    print(f"First attack:")
+    print("First attack:")
     print(f"  Fingerprint: {result1['fingerprint_id']}")
     print(f"  Known attacker: {result1['is_known_attacker']}")
     print(f"  Techniques: {result1['features']['techniques']}")
@@ -816,7 +815,7 @@ if __name__ == "__main__":
         was_blocked=True,
     )
 
-    print(f"\nSecond attack (same attacker, different IP):")
+    print("\nSecond attack (same attacker, different IP):")
     print(f"  Fingerprint: {result2['fingerprint_id']}")
     print(f"  Known attacker: {result2['is_known_attacker']}")
     print(f"  Match similarity: {result2['match_similarity']:.2%}")
@@ -832,7 +831,7 @@ if __name__ == "__main__":
         was_blocked=False,
     )
 
-    print(f"\nDifferent user (not attacker):")
+    print("\nDifferent user (not attacker):")
     print(f"  Fingerprint: {result3['fingerprint_id']}")
     print(f"  Known attacker: {result3['is_known_attacker']}")
 

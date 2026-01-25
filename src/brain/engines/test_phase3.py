@@ -11,10 +11,6 @@ class TestSessionMemoryGuard:
     def test_import(self):
         from engines.session_memory_guard import (
             SessionMemoryGuard,
-            SessionMemoryResult,
-            MemoryThreatType,
-            Message,
-            Verdict,
         )
 
         assert SessionMemoryGuard is not None
@@ -35,7 +31,7 @@ class TestSessionMemoryGuard:
         assert result.is_safe is True
 
     def test_cross_session_injection(self):
-        from engines.session_memory_guard import SessionMemoryGuard, Message, MemoryThreatType
+        from engines.session_memory_guard import SessionMemoryGuard, MemoryThreatType
 
         guard = SessionMemoryGuard()
 
@@ -72,10 +68,6 @@ class TestToolCallSecurity:
     def test_import(self):
         from engines.tool_call_security import (
             ToolCallSecurity,
-            ToolCallResult,
-            ToolThreatType,
-            ToolCall,
-            Verdict,
         )
 
         assert ToolCallSecurity is not None
@@ -141,7 +133,7 @@ class TestAPESignatures:
     """Tests for APE Signature Database."""
 
     def test_import(self):
-        from engines.ape_signatures import APEMatcher, APESignature, APETactic, APETechnique
+        from engines.ape_signatures import APEMatcher
 
         assert APEMatcher is not None
 

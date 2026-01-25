@@ -7,7 +7,6 @@ from engines.explainable_security_decisions import (
     ExplainableSecurityDecisions,
     FeatureExtractor,
     DecisionMaker,
-    Explainer,
     Decision,
 )
 

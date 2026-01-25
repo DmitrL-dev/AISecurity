@@ -10,10 +10,9 @@ Uses machine learning to predict best bypass techniques based on:
 """
 
 from dataclasses import dataclass
-from typing import Dict, List, Tuple, Optional
+from typing import Dict, List, Tuple
 import random
 import math
-import re
 from collections import Counter
 
 

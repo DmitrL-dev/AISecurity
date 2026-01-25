@@ -6,7 +6,7 @@ Bypasses word-based security filters by splitting tokens.
 
 import random
 import re
-from typing import List, Callable
+from typing import List
 
 
 class TokenSplitter:

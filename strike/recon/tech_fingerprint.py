@@ -8,7 +8,6 @@ Detects technology stack, frameworks, and security headers.
 import logging
 from typing import Dict, List, Optional
 from dataclasses import dataclass, field
-from urllib.parse import urlparse
 
 logger = logging.getLogger(__name__)
 

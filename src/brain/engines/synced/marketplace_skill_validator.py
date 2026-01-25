@@ -16,7 +16,7 @@ Targets:
 
 import re
 import logging
-from typing import Dict, List, Optional, Set, Tuple
+from typing import List, Optional
 from dataclasses import dataclass, field
 from enum import Enum
 from difflib import SequenceMatcher

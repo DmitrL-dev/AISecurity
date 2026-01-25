@@ -18,11 +18,9 @@ from strike.orchestrator import StrikeOrchestrator, StrikeConfig
 from pydantic import BaseModel, Field
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi import FastAPI, HTTPException, BackgroundTasks
-import asyncio
 import uuid
 from datetime import datetime
 from typing import Optional, Dict, Any, List
-from dataclasses import asdict
 from pathlib import Path
 import sys
 

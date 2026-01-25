@@ -5,7 +5,6 @@ Run from engines directory.
 
 import os
 import re
-import glob
 
 # Engines to migrate (research inventions)
 ENGINES = [

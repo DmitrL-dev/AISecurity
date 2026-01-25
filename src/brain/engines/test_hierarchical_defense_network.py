@@ -7,10 +7,7 @@ from engines.hierarchical_defense_network import (
     HierarchicalDefenseNetwork,
     PerimeterLayer,
     ApplicationLayer,
-    DataLayer,
-    CoreLayer,
     DefenseAction,
-    DefenseLayer,
 )
 
 

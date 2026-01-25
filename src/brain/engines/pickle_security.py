@@ -475,7 +475,7 @@ class PickleSecurityEngine(BaseDetector):
         """Analyze using fickling library."""
         try:
             from fickling.fickle import Pickled
-            from fickling.analysis import check_safety, Severity as FicklingSeverity
+            from fickling.analysis import check_safety
 
             pickled = Pickled.loads(data)
             results = check_safety(pickled)
@@ -575,7 +575,6 @@ class PyTorchModelScanner:
         Returns:
             PickleAnalysisResult
         """
-        import os
         from pathlib import Path
 
         path = Path(model_path)

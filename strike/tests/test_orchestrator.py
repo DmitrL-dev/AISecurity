@@ -4,13 +4,11 @@ SENTINEL Strike - Orchestrator Tests
 Tests for strike.orchestrator module.
 """
 
-import pytest
 from strike.orchestrator import (
     DefenseType,
     TargetProfile,
     AttackResult,
     detect_defense,
-    DEFENSE_PATTERNS,
     CATEGORY_PRIORITY,
     get_priority_categories,
     get_best_category,

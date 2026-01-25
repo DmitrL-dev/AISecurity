@@ -44,3 +44,27 @@ view_file c:\AISecurity\agent_system_prompts\core_instructions.md
    - `c:\AISecurity\README.md` - main technical docs
    - `c:\AISecurity\SENTINEL_WALKTHROUGH.md` - detailed walkthrough
    - `c:\AISecurity\docs\reference\engines\` - engine category docs
+
+6. **MANDATORY** — Seed RLM with steering rules (prevents methodology amnesia):
+
+```
+// Read steering files
+view_file c:\AISecurity\sentinel-community\.kiro\steering\tdd.md
+view_file c:\AISecurity\sentinel-community\.kiro\steering\product.md
+view_file c:\AISecurity\sentinel-community\.kiro\steering\tech.md
+
+// Seed critical L0 facts into RLM
+mcp_rlm-toolkit_rlm_add_hierarchical_fact:
+  content: "TDD Iron Law: Перед ЛЮБЫМ кодом проверь есть ли тесты. Если НЕТ — создай тест ПЕРВЫМ."
+  level: 0
+  domain: "methodology"
+
+mcp_rlm-toolkit_rlm_add_hierarchical_fact:
+  content: "Steering files .kiro/steering/*.md обязательны к чтению при старте сессии"
+  level: 0
+  domain: "project"
+
+mcp_rlm-toolkit_rlm_sync_state
+```
+
+> ✅ После этого шага `rlm_search_facts("TDD")` должен возвращать L0 правило

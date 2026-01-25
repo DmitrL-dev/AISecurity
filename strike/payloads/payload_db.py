@@ -14,9 +14,8 @@ Provides unified interface to ALL known attack vectors.
 import asyncio
 import aiohttp
 import json
-import os
 from pathlib import Path
-from typing import List, Dict, Optional, Set
+from typing import List, Dict
 from dataclasses import dataclass
 from datetime import datetime
 

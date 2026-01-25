@@ -23,9 +23,8 @@ from dataclasses import dataclass, field
 from typing import List, Dict, Optional, Set
 from enum import Enum, auto
 import re
-import math
 
-from .base_engine import BaseEngine, DetectionResult, Severity
+from .base_engine import BaseEngine, DetectionResult
 
 
 class MoEAttackType(Enum):

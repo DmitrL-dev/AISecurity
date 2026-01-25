@@ -16,7 +16,7 @@ Generated: 2026-01-07
 
 import re
 import logging
-from typing import Dict, List, Optional
+from typing import List
 from dataclasses import dataclass, field
 from enum import Enum
 

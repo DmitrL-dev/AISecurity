@@ -8,7 +8,7 @@ import logging
 import asyncio
 import os
 from dataclasses import dataclass
-from typing import List, Dict, Optional, Tuple
+from typing import List, Dict, Optional
 from datetime import datetime, timedelta
 from collections import defaultdict
 import json

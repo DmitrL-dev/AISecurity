@@ -14,11 +14,9 @@ Author: Dmitry Labintsev
 Contact: chg@live.ru | @DmLabincev
 """
 
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 from typing import List, Dict, Any, Optional, Set
 from enum import Enum
-from datetime import datetime
-import hashlib
 import re
 
 

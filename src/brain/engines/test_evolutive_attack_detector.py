@@ -5,7 +5,6 @@ Tests real-time detection of genetic algorithm-based attacks.
 """
 
 import pytest
-from datetime import datetime, timedelta
 from .evolutive_attack_detector import (
     EvolutiveAttackDetector,
     SimHash,

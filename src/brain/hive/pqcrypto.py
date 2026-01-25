@@ -7,7 +7,6 @@ Fallback to Ed25519 if PQC not available.
 import logging
 import hashlib
 import base64
-import os
 from dataclasses import dataclass
 from typing import Tuple, Optional
 from datetime import datetime

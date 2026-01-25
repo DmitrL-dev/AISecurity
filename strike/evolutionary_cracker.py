@@ -9,7 +9,7 @@ import aiohttp
 from pathlib import Path
 from typing import Optional
 
-from .genetic_engine import GeneticAttackEngine, AttackGenome
+from .genetic_engine import GeneticAttackEngine
 
 
 class EvolutionaryGandalfCracker:
@@ -179,7 +179,7 @@ class EvolutionaryGandalfCracker:
     def generate_report(self) -> str:
         """Generate results report."""
         report = "# Evolutionary Gandalf Crack Report\n\n"
-        report += f"## Results\n"
+        report += "## Results\n"
         report += f"- Levels cracked: {len(self.passwords_found)}/8\n\n"
         
         report += "## Passwords Found\n"

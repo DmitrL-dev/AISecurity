@@ -16,7 +16,7 @@ Adversarial Image Detector Engine (#37) - VLM Attack Protection
 
 import io
 import logging
-from typing import Dict, List, Optional, Tuple
+from typing import List, Optional, Tuple
 from dataclasses import dataclass, field
 from enum import Enum
 

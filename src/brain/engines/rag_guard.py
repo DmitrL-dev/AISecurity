@@ -16,7 +16,6 @@ RAG Guard Engine (#38) - RAG Poisoning Protection
 
 import re
 import logging
-import hashlib
 from typing import Dict, List, Optional, Tuple
 from dataclasses import dataclass, field
 from enum import Enum

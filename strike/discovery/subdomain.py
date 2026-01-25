@@ -99,7 +99,6 @@ class SubdomainFinder:
 
     async def _resolve_subdomain(self, subdomain: str) -> Optional[str]:
         """Try to resolve subdomain."""
-        import socket
 
         try:
             loop = asyncio.get_event_loop()

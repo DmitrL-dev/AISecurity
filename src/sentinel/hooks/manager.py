@@ -9,7 +9,7 @@ Handles:
 """
 
 import logging
-from typing import List, Optional, Dict, Any, Type
+from typing import List, Optional, Dict, Any
 import importlib.metadata
 
 from sentinel.hooks.spec import SentinelHookSpec, PLUGGY_AVAILABLE
@@ -100,7 +100,6 @@ class PluginManager:
     
     def _load_local_plugins(self) -> None:
         """Load local plugins from sentinel_plugins.py in cwd."""
-        import sys
         import os
         
         # Check for sentinel_plugins.py in current directory

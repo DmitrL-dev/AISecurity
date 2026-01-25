@@ -6,7 +6,7 @@ Engine management and status.
 
 from fastapi import APIRouter
 from pydantic import BaseModel
-from typing import Dict, List, Optional
+from typing import List, Optional
 
 router = APIRouter(prefix="/engines", tags=["engines"])
 

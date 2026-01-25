@@ -13,7 +13,7 @@ All engines should inherit from appropriate base class.
 from abc import ABC, abstractmethod
 from dataclasses import dataclass, field
 from enum import Enum
-from typing import Any, Dict, Generic, List, Optional, TypeVar
+from typing import Any, Dict, List, Optional, TypeVar
 import logging
 import time
 

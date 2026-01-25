@@ -16,9 +16,8 @@ import logging
 import time
 from dataclasses import dataclass, field
 from enum import Enum
-from typing import Callable, Dict, List, Optional
+from typing import List, Optional
 
-from .base_engine import Severity, Action  # Base classes
 
 logger = logging.getLogger("HierarchicalDefenseNetwork")
 

@@ -132,7 +132,7 @@ class HydraCore:
         """Execute single head with error handling."""
         try:
             return await head.execute(target)
-        except Exception as e:
+        except Exception:
             # Try fallback
             if hasattr(head, "fallback"):
                 return await head.fallback(target)

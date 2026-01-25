@@ -12,7 +12,7 @@ from typing import Dict, List, Optional
 from dataclasses import dataclass, field
 from enum import Enum
 
-from .targets import Target, GandalfTarget, create_target
+from .targets import Target, GandalfTarget
 
 logger = logging.getLogger(__name__)
 
@@ -1863,7 +1863,7 @@ class UniversalController:
             )
 
             if is_near_miss:
-                print(f"   🎯 NEAR-MISS detected! Trying extraction...")
+                print("   🎯 NEAR-MISS detected! Trying extraction...")
                 # Already have partial, try harder extraction
                 import re
 
@@ -2178,7 +2178,7 @@ async def crack_crucible(
         print(f"   📈 Avg attempts per success: {avg_attempts:.1f}")
 
     if results:
-        print(f"\n🏴 FLAGS CAPTURED:")
+        print("\n🏴 FLAGS CAPTURED:")
         for slug in sorted(results.keys()):
             t = timings.get(slug, {})
             print(f"   {slug}: {t.get('attempts', '?')} att, {t.get('time_sec', '?')}s")
@@ -2306,7 +2306,7 @@ async def crack_crucible_hydra(
         print(f"   📈 Avg attempts/success: {avg:.1f}")
 
     if results:
-        print(f"\n🏴 FLAGS CAPTURED:")
+        print("\n🏴 FLAGS CAPTURED:")
         for slug in sorted(results.keys()):
             t = timings.get(slug, {})
             print(f"   {slug}: {t.get('attempts')} att, {t.get('time_sec')}s")

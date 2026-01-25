@@ -9,7 +9,6 @@ Part of SENTINEL Hybrid Search Agent.
 
 import logging
 import random
-import asyncio
 from typing import Optional, List, Callable, Any, Dict
 from concurrent.futures import ThreadPoolExecutor, as_completed
 
@@ -218,7 +217,7 @@ class SentinelHybridAgent:
 
         return SearchNode(
             code=payload,
-            plan=f"Draft: pattern-based",
+            plan="Draft: pattern-based",
         )
 
     def _improve(self, parent: SearchNode) -> SearchNode:

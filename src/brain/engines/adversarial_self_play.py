@@ -12,10 +12,9 @@ AI атакует себя для поиска уязвимостей:
 import re
 import logging
 import random
-from typing import Dict, List, Optional, Tuple, Callable
+from typing import List, Optional, Callable
 from dataclasses import dataclass, field
 from enum import Enum
-from abc import ABC, abstractmethod
 
 logger = logging.getLogger("AdversarialSelfPlay")
 

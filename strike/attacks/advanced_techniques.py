@@ -10,7 +10,6 @@ Sophisticated attack patterns that bypass common defenses:
 """
 
 from ..executor import Attack, AttackSeverity
-import base64
 
 
 # ============================================================

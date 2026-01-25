@@ -7,7 +7,6 @@ from engines.recursive_injection_guard import (
     RecursiveInjectionGuard,
     DepthAnalyzer,
     PatternDetector,
-    EscapeDetector,
     NestingType,
 )
 

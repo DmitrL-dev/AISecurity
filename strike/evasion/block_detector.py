@@ -16,10 +16,9 @@ This is CRITICAL for real-world pentesting.
 
 import asyncio
 import random
-import re
 import time
 import hashlib
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 from datetime import datetime
 from typing import Optional, Dict, List, Tuple
 from enum import Enum
@@ -471,27 +470,27 @@ class EvasionEngine:
 
         if block_info.block_type == BlockType.RATE_LIMIT:
             # Slow down and wait
-            print(f"   🕐 Rate limited - increasing delay...")
+            print("   🕐 Rate limited - increasing delay...")
             self.current_delay = min(self.current_delay * 2, 30.0)
             await asyncio.sleep(random.uniform(5, 15))
 
         elif block_info.block_type in [BlockType.WAF, BlockType.IP_BAN]:
             # Rotate IP
             if self.rotator:
-                print(f"   🔄 Rotating IP...")
+                print("   🔄 Rotating IP...")
                 self.rotator.force_rotate()
                 print(f"      New proxy: {self.rotator.current_server}")
 
             # Change user agent
             self.current_ua = random.choice(self.user_agents)
-            print(f"   🔄 Changed User-Agent")
+            print("   🔄 Changed User-Agent")
 
             # Wait a bit
             await asyncio.sleep(random.uniform(3, 8))
 
         elif block_info.block_type == BlockType.CAPTCHA:
             # Can't solve captcha automatically
-            print(f"   🚫 Captcha detected - need manual intervention or alternative IP")
+            print("   🚫 Captcha detected - need manual intervention or alternative IP")
             if self.rotator:
                 self.rotator.force_rotate()
             await asyncio.sleep(random.uniform(10, 20))

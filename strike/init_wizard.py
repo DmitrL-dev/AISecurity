@@ -246,7 +246,7 @@ def run_defense_wizard():
         "from .config import guard, scan\n", encoding="utf-8"
     )
 
-    console.print(f"\n[green]✅ Created:[/] sentinel/config.py")
+    console.print("\n[green]✅ Created:[/] sentinel/config.py")
     console.print(
         Panel(
             "[bold]Добавь в код:[/]\n"
@@ -277,7 +277,7 @@ def run_attack_wizard():
     config = gen_attack_config(targets, mode)
     Path("strike_config.yaml").write_text(config, encoding="utf-8")
 
-    console.print(f"\n[green]✅ Created:[/] strike_config.yaml")
+    console.print("\n[green]✅ Created:[/] strike_config.yaml")
     console.print(
         Panel(
             "[cyan]strike attack -t YOUR_URL[/]", title="Next Steps", border_style="red"
@@ -301,7 +301,7 @@ def run_gateway_wizard():
     config = gen_gateway_config(backend)
     Path("docker-compose.yml").write_text(config, encoding="utf-8")
 
-    console.print(f"\n[green]✅ Created:[/] docker-compose.yml")
+    console.print("\n[green]✅ Created:[/] docker-compose.yml")
     console.print(
         Panel("[cyan]docker-compose up -d[/]", title="Next Steps", border_style="cyan")
     )
@@ -321,7 +321,7 @@ def run_advanced_wizard():
     config = gen_advanced_config()
     Path("sentinel.yaml").write_text(config, encoding="utf-8")
 
-    console.print(f"\n[green]✅ Created:[/] sentinel.yaml")
+    console.print("\n[green]✅ Created:[/] sentinel.yaml")
     console.print(
         Panel(
             "[bold]Отредактируй sentinel.yaml:[/]\n"

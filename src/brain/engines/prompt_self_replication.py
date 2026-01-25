@@ -19,9 +19,8 @@ Related research:
 import re
 import logging
 import hashlib
-from typing import Dict, List, Optional, Tuple, Set
+from typing import List, Optional, Tuple, Set
 from dataclasses import dataclass, field
-from datetime import datetime
 
 logger = logging.getLogger("SelfReplicationDetector")
 

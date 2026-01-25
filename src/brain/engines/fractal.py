@@ -14,9 +14,8 @@ Date: 2025-12-16
 """
 
 import logging
-import math
 from dataclasses import dataclass
-from typing import List, Dict, Any, Optional, Tuple
+from typing import Dict, Any, Optional
 import numpy as np
 
 logger = logging.getLogger("StrangeMath.Fractal")

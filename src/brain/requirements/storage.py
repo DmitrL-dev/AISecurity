@@ -6,7 +6,6 @@ Handles YAML config files and SQLite persistence.
 Generated: 2026-01-08
 """
 
-import os
 import yaml
 import sqlite3
 import json

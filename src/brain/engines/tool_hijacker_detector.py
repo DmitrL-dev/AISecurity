@@ -20,7 +20,7 @@ Detection approach:
 
 import re
 import logging
-from typing import Dict, List, Optional, Set, Any, Tuple
+from typing import Dict, List, Optional, Any, Tuple
 from dataclasses import dataclass, field
 from enum import Enum
 from collections import Counter

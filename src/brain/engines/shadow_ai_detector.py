@@ -16,12 +16,11 @@ Invention: Shadow AI Detector (#47)
 import re
 import logging
 import time
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 from enum import Enum
 from typing import Dict, List, Optional, Set, Tuple
 from collections import defaultdict
 
-from .base_engine import Severity, Action  # Base classes
 
 logger = logging.getLogger("ShadowAIDetector")
 

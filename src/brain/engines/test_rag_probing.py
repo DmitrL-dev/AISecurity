@@ -3,7 +3,6 @@ Unit tests for RAG Guard (#38) and Probing Detection (#39) Engines
 """
 
 import pytest
-from unittest.mock import Mock, patch
 
 
 # ============================================================================
@@ -16,7 +15,7 @@ class TestRAGGuard:
 
     def test_import(self):
         """Test module import."""
-        from engines.rag_guard import RAGGuard, RAGGuardResult, RAGThreatType, Document, Verdict
+        from engines.rag_guard import RAGGuard
 
         assert RAGGuard is not None
 
@@ -162,10 +161,6 @@ class TestProbingDetection:
         """Test module import."""
         from engines.probing_detection import (
             ProbingDetector,
-            ProbingResult,
-            ProbingType,
-            Verdict,
-            Recommendation,
         )
 
         assert ProbingDetector is not None
@@ -225,7 +220,7 @@ class TestProbingDetection:
 
     def test_error_harvesting(self):
         """Test error harvesting detection."""
-        from engines.probing_detection import ProbingDetector, ProbingType
+        from engines.probing_detection import ProbingDetector
 
         detector = ProbingDetector()
 

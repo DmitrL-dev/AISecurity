@@ -4,7 +4,6 @@ SENTINEL Strike — LLM Fingerprinter
 Detect LLM providers and endpoints.
 """
 
-import asyncio
 from dataclasses import dataclass, field
 from typing import Optional
 from enum import Enum

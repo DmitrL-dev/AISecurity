@@ -17,7 +17,6 @@ from pathlib import Path
 import time
 import secrets
 import hashlib
-import json
 
 try:
     from cryptography.hazmat.primitives.asymmetric.ed25519 import (

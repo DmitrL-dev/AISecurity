@@ -29,7 +29,7 @@ from typing import List, Optional, Dict, Any, TYPE_CHECKING
 
 if TYPE_CHECKING:
     from sentinel.core.context import AnalysisContext
-    from sentinel.core.engine import BaseEngine, EngineResult
+    from sentinel.core.engine import EngineResult
     from sentinel.core.finding import Finding
 
 

@@ -20,7 +20,6 @@ from typing import Dict, List, Optional, Tuple
 from dataclasses import dataclass, field
 from enum import Enum
 from collections import deque
-import hashlib
 
 logger = logging.getLogger("ProactiveDefense")
 

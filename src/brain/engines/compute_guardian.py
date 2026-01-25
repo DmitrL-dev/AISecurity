@@ -16,7 +16,7 @@ Invention: Compute Guardian (#45)
 import re
 import logging
 import time
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 from enum import Enum
 from typing import Dict, List, Optional, Tuple
 from collections import defaultdict

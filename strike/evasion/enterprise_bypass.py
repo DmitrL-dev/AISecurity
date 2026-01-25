@@ -24,9 +24,7 @@ Author: SENTINEL Strike Team
 import random
 import string
 import json
-import base64
-import re
-from typing import Dict, List, Tuple, Optional
+from typing import Dict, List, Optional
 from dataclasses import dataclass
 from enum import IntEnum
 from urllib.parse import quote

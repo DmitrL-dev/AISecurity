@@ -12,8 +12,7 @@ Discovers company infrastructure by:
 import asyncio
 import socket
 import aiohttp
-import re
-from typing import List, Dict, Optional, Set
+from typing import List, Dict, Optional
 from dataclasses import dataclass, field
 from urllib.parse import urlparse
 import logging
@@ -546,7 +545,7 @@ async def scan_company_range(domain: str, proxy_url: str = None) -> RangeScanRes
     print(f"Hosts found: {result.hosts_found}")
 
     if result.hosts:
-        print(f"\n🖥️ Discovered Hosts:")
+        print("\n🖥️ Discovered Hosts:")
         for host in result.hosts:
             hostname = f" ({host.hostname})" if host.hostname else ""
             print(f"  {host.ip}{hostname}")
@@ -555,7 +554,7 @@ async def scan_company_range(domain: str, proxy_url: str = None) -> RangeScanRes
                 print(f"    Chat endpoints: {len(host.chat_endpoints)}")
 
     if result.chat_endpoints:
-        print(f"\n🎯 Chat Endpoints Found:")
+        print("\n🎯 Chat Endpoints Found:")
         for ep in result.chat_endpoints:
             print(f"  {ep}")
 
@@ -578,6 +577,6 @@ if __name__ == "__main__":
     proxy = None
     if api_key:
         proxy = f"http://scraperapi:{api_key}@proxy-server.scraperapi.com:8001"
-        print(f"🏠 Using ScraperAPI proxy")
+        print("🏠 Using ScraperAPI proxy")
 
     asyncio.run(scan_company_range(target, proxy))

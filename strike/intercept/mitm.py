@@ -7,7 +7,6 @@ Proxy integration for traffic interception.
 from dataclasses import dataclass, field
 from typing import Optional, Callable, Any
 from datetime import datetime
-import asyncio
 
 
 @dataclass

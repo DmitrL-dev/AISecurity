@@ -5,7 +5,7 @@ Provides backwards compatibility layer allowing existing 200+ engines
 to work with the new BaseEngine interface without modification.
 """
 
-from typing import Dict, Any, List, Optional, Type, Callable
+from typing import Dict, Any, List, Optional, Type
 import logging
 import time
 

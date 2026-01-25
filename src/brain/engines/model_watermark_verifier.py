@@ -15,13 +15,11 @@ Invention: Model Watermark Verifier (#46)
 import hashlib
 import logging
 import time
-import math
 from collections import Counter
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 from enum import Enum
 from typing import Dict, List, Optional, Set, Tuple
 
-from .base_engine import Severity, Action  # Base classes
 
 logger = logging.getLogger("ModelWatermarkVerifier")
 

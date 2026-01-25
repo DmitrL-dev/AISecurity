@@ -5,7 +5,7 @@ Demonstrates how to create a custom engine using the BaseEngine abstraction.
 """
 
 from sentinel.core.engine import BaseEngine, EngineResult, register_engine
-from sentinel.core.finding import Finding, Severity, Confidence
+from sentinel.core.finding import Severity, Confidence
 from sentinel.core.context import AnalysisContext
 
 

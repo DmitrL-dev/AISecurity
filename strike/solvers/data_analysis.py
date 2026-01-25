@@ -249,7 +249,7 @@ class DataAnalysisSolver:
 
                 if arr.dtype == np.float64 or arr.dtype == np.float32:
                     print(
-                        f"  🔬 Float data detected — applying histogram forensic analysis"
+                        "  🔬 Float data detected — applying histogram forensic analysis"
                     )
                     self.histogram_forensic_analysis(artifact)
                 else:

@@ -21,7 +21,7 @@ Usage:
 """
 
 from dataclasses import dataclass, field
-from typing import Dict, List, Optional, Set, Tuple
+from typing import Dict, List, Optional
 import unicodedata
 import re
 

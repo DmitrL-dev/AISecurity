@@ -66,17 +66,12 @@ IMPLEMENTATION:
 - Residential proxy support
 """
 
-import asyncio
 import random
 import time
 import hashlib
-import platform
-import json
-from datetime import datetime
-from dataclasses import dataclass, field
-from typing import List, Dict, Optional, Tuple, Any
+from dataclasses import dataclass
+from typing import List, Dict, Optional, Tuple
 from enum import Enum
-from pathlib import Path
 import math
 
 
@@ -745,14 +740,14 @@ def demo():
     print(f"   User-Agent: {headers['User-Agent'][:50]}...")
 
     # Timing
-    print(f"\n⏱️ Human Timing Samples:")
+    print("\n⏱️ Human Timing Samples:")
     timing = HumanTiming(base_delay=1.0)
     for i in range(5):
         delay = timing.get_delay()
         print(f"   Request {i+1}: {delay:.2f}s delay")
 
     # IP Reputation
-    print(f"\n🌐 Recommended Proxy Types:")
+    print("\n🌐 Recommended Proxy Types:")
     ip_rep = IPReputation()
     for service, desc in list(ip_rep.get_residential_proxy_services().items())[:3]:
         print(f"   • {service}: {desc}")

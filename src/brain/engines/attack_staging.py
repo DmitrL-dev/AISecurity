@@ -16,10 +16,9 @@ Attack Staging Detection Engine (#44) - Multi-Stage Attack Detection
 
 import re
 import logging
-from typing import Dict, List, Optional, Tuple
+from typing import List, Optional, Tuple
 from dataclasses import dataclass, field
 from enum import Enum
-from collections import Counter
 
 logger = logging.getLogger("AttackStaging")
 

@@ -17,15 +17,13 @@ import logging
 import json
 import asyncio
 from pathlib import Path
-from typing import List, Dict, Any, Optional, Callable
+from typing import List, Dict, Any, Optional
 from datetime import datetime
 import httpx
 
 from .schema import (
     Workflow,
     WorkflowStatus,
-    Trigger,
-    TriggerType,
     Action,
     ActionType,
     ExecutionRecord,

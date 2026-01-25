@@ -10,12 +10,11 @@ for detecting risks at micro/meso/macro levels in multi-agent systems.
 
 import logging
 from dataclasses import dataclass, field
-from typing import Dict, List, Optional, Set, Tuple
+from typing import Dict, List, Optional, Set
 from datetime import datetime, timedelta
 from collections import defaultdict
 from enum import Enum
 import hashlib
-import math
 
 logger = logging.getLogger("MultiAgentSafety")
 

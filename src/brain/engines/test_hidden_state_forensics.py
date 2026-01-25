@@ -9,7 +9,6 @@ from engines.hidden_state_forensics import (
     LayerAnalyzer,
     PatternDetector,
     ThreatType,
-    ConfidenceLevel,
     LayerActivation
 )
 

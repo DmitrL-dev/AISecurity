@@ -9,7 +9,6 @@ Focuses on AWS WAF, Cloudflare, Akamai, Imperva.
 from dataclasses import dataclass, field
 from typing import Dict, List, Optional, Tuple
 from enum import Enum
-import re
 import hashlib
 
 

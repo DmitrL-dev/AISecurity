@@ -6,14 +6,10 @@ Tests for pattern detection and risk assessment.
 Generated: 2026-01-08
 """
 
-import pytest
-from datetime import datetime
 
 from brain.design_review import (
     RiskCategory,
     Severity,
-    DesignRisk,
-    DesignReviewResult,
     DesignReviewer,
     review_text,
     review_documents,

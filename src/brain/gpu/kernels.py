@@ -12,7 +12,7 @@ Kernels:
 
 import logging
 import numpy as np
-from typing import Union, Optional
+from typing import Union
 from .detector import gpu_available, cutile_available, gpu_fallback
 
 logger = logging.getLogger("GPU.Kernels")

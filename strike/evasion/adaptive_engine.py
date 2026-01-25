@@ -6,8 +6,8 @@ Learns from successful/failed bypasses and adapts technique selection.
 Uses reinforcement learning principles to maximize bypass rate.
 """
 
-from dataclasses import dataclass, field
-from typing import Dict, List, Optional, Tuple, Set
+from dataclasses import dataclass
+from typing import Dict, List, Tuple, Set
 from collections import defaultdict
 import random
 import math
@@ -296,7 +296,7 @@ class AdaptivePayloadEngine:
 
     def _apply_technique(self, payload: str, technique: str) -> str:
         """Apply a bypass technique to payload."""
-        from urllib.parse import quote, quote_plus
+        from urllib.parse import quote
 
         if technique == 'hpp_get':
             # HTTP Parameter Pollution style

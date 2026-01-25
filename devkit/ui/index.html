@@ -1,0 +1,233 @@
+<!doctype html>
+<html lang="ru">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>SENTINEL DevKit Dashboard</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <div class="dashboard">
+      <!-- Header -->
+      <header class="header">
+        <div class="logo">
+          <span class="logo-icon">🛡️</span>
+          <h1>SENTINEL DevKit</h1>
+        </div>
+        <div class="header-actions">
+          <span class="status-badge status-active">Active</span>
+          <button class="btn-icon" onclick="toggleTheme()" title="Toggle theme">
+            <span id="theme-icon">🌙</span>
+          </button>
+        </div>
+      </header>
+
+      <!-- Main Grid -->
+      <main class="main-grid">
+        <!-- TDD Compliance Card -->
+        <div class="card card-tdd">
+          <div class="card-header">
+            <h2>TDD Iron Law</h2>
+            <span class="card-icon">🔴</span>
+          </div>
+          <div class="card-body">
+            <div class="compliance-meter">
+              <div class="meter-fill" id="tdd-meter" style="width: 87%"></div>
+            </div>
+            <div class="compliance-stats">
+              <div class="stat">
+                <span class="stat-value" id="tdd-percent">87%</span>
+                <span class="stat-label">Compliance</span>
+              </div>
+              <div class="stat">
+                <span class="stat-value" id="tests-count">142</span>
+                <span class="stat-label">Tests</span>
+              </div>
+              <div class="stat">
+                <span class="stat-value" id="coverage">78%</span>
+                <span class="stat-label">Coverage</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Workflow Status Card -->
+        <div class="card card-workflow">
+          <div class="card-header">
+            <h2>SDD Workflow</h2>
+            <span class="card-icon">📋</span>
+          </div>
+          <div class="card-body">
+            <div class="workflow-steps">
+              <div class="workflow-step completed">
+                <span class="step-icon">✅</span>
+                <span class="step-label">Requirements</span>
+              </div>
+              <div class="workflow-connector"></div>
+              <div class="workflow-step completed">
+                <span class="step-icon">✅</span>
+                <span class="step-label">Design</span>
+              </div>
+              <div class="workflow-connector"></div>
+              <div class="workflow-step active">
+                <span class="step-icon">🔄</span>
+                <span class="step-label">Tasks</span>
+              </div>
+              <div class="workflow-connector"></div>
+              <div class="workflow-step pending">
+                <span class="step-icon">⏳</span>
+                <span class="step-label">Implementation</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Two-Stage Review Card -->
+        <div class="card card-review">
+          <div class="card-header">
+            <h2>Two-Stage Review</h2>
+            <span class="card-icon">🔍</span>
+          </div>
+          <div class="card-body">
+            <div class="review-stages">
+              <div class="review-stage">
+                <div class="stage-header">
+                  <span class="stage-name">Stage 1: Spec Compliance</span>
+                  <span class="stage-status status-pass">PASS</span>
+                </div>
+                <div class="stage-checks">
+                  <span class="check check-pass">✓ Requirements</span>
+                  <span class="check check-pass">✓ Edge Cases</span>
+                  <span class="check check-pass">✓ API Contract</span>
+                </div>
+              </div>
+              <div class="review-stage">
+                <div class="stage-header">
+                  <span class="stage-name">Stage 2: Code Quality</span>
+                  <span class="stage-status status-pending">IN PROGRESS</span>
+                </div>
+                <div class="stage-checks">
+                  <span class="check check-pass">✓ Clean Architecture</span>
+                  <span class="check check-pending">○ Type Hints</span>
+                  <span class="check check-pending">○ Docstrings</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- QA Fix Loop Card -->
+        <div class="card card-qa">
+          <div class="card-header">
+            <h2>QA Fix Loop</h2>
+            <span class="card-icon">🔄</span>
+          </div>
+          <div class="card-body">
+            <div class="qa-status">
+              <div class="qa-iteration">
+                <span class="iteration-label">Iteration</span>
+                <span class="iteration-value" id="qa-iteration">2 / 3</span>
+              </div>
+              <div class="qa-issues">
+                <div class="issue-stat">
+                  <span class="issue-count issue-high">1</span>
+                  <span class="issue-label">High</span>
+                </div>
+                <div class="issue-stat">
+                  <span class="issue-count issue-medium">3</span>
+                  <span class="issue-label">Medium</span>
+                </div>
+                <div class="issue-stat">
+                  <span class="issue-count issue-low">5</span>
+                  <span class="issue-label">Low</span>
+                </div>
+              </div>
+            </div>
+            <div class="qa-progress">
+              <div class="progress-bar">
+                <div class="progress-fill" style="width: 66%"></div>
+              </div>
+              <span class="progress-label">6 of 9 issues fixed</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- RLM Memory Card -->
+        <div class="card card-memory">
+          <div class="card-header">
+            <h2>RLM Memory</h2>
+            <span class="card-icon">🧠</span>
+          </div>
+          <div class="card-body">
+            <div class="memory-stats">
+              <div class="memory-level">
+                <span class="level-name">L0 Core</span>
+                <span class="level-count">12</span>
+              </div>
+              <div class="memory-level">
+                <span class="level-name">L1 Session</span>
+                <span class="level-count">47</span>
+              </div>
+              <div class="memory-level">
+                <span class="level-name">L2 Project</span>
+                <span class="level-count">156</span>
+              </div>
+            </div>
+            <div class="memory-recent">
+              <h4>Recent Facts</h4>
+              <ul class="facts-list">
+                <li class="fact-item">
+                  <span class="fact-time">5m ago</span>
+                  <span class="fact-text">Review APPROVED: engine-xyz</span>
+                </li>
+                <li class="fact-item">
+                  <span class="fact-time">12m ago</span>
+                  <span class="fact-text">TDD violation fixed in shield/</span>
+                </li>
+                <li class="fact-item">
+                  <span class="fact-time">1h ago</span>
+                  <span class="fact-text">Pattern: unicode edge cases</span>
+                </li>
+              </ul>
+            </div>
+          </div>
+        </div>
+
+        <!-- Rationalizations Card -->
+        <div class="card card-rationalizations">
+          <div class="card-header">
+            <h2>Rationalizations Defense</h2>
+            <span class="card-icon">🛡️</span>
+          </div>
+          <div class="card-body">
+            <div class="rationalization-table">
+              <div class="rationalization-row">
+                <span class="rat-excuse">❌ "Too small for test"</span>
+                <span class="rat-response">✅ Small change = small test</span>
+              </div>
+              <div class="rationalization-row">
+                <span class="rat-excuse">❌ "Will add tests later"</span>
+                <span class="rat-response">✅ Tests first or reject</span>
+              </div>
+              <div class="rationalization-row">
+                <span class="rat-excuse">❌ "Just refactoring"</span>
+                <span class="rat-response"
+                  >✅ Refactor without tests = gambling</span
+                >
+              </div>
+            </div>
+          </div>
+        </div>
+      </main>
+
+      <!-- Footer -->
+      <footer class="footer">
+        <span>SENTINEL DevKit v1.0</span>
+        <span>•</span>
+        <span>SDD → TDD → Review → Merge</span>
+      </footer>
+    </div>
+
+    <script src="app.js"></script>
+  </body>
+</html>

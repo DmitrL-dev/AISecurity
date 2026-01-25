@@ -876,7 +876,7 @@ class SentinelAnalyzer:
 
                 elif qwen_result.level == SafetyLevel.CONTROVERSIAL:
                     risk_score = 50.0
-                    threats.append(f"QwenGuard Response: CONTROVERSIAL")
+                    threats.append("QwenGuard Response: CONTROVERSIAL")
 
             except Exception as e:
                 logger.error(f"QwenGuard egress error: {e}")

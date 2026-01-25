@@ -20,7 +20,7 @@ Usage:
 import hashlib
 import random
 from dataclasses import dataclass, field
-from typing import Dict, List, Set, Optional
+from typing import Dict, Set, Optional
 from datetime import datetime
 
 

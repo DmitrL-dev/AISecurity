@@ -16,11 +16,11 @@ import random
 import logging
 import time
 from collections import defaultdict
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 from enum import Enum
-from typing import Dict, List, Optional, Tuple
+from typing import Dict, List, Optional
 
-from .base_engine import Severity, Action  # Base classes
+from .base_engine import Action  # Base classes
 
 logger = logging.getLogger("ReinforcementSafetyAgent")
 
