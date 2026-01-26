@@ -1,0 +1,16 @@
+# Academy Lab Requirements
+
+# Core dependencies
+pydantic>=2.0.0
+
+# Optional: For real LLM testing
+openai>=1.0.0
+anthropic>=0.20.0
+
+# Testing
+pytest>=7.0.0
+pytest-cov>=4.0.0
+
+# Development
+ruff>=0.1.0
+mypy>=1.0.0

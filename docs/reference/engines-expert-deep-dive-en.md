@@ -3,7 +3,7 @@
 > **Audience:** Researchers, experts in topology, differential geometry, machine learning.  
 > **Purpose:** Detailed description of mathematical foundations and their engineering adaptation.  
 > **Updated:** January 2026 — Dragon v4.0, MoE Guard, RAG Poisoning, Dark Patterns  
-> **Unit Tests:** 1,050+ | **Engines:** 217 (verified ✅ Health Check 98%) | **LOC:** ~98,000
+> **Unit Tests:** 1,200+ | **Engines:** 219 (verified ✅ Health Check 98%) | **LOC:** ~120,000
 
 ---
 
@@ -15324,30 +15324,123 @@ class AttackSynthesizer:
 
 ## Document Complete ✅
 
-**All 217 engines now documented** in engines-expert-deep-dive-en.md:
+**All 219 engines now documented** in engines-expert-deep-dive-en.md:
 - 116 original engines with full scientific descriptions
-- 82 newly added engines (Batches 1-8)
+- 82 engines (Batches 1-8)
+- 8 R&D engines (Jan 25, 2026)
 - Consistent formatting: File, LOC, Category, Description
 - Key engines include mathematical foundations and code examples
 
 ---
 
-## Updated Statistics
+## 🆕 R&D Daily Research — January 25, 2026
 
-> **Total Engines:** 217  
-> **Unit Tests:** 1,150+  
-> **LOC Analyzed:** ~116,000  
-> **Version:** Dragon v4.1 (January 2026)  
-> **Coverage:** OWASP LLM Top 10 + OWASP ASI Top 10 (2025)
+### 218. SkillWormDetector
 
-> **Total Engines:** 217  
-> **Unit Tests:** 1,150+  
-> **LOC Analyzed:** ~116,000  
-> **Version:** Dragon v4.1 (January 2026)  
-> **Coverage:** OWASP LLM Top 10 + OWASP ASI Top 10 (2025)
+**File:** `synced/skill_worm_detector.py`  
+**LOC:** ~150  
+**Category:** Agentic AI Security
+
+**Scientific Basis:** Łukasz Olejnik research on "Skill Worms" — self-propagating prompt injections in Claude skills. Skills load BEFORE model analysis (pre-model execution), enabling lateral movement between skills.
+
+**Detection:** Cross-skill references, installation commands, persistence mechanisms.
 
 ---
 
-*Document last updated: January 18, 2026*
+### 219. IDEExtensionDetector
 
+**File:** `synced/ide_extension_detector.py`  
+**LOC:** ~180  
+**Category:** Supply Chain Security
+
+**Scientific Basis:** Koi.ai MaliciousCorgi campaign analysis — 1.5M affected developers via fake AI extensions (ChatMoss). Extensions masquerade as legitimate AI assistants while exfiltrating code and credentials.
+
+**Detection:** Suspicious API endpoints, overly broad permissions, code exfiltration patterns.
+
+---
+
+### 220. AIGeneratedMalwareDetector
+
+**File:** `synced/ai_generated_malware_detector.py`  
+**LOC:** ~200  
+**Category:** Malware Defense
+
+**Scientific Basis:** CheckPoint KONNI APT research — North Korean threat actors using LLMs to generate polymorphic PowerShell backdoors with AI-style comments for evasion.
+
+**Detection:** Base64/Invoke-Expression chains, AI-style code comments, unusual obfuscation.
+
+---
+
+### 221. MCPAuthBypassDetector
+
+**File:** `synced/mcp_auth_bypass_detector.py`  
+**LOC:** ~170  
+**Category:** MCP/A2A Security
+
+**Scientific Basis:** Praetorian research on MCP authorization bypass via IDOR (Insecure Direct Object Reference) in account_id parameters.
+
+**Detection:** Resource ID manipulation, cross-account access, scope escalation.
+
+---
+
+### 222. AdvancedInjectionDetector
+
+**File:** `synced/advanced_injection_detector.py`  
+**LOC:** ~250  
+**Category:** Prompt Injection
+
+**Scientific Basis:** BlackHills InfoSec Part 2 — 10+ techniques including Crescendo (multi-turn), GCG (gradient-based), AutoDAN (automated), Visual Injection (image-embedded).
+
+**Detection:** Gradient-like tokens, conversation escalation, image-embedded instructions.
+
+---
+
+### 223. AgentAutonomyLevelAnalyzer
+
+**File:** `synced/agent_autonomy_level_analyzer.py`  
+**LOC:** ~180  
+**Category:** Agentic Governance
+
+**Scientific Basis:** IMDA Model Governance Framework + Palantir AIP 5 Security Dimensions. Risk scoring based on autonomy level (0-4 scale from tool to self-improving).
+
+**Detection:** Risk assessment per autonomy level, tool access count, human oversight checks.
+
+---
+
+### 224. MultiAgentCascadeDetector
+
+**File:** `synced/multi_agent_cascade_detector.py`  
+**LOC:** ~200  
+**Category:** Multi-Agent Security
+
+**Scientific Basis:** IMDA MGF multi-agent governance + Palantir cascade failure prevention research. Detects failure propagation chains across interconnected agents.
+
+**Detection:** Deep call chains (>5), loop detection, single point of failure, missing circuit breakers.
+
+---
+
+### 225. AgenticGovernanceCompliance
+
+**File:** `synced/agentic_governance_compliance.py`  
+**LOC:** ~220  
+**Category:** Regulatory Compliance
+
+**Scientific Basis:** IMDA 4-Dimension Compliance Framework: Accountability, Transparency, Fairness, Safety. Aligned with EU AI Act high-risk requirements.
+
+**Detection:** Per-dimension compliance scoring (0-100%), weighted overall score.
+
+---
+
+## Updated Statistics
+
+> **Total Engines:** 219 (was 217)  
+> **New (Jan 25):** 8 R&D engines  
+> **Unit Tests:** 1,200+ (+65 new)  
+> **LOC Analyzed:** ~120,000  
+> **Version:** Dragon v4.2 (January 2026)  
+> **Coverage:** OWASP LLM Top 10 + OWASP ASI Top 10 + IMDA MGF
+
+---
+
+*Document last updated: January 25, 2026*
 

@@ -1,0 +1,21 @@
+{
+  "name": "ai-security-academy",
+  "description": "Comprehensive AI Security Academy - bilingual education platform (RU/EN)",
+  "language": "ru",
+  "status": "requirements",
+  "created": "2026-01-25",
+  "priority": "P0",
+  "tracks": [
+    "AI Fundamentals",
+    "Threat Landscape",
+    "Attack Vectors",
+    "Agentic Security",
+    "Defense Strategies",
+    "Advanced Detection",
+    "Governance & Compliance",
+    "Hands-on Labs"
+  ],
+  "levels": ["beginner", "intermediate", "advanced", "expert", "master"],
+  "languages": ["ru", "en"],
+  "dependencies": ["sentinel-engines", "strike-payloads", "shield-academy", "immune-academy"]
+}

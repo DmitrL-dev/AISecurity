@@ -34,8 +34,7 @@ class SentinelAnalyzer:
     def __init__(self):
         logger.info("SentinelAnalyzer initializing (lazy mode)...")
         # Only store config, don't load models yet
-        self._qwen_enabled = os.getenv(
-            "QWEN_GUARD_ENABLED", "true").lower() == "true"
+        self._qwen_enabled = os.getenv("QWEN_GUARD_ENABLED", "true").lower() == "true"
         self._qwen_mode = os.getenv("QWEN_GUARD_MODE", "local")
         self._language_mode = os.getenv("LANGUAGE_MODE", "WHITELIST")
         self._warmed_up = False
@@ -74,10 +73,11 @@ class SentinelAnalyzer:
             _ = self.geometric_kernel  # Trigger lazy load
             results["geometric_kernel"] = {
                 "status": "ok",
-                "time_ms": round((time.perf_counter() - start) * 1000, 1)
+                "time_ms": round((time.perf_counter() - start) * 1000, 1),
             }
             logger.info(
-                f"✓ Geometric Kernel loaded in {results['geometric_kernel']['time_ms']}ms")
+                f"✓ Geometric Kernel loaded in {results['geometric_kernel']['time_ms']}ms"
+            )
         except Exception as e:
             results["geometric_kernel"] = {"status": "error", "error": str(e)}
             logger.error(f"✗ Geometric Kernel failed: {e}")
@@ -88,10 +88,9 @@ class SentinelAnalyzer:
             _ = self.pii_engine
             results["pii_engine"] = {
                 "status": "ok",
-                "time_ms": round((time.perf_counter() - start) * 1000, 1)
+                "time_ms": round((time.perf_counter() - start) * 1000, 1),
             }
-            logger.info(
-                f"✓ PII Engine loaded in {results['pii_engine']['time_ms']}ms")
+            logger.info(f"✓ PII Engine loaded in {results['pii_engine']['time_ms']}ms")
         except Exception as e:
             results["pii_engine"] = {"status": "error", "error": str(e)}
             logger.error(f"✗ PII Engine failed: {e}")
@@ -102,10 +101,11 @@ class SentinelAnalyzer:
             _ = self.language_engine
             results["language_engine"] = {
                 "status": "ok",
-                "time_ms": round((time.perf_counter() - start) * 1000, 1)
+                "time_ms": round((time.perf_counter() - start) * 1000, 1),
             }
             logger.info(
-                f"✓ Language Engine loaded in {results['language_engine']['time_ms']}ms")
+                f"✓ Language Engine loaded in {results['language_engine']['time_ms']}ms"
+            )
         except Exception as e:
             results["language_engine"] = {"status": "error", "error": str(e)}
             logger.error(f"✗ Language Engine failed: {e}")
@@ -116,10 +116,11 @@ class SentinelAnalyzer:
             _ = self.knowledge_guard
             results["knowledge_guard"] = {
                 "status": "ok",
-                "time_ms": round((time.perf_counter() - start) * 1000, 1)
+                "time_ms": round((time.perf_counter() - start) * 1000, 1),
             }
             logger.info(
-                f"✓ Knowledge Guard loaded in {results['knowledge_guard']['time_ms']}ms")
+                f"✓ Knowledge Guard loaded in {results['knowledge_guard']['time_ms']}ms"
+            )
         except Exception as e:
             results["knowledge_guard"] = {"status": "error", "error": str(e)}
             logger.error(f"✗ Knowledge Guard failed: {e}")
@@ -130,10 +131,11 @@ class SentinelAnalyzer:
             _ = self.yara_engine
             results["yara_engine"] = {
                 "status": "ok" if self.yara_engine.is_available else "unavailable",
-                "time_ms": round((time.perf_counter() - start) * 1000, 1)
+                "time_ms": round((time.perf_counter() - start) * 1000, 1),
             }
             logger.info(
-                f"✓ YARA Engine loaded in {results['yara_engine']['time_ms']}ms")
+                f"✓ YARA Engine loaded in {results['yara_engine']['time_ms']}ms"
+            )
         except Exception as e:
             results["yara_engine"] = {"status": "error", "error": str(e)}
             logger.error(f"✗ YARA Engine failed: {e}")
@@ -145,10 +147,11 @@ class SentinelAnalyzer:
             _ = self.chaos_engine
             results["strange_math"] = {
                 "status": "ok",
-                "time_ms": round((time.perf_counter() - start) * 1000, 1)
+                "time_ms": round((time.perf_counter() - start) * 1000, 1),
             }
             logger.info(
-                f"✓ Strange Math loaded in {results['strange_math']['time_ms']}ms")
+                f"✓ Strange Math loaded in {results['strange_math']['time_ms']}ms"
+            )
         except Exception as e:
             results["strange_math"] = {"status": "error", "error": str(e)}
             logger.error(f"✗ Strange Math failed: {e}")
@@ -160,10 +163,11 @@ class SentinelAnalyzer:
                 _ = self.qwen_guard
                 results["qwen_guard"] = {
                     "status": "ok" if self.qwen_guard else "disabled",
-                    "time_ms": round((time.perf_counter() - start) * 1000, 1)
+                    "time_ms": round((time.perf_counter() - start) * 1000, 1),
                 }
                 logger.info(
-                    f"✓ Qwen Guard loaded in {results['qwen_guard']['time_ms']}ms")
+                    f"✓ Qwen Guard loaded in {results['qwen_guard']['time_ms']}ms"
+                )
             except Exception as e:
                 results["qwen_guard"] = {"status": "error", "error": str(e)}
                 logger.error(f"✗ Qwen Guard failed: {e}")
@@ -176,13 +180,13 @@ class SentinelAnalyzer:
             _ = self.adversarial_engine
             results["adversarial_engine"] = {
                 "status": "ok",
-                "time_ms": round((time.perf_counter() - start) * 1000, 1)
+                "time_ms": round((time.perf_counter() - start) * 1000, 1),
             }
             logger.info(
-                f"✓ Adversarial Engine loaded in {results['adversarial_engine']['time_ms']}ms")
+                f"✓ Adversarial Engine loaded in {results['adversarial_engine']['time_ms']}ms"
+            )
         except Exception as e:
-            results["adversarial_engine"] = {
-                "status": "error", "error": str(e)}
+            results["adversarial_engine"] = {"status": "error", "error": str(e)}
             logger.error(f"✗ Adversarial Engine failed: {e}")
 
         # 9. Learning Engine
@@ -191,10 +195,11 @@ class SentinelAnalyzer:
             _ = self.learning_engine
             results["learning_engine"] = {
                 "status": "ok",
-                "time_ms": round((time.perf_counter() - start) * 1000, 1)
+                "time_ms": round((time.perf_counter() - start) * 1000, 1),
             }
             logger.info(
-                f"✓ Learning Engine loaded in {results['learning_engine']['time_ms']}ms")
+                f"✓ Learning Engine loaded in {results['learning_engine']['time_ms']}ms"
+            )
         except Exception as e:
             results["learning_engine"] = {"status": "error", "error": str(e)}
             logger.error(f"✗ Learning Engine failed: {e}")
@@ -205,13 +210,13 @@ class SentinelAnalyzer:
             _ = self.hallucination_engine
             results["hallucination_engine"] = {
                 "status": "ok",
-                "time_ms": round((time.perf_counter() - start) * 1000, 1)
+                "time_ms": round((time.perf_counter() - start) * 1000, 1),
             }
             logger.info(
-                f"✓ Hallucination Engine loaded in {results['hallucination_engine']['time_ms']}ms")
+                f"✓ Hallucination Engine loaded in {results['hallucination_engine']['time_ms']}ms"
+            )
         except Exception as e:
-            results["hallucination_engine"] = {
-                "status": "error", "error": str(e)}
+            results["hallucination_engine"] = {"status": "error", "error": str(e)}
             logger.error(f"✗ Hallucination Engine failed: {e}")
 
         total_time = (time.perf_counter() - start_total) * 1000
@@ -222,13 +227,14 @@ class SentinelAnalyzer:
         total_count = len(results)
 
         logger.info(
-            f"🔥 Warmup complete: {ok_count}/{total_count} components in {total_time:.0f}ms")
+            f"🔥 Warmup complete: {ok_count}/{total_count} components in {total_time:.0f}ms"
+        )
 
         return {
             "status": "warmed_up",
             "total_time_ms": round(total_time, 1),
             "components": results,
-            "summary": f"{ok_count}/{total_count} components loaded"
+            "summary": f"{ok_count}/{total_count} components loaded",
         }
 
     @property
@@ -330,8 +336,7 @@ class SentinelAnalyzer:
         if engine.is_available:
             logger.info(f"YARA Engine loaded with {engine.rule_count} rules")
         else:
-            logger.warning(
-                "YARA Engine not available (yara-python not installed)")
+            logger.warning("YARA Engine not available (yara-python not installed)")
         return engine
 
     @cached_property
@@ -442,6 +447,80 @@ class SentinelAnalyzer:
 
         return PolymorphicPromptAssembler()
 
+    # --- R&D Daily Research Engines (Jan 25 2026) ---
+
+    @cached_property
+    def skill_worm_detector(self):
+        """Skill Worm Detector - Claude skill lateral movement defense."""
+        logger.info("Lazy loading Skill Worm Detector...")
+        from engines.synced.skill_worm_detector import SkillWormDetector
+
+        return SkillWormDetector()
+
+    @cached_property
+    def ide_extension_detector(self):
+        """IDE Extension Detector - Malicious AI extension defense."""
+        logger.info("Lazy loading IDE Extension Detector...")
+        from engines.synced.ide_extension_detector import IDEExtensionDetector
+
+        return IDEExtensionDetector()
+
+    @cached_property
+    def ai_malware_detector(self):
+        """AI-Generated Malware Detector - LLM-created malware defense."""
+        logger.info("Lazy loading AI Malware Detector...")
+        from engines.synced.ai_generated_malware_detector import (
+            AIGeneratedMalwareDetector,
+        )
+
+        return AIGeneratedMalwareDetector()
+
+    @cached_property
+    def mcp_auth_bypass_detector(self):
+        """MCP Auth Bypass Detector - Authorization bypass defense."""
+        logger.info("Lazy loading MCP Auth Bypass Detector...")
+        from engines.synced.mcp_auth_bypass_detector import MCPAuthBypassDetector
+
+        return MCPAuthBypassDetector()
+
+    @cached_property
+    def advanced_injection_detector(self):
+        """Advanced Injection Detector - Crescendo, GCG, Visual attacks."""
+        logger.info("Lazy loading Advanced Injection Detector...")
+        from engines.synced.advanced_injection_detector import AdvancedInjectionDetector
+
+        return AdvancedInjectionDetector()
+
+    @cached_property
+    def agent_autonomy_analyzer(self):
+        """Agent Autonomy Level Analyzer - IMDA risk scoring."""
+        logger.info("Lazy loading Agent Autonomy Analyzer...")
+        from engines.synced.agent_autonomy_level_analyzer import (
+            AgentAutonomyLevelAnalyzer,
+        )
+
+        return AgentAutonomyLevelAnalyzer()
+
+    @cached_property
+    def cascade_detector(self):
+        """Multi-Agent Cascade Detector - Cascading failure defense."""
+        logger.info("Lazy loading Cascade Detector...")
+        from engines.synced.multi_agent_cascade_detector import (
+            MultiAgentCascadeDetector,
+        )
+
+        return MultiAgentCascadeDetector()
+
+    @cached_property
+    def governance_compliance(self):
+        """Agentic Governance Compliance - IMDA framework checker."""
+        logger.info("Lazy loading Governance Compliance...")
+        from engines.synced.agentic_governance_compliance import (
+            AgenticGovernanceCompliance,
+        )
+
+        return AgenticGovernanceCompliance()
+
     # =========================================================================
     # TIERED PARALLEL EXECUTION HELPERS
     # =========================================================================
@@ -523,8 +602,7 @@ class SentinelAnalyzer:
         results["language"] = (
             lang_result if not isinstance(lang_result, Exception) else None
         )
-        results["learned"] = learned if not isinstance(
-            learned, Exception) else None
+        results["learned"] = learned if not isinstance(learned, Exception) else None
         results["info_theory"] = (
             info_result if not isinstance(info_result, Exception) else None
         )
@@ -550,8 +628,7 @@ class SentinelAnalyzer:
             try:
                 # Add timeout to prevent hanging
                 return await asyncio.wait_for(
-                    self._run_in_executor(
-                        self.qwen_guard.classify_prompt, prompt),
+                    self._run_in_executor(self.qwen_guard.classify_prompt, prompt),
                     timeout=0.3,  # 300ms max
                 )
             except asyncio.TimeoutError:
@@ -580,8 +657,7 @@ class SentinelAnalyzer:
             if not isinstance(tda, Exception)
             else {"is_anomalous": False, "tda_score": 0}
         )
-        results["knowledge"] = knowledge if not isinstance(
-            knowledge, Exception) else 0
+        results["knowledge"] = knowledge if not isinstance(knowledge, Exception) else 0
 
         return results
 
@@ -600,16 +676,20 @@ class SentinelAnalyzer:
 
         # Get polymorphic configuration for this session (Shapeshifter Defense)
         from core.shapeshifter import get_session_config
+
         session_config = get_session_config(session_id)
         logger.debug(
-            f"Shapeshifter config: {len(session_config.active_engines)} engines, threshold={session_config.thresholds.get('risk_score', 70):.1f}")
+            f"Shapeshifter config: {len(session_config.active_engines)} engines, threshold={session_config.thresholds.get('risk_score', 70):.1f}"
+        )
 
         # Get current threat tide level (Semantic Tide)
         from core.semantic_tide import get_semantic_tide
+
         tide = get_semantic_tide()
         tide_level = tide.get_current_level()
         logger.debug(
-            f"Semantic Tide: level={tide_level.level}/10 ({tide_level.severity}), trend={tide_level.trend}")
+            f"Semantic Tide: level={tide_level.level}/10 ({tide_level.severity}), trend={tide_level.trend}"
+        )
 
         # =====================================================================
         # TIER 0: Early Exit (~10ms) - Fast checks first
@@ -671,10 +751,8 @@ class SentinelAnalyzer:
                 if yara_result.risk_score >= 75:  # CRITICAL/HIGH severity
                     allowed = False
                 for match in yara_result.matches:
-                    threats.append(
-                        f"YARA [{match.severity}]: {match.description}")
-                logger.warning(
-                    f"YARA detected {len(yara_result.matches)} rule matches")
+                    threats.append(f"YARA [{match.severity}]: {match.description}")
+                logger.warning(f"YARA detected {len(yara_result.matches)} rule matches")
 
         # 3. Qwen3Guard (Safety - 119 languages, 9 categories)
         if self.qwen_guard:
@@ -686,8 +764,7 @@ class SentinelAnalyzer:
                     risk_score = max(risk_score, 100.0)
                     allowed = False
                     categories = [c.value for c in qwen_result.categories]
-                    threats.append(
-                        f"QwenGuard: UNSAFE ({', '.join(categories)})")
+                    threats.append(f"QwenGuard: UNSAFE ({', '.join(categories)})")
                     logger.warning(f"QwenGuard blocked: {categories}")
 
                 elif qwen_result.level == SafetyLevel.CONTROVERSIAL:
@@ -718,8 +795,7 @@ class SentinelAnalyzer:
                 threats.append(query_result["reason"])
 
         # 5. Knowledge Guard (Semantic Access Control)
-        knowledge_risk = self.knowledge_guard.get_risk_adjustment(
-            prompt, user_id)
+        knowledge_risk = self.knowledge_guard.get_risk_adjustment(prompt, user_id)
         if knowledge_risk > 0:
             risk_score = max(risk_score, knowledge_risk)
             decision = self.knowledge_guard.check(prompt, user_id)
@@ -752,8 +828,7 @@ class SentinelAnalyzer:
                 f"InfoTheory: entropy={info_result['entropy']['shannon']:.2f}, KL={info_result['divergence']['kl']:.2f}"
             )
             if info_result["patterns"]:
-                threats.append(
-                    f"Patterns: {', '.join(info_result['patterns'])}")
+                threats.append(f"Patterns: {', '.join(info_result['patterns'])}")
 
         # 8b. Chaos Theory (Lyapunov, Phase Space) - per-user analysis
         self.chaos_engine.record_interaction(
@@ -810,15 +885,16 @@ class SentinelAnalyzer:
         # Combines adversarial resistance with per-session variation + tide adjustment
         base_threshold = self.adversarial_engine.get_threshold("risk_score")
         shapeshifter_threshold = session_config.thresholds.get(
-            "risk_score", base_threshold)
+            "risk_score", base_threshold
+        )
         # Apply Semantic Tide adjustment (tighter during high tide)
         tide_threshold = tide.adjust_threshold(base_threshold)
         # Combine all three for defense-in-depth
-        risk_threshold = (
-            base_threshold + shapeshifter_threshold + tide_threshold) / 3
+        risk_threshold = (base_threshold + shapeshifter_threshold + tide_threshold) / 3
 
         # Apply Cognitive Mirror personalized adjustment
         from core.cognitive_mirror import get_cognitive_mirror
+
         mirror = get_cognitive_mirror()
         defense = mirror.get_defense_strategy(user_id)
         mirror_adjustment = defense.get("threshold_adjustment", 1.0)
@@ -827,14 +903,13 @@ class SentinelAnalyzer:
         if final_risk >= risk_threshold and allowed:
             allowed = False
             threats.append(
-                f"Risk threshold exceeded (adaptive: {risk_threshold:.1f}, tide={tide_level.level:.1f})")
+                f"Risk threshold exceeded (adaptive: {risk_threshold:.1f}, tide={tide_level.level:.1f})"
+            )
 
         # Record attack in Cognitive Mirror if blocked
         if not allowed and threats:
-            attack_type = threats[0].split(
-                ":")[0] if ":" in threats[0] else "unknown"
-            mirror.record_attack(user_id, attack_type,
-                                 final_risk, True, prompt)
+            attack_type = threats[0].split(":")[0] if ":" in threats[0] else "unknown"
+            mirror.record_attack(user_id, attack_type, final_risk, True, prompt)
 
         # Calculate total latency
         elapsed = (time.perf_counter() - start_time) * 1000
@@ -863,8 +938,7 @@ class SentinelAnalyzer:
         # 1. Qwen3Guard Response Moderation
         if self.qwen_guard:
             try:
-                qwen_result = self.qwen_guard.classify_response(
-                    prompt, response)
+                qwen_result = self.qwen_guard.classify_response(prompt, response)
 
                 if qwen_result.level == SafetyLevel.UNSAFE:
                     risk_score = 100.0
@@ -886,8 +960,7 @@ class SentinelAnalyzer:
         if pii_results:
             risk_score = max(risk_score, 80.0)
             allowed = False
-            threats.append(
-                f"Response contains {len(pii_results)} PII entities")
+            threats.append(f"Response contains {len(pii_results)} PII entities")
 
         # 3. Hallucination Detection
         halluc_result = self.hallucination_engine.analyze_response(response)

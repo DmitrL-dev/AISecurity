@@ -1,6 +1,6 @@
 # 🔬 SENTINEL — Engine Reference Guide
 
-> **Total Engines:** 217 engine files (Jan 2026)  
+> **Total Engines:** 219 engine files (Jan 25, 2026)  
 > **Benchmark Recall:** 85.1% | Precision: 84.4% | F1: 84.7%  
 > **Categories:** 20  
 > **Coverage:** OWASP LLM Top 10 + OWASP ASI Top 10
@@ -929,6 +929,49 @@ First globally applicable European Standard for AI cybersecurity (Jan 15, 2026).
 - P1: Intent detection in Trust Zones
 - P2: SemanticMatcher implementation
 - P3: ASTRA integration for testing
+
+---
+
+## 🔬 January 25, 2026 — R&D Daily Research
+
+### New Engines (8)
+
+#### Research-Based Engines (5)
+
+| Engine | File | Source | Description |
+|--------|------|--------|-------------|
+| SkillWormDetector | `synced/skill_worm_detector.py` | Olejnik | Claude skill lateral movement |
+| IDEExtensionDetector | `synced/ide_extension_detector.py` | Koi.ai MaliciousCorgi | Malicious AI extensions (1.5M devs) |
+| AIGeneratedMalwareDetector | `synced/ai_generated_malware_detector.py` | CheckPoint KONNI | LLM-generated malware |
+| MCPAuthBypassDetector | `synced/mcp_auth_bypass_detector.py` | Praetorian | MCP authorization bypass |
+| AdvancedInjectionDetector | `synced/advanced_injection_detector.py` | BlackHills Part 2 | Crescendo, GCG, Visual injection |
+
+#### IMDA Governance Engines (3)
+
+| Engine | File | Source | Description |
+|--------|------|--------|-------------|
+| AgentAutonomyLevelAnalyzer | `synced/agent_autonomy_level_analyzer.py` | IMDA MGF + Palantir | Risk scoring by autonomy |
+| MultiAgentCascadeDetector | `synced/multi_agent_cascade_detector.py` | IMDA + Palantir | Cascade failure detection |
+| AgenticGovernanceCompliance | `synced/agentic_governance_compliance.py` | IMDA MGF | 4-dimension compliance check |
+
+**Total new tests:** 65+
+
+### Research Sources
+
+- **Łukasz Olejnik** — "Skill Worms" lateral movement in Claude skills
+- **Koi.ai** — MaliciousCorgi campaign (ChatMoss + fake AI extensions)
+- **CheckPoint** — KONNI APT with LLM-generated PowerShell backdoors
+- **Praetorian** — account_id IDOR in MCP servers
+- **BlackHills** — 10+ injection techniques (Crescendo, GCG, AutoDAN)
+- **IMDA MGF** — Model Governance Framework for Agentic AI (Singapore)
+- **Palantir AIP** — 5 security dimensions for agentic runtime
+
+---
+
+**Engine Reference Complete!**
+
+> **219 total engine files** = 179 base detection + 5 utility modules + 35 in synced/
+> Verified: Jan 25, 2026
 
 ---
 

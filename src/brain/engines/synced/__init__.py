@@ -26,7 +26,10 @@ from .synced_attack_detector import SyncedAttackDetector, detect_synced_attacks
 # Security Engines (Jan 2026 R&D)
 from .supply_chain_scanner import SupplyChainScanner, scan as supply_chain_scan
 from .mcp_security_monitor import MCPSecurityMonitor, analyze as mcp_analyze
-from .agentic_behavior_analyzer import AgenticBehaviorAnalyzer, analyze as agentic_analyze
+from .agentic_behavior_analyzer import (
+    AgenticBehaviorAnalyzer,
+    analyze as agentic_analyze,
+)
 from .sleeper_agent_detector import SleeperAgentDetector, detect as sleeper_detect
 from .model_integrity_verifier import ModelIntegrityVerifier, verify as model_verify
 
@@ -38,7 +41,32 @@ from .prompt_leak_detector import PromptLeakDetector, detect as leak_detect
 from .sandbox_monitor import SandboxMonitor, analyze as sandbox_analyze
 
 # Marketplace Skill Validator (Jan 9 2026)
-from .marketplace_skill_validator import MarketplaceSkillValidator, validate as skill_validate
+from .marketplace_skill_validator import (
+    MarketplaceSkillValidator,
+    validate as skill_validate,
+)
+
+# R&D Daily Research Engines (Jan 25 2026)
+from .skill_worm_detector import SkillWormDetector, detect_skill_worm
+from .ide_extension_detector import (
+    IDEExtensionDetector,
+    detect_malicious_extension as detect_ide_extension,
+)
+from .ai_generated_malware_detector import AIGeneratedMalwareDetector
+from .mcp_auth_bypass_detector import MCPAuthBypassDetector
+from .advanced_injection_detector import (
+    AdvancedInjectionDetector,
+    detect_advanced_injection,
+)
+from .agent_autonomy_level_analyzer import (
+    AgentAutonomyLevelAnalyzer,
+    analyze_agent_autonomy,
+)
+from .multi_agent_cascade_detector import MultiAgentCascadeDetector, detect_cascade
+from .agentic_governance_compliance import (
+    AgenticGovernanceCompliance,
+    check_governance_compliance,
+)
 
 __all__ = [
     # Original detectors
@@ -67,5 +95,19 @@ __all__ = [
     # Marketplace Skill Validator (Jan 9 2026)
     "MarketplaceSkillValidator",
     "skill_validate",
+    # R&D Daily Research (Jan 25 2026)
+    "SkillWormDetector",
+    "detect_skill_worm",
+    "IDEExtensionDetector",
+    "detect_ide_extension",
+    "AIGeneratedMalwareDetector",
+    "MCPAuthBypassDetector",
+    "AdvancedInjectionDetector",
+    "detect_advanced_injection",
+    "AgentAutonomyLevelAnalyzer",
+    "analyze_agent_autonomy",
+    "MultiAgentCascadeDetector",
+    "detect_cascade",
+    "AgenticGovernanceCompliance",
+    "check_governance_compliance",
 ]
-

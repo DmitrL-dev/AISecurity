@@ -1,6 +1,6 @@
 # 🔬 SENTINEL — Справочник движков
 
-> **Всего движков:** 217 файлов (Янв 2026)  
+> **Всего движков:** 219 файлов (25 Янв 2026)  
 > **Benchmark Recall:** 85.1% | Precision: 84.4% | F1: 84.7%  
 > **Категорий:** 20  
 > **Покрытие:** OWASP LLM Top 10 + OWASP ASI Top 10
@@ -923,6 +923,42 @@ Zero trust верификация.
 - P1: Определение намерений в Trust Zones
 - P2: Реализация SemanticMatcher
 - P3: Интеграция ASTRA
+
+---
+
+## 🔬 25 января 2026 — R&D Daily Research
+
+### Новые движки (8)
+
+#### Исследовательские движки (5)
+
+| Engine | Файл | Источник | Описание |
+|--------|------|----------|----------|
+| SkillWormDetector | `synced/skill_worm_detector.py` | Olejnik | Skill Worms в Claude |
+| IDEExtensionDetector | `synced/ide_extension_detector.py` | Koi.ai MaliciousCorgi | Malicious AI extensions (1.5M devs) |
+| AIGeneratedMalwareDetector | `synced/ai_generated_malware_detector.py` | CheckPoint KONNI | LLM-generated malware |
+| MCPAuthBypassDetector | `synced/mcp_auth_bypass_detector.py` | Praetorian | MCP authorization bypass |
+| AdvancedInjectionDetector | `synced/advanced_injection_detector.py` | BlackHills Part 2 | Crescendo, GCG, Visual injection |
+
+#### IMDA Governance движки (3)
+
+| Engine | Файл | Источник | Описание |
+|--------|------|----------|----------|
+| AgentAutonomyLevelAnalyzer | `synced/agent_autonomy_level_analyzer.py` | IMDA MGF + Palantir | Risk scoring по автономии |
+| MultiAgentCascadeDetector | `synced/multi_agent_cascade_detector.py` | IMDA + Palantir | Cascade failure detection |
+| AgenticGovernanceCompliance | `synced/agentic_governance_compliance.py` | IMDA MGF | 4-dimension compliance check |
+
+**Итого тестов:** 65+ новых
+
+### Исследовательские источники
+
+- **Łukasz Olejnik** — "Skill Worms" lateral movement в Claude skills
+- **Koi.ai** — MaliciousCorgi campaign (ChatMoss + fake AI extensions)
+- **CheckPoint** — KONNI APT с LLM-generated PowerShell backdoors
+- **Praetorian** — account_id IDOR в MCP servers
+- **BlackHills** — 10+ injection techniques (Crescendo, GCG, AutoDAN)
+- **IMDA MGF** — Model Governance Framework for Agentic AI (Singapore)
+- **Palantir AIP** — 5 security dimensions for agentic runtime
 
 ---
 

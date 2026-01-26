@@ -132,8 +132,7 @@ class RegexLayer:
             ),
             (re.compile(r"do\s+anything\s+now", re.IGNORECASE), "DAN Mode", 100.0),
             (
-                re.compile(r"you\s+are\s+now\s+(?!going|about)",
-                           re.IGNORECASE),
+                re.compile(r"you\s+are\s+now\s+(?!going|about)", re.IGNORECASE),
                 "Roleplay Injection",
                 80.0,
             ),
@@ -150,8 +149,7 @@ class RegexLayer:
                 "Simulation Jailbreak",
                 90.0,
             ),
-            (re.compile(r"\bjailbreak\b", re.IGNORECASE),
-             "Explicit Jailbreak", 100.0),
+            (re.compile(r"\bjailbreak\b", re.IGNORECASE), "Explicit Jailbreak", 100.0),
             (re.compile(r"developer\s+mode", re.IGNORECASE), "Developer Mode", 95.0),
             (
                 re.compile(
@@ -303,14 +301,12 @@ class RegexLayer:
                 50.0,
             ),
             (
-                re.compile(
-                    r"\blet's\s+(?:play|pretend|imagine|say)\b", re.IGNORECASE),
+                re.compile(r"\blet's\s+(?:play|pretend|imagine|say)\b", re.IGNORECASE),
                 "Let's Play",
                 45.0,
             ),
             (
-                re.compile(
-                    r"\bcreative\s+(?:writing|exercise|mode)\b", re.IGNORECASE),
+                re.compile(r"\bcreative\s+(?:writing|exercise|mode)\b", re.IGNORECASE),
                 "Creative Mode",
                 45.0,
             ),
@@ -405,8 +401,7 @@ class RegexLayer:
                 80.0,
             ),
             (
-                re.compile(r"summarize\s+(?:your\s+)?guidelines",
-                           re.IGNORECASE),
+                re.compile(r"summarize\s+(?:your\s+)?guidelines", re.IGNORECASE),
                 "Guidelines Summary",
                 70.0,
             ),
@@ -482,8 +477,7 @@ class RegexLayer:
                 40.0,
             ),
             (
-                re.compile(
-                    r"someone\s+will\s+(?:die|be\s+hurt|suffer)", re.IGNORECASE),
+                re.compile(r"someone\s+will\s+(?:die|be\s+hurt|suffer)", re.IGNORECASE),
                 "Threat of Harm",
                 70.0,
             ),
@@ -492,8 +486,7 @@ class RegexLayer:
         # === 2025 Advanced Attack Patterns ===
         self.advanced_patterns = [
             (
-                re.compile(
-                    r"#[^#]*(?:ignore|bypass|override|system)", re.IGNORECASE),
+                re.compile(r"#[^#]*(?:ignore|bypass|override|system)", re.IGNORECASE),
                 "HashJack URL Fragment",
                 90.0,
             ),
@@ -521,8 +514,7 @@ class RegexLayer:
                 95.0,
             ),
             (
-                re.compile(
-                    r"ADMIN\s+OVERRIDE|DEBUG\s+MODE|MAINTENANCE", re.IGNORECASE),
+                re.compile(r"ADMIN\s+OVERRIDE|DEBUG\s+MODE|MAINTENANCE", re.IGNORECASE),
                 "Fake Admin Command",
                 90.0,
             ),
@@ -542,7 +534,8 @@ class RegexLayer:
             ),
             (
                 re.compile(
-                    r"building\s+on\s+(?:that|what\s+you\s+said)", re.IGNORECASE),
+                    r"building\s+on\s+(?:that|what\s+you\s+said)", re.IGNORECASE
+                ),
                 "Crescendo Build",
                 50.0,
             ),
@@ -553,7 +546,9 @@ class RegexLayer:
             ),
             (
                 re.compile(
-                    r"since\s+you\s+(?:already|just)\s+(?:said|mentioned|agreed)", re.IGNORECASE),
+                    r"since\s+you\s+(?:already|just)\s+(?:said|mentioned|agreed)",
+                    re.IGNORECASE,
+                ),
                 "Crescendo Reference",
                 60.0,
             ),
@@ -564,7 +559,8 @@ class RegexLayer:
             ),
             (
                 re.compile(
-                    r"(?:now|so)\s+(?:can|could)\s+you\s+(?:just|also)", re.IGNORECASE),
+                    r"(?:now|so)\s+(?:can|could)\s+you\s+(?:just|also)", re.IGNORECASE
+                ),
                 "Crescendo Extension",
                 50.0,
             ),
@@ -610,8 +606,7 @@ class RegexLayer:
                 85.0,
             ),
             (
-                re.compile(r"\brogue\s+(?:AI|assistant|mode)\b",
-                           re.IGNORECASE),
+                re.compile(r"\brogue\s+(?:AI|assistant|mode)\b", re.IGNORECASE),
                 "Rogue Mode",
                 80.0,
             ),
@@ -632,14 +627,12 @@ class RegexLayer:
                 65.0,
             ),
             (
-                re.compile(
-                    r"\bexecute\b.*\b(?:command|code|script)\b", re.IGNORECASE),
+                re.compile(r"\bexecute\b.*\b(?:command|code|script)\b", re.IGNORECASE),
                 "Execute Command",
                 80.0,
             ),
             (
-                re.compile(
-                    r"\brun\b.*\b(?:this|command|code|script)\b", re.IGNORECASE),
+                re.compile(r"\brun\b.*\b(?:this|command|code|script)\b", re.IGNORECASE),
                 "Run Command",
                 75.0,
             ),
@@ -708,8 +701,7 @@ class RegexLayer:
                 55.0,
             ),
             (
-                re.compile(r"\bpermission\s+(?:granted|to|for)\b",
-                           re.IGNORECASE),
+                re.compile(r"\bpermission\s+(?:granted|to|for)\b", re.IGNORECASE),
                 "Permission Claim",
                 50.0,
             ),
@@ -736,8 +728,7 @@ class RegexLayer:
                 90.0,
             ),
             (
-                re.compile(r"\bllm\s*(?:attack|hack|exploit)\b",
-                           re.IGNORECASE),
+                re.compile(r"\bllm\s*(?:attack|hack|exploit)\b", re.IGNORECASE),
                 "LLM Attack Term",
                 85.0,
             ),
@@ -798,8 +789,7 @@ class RegexLayer:
                 65.0,
             ),
             (
-                re.compile(
-                    r"\bobey\b.*\b(?:me|my|commands?|orders?)\b", re.IGNORECASE),
+                re.compile(r"\bobey\b.*\b(?:me|my|commands?|orders?)\b", re.IGNORECASE),
                 "Obey Command",
                 70.0,
             ),
@@ -812,8 +802,7 @@ class RegexLayer:
                 60.0,
             ),
             (
-                re.compile(r"\blisten\s+(?:to\s+)?(?:me|only)\b",
-                           re.IGNORECASE),
+                re.compile(r"\blisten\s+(?:to\s+)?(?:me|only)\b", re.IGNORECASE),
                 "Listen To Me",
                 55.0,
             ),
@@ -839,20 +828,17 @@ class RegexLayer:
                 60.0,
             ),
             (
-                re.compile(r"\balter\s+(?:ego|self|personality)\b",
-                           re.IGNORECASE),
+                re.compile(r"\balter\s+(?:ego|self|personality)\b", re.IGNORECASE),
                 "Alter Ego",
                 65.0,
             ),
             (
-                re.compile(r"\bdark\s+(?:side|mode|personality)\b",
-                           re.IGNORECASE),
+                re.compile(r"\bdark\s+(?:side|mode|personality)\b", re.IGNORECASE),
                 "Dark Side",
                 60.0,
             ),
             (
-                re.compile(
-                    r"\bshadow\s+(?:self|mode|personality)\b", re.IGNORECASE),
+                re.compile(r"\bshadow\s+(?:self|mode|personality)\b", re.IGNORECASE),
                 "Shadow Self",
                 60.0,
             ),
@@ -871,8 +857,7 @@ class RegexLayer:
                 55.0,
             ),
             (
-                re.compile(r"\boriginal\s+(?:model|version|AI)\b",
-                           re.IGNORECASE),
+                re.compile(r"\boriginal\s+(?:model|version|AI)\b", re.IGNORECASE),
                 "Original Version",
                 50.0,
             ),
@@ -902,8 +887,7 @@ class RegexLayer:
                 35.0,
             ),
             (
-                re.compile(
-                    r"\b(?:says?|contains?|reads?)\s*:?\s*['\"]", re.IGNORECASE),
+                re.compile(r"\b(?:says?|contains?|reads?)\s*:?\s*['\"]", re.IGNORECASE),
                 "Quote Injection",
                 45.0,
             ),
@@ -914,8 +898,7 @@ class RegexLayer:
                 85.0,
             ),
             (
-                re.compile(
-                    r"\bos\.system\b|\bsubprocess\b|\bspawn\b", re.IGNORECASE),
+                re.compile(r"\bos\.system\b|\bsubprocess\b|\bspawn\b", re.IGNORECASE),
                 "System Call",
                 90.0,
             ),
@@ -1067,9 +1050,130 @@ class RegexLayer:
         ]
 
     def _normalize_text(self, text: str) -> str:
-        """Remove obfuscation characters."""
+        """Remove obfuscation characters and decode encoding bypasses.
+
+        Decodes:
+        - Unicode obfuscation characters
+        - Leetspeak (1337 speak): m4k3 → make, pr0mpt → prompt
+        - Base64 encoded payloads
+        - ROT13 encoded text
+        - Cyrillic/Greek lookalike characters
+
+        Source: HiddenLayer Policy Puppetry, BlackHills AI Hacking research
+        """
+        import base64
+        import codecs
+
+        # Step 1: Remove zero-width and invisible Unicode characters
         normalized = re.sub(r"[\u200b-\u200f\u2028-\u202f\ufeff]", "", text)
+
+        # Step 2: Normalize Unicode (NFKC handles many lookalikes)
         normalized = unicodedata.normalize("NFKC", normalized)
+
+        # Step 3: Decode Cyrillic/Greek lookalikes to Latin
+        cyrillic_to_latin = {
+            "а": "a",
+            "е": "e",
+            "о": "o",
+            "р": "p",
+            "с": "c",
+            "у": "y",
+            "х": "x",
+            "А": "A",
+            "Е": "E",
+            "О": "O",
+            "Р": "P",
+            "С": "C",
+            "У": "Y",
+            "Х": "X",
+            "В": "B",
+            "Н": "H",
+            "К": "K",
+            "М": "M",
+            "Т": "T",
+            "і": "i",
+            "ї": "i",
+            "ё": "e",
+            "α": "a",
+            "ε": "e",
+            "ο": "o",
+            "ρ": "p",
+            "υ": "u",
+            "ν": "v",
+            "Α": "A",
+            "Ε": "E",
+            "Ο": "O",
+            "Ρ": "P",
+            "Τ": "T",
+            "Η": "H",
+        }
+        for cyrillic, latin in cyrillic_to_latin.items():
+            normalized = normalized.replace(cyrillic, latin)
+
+        # Step 4: Decode leetspeak (1337 speak)
+        leetspeak_map = {
+            "0": "o",
+            "1": "i",
+            "3": "e",
+            "4": "a",
+            "5": "s",
+            "7": "t",
+            "8": "b",
+            "9": "g",
+            "@": "a",
+            "$": "s",
+            "+": "t",
+            "!": "i",
+            "|": "l",
+            "(": "c",
+            ")": "d",
+        }
+        leetspeak_decoded = normalized
+        for leet, char in leetspeak_map.items():
+            leetspeak_decoded = leetspeak_decoded.replace(leet, char)
+
+        leet_attack_keywords = [
+            "ignore",
+            "system",
+            "prompt",
+            "bypass",
+            "jailbreak",
+            "override",
+            "instruction",
+            "hack",
+            "meth",
+            "bomb",
+            "weapon",
+            "explode",
+            "kill",
+            "poison",
+            "drug",
+        ]
+        if any(kw in leetspeak_decoded.lower() for kw in leet_attack_keywords):
+            normalized = leetspeak_decoded
+
+        # Step 5: Detect and decode base64 encoded payloads
+        base64_pattern = re.compile(r"[A-Za-z0-9+/]{20,}={0,2}")
+        for match in base64_pattern.finditer(normalized):
+            try:
+                decoded = base64.b64decode(match.group()).decode(
+                    "utf-8", errors="ignore"
+                )
+                if any(kw in decoded.lower() for kw in leet_attack_keywords):
+                    normalized = normalized.replace(
+                        match.group(), f"[BASE64:{decoded}]"
+                    )
+            except Exception:
+                pass
+
+        # Step 6: Detect and decode ROT13 encoded text
+        try:
+            rot13_decoded = codecs.decode(normalized, "rot_13")
+            if any(kw in rot13_decoded.lower() for kw in leet_attack_keywords):
+                normalized = f"{normalized} [ROT13:{rot13_decoded}]"
+        except Exception:
+            pass
+
         return normalized
 
     def _detect_flip_attack(self, text: str) -> Tuple[bool, str]:
@@ -1187,12 +1291,10 @@ class RegexLayer:
             "desperate",
         ]
 
-        keyword_count = sum(
-            1 for kw in suspicious_keywords if kw in text_lower)
+        keyword_count = sum(1 for kw in suspicious_keywords if kw in text_lower)
         if keyword_count >= 2 and risk_score < 30:
             # Multiple keywords suggest attack even if no regex matched
-            threats.append(
-                f"Keyword cluster: {keyword_count} suspicious terms")
+            threats.append(f"Keyword cluster: {keyword_count} suspicious terms")
             risk_score += min(keyword_count * 20, 60)
 
         # Check for imperative verbs targeting AI
@@ -1207,8 +1309,7 @@ class RegexLayer:
             "always",
             "now",
         ]
-        imperative_count = sum(
-            1 for p in imperative_patterns if p in text_lower)
+        imperative_count = sum(1 for p in imperative_patterns if p in text_lower)
         if imperative_count >= 2 and keyword_count >= 2:
             threats.append("Imperative command pattern")
             risk_score += 30
@@ -1638,7 +1739,10 @@ class SemanticLayer:
             max_idx = int(np.argmax(similarities))
 
             # Check if it's actually a safe example
-            if self.safe_embeddings is not None and len(self.safe_embeddings.shape) >= 2:
+            if (
+                self.safe_embeddings is not None
+                and len(self.safe_embeddings.shape) >= 2
+            ):
                 safe_sims = np.dot(self.safe_embeddings, query_embedding)
                 if safe_sims.size > 0:
                     max_safe_sim = float(np.max(safe_sims))
@@ -1692,8 +1796,7 @@ class StructuralLayer:
         for char in text:
             freq[char] = freq.get(char, 0) + 1
         n = len(text)
-        entropy = -sum((count / n) * np.log2(count / n)
-                       for count in freq.values())
+        entropy = -sum((count / n) * np.log2(count / n) for count in freq.values())
         return entropy
 
     def scan(self, text: str) -> Tuple[float, List[str]]:
@@ -1719,8 +1822,7 @@ class StructuralLayer:
         if len(text) > 0:
             special_ratio = special_chars / len(text)
             if special_ratio > 0.3:
-                threats.append(
-                    f"High special char ratio ({special_ratio:.2f})")
+                threats.append(f"High special char ratio ({special_ratio:.2f})")
                 risk_score += 20.0
 
         return min(risk_score, 50.0), threats
@@ -1801,8 +1903,7 @@ class InjectionEngine:
 
     def __init__(self, config_dir: str = None):
         if config_dir is None:
-            config_dir = os.path.join(
-                os.path.dirname(__file__), "..", "config")
+            config_dir = os.path.join(os.path.dirname(__file__), "..", "config")
 
         self.config_dir = config_dir
         self.profiles = self._load_profiles()
@@ -1927,8 +2028,7 @@ class InjectionEngine:
                 session_id, total_score
             )
             if is_escalating:
-                all_threats.append(
-                    f"Session escalation (cumulative: {cumulative:.0f})")
+                all_threats.append(f"Session escalation (cumulative: {cumulative:.0f})")
                 total_score = max(total_score, 80.0)
                 detected_layer = "context"
 

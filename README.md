@@ -21,7 +21,7 @@
   <a href="https://pypi.org/project/sentinel-llm-security/"><img src="https://img.shields.io/pypi/v/sentinel-llm-security?style=flat-square&label=PyPI" alt="PyPI"></a>
   <a href="https://pepy.tech/project/rlm-toolkit"><img src="https://static.pepy.tech/badge/rlm-toolkit" alt="RLM Downloads"></a>
   <a href="./LICENSE"><img src="https://img.shields.io/badge/License-Apache_2.0-blue?style=flat-square" alt="License"></a>
-  <a href="./docs/academy/beginners/en/"><img src="https://img.shields.io/badge/Academy-48_Lessons-orange?style=flat-square" alt="Academy"></a>
+  <a href="./docs/academy/README.md"><img src="https://img.shields.io/badge/Academy-159_Lessons-orange?style=flat-square" alt="Academy"></a>
 </p>
 
 ---
@@ -33,35 +33,61 @@
 
 ---
 
-<h2 align="center">🎓 New to AI Security?</h2>
+<h2 align="center">🎓 AI Security Academy</h2>
+
+<p align="center">
+  <img src="./docs/images/academy_evolution.png" alt="From Antivirus to AI Security" width="600">
+</p>
 
 <details open>
-<summary><h3>🇺🇸 English</h3></summary>
+<summary><h3>🇺🇸 Remember when no one believed in viruses?</h3></summary>
 
-| I want to... | Go to... |
-|--------------|----------|
-| **Understand the basics** | [What is Prompt Injection?](./docs/academy/beginners/en/01-prompt-injection.md) |
-| **Scan my first prompt** | [Quickstart (10 min)](./docs/academy/beginners/en/00-quickstart.md) |
-| **Learn OWASP LLM Top 10** | [OWASP Lesson](./docs/academy/beginners/en/03-owasp-llm-top10.md) |
-| **Protect my chatbot** | [Protection Guide](./docs/academy/beginners/en/05-protecting-chatbot.md) |
+In 1995, "computer virus" sounded like science fiction.  
+In 2000, like sysadmin paranoia.  
+In 2010, antivirus was standard. Like a lock on your door.
 
-📚 **[Beginner](./docs/academy/beginners/en/)** (11) · 📈 **[Mid-Level](./docs/academy/mid-level/en/)** (16) · 🎓 **[Expert](./docs/academy/expert/en/)** (21)
+**AI Security today is antivirus in 1998.**
+
+Prompt injection, jailbreaks, data extraction — not theory. Already working. On your projects too.
+
+The only question is when you'll learn about it: before an incident, or after.
+
+| I want to... | Start here |
+|--------------|------------|
+| **Understand AI threats** | [OWASP LLM Top 10](./docs/academy/en/02-threat-landscape/) |
+| **Learn attack techniques** | [Attack Vectors](./docs/academy/en/03-attack-vectors/) |
+| **Protect my AI project** | [Defense Strategies](./docs/academy/en/05-defense-strategies/) |
+| **Practice in labs** | [Red Team](./docs/academy/en/08-labs/strike-red-team/) ・ [Blue Team](./docs/academy/en/08-labs/sentinel-blue-team/) |
+
+📚 **[Full Curriculum →](./docs/academy/README.md)** • 159 lessons • 8 labs
 
 </details>
 
 <details>
-<summary><h3>🇷🇺 Русский</h3></summary>
+<summary><h3>🇷🇺 Помнишь, как никто не верил в вирусы?</h3></summary>
 
-| Хочу... | Перейти... |
-|---------|------------|
-| **Понять основы** | [Что такое Prompt Injection?](./docs/academy/beginners/ru/01-prompt-injection.md) |
-| **Первый промпт** | [Быстрый старт](./docs/academy/beginners/ru/00-quickstart.md) |
-| **OWASP LLM Top 10** | [Урок OWASP](./docs/academy/beginners/ru/03-owasp-llm-top10.md) |
-| **Защитить чатбота** | [Руководство](./docs/academy/beginners/ru/05-protecting-chatbot.md) |
+В 1995 году "компьютерный вирус" звучал как научная фантастика.  
+В 2000 — как паранойя сисадминов.  
+В 2010 — антивирус стоял у всех. Как замок на двери.
 
-📚 **[Начинающий](./docs/academy/beginners/ru/)** (11) · 📈 **[Средний](./docs/academy/mid-level/ru/)** (16) · 🎓 **[Эксперт](./docs/academy/expert/ru/)** (21)
+**AI Security сегодня — это антивирус в 1998 году.**
+
+Prompt injection, jailbreaks, извлечение данных — не теория. Уже работает. На твоих проектах тоже.
+
+Вопрос только в том, когда ты об этом узнаешь: до инцидента или после.
+
+| Хочу... | Начать здесь |
+|---------|--------------|
+| **Понять угрозы AI** | [OWASP LLM Top 10](./docs/academy/ru/02-threat-landscape/) |
+| **Изучить техники атак** | [Векторы атак](./docs/academy/ru/03-attack-vectors/) |
+| **Защитить свой AI проект** | [Стратегии защиты](./docs/academy/ru/05-defense-strategies/) |
+| **Практика в лабах** | [Red Team](./docs/academy/ru/08-labs/strike-red-team/) ・ [Blue Team](./docs/academy/ru/08-labs/sentinel-blue-team/) |
+
+📚 **[Полный курс →](./docs/academy/README.md)** • 159 уроков • 8 лабораторных
 
 </details>
+
+
 
 🔒 **[Security](./SECURITY.md)** · 🏗️ **[Architecture](./docs/ARCHITECTURE.md)** · 📋 **[Changelog](./docs/CHANGELOG.md)**
 
