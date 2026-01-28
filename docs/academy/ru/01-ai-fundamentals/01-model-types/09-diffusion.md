@@ -1,139 +1,139 @@
-# Diffusion Models: Stable Diffusion, DALL-E
+# –î–∏—Ñ—Ñ—É–∑–∏–æ–Ω–Ω—ã–µ –º–æ–¥–µ–ª–∏: Stable Diffusion, DALL-E
 
-> **”Ó‚ÂÌ¸:** Õ‡˜ËÌ‡˛˘ËÈ  
-> **¬ÂÏˇ:** 35 ÏËÌÛÚ  
-> **“ÂÍ:** 01 ó AI Fundamentals  
-> **ÃÓ‰ÛÎ¸:** 01.1 ó “ËÔ˚ ÏÓ‰ÂÎÂÈ
-
----
-
-## ÷ÂÎË Ó·Û˜ÂÌËˇ
-
-- [ ] œÓÌˇÚ¸ ÔÓˆÂÒÒ diffusion
-- [ ] Œ·˙ˇÒÌËÚ¸ Á‡‰‡˜Û denoising
-- [ ] œÓÌˇÚ¸ ÓÎ¸ ‚ AI security
-- [ ] —‚ˇÁ‡Ú¸ Ò deepfakes Ë adversarial images
+> **–£—Ä–æ–≤–µ–Ω—å:** Beginner  
+> **–í—Ä–µ–º—è:** 35 –º–∏–Ω—É—Ç  
+> **–¢—Ä–µ–∫:** 01 ‚Äî –û—Å–Ω–æ–≤—ã AI  
+> **–ú–æ–¥—É–ª—å:** 01.1 ‚Äî –¢–∏–ø—ã –º–æ–¥–µ–ª–µ–π
 
 ---
 
-## ◊ÚÓ Ú‡ÍÓÂ Diffusion?
+## –¶–µ–ª–∏ –æ–±—É—á–µ–Ω–∏—è
 
-### œÓˆÂÒÒ
+- [ ] –ü–æ–Ω—è—Ç—å –ø—Ä–æ—Ü–µ—Å—Å –¥–∏—Ñ—Ñ—É–∑–∏–∏
+- [ ] –û–±—ä—è—Å–Ω–∏—Ç—å –∑–∞–¥–∞—á—É denoising
+- [ ] –ü–æ–Ω—è—Ç—å —Ä–æ–ª—å –≤ –±–µ–∑–æ–ø–∞—Å–Ω–æ—Å—Ç–∏ AI
+- [ ] –°–≤—è–∑–∞—Ç—å —Å deepfakes –∏ adversarial images
 
-**Forward process:** ÔÓÒÚÂÔÂÌÌÓ ‰Ó·‡‚ÎˇÂÏ ¯ÛÏ
+---
+
+## –ß—Ç–æ —Ç–∞–∫–æ–µ –î–∏—Ñ—Ñ—É–∑–∏—è?
+
+### –ü—Ä–æ—Ü–µ—Å—Å
+
+**Forward process:** –ø–æ—Å—Ç–µ–ø–µ–Ω–Ω–æ –¥–æ–±–∞–≤–ª—è–µ–º —à—É–º
 ```
-Image > Slightly noisy > More noisy > ... > Pure noise
+Image ‚Üí –°–ª–µ–≥–∫–∞ –∑–∞—à—É–º–ª—ë–Ω–Ω–æ–µ ‚Üí –ë–æ–ª–µ–µ –∑–∞—à—É–º–ª—ë–Ω–Ω–æ–µ ‚Üí ... ‚Üí –ß–∏—Å—Ç—ã–π —à—É–º
 ```
 
-**Reverse process („ÂÌÂ‡ˆËˇ):** Û·Ë‡ÂÏ ¯ÛÏ
+**Reverse process (–≥–µ–Ω–µ—Ä–∞—Ü–∏—è):** —É–¥–∞–ª—è–µ–º —à—É–º
 ```
-Pure noise > Less noisy > ... > Generated image
+–ß–∏—Å—Ç—ã–π —à—É–º ‚Üí –ú–µ–Ω–µ–µ –∑–∞—à—É–º–ª—ë–Ω–Ω–æ–µ ‚Üí ... ‚Üí –°–≥–µ–Ω–µ—Ä–∏—Ä–æ–≤–∞–Ω–Ω–æ–µ –∏–∑–æ–±—Ä–∞–∂–µ–Ω–∏–µ
 ```
 
-### Ã‡ÚÂÏ‡ÚËÍ‡
+### –ú–∞—Ç–µ–º–∞—Ç–∏–∫–∞
 
 Forward:
 ```
-x_t = v(?_t) * x_0 + v(1 - ?_t) * ?
+x_t = ‚àö(Œ±_t) * x_0 + ‚àö(1 - Œ±_t) * Œµ
 ```
 
-Reverse (Ó·Û˜‡ÂÏ ÔÂ‰ÒÍ‡Á˚‚‡Ú¸ ¯ÛÏ):
+Reverse (–æ–±—É—á–∞–µ–º –ø—Ä–µ–¥—Å–∫–∞–∑—ã–≤–∞—Ç—å —à—É–º):
 ```
-?_?(x_t, t) ? ?
+Œµ_Œ∏(x_t, t) ‚âà Œµ
 ```
 
 ---
 
-## ¿ıËÚÂÍÚÛ‡
+## –ê—Ä—Ö–∏—Ç–µ–∫—Ç—É—Ä–∞
 
 ### U-Net
 
 ```
-Input noise > [Encoder] > [Middle] > [Decoder] > Predicted noise
-                  v                      ^
-               Skip connections
+Input noise ‚Üí [Encoder] ‚Üí [Middle] ‚Üí [Decoder] ‚Üí Predicted noise
+                   ‚Üì                      ‚Üë
+                Skip connections
 ```
 
 ### Conditioning
 
-Text-to-image ËÒÔÓÎ¸ÁÛÂÚ text conditioning:
+Text-to-image –∏—Å–ø–æ–ª—å–∑—É–µ—Ç text conditioning:
 ```
-Text > CLIP encoder > Text embedding
-                          v
-Noise > U-Net + Cross-Attention > Image
+Text ‚Üí CLIP encoder ‚Üí Text embedding
+                          ‚Üì
+Noise ‚Üí U-Net + Cross-Attention ‚Üí Image
 ```
 
 ---
 
-## ÃÓ‰ÂÎË
+## –ú–æ–¥–µ–ª–∏
 
 ### DALL-E (OpenAI)
 
-| ¬ÂÒËˇ | ƒ‡Ú‡ | ŒÒÓ·ÂÌÌÓÒÚË |
+| –í–µ—Ä—Å–∏—è | –î–∞—Ç–∞ | –û—Å–æ–±–µ–Ω–Ω–æ—Å—Ç–∏ |
 |--------|------|-------------|
-| DALL-E | Jan 2021 | dVAE + Transformer |
-| DALL-E 2 | Apr 2022 | CLIP + Diffusion |
-| DALL-E 3 | Oct 2023 | Improved consistency |
+| DALL-E | –Ø–Ω–≤ 2021 | dVAE + Transformer |
+| DALL-E 2 | –ê–ø—Ä 2022 | CLIP + Diffusion |
+| DALL-E 3 | –û–∫—Ç 2023 | –£–ª—É—á—à–µ–Ω–Ω–∞—è consistency |
 
 ### Stable Diffusion (Stability AI)
 
-- Latent diffusion (ÌÂ pixel space)
+- Latent diffusion (–Ω–µ pixel space)
 - Open source
-- ÃÌÓ„Ó fine-tuned ‚ÂÒËÈ
+- –ú–Ω–æ–∂–µ—Å—Ç–≤–æ fine-tuned –≤–µ—Ä—Å–∏–π
 - ControlNet, LoRA adapters
 
 ### Midjourney
 
 - Closed source
-- ‘ÓÍÛÒ Ì‡ ˝ÒÚÂÚËÍÂ
-- —ËÎ¸Ì˚È ıÛ‰ÓÊÂÒÚ‚ÂÌÌ˚È ÒÚËÎ¸
+- –§–æ–∫—É—Å –Ω–∞ —ç—Å—Ç–µ—Ç–∏–∫–µ
+- –°–∏–ª—å–Ω—ã–π —Ö—É–¥–æ–∂–µ—Å—Ç–≤–µ–Ω–Ω—ã–π —Å—Ç–∏–ª—å
 
 ---
 
-## Security: ”„ÓÁ˚
+## –ë–µ–∑–æ–ø–∞—Å–Ω–æ—Å—Ç—å: –£–≥—Ä–æ–∑—ã
 
 ### 1. Deepfakes
 
 ```
-Photo of person A > Diffusion > Fake image of person A doing X
+–§–æ—Ç–æ —á–µ–ª–æ–≤–µ–∫–∞ A ‚Üí Diffusion ‚Üí –§–µ–π–∫–æ–≤–æ–µ –∏–∑–æ–±—Ä–∞–∂–µ–Ω–∏–µ —á–µ–ª–æ–≤–µ–∫–∞ A –¥–µ–ª–∞—é—â–µ–≥–æ X
 ```
 
-### 2. NSFW Generation
+### 2. NSFW –≥–µ–Ω–µ—Ä–∞—Ü–∏—è
 
-Œ·ıÓ‰ content filters ˜ÂÂÁ:
+–û–±—Ö–æ–¥ content —Ñ–∏–ª—å—Ç—Ä–æ–≤ —á–µ—Ä–µ–∑:
 - Prompt engineering
-- Fine-tuned ÏÓ‰ÂÎË
-- Negative prompts manipulation
+- Fine-tuned –º–æ–¥–µ–ª–∏
+- –ú–∞–Ω–∏–ø—É–ª—è—Ü–∏—è negative prompts
 
-### 3. Adversarial Image Generation
+### 3. –ì–µ–Ω–µ—Ä–∞—Ü–∏—è Adversarial –∏–∑–æ–±—Ä–∞–∂–µ–Ω–∏–π
 
 ```
 Prompt: "Image that will jailbreak GPT-4V"
-> Diffusion „ÂÌÂËÛÂÚ adversarial perturbations
+‚Üí Diffusion –≥–µ–Ω–µ—Ä–∏—Ä—É–µ—Ç adversarial perturbations
 ```
 
-### 4. Intellectual Property
+### 4. –ò–Ω—Ç–µ–ª–ª–µ–∫—Ç—É–∞–ª—å–Ω–∞—è —Å–æ–±—Å—Ç–≤–µ–Ω–Ω–æ—Å—Ç—å
 
-- Œ·Û˜ÂÌËÂ Ì‡ copyrighted images
-- –Â„ÂÌÂ‡ˆËˇ ÛÁÌ‡‚‡ÂÏ˚ı ÒÚËÎÂÈ
+- –û–±—É—á–µ–Ω–∏–µ –Ω–∞ copyrighted –∏–∑–æ–±—Ä–∞–∂–µ–Ω–∏—è—Ö
+- –í–æ—Å–ø—Ä–æ–∏–∑–≤–µ–¥–µ–Ω–∏–µ —É–∑–Ω–∞–≤–∞–µ–º—ã—Ö —Å—Ç–∏–ª–µ–π
 
 ---
 
-## Protection Ë Detection
+## –ó–∞—â–∏—Ç–∞ –∏ –¥–µ—Ç–µ–∫—Ü–∏—è
 
 ### SENTINEL Engines
 
-| Engine | Õ‡ÁÌ‡˜ÂÌËÂ |
+| Engine | –ù–∞–∑–Ω–∞—á–µ–Ω–∏–µ |
 |--------|------------|
-| DeepfakeDetector | ƒÂÚÂÍˆËˇ Ò„ÂÌÂËÓ‚‡ÌÌ˚ı ËÁÓ·‡ÊÂÌËÈ |
-| DiffusionArtifactDetector | œ‡ÚÚÂÌ˚ diffusion ÏÓ‰ÂÎË |
-| StyleTransferDetector | ƒÂÚÂÍˆËˇ style manipulation |
+| DeepfakeDetector | –û–±–Ω–∞—Ä—É–∂–µ–Ω–∏–µ —Å–≥–µ–Ω–µ—Ä–∏—Ä–æ–≤–∞–Ω–Ω—ã—Ö –∏–∑–æ–±—Ä–∞–∂–µ–Ω–∏–π |
+| DiffusionArtifactDetector | –ü–∞—Ç—Ç–µ—Ä–Ω—ã diffusion –º–æ–¥–µ–ª–µ–π |
+| StyleTransferDetector | –û–±–Ω–∞—Ä—É–∂–µ–Ω–∏–µ –º–∞–Ω–∏–ø—É–ª—è—Ü–∏–∏ —Å–æ —Å—Ç–∏–ª–µ–º |
 
-### ÃÂÚÓ‰˚ ‰ÂÚÂÍˆËË
+### –ú–µ—Ç–æ–¥—ã –¥–µ—Ç–µ–∫—Ü–∏–∏
 
-1. **Frequency analysis** ó diffusion ÓÒÚ‡‚ÎˇÂÚ ‡ÚÂÙ‡ÍÚ˚ ‚ FFT
-2. **Noise pattern analysis** ó ÒÔÂˆËÙË˜Ì˚Â Ô‡ÚÚÂÌ˚ ¯ÛÏ‡
-3. **Metadata analysis** ó ÒÎÂ‰˚ „ÂÌÂ‡ˆËË
+1. **–ß–∞—Å—Ç–æ—Ç–Ω—ã–π –∞–Ω–∞–ª–∏–∑** ‚Äî diffusion –æ—Å—Ç–∞–≤–ª—è–µ—Ç –∞—Ä—Ç–µ—Ñ–∞–∫—Ç—ã –≤ FFT
+2. **–ê–Ω–∞–ª–∏–∑ –ø–∞—Ç—Ç–µ—Ä–Ω–æ–≤ —à—É–º–∞** ‚Äî —Å–ø–µ—Ü–∏—Ñ–∏—á–µ—Å–∫–∏–µ noise patterns
+3. **–ê–Ω–∞–ª–∏–∑ –º–µ—Ç–∞–¥–∞–Ω–Ω—ã—Ö** ‚Äî —Å–ª–µ–¥—ã –≥–µ–Ω–µ—Ä–∞—Ü–∏–∏
 
 ```python
 from sentinel import scan  # Public API
@@ -148,15 +148,15 @@ if result.is_generated:
 
 ---
 
-## œ‡ÍÚËÍ‡
+## –ü—Ä–∞–∫—Ç–∏–∫–∞
 
-### «‡‰‡ÌËÂ: Frequency Analysis
+### –ó–∞–¥–∞–Ω–∏–µ: –ß–∞—Å—Ç–æ—Ç–Ω—ã–π –∞–Ω–∞–ª–∏–∑
 
 ```python
 import numpy as np
 from PIL import Image
 
-# «‡„ÛÁÍ‡ ËÁÓ·‡ÊÂÌËÈ
+# –ó–∞–≥—Ä—É–∑–∫–∞ –∏–∑–æ–±—Ä–∞–∂–µ–Ω–∏–π
 real = np.array(Image.open("real.jpg"))
 generated = np.array(Image.open("generated.jpg"))
 
@@ -164,17 +164,17 @@ generated = np.array(Image.open("generated.jpg"))
 real_fft = np.abs(np.fft.fftshift(np.fft.fft2(real[:,:,0])))
 gen_fft = np.abs(np.fft.fftshift(np.fft.fft2(generated[:,:,0])))
 
-# —‡‚ÌÂÌËÂ high-frequency ÍÓÏÔÓÌÂÌÚ
+# –°—Ä–∞–≤–Ω–µ–Ω–∏–µ –≤—ã—Å–æ–∫–æ—á–∞—Å—Ç–æ—Ç–Ω—ã—Ö –∫–æ–º–ø–æ–Ω–µ–Ω—Ç–æ–≤
 print(f"Real HF energy: {real_fft[100:200, 100:200].sum()}")
 print(f"Generated HF energy: {gen_fft[100:200, 100:200].sum()}")
 ```
 
 ---
 
-## —ÎÂ‰Û˛˘ËÈ ÛÓÍ
+## –°–ª–µ–¥—É—é—â–∏–π —É—Ä–æ–∫
 
-> [10. Audio Models: Whisper, AudioPalm](10-audio-models.md)
+‚Üí [10. Audio Models: Whisper, AudioPalm](10-audio-models.md)
 
 ---
 
-*AI Security Academy | Track 01: AI Fundamentals*
+*AI Security Academy | –¢—Ä–µ–∫ 01: –û—Å–Ω–æ–≤—ã AI*

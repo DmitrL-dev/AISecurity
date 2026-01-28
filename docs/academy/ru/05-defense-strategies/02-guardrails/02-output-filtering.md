@@ -1,63 +1,63 @@
-# Output Filtering ��� LLM Security
+# Фильтрация вывода для безопасности LLM
 
-> **�������:** �������  
-> **�����:** 45 �����  
-> **����:** 05 � Defense Strategies  
-> **������:** 05.2 � Guardrails  
-> **������:** 2.0 (Production)
-
----
-
-## ���� ��������
-
-����� ���������� ����� ����� �� �������:
-
-- [ ] ��������� ������ output filtering �������� ��� LLM ����������
-- [ ] ����������� content classification � blocking
-- [ ] ������������� PII � secrets � LLM responses
-- [ ] ������� response sanitization pipelines
-- [ ] ������������� output filtering � SENTINEL
+> **Уровень:** Средний  
+> **Время:** 45 минут  
+> **Трек:** 05 — Стратегии защиты  
+> **Модуль:** 05.2 — Guardrails  
+> **Версия:** 2.0 (Production)
 
 ---
 
-## 1. ����������� Output Filtering
+## Цели обучения
+
+По завершении этого урока вы сможете:
+
+- [ ] Объяснить почему фильтрация вывода критична для LLM-приложений
+- [ ] Реализовать классификацию и блокировку контента
+- [ ] Детектировать PII и секреты в ответах LLM
+- [ ] Создавать пайплайны санитизации ответов
+- [ ] Интегрировать фильтрацию вывода с SENTINEL
+
+---
+
+## 1. Архитектура фильтрации вывода
 
 ```
----------------------------------------------------------------------�
-�                    OUTPUT FILTERING PIPELINE                       �
-+--------------------------------------------------------------------+
-�                                                                    �
-�  RAW LLM OUTPUT                                                    �
-�      v                                                             �
-�  �===============================================================� �
-�  �  LAYER 1: CONTENT CLASSIFICATION                              � �
-�  �  � Harmful content detection                                  � �
-�  �  � Policy violation check                                     � �
-�  �  � Jailbreak success detection                                � �
-�  L===============================================================- �
-�      v                                                             �
-�  �===============================================================� �
-�  �  LAYER 2: DATA LEAKAGE DETECTION                              � �
-�  �  � PII detection (email, phone, SSN)                          � �
-�  �  � Secret detection (API keys, tokens)                        � �
-�  �  � System prompt leak detection                               � �
-�  L===============================================================- �
-�      v                                                             �
-�  �===============================================================� �
-�  �  LAYER 3: SANITIZATION                                        � �
-�  �  � PII redaction                                              � �
-�  �  � Secret masking                                             � �
-�  �  � Content transformation                                     � �
-�  L===============================================================- �
-�      v                                                             �
-�  FILTERED OUTPUT                                                   �
-�                                                                    �
-L---------------------------------------------------------------------
+┌────────────────────────────────────────────────────────────────────┐
+│                    ПАЙПЛАЙН ФИЛЬТРАЦИИ ВЫВОДА                     │
+├────────────────────────────────────────────────────────────────────┤
+│                                                                    │
+│  СЫРОЙ ВЫВОД LLM                                                   │
+│      ↓                                                             │
+│  ╔═══════════════════════════════════════════════════════════════╗ │
+│  ║  СЛОЙ 1: КЛАССИФИКАЦИЯ КОНТЕНТА                               ║ │
+│  ║  • Детекция вредного контента                                 ║ │
+│  ║  • Проверка нарушений политики                                ║ │
+│  ║  • Детекция успешного jailbreak                               ║ │
+│  ╚═══════════════════════════════════════════════════════════════╝ │
+│      ↓                                                             │
+│  ╔═══════════════════════════════════════════════════════════════╗ │
+│  ║  СЛОЙ 2: ДЕТЕКЦИЯ УТЕЧЕК ДАННЫХ                               ║ │
+│  ║  • Детекция PII (email, телефон, SSN)                         ║ │
+│  ║  • Детекция секретов (API ключи, токены)                      ║ │
+│  ║  • Детекция утечки системного промпта                         ║ │
+│  ╚═══════════════════════════════════════════════════════════════╝ │
+│      ↓                                                             │
+│  ╔═══════════════════════════════════════════════════════════════╗ │
+│  ║  СЛОЙ 3: САНИТИЗАЦИЯ                                          ║ │
+│  ║  • Редактирование PII                                         ║ │
+│  ║  • Маскирование секретов                                      ║ │
+│  ║  • Трансформация контента                                     ║ │
+│  ╚═══════════════════════════════════════════════════════════════╝ │
+│      ↓                                                             │
+│  ОТФИЛЬТРОВАННЫЙ ВЫВОД                                             │
+│                                                                    │
+└────────────────────────────────────────────────────────────────────┘
 ```
 
 ---
 
-## 2. Content Classification
+## 2. Классификация контента
 
 ```python
 from dataclasses import dataclass
@@ -71,36 +71,23 @@ class ContentCategory(Enum):
     JAILBREAK_SUCCESS = "jailbreak_success"
     DATA_LEAK = "data_leak"
 
-@dataclass
-class ClassificationResult:
-    category: ContentCategory
-    confidence: float
-    details: Dict
-
 class ContentClassifier:
-    """Classify LLM output ��� ������������."""
+    """Классификация вывода LLM для безопасности."""
     
     HARMFUL_PATTERNS = [
         r'how\s+to\s+(make|create|build)\s+(a\s+)?(bomb|weapon|explosive)',
         r'step.by.step\s+(guide|instructions?)\s+(to|for)\s+(hack|attack)',
-        r'here\s+(is|are)\s+(the\s+)?instructions?\s+to\s+(harm|kill)',
     ]
     
     JAILBREAK_SUCCESS_PATTERNS = [
         r'as\s+(DAN|an?\s+unrestricted)',
         r'without\s+(any\s+)?restrictions?',
         r'ignoring\s+(my\s+)?(previous\s+)?guidelines',
-        r'breaking\s+character',
         r'I\s+(can|will)\s+now\s+do\s+anything',
     ]
     
-    def __init__(self):
-        import re
-        self.harmful_compiled = [re.compile(p, re.I) for p in self.HARMFUL_PATTERNS]
-        self.jailbreak_compiled = [re.compile(p, re.I) for p in self.JAILBREAK_SUCCESS_PATTERNS]
-    
-    def classify(self, text: str, prompt: str = None) -> ClassificationResult:
-        # �������� �� jailbreak success
+    def classify(self, text: str) -> ClassificationResult:
+        # Проверка на успешный jailbreak
         for pattern in self.jailbreak_compiled:
             if pattern.search(text):
                 return ClassificationResult(
@@ -109,7 +96,7 @@ class ContentClassifier:
                     details={'pattern_matched': pattern.pattern}
                 )
         
-        # �������� �� harmful content
+        # Проверка на вредный контент
         for pattern in self.harmful_compiled:
             if pattern.search(text):
                 return ClassificationResult(
@@ -127,14 +114,13 @@ class ContentClassifier:
 
 ---
 
-## 3. PII Detection
+## 3. Детекция PII
 
 ```python
 import re
-from typing import Tuple
 
 class PIIDetector:
-    """Detect Personally Identifiable Information."""
+    """Детекция персонально идентифицируемой информации."""
     
     PATTERNS = {
         'email': {
@@ -152,28 +138,19 @@ class PIIDetector:
         'credit_card': {
             'pattern': r'\b(?:\d{4}[-.\s]?){3}\d{4}\b',
             'severity': 'critical'
-        },
-        'ip_address': {
-            'pattern': r'\b(?:\d{1,3}\.){3}\d{1,3}\b',
-            'severity': 'low'
         }
     }
     
-    def __init__(self):
-        self.compiled = {
-            name: (re.compile(data['pattern']), data['severity'])
-            for name, data in self.PATTERNS.items()
-        }
-    
     def detect(self, text: str) -> List[Dict]:
         detections = []
-        for pii_type, (pattern, severity) in self.compiled.items():
+        for pii_type, data in self.PATTERNS.items():
+            pattern = re.compile(data['pattern'])
             matches = pattern.findall(text)
             for match in matches:
                 detections.append({
                     'type': pii_type,
                     'value': self._mask_value(match),
-                    'severity': severity
+                    'severity': data['severity']
                 })
         return detections
     
@@ -184,28 +161,20 @@ class PIIDetector:
 
 
 class SecretsDetector:
-    """Detect API keys, tokens, and credentials."""
+    """Детекция API ключей, токенов и учётных данных."""
     
     PATTERNS = {
         'api_key_generic': r'(?:api[_-]?key|apikey)["\']?\s*[:=]\s*["\']?([a-zA-Z0-9_-]{20,})',
         'aws_access_key': r'\b(AKIA[0-9A-Z]{16})\b',
-        'aws_secret_key': r'(?:aws_secret|secret_key)["\']?\s*[:=]\s*["\']?([A-Za-z0-9/+=]{40})',
         'github_token': r'\b(ghp_[a-zA-Z0-9]{36})\b',
         'jwt': r'\b(eyJ[a-zA-Z0-9_-]+\.eyJ[a-zA-Z0-9_-]+\.[a-zA-Z0-9_-]+)\b',
         'openai_key': r'\b(sk-[a-zA-Z0-9]{48})\b',
-        'password_assignment': r'(?:password|passwd|pwd)["\']?\s*[:=]\s*["\']?([^\s"\']    {8,})',
     }
-    
-    def __init__(self):
-        self.compiled = {
-            name: re.compile(pattern, re.I)
-            for name, pattern in self.PATTERNS.items()
-        }
     
     def detect(self, text: str) -> List[Dict]:
         detections = []
-        for secret_type, pattern in self.compiled.items():
-            matches = pattern.findall(text)
+        for secret_type, pattern in self.PATTERNS.items():
+            matches = re.findall(pattern, text, re.I)
             for match in matches:
                 detections.append({
                     'type': secret_type,
@@ -217,48 +186,47 @@ class SecretsDetector:
 
 ---
 
-## 4. Response Sanitizer
+## 4. Санитизатор ответов
 
 ```python
 class ResponseSanitizer:
-    """Sanitize LLM responses ���� �������������� sensitive data."""
+    """Санитизация ответов LLM путём редактирования чувствительных данных."""
     
-    def __init__(self, config: Dict = None):
+    def __init__(self):
         self.pii_detector = PIIDetector()
         self.secrets_detector = SecretsDetector()
         
         self.redaction_templates = {
-            'email': '[EMAIL REDACTED]',
-            'phone_us': '[PHONE REDACTED]',
-            'ssn': '[SSN REDACTED]',
-            'credit_card': '[CREDIT CARD REDACTED]',
-            'api_key_generic': '[API KEY REDACTED]',
-            'aws_access_key': '[AWS KEY REDACTED]',
-            'jwt': '[TOKEN REDACTED]',
-            'openai_key': '[API KEY REDACTED]',
-            'password_assignment': '[PASSWORD REDACTED]',
+            'email': '[EMAIL СКРЫТ]',
+            'phone_us': '[ТЕЛЕФОН СКРЫТ]',
+            'ssn': '[SSN СКРЫТ]',
+            'credit_card': '[КАРТА СКРЫТА]',
+            'api_key_generic': '[API КЛЮЧ СКРЫТ]',
+            'aws_access_key': '[AWS КЛЮЧ СКРЫТ]',
+            'jwt': '[ТОКЕН СКРЫТ]',
+            'openai_key': '[API КЛЮЧ СКРЫТ]',
         }
     
-    def sanitize(self, text: str) -> Tuple[str, List[Dict]]:
+    def sanitize(self, text: str) -> tuple[str, List[Dict]]:
         all_detections = []
         result = text
         
-        # Detect and redact PII
+        # Детекция и редактирование PII
         pii_detections = self.pii_detector.detect(result)
         for det in pii_detections:
             pii_type = det['type']
             pattern = self.pii_detector.compiled[pii_type][0]
-            replacement = self.redaction_templates.get(pii_type, '[REDACTED]')
+            replacement = self.redaction_templates.get(pii_type, '[СКРЫТО]')
             result = pattern.sub(replacement, result)
         
         all_detections.extend(pii_detections)
         
-        # Detect and redact secrets
+        # Детекция и редактирование секретов
         secret_detections = self.secrets_detector.detect(result)
         for det in secret_detections:
             secret_type = det['type']
             pattern = self.secrets_detector.compiled[secret_type]
-            replacement = self.redaction_templates.get(secret_type, '[SECRET REDACTED]')
+            replacement = self.redaction_templates.get(secret_type, '[СЕКРЕТ СКРЫТ]')
             result = pattern.sub(replacement, result)
         
         all_detections.extend(secret_detections)
@@ -268,7 +236,7 @@ class ResponseSanitizer:
 
 ---
 
-## 5. SENTINEL Integration
+## 5. Интеграция с SENTINEL
 
 ```python
 from enum import Enum
@@ -278,16 +246,8 @@ class FilterAction(Enum):
     SANITIZE = "sanitize"
     BLOCK = "block"
 
-@dataclass
-class FilterResult:
-    action: FilterAction
-    original_output: str
-    filtered_output: str
-    detections: List[Dict]
-    risk_score: float
-
 class SENTINELOutputFilter:
-    """SENTINEL ������ ��� comprehensive output filtering."""
+    """Модуль SENTINEL для комплексной фильтрации вывода."""
     
     def __init__(self, config: Dict = None):
         config = config or {}
@@ -305,7 +265,7 @@ class SENTINELOutputFilter:
     def filter(self, prompt: str, response: str) -> FilterResult:
         detections = []
         
-        # Step 1: Content classification
+        # Шаг 1: Классификация контента
         classification = self.classifier.classify(response, prompt)
         
         if classification.category in self.block_categories:
@@ -321,11 +281,11 @@ class SENTINELOutputFilter:
                 risk_score=1.0
             )
         
-        # Step 2: Sanitization
+        # Шаг 2: Санитизация
         sanitized, sanitize_detections = self.sanitizer.sanitize(response)
         detections.extend(sanitize_detections)
         
-        # Check for critical data
+        # Проверка на критичные данные
         critical_detections = [
             d for d in detections if d.get('severity') == 'critical'
         ]
@@ -339,7 +299,7 @@ class SENTINELOutputFilter:
                 risk_score=1.0
             )
         
-        # Calculate risk
+        # Расчёт риска
         risk = min(len(detections) * 0.15, 0.9)
         
         if sanitized != response:
@@ -362,36 +322,36 @@ class SENTINELOutputFilter:
 
 ---
 
-## 6. ������
+## 6. Итоги
 
-### ��������� ����������
+### Категории фильтрации
 
-| ��������� | �������� | Severity |
-|-----------|----------|----------|
-| Safe | Allow | None |
-| PII | Sanitize/Block | Medium-Critical |
-| Secrets | Block | Critical |
-| Harmful | Block | Critical |
-| Jailbreak Success | Block | Critical |
+| Категория | Действие | Серьёзность |
+|-----------|----------|-------------|
+| Безопасный | Разрешить | Нет |
+| PII | Санитизировать/Блокировать | Средняя-Критичная |
+| Секреты | Блокировать | Критичная |
+| Вредный | Блокировать | Критичная |
+| Успешный Jailbreak | Блокировать | Критичная |
 
-### Quick Checklist
+### Чек-лист
 
 ```
-? Classify content ��� harmful/policy violations
-? Detect jailbreak success patterns
-? Scan ��� PII (email, phone, SSN, credit cards)
-? Detect secrets (API keys, tokens, passwords)
-? Redact ��� block sensitive content
-? Log ��� filtering decisions
-? Calculate risk score
+□ Классифицировать контент на вредный/нарушения политики
+□ Детектировать паттерны успешного jailbreak
+□ Сканировать на PII (email, телефон, SSN, карты)
+□ Детектировать секреты (API ключи, токены, пароли)
+□ Редактировать или блокировать чувствительный контент
+□ Логировать все решения фильтрации
+□ Рассчитать риск-скор
 ```
 
 ---
 
-## ��������� ����
+## Следующий урок
 
-> [Guardrails Frameworks](03-guardrails-frameworks.md)
+→ [Фреймворки Guardrails](03-guardrails-frameworks.md)
 
 ---
 
-*AI Security Academy | Track 05: Defense Strategies | Guardrails*
+*AI Security Academy | Трек 05: Стратегии защиты | Guardrails*

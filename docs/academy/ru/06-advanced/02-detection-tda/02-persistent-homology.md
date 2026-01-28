@@ -1,43 +1,43 @@
-# Persistent Homology для детекции атак
+# Persistent Homology for Attack Обнаружение
 
-> **Урок:** 06.2.2 — Persistent Homology  
+> **Урок:** 06.2.2 - Persistent Homology  
 > **Время:** 45 минут  
-> **Требования:** Введение в TDA
+> **Пререквизиты:** TDA Введение
 
 ---
 
 ## Цели обучения
 
-После завершения этого урока вы сможете:
+К концу этого урока, you will be able to:
 
-1. Понять основы persistent homology
-2. Применять топологический анализ к embedding spaces
-3. Детектировать атаки через топологические сигнатуры
-4. Реализовать persistence-based anomaly detection
+1. Understand persistent homology fundamentals
+2. Apply topological analysis to embedding spaces
+3. Detect attacks via topological signatures
+4. Implement persistence-based anomaly detection
 
 ---
 
 ## Что такое Persistent Homology?
 
-Persistent homology отслеживает топологические признаки (дыры, пустоты) на разных масштабах:
+Persistent homology tracks topological features (holes, voids) across multiple scales:
 
 ```
-Scale 0: Отдельные точки (0-dim holes = компоненты)
-Scale ε: Точки соединяются на расстоянии ε (1-dim holes = циклы)
-Scale ∞: Все точки соединены (признаки исчезают)
+Scale 0: Individual points (0-dim holes = components)
+Scale ε: Points connect at distance ε (1-dim holes = loops)
+Scale ∞: All points connected (features vanish)
 
-Persistence = как долго признак выживает на разных масштабах
+Persistence = how long a feature survives across scales
 ```
 
-| Размерность | Признак | Применение в безопасности |
-|-------------|---------|---------------------------|
-| H₀ | Связные компоненты | Структура кластеров |
-| H₁ | Циклы/петли | Циклические паттерны атак |
-| H₂ | Пустоты | Сложные топологические аномалии |
+| Dimension | Feature | Security Application |
+|-----------|---------|---------------------|
+| H₀ | Connected components | Cluster structure |
+| H₁ | Loops/cycles | Circular attack patterns |
+| H₂ | Voids | Complex topological anomalies |
 
 ---
 
-## Базовая реализация
+## Basic Реализация
 
 ```python
 import numpy as np
@@ -45,18 +45,18 @@ from ripser import ripser
 from scipy.spatial.distance import pdist, squareform
 
 class PersistenceAnalyzer:
-    """Persistent homology для анализа безопасности."""
+    """Persistent homology for security analysis."""
     
     def __init__(self, max_dimension: int = 1):
         self.max_dim = max_dimension
     
     def compute_persistence(self, points: np.ndarray) -> dict:
-        """Вычисление persistence diagrams."""
+        """Compute persistence diagrams."""
         
-        # Вычисление попарных расстояний
+        # Compute pairwise distances
         distances = squareform(pdist(points))
         
-        # Вычисление persistent homology
+        # Compute persistent homology
         result = ripser(distances, maxdim=self.max_dim, distance_matrix=True)
         
         diagrams = {}
@@ -71,7 +71,7 @@ class PersistenceAnalyzer:
         return diagrams
     
     def extract_features(self, diagrams: dict) -> np.ndarray:
-        """Извлечение статистических признаков из persistence diagrams."""
+        """Extract statistical features from persistence diagrams."""
         
         features = []
         
@@ -82,11 +82,11 @@ class PersistenceAnalyzer:
                 features.extend([0, 0, 0, 0, 0])
             else:
                 features.extend([
-                    len(persistence),          # Количество признаков
-                    np.mean(persistence),      # Средняя persistence
-                    np.max(persistence),       # Максимальная persistence
-                    np.std(persistence),       # Std persistence
-                    np.sum(persistence),       # Общая persistence
+                    len(persistence),          # Number of features
+                    np.mean(persistence),      # Mean persistence
+                    np.max(persistence),       # Max persistence
+                    np.std(persistence),       # Std of persistence
+                    np.sum(persistence),       # Total persistence
                 ])
         
         return np.array(features)
@@ -94,21 +94,21 @@ class PersistenceAnalyzer:
 
 ---
 
-## Топология Embedding Space
+## Embedding Space Topology
 
 ```python
 class EmbeddingTopologyAnalyzer:
-    """Анализ топологии embedding space для безопасности."""
+    """Analyze topology of embedding space for security."""
     
     def __init__(self, embedding_model):
         self.embed = embedding_model
         self.persistence = PersistenceAnalyzer(max_dimension=1)
         
-        # Baseline топология
+        # Baseline topology
         self.baseline_features = None
     
     def fit_baseline(self, normal_texts: list):
-        """Установление baseline топологии из нормальных входов."""
+        """Establish baseline topology from normal inputs."""
         
         embeddings = np.array([self.embed(t) for t in normal_texts])
         
@@ -116,17 +116,17 @@ class EmbeddingTopologyAnalyzer:
         self.baseline_features = self.persistence.extract_features(diagrams)
     
     def detect_anomaly(self, texts: list, threshold: float = 2.0) -> dict:
-        """Детекция топологических аномалий в наборе входов."""
+        """Detect topological anomalies in input set."""
         
         if len(texts) < 5:
-            return {"error": "Нужно минимум 5 samples для топологии"}
+            return {"error": "Need at least 5 samples for topology"}
         
         embeddings = np.array([self.embed(t) for t in texts])
         
         diagrams = self.persistence.compute_persistence(embeddings)
         features = self.persistence.extract_features(diagrams)
         
-        # Сравнение с baseline
+        # Compare to baseline
         if self.baseline_features is not None:
             deviation = np.linalg.norm(features - self.baseline_features)
             baseline_norm = np.linalg.norm(self.baseline_features)
@@ -144,29 +144,29 @@ class EmbeddingTopologyAnalyzer:
 
 ---
 
-## Детекция сигнатур атак
+## Attack Signature Обнаружение
 
 ```python
 class TopologicalAttackDetector:
-    """Детекция атак через топологические сигнатуры."""
+    """Detect attacks via topological signatures."""
     
     def __init__(self, embedding_model):
         self.embed = embedding_model
         self.persistence = PersistenceAnalyzer(max_dimension=1)
         
-        # Известные топологические сигнатуры атак
+        # Known attack topological signatures
         self.attack_signatures = {}
     
     def learn_attack_signature(self, attack_type: str, examples: list):
-        """Обучение топологической сигнатуры типа атаки."""
+        """Learn topological signature of attack type."""
         
         embeddings = np.array([self.embed(ex) for ex in examples])
         diagrams = self.persistence.compute_persistence(embeddings)
         features = self.persistence.extract_features(diagrams)
         
-        # Также вычисление variance для понимания spread сигнатуры
+        # Also compute variance to understand signature spread
         if len(examples) > 10:
-            # Bootstrap для оценки variance
+            # Bootstrap for variance estimation
             feature_samples = []
             for _ in range(10):
                 indices = np.random.choice(len(examples), len(examples)//2)
@@ -185,10 +185,10 @@ class TopologicalAttackDetector:
         }
     
     def detect(self, texts: list) -> dict:
-        """Детекция соответствия текстов сигнатуре атаки."""
+        """Detect if texts match attack signature."""
         
         if len(texts) < 5:
-            return {"error": "Нужно минимум 5 samples"}
+            return {"error": "Need at least 5 samples"}
         
         embeddings = np.array([self.embed(t) for t in texts])
         diagrams = self.persistence.compute_persistence(embeddings)
@@ -197,11 +197,11 @@ class TopologicalAttackDetector:
         matches = []
         
         for attack_type, signature in self.attack_signatures.items():
-            # Mahalanobis-подобное расстояние
+            # Mahalanobis-like distance
             diff = features - signature["mean"]
             normalized_dist = np.sqrt(np.sum((diff / (signature["std"] + 1e-8))**2))
             
-            # Меньше расстояние = ближе match
+            # Lower distance = closer match
             match_score = 1 / (1 + normalized_dist)
             
             if match_score > 0.5:
@@ -221,13 +221,13 @@ class TopologicalAttackDetector:
 
 ---
 
-## Streaming детекция
+## Streaming Обнаружение
 
 ```python
 from collections import deque
 
 class StreamingTopologyMonitor:
-    """Мониторинг топологии embedding в реальном времени."""
+    """Monitor embedding topology in real-time."""
     
     def __init__(self, embedding_model, window_size: int = 50):
         self.embed = embedding_model
@@ -241,7 +241,7 @@ class StreamingTopologyMonitor:
         self.baseline_std = None
     
     def add_sample(self, text: str) -> dict:
-        """Добавление sample и проверка изменений топологии."""
+        """Add sample and check for topology changes."""
         
         embedding = self.embed(text)
         self.embedding_window.append(embedding)
@@ -249,14 +249,14 @@ class StreamingTopologyMonitor:
         if len(self.embedding_window) < 10:
             return {"status": "warming_up"}
         
-        # Вычисление текущей топологии
+        # Compute current topology
         embeddings = np.array(list(self.embedding_window))
         diagrams = self.persistence.compute_persistence(embeddings)
         features = self.persistence.extract_features(diagrams)
         
         self.feature_history.append(features)
         
-        # Обновление baseline (exponential moving average)
+        # Update baseline (exponential moving average)
         if self.baseline_mean is None:
             self.baseline_mean = features
             self.baseline_std = np.ones_like(features)
@@ -266,7 +266,7 @@ class StreamingTopologyMonitor:
             diff = features - self.baseline_mean
             self.baseline_std = alpha * np.abs(diff) + (1 - alpha) * self.baseline_std
         
-        # Детекция отклонения
+        # Detect deviation
         z_score = np.abs(features - self.baseline_mean) / (self.baseline_std + 1e-8)
         max_z = np.max(z_score)
         
@@ -279,13 +279,13 @@ class StreamingTopologyMonitor:
 
 ---
 
-## Визуализация
+## Visualization
 
 ```python
 import matplotlib.pyplot as plt
 
 def plot_persistence_diagram(diagrams: dict, title: str = "Persistence Diagram"):
-    """Визуализация persistence diagram."""
+    """Visualize persistence diagram."""
     
     fig, axes = plt.subplots(1, len(diagrams), figsize=(5*len(diagrams), 5))
     
@@ -296,10 +296,10 @@ def plot_persistence_diagram(diagrams: dict, title: str = "Persistence Diagram")
         births = dgm["birth"]
         deaths = dgm["death"]
         
-        # Отрисовка точек
+        # Plot points
         ax.scatter(births, deaths, alpha=0.6)
         
-        # Диагональная линия
+        # Diagonal line
         max_val = max(max(deaths), 1)
         ax.plot([0, max_val], [0, max_val], 'k--', alpha=0.3)
         
@@ -314,7 +314,7 @@ def plot_persistence_diagram(diagrams: dict, title: str = "Persistence Diagram")
 
 ---
 
-## Интеграция SENTINEL
+## SENTINEL Интеграция
 
 ```python
 from sentinel import configure, TopologyGuard
@@ -333,7 +333,7 @@ topology_guard = TopologyGuard(
 
 @topology_guard.monitor
 def process_batch(texts: list):
-    # Топология мониторится автоматически
+    # Topology monitored automatically
     return [llm.generate(t) for t in texts]
 ```
 
@@ -341,12 +341,12 @@ def process_batch(texts: list):
 
 ## Ключевые выводы
 
-1. **Топология захватывает структуру** — Выходит за рамки точечного анализа
-2. **Persistence = важность** — Долгоживущие признаки имеют значение
-3. **Изучай сигнатуры атак** — Каждый тип атаки имеет топологию
-4. **Мониторь в реальном времени** — Детектируй изменения топологии
-5. **Комбинируй с другими методами** — Часть defense-in-depth
+1. **Topology captures structure** - Beyond point-wise analysis
+2. **Persistence = importance** - Long-lived features matter
+3. **Learn attack signatures** - Each attack type has topology
+4. **Monitor in real-time** - Detect topology changes
+5. **Combine with other methods** - Part of defense-in-depth
 
 ---
 
-*AI Security Academy | Урок 06.2.2*
+*AI Security Academy (RU) | Lesson 06.2.2*

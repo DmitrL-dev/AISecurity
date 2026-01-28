@@ -1,54 +1,54 @@
-# Persistent Homology for LLM Security
+ï»¿# Persistent Homology for LLM Security
 
-> **Óðîâåíü:** Ýêñïåðò  
-> **Âðåìÿ:** 60 ìèíóò  
-> **Òðåê:** 06 — Mathematical Foundations  
-> **Ìîäóëü:** 06.1 — TDA (Topological Data Analysis)  
-> **Âåðñèÿ:** 1.0
-
----
-
-## Öåëè îáó÷åíèÿ
-
-- [ ] Ïîíÿòü îñíîâû persistent homology
-- [ ] Ïðèìåíÿòü TDA ê embedding space àíàëèçó
-- [ ] Äåòåêòèðîâàòü anomalies ÷åðåç topological features
+> **Level:** Expert  
+> **Ð’Ñ€ÐµÐ¼Ñ:** 60 Ð¼Ð¸Ð½ÑƒÑ‚  
+> **Track:** 06 â€” Mathematical Foundations  
+> **Module:** 06.1 â€” TDA (Topological Data Analysis)  
+> **Version:** 1.0
 
 ---
 
-## 1. Introduction to Persistent Homology
+## Ð¦ÐµÐ»Ð¸ Ð¾Ð±ÑƒÑ‡ÐµÐ½Ð¸Ñ
 
-### 1.1 What is Topology?
+- [ ] Understand persistent homology fundamentals
+- [ ] Apply TDA to embedding space analysis
+- [ ] Detect anomalies through topological features
 
-**Topology** èçó÷àåò ñâîéñòâà ïðîñòðàíñòâà, èíâàðèàíòíûå ê íåïðåðûâíûì äåôîðìàöèÿì.
+---
+
+## 1. Ð’Ð²ÐµÐ´ÐµÐ½Ð¸Ðµ to Persistent Homology
+
+### 1.1 Ð§Ñ‚Ð¾ Ñ‚Ð°ÐºÐ¾Ðµ Topology?
+
+**Topology** studies properties of space invariant under continuous deformation.
 
 ```
----------------------------------------------------------------------¬
-¦                    TOPOLOGICAL FEATURES                             ¦
-+--------------------------------------------------------------------+
-¦                                                                    ¦
-¦  H?: Connected Components (clusters)                               ¦
-¦      • • •   > 3 components                                        ¦
-¦      •••     > 1 component                                         ¦
-¦                                                                    ¦
-¦  H?: Loops (1-dimensional holes)                                   ¦
-¦      0      > 1 loop                                               ¦
-¦      ?      > 2 loops                                              ¦
-¦                                                                    ¦
-¦  H?: Voids (2-dimensional holes)                                   ¦
-¦      ? (sphere shell) > 1 void                                     ¦
-¦                                                                    ¦
-L---------------------------------------------------------------------
+â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”
+â”‚                    TOPOLOGICAL FEATURES                             â”‚
+â”œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”¤
+â”‚                                                                    â”‚
+â”‚  Hâ‚€: Connected Components (clusters)                               â”‚
+â”‚      â€¢ â€¢ â€¢   â†’ 3 components                                        â”‚
+â”‚      â€¢â€¢â€¢     â†’ 1 component                                         â”‚
+â”‚                                                                    â”‚
+â”‚  Hâ‚: Loops (1-dimensional holes)                                   â”‚
+â”‚      â—‹      â†’ 1 loop                                               â”‚
+â”‚      âˆž      â†’ 2 loops                                              â”‚
+â”‚                                                                    â”‚
+â”‚  Hâ‚‚: Voids (2-dimensional holes)                                   â”‚
+â”‚      â—¯ (sphere shell) â†’ 1 void                                     â”‚
+â”‚                                                                    â”‚
+â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜
 ```
 
 ### 1.2 Persistent Homology Concept
 
 ```
 Persistence:
-+-- Build simplicial complex at different scales
-+-- Track when features (holes) appear (birth)
-+-- Track when features disappear (death)
-L-- Persistence = death - birth
+â”œâ”€â”€ Build simplicial complex at different scales
+â”œâ”€â”€ Track when features (holes) appear (birth)
+â”œâ”€â”€ Track when features disappear (death)
+â””â”€â”€ Persistence = death - birth
     (longer persistence = more significant feature)
 ```
 
@@ -150,7 +150,7 @@ from typing import List, Tuple
 
 @dataclass
 class PersistenceInterval:
-    dimension: int  # H?, H?, H?
+    dimension: int  # Hâ‚€, Hâ‚, Hâ‚‚
     birth: float
     death: float  # np.inf for features that never die
     
@@ -182,7 +182,7 @@ class PersistenceDiagram:
 
 ## 3. Computing Persistent Homology
 
-### 3.1 Using Ripser (Fast Implementation)
+### 3.1 Using Ripser (Fast Ð ÐµÐ°Ð»Ð¸Ð·Ð°Ñ†Ð¸Ñ)
 
 ```python
 import ripser
@@ -274,7 +274,7 @@ class EmbeddingPersistence:
 
 ## 4. Application to LLM Security
 
-### 4.1 Anomaly Detection via Topology
+### 4.1 Anomaly ÐžÐ±Ð½Ð°Ñ€ÑƒÐ¶ÐµÐ½Ð¸Ðµ via Topology
 
 ```python
 class TopologicalAnomalyDetector:
@@ -339,7 +339,7 @@ class TopologicalAnomalyDetector:
         return score / count if count > 0 else 0.0
 ```
 
-### 4.2 Injection Detection via H? Features
+### 4.2 Injection ÐžÐ±Ð½Ð°Ñ€ÑƒÐ¶ÐµÐ½Ð¸Ðµ via Hâ‚ Features
 
 ```python
 class H1InjectionDetector:
@@ -355,7 +355,7 @@ class H1InjectionDetector:
         self.normal_h1_stats = None
     
     def fit(self, normal_conversations: List[List[str]]):
-        """Learn H? characteristics of normal conversations"""
+        """Learn Hâ‚ characteristics of normal conversations"""
         h1_features = []
         
         for conv in normal_conversations:
@@ -374,7 +374,7 @@ class H1InjectionDetector:
         }
     
     def detect_injection(self, conversation: List[str]) -> dict:
-        """Detect injection attempt via H? anomaly"""
+        """Detect injection attempt via Hâ‚ anomaly"""
         embeddings = self.embedding_model.encode(conversation)
         dgm = self.ph_computer.compute(embeddings)
         h1 = dgm.get_by_dimension(1)
@@ -400,7 +400,7 @@ class H1InjectionDetector:
 
 ---
 
-## 5. SENTINEL Integration
+## 5. SENTINEL Ð˜Ð½Ñ‚ÐµÐ³Ñ€Ð°Ñ†Ð¸Ñ
 
 ```python
 from sentinel import scan  # Public API
@@ -427,10 +427,10 @@ class SENTINELTopologicalAnalyzer:
         embeddings = self.embedding_model.encode(inputs)
         current_dgm = self.ph_computer.compute(embeddings)
         
-        # Compare H? (clustering structure)
+        # Compare Hâ‚€ (clustering structure)
         h0_anomaly = self._analyze_h0(current_dgm)
         
-        # Compare H? (loop structure)
+        # Compare Hâ‚ (loop structure)
         h1_anomaly = self._analyze_h1(current_dgm)
         
         return {
@@ -443,19 +443,19 @@ class SENTINELTopologicalAnalyzer:
 
 ---
 
-## 6. Ðåçþìå
+## 6. Summary
 
 1. **Persistent Homology:** Track topological features across scales
-2. **Features:** H? (clusters), H? (loops), H? (voids)
+2. **Features:** Hâ‚€ (clusters), Hâ‚ (loops), Hâ‚‚ (voids)
 3. **Application:** Detect anomalies in embedding space
-4. **Injection Detection:** Unusual H? features indicate injection
+4. **Injection ÐžÐ±Ð½Ð°Ñ€ÑƒÐ¶ÐµÐ½Ð¸Ðµ:** Unusual Hâ‚ features indicate injection
 
 ---
 
-## Ñëåäóþùèé óðîê
+## Next Lesson
 
-> [02. Mapper Algorithm](02-mapper-algorithm.md)
+â†’ [02. Mapper Algorithm](02-mapper-algorithm.md)
 
 ---
 
-*AI Security Academy | Track 06: Mathematical Foundations | Module 06.1: TDA*
+*AI Security Academy (RU) | Track 06: Mathematical Foundations | Module 06.1: TDA*

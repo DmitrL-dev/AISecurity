@@ -1,48 +1,48 @@
-# Техники защиты
+# Defense Techniques
 
-> **Модуль: Основные методы защиты**
+> **Module: Core Defense Methods**
 
 ---
 
 ## Обзор
 
-Техники защиты формируют фундамент безопасности AI. Этот модуль охватывает как превентивные, так и детективные контроли для защиты AI систем от атак, с практическими рекомендациями по реализации.
+Defense techniques формируют foundation AI security. Этот модуль покрывает как preventive так и detective controls для protection AI systems от атак, с practical implementation guidance.
 
 ---
 
-## Категории защиты
+## Defense Categories
 
-| Категория | Назначение | Примеры |
-|-----------|------------|---------|
-| **Превентивные** | Остановка атак до нанесения вреда | Input filtering, guardrails |
-| **Детективные** | Идентификация атак в процессе | Мониторинг, anomaly detection |
-| **Корректирующие** | Реагирование на инциденты | Incident response, rollback |
-| **Сдерживающие** | Отпугивание атакующих | Audit logging, rate limiting |
+| Категория | Purpose | Examples |
+|-----------|---------|----------|
+| **Preventive** | Stop attacks before harm | Input filtering, guardrails |
+| **Detective** | Identify attacks in progress | Monitoring, anomaly detection |
+| **Corrective** | Respond to incidents | Incident response, rollback |
+| **Deterrent** | Discourage attackers | Audit logging, rate limiting |
 
 ---
 
-## Слои защиты
+## Defense Layers
 
 ```
 ┌─────────────────────────────────────────────────────────────┐
 │                    DEFENSE IN DEPTH                          │
 ├─────────────────────────────────────────────────────────────┤
-│  Слой 1: ЗАЩИТА ВХОДА                                        │
+│  Layer 1: INPUT DEFENSE                                      │
 │  ├── Pattern matching (regex, keywords)                     │
-│  ├── Семантический анализ (embeddings, classification)      │
-│  └── Rate limiting и anomaly detection                      │
+│  ├── Semantic analysis (embeddings, classification)         │
+│  └── Rate limiting and anomaly detection                    │
 ├─────────────────────────────────────────────────────────────┤
-│  Слой 2: ЗАЩИТА СИСТЕМЫ                                      │
+│  Layer 2: SYSTEM DEFENSE                                     │
 │  ├── Prompt engineering (hardening, structure)              │
-│  ├── Разделение привилегий (least access)                   │
-│  └── Лимиты ресурсов (tokens, time, memory)                 │
+│  ├── Privilege separation (least access)                    │
+│  └── Resource limits (tokens, time, memory)                 │
 ├─────────────────────────────────────────────────────────────┤
-│  Слой 3: ЗАЩИТА ВЫХОДА                                       │
-│  ├── Фильтрация контента (harmful, PII)                     │
+│  Layer 3: OUTPUT DEFENSE                                     │
+│  ├── Content filtering (harmful, PII)                       │
 │  ├── Policy enforcement (compliance)                        │
 │  └── Response validation (format, length)                   │
 ├─────────────────────────────────────────────────────────────┤
-│  Слой 4: МОНИТОРИНГ                                          │
+│  Layer 4: MONITORING                                         │
 │  ├── Real-time detection (streaming)                        │
 │  ├── Audit logging (forensics)                              │
 │  └── Alerting and response (automation)                     │
@@ -51,68 +51,68 @@
 
 ---
 
-## Темы
+## Topics
 
-### Защита входа
+### Input Defense
 - Pattern matching с regex и keywords
-- Семантический анализ с embeddings
+- Semantic analysis используя embeddings
 - Rate limiting и quotas
 - Input normalization и sanitization
 
-### Защита выхода
-- Фильтрация контента для вредоносного материала
-- Редактирование PII и credentials
+### Output Defense
+- Content filtering для harmful material
+- PII и credential redaction
 - Policy enforcement и compliance
 - Response validation и modification
 
-### Защита системы
-- Принципы hardening архитектуры
-- Паттерны разделения привилегий
-- Enforcement trust boundary
-- Реализация лимитов ресурсов
+### System Defense
+- Architecture hardening principles
+- Privilege separation patterns
+- Trust boundary enforcement
+- Resource limit implementation
 
-### Мониторинг
+### Monitoring
 - Real-time threat detection
-- Комплексное audit logging
-- Конфигурация и tuning alerts
-- Автоматизация incident response
+- Comprehensive audit logging
+- Alert configuration и tuning
+- Incident response automation
 
 ---
 
-## Ключевые принципы
+## Key Principles
 
-1. **Defense in depth** — Множество слоёв; нет единой точки отказа
-2. **Minimal privilege** — Предоставляй только необходимый доступ
-3. **Fail secure** — По умолчанию блокируй при неопределённости
-4. **Continuous monitoring** — Детектируй аномалии в реальном времени
-5. **Rapid response** — Быстрое containment и remediation
+1. **Defense in depth** — Multiple layers; no single point of failure
+2. **Minimal privilege** — Grant only necessary access
+3. **Fail secure** — Default to blocking when uncertain
+4. **Continuous monitoring** — Detect anomalies in real-time
+5. **Rapid response** — Quick containment and remediation
 
 ---
 
-## Путь реализации
+## Implementation Path
 
 ```
 Input Filtering → System Hardening → Output Filtering → Monitoring
-       ↓                ↓                   ↓              ↓
-  Блокируй плохой    Ограничь ущерб      Лови утечки   Детектируй атаки
-    input           если bypassed        в output       в процессе
+      ↓                ↓                   ↓              ↓
+  Block bad         Limit damage       Catch leaks     Detect attacks
+   input           if bypassed         in output       in progress
 ```
 
 ---
 
-## Интеграция SENTINEL
+## Интеграция с SENTINEL
 
 ```python
 from sentinel import configure, scan, Guard
 
-# Конфигурация слоёв защиты
+# Configure defense layers
 configure(
     input_engines=["injection", "jailbreak"],
     output_engines=["pii", "harmful"],
     monitoring=True
 )
 
-# Применение защиты
+# Apply protection
 guard = Guard(mode="strict")
 
 @guard.protect
@@ -126,8 +126,8 @@ def process_message(msg):
 
 | Предыдущий | Текущий | Следующий |
 |------------|---------|-----------|
-| [Attack Vectors](../03-attack-vectors/) | **Техники защиты** | [Agentic Security](../04-agentic-security/) |
+| [Attack Vectors](../03-attack-vectors/) | **Defense Techniques** | [Agentic Security](../04-agentic-security/) |
 
 ---
 
-*AI Security Academy | Техники защиты*
+*AI Security Academy | Defense Techniques*

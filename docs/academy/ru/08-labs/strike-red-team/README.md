@@ -1,126 +1,55 @@
 # STRIKE Red Team Labs
 
-> **Lab Track: Упражнения по Offensive Security**
+> **РџСЂР°РєС‚РёС‡РµСЃРєРёРµ Р»Р°Р±РѕСЂР°С‚РѕСЂРёРё РїРѕ Р°С‚Р°РєР°Рј**
 
 ---
 
-## Обзор
+## РћР±Р·РѕСЂ
 
-Red Team lab track фокусируется на offensive skills: crafting атак, exploitation, evasion и выполнение кампаний с использованием STRIKE и связанных инструментов.
-
----
-
-## ?? Этические Guidelines
-
-**Эти упражнения только для авторизованного тестирования:**
-- Атакуйте только системы, которыми вы владеете или имеете разрешение тестировать
-- Следуйте всем применимым законам и regulations
-- Практикуйте responsible disclosure
-- Документируйте все активности
+РџСЂР°РєС‚РёС‡РµСЃРєРёРµ Р»Р°Р±РѕСЂР°С‚РѕСЂРЅС‹Рµ СЂР°Р±РѕС‚С‹ РїРѕ Р°С‚Р°РєР°Рј РЅР° AI-СЃРёСЃС‚РµРјС‹ (СЌС‚РёС‡РЅС‹Р№ С…Р°РєРёРЅРі).
 
 ---
 
-## Предварительные требования
+## Р›Р°Р±РѕСЂР°С‚РѕСЂРёРё
 
-- Завершены Модули 01-04
-- Понимание техник атак
-- STRIKE tools установлены
-- Доступ к lab sandboxes
+### [Lab 001: Р‘Р°Р·РѕРІР°СЏ РёРЅСЉРµРєС†РёСЏ РїСЂРѕРјРїС‚РѕРІ](lab-001-basic-injection.md)
+- 5 РєР°С‚РµРіРѕСЂРёР№ Р°С‚Р°Рє: РїРµСЂРµРѕРїСЂРµРґРµР»РµРЅРёРµ, РёР·РІР»РµС‡РµРЅРёРµ, СЂРѕР»РµРІР°СЏ РёРіСЂР°, СЂР°Р·РґРµР»РёС‚РµР»Рё, РєРѕРґРёСЂРѕРІР°РЅРёРµ
+- РђС‚Р°РєР° РЅР° СѓСЏР·РІРёРјС‹Р№ TargetChatbot
+- РћС†РµРЅРєР° РЅР° РѕСЃРЅРѕРІРµ Р±Р°Р»Р»РѕРІ (100 РѕС‡РєРѕРІ)
 
----
+### [Lab 002: РќРµРїСЂСЏРјР°СЏ РёРЅСЉРµРєС†РёСЏ РїСЂРѕРјРїС‚РѕРІ](lab-002-indirect-injection.md)
+- РўРµС…РЅРёРєРё РѕС‚СЂР°РІР»РµРЅРёСЏ RAG
+- РЎРєСЂС‹С‚С‹Рµ РёРЅСЃС‚СЂСѓРєС†РёРё РІ РґРѕРєСѓРјРµРЅС‚Р°С…
+- РњРЅРѕРіРѕС€Р°РіРѕРІС‹Рµ С†РµРїРѕС‡РєРё Р°С‚Р°Рє
 
-## Labs
+### [Lab 003: РўРµС…РЅРёРєРё РґР¶РµР№Р»Р±СЂРµР№РєРѕРІ](lab-003-jailbreak-techniques.md)
+- DAN Рё РїРµСЂСЃРѕРЅР°Р¶РЅС‹Рµ Р°С‚Р°РєРё
+- РњР°РЅРёРїСѓР»СЏС†РёСЏ РєРѕРЅС‚РµРєСЃС‚РѕРј
+- РњРµС‚РѕРґС‹ РѕР±С…РѕРґР° С‡РµСЂРµР· РєРѕРґРёСЂРѕРІР°РЅРёРµ
 
-### Lab 001: STRIKE Setup
-**Время:** 30 минут | **Сложность:** Начинающий
-
-Установка и конфигурация STRIKE:
-- Tool installation
-- Payload libraries
-- Target configuration
-- Safety settings
-
-### Lab 002: Basic Prompt Injection
-**Время:** 40 минут | **Сложность:** Начинающий
-
-Craft ваших первых injections:
-- Direct override attempts
-- Instruction manipulation
-- Context exploitation
-- Success verification
-
-### Lab 003: Jailbreak Techniques
-**Время:** 45 минут | **Сложность:** Средний
-
-Обход safety measures:
-- DAN-style attacks
-- Persona manipulation
-- Gradual escalation
-- Effectiveness measurement
-
-### Lab 004: Defense Evasion
-**Время:** 50 минут | **Сложность:** Средний
-
-Обход известных защит:
-- Pattern evasion
-- Encoding techniques
-- Semantic manipulation
-- Detection testing
-
-### Lab 005: Payload Mutation
-**Время:** 50 минут | **Сложность:** Средний
-
-Генерация attack variants:
-- Mutation strategies
-- Grammar-based fuzzing
-- Coverage analysis
-- Effectiveness tracking
-
-### Lab 006: Automated Campaigns
-**Время:** 60 минут | **Сложность:** Продвинутый
-
-Запуск структурированных attack campaigns:
-- Campaign planning
-- Target mapping
-- Attack execution
-- Results analysis
-
-### Lab 007: Tool Injection
-**Время:** 60 минут | **Сложность:** Продвинутый
-
-Атаки на agentic systems:
-- MCP exploitation
-- Tool manipulation
-- Privilege escalation
-- Multi-hop attacks
-
-### Lab 008: Novel Attack Research
-**Время:** 90 минут | **Сложность:** Эксперт
-
-Открытие новых техник:
-- Research methodology
-- Variant generation
-- Validation testing
-- Responsible documentation
+### [Lab 004: РђС‚Р°РєРё РЅР° Р°РіРµРЅС‚РѕРІ](lab-004-agent-attacks.md)
+- РђС‚Р°РєРё Р·Р»РѕСѓРїРѕС‚СЂРµР±Р»РµРЅРёСЏ РёРЅСЃС‚СЂСѓРјРµРЅС‚Р°РјРё
+- РџСѓС‚Р°РЅРёС†Р° РјСѓР»СЊС‚Рё-Р°РіРµРЅС‚РѕРІ
+- Р­СЃРєР°Р»Р°С†РёСЏ РїСЂРёРІРёР»РµРіРёР№
 
 ---
 
-## Начало работы
+## РћС†РµРЅРєР°
 
-Начните с Lab 001:
-
-```bash
-python -m labs.red.lab_001
-```
-
----
-
-## Навигация
-
-| Предыдущий | Текущий | Следующий |
-|------------|---------|-----------|
-| [Blue Team](../sentinel-blue-team/) | **Red Team** | [CTF Challenges](../ctf/) |
+| Р‘Р°Р»Р»С‹ | РћС†РµРЅРєР° |
+|-------|--------|
+| 90-100 | A (Р­РєСЃРїРµСЂС‚) |
+| 80-89 | B (РџСЂРѕРґРІРёРЅСѓС‚С‹Р№) |
+| 70-79 | C (Р—Р°С‡С‘С‚) |
+| <70 | РўСЂРµР±СѓРµС‚СЃСЏ РїСЂР°РєС‚РёРєР° |
 
 ---
 
-*AI Security Academy | Red Team Labs*
+## Р­С‚РёРєР°
+
+> вљ пёЏ **Р­С‚Рё С‚РµС…РЅРёРєРё С‚РѕР»СЊРєРѕ РґР»СЏ РѕР±СЂР°Р·РѕРІР°С‚РµР»СЊРЅС‹С… С†РµР»РµР№.**  
+> Р’СЃРµРіРґР° РїРѕР»СѓС‡Р°Р№С‚Рµ СЃРѕРѕС‚РІРµС‚СЃС‚РІСѓСЋС‰РµРµ СЂР°Р·СЂРµС€РµРЅРёРµ РїРµСЂРµРґ С‚РµСЃС‚РёСЂРѕРІР°РЅРёРµРј РЅР° СЂРµР°Р»СЊРЅС‹С… СЃРёСЃС‚РµРјР°С….
+
+---
+
+*AI Security Academy | STRIKE Red Team*

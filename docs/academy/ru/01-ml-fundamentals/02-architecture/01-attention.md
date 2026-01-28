@@ -1,25 +1,25 @@
-# Attention Mechanisms и Security
+# Attention Mechanisms и безопасность
 
 > **Урок:** 01.2.1 - Attention Mechanisms  
 > **Время:** 45 минут  
-> **Prerequisites:** Основы нейронных сетей
+> **Пререквизиты:** Neural Network basics
 
 ---
 
 ## Цели обучения
 
-После завершения этого урока вы сможете:
+К концу этого урока вы сможете:
 
-1. Понять как attention работает в transformers
+1. Понимать как attention работает в transformers
 2. Идентифицировать security implications attention patterns
 3. Анализировать attention для attack detection
-4. Реализовать attention-based defenses
+4. Реализовывать attention-based defenses
 
 ---
 
 ## Что такое Attention?
 
-Attention позволяет моделям фокусироваться на релевантных частях input при генерации каждого output токена:
+Attention позволяет моделям focus на relevant input parts при генерации каждого output token:
 
 ```
 Input: "The capital of France is"
@@ -27,7 +27,7 @@ Input: "The capital of France is"
          ↓      ↓       ↓      ↓      ↓
 Attention weights: 0.05  0.15   0.05  0.60   0.15
 
-Output: "Paris" (heavily influenced by "France")
+Output: "Paris" (сильно influenced by "France")
 ```
 
 ---
@@ -42,21 +42,21 @@ def self_attention(query, key, value, d_k):
     Scaled dot-product attention.
     
     Args:
-        query: What we're looking for [batch, seq_len, d_k]
-        key: What we match against [batch, seq_len, d_k]
-        value: What we retrieve [batch, seq_len, d_v]
-        d_k: Key dimension for scaling
+        query: Что мы ищем [batch, seq_len, d_k]
+        key: С чем сопоставляем [batch, seq_len, d_k]
+        value: Что извлекаем [batch, seq_len, d_v]
+        d_k: Key dimension для масштабирования
     
     Returns:
-        Attended values and attention weights
+        Attended values и attention weights
     """
     # Compute attention scores
     scores = np.matmul(query, key.transpose(-2, -1)) / np.sqrt(d_k)
     
-    # Softmax to get attention weights
+    # Softmax для получения attention weights
     attention_weights = softmax(scores, axis=-1)
     
-    # Apply attention to values
+    # Apply attention к values
     output = np.matmul(attention_weights, value)
     
     return output, attention_weights
@@ -85,8 +85,8 @@ class MultiHeadAttention:
         """
         Forward pass с optional attention extraction.
         
-        Multiple heads позволяют модели attend to different
-        aspects of the input simultaneously:
+        Multiple heads позволяют модели attend к разным
+        aspects input одновременно:
         - Head 1: syntactic relationships
         - Head 2: semantic similarity
         - Head 3: positional patterns
@@ -94,18 +94,29 @@ class MultiHeadAttention:
         """
         batch_size, seq_len, _ = x.shape
         
-        # Project to Q, K, V
+        # Project к Q, K, V
         Q = x @ self.W_q
         K = x @ self.W_k
         V = x @ self.W_v
         
-        # Split into heads
+        # Split на heads
         Q = Q.reshape(batch_size, seq_len, self.num_heads, self.d_k)
         K = K.reshape(batch_size, seq_len, self.num_heads, self.d_k)
         V = V.reshape(batch_size, seq_len, self.num_heads, self.d_k)
         
-        # Compute attention for all heads
+        # Transpose для attention computation
+        Q = Q.transpose(0, 2, 1, 3)
+        K = K.transpose(0, 2, 1, 3)
+        V = V.transpose(0, 2, 1, 3)
+        
+        # Compute attention для всех heads
         output, attention = self.scaled_dot_product_attention(Q, K, V, mask)
+        
+        # Concatenate heads
+        output = output.transpose(0, 2, 1, 3).reshape(batch_size, seq_len, self.d_model)
+        
+        # Final projection
+        output = output @ self.W_o
         
         if return_attention:
             return output, attention
@@ -118,17 +129,17 @@ class MultiHeadAttention:
 
 ### 1. Attention Hijacking
 
-Атаки могут hijack attention для фокусировки на malicious content:
+Атаки могут hijack attention чтобы сфокусировать на malicious content:
 
 ```python
 class AttentionHijackDetector:
-    """Detect attempts to hijack model attention."""
+    """Детекция попыток hijack model attention."""
     
     def __init__(self, model):
         self.model = model
     
     def analyze_attention(self, prompt: str) -> dict:
-        """Анализ attention patterns для hijacking."""
+        """Анализ attention patterns на hijacking."""
         
         # Get attention weights
         tokens = self.model.tokenize(prompt)
@@ -136,17 +147,17 @@ class AttentionHijackDetector:
             tokens, return_attention=True
         )
         
-        # Average across heads and layers
+        # Average across heads и layers
         avg_attention = np.mean(attention_weights, axis=(0, 1))
         
         findings = []
         
-        # Check for attention concentration (potential injection)
+        # Check для attention concentration (potential injection)
         for pos in range(len(tokens)):
             attention_to_pos = avg_attention[:, pos].mean()
             
-            # Is this position getting unusual attention?
-            if attention_to_pos > 0.5:  # Threshold for concern
+            # Получает ли эта позиция unusual attention?
+            if attention_to_pos > 0.5:  # Threshold для concern
                 findings.append({
                     "position": pos,
                     "token": self.model.decode([tokens[pos]]),
@@ -161,20 +172,21 @@ class AttentionHijackDetector:
         }
     
     def detect_injection_pattern(self, prompt: str) -> dict:
-        """Detect injection via attention analysis."""
+        """Детекция injection через attention analysis."""
         
         tokens = self.model.tokenize(prompt)
         _, attention = self.model.forward(tokens, return_attention=True)
         
-        # Injection often creates "cutoff" in attention
-        # System prompt tokens get ignored after injection point
+        # Injection часто создаёт "cutoff" в attention
+        # System prompt tokens игнорируются после injection point
         
-        # Check for attention discontinuity
+        # Check для attention discontinuity
         attention_flow = []
         for layer in range(attention.shape[0]):
-            layer_attention = attention[layer].mean(axis=0)
+            # Насколько later tokens attend к earlier ones?
+            layer_attention = attention[layer].mean(axis=0)  # Avg across heads
             
-            # Measure if there's a "wall" in attention
+            # Measure есть ли "wall" в attention
             for pos in range(1, len(tokens)):
                 backward_attention = layer_attention[pos, :pos].sum()
                 attention_flow.append({
@@ -183,7 +195,7 @@ class AttentionHijackDetector:
                     "backward_attention": backward_attention
                 })
         
-        # Look for sudden drops in backward attention
+        # Look для sudden drops в backward attention
         discontinuities = []
         for i in range(1, len(attention_flow)):
             curr = attention_flow[i]["backward_attention"]
@@ -207,7 +219,7 @@ class AttentionHijackDetector:
 
 ```python
 class AttentionBasedDetector:
-    """Use attention patterns для attack detection."""
+    """Использование attention patterns для attack detection."""
     
     def __init__(self, model, baseline_patterns: dict):
         self.model = model
@@ -230,6 +242,9 @@ class AttentionBasedDetector:
                 for l in range(attention.shape[0])
             ],
             
+            # Special token attention
+            "bos_attention": attention[:, :, :, 0].mean(),
+            
             # Attention distribution
             "attention_concentration": self._gini_coefficient(
                 attention.mean(axis=(0, 1)).flatten()
@@ -238,12 +253,30 @@ class AttentionBasedDetector:
         
         return signature
     
+    def _compute_attention_entropy(self, attention: np.ndarray) -> float:
+        """Compute entropy распределения attention."""
+        # Flatten и normalize
+        probs = attention.flatten()
+        probs = probs / probs.sum()
+        
+        # Compute entropy
+        entropy = -np.sum(probs * np.log(probs + 1e-10))
+        return entropy
+    
+    def _gini_coefficient(self, values: np.ndarray) -> float:
+        """Compute Gini coefficient (inequality measure)."""
+        sorted_values = np.sort(values)
+        n = len(values)
+        cumulative = np.cumsum(sorted_values)
+        
+        return (n + 1 - 2 * np.sum(cumulative) / cumulative[-1]) / n
+    
     def detect_anomaly(self, prompt: str) -> dict:
-        """Detect anomalous attention patterns."""
+        """Детекция anomalous attention patterns."""
         
         signature = self.compute_attention_signature(prompt)
         
-        # Compare to baseline
+        # Compare к baseline
         anomaly_scores = {}
         
         for key in signature:
@@ -252,7 +285,12 @@ class AttentionBasedDetector:
                 current_val = signature[key]
                 
                 if isinstance(baseline_val, (int, float)):
+                    # Simple difference
                     anomaly_scores[key] = abs(current_val - baseline_val)
+                elif isinstance(baseline_val, list):
+                    # Element-wise difference
+                    diff = [abs(c - b) for c, b in zip(current_val, baseline_val)]
+                    anomaly_scores[key] = sum(diff) / len(diff)
         
         overall_score = sum(anomaly_scores.values()) / len(anomaly_scores)
         
@@ -266,13 +304,63 @@ class AttentionBasedDetector:
 
 ---
 
+### 3. Attention Visualization для Debugging
+
+```python
+def visualize_attention_security(prompt: str, model, suspicious_tokens: list = None):
+    """
+    Визуализация attention для security analysis.
+    
+    Highlights:
+    - Где model фокусируется
+    - Potential injection points
+    - Unusual attention patterns
+    """
+    import matplotlib.pyplot as plt
+    import seaborn as sns
+    
+    tokens = model.tokenize(prompt)
+    token_strings = [model.decode([t]) for t in tokens]
+    
+    _, attention = model.forward(tokens, return_attention=True)
+    
+    # Average across heads для visualization
+    avg_attention = attention.mean(axis=(0, 1))
+    
+    fig, ax = plt.subplots(figsize=(12, 10))
+    
+    # Create heatmap
+    sns.heatmap(
+        avg_attention,
+        xticklabels=token_strings,
+        yticklabels=token_strings,
+        cmap="Reds",
+        ax=ax
+    )
+    
+    # Highlight suspicious tokens если provided
+    if suspicious_tokens:
+        for pos in suspicious_tokens:
+            ax.axhline(y=pos, color='blue', linewidth=2, alpha=0.5)
+            ax.axvline(x=pos, color='blue', linewidth=2, alpha=0.5)
+    
+    ax.set_title("Attention Matrix (rows attend to columns)")
+    ax.set_xlabel("Key Tokens")
+    ax.set_ylabel("Query Tokens")
+    
+    plt.tight_layout()
+    return fig
+```
+
+---
+
 ## Defense Strategies
 
 ### 1. Attention Monitoring
 
 ```python
 class AttentionMonitor:
-    """Monitor attention patterns в production."""
+    """Мониторинг attention patterns в production."""
     
     def __init__(self, model, alert_threshold: float = 0.7):
         self.model = model
@@ -280,7 +368,7 @@ class AttentionMonitor:
         self.history = []
     
     def process_with_monitoring(self, prompt: str) -> dict:
-        """Process prompt while monitoring attention."""
+        """Обработать prompt с мониторингом attention."""
         
         tokens = self.model.tokenize(prompt)
         output, attention = self.model.forward(tokens, return_attention=True)
@@ -300,7 +388,7 @@ class AttentionMonitor:
 
 ---
 
-## SENTINEL Integration
+## Интеграция с SENTINEL
 
 ```python
 from sentinel import configure, AttentionGuard
@@ -326,11 +414,11 @@ if result.hijack_detected:
 
 ## Ключевые выводы
 
-1. **Attention reveals intent** - Where model focuses matters
-2. **Hijacking is detectable** - Unusual patterns are visible
-3. **Monitor in production** - Attention analysis aids detection
-4. **Visualize for debugging** - Heatmaps show attack patterns
-5. **Combine with other signals** - Part of defense-in-depth
+1. **Attention reveals intent** — Где model фокусируется важно
+2. **Hijacking detectable** — Unusual patterns видны
+3. **Monitor в production** — Attention analysis помогает detection
+4. **Visualize для debugging** — Heatmaps показывают attack patterns
+5. **Combine с другими signals** — Часть defense-in-depth
 
 ---
 

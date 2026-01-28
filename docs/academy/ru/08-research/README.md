@@ -1,101 +1,101 @@
-# Исследовательские темы
+# Research Topics
 
-> **Модуль 08-Research: Передовая безопасность AI**
+> **Module 08-Research: Cutting-Edge AI Security**
 
 ---
 
 ## Обзор
 
-Этот модуль охватывает активные области исследований в безопасности AI. Контент здесь представляет фронтир области — темы в разработке, emerging threats и экспериментальные защиты. Обновления продолжаются по мере развития области.
+Этот модуль покрывает active research areas в AI security. Content здесь представляет frontier of the field — topics under development, emerging threats, и experimental defenses. Updates ongoing as the field evolves.
 
 ---
 
-## Области исследований
+## Research Areas
 
-| Область | Статус | Ключевые вопросы |
-|---------|--------|------------------|
-| **Новые векторы атак** | Активные исследования | Какие новые атаки появляются? |
-| **Улучшения защиты** | Ongoing development | Можно ли достичь доказуемой безопасности? |
-| **Методы детекции** | Экспериментальные | Как детектировать novel атаки? |
-| **Теоретические основы** | В разработке | Каковы фундаментальные лимиты? |
+| Area | Status | Key Questions |
+|------|--------|---------------|
+| **Novel attack vectors** | Active research | What new attacks are emerging? |
+| **Defense improvements** | Ongoing development | Can we achieve provable security? |
+| **Detection methods** | Experimental | How to detect novel attacks? |
+| **Theoretical foundations** | Developing | What are fundamental limits? |
 
 ---
 
-## Темы
+## Topics
 
 ### Emerging Attack Vectors
-Текущие фронтиры исследований:
-- Multi-modal атаки (image + text + audio)
+Current research frontiers:
+- Multi-modal attacks (image + text + audio)
 - Cross-agent exploitation chains
-- Training-time атаки в масштабе
-- Уязвимости long-context window
+- Training-time attacks at scale
+- Long-context window vulnerabilities
 - Fine-tuning attack vectors
 
 ### Defense Research
-Открытые проблемы и подходы:
-- Adversarial training для LLM
+Open problems и approaches:
+- Adversarial training для LLMs
 - Certified defense mechanisms
-- Interpretability для анализа безопасности
-- Proactive (vs reactive) защита
-- Формальная верификация safety
+- Interpretability для security analysis
+- Proactive (vs reactive) protection
+- Formal verification of safety
 
 ### Detection Research
-Новые подходы к детекции:
-- Топологические методы (TDA-based)
-- Causal analysis для детекции атак
+Novel detection approaches:
+- Topological methods (TDA-based)
+- Causal analysis для attack detection
 - Behavioral fingerprinting
-- Zero-shot детекция атак
+- Zero-shot attack detection
 - Cross-model transfer detection
 
 ### Measurement and Evaluation
-Проблемы бенчмаркинга:
-- Стандартизация метрик успеха атак
-- Измерение эффективности защиты
-- Разработка benchmark suite
-- Формализация red team методологии
-- Стандарты воспроизводимости
+Benchmarking challenges:
+- Attack success metrics standardization
+- Defense effectiveness measurement
+- Benchmark suite development
+- Red team methodology formalization
+- Reproducibility standards
 
 ---
 
-## Исследовательские вклады
+## Research Contributions
 
-### Как внести вклад
-Мы приветствуем исследовательские вклады:
-- Документация novel атак (responsible disclosure)
-- Предложения по улучшению защиты
-- Вклады в benchmarks
+### How to Contribute
+We welcome research contributions:
+- Novel attack documentation (responsible disclosure)
+- Defense improvement proposals
+- Benchmark contributions
 - Literature reviews и surveys
 - Replication studies
 
-### Процесс вклада
+### Contribution Process
 ```
-1. Обзор существующих исследований
-2. Документирование novel findings
-3. Тестирование в lab environment
-4. Submit через GitHub PR
-5. Процесс peer review
-6. Публикация в Academy
+1. Review existing research
+2. Document novel findings
+3. Test in lab environment
+4. Submit via GitHub PR
+5. Peer review process
+6. Publication in Academy
 ```
 
 ---
 
-## Ключевые исследовательские вопросы
+## Key Research Questions
 
-| Вопрос | Важность | Статус |
-|--------|----------|--------|
-| Могут ли LLM быть доказуемо безопасными? | Критическая | Open |
-| Каковы фундаментальные лимиты детекции? | Высокая | Partial |
-| Как защищаться от unknown атак? | Критическая | Active |
-| Можно ли верифицировать safety alignment? | Высокая | Early |
+| Question | Importance | Status |
+|----------|------------|--------|
+| Can LLMs be made provably secure? | Critical | Open |
+| What are fundamental detection limits? | High | Partial |
+| How to defend against unknown attacks? | Critical | Active |
+| Can we verify safety alignment? | High | Early |
 
 ---
 
-## Ресурсы
+## Resources
 
-- Коллекция академических статей
-- Proceedings конференций
+- Academic paper collection
+- Conference proceedings
 - Industry reports
-- Ссылки на research community
+- Research community links
 
 ---
 

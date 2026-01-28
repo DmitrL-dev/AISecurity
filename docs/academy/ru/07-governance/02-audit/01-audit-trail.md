@@ -1,6 +1,6 @@
-# Audit Trail для AI Systems
+# Audit Trail для AI систем
 
-> **Уровень:** �����������  
+> **Уровень:** Продвинутый  
 > **Время:** 45 минут  
 > **Трек:** 07 — Governance  
 > **Модуль:** 07.2 — Audit  
@@ -10,45 +10,45 @@
 
 ## Цели обучения
 
-- [ ] Понять requirements для AI audit trail
-- [ ] Имплементировать comprehensive audit logging
-- [ ] Построить audit query и analysis capabilities
+- [ ] Понять требования к AI audit trail
+- [ ] Реализовать комплексное audit логирование
+- [ ] Построить возможности audit query и анализа
 - [ ] Интегрировать audit trail в SENTINEL
 
 ---
 
-## 1. Audit Trail Overview
+## 1. Обзор Audit Trail
 
 ### 1.1 Зачем Audit Trail для AI?
 
 ```
 ┌────────────────────────────────────────────────────────────────────┐
-│              AI AUDIT TRAIL REQUIREMENTS                            │
+│              ТРЕБОВАНИЯ К AI AUDIT TRAIL                           │
 ├────────────────────────────────────────────────────────────────────┤
 │                                                                    │
-│  Regulatory Requirements:                                          │
-│  ├── EU AI Act: Retain logs for high-risk systems                 │
-│  ├── SOC 2: Demonstrate control effectiveness                    │
-│  └── GDPR: Record data processing activities                     │
+│  Регуляторные требования:                                          │
+│  ├── EU AI Act: Хранить логи для high-risk систем                 │
+│  ├── SOC 2: Демонстрировать эффективность контролей              │
+│  └── GDPR: Записывать активности обработки данных                 │
 │                                                                    │
-│  Security Requirements:                                            │
-│  ├── Incident Investigation: What happened and when              │
-│  ├── Attack Detection: Pattern analysis across logs              │
-│  └── Forensics: Evidence for security incidents                  │
+│  Требования безопасности:                                          │
+│  ├── Incident Investigation: Что произошло и когда               │
+│  ├── Attack Detection: Pattern analysis по логам                  │
+│  └── Forensics: Доказательства для security incidents             │
 │                                                                    │
-│  Operational Requirements:                                         │
-│  ├── Debugging: Trace issues to root cause                       │
-│  ├── Performance: Identify bottlenecks                           │
-│  └── Usage Analytics: Understand system usage                    │
+│  Операционные требования:                                          │
+│  ├── Debugging: Трассировка issues до root cause                  │
+│  ├── Performance: Идентификация bottlenecks                       │
+│  └── Usage Analytics: Понимание использования системы             │
 │                                                                    │
 └────────────────────────────────────────────────────────────────────┘
 ```
 
 ---
 
-## 2. Audit Event Model
+## 2. Модель Audit Event
 
-### 2.1 Core Entities
+### 2.1 Основные сущности
 
 ```python
 from dataclasses import dataclass, field
@@ -59,27 +59,27 @@ import hashlib
 import json
 
 class AuditEventType(Enum):
-    # Request/Response events
+    # Request/Response события
     REQUEST_RECEIVED = "request_received"
     RESPONSE_GENERATED = "response_generated"
     
-    # Security events
+    # Security события
     SECURITY_VIOLATION = "security_violation"
     ACCESS_DENIED = "access_denied"
     ATTACK_DETECTED = "attack_detected"
     POLICY_VIOLATION = "policy_violation"
     
-    # System events
+    # System события
     TOOL_INVOKED = "tool_invoked"
     DATA_ACCESSED = "data_accessed"
     CONFIG_CHANGED = "config_changed"
     
-    # Agent events
+    # Agent события
     AGENT_CREATED = "agent_created"
     AGENT_PERMISSION_CHANGED = "agent_permission_changed"
     AGENT_TERMINATED = "agent_terminated"
     
-    # Approval events
+    # Approval события
     APPROVAL_REQUESTED = "approval_requested"
     APPROVAL_GRANTED = "approval_granted"
     APPROVAL_DENIED = "approval_denied"
@@ -93,19 +93,19 @@ class AuditSeverity(Enum):
 
 @dataclass
 class AuditEvent:
-    """Complete audit event"""
+    """Полное audit событие"""
     event_id: str
     timestamp: datetime
     event_type: AuditEventType
     severity: AuditSeverity
     
-    # Context
+    # Контекст
     session_id: str
     user_id: str
     agent_id: str
     system_id: str
     
-    # Event details
+    # Детали события
     action: str
     resource: str
     outcome: str  # success, failure, blocked
@@ -128,7 +128,7 @@ class AuditEvent:
             self.event_hash = self._compute_hash()
     
     def _compute_hash(self) -> str:
-        """Compute hash for integrity verification"""
+        """Вычислить hash для верификации integrity"""
         data = {
             'event_id': self.event_id,
             'timestamp': self.timestamp.isoformat(),
@@ -142,7 +142,7 @@ class AuditEvent:
         return hashlib.sha256(content.encode()).hexdigest()
     
     def verify_integrity(self) -> bool:
-        """Verify event hasn't been tampered"""
+        """Проверить что событие не было изменено"""
         return self.event_hash == self._compute_hash()
     
     def to_dict(self) -> dict:
@@ -163,19 +163,19 @@ class AuditEvent:
 
 @dataclass
 class AuditChain:
-    """Chain of audit events with integrity verification"""
+    """Цепочка audit событий с верификацией integrity"""
     chain_id: str
     events: List[AuditEvent] = field(default_factory=list)
     
     def add_event(self, event: AuditEvent):
-        """Add event to chain with hash linking"""
+        """Добавить событие в цепочку с hash linking"""
         if self.events:
             event.previous_hash = self.events[-1].event_hash
             event.event_hash = event._compute_hash()
         self.events.append(event)
     
     def verify_chain(self) -> bool:
-        """Verify entire chain integrity"""
+        """Верифицировать integrity всей цепочки"""
         for i, event in enumerate(self.events):
             if not event.verify_integrity():
                 return False
@@ -188,7 +188,7 @@ class AuditChain:
 
 ## 3. Audit Logger
 
-### 3.1 Logger Implementation
+### 3.1 Реализация Logger
 
 ```python
 from abc import ABC, abstractmethod
@@ -198,7 +198,7 @@ import queue
 import uuid
 
 class AuditBackend(ABC):
-    """Abstract audit storage backend"""
+    """Абстрактный audit storage backend"""
     
     @abstractmethod
     def write(self, event: AuditEvent):
@@ -209,14 +209,14 @@ class AuditBackend(ABC):
         pass
 
 class InMemoryAuditBackend(AuditBackend):
-    """In-memory backend for development"""
+    """In-memory backend для разработки"""
     
     def __init__(self, max_events: int = 100000):
         self.events: List[AuditEvent] = []
         self.max_events = max_events
         self.lock = threading.RLock()
         
-        # Indexes
+        # Индексы
         self.by_session: Dict[str, List[int]] = defaultdict(list)
         self.by_user: Dict[str, List[int]] = defaultdict(list)
         self.by_type: Dict[str, List[int]] = defaultdict(list)
@@ -226,12 +226,12 @@ class InMemoryAuditBackend(AuditBackend):
             idx = len(self.events)
             self.events.append(event)
             
-            # Update indexes
+            # Обновить индексы
             self.by_session[event.session_id].append(idx)
             self.by_user[event.user_id].append(idx)
             self.by_type[event.event_type.value].append(idx)
             
-            # Trim if needed
+            # Trim при необходимости
             if len(self.events) > self.max_events:
                 self._trim()
     
@@ -239,7 +239,7 @@ class InMemoryAuditBackend(AuditBackend):
         with self.lock:
             candidates = None
             
-            # Use indexes if available
+            # Использовать индексы если доступны
             if 'session_id' in filters:
                 indices = self.by_session.get(filters['session_id'], [])
                 candidates = set(indices)
@@ -258,11 +258,11 @@ class InMemoryAuditBackend(AuditBackend):
                 else:
                     candidates &= set(indices)
             
-            # If no index used, scan all
+            # Если индекс не использован, сканировать все
             if candidates is None:
                 candidates = set(range(len(self.events)))
             
-            # Filter candidates
+            # Фильтровать кандидатов
             results = []
             for idx in sorted(candidates, reverse=True):
                 event = self.events[idx]
@@ -283,22 +283,9 @@ class InMemoryAuditBackend(AuditBackend):
         if 'outcome' in filters and event.outcome != filters['outcome']:
             return False
         return True
-    
-    def _trim(self):
-        """Remove oldest events"""
-        trim_count = self.max_events // 10
-        self.events = self.events[trim_count:]
-        # Rebuild indexes (simplified)
-        self.by_session.clear()
-        self.by_user.clear()
-        self.by_type.clear()
-        for i, e in enumerate(self.events):
-            self.by_session[e.session_id].append(i)
-            self.by_user[e.user_id].append(i)
-            self.by_type[e.event_type.value].append(i)
 
 class AuditLogger:
-    """Main audit logger"""
+    """Главный audit logger"""
     
     def __init__(self, backend: AuditBackend, async_mode: bool = True):
         self.backend = backend
@@ -310,21 +297,12 @@ class AuditLogger:
             self.worker = threading.Thread(target=self._process_queue, daemon=True)
             self.worker.start()
     
-    def _process_queue(self):
-        while True:
-            try:
-                event = self.queue.get(timeout=1.0)
-                self.chain.add_event(event)
-                self.backend.write(event)
-            except queue.Empty:
-                continue
-    
     def log(self, event_type: AuditEventType, severity: AuditSeverity,
             session_id: str, user_id: str, agent_id: str,
             action: str, resource: str, outcome: str,
             request_data: Dict = None, response_data: Dict = None,
             metadata: Dict = None, system_id: str = "default") -> str:
-        """Log an audit event"""
+        """Логировать audit событие"""
         event = AuditEvent(
             event_id=str(uuid.uuid4()),
             timestamp=datetime.utcnow(),
@@ -346,7 +324,6 @@ class AuditLogger:
             try:
                 self.queue.put_nowait(event)
             except queue.Full:
-                # Fallback to sync
                 self.chain.add_event(event)
                 self.backend.write(event)
         else:
@@ -355,7 +332,7 @@ class AuditLogger:
         
         return event.event_id
     
-    # Convenience methods
+    # Convenience методы
     def log_request(self, session_id: str, user_id: str, agent_id: str,
                     request_data: Dict) -> str:
         return self.log(
@@ -406,13 +383,13 @@ class AuditLogger:
 from collections import Counter
 
 class AuditAnalyzer:
-    """Analyze audit logs for insights"""
+    """Анализ audit логов для insights"""
     
     def __init__(self, logger: AuditLogger):
         self.logger = logger
     
     def get_security_summary(self, hours: int = 24) -> Dict:
-        """Get security events summary"""
+        """Получить сводку security событий"""
         from datetime import timedelta
         start = datetime.utcnow() - timedelta(hours=hours)
         
@@ -430,7 +407,7 @@ class AuditAnalyzer:
                 start_time=start
             ))
         
-        # Aggregate
+        # Агрегация
         by_type = Counter(e.event_type.value for e in events)
         by_severity = Counter(e.severity.value for e in events)
         by_agent = Counter(e.agent_id for e in events)
@@ -445,34 +422,13 @@ class AuditAnalyzer:
             'period_hours': hours
         }
     
-    def get_attack_timeline(self, hours: int = 24) -> List[Dict]:
-        """Get timeline of attacks"""
-        from datetime import timedelta
-        start = datetime.utcnow() - timedelta(hours=hours)
-        
-        events = self.logger.query(
-            event_type=AuditEventType.ATTACK_DETECTED.value,
-            start_time=start
-        )
-        
-        return [
-            {
-                'timestamp': e.timestamp.isoformat(),
-                'attack_type': e.action,
-                'agent_id': e.agent_id,
-                'user_id': e.user_id,
-                'confidence': e.metadata.get('confidence', 0)
-            }
-            for e in sorted(events, key=lambda x: x.timestamp)
-        ]
-    
     def detect_anomalies(self, session_id: str) -> List[Dict]:
-        """Detect anomalies in a session"""
+        """Детекция аномалий в сессии"""
         events = self.logger.query(session_id=session_id)
         
         anomalies = []
         
-        # Check for rapid requests
+        # Проверка rapid requests
         if len(events) > 1:
             times = [e.timestamp for e in events]
             intervals = [(times[i+1] - times[i]).total_seconds() 
@@ -482,19 +438,19 @@ class AuditAnalyzer:
                 anomalies.append({
                     'type': 'rapid_requests',
                     'severity': 'medium',
-                    'description': 'Unusually rapid request rate detected'
+                    'description': 'Обнаружен необычно высокий rate запросов'
                 })
         
-        # Check for many failures
+        # Проверка many failures
         failures = [e for e in events if e.outcome == 'failure']
         if len(failures) > len(events) * 0.5:
             anomalies.append({
                 'type': 'high_failure_rate',
                 'severity': 'high',
-                'description': f'{len(failures)} failures out of {len(events)} events'
+                'description': f'{len(failures)} failures из {len(events)} событий'
             })
         
-        # Check for security events
+        # Проверка security events
         security_events = [e for e in events 
                          if e.event_type in [AuditEventType.SECURITY_VIOLATION,
                                             AuditEventType.ACCESS_DENIED,
@@ -503,14 +459,14 @@ class AuditAnalyzer:
             anomalies.append({
                 'type': 'security_events',
                 'severity': 'critical',
-                'description': f'{len(security_events)} security events in session',
+                'description': f'{len(security_events)} security событий в сессии',
                 'events': [e.event_id for e in security_events]
             })
         
         return anomalies
     
     def generate_session_report(self, session_id: str) -> Dict:
-        """Generate complete session report"""
+        """Сгенерировать полный отчёт сессии"""
         events = self.logger.query(session_id=session_id)
         
         if not events:
@@ -527,36 +483,27 @@ class AuditAnalyzer:
             'event_types': dict(Counter(e.event_type.value for e in events)),
             'outcomes': dict(Counter(e.outcome for e in events)),
             'agents_involved': list(set(e.agent_id for e in events)),
-            'anomalies': self.detect_anomalies(session_id),
-            'timeline': [
-                {
-                    'timestamp': e.timestamp.isoformat(),
-                    'type': e.event_type.value,
-                    'action': e.action,
-                    'outcome': e.outcome
-                }
-                for e in events
-            ]
+            'anomalies': self.detect_anomalies(session_id)
         }
 ```
 
 ---
 
-## 5. SENTINEL Integration
+## 5. Интеграция с SENTINEL
 
 ```python
 from dataclasses import dataclass
 
 @dataclass
 class AuditConfig:
-    """Audit engine configuration"""
+    """Конфигурация audit engine"""
     async_mode: bool = True
     max_events: int = 100000
     retention_days: int = 90
     enable_integrity_check: bool = True
 
 class SENTINELAuditEngine:
-    """Audit engine for SENTINEL framework"""
+    """Audit engine для SENTINEL framework"""
     
     def __init__(self, config: AuditConfig):
         self.config = config
@@ -579,18 +526,6 @@ class SENTINELAuditEngine:
             response_data=response
         )
     
-    def log_security_event(self, session_id: str, user_id: str, agent_id: str,
-                           event_type: str, severity: str, details: Dict) -> str:
-        sev = AuditSeverity[severity.upper()]
-        return self.logger.log(
-            AuditEventType.SECURITY_VIOLATION,
-            sev,
-            session_id, user_id, agent_id,
-            event_type, "security",
-            "detected",
-            metadata=details
-        )
-    
     def log_attack(self, session_id: str, user_id: str, agent_id: str,
                    attack_type: str, confidence: float, details: Dict) -> str:
         return self.logger.log_attack_detected(
@@ -604,10 +539,6 @@ class SENTINELAuditEngine:
     def get_session_report(self, session_id: str) -> Dict:
         return self.analyzer.generate_session_report(session_id)
     
-    def query_events(self, **filters) -> List[Dict]:
-        events = self.logger.query(**filters)
-        return [e.to_dict() for e in events]
-    
     def verify_integrity(self) -> bool:
         if not self.config.enable_integrity_check:
             return True
@@ -616,22 +547,22 @@ class SENTINELAuditEngine:
 
 ---
 
-## 6. Резюме
+## 6. Итоги
 
 | Компонент | Описание |
 |-----------|----------|
-| **AuditEvent** | Единица audit log с hash |
-| **AuditChain** | Цепочка events с integrity |
+| **AuditEvent** | Единица audit лога с hash |
+| **AuditChain** | Цепочка событий с integrity |
 | **Backend** | Storage (in-memory, DB) |
-| **Logger** | Async logging с convenience methods |
+| **Logger** | Async логирование с convenience методами |
 | **Analyzer** | Security summary, anomaly detection |
 
 ---
 
 ## Следующий урок
 
-→ [Track 08: Research](../../08-research/README.md)
+→ [Трек 08: Research](../../08-research/README.md)
 
 ---
 
-*AI Security Academy | Track 07: Governance | Module 07.2: Audit*
+*AI Security Academy | Трек 07: Governance | Модуль 07.2: Audit*

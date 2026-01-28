@@ -1,25 +1,25 @@
-# Tokenization и Security
+# Tokenization и безопасность
 
 > **Урок:** 01.2.2 - Tokenization  
 > **Время:** 35 минут  
-> **Prerequisites:** Основы Attention
+> **Пререквизиты:** Attention basics
 
 ---
 
 ## Цели обучения
 
-После завершения этого урока вы сможете:
+К концу этого урока вы сможете:
 
-1. Понять как работает tokenization
+1. Понимать как tokenization работает
 2. Идентифицировать tokenization-based attack vectors
-3. Эксплуатировать и defense против tokenization quirks
+3. Exploit и защищаться от tokenization quirks
 4. Проектировать token-aware security measures
 
 ---
 
 ## Что такое Tokenization?
 
-Tokenization конвертирует текст в числовые токены которые модели могут обрабатывать:
+Tokenization конвертирует текст в numerical tokens которые модели могут обрабатывать:
 
 ```
 "Hello, world!" → [15496, 11, 995, 0]
@@ -40,14 +40,14 @@ Tokenization конвертирует текст в числовые токен�
 ### 1. Token Boundaries Enable Attacks
 
 ```python
-# Word-level detection fails on split tokens
+# Word-level detection fails на split tokens
 keyword = "bomb"  # Blocked as keyword
 
-# But tokenizer may split it differently:
+# Но tokenizer может split иначе:
 evasion = "b" + "omb"  # May tokenize as ["b", "omb"]
 evasion2 = "bo" + "mb"  # May tokenize as ["bo", "mb"]
 
-# Regex looking for "bomb" misses the split versions
+# Regex ищущий "bomb" пропускает split versions
 ```
 
 ### 2. Tokenization Inconsistency
@@ -57,13 +57,13 @@ from transformers import AutoTokenizer
 
 tokenizer = AutoTokenizer.from_pretrained("gpt2")
 
-# Same word, different tokenizations based on context
+# Одно слово, разные tokenizations based on context
 print(tokenizer.encode("bomb"))      # [21901]
 print(tokenizer.encode(" bomb"))     # [6202]   (with space)
 print(tokenizer.encode("Bomb"))      # [33, 2381]  (capitalized)
 print(tokenizer.encode("BOMB"))      # [33, 2662, 33]  (all caps)
 
-# Detection must account for all variants!
+# Detection должен учитывать все variants!
 ```
 
 ---
@@ -74,20 +74,20 @@ print(tokenizer.encode("BOMB"))      # [33, 2662, 33]  (all caps)
 
 ```python
 class TokenSplitAttack:
-    """Evade keyword detection via token splitting."""
+    """Evasion keyword detection через token splitting."""
     
     def __init__(self, tokenizer):
         self.tokenizer = tokenizer
     
     def find_evasive_spellings(self, keyword: str) -> list:
-        """Find spellings that avoid the keyword's token."""
+        """Найти spellings которые avoid keyword's token."""
         
         original_tokens = self.tokenizer.encode(keyword)
         evasions = []
         
         # Try various splitting strategies
         for i in range(1, len(keyword)):
-            # Split with spaces
+            # Split с spaces
             split = keyword[:i] + " " + keyword[i:]
             tokens = self.tokenizer.encode(split)
             if tokens != original_tokens:
@@ -97,7 +97,7 @@ class TokenSplitAttack:
                     "strategy": "space_split"
                 })
             
-            # Split with zero-width characters
+            # Split с zero-width characters
             zwsp = "\u200b"
             split_zwsp = keyword[:i] + zwsp + keyword[i:]
             tokens = self.tokenizer.encode(split_zwsp)
@@ -111,7 +111,7 @@ class TokenSplitAttack:
         return evasions
     
     def find_homoglyph_evasions(self, keyword: str) -> list:
-        """Find homoglyph substitutions that change tokens."""
+        """Найти homoglyph substitutions которые change tokens."""
         
         homoglyphs = {
             'a': 'а', 'e': 'е', 'o': 'о', 'p': 'р',
@@ -138,10 +138,53 @@ class TokenSplitAttack:
 
 ---
 
-### 2. Glitch Tokens
+### 2. Token Boundary Manipulation
 
 ```python
-# Some tokenizers have "glitch tokens" - tokens that cause unusual behavior
+class TokenBoundaryManipulator:
+    """Exploit token boundaries для attacks."""
+    
+    def __init__(self, tokenizer):
+        self.tokenizer = tokenizer
+    
+    def fragment_instruction(self, instruction: str) -> str:
+        """Fragment instruction across token boundaries."""
+        
+        # Find natural token breaks
+        tokens = self.tokenizer.encode(instruction)
+        decoded_tokens = [self.tokenizer.decode([t]) for t in tokens]
+        
+        # Insert characters которые change boundaries
+        fragmented = ""
+        for i, token_text in enumerate(decoded_tokens):
+            fragmented += token_text
+            if i < len(decoded_tokens) - 1:
+                # Insert boundary-breaking character
+                fragmented += "\u200b"  # Zero-width space
+        
+        return fragmented
+    
+    def embed_in_tokens(self, payload: str, carrier: str) -> str:
+        """Embed payload within carrier text tokens."""
+        
+        # Strategy: insert payload где не будет detected
+        # by token-level keyword matching
+        
+        carrier_tokens = self.tokenizer.encode(carrier)
+        payload_tokens = self.tokenizer.encode(payload)
+        
+        # Find position где payload integrates smoothly
+        # Это model-specific и requires experimentation
+        
+        return carrier + "\n\n" + payload
+```
+
+---
+
+### 3. Glitch Tokens
+
+```python
+# Некоторые tokenizers имеют "glitch tokens" - tokens которые cause unusual behavior
 
 glitch_tokens = {
     "gpt-2": [
@@ -158,7 +201,7 @@ class GlitchTokenExplorer:
         self.model = model
     
     def find_glitch_tokens(self, sample_size: int = 1000) -> list:
-        """Find tokens with unusual embedding properties."""
+        """Найти tokens с unusual embedding properties."""
         
         unusual = []
         
@@ -168,7 +211,7 @@ class GlitchTokenExplorer:
                 torch.tensor([token_id])
             )
             
-            # Check for unusual embedding properties
+            # Check для unusual embedding properties
             norm = torch.norm(embedding).item()
             if norm > 100 or norm < 0.01:
                 unusual.append({
@@ -188,18 +231,18 @@ class GlitchTokenExplorer:
 
 ```python
 class TokenAwareDetector:
-    """Keyword detection that accounts for tokenization."""
+    """Keyword detection который accounts for tokenization."""
     
     def __init__(self, tokenizer, keywords: list):
         self.tokenizer = tokenizer
         
-        # Pre-compute all token variants of keywords
+        # Pre-compute все token variants keywords
         self.keyword_token_sets = {}
         for keyword in keywords:
             self.keyword_token_sets[keyword] = self._get_all_variants(keyword)
     
     def _get_all_variants(self, keyword: str) -> set:
-        """Get all token sequences for keyword variants."""
+        """Get все token sequences для keyword variants."""
         
         variants = set()
         
@@ -232,16 +275,26 @@ class TokenAwareDetector:
             "found_keywords": found,
             "is_suspicious": len(found) > 0
         }
+    
+    def _contains_subsequence(self, sequence: tuple, subseq: tuple) -> bool:
+        """Check содержит ли sequence subsequence."""
+        n, m = len(sequence), len(subseq)
+        for i in range(n - m + 1):
+            if sequence[i:i+m] == subseq:
+                return True
+        return False
 ```
+
+---
 
 ### 2. Pre-Tokenization Normalization
 
 ```python
 class TokenizationNormalizer:
-    """Normalize text before tokenization to prevent evasion."""
+    """Normalize text до tokenization чтобы prevent evasion."""
     
     def __init__(self):
-        # Zero-width characters to remove
+        # Zero-width characters для removal
         self.invisible_chars = [
             '\u200b', '\u200c', '\u200d', '\u2060', '\ufeff'
         ]
@@ -253,7 +306,7 @@ class TokenizationNormalizer:
         }
     
     def normalize(self, text: str) -> str:
-        """Normalize text to consistent form."""
+        """Normalize text к consistent form."""
         
         # Remove invisible characters
         for char in self.invisible_chars:
@@ -272,7 +325,48 @@ class TokenizationNormalizer:
 
 ---
 
-## SENTINEL Integration
+### 3. Semantic Detection (Token-Agnostic)
+
+```python
+class SemanticDetector:
+    """Detect harmful content regardless of tokenization."""
+    
+    def __init__(self, embedding_model, harmful_examples: list):
+        self.embed = embedding_model
+        
+        # Pre-compute embeddings для known harmful patterns
+        self.harmful_embeddings = [
+            self.embed(ex) for ex in harmful_examples
+        ]
+    
+    def detect(self, text: str, threshold: float = 0.85) -> dict:
+        """Detect harmful content через semantic similarity."""
+        
+        text_emb = self.embed(text)
+        
+        max_similarity = 0
+        most_similar_idx = -1
+        
+        for i, harmful_emb in enumerate(self.harmful_embeddings):
+            sim = self._cosine_similarity(text_emb, harmful_emb)
+            if sim > max_similarity:
+                max_similarity = sim
+                most_similar_idx = i
+        
+        return {
+            "is_harmful": max_similarity > threshold,
+            "confidence": max_similarity,
+            "matched_pattern": most_similar_idx if max_similarity > threshold else None
+        }
+    
+    def _cosine_similarity(self, a, b):
+        import numpy as np
+        return np.dot(a, b) / (np.linalg.norm(a) * np.linalg.norm(b))
+```
+
+---
+
+## Интеграция с SENTINEL
 
 ```python
 from sentinel import configure, TokenGuard
@@ -290,7 +384,7 @@ token_guard = TokenGuard(
 
 @token_guard.protect  
 def process_input(text: str):
-    # Automatically normalized and checked
+    # Автоматически normalized и checked
     return llm.generate(text)
 ```
 
@@ -298,11 +392,11 @@ def process_input(text: str):
 
 ## Ключевые выводы
 
-1. **Tokenization affects detection** - Same word, different tokens
-2. **Attackers exploit splits** - Bypass keyword filters
-3. **Normalize before detection** - Remove invisible chars, homoglyphs
-4. **Use semantic detection** - Token-agnostic is more robust
-5. **Test your tokenizer** - Know its quirks
+1. **Tokenization affects detection** — Одно слово, different tokens
+2. **Attackers exploit splits** — Bypass keyword filters
+3. **Normalize before detection** — Remove invisible chars, homoglyphs
+4. **Use semantic detection** — Token-agnostic более robust
+5. **Test your tokenizer** — Know its quirks
 
 ---
 

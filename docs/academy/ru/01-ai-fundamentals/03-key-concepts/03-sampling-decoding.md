@@ -1,18 +1,18 @@
 # Sampling и Decoding
 
-> **Уровень:** ����������  
+> **Уровень:** Beginner  
 > **Время:** 35 минут  
 > **Трек:** 01 — AI Fundamentals  
-> **Модуль:** 01.3 — Ключевые концепции  
+> **Модуль:** 01.3 — Key Concepts  
 > **Версия:** 1.0
 
 ---
 
 ## Цели обучения
 
-- [ ] Понять как модели выбирают следующий токен
+- [ ] Понять как модели выбирают следующий token
 - [ ] Знать основные стратегии: greedy, top-k, top-p, temperature
-- [ ] Понять влияние параметров на output
+- [ ] Понимать влияние параметров на output
 - [ ] Связать sampling с reproducibility и security
 
 ---
@@ -22,11 +22,11 @@
 ### 1.1 Model Output: Logits
 
 ```python
-# Модель возвращает logits для каждого токена в vocabulary
+# Model возвращает logits для каждого token в vocabulary
 logits = model(input_ids)  # [batch, seq_len, vocab_size]
                            # [1, 10, 50257] для GPT-2
 
-# logits[-1] = scores для next token
+# logits[-1] = scores для следующего token
 next_logits = logits[0, -1, :]  # [50257]
 ```
 
@@ -36,9 +36,9 @@ next_logits = logits[0, -1, :]  # [50257]
 import torch.nn.functional as F
 
 probs = F.softmax(next_logits, dim=-1)
-# probs[i] = probability токена i
+# probs[i] = probability token i
 
-# Пример:
+# Example:
 # probs[15496] = 0.15  # "Hello"
 # probs[42] = 0.08     # "the"
 # probs[...] = ...
@@ -46,23 +46,23 @@ probs = F.softmax(next_logits, dim=-1)
 
 ---
 
-## 2. Стратегии Sampling
+## 2. Sampling Strategies
 
 ### 2.1 Greedy Decoding
 
-**Идея:** Всегда выбирать токен с максимальной вероятностью.
+**Идея:** Всегда выбирать token с максимальной probability.
 
 ```python
 def greedy(logits):
     return logits.argmax()
 
 # Pros: Deterministic, fast
-# Cons: Скучный, повторяющийся output
+# Cons: Boring, repetitive output
 ```
 
 ### 2.2 Temperature
 
-**Идея:** Контроль "остроты" распределения.
+**Идея:** Контроль "sharpness" распределения.
 
 ```python
 def sample_with_temperature(logits, temperature=1.0):
@@ -70,14 +70,14 @@ def sample_with_temperature(logits, temperature=1.0):
     probs = F.softmax(scaled_logits, dim=-1)
     return torch.multinomial(probs, num_samples=1)
 
-# temperature = 0.1: Почти greedy (confident)
+# temperature = 0.1: Almost greedy (confident)
 # temperature = 1.0: Original distribution
 # temperature = 2.0: More random (creative)
 ```
 
 ### 2.3 Top-K Sampling
 
-**Идея:** Выборка только из K наиболее вероятных токенов.
+**Идея:** Sample только из K most probable tokens.
 
 ```python
 def top_k(logits, k=50):
@@ -89,7 +89,7 @@ def top_k(logits, k=50):
 
 ### 2.4 Top-P (Nucleus) Sampling
 
-**Идея:** Выборка из минимального набора токенов с cumulative probability >= p.
+**Идея:** Sample из minimum set tokens с cumulative probability >= p.
 
 ```python
 def top_p(logits, p=0.9):
@@ -121,7 +121,7 @@ def top_p(logits, p=0.9):
 
 ---
 
-## 3. Практическое использование
+## 3. Practical Usage
 
 ```python
 from transformers import AutoModelForCausalLM, AutoTokenizer
@@ -129,7 +129,7 @@ from transformers import AutoModelForCausalLM, AutoTokenizer
 model = AutoModelForCausalLM.from_pretrained("gpt2")
 tokenizer = AutoTokenizer.from_pretrained("gpt2")
 
-# Разные sampling стратегии
+# Different sampling strategies
 outputs = model.generate(
     input_ids,
     max_new_tokens=50,
@@ -148,14 +148,14 @@ outputs = model.generate(
 ### 4.1 Reproducibility
 
 ```python
-# Проблема: random sampling не воспроизводим
+# Problem: random sampling не reproducible
 torch.manual_seed(42)
 output1 = model.generate(..., do_sample=True)
 
 torch.manual_seed(42)
 output2 = model.generate(..., do_sample=True)
 
-# output1 == output2 только если seed одинаковый!
+# output1 == output2 только если seed тот же!
 ```
 
 ### 4.2 Sampling Manipulation
@@ -163,14 +163,14 @@ output2 = model.generate(..., do_sample=True)
 ```python
 # Temperature влияет на probability harmful outputs
 # Low temp: Model follows training distribution
-# High temp: Increases probability of rare tokens
+# High temp: Increases probability rare tokens
 
-# Некоторые jailbreaks эксплуатируют high temperature
+# Некоторые jailbreaks exploit high temperature
 ```
 
 ---
 
-## 5. Резюме
+## 5. Summary
 
 1. **Logits → Probabilities:** softmax conversion
 2. **Greedy:** Deterministic, boring
@@ -186,4 +186,4 @@ output2 = model.generate(..., do_sample=True)
 
 ---
 
-*AI Security Academy | Track 01: AI Fundamentals | Module 01.3: Key Concepts*
+*AI Security Academy | Трек 01: AI Fundamentals | Модуль 01.3: Key Concepts*

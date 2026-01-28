@@ -1,133 +1,133 @@
-# Pre-training и Transfer Learning
+# Pre-training Рё Transfer Learning
 
-> **Уровень:** Начинающий  
-> **Время:** 45 минут  
-> **Трек:** 01 — AI Fundamentals  
-> **Модуль:** 01.2 — Жизненный цикл обучения  
-> **Версия:** 1.0
-
----
-
-## Цели обучения
-
-После завершения этого урока вы сможете:
-
-- [ ] Объяснить разницу между pre-training и training from scratch
-- [ ] Понять концепцию transfer learning
-- [ ] Описать типы pre-training задач (MLM, CLM, контрастивное)
-- [ ] Понять риски использования pre-trained моделей
+> **РЈСЂРѕРІРµРЅСЊ:** Beginner  
+> **Р’СЂРµРјСЏ:** 45 РјРёРЅСѓС‚  
+> **РўСЂРµРє:** 01 вЂ” РћСЃРЅРѕРІС‹ AI  
+> **РњРѕРґСѓР»СЊ:** 01.2 вЂ” Training Lifecycle  
+> **Р’РµСЂСЃРёСЏ:** 1.0
 
 ---
 
-## 1. Эволюция обучения моделей
+## Р¦РµР»Рё РѕР±СѓС‡РµРЅРёСЏ
 
-### 1.1 До Transfer Learning (до 2018)
+РџРѕСЃР»Рµ Р·Р°РІРµСЂС€РµРЅРёСЏ СЌС‚РѕРіРѕ СѓСЂРѕРєР° РІС‹ СЃРјРѕР¶РµС‚Рµ:
 
-```
-Старый подход:
-Задача A > Train Model A from scratch (randomly initialized)
-Задача B > Train Model B from scratch (randomly initialized)
-Задача C > Train Model C from scratch (randomly initialized)
+- [ ] РћР±СЉСЏСЃРЅРёС‚СЊ СЂР°Р·РЅРёС†Сѓ РјРµР¶РґСѓ pre-training Рё training from scratch
+- [ ] РџРѕРЅСЏС‚СЊ РєРѕРЅС†РµРїС†РёСЋ transfer learning
+- [ ] РћРїРёСЃР°С‚СЊ С‚РёРїС‹ pre-training Р·Р°РґР°С‡ (MLM, CLM, contrastive)
+- [ ] РџРѕРЅСЏС‚СЊ СЂРёСЃРєРё РёСЃРїРѕР»СЊР·РѕРІР°РЅРёСЏ pre-trained РјРѕРґРµР»РµР№
 
-Проблемы:
-- Каждая задача требует много labeled данных
-- Модели не переиспользуют знания
-- Дорого и неэффективно
-```
+---
 
-### 1.2 Transfer Learning парадигма
+## 1. Р­РІРѕР»СЋС†РёСЏ РѕР±СѓС‡РµРЅРёСЏ РјРѕРґРµР»РµР№
+
+### 1.1 Р”Рѕ Transfer Learning (РґРѕ 2018)
 
 ```
-Новый подход:
-                    Pre-training (once)
-                          v
+РЎС‚Р°СЂС‹Р№ РїРѕРґС…РѕРґ:
+Task A в†’ РћР±СѓС‡Р°РµРј Model A СЃ РЅСѓР»СЏ (СЃР»СѓС‡Р°Р№РЅР°СЏ РёРЅРёС†РёР°Р»РёР·Р°С†РёСЏ)
+Task B в†’ РћР±СѓС‡Р°РµРј Model B СЃ РЅСѓР»СЏ (СЃР»СѓС‡Р°Р№РЅР°СЏ РёРЅРёС†РёР°Р»РёР·Р°С†РёСЏ)
+Task C в†’ РћР±СѓС‡Р°РµРј Model C СЃ РЅСѓР»СЏ (СЃР»СѓС‡Р°Р№РЅР°СЏ РёРЅРёС†РёР°Р»РёР·Р°С†РёСЏ)
+
+РџСЂРѕР±Р»РµРјС‹:
+- РљР°Р¶РґР°СЏ Р·Р°РґР°С‡Р° С‚СЂРµР±СѓРµС‚ РјРЅРѕРіРѕ СЂР°Р·РјРµС‡РµРЅРЅС‹С… РґР°РЅРЅС‹С…
+- РњРѕРґРµР»Рё РЅРµ РїРµСЂРµРёСЃРїРѕР»СЊР·СѓСЋС‚ Р·РЅР°РЅРёСЏ
+- Р”РѕСЂРѕРіРѕ Рё РЅРµСЌС„С„РµРєС‚РёРІРЅРѕ
+```
+
+### 1.2 РџР°СЂР°РґРёРіРјР° Transfer Learning
+
+```
+РќРѕРІС‹Р№ РїРѕРґС…РѕРґ:
+                    Pre-training (РѕРґРёРЅ СЂР°Р·)
+                          в†“
               [Pre-trained Foundation Model]
-                    v     v     v
+                    в†“     в†“     в†“
             Fine-tune  Fine-tune  Fine-tune
-                v         v         v
+                в†“         в†“         в†“
             Task A    Task B    Task C
 
-Преимущества:
-- Pre-training на огромных unlabeled данных
-- Fine-tuning требует мало labeled данных
-- Знания переиспользуются между задачами
+РџСЂРµРёРјСѓС‰РµСЃС‚РІР°:
+- Pre-training РЅР° РѕРіСЂРѕРјРЅС‹С… РЅРµСЂР°Р·РјРµС‡РµРЅРЅС‹С… РґР°РЅРЅС‹С…
+- Fine-tuning С‚СЂРµР±СѓРµС‚ РјР°Р»Рѕ СЂР°Р·РјРµС‡РµРЅРЅС‹С… РґР°РЅРЅС‹С…
+- Р—РЅР°РЅРёСЏ РїРµСЂРµРёСЃРїРѕР»СЊР·СѓСЋС‚СЃСЏ РјРµР¶РґСѓ Р·Р°РґР°С‡Р°РјРё
 ```
 
 ---
 
-## 2. Pre-training: Обучение основам
+## 2. Pre-training: РР·СѓС‡РµРЅРёРµ РѕСЃРЅРѕРІ
 
-### 2.1 Что такое Pre-training?
+### 2.1 Р§С‚Рѕ С‚Р°РєРѕРµ Pre-training?
 
-**Pre-training** — обучение модели на большом корпусе данных для изучения общих patterns языка/изображений.
+**Pre-training** вЂ” РѕР±СѓС‡РµРЅРёРµ РјРѕРґРµР»Рё РЅР° Р±РѕР»СЊС€РѕРј РєРѕСЂРїСѓСЃРµ РґР°РЅРЅС‹С… РґР»СЏ РёР·СѓС‡РµРЅРёСЏ РѕР±С‰РёС… СЏР·С‹РєРѕРІС‹С…/РІРёР·СѓР°Р»СЊРЅС‹С… РїР°С‚С‚РµСЂРЅРѕРІ.
 
 ```python
-# Pre-training НЕ требует labels для конкретных задач
-# Модель учится из самих данных
+# Pre-training РќР• С‚СЂРµР±СѓРµС‚ РјРµС‚РѕРє РґР»СЏ РєРѕРЅРєСЂРµС‚РЅС‹С… Р·Р°РґР°С‡
+# РњРѕРґРµР»СЊ СѓС‡РёС‚СЃСЏ РёР· СЃР°РјРёС… РґР°РЅРЅС‹С…
 
-Pre-training data:
-- Wikipedia (text)
-- CommonCrawl (web text)
-- Books (literature)
-- ImageNet (images)
-- LAION (image-text pairs)
+Pre-training РґР°РЅРЅС‹Рµ:
+- Wikipedia (С‚РµРєСЃС‚)
+- CommonCrawl (РІРµР±-С‚РµРєСЃС‚)
+- Books (Р»РёС‚РµСЂР°С‚СѓСЂР°)
+- ImageNet (РёР·РѕР±СЂР°Р¶РµРЅРёСЏ)
+- LAION (РїР°СЂС‹ РёР·РѕР±СЂР°Р¶РµРЅРёРµ-С‚РµРєСЃС‚)
 ```
 
-### 2.2 Типы Pre-training задач
+### 2.2 РўРёРїС‹ Pre-training Р·Р°РґР°С‡
 
-| Тип | Задача | Модели |
+| РўРёРї | Р—Р°РґР°С‡Р° | РњРѕРґРµР»Рё |
 |-----|--------|--------|
-| **MLM** | Предсказать замаскированные токены | BERT, RoBERTa |
-| **CLM** | Предсказать следующий токен | GPT, LLaMA |
-| **Contrastive** | Сблизить похожие, отдалить разные | CLIP, SimCLR |
-| **Denoising** | Восстановить из зашумлённого | BART, T5 |
+| **MLM** | РџСЂРµРґСЃРєР°Р·Р°С‚СЊ masked С‚РѕРєРµРЅС‹ | BERT, RoBERTa |
+| **CLM** | РџСЂРµРґСЃРєР°Р·Р°С‚СЊ СЃР»РµРґСѓСЋС‰РёР№ С‚РѕРєРµРЅ | GPT, LLaMA |
+| **Contrastive** | РЎР±Р»РёР¶Р°С‚СЊ РїРѕС…РѕР¶РёРµ, РѕС‚РґР°Р»СЏС‚СЊ СЂР°Р·РЅС‹Рµ | CLIP, SimCLR |
+| **Denoising** | Р’РѕСЃСЃС‚Р°РЅРѕРІРёС‚СЊ РёР· Р·Р°С€СѓРјР»С‘РЅРЅРѕРіРѕ | BART, T5 |
 
 ### 2.3 Self-Supervised Learning
 
-**Ключевая идея:** Создавать labels из самих данных, без human annotation.
+**РљР»СЋС‡РµРІР°СЏ РёРґРµСЏ:** РЎРѕР·РґР°С‘Рј labels РёР· СЃР°РјРёС… РґР°РЅРЅС‹С…, Р±РµР· С‡РµР»РѕРІРµС‡РµСЃРєРѕР№ Р°РЅРЅРѕС‚Р°С†РёРё.
 
 ```python
 # Masked Language Modeling
 text = "The cat sat on the mat"
 input = "The [MASK] sat on the [MASK]"
-labels = ["cat", "mat"]  # Автоматически из оригинального текста!
+labels = ["cat", "mat"]  # РђРІС‚РѕРјР°С‚РёС‡РµСЃРєРё РёР· РѕСЂРёРіРёРЅР°Р»СЊРЅРѕРіРѕ С‚РµРєСЃС‚Р°!
 
 # Causal Language Modeling
 text = "The cat sat on the mat"
 input = ["The", "The cat", "The cat sat", ...]
-labels = ["cat", "sat", "on", ...]  # Следующие токены!
+labels = ["cat", "sat", "on", ...]  # РЎР»РµРґСѓСЋС‰РёРµ С‚РѕРєРµРЅС‹!
 
 # Contrastive Learning
 image = load_image("cat.jpg")
 text = "A photo of a cat"
-# Positive pair: (image, text) — должны быть близко
-# Negative pair: (image, "A photo of a dog") — должны быть далеко
+# Positive pair: (image, text) вЂ” РґРѕР»Р¶РЅС‹ Р±С‹С‚СЊ Р±Р»РёР·РєРѕ
+# Negative pair: (image, "A photo of a dog") вЂ” РґРѕР»Р¶РЅС‹ Р±С‹С‚СЊ РґР°Р»РµРєРѕ
 ```
 
 ---
 
 ## 3. Foundation Models
 
-### 3.1 Определение
+### 3.1 РћРїСЂРµРґРµР»РµРЅРёРµ
 
-**Foundation Model** — большая pre-trained модель, которая служит основой для множества downstream задач.
+**Foundation Model** вЂ” Р±РѕР»СЊС€Р°СЏ pre-trained РјРѕРґРµР»СЊ, РєРѕС‚РѕСЂР°СЏ СЃР»СѓР¶РёС‚ РѕСЃРЅРѕРІРѕР№ РґР»СЏ РјРЅРѕР¶РµСЃС‚РІР° downstream Р·Р°РґР°С‡.
 
 ```
 Foundation Models:
-+-- Language: GPT-4, LLaMA, Claude
-+-- Vision: ViT, CLIP
-+-- Multimodal: Gemini, GPT-4V
-L-- Code: Codex, StarCoder
+в”њв”Ђв”Ђ Language: GPT-4, LLaMA, Claude
+в”њв”Ђв”Ђ Vision: ViT, CLIP
+в”њв”Ђв”Ђ Multimodal: Gemini, GPT-4V
+в””в”Ђв”Ђ Code: Codex, StarCoder
 ```
 
-### 3.2 Характеристики
+### 3.2 РҐР°СЂР°РєС‚РµСЂРёСЃС‚РёРєРё
 
-| Характеристика | Описание |
+| РҐР°СЂР°РєС‚РµСЂРёСЃС‚РёРєР° | РћРїРёСЃР°РЅРёРµ |
 |----------------|----------|
-| **Scale** | Миллиарды параметров |
-| **Data** | Терабайты текста/изображений |
-| **Compute** | Тысячи GPU-часов |
-| **Generalization** | Решают множество задач |
+| **Scale** | РњРёР»Р»РёР°СЂРґС‹ РїР°СЂР°РјРµС‚СЂРѕРІ |
+| **Data** | РўРµСЂР°Р±Р°Р№С‚С‹ С‚РµРєСЃС‚Р°/РёР·РѕР±СЂР°Р¶РµРЅРёР№ |
+| **Compute** | РўС‹СЃСЏС‡Рё GPU-С‡Р°СЃРѕРІ |
+| **Generalization** | Р РµС€Р°РµС‚ РјРЅРѕР¶РµСЃС‚РІРѕ Р·Р°РґР°С‡ |
 
 ### 3.3 Model Hubs
 
@@ -146,11 +146,11 @@ model = hub.load("https://tfhub.dev/google/imagenet/resnet_v2_50/feature_vector/
 
 ---
 
-## 4. Transfer Learning на практике
+## 4. Transfer Learning РЅР° РїСЂР°РєС‚РёРєРµ
 
 ### 4.1 Feature Extraction
 
-**Идея:** Использовать pre-trained модель как fixed feature extractor.
+**РРґРµСЏ:** РСЃРїРѕР»СЊР·РѕРІР°С‚СЊ pre-trained РјРѕРґРµР»СЊ РєР°Рє С„РёРєСЃРёСЂРѕРІР°РЅРЅС‹Р№ feature extractor.
 
 ```python
 from transformers import BertModel, BertTokenizer
@@ -159,39 +159,39 @@ import torch.nn as nn
 class FeatureExtractor(nn.Module):
     def __init__(self, num_classes):
         super().__init__()
-        # Pre-trained BERT (frozen)
+        # Pre-trained BERT (Р·Р°РјРѕСЂРѕР¶РµРЅРЅС‹Р№)
         self.bert = BertModel.from_pretrained('bert-base-uncased')
         for param in self.bert.parameters():
-            param.requires_grad = False  # Заморозить!
+            param.requires_grad = False  # Р—Р°РјРѕСЂР°Р¶РёРІР°РµРј!
         
-        # Trainable classifier
+        # РћР±СѓС‡Р°РµРјС‹Р№ РєР»Р°СЃСЃРёС„РёРєР°С‚РѕСЂ
         self.classifier = nn.Linear(768, num_classes)
     
     def forward(self, input_ids, attention_mask):
         with torch.no_grad():
             outputs = self.bert(input_ids, attention_mask)
-        # Используем [CLS] token
+        # РСЃРїРѕР»СЊР·СѓРµРј [CLS] С‚РѕРєРµРЅ
         pooled = outputs.pooler_output
         return self.classifier(pooled)
 ```
 
 ### 4.2 Full Fine-tuning
 
-**Идея:** Дообучить всю модель на downstream задаче.
+**РРґРµСЏ:** Fine-tune РІСЃСЋ РјРѕРґРµР»СЊ РЅР° downstream Р·Р°РґР°С‡Рµ.
 
 ```python
 from transformers import BertForSequenceClassification, Trainer, TrainingArguments
 
-# Загружаем pre-trained + добавляем classification head
+# Р—Р°РіСЂСѓР¶Р°РµРј pre-trained + РґРѕР±Р°РІР»СЏРµРј classification head
 model = BertForSequenceClassification.from_pretrained(
     'bert-base-uncased',
     num_labels=2
 )
 
-# Fine-tune все параметры
+# Fine-tune РІСЃРµ РїР°СЂР°РјРµС‚СЂС‹
 training_args = TrainingArguments(
     output_dir='./results',
-    learning_rate=2e-5,  # Маленький LR для fine-tuning!
+    learning_rate=2e-5,  # РњР°Р»РµРЅСЊРєРёР№ LR РґР»СЏ fine-tuning!
     num_train_epochs=3,
     per_device_train_batch_size=16,
 )
@@ -206,82 +206,82 @@ trainer = Trainer(
 trainer.train()
 ```
 
-### 4.3 Сравнение подходов
+### 4.3 РЎСЂР°РІРЅРµРЅРёРµ РїРѕРґС…РѕРґРѕРІ
 
-| Подход | Trainable params | Data needed | Quality |
-|--------|------------------|-------------|---------|
-| **Feature extraction** | ~1% | Мало | Хорошо |
-| **Fine-tuning** | 100% | Средне | Отлично |
-| **PEFT (LoRA)** | ~1-5% | Мало | Отлично |
+| РџРѕРґС…РѕРґ | РћР±СѓС‡Р°РµРјС‹Рµ params | РќСѓР¶РЅРѕ РґР°РЅРЅС‹С… | РљР°С‡РµСЃС‚РІРѕ |
+|--------|------------------|--------------|----------|
+| **Feature extraction** | ~1% | РњР°Р»Рѕ | РҐРѕСЂРѕС€РµРµ |
+| **Fine-tuning** | 100% | РЎСЂРµРґРЅРµРµ | РћС‚Р»РёС‡РЅРѕРµ |
+| **PEFT (LoRA)** | ~1-5% | РњР°Р»Рѕ | РћС‚Р»РёС‡РЅРѕРµ |
 
 ---
 
 ## 5. Parameter-Efficient Fine-Tuning (PEFT)
 
-### 5.1 Проблема Full Fine-tuning
+### 5.1 РџСЂРѕР±Р»РµРјР° Full Fine-tuning
 
 ```
-LLaMA-70B: 70 миллиардов параметров
-? 4 bytes (fp32) = 280 GB
-? 2 (gradients) = 560 GB
-? ~3 (optimizer states) = 1.7 TB
+LLaMA-70B: 70 РјРёР»Р»РёР°СЂРґРѕРІ РїР°СЂР°РјРµС‚СЂРѕРІ
+Г— 4 Р±Р°Р№С‚Р° (fp32) = 280 GB
+Г— 2 (РіСЂР°РґРёРµРЅС‚С‹) = 560 GB
+Г— ~3 (optimizer states) = 1.7 TB
 
-Для fine-tuning нужно ~1.7 TB памяти!
+Р”Р»СЏ fine-tuning РЅСѓР¶РЅРѕ ~1.7 TB РїР°РјСЏС‚Рё!
 ```
 
 ### 5.2 LoRA (Low-Rank Adaptation)
 
-**Идея:** Добавить small trainable matrices рядом с frozen pre-trained weights.
+**РРґРµСЏ:** Р”РѕР±Р°РІР»СЏРµРј РјР°Р»РµРЅСЊРєРёРµ РѕР±СѓС‡Р°РµРјС‹Рµ РјР°С‚СЂРёС†С‹ СЂСЏРґРѕРј СЃ Р·Р°РјРѕСЂРѕР¶РµРЅРЅС‹РјРё pre-trained РІРµСЃР°РјРё.
 
 ```python
 from peft import LoraConfig, get_peft_model
 
-# Конфигурация LoRA
+# РљРѕРЅС„РёРіСѓСЂР°С†РёСЏ LoRA
 lora_config = LoraConfig(
-    r=8,  # Rank of decomposition
+    r=8,  # Rank РґРµРєРѕРјРїРѕР·РёС†РёРё
     lora_alpha=32,
-    target_modules=["q_proj", "v_proj"],  # Какие слои адаптировать
+    target_modules=["q_proj", "v_proj"],  # РљР°РєРёРµ СЃР»РѕРё Р°РґР°РїС‚РёСЂРѕРІР°С‚СЊ
     lora_dropout=0.05,
 )
 
-# Применяем LoRA
+# РџСЂРёРјРµРЅСЏРµРј LoRA
 model = get_peft_model(base_model, lora_config)
 
-# Проверяем количество trainable параметров
+# РџСЂРѕРІРµСЂСЏРµРј РѕР±СѓС‡Р°РµРјС‹Рµ РїР°СЂР°РјРµС‚СЂС‹
 model.print_trainable_parameters()
 # trainable params: 4,194,304 || all params: 6,742,609,920 || trainable%: 0.06%
 ```
 
 ---
 
-## 6. Безопасность Pre-trained моделей
+## 6. Р‘РµР·РѕРїР°СЃРЅРѕСЃС‚СЊ Pre-trained РјРѕРґРµР»РµР№
 
-### 6.1 Supply Chain Risks
+### 6.1 Р РёСЃРєРё Supply Chain
 
 ```
-Pre-trained Model Risks:
-+-- Backdoors (trojan)
-+-- Data poisoning
-+-- Model tampering
-+-- License violations
-L-- Unintended biases
+Р РёСЃРєРё Pre-trained РјРѕРґРµР»РµР№:
+в”њв”Ђв”Ђ Backdoors (trojan)
+в”њв”Ђв”Ђ Data poisoning
+в”њв”Ђв”Ђ Model tampering
+в”њв”Ђв”Ђ License violations
+в””в”Ђв”Ђ Unintended biases
 ```
 
 ### 6.2 Model Provenance
 
-**Проблема:** Откуда взялась модель? Можно ли ей доверять?
+**РџСЂРѕР±Р»РµРјР°:** РћС‚РєСѓРґР° РїСЂРёС€Р»Р° РјРѕРґРµР»СЊ? РњРѕР¶РЅРѕ Р»Рё РµР№ РґРѕРІРµСЂСЏС‚СЊ?
 
 ```python
-# ПЛОХО: Скачать модель из неизвестного источника
+# РџР›РћРҐРћ: РЎРєР°С‡РёРІР°РЅРёРµ РјРѕРґРµР»Рё РёР· РЅРµРёР·РІРµСЃС‚РЅРѕРіРѕ РёСЃС‚РѕС‡РЅРёРєР°
 model = AutoModel.from_pretrained("random-user/suspicious-model")
 
-# ХОРОШО: Проверить provenance
-# 1. Официальный источник (OpenAI, Meta, Google)
-# 2. Verified организация на HuggingFace
-# 3. Checksums и signatures
+# РҐРћР РћРЁРћ: РџСЂРѕРІРµСЂСЏРµРј provenance
+# 1. РћС„РёС†РёР°Р»СЊРЅС‹Р№ РёСЃС‚РѕС‡РЅРёРє (OpenAI, Meta, Google)
+# 2. Verified РѕСЂРіР°РЅРёР·Р°С†РёСЏ РЅР° HuggingFace
+# 3. Checksums Рё РїРѕРґРїРёСЃРё
 ```
 
-### 6.3 SENTINEL Проверки
+### 6.3 SENTINEL РџСЂРѕРІРµСЂРєРё
 
 ```python
 from sentinel import scan  # Public API
@@ -290,7 +290,7 @@ from sentinel import scan  # Public API
     WeightIntegrityValidator
 )
 
-# Проверка происхождения
+# РџСЂРѕРІРµСЂСЏРµРј provenance
 provenance = ModelProvenanceChecker()
 result = provenance.verify(
     model_path="path/to/model",
@@ -302,7 +302,7 @@ if not result.verified:
     print(f"Warning: {result.issues}")
     # ["Signature mismatch", "Unknown source"]
 
-# Сканирование на backdoors
+# РЎРєР°РЅРёСЂСѓРµРј РЅР° backdoors
 backdoor_scanner = BackdoorScanner()
 scan_result = backdoor_scanner.scan(
     model=loaded_model,
@@ -316,97 +316,97 @@ if scan_result.backdoor_detected:
 
 ### 6.4 Best Practices
 
-| Practice | Description |
-|----------|-------------|
-| **Verify source** | Только oficial/verified источники |
-| **Check checksums** | SHA256 hash должен совпадать |
-| **Audit weights** | Проверяйте на аномалии |
-| **Test behavior** | Тестируйте на trigger phrases |
-| **Monitor updates** | Отслеживайте security advisories |
+| РџСЂР°РєС‚РёРєР° | РћРїРёСЃР°РЅРёРµ |
+|----------|----------|
+| **Verify source** | РўРѕР»СЊРєРѕ РѕС„РёС†РёР°Р»СЊРЅС‹Рµ/verified РёСЃС‚РѕС‡РЅРёРєРё |
+| **Check checksums** | SHA256 hash РґРѕР»Р¶РµРЅ СЃРѕРІРїР°РґР°С‚СЊ |
+| **Audit weights** | РџСЂРѕРІРµСЂРєР° РЅР° Р°РЅРѕРјР°Р»РёРё |
+| **Test behavior** | РўРµСЃС‚РёСЂРѕРІР°РЅРёРµ РЅР° trigger phrases |
+| **Monitor updates** | РћС‚СЃР»РµР¶РёРІР°РЅРёРµ security advisories |
 
 ---
 
-## 7. Практические задания
+## 7. РџСЂР°РєС‚РёС‡РµСЃРєРёРµ СѓРїСЂР°Р¶РЅРµРЅРёСЏ
 
-### Задание 1: Feature Extraction vs Fine-tuning
+### РЈРїСЂР°Р¶РЅРµРЅРёРµ 1: Feature Extraction vs Fine-tuning
 
 ```python
-# Сравните два подхода на одном датасете
+# РЎСЂР°РІРЅРёС‚Рµ РґРІР° РїРѕРґС…РѕРґР° РЅР° РѕРґРЅРѕРј РґР°С‚Р°СЃРµС‚Рµ
 
-# 1. Feature extraction (frozen BERT)
+# 1. Feature extraction (Р·Р°РјРѕСЂРѕР¶РµРЅРЅС‹Р№ BERT)
 # 2. Full fine-tuning
 
-# Метрики для сравнения:
-# - Training time
-# - Memory usage
-# - Final accuracy
+# РњРµС‚СЂРёРєРё РґР»СЏ СЃСЂР°РІРЅРµРЅРёСЏ:
+# - Р’СЂРµРјСЏ РѕР±СѓС‡РµРЅРёСЏ
+# - РСЃРїРѕР»СЊР·РѕРІР°РЅРёРµ РїР°РјСЏС‚Рё
+# - Р¤РёРЅР°Р»СЊРЅР°СЏ accuracy
 ```
 
-### Задание 2: LoRA Fine-tuning
+### РЈРїСЂР°Р¶РЅРµРЅРёРµ 2: LoRA Fine-tuning
 
 ```python
 from peft import LoraConfig, get_peft_model
 
-# Попробуйте разные значения:
+# РџРѕРїСЂРѕР±СѓР№С‚Рµ СЂР°Р·РЅС‹Рµ Р·РЅР°С‡РµРЅРёСЏ:
 # - r (rank): 4, 8, 16, 32
 # - target_modules: q_proj, v_proj, all linear
 
-# Измерьте:
-# - Trainable parameters %
-# - Quality
-# - Memory usage
+# РР·РјРµСЂСЊС‚Рµ:
+# - % РѕР±СѓС‡Р°РµРјС‹С… РїР°СЂР°РјРµС‚СЂРѕРІ
+# - РљР°С‡РµСЃС‚РІРѕ
+# - РСЃРїРѕР»СЊР·РѕРІР°РЅРёРµ РїР°РјСЏС‚Рё
 ```
 
 ---
 
-## 8. Проверочные вопросы
+## 8. Quiz РІРѕРїСЂРѕСЃС‹
 
-### Вопрос 1
+### Р’РѕРїСЂРѕСЃ 1
 
-Что такое transfer learning?
+Р§С‚Рѕ С‚Р°РєРѕРµ transfer learning?
 
-- [ ] A) Обучение модели с нуля
-- [x] B) Перенос знаний из pre-trained модели на новую задачу
-- [ ] C) Обучение на transfer данных
-- [ ] D) Копирование весов между GPU
+- [ ] A) РћР±СѓС‡РµРЅРёРµ РјРѕРґРµР»Рё СЃ РЅСѓР»СЏ
+- [x] B) РџРµСЂРµРЅРѕСЃ Р·РЅР°РЅРёР№ РёР· pre-trained РјРѕРґРµР»Рё РЅР° РЅРѕРІСѓСЋ Р·Р°РґР°С‡Сѓ
+- [ ] C) РћР±СѓС‡РµРЅРёРµ РЅР° transfer РґР°РЅРЅС‹С…
+- [ ] D) РљРѕРїРёСЂРѕРІР°РЅРёРµ РІРµСЃРѕРІ РјРµР¶РґСѓ GPU
 
-### Вопрос 2
+### Р’РѕРїСЂРѕСЃ 2
 
-Какая задача используется для pre-training BERT?
+РљР°РєР°СЏ Р·Р°РґР°С‡Р° РёСЃРїРѕР»СЊР·СѓРµС‚СЃСЏ РґР»СЏ pre-training BERT?
 
 - [x] A) Masked Language Modeling
-- [ ] B) Image classification
+- [ ] B) РљР»Р°СЃСЃРёС„РёРєР°С†РёСЏ РёР·РѕР±СЂР°Р¶РµРЅРёР№
 - [ ] C) Reinforcement learning
 - [ ] D) Sentiment analysis
 
-### Вопрос 3
+### Р’РѕРїСЂРѕСЃ 3
 
-Что такое LoRA?
+Р§С‚Рѕ С‚Р°РєРѕРµ LoRA?
 
-- [ ] A) Новая архитектура модели
-- [x] B) Метод parameter-efficient fine-tuning через low-rank matrices
-- [ ] C) Тип regularization
+- [ ] A) РќРѕРІР°СЏ Р°СЂС…РёС‚РµРєС‚СѓСЂР° РјРѕРґРµР»Рё
+- [x] B) РњРµС‚РѕРґ parameter-efficient fine-tuning СЃ РёСЃРїРѕР»СЊР·РѕРІР°РЅРёРµРј low-rank РјР°С‚СЂРёС†
+- [ ] C) РўРёРї СЂРµРіСѓР»СЏСЂРёР·Р°С†РёРё
 - [ ] D) Learning rate scheduler
 
 ---
 
-## 9. Резюме
+## 9. Р РµР·СЋРјРµ
 
-В этом уроке мы изучили:
+Р’ СЌС‚РѕРј СѓСЂРѕРєРµ РјС‹ РёР·СѓС‡РёР»Рё:
 
-1. **Pre-training:** Обучение на больших данных без labels
-2. **Transfer learning:** Перенос знаний на downstream задачи
-3. **Foundation models:** Большие pre-trained модели как основа
+1. **Pre-training:** РћР±СѓС‡РµРЅРёРµ РЅР° Р±РѕР»СЊС€РёС… РґР°РЅРЅС‹С… Р±РµР· РјРµС‚РѕРє
+2. **Transfer learning:** РџРµСЂРµРЅРѕСЃ Р·РЅР°РЅРёР№ РЅР° downstream Р·Р°РґР°С‡Рё
+3. **Foundation models:** Р‘РѕР»СЊС€РёРµ pre-trained РјРѕРґРµР»Рё РєР°Рє РѕСЃРЅРѕРІР°
 4. **Fine-tuning:** Feature extraction vs full fine-tuning
-5. **PEFT:** LoRA для эффективного дообучения
-6. **Безопасность:** Риски pre-trained моделей, provenance checking
+5. **PEFT:** LoRA РґР»СЏ СЌС„С„РµРєС‚РёРІРЅРѕРіРѕ fine-tuning
+6. **Security:** Р РёСЃРєРё pre-trained РјРѕРґРµР»РµР№, РїСЂРѕРІРµСЂРєР° provenance
 
 ---
 
-## Следующий урок
+## РЎР»РµРґСѓСЋС‰РёР№ СѓСЂРѕРє
 
-> [02. Fine-tuning и RLHF](02-finetuning-rlhf.md)
+в†’ [02. Fine-tuning Рё RLHF](02-finetuning-rlhf.md)
 
 ---
 
-*AI Security Academy | Track 01: AI Fundamentals | Module 01.2: Training Lifecycle*
+*AI Security Academy | РўСЂРµРє 01: РћСЃРЅРѕРІС‹ AI | РњРѕРґСѓР»СЊ 01.2: Training Lifecycle*

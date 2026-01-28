@@ -1,87 +1,45 @@
-# Model-Level Attacks
+# Атаки уровня модели
 
-> **Submodule 03.3: Attacks on the Model Itself**
-
----
-
-## �����
-
-Model-level attacks target the ML model directly rather than exploiting application logic. These attacks require deeper technical knowledge but can have severe consequences including data extraction and model theft.
+> **Модуль 03.4: Векторы атак уровня модели**
 
 ---
 
-## Attack Categories
+## Обзор
 
-| Attack Type | Goal | Difficulty |
-|-------------|------|------------|
-| **Membership Inference** | Determine if data was in training | Medium |
-| **Data Extraction** | Recover training data | Hard |
-| **Adversarial Examples** | Fool model predictions | Medium |
-| **Model Extraction** | Steal model weights | Very Hard |
+Атаки уровня модели направлены на извлечение информации из самой модели — обучающих данных, архитектуры или поведения.
 
 ---
 
-## Lessons
+## Уроки
 
-### 01. Data Extraction
-**�����:** 40 minutes | **���������:** �����������
+### [01. Извлечение данных](01-data-extraction.md)
+- Извлечение обучающих данных
+- Утечка системных промптов
+- Атаки восстановления памяти
+- Техники защиты
 
-Recovering training data:
-- Memorization exploitation
-- Prefix attacks
-- Verbatim extraction
-- PII and credential leakage
+### [02. Атаки членства](02-membership-inference.md)
+- Определение присутствия в обучающих данных
+- Извлечение атрибутов
+- Инверсия модели
+- Дифференциальная приватность
 
-### 02. Membership Inference
-**�����:** 40 minutes | **���������:** �������
-
-Determining training data membership:
-- Statistical analysis techniques
-- Confidence score analysis
-- Shadow model training
-- Privacy implications
-
-### 03. Adversarial Examples
-**�����:** 45 minutes | **���������:** �������
-
-Crafting inputs that fool models:
-- Gradient-based attacks
-- Transfer attacks
-- Black-box techniques
-- Defense mechanisms
+### [03. Состязательные примеры](03-adversarial-examples.md)
+- Пертурбации ввода
+- Обход классификаторов
+- Токсичная генерация
+- Робастность моделей
 
 ---
 
-## Attack Surface
+## Ключевые концепции
 
-```
-Model API
-    │
-    ├── Logits/Probabilities → Membership Inference
-    ├── Embeddings → Adversarial Examples  
-    ├── Generated Text → Data Extraction
-    └── Query Access → Model Extraction
-```
+| Атака | Цель | Риск |
+|-------|------|------|
+| **Извлечение** | Обучающие данные | Высокий |
+| **Членство** | Приватность | Средний |
+| **Состязательные** | Поведение модели | Средний-Высокий |
 
 ---
 
-## Real-World Impact
-
-| Attack | Example Impact |
-|--------|---------------|
-| Membership Inference | Privacy violation, GDPR breach |
-| Data Extraction | Credential leakage, PII exposure |
-| Adversarial | Safety bypass, misclassification |
-| Model Extraction | IP theft, competitive harm |
-
----
-
-## ���������
-
-| Previous | Current | Next |
-|----------|---------|------|
-| [Jailbreaking](../02-jailbreaks/) | **Model-Level** | [Prompt-Level](../04-prompt-level/) |
-
----
-
-*AI Security Academy | Submodule 03.3*
+*AI Security Academy | Модуль 03.4*

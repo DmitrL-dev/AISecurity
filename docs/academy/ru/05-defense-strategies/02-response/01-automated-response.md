@@ -1,6 +1,6 @@
-# Automated Response для AI Security
+# Автоматический Response для AI Security
 
-> **Уровень:** �����������  
+> **Уровень:** Продвинутый  
 > **Время:** 50 минут  
 > **Трек:** 05 — Defense Strategies  
 > **Модуль:** 05.2 — Response  
@@ -10,16 +10,16 @@
 
 ## Цели обучения
 
-- [ ] Понять automated response strategies для AI security
-- [ ] Имплементировать response action framework
-- [ ] Построить response orchestration pipeline
-- [ ] Интегрировать automated response в SENTINEL
+- [ ] Понять стратегии автоматического response для AI security
+- [ ] Реализовать фреймворк response actions
+- [ ] Построить пайплайн response orchestration
+- [ ] Интегрировать автоматический response в SENTINEL
 
 ---
 
-## 1. Response Framework Overview
+## 1. Обзор Response Framework
 
-### 1.1 Response Strategies
+### 1.1 Стратегии Response
 
 ```
 ┌────────────────────────────────────────────────────────────────────┐
@@ -27,17 +27,17 @@
 ├────────────────────────────────────────────────────────────────────┤
 │                                                                    │
 │  Response Levels:                                                  │
-│  ├── LOG: Record event, continue processing                      │
-│  ├── WARN: Log + alert, continue with caution                    │
+│  ├── LOG: Записать событие, продолжить обработку                 │
+│  ├── WARN: Log + alert, продолжить с осторожностью               │
 │  ├── THROTTLE: Rate limit agent/session                          │
-│  ├── BLOCK: Block current request                                │
-│  ├── SUSPEND: Suspend agent temporarily                          │
-│  └── TERMINATE: Terminate session/agent                          │
+│  ├── BLOCK: Заблокировать текущий запрос                         │
+│  ├── SUSPEND: Приостановить агента временно                      │
+│  └── TERMINATE: Завершить session/agent                          │
 │                                                                    │
 │  Response Types:                                                   │
 │  ├── Immediate: Block, redact, transform                         │
 │  ├── Delayed: Alert, escalate, review queue                      │
-│  └── Adaptive: Adjust security level dynamically                 │
+│  └── Adaptive: Динамическая корректировка security level         │
 │                                                                    │
 │  Trigger Sources:                                                  │
 │  ├── Detection Engine: Anomaly, pattern match                    │
@@ -52,7 +52,7 @@
 
 ## 2. Response Actions
 
-### 2.1 Action Definition
+### 2.1 Определение Action
 
 ```python
 from dataclasses import dataclass, field
@@ -83,7 +83,7 @@ class ActionType(Enum):
 
 @dataclass
 class ResponseAction:
-    """Single response action"""
+    """Единичный response action"""
     action_type: ActionType
     level: ResponseLevel
     parameters: Dict = field(default_factory=dict)
@@ -98,7 +98,7 @@ class ResponseAction:
 
 @dataclass
 class ResponseRule:
-    """Rule mapping trigger to actions"""
+    """Правило маппинга trigger на actions"""
     rule_id: str
     name: str
     description: str
@@ -117,7 +117,7 @@ class ResponseRule:
     max_triggers_per_hour: int = 100
     
     def matches(self, event: Dict) -> bool:
-        """Check if event matches rule conditions"""
+        """Проверить соответствует ли событие условиям правила"""
         if event.get('type') != self.trigger_type:
             return False
         
@@ -140,7 +140,7 @@ class ResponseRule:
 
 @dataclass
 class ResponseEvent:
-    """Event that triggers response"""
+    """Событие, триггерящее response"""
     event_id: str
     timestamp: datetime
     type: str  # attack_detected, policy_violation, etc.
@@ -163,7 +163,7 @@ from abc import ABC, abstractmethod
 import logging
 
 class ActionHandler(ABC):
-    """Base action handler"""
+    """Базовый action handler"""
     
     @abstractmethod
     def execute(self, action: ResponseAction, event: ResponseEvent) -> Dict:
@@ -249,7 +249,7 @@ class ThrottleHandler(ActionHandler):
             }
     
     def is_throttled(self, agent_id: str) -> tuple[bool, Optional[int]]:
-        """Check if agent is throttled"""
+        """Проверить находится ли агент под throttling"""
         with self.lock:
             if agent_id not in self.throttled:
                 return False, None
@@ -292,46 +292,6 @@ class SuspendAgentHandler(ActionHandler):
             return False
         
         return True
-
-class AlertHandler(ActionHandler):
-    """Alert action"""
-    
-    def __init__(self):
-        self.alerts: List[Dict] = []
-        self.callbacks: List[Callable] = []
-    
-    @property
-    def action_type(self) -> ActionType:
-        return ActionType.ALERT
-    
-    def register_callback(self, callback: Callable):
-        self.callbacks.append(callback)
-    
-    def execute(self, action: ResponseAction, event: ResponseEvent) -> Dict:
-        alert = {
-            'timestamp': datetime.utcnow().isoformat(),
-            'event_type': event.type,
-            'severity': event.severity,
-            'agent_id': event.agent_id,
-            'session_id': event.session_id,
-            'details': event.details,
-            'message': action.parameters.get('message', f"Security alert: {event.type}")
-        }
-        
-        self.alerts.append(alert)
-        
-        # Notify callbacks
-        for callback in self.callbacks:
-            try:
-                callback(alert)
-            except:
-                pass
-        
-        return {
-            'success': True,
-            'alerted': True,
-            'alert': alert
-        }
 ```
 
 ---
@@ -344,7 +304,7 @@ import uuid
 
 @dataclass
 class ResponseResult:
-    """Result of response execution"""
+    """Результат выполнения response"""
     event_id: str
     rule_id: str
     success: bool
@@ -353,7 +313,7 @@ class ResponseResult:
     timestamp: datetime = field(default_factory=datetime.utcnow)
 
 class ResponseOrchestrator:
-    """Orchestrates response execution"""
+    """Оркестрирует выполнение response"""
     
     def __init__(self):
         self.rules: Dict[str, ResponseRule] = {}
@@ -368,20 +328,15 @@ class ResponseOrchestrator:
         self.max_history = 10000
     
     def register_handler(self, handler: ActionHandler):
-        """Register action handler"""
+        """Зарегистрировать action handler"""
         self.handlers[handler.action_type] = handler
     
     def add_rule(self, rule: ResponseRule):
-        """Add response rule"""
+        """Добавить response правило"""
         self.rules[rule.rule_id] = rule
     
-    def remove_rule(self, rule_id: str):
-        """Remove response rule"""
-        if rule_id in self.rules:
-            del self.rules[rule_id]
-    
     def process_event(self, event: ResponseEvent) -> List[ResponseResult]:
-        """Process event and execute matching responses"""
+        """Обработать событие и выполнить matching responses"""
         results = []
         
         for rule in self.rules.values():
@@ -402,7 +357,7 @@ class ResponseOrchestrator:
         return results
     
     def _check_rate_limit(self, rule: ResponseRule) -> bool:
-        """Check if rule can be triggered"""
+        """Проверить можно ли триггерить правило"""
         now = datetime.utcnow()
         
         # Cooldown check
@@ -417,14 +372,8 @@ class ResponseOrchestrator:
         
         return len(recent) < rule.max_triggers_per_hour
     
-    def _record_trigger(self, rule: ResponseRule):
-        """Record rule trigger"""
-        now = datetime.utcnow()
-        self.last_trigger[rule.rule_id] = now
-        self.rule_triggers[rule.rule_id].append(now)
-    
     def _execute_rule(self, rule: ResponseRule, event: ResponseEvent) -> ResponseResult:
-        """Execute all actions for a rule"""
+        """Выполнить все actions для правила"""
         actions_executed = []
         errors = []
         
@@ -432,7 +381,7 @@ class ResponseOrchestrator:
             handler = self.handlers.get(action.action_type)
             
             if not handler:
-                errors.append(f"No handler for {action.action_type}")
+                errors.append(f"Нет handler для {action.action_type}")
                 continue
             
             try:
@@ -444,26 +393,16 @@ class ResponseOrchestrator:
             except Exception as e:
                 errors.append(f"Action {action.action_type} failed: {e}")
         
-        response_result = ResponseResult(
+        return ResponseResult(
             event_id=event.event_id,
             rule_id=rule.rule_id,
             success=len(errors) == 0,
             actions_executed=actions_executed,
             errors=errors
         )
-        
-        self._record_result(response_result)
-        
-        return response_result
-    
-    def _record_result(self, result: ResponseResult):
-        """Record response result"""
-        self.response_history.append(result)
-        if len(self.response_history) > self.max_history:
-            self.response_history = self.response_history[-self.max_history:]
     
     def get_stats(self) -> Dict:
-        """Get response statistics"""
+        """Получить статистику response"""
         if not self.response_history:
             return {'total_responses': 0}
         
@@ -483,11 +422,11 @@ class ResponseOrchestrator:
 
 ---
 
-## 4. Pre-built Response Rules
+## 4. Предустановленные Response Rules
 
 ```python
 class DefaultResponseRules:
-    """Default security response rules"""
+    """Правила security response по умолчанию"""
     
     @staticmethod
     def get_all() -> List[ResponseRule]:
@@ -496,7 +435,7 @@ class DefaultResponseRules:
             ResponseRule(
                 rule_id="attack-high",
                 name="High Severity Attack Response",
-                description="Block and alert on high severity attacks",
+                description="Block и alert при high severity атаках",
                 trigger_type="attack_detected",
                 conditions={'severity': 'high'},
                 level=ResponseLevel.BLOCK,
@@ -513,7 +452,7 @@ class DefaultResponseRules:
             ResponseRule(
                 rule_id="attack-medium",
                 name="Medium Severity Attack Response",
-                description="Throttle and monitor on medium severity attacks",
+                description="Throttle и мониторинг при medium severity атаках",
                 trigger_type="attack_detected",
                 conditions={'severity': 'medium'},
                 level=ResponseLevel.THROTTLE,
@@ -543,7 +482,7 @@ class DefaultResponseRules:
             ResponseRule(
                 rule_id="repeated-failures",
                 name="Repeated Failures Response",
-                description="Suspend agent with too many failures",
+                description="Suspend агента с слишком многими failures",
                 trigger_type="repeated_failures",
                 conditions={'failure_count': {'min': 5}},
                 level=ResponseLevel.SUSPEND,
@@ -551,22 +490,7 @@ class DefaultResponseRules:
                     ResponseAction(ActionType.SUSPEND_AGENT, ResponseLevel.SUSPEND,
                                   {'duration_seconds': 300}),
                     ResponseAction(ActionType.ALERT, ResponseLevel.WARN,
-                                  {'message': 'Agent suspended due to failures'})
-                ]
-            ),
-            
-            # Rate limit exceeded
-            ResponseRule(
-                rule_id="rate-limit",
-                name="Rate Limit Response",
-                description="Throttle on rate limit exceeded",
-                trigger_type="rate_limit_exceeded",
-                conditions={},
-                level=ResponseLevel.THROTTLE,
-                actions=[
-                    ResponseAction(ActionType.THROTTLE, ResponseLevel.THROTTLE,
-                                  {'duration_seconds': 120, 'requests_per_minute': 10}),
-                    ResponseAction(ActionType.LOG, ResponseLevel.LOG)
+                                  {'message': 'Agent suspended из-за failures'})
                 ]
             )
         ]
@@ -574,20 +498,20 @@ class DefaultResponseRules:
 
 ---
 
-## 5. SENTINEL Integration
+## 5. Интеграция с SENTINEL
 
 ```python
 from dataclasses import dataclass
 
 @dataclass
 class ResponseConfig:
-    """Response engine configuration"""
+    """Конфигурация response engine"""
     enable_default_rules: bool = True
     max_history: int = 10000
     alert_callbacks: List[Callable] = field(default_factory=list)
 
 class SENTINELResponseEngine:
-    """Response engine for SENTINEL framework"""
+    """Response engine для SENTINEL framework"""
     
     def __init__(self, config: ResponseConfig):
         self.config = config
@@ -598,17 +522,11 @@ class SENTINELResponseEngine:
         self.block_handler = BlockRequestHandler()
         self.throttle_handler = ThrottleHandler()
         self.suspend_handler = SuspendAgentHandler()
-        self.alert_handler = AlertHandler()
         
         self.orchestrator.register_handler(self.log_handler)
         self.orchestrator.register_handler(self.block_handler)
         self.orchestrator.register_handler(self.throttle_handler)
         self.orchestrator.register_handler(self.suspend_handler)
-        self.orchestrator.register_handler(self.alert_handler)
-        
-        # Alert callbacks
-        for callback in config.alert_callbacks:
-            self.alert_handler.register_callback(callback)
         
         # Load default rules
         if config.enable_default_rules:
@@ -618,7 +536,7 @@ class SENTINELResponseEngine:
     def process_detection(self, detection_type: str, severity: str,
                           agent_id: str, session_id: str, user_id: str,
                           details: Dict = None) -> List[ResponseResult]:
-        """Process a detection event"""
+        """Обработать detection event"""
         event = ResponseEvent(
             event_id=str(uuid.uuid4()),
             timestamp=datetime.utcnow(),
@@ -634,44 +552,36 @@ class SENTINELResponseEngine:
         return self.orchestrator.process_event(event)
     
     def is_agent_blocked(self, agent_id: str) -> bool:
-        """Check if agent is blocked (suspended or throttled)"""
+        """Проверить заблокирован ли агент"""
         return self.suspend_handler.is_suspended(agent_id)
     
     def is_throttled(self, agent_id: str) -> tuple[bool, Optional[int]]:
-        """Check if agent is throttled"""
+        """Проверить throttled ли агент"""
         return self.throttle_handler.is_throttled(agent_id)
     
-    def add_custom_rule(self, rule: ResponseRule):
-        """Add custom response rule"""
-        self.orchestrator.add_rule(rule)
-    
-    def get_alerts(self, limit: int = 100) -> List[Dict]:
-        """Get recent alerts"""
-        return self.alert_handler.alerts[-limit:]
-    
     def get_stats(self) -> Dict:
-        """Get response statistics"""
+        """Получить статистику response"""
         return self.orchestrator.get_stats()
 ```
 
 ---
 
-## 6. Резюме
+## 6. Итоги
 
 | Компонент | Описание |
 |-----------|----------|
-| **ResponseAction** | Единичное action (block, alert) |
+| **ResponseAction** | Единичный action (block, alert) |
 | **ResponseRule** | Trigger conditions → actions |
-| **ActionHandler** | Исполнение action |
+| **ActionHandler** | Выполнение action |
 | **Orchestrator** | Rate limiting + execution |
-| **DefaultRules** | Pre-built security rules |
+| **DefaultRules** | Предустановленные security rules |
 
 ---
 
 ## Следующий урок
 
-→ [Track 06: �����������](../../06-�����������/README.md)
+→ [Трек 06: Advanced](../../06-advanced/README.md)
 
 ---
 
-*AI Security Academy | Track 05: Defense Strategies | Module 05.2: Response*
+*AI Security Academy | Трек 05: Defense Strategies | Модуль 05.2: Response*

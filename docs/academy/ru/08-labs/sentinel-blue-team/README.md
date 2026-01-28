@@ -1,116 +1,49 @@
 # SENTINEL Blue Team Labs
 
-> **Lab Track: Упражнения по Defensive Security**
+> **РџСЂР°РєС‚РёС‡РµСЃРєРёРµ Р»Р°Р±РѕСЂР°С‚РѕСЂРёРё РїРѕ Р·Р°С‰РёС‚Рµ**
 
 ---
 
-## Обзор
+## РћР±Р·РѕСЂ
 
-Blue Team lab track фокусируется на defensive skills: установка, конфигурация, детекция и реагирование с использованием SENTINEL и связанных инструментов.
-
----
-
-## Предварительные требования
-
-- Завершены Модули 01-05
-- Python 3.10+
-- SENTINEL установлен и verified
-- Доступ к lab environment
+РџСЂР°РєС‚РёС‡РµСЃРєРёРµ Р»Р°Р±РѕСЂР°С‚РѕСЂРЅС‹Рµ СЂР°Р±РѕС‚С‹ РїРѕ Р·Р°С‰РёС‚Рµ AI-СЃРёСЃС‚РµРј СЃ РїРѕРјРѕС‰СЊСЋ SENTINEL.
 
 ---
 
-## Labs
+## Р›Р°Р±РѕСЂР°С‚РѕСЂРёРё
 
-### Lab 001: Installation and Setup
-**Время:** 30 минут | **Сложность:** Начинающий
+### [Lab 001: РЈСЃС‚Р°РЅРѕРІРєР° SENTINEL](lab-001-installation.md)
+- РЈСЃС‚Р°РЅРѕРІРєР° SENTINEL РёР· РёСЃС…РѕРґРЅРёРєРѕРІ РёР»Рё PyPI
+- Р‘Р°Р·РѕРІРѕРµ РёСЃРїРѕР»СЊР·РѕРІР°РЅРёРµ С„СѓРЅРєС†РёРё `scan()`
+- Р”РµРєРѕСЂР°С‚РѕСЂ `@guard` РґР»СЏ Р·Р°С‰РёС‚С‹
+- РРЅС‚РµРіСЂР°С†РёСЏ СЃ LLM-РїСЂРёР»РѕР¶РµРЅРёСЏРјРё
 
-Запустите SENTINEL в вашем environment:
-- Installation verification
-- Basic configuration
-- First scan execution
-- Understanding output
+### [Lab 002: РћР±РЅР°СЂСѓР¶РµРЅРёРµ Р°С‚Р°Рє](lab-002-attack-detection.md)
+- РќР°СЃС‚СЂРѕР№РєР° РґРІРёР¶РєРѕРІ РѕР±РЅР°СЂСѓР¶РµРЅРёСЏ
+- РђРЅР°Р»РёР· РїР°С‚С‚РµСЂРЅРѕРІ Р°С‚Р°Рє
+- РќР°СЃС‚СЂРѕР№РєР° РєР°СЃС‚РѕРјРЅС‹С… РїРѕСЂРѕРіРѕРІ
 
-### Lab 002: Detection Engine Tour
-**Время:** 40 минут | **Сложность:** Начинающий
+### [Lab 003: РљР°СЃС‚РѕРјРЅС‹Рµ РїСЂР°РІРёР»Р°](lab-003-custom-rules.md)
+- РЎРѕР·РґР°РЅРёРµ РєР°СЃС‚РѕРјРЅС‹С… РїР°С‚С‚РµСЂРЅРѕРІ РѕР±РЅР°СЂСѓР¶РµРЅРёСЏ
+- РљРѕРЅС„РёРіСѓСЂР°С†РёСЏ РґРІРёР¶РєР° РїРѕР»РёС‚РёРє
+- Р”РѕРјРµРЅРЅРѕ-СЃРїРµС†РёС„РёС‡РµСЃРєРёРµ РїСЂР°РІРёР»Р°
 
-Исследуйте 217 engines SENTINEL:
-- Engine categories
-- Configuration options
-- Performance tuning
-- Enabling/disabling engines
-
-### Lab 003: Custom Pattern Rules
-**Время:** 45 минут | **Сложность:** Средний
-
-Создайте свои detection rules:
-- Pattern rule syntax
-- Rule testing
-- False positive tuning
-- Rule deployment
-
-### Lab 004: Alert Investigation
-**Время:** 50 минут | **Сложность:** Средний
-
-Расследуйте security alerts:
-- Alert triage
-- Evidence collection
-- Root cause analysis
-- Documentation
-
-### Lab 005: Incident Response
-**Время:** 60 минут | **Сложность:** Средний
-
-Обработка AI security incidents:
-- Containment procedures
-- Evidence preservation
-- Communication
-- Post-incident review
-
-### Lab 006: Integration Patterns
-**Время:** 45 минут | **Сложность:** Средний
-
-Интеграция SENTINEL в приложения:
-- API integration
-- Middleware patterns
-- Async processing
-- Error handling
-
-### Lab 007: Performance Optimization
-**Время:** 50 минут | **Сложность:** Продвинутый
-
-Оптимизация для production:
-- Caching strategies
-- Batch processing
-- Latency reduction
-- Resource management
-
-### Lab 008: Custom Engine Development
-**Время:** 90 минут | **Сложность:** Продвинутый
-
-Создайте свой detection engine:
-- Engine interface
-- Detection logic
-- Testing framework
-- Deployment
+### [Lab 004: РњРѕРЅРёС‚РѕСЂРёРЅРі РІ РїСЂРѕРґР°РєС€РµРЅРµ](lab-004-production-monitoring.md)
+- Р”РµРїР»РѕР№ РІ РїСЂРѕРґР°РєС€РµРЅ
+- РњРµС‚СЂРёРєРё Рё Р°Р»РµСЂС‚С‹
+- РђРЅР°Р»РёР· Р°СѓРґРёС‚-С‚СЂРµР№Р»Р°
 
 ---
 
-## Начало работы
+## РџСЂРёРѕР±СЂРµС‚Р°РµРјС‹Рµ РЅР°РІС‹РєРё
 
-Начните с Lab 001:
-
-```bash
-python -m labs.blue.lab_001
-```
-
----
-
-## Навигация
-
-| Предыдущий | Текущий | Следующий |
-|------------|---------|-----------|
-| [Labs Overview](../README.md) | **Blue Team** | [Red Team](../strike-red-team/) |
+| Lab | РќР°РІС‹Рє |
+|-----|-------|
+| 001 | РЈСЃС‚Р°РЅРѕРІРєР° Рё Р±Р°Р·РѕРІРѕРµ РёСЃРїРѕР»СЊР·РѕРІР°РЅРёРµ |
+| 002 | РљРѕРЅС„РёРіСѓСЂР°С†РёСЏ РѕР±РЅР°СЂСѓР¶РµРЅРёСЏ |
+| 003 | РЎРѕР·РґР°РЅРёРµ РєР°СЃС‚РѕРјРЅС‹С… РїСЂР°РІРёР» |
+| 004 | РџСЂРѕРґР°РєС€РµРЅ-РґРµРїР»РѕР№ |
 
 ---
 
-*AI Security Academy | Blue Team Labs*
+*AI Security Academy | SENTINEL Blue Team*

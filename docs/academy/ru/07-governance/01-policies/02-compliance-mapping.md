@@ -1,6 +1,6 @@
-# Compliance Mapping для AI Systems
+# Compliance Mapping для AI систем
 
-> **Уровень:** �����������  
+> **Уровень:** Продвинутый  
 > **Время:** 45 минут  
 > **Трек:** 07 — Governance  
 > **Модуль:** 07.1 — Policies  
@@ -11,34 +11,34 @@
 ## Цели обучения
 
 - [ ] Понять compliance frameworks для AI систем
-- [ ] Имплементировать mapping policies → compliance controls
+- [ ] Реализовать маппинг policies → compliance controls
 - [ ] Построить compliance reporting
 - [ ] Интегрировать compliance tracking в SENTINEL
 
 ---
 
-## 1. Compliance Frameworks Overview
+## 1. Обзор Compliance Frameworks
 
-### 1.1 Основные Frameworks
+### 1.1 Основные фреймворки
 
 ```
 ┌────────────────────────────────────────────────────────────────────┐
-│              AI COMPLIANCE LANDSCAPE                                │
+│              AI COMPLIANCE ЛАНДШАФТ                                │
 ├────────────────────────────────────────────────────────────────────┤
 │                                                                    │
 │  EU AI Act                                                         │
-│  ├── Risk-based classification                                    │
-│  ├── Transparency requirements                                    │
-│  └── Human oversight mandates                                     │
+│  ├── Risk-based классификация                                     │
+│  ├── Требования прозрачности                                      │
+│  └── Мандаты human oversight                                      │
 │                                                                    │
 │  NIST AI RMF                                                       │
 │  ├── Govern, Map, Measure, Manage                                 │
 │  ├── AI system risk assessment                                    │
-│  └── Trustworthy AI characteristics                               │
+│  └── Trustworthy AI характеристики                                │
 │                                                                    │
 │  ISO/IEC 42001                                                     │
 │  ├── AI Management System                                         │
-│  ├── Governance and accountability                                │
+│  ├── Governance и accountability                                  │
 │  └── Continuous improvement                                       │
 │                                                                    │
 │  Industry-Specific                                                 │
@@ -51,9 +51,9 @@
 
 ---
 
-## 2. Compliance Model
+## 2. Compliance модель
 
-### 2.1 Core Entities
+### 2.1 Основные сущности
 
 ```python
 from dataclasses import dataclass, field
@@ -84,28 +84,28 @@ class RiskLevel(Enum):
 
 @dataclass
 class ComplianceControl:
-    """Single compliance control"""
+    """Единичный compliance control"""
     control_id: str
     framework: Framework
     title: str
     description: str
     requirements: List[str] = field(default_factory=list)
     
-    # Status
+    # Статус
     status: ControlStatus = ControlStatus.NOT_IMPLEMENTED
     implementation_notes: str = ""
     
-    # Evidence
+    # Доказательства
     evidence_links: List[str] = field(default_factory=list)
     policy_mappings: List[str] = field(default_factory=list)
     
-    # Metadata
+    # Метаданные
     last_assessed: Optional[datetime] = None
     assessor: str = ""
 
 @dataclass
 class ComplianceFramework:
-    """Complete compliance framework"""
+    """Полный compliance framework"""
     framework_id: str
     name: str
     version: str
@@ -129,11 +129,11 @@ class ComplianceFramework:
         return implemented / applicable if applicable > 0 else 0.0
 ```
 
-### 2.2 Framework Definitions
+### 2.2 Определения фреймворков
 
 ```python
 class FrameworkLibrary:
-    """Library of compliance frameworks"""
+    """Библиотека compliance frameworks"""
     
     @staticmethod
     def get_eu_ai_act() -> ComplianceFramework:
@@ -147,55 +147,55 @@ class FrameworkLibrary:
                     control_id="EU-AI-1",
                     framework=Framework.EU_AI_ACT,
                     title="Risk Classification",
-                    description="Classify AI system by risk level",
+                    description="Классифицировать AI систему по уровню риска",
                     requirements=[
-                        "Perform risk assessment",
-                        "Document risk classification",
-                        "Review classification periodically"
+                        "Выполнить оценку риска",
+                        "Документировать классификацию риска",
+                        "Периодически пересматривать классификацию"
                     ]
                 ),
                 ComplianceControl(
                     control_id="EU-AI-2", 
                     framework=Framework.EU_AI_ACT,
                     title="Transparency",
-                    description="Ensure AI system transparency",
+                    description="Обеспечить прозрачность AI системы",
                     requirements=[
-                        "Inform users of AI interaction",
-                        "Provide explanations for decisions",
-                        "Document training data sources"
+                        "Информировать пользователей о взаимодействии с AI",
+                        "Предоставлять объяснения решений",
+                        "Документировать источники обучающих данных"
                     ]
                 ),
                 ComplianceControl(
                     control_id="EU-AI-3",
                     framework=Framework.EU_AI_ACT,
                     title="Human Oversight",
-                    description="Implement human oversight mechanisms",
+                    description="Реализовать механизмы human oversight",
                     requirements=[
-                        "Enable human intervention",
-                        "Provide override capabilities",
-                        "Log oversight actions"
+                        "Обеспечить человеческое вмешательство",
+                        "Предоставить возможности override",
+                        "Логировать действия oversight"
                     ]
                 ),
                 ComplianceControl(
                     control_id="EU-AI-4",
                     framework=Framework.EU_AI_ACT,
                     title="Data Governance",
-                    description="Ensure proper data governance",
+                    description="Обеспечить надлежащее data governance",
                     requirements=[
-                        "Document data sources",
-                        "Implement data quality checks",
-                        "Maintain data lineage"
+                        "Документировать источники данных",
+                        "Реализовать проверки качества данных",
+                        "Поддерживать data lineage"
                     ]
                 ),
                 ComplianceControl(
                     control_id="EU-AI-5",
                     framework=Framework.EU_AI_ACT,
                     title="Technical Documentation",
-                    description="Maintain technical documentation",
+                    description="Поддерживать техническую документацию",
                     requirements=[
-                        "Document system architecture",
-                        "Describe training methodology",
-                        "Record testing procedures"
+                        "Документировать архитектуру системы",
+                        "Описать методологию обучения",
+                        "Записать процедуры тестирования"
                     ]
                 )
             ]
@@ -213,44 +213,44 @@ class FrameworkLibrary:
                     control_id="GOVERN-1",
                     framework=Framework.NIST_AI_RMF,
                     title="Governance Structure",
-                    description="Establish AI governance structure",
+                    description="Установить структуру AI governance",
                     requirements=[
-                        "Define roles and responsibilities",
-                        "Establish oversight mechanisms",
-                        "Create accountability framework"
+                        "Определить роли и обязанности",
+                        "Установить механизмы oversight",
+                        "Создать фреймворк accountability"
                     ]
                 ),
                 ComplianceControl(
                     control_id="MAP-1",
                     framework=Framework.NIST_AI_RMF,
                     title="Context Mapping",
-                    description="Map AI system context and impacts",
+                    description="Отобразить контекст и воздействия AI системы",
                     requirements=[
-                        "Identify stakeholders",
-                        "Document use cases",
-                        "Assess potential impacts"
+                        "Идентифицировать stakeholders",
+                        "Документировать use cases",
+                        "Оценить потенциальные воздействия"
                     ]
                 ),
                 ComplianceControl(
                     control_id="MEASURE-1",
                     framework=Framework.NIST_AI_RMF,
                     title="Risk Measurement",
-                    description="Measure and track AI risks",
+                    description="Измерять и отслеживать AI риски",
                     requirements=[
-                        "Define risk metrics",
-                        "Implement monitoring",
-                        "Track risk indicators"
+                        "Определить метрики риска",
+                        "Реализовать мониторинг",
+                        "Отслеживать индикаторы риска"
                     ]
                 ),
                 ComplianceControl(
                     control_id="MANAGE-1",
                     framework=Framework.NIST_AI_RMF,
                     title="Risk Management",
-                    description="Manage identified risks",
+                    description="Управлять идентифицированными рисками",
                     requirements=[
-                        "Prioritize risks",
-                        "Implement mitigations",
-                        "Review effectiveness"
+                        "Приоритизировать риски",
+                        "Реализовать mitigations",
+                        "Пересматривать эффективность"
                     ]
                 )
             ]
@@ -259,23 +259,23 @@ class FrameworkLibrary:
 
 ---
 
-## 3. Policy-to-Control Mapping
+## 3. Маппинг Policy-to-Control
 
-### 3.1 Mapping Engine
+### 3.1 Движок маппинга
 
 ```python
 @dataclass
 class PolicyControlMapping:
-    """Mapping between policy and compliance control"""
+    """Маппинг между policy и compliance control"""
     mapping_id: str
     policy_id: str
     control_id: str
     framework: Framework
-    coverage: float  # 0-1, how much of control is covered
+    coverage: float  # 0-1, насколько control покрыт
     notes: str = ""
 
 class ComplianceMappingEngine:
-    """Maps policies to compliance controls"""
+    """Маппит policies на compliance controls"""
     
     def __init__(self):
         self.mappings: List[PolicyControlMapping] = []
@@ -294,17 +294,17 @@ class ComplianceMappingEngine:
         return [m for m in self.mappings if m.control_id == control_id]
     
     def calculate_control_coverage(self, control_id: str) -> float:
-        """Calculate total coverage for a control from all mapped policies"""
+        """Рассчитать общее покрытие control из всех mapped policies"""
         mappings = self.get_mappings_for_control(control_id)
         if not mappings:
             return 0.0
         
-        # Sum coverage, capped at 1.0
+        # Сумма coverage, ограничено 1.0
         total = sum(m.coverage for m in mappings)
         return min(total, 1.0)
     
     def get_framework_coverage(self, framework_id: str) -> Dict[str, float]:
-        """Get coverage for all controls in a framework"""
+        """Получить coverage для всех controls в framework"""
         framework = self.frameworks.get(framework_id)
         if not framework:
             return {}
@@ -315,19 +315,19 @@ class ComplianceMappingEngine:
         }
     
     def find_gaps(self, framework_id: str, threshold: float = 0.8) -> List[str]:
-        """Find controls with insufficient coverage"""
+        """Найти controls с недостаточным coverage"""
         coverage = self.get_framework_coverage(framework_id)
         return [cid for cid, cov in coverage.items() if cov < threshold]
 ```
 
-### 3.2 Auto-Mapping
+### 3.2 Авто-маппинг
 
 ```python
 class AutoMapper:
-    """Automatic policy-to-control mapping suggestions"""
+    """Автоматические предложения маппинга policy-to-control"""
     
     def __init__(self):
-        # Keywords for each control category
+        # Ключевые слова для каждой категории control
         self.control_keywords = {
             "transparency": ["log", "audit", "record", "document", "explain"],
             "human_oversight": ["approval", "review", "human", "override", "intervene"],
@@ -338,7 +338,7 @@ class AutoMapper:
     
     def suggest_mappings(self, policy: 'Policy', 
                          framework: ComplianceFramework) -> List[PolicyControlMapping]:
-        """Suggest mappings based on policy content"""
+        """Предложить mappings на основе содержимого policy"""
         suggestions = []
         
         policy_text = self._extract_policy_text(policy)
@@ -346,7 +346,7 @@ class AutoMapper:
         for control in framework.controls:
             score = self._calculate_relevance(policy_text, control)
             
-            if score > 0.3:  # Threshold for suggestion
+            if score > 0.3:  # Порог для предложения
                 suggestions.append(PolicyControlMapping(
                     mapping_id=f"auto_{policy.policy_id}_{control.control_id}",
                     policy_id=policy.policy_id,
@@ -359,7 +359,7 @@ class AutoMapper:
         return suggestions
     
     def _extract_policy_text(self, policy: 'Policy') -> str:
-        """Extract searchable text from policy"""
+        """Извлечь текст для поиска из policy"""
         parts = [policy.name, policy.description]
         for rule in policy.rules:
             parts.append(rule.description)
@@ -368,10 +368,10 @@ class AutoMapper:
     
     def _calculate_relevance(self, policy_text: str, 
                             control: ComplianceControl) -> float:
-        """Calculate relevance score"""
+        """Рассчитать score релевантности"""
         control_text = f"{control.title} {control.description}".lower()
         
-        # Simple keyword matching
+        # Простой keyword matching
         policy_words = set(policy_text.split())
         control_words = set(control_text.split())
         
@@ -386,17 +386,17 @@ class AutoMapper:
 
 ## 4. Compliance Reporting
 
-### 4.1 Report Generator
+### 4.1 Генератор отчётов
 
 ```python
 @dataclass
 class ComplianceReport:
-    """Compliance status report"""
+    """Отчёт о статусе compliance"""
     framework_id: str
     framework_name: str
     generated_at: datetime
     
-    # Summary
+    # Сводка
     total_controls: int
     implemented: int
     partial: int
@@ -406,24 +406,24 @@ class ComplianceReport:
     # Score
     compliance_score: float
     
-    # Details
+    # Детали
     control_details: List[Dict]
     gaps: List[str]
     recommendations: List[str]
 
 class ComplianceReporter:
-    """Generates compliance reports"""
+    """Генерирует compliance отчёты"""
     
     def __init__(self, mapping_engine: ComplianceMappingEngine):
         self.engine = mapping_engine
     
     def generate_report(self, framework_id: str) -> ComplianceReport:
-        """Generate compliance report for framework"""
+        """Сгенерировать compliance отчёт для framework"""
         framework = self.engine.frameworks.get(framework_id)
         if not framework:
             raise ValueError(f"Framework {framework_id} not found")
         
-        # Count statuses
+        # Подсчёт статусов
         status_counts = {s: 0 for s in ControlStatus}
         control_details = []
         
@@ -439,10 +439,10 @@ class ComplianceReporter:
                 'mappings': len(self.engine.get_mappings_for_control(control.control_id))
             })
         
-        # Find gaps
+        # Найти gaps
         gaps = self.engine.find_gaps(framework_id, threshold=0.8)
         
-        # Generate recommendations
+        # Сгенерировать рекомендации
         recommendations = self._generate_recommendations(framework, gaps)
         
         return ComplianceReport(
@@ -462,59 +462,35 @@ class ComplianceReporter:
     
     def _generate_recommendations(self, framework: ComplianceFramework,
                                   gaps: List[str]) -> List[str]:
-        """Generate recommendations for gaps"""
+        """Сгенерировать рекомендации для gaps"""
         recommendations = []
         
-        for gap_id in gaps[:5]:  # Top 5 gaps
+        for gap_id in gaps[:5]:  # Топ 5 gaps
             control = framework.get_control(gap_id)
             if control:
                 recommendations.append(
-                    f"Implement policies covering: {control.title} - {control.description}"
+                    f"Реализовать policies покрывающие: {control.title} - {control.description}"
                 )
         
         return recommendations
-    
-    def export_report(self, report: ComplianceReport, format: str = "json") -> str:
-        """Export report to specified format"""
-        import json
-        
-        data = {
-            'framework': report.framework_name,
-            'generated_at': report.generated_at.isoformat(),
-            'compliance_score': round(report.compliance_score * 100, 1),
-            'summary': {
-                'total': report.total_controls,
-                'implemented': report.implemented,
-                'partial': report.partial,
-                'not_implemented': report.not_implemented
-            },
-            'gaps': report.gaps,
-            'recommendations': report.recommendations,
-            'controls': report.control_details
-        }
-        
-        if format == "json":
-            return json.dumps(data, indent=2)
-        else:
-            raise ValueError(f"Unsupported format: {format}")
 ```
 
 ---
 
-## 5. SENTINEL Integration
+## 5. Интеграция с SENTINEL
 
 ```python
 from dataclasses import dataclass
 
 @dataclass
 class ComplianceConfig:
-    """Compliance engine configuration"""
+    """Конфигурация compliance engine"""
     enabled_frameworks: List[str] = field(default_factory=lambda: ["eu_ai_act", "nist_ai_rmf"])
     auto_mapping: bool = True
     gap_threshold: float = 0.8
 
 class SENTINELComplianceEngine:
-    """Compliance engine for SENTINEL"""
+    """Compliance engine для SENTINEL"""
     
     def __init__(self, config: ComplianceConfig):
         self.config = config
@@ -522,7 +498,7 @@ class SENTINELComplianceEngine:
         self.reporter = ComplianceReporter(self.mapping_engine)
         self.auto_mapper = AutoMapper()
         
-        # Load enabled frameworks
+        # Загрузить enabled frameworks
         self._load_frameworks()
     
     def _load_frameworks(self):
@@ -532,7 +508,7 @@ class SENTINELComplianceEngine:
             self.mapping_engine.add_framework(FrameworkLibrary.get_nist_ai_rmf())
     
     def map_policy(self, policy: 'Policy', auto: bool = None):
-        """Map policy to compliance controls"""
+        """Замапить policy на compliance controls"""
         use_auto = auto if auto is not None else self.config.auto_mapping
         
         if use_auto:
@@ -543,7 +519,7 @@ class SENTINELComplianceEngine:
     
     def add_mapping(self, policy_id: str, control_id: str,
                     framework: str, coverage: float):
-        """Manually add mapping"""
+        """Вручную добавить mapping"""
         mapping = PolicyControlMapping(
             mapping_id=f"manual_{policy_id}_{control_id}",
             policy_id=policy_id,
@@ -555,15 +531,15 @@ class SENTINELComplianceEngine:
         self.mapping_engine.add_mapping(mapping)
     
     def get_report(self, framework_id: str) -> ComplianceReport:
-        """Generate compliance report"""
+        """Сгенерировать compliance отчёт"""
         return self.reporter.generate_report(framework_id)
     
     def get_gaps(self, framework_id: str) -> List[str]:
-        """Get compliance gaps"""
+        """Получить compliance gaps"""
         return self.mapping_engine.find_gaps(framework_id, self.config.gap_threshold)
     
     def get_all_frameworks(self) -> List[Dict]:
-        """List all frameworks with status"""
+        """Список всех frameworks со статусом"""
         return [
             {
                 'id': fw.framework_id,
@@ -577,22 +553,22 @@ class SENTINELComplianceEngine:
 
 ---
 
-## 6. Резюме
+## 6. Итоги
 
 | Компонент | Описание |
 |-----------|----------|
 | **Control** | Единица compliance requirement |
 | **Framework** | Набор controls (EU AI Act, NIST) |
-| **Mapping** | Связь policy → control |
+| **Mapping** | Связь Policy → control |
 | **Coverage** | Степень покрытия control |
-| **Report** | Compliance status report |
+| **Report** | Отчёт о статусе compliance |
 
 ---
 
 ## Следующий урок
 
-→ [Module 07.2: Audit Trail](../02-audit/README.md)
+→ [Модуль 07.2: Audit Trail](../02-audit/README.md)
 
 ---
 
-*AI Security Academy | Track 07: Governance | Module 07.1: Policies*
+*AI Security Academy | Трек 07: Governance | Модуль 07.1: Policies*

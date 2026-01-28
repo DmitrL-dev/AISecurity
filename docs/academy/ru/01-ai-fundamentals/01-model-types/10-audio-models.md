@@ -1,40 +1,40 @@
-# Audio Models: Whisper, AudioPalm
+# Audio РјРѕРґРµР»Рё: Whisper, AudioPalm
 
-> **Уровень:** Начинающий  
-> **Время:** 30 минут  
-> **Трек:** 01 — AI Fundamentals  
-> **Модуль:** 01.1 — Типы моделей
+> **РЈСЂРѕРІРµРЅСЊ:** Beginner  
+> **Р’СЂРµРјСЏ:** 30 РјРёРЅСѓС‚  
+> **РўСЂРµРє:** 01 вЂ” РћСЃРЅРѕРІС‹ AI  
+> **РњРѕРґСѓР»СЊ:** 01.1 вЂ” РўРёРїС‹ РјРѕРґРµР»РµР№
 
 ---
 
-## Цели обучения
+## Р¦РµР»Рё РѕР±СѓС‡РµРЅРёСЏ
 
-- [ ] Понять архитектуру speech recognition
-- [ ] Объяснить audio tokenization
-- [ ] Понять text-to-speech
-- [ ] Связать с voice-based атаками
+- [ ] РџРѕРЅСЏС‚СЊ Р°СЂС…РёС‚РµРєС‚СѓСЂСѓ СЂР°СЃРїРѕР·РЅР°РІР°РЅРёСЏ СЂРµС‡Рё
+- [ ] РћР±СЉСЏСЃРЅРёС‚СЊ audio С‚РѕРєРµРЅРёР·Р°С†РёСЋ
+- [ ] РџРѕРЅСЏС‚СЊ text-to-speech
+- [ ] РЎРІСЏР·Р°С‚СЊ СЃ voice-based Р°С‚Р°РєР°РјРё
 
 ---
 
 ## Whisper (OpenAI)
 
-**OpenAI, сентябрь 2022**
+**OpenAI, СЃРµРЅС‚СЏР±СЂСЊ 2022**
 
-### Архитектура
+### РђСЂС…РёС‚РµРєС‚СѓСЂР°
 
 ```
-Audio > Mel Spectrogram > Encoder > Decoder > Text
-                            v
+Audio в†’ Mel Spectrogram в†’ Encoder в†’ Decoder в†’ Text
+                            в†“
                      Cross-Attention
 ```
 
 - Encoder-Decoder Transformer
 - 80-channel mel spectrogram input
-- Обучен на 680,000 часов аудио
+- РћР±СѓС‡РµРЅ РЅР° 680,000 С‡Р°СЃРѕРІ Р°СѓРґРёРѕ
 
-### Размеры
+### Р Р°Р·РјРµСЂС‹
 
-| Модель | Параметры | English WER |
+| РњРѕРґРµР»СЊ | РџР°СЂР°РјРµС‚СЂС‹ | English WER |
 |--------|-----------|-------------|
 | tiny | 39M | 8.2% |
 | base | 74M | 5.4% |
@@ -42,7 +42,7 @@ Audio > Mel Spectrogram > Encoder > Decoder > Text
 | medium | 769M | 3.6% |
 | large | 1.5B | 2.7% |
 
-### Использование
+### РСЃРїРѕР»СЊР·РѕРІР°РЅРёРµ
 
 ```python
 import whisper
@@ -60,47 +60,47 @@ print(result["text"])
 
 ### AudioLM
 
-Генерация audio continuations:
+Р“РµРЅРµСЂР°С†РёСЏ audio continuations:
 ```
-Audio prompt > Semantic tokens > Acoustic tokens > Audio
+Audio prompt в†’ Semantic tokens в†’ Acoustic tokens в†’ Audio
 ```
 
 ### AudioPalm
 
 Multimodal (text + audio):
-- Speech-to-speech translation
-- Text-to-speech synthesis
+- Speech-to-speech РїРµСЂРµРІРѕРґ
+- Text-to-speech СЃРёРЅС‚РµР·
 - Audio understanding
 
 ---
 
 ## Text-to-Speech (TTS)
 
-### Современные модели
+### РЎРѕРІСЂРµРјРµРЅРЅС‹Рµ РјРѕРґРµР»Рё
 
-| Модель | Компания | Особенности |
+| РњРѕРґРµР»СЊ | РљРѕРјРїР°РЅРёСЏ | РћСЃРѕР±РµРЅРЅРѕСЃС‚Рё |
 |--------|----------|-------------|
 | VALL-E | Microsoft | Zero-shot voice cloning |
 | Bark | Suno | Music + Speech |
-| Tortoise | Open | High quality, slow |
-| XTTS | Coqui | Multilingual |
+| Tortoise | Open | Р’С‹СЃРѕРєРѕРµ РєР°С‡РµСЃС‚РІРѕ, РјРµРґР»РµРЅРЅС‹Р№ |
+| XTTS | Coqui | РњСѓР»СЊС‚РёСЏР·С‹С‡РЅС‹Р№ |
 
-### VALL-E Architecture
+### РђСЂС…РёС‚РµРєС‚СѓСЂР° VALL-E
 
 ```
-Text > Phonemes > AR Transformer > NAR Transformer > Audio
-                        v
-              Speaker embedding (3 sec prompt)
+Text в†’ Phonemes в†’ AR Transformer в†’ NAR Transformer в†’ Audio
+                        в†“
+              Speaker embedding (3 СЃРµРє prompt)
 ```
 
 ---
 
-## Security: Voice Attacks
+## Р‘РµР·РѕРїР°СЃРЅРѕСЃС‚СЊ: Voice Р°С‚Р°РєРё
 
-### 1. Voice Cloning Attacks
+### 1. Voice Cloning Р°С‚Р°РєРё
 
 ```
-3 seconds of voice > VALL-E > Deepfake audio call
+3 СЃРµРєСѓРЅРґС‹ РіРѕР»РѕСЃР° в†’ VALL-E в†’ Deepfake audio Р·РІРѕРЅРѕРє
 ```
 
 **Use cases:**
@@ -112,28 +112,28 @@ Text > Phonemes > AR Transformer > NAR Transformer > Audio
 
 ```
 Audio: "Ignore previous instructions..."
-> Whisper transcription
-> LLM processes as text
-> Jailbreak executed
+в†’ Whisper transcription
+в†’ LLM РѕР±СЂР°Р±Р°С‚С‹РІР°РµС‚ РєР°Рє С‚РµРєСЃС‚
+в†’ Jailbreak РІС‹РїРѕР»РЅРµРЅ
 ```
 
 ### 3. Adversarial Audio
 
-Imperceptible perturbations которые:
-- Cause mis-transcription
-- Hide commands from humans
+РќРµР·Р°РјРµС‚РЅС‹Рµ perturbations РєРѕС‚РѕСЂС‹Рµ:
+- Р’С‹Р·С‹РІР°СЋС‚ mis-transcription
+- РЎРєСЂС‹РІР°СЋС‚ РєРѕРјР°РЅРґС‹ РѕС‚ Р»СЋРґРµР№
 
 ```
-"Play music" > Whisper > "Delete all files"
+"Play music" в†’ Whisper в†’ "Delete all files"
 ```
 
 ### SENTINEL Engines
 
-| Engine | Назначение |
+| Engine | РќР°Р·РЅР°С‡РµРЅРёРµ |
 |--------|------------|
-| VoiceGuardEngine | Анализ voice commands |
-| AudioInjectionDetector | Hidden commands в audio |
-| VoiceCloningDetector | Детекция synthesized speech |
+| VoiceGuardEngine | РђРЅР°Р»РёР· РіРѕР»РѕСЃРѕРІС‹С… РєРѕРјР°РЅРґ |
+| AudioInjectionDetector | РЎРєСЂС‹С‚С‹Рµ РєРѕРјР°РЅРґС‹ РІ audio |
+| VoiceCloningDetector | РћР±РЅР°СЂСѓР¶РµРЅРёРµ СЃРёРЅС‚РµР·РёСЂРѕРІР°РЅРЅРѕР№ СЂРµС‡Рё |
 
 ```python
 from sentinel import scan  # Public API
@@ -148,20 +148,20 @@ if result.is_suspicious:
 
 ---
 
-## Практика
+## РџСЂР°РєС‚РёРєР°
 
-### Задание: Whisper Analysis
+### Р—Р°РґР°РЅРёРµ: Whisper Analysis
 
 ```python
 import whisper
 
 model = whisper.load_model("base")
 
-# Transcribe и анализ
+# РўСЂР°РЅСЃРєСЂРёР±РёСЂСѓРµРј Рё Р°РЅР°Р»РёР·РёСЂСѓРµРј
 result = model.transcribe("suspicious_audio.mp3")
 text = result["text"]
 
-# Проверка на injection patterns
+# РџСЂРѕРІРµСЂСЏРµРј РЅР° injection РїР°С‚С‚РµСЂРЅС‹
 injection_patterns = [
     "ignore", "forget", "new instructions",
     "system prompt", "jailbreak"
@@ -169,34 +169,34 @@ injection_patterns = [
 
 for pattern in injection_patterns:
     if pattern.lower() in text.lower():
-        print(f"?? Potential voice injection: {pattern}")
+        print(f"вљ пёЏ Potential voice injection: {pattern}")
 ```
 
 ---
 
-## Завершение модуля
+## Р—Р°РІРµСЂС€РµРЅРёРµ РјРѕРґСѓР»СЏ
 
-**Поздравляем!** Вы завершили модуль 01.1 — Типы моделей.
+**РџРѕР·РґСЂР°РІР»СЏРµРј!** Р’С‹ Р·Р°РІРµСЂС€РёР»Рё РјРѕРґСѓР»СЊ 01.1 вЂ” РўРёРїС‹ РјРѕРґРµР»РµР№.
 
-### Покрытые архитектуры
+### РР·СѓС‡РµРЅРЅС‹Рµ Р°СЂС…РёС‚РµРєС‚СѓСЂС‹
 
-1. ? Transformer
-2. ? Encoder-Only (BERT)
-3. ? Decoder-Only (GPT)
-4. ? Encoder-Decoder (T5)
-5. ? Vision Transformer
-6. ? Multimodal
-7. ? Mixture of Экспертs
-8. ? State Space Models
-9. ? Diffusion Models
-10. ? Audio Models
-
----
-
-## Следующий модуль
-
-> **Следующий модуль:** 01.2 Architectural Components (attention, embeddings)
+1. вњ… Transformer
+2. вњ… Encoder-Only (BERT)
+3. вњ… Decoder-Only (GPT)
+4. вњ… Encoder-Decoder (T5)
+5. вњ… Vision Transformer
+6. вњ… Multimodal
+7. вњ… Mixture of Experts
+8. вњ… State Space Models
+9. вњ… Diffusion Models
+10. вњ… Audio Models
 
 ---
 
-*AI Security Academy | Track 01: AI Fundamentals*
+## РЎР»РµРґСѓСЋС‰РёР№ РјРѕРґСѓР»СЊ
+
+в†’ **РЎР»РµРґСѓСЋС‰РёР№ РјРѕРґСѓР»СЊ:** 01.2 РђСЂС…РёС‚РµРєС‚СѓСЂРЅС‹Рµ РєРѕРјРїРѕРЅРµРЅС‚С‹ (attention, embeddings)
+
+---
+
+*AI Security Academy | РўСЂРµРє 01: РћСЃРЅРѕРІС‹ AI*

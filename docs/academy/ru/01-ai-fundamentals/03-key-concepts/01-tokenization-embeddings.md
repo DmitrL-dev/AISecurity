@@ -1,25 +1,25 @@
-# Tokenization и Embeddings
+# Tokenization Рё Embeddings
 
-> **Урок:** 01.3.1 - Tokenization and Embeddings  
-> **Время:** 35 минут  
-> **Prerequisites:** Основы ML
-
----
-
-## Цели обучения
-
-После завершения этого урока вы сможете:
-
-1. Понять алгоритмы tokenization
-2. Объяснить embedding representations
-3. Идентифицировать tokenization-related уязвимости
-4. Применить embedding security техники
+> **РЈСЂРѕРє:** 01.3.1 - Tokenization and Embeddings  
+> **Р’СЂРµРјСЏ:** 35 РјРёРЅСѓС‚  
+> **РџСЂРµСЂРµРєРІРёР·РёС‚С‹:** ML basics
 
 ---
 
-## Основы Tokenization
+## Р¦РµР»Рё РѕР±СѓС‡РµРЅРёСЏ
 
-Tokenization преобразует текст в числовые токены:
+Рљ РєРѕРЅС†Сѓ СЌС‚РѕРіРѕ СѓСЂРѕРєР° РІС‹ СЃРјРѕР¶РµС‚Рµ:
+
+1. РџРѕРЅРёРјР°С‚СЊ tokenization algorithms
+2. РћР±СЉСЏСЃРЅСЏС‚СЊ embedding representations
+3. РРґРµРЅС‚РёС„РёС†РёСЂРѕРІР°С‚СЊ tokenization-related vulnerabilities
+4. РџСЂРёРјРµРЅСЏС‚СЊ embedding security techniques
+
+---
+
+## Tokenization Fundamentals
+
+Tokenization РєРѕРЅРІРµСЂС‚РёСЂСѓРµС‚ text РІ numerical tokens:
 
 ```python
 from transformers import AutoTokenizer
@@ -34,32 +34,32 @@ decoded = [tokenizer.decode([t]) for t in tokens]
 # ['Hello', ',', 'world', '!']
 ```
 
-| Алгоритм | Описание | Используется в |
-|----------|----------|----------------|
+| Algorithm | Description | Used By |
+|-----------|-------------|---------|
 | **BPE** | Byte-Pair Encoding | GPT-2, GPT-3/4 |
 | **WordPiece** | Word-level + subwords | BERT |
 | **SentencePiece** | Unigram-based | T5, LLaMA |
 
 ---
 
-## Security Implications Tokenization
+## Security Implications of Tokenization
 
 ### 1. Token Boundary Attacks
 
 ```python
 class TokenBoundaryAttack:
-    """Exploit token boundaries для evasion."""
+    """Exploit token boundaries РґР»СЏ evasion."""
     
     def __init__(self, tokenizer):
         self.tokenizer = tokenizer
     
     def find_split_evasions(self, keyword: str) -> list:
-        """Нахождение spellings которые split keyword в разные токены."""
+        """РќР°Р№С‚Рё spellings РєРѕС‚РѕСЂС‹Рµ split keyword РЅР° different tokens."""
         
         original_tokens = self.tokenizer.encode(keyword)
         evasions = []
         
-        # Попробуем вставку пробела
+        # Try space insertion
         for i in range(1, len(keyword)):
             variant = keyword[:i] + " " + keyword[i:]
             new_tokens = self.tokenizer.encode(variant)
@@ -74,9 +74,9 @@ class TokenBoundaryAttack:
         return evasions
     
     def homoglyph_evasion(self, keyword: str) -> list:
-        """Использование similar-looking characters для изменения tokenization."""
+        """РСЃРїРѕР»СЊР·РѕРІР°С‚СЊ similar-looking characters С‡С‚РѕР±С‹ change tokenization."""
         
-        homoglyphs = {'a': 'а', 'e': 'е', 'o': 'о', 'c': 'с'}
+        homoglyphs = {'a': 'Р°', 'e': 'Рµ', 'o': 'Рѕ', 'c': 'СЃ'}
         
         original_tokens = self.tokenizer.encode(keyword)
         evasions = []
@@ -99,7 +99,7 @@ class TokenBoundaryAttack:
 ### 2. Glitch Tokens
 
 ```python
-# Некоторые tokenizers имеют "glitch tokens" с необычным поведением
+# РќРµРєРѕС‚РѕСЂС‹Рµ tokenizers РёРјРµСЋС‚ "glitch tokens" СЃ unusual behavior
 known_glitch_tokens = {
     "gpt2": [
         " SolidGoldMagikarp",  # Known anomaly token
@@ -108,7 +108,7 @@ known_glitch_tokens = {
 }
 
 def detect_glitch_tokens(tokenizer, model) -> list:
-    """Детекция токенов с аномальными embeddings."""
+    """Detect tokens СЃ anomalous embeddings."""
     
     anomalies = []
     
@@ -116,7 +116,7 @@ def detect_glitch_tokens(tokenizer, model) -> list:
         embedding = model.get_input_embeddings()(torch.tensor([token_id]))
         norm = torch.norm(embedding).item()
         
-        # Экстремально высокие или низкие norms подозрительны
+        # Extremely high РёР»Рё low norms suspicious
         if norm > 100 or norm < 0.001:
             anomalies.append({
                 "token_id": token_id,
@@ -137,13 +137,13 @@ def detect_glitch_tokens(tokenizer, model) -> list:
 import numpy as np
 
 class EmbeddingSecurityAnalyzer:
-    """Анализ embeddings для security applications."""
+    """Analyze embeddings РґР»СЏ security applications."""
     
     def __init__(self, embedding_model):
         self.model = embedding_model
     
     def semantic_similarity(self, text1: str, text2: str) -> float:
-        """Вычисление semantic similarity."""
+        """Compute semantic similarity."""
         
         emb1 = self.model.encode(text1)
         emb2 = self.model.encode(text2)
@@ -156,7 +156,7 @@ class EmbeddingSecurityAnalyzer:
         attack_references: list,
         threshold: float = 0.75
     ) -> dict:
-        """Детекция атаки через embedding similarity."""
+        """Detect attack С‡РµСЂРµР· embedding similarity."""
         
         input_emb = self.model.encode(input_text)
         
@@ -180,7 +180,7 @@ class EmbeddingSecurityAnalyzer:
 
 ```python
 class EmbeddingAnomalyDetector:
-    """Детекция аномальных inputs через embeddings."""
+    """Detect anomalous inputs С‡РµСЂРµР· embeddings."""
     
     def __init__(self, embedding_model):
         self.model = embedding_model
@@ -188,7 +188,7 @@ class EmbeddingAnomalyDetector:
         self.threshold = None
     
     def fit(self, normal_samples: list):
-        """Fit на нормальных samples."""
+        """Fit РЅР° normal samples."""
         
         embeddings = [self.model.encode(s) for s in normal_samples]
         self.baseline = np.mean(embeddings, axis=0)
@@ -197,7 +197,7 @@ class EmbeddingAnomalyDetector:
         self.threshold = np.percentile(distances, 95)
     
     def detect(self, text: str) -> dict:
-        """Детекция аномалии."""
+        """Detect anomaly."""
         
         embedding = self.model.encode(text)
         distance = np.linalg.norm(embedding - self.baseline)
@@ -213,7 +213,7 @@ class EmbeddingAnomalyDetector:
 
 ```python
 class EmbeddingDefense:
-    """Защита от embedding-level атак."""
+    """Defend РїСЂРѕС‚РёРІ embedding-level attacks."""
     
     def __init__(self, embedding_model):
         self.model = embedding_model
@@ -224,7 +224,7 @@ class EmbeddingDefense:
         text2: str, 
         n_augments: int = 5
     ) -> float:
-        """Robust similarity через augmentation."""
+        """Robust similarity С‡РµСЂРµР· augmentation."""
         
         augments1 = self._augment(text1, n_augments)
         augments2 = self._augment(text2, n_augments)
@@ -239,7 +239,7 @@ class EmbeddingDefense:
                 )
                 similarities.append(sim)
         
-        # Используем median для robustness
+        # РСЃРїРѕР»СЊР·РѕРІР°С‚СЊ median РґР»СЏ robustness
         return np.median(similarities)
     
     def _augment(self, text: str, n: int) -> list:
@@ -268,18 +268,18 @@ class EmbeddingDefense:
 
 ```python
 class TokenAwareDetector:
-    """Detection с учётом tokenization."""
+    """Detection РєРѕС‚РѕСЂС‹Р№ accounts for tokenization."""
     
     def __init__(self, tokenizer, keywords: list):
         self.tokenizer = tokenizer
         
-        # Pre-compute все token variants
+        # Pre-compute РІСЃРµ token variants
         self.keyword_tokens = {}
         for keyword in keywords:
             self.keyword_tokens[keyword] = self._get_token_variants(keyword)
     
     def _get_token_variants(self, keyword: str) -> set:
-        """Получение всех token representations keyword."""
+        """Get РІСЃРµ token representations keyword."""
         
         variants = set()
         
@@ -297,7 +297,7 @@ class TokenAwareDetector:
         return variants
     
     def detect(self, text: str) -> dict:
-        """Detect keywords с учётом tokenization."""
+        """Detect keywords accounting for tokenization."""
         
         text_tokens = tuple(self.tokenizer.encode(text))
         
@@ -314,7 +314,7 @@ class TokenAwareDetector:
         }
     
     def _subsequence_in(self, subseq: tuple, seq: tuple) -> bool:
-        """Check if subsequence is in sequence."""
+        """Check РµСЃР»Рё subsequence РІ sequence."""
         n, m = len(seq), len(subseq)
         for i in range(n - m + 1):
             if seq[i:i+m] == subseq:
@@ -324,7 +324,7 @@ class TokenAwareDetector:
 
 ---
 
-## SENTINEL Integration
+## РРЅС‚РµРіСЂР°С†РёСЏ СЃ SENTINEL
 
 ```python
 from sentinel import configure, TokenGuard, EmbeddingGuard
@@ -347,20 +347,20 @@ embedding_guard = EmbeddingGuard(
 @token_guard.protect
 @embedding_guard.protect
 def process_input(text: str):
-    # Protected на обоих уровнях: token и embedding
+    # Protected РЅР° РѕР±РѕРёС… token Рё embedding level
     return llm.generate(text)
 ```
 
 ---
 
-## Ключевые выводы
+## РљР»СЋС‡РµРІС‹Рµ РІС‹РІРѕРґС‹
 
-1. **Tokenization влияет на detection** - Одно слово, разные токены
-2. **Homoglyphs evade filters** - Normalize перед matching
-3. **Embeddings capture meaning** - Semantic attack detection
-4. **Glitch tokens exist** - Monitor на аномалии
-5. **Layer your defenses** - Token + embedding + pattern
+1. **Tokenization affects detection** вЂ” РћРґРЅРѕ СЃР»РѕРІРѕ, СЂР°Р·РЅС‹Рµ tokens
+2. **Homoglyphs evade filters** вЂ” Normalize before matching
+3. **Embeddings capture meaning** вЂ” Semantic attack detection
+4. **Glitch tokens exist** вЂ” Monitor for anomalies
+5. **Layer your defenses** вЂ” Token + embedding + pattern
 
 ---
 
-*AI Security Academy | Урок 01.3.1*
+*AI Security Academy | РЈСЂРѕРє 01.3.1*

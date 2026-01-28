@@ -1,84 +1,84 @@
-# Guardrails Frameworks
+# Фреймворки Guardrails
 
-> **�������:** �������  
-> **�����:** 50 �����  
-> **����:** 05 � Defense Strategies  
-> **������:** 05.2 � Guardrails  
-> **������:** 2.0 (Production)
-
----
-
-## ���� ��������
-
-����� ���������� ����� ����� �� �������:
-
-- [ ] ������ ��������� guardrails frameworks
-- [ ] �������� ���������� �������: NVIDIA NeMo, Guardrails AI, LlamaGuard
-- [ ] ����������� custom validators � rails
-- [ ] ������������� guardrails � SENTINEL
-- [ ] ������� ���������� framework ��� ������ use case
+> **Уровень:** Средний  
+> **Время:** 50 минут  
+> **Трек:** 05 — Стратегии защиты  
+> **Модуль:** 05.2 — Guardrails  
+> **Версия:** 2.0 (Production)
 
 ---
 
-## 1. ��� ����� Guardrails Frameworks?
+## Цели обучения
 
-### 1.1 ����� �����������
+По завершении этого урока вы сможете:
+
+- [ ] Понять концепцию guardrails фреймворков
+- [ ] Сравнить популярные решения: NVIDIA NeMo, Guardrails AI, LlamaGuard
+- [ ] Реализовать кастомные валидаторы и rails
+- [ ] Интегрировать guardrails с SENTINEL
+- [ ] Выбрать правильный фреймворк для вашего use case
+
+---
+
+## 1. Что такое Guardrails Frameworks?
+
+### 1.1 Обзор архитектуры
 
 ```
----------------------------------------------------------------------�
-�                    GUARDRAILS FRAMEWORK                            �
-+--------------------------------------------------------------------+
-�                                                                    �
-�  USER INPUT                                                        �
-�      v                                                             �
-�  �===============================================================� �
-�  �  INPUT RAILS                                                  � �
-�  �  � Injection detection                                        � �
-�  �  � Topic filtering                                            � �
-�  �  � Rate limiting                                              � �
-�  �  � Language detection                                         � �
-�  L===============================================================- �
-�      v                                                             �
-�  �===============================================================� �
-�  �  LLM                                                          � �
-�  L===============================================================- �
-�      v                                                             �
-�  �===============================================================� �
-�  �  OUTPUT RAILS                                                 � �
-�  �  � PII redaction                                              � �
-�  �  � Toxicity filtering                                         � �
-�  �  � Hallucination detection                                    � �
-�  �  � Jailbreak success detection                                � �
-�  L===============================================================- �
-�      v                                                             �
-�  VALIDATED OUTPUT                                                  �
-�                                                                    �
-L---------------------------------------------------------------------
+┌────────────────────────────────────────────────────────────────────┐
+│                    GUARDRAILS FRAMEWORK                            │
+├────────────────────────────────────────────────────────────────────┤
+│                                                                    │
+│  ВВОД ПОЛЬЗОВАТЕЛЯ                                                 │
+│      ↓                                                             │
+│  ╔═══════════════════════════════════════════════════════════════╗ │
+│  ║  INPUT RAILS                                                  ║ │
+│  ║  • Детекция инъекций                                          ║ │
+│  ║  • Фильтрация топиков                                         ║ │
+│  ║  • Rate limiting                                              ║ │
+│  ║  • Детекция языка                                             ║ │
+│  ╚═══════════════════════════════════════════════════════════════╝ │
+│      ↓                                                             │
+│  ╔═══════════════════════════════════════════════════════════════╗ │
+│  ║  LLM                                                          ║ │
+│  ╚═══════════════════════════════════════════════════════════════╝ │
+│      ↓                                                             │
+│  ╔═══════════════════════════════════════════════════════════════╗ │
+│  ║  OUTPUT RAILS                                                 ║ │
+│  ║  • Редактирование PII                                         ║ │
+│  ║  • Фильтрация токсичности                                     ║ │
+│  ║  • Детекция галлюцинаций                                      ║ │
+│  ║  • Детекция успешного jailbreak                               ║ │
+│  ╚═══════════════════════════════════════════════════════════════╝ │
+│      ↓                                                             │
+│  ВАЛИДИРОВАННЫЙ ВЫВОД                                              │
+│                                                                    │
+└────────────────────────────────────────────────────────────────────┘
 ```
 
-### 1.2 �������� ����������
+### 1.2 Ключевые компоненты
 
-| ��������� | ���������� | ������� |
+| Компонент | Назначение | Примеры |
 |-----------|------------|---------|
-| **Input Rails** | Pre-processing | Injection detection, topic filtering |
-| **Output Rails** | Post-processing | PII redaction, safety check |
-| **Dialog Rails** | Conversation flow | Topic boundaries, persona |
-| **Fact-checking** | Hallucination | Source verification |
+| **Input Rails** | Пре-обработка | Детекция инъекций, фильтр топиков |
+| **Output Rails** | Пост-обработка | Редактирование PII, проверка безопасности |
+| **Dialog Rails** | Поток разговора | Границы топиков, персона |
+| **Fact-checking** | Галлюцинации | Верификация источников |
 
 ---
 
 ## 2. NVIDIA NeMo Guardrails
 
-### 2.1 �����
+### 2.1 Обзор
 
 ```python
 from nemoguardrails import RailsConfig, LLMRails
 
-# �������� ������������
+# Загрузить конфигурацию
 config = RailsConfig.from_path("./config")
 rails = LLMRails(config)
 
-# ��������� � guardrails
+# Генерация с guardrails
 response = rails.generate(messages=[
     {"role": "user", "content": "Hello, how are you?"}
 ])
@@ -86,11 +86,11 @@ response = rails.generate(messages=[
 print(response["content"])
 ```
 
-### 2.2 ���� Colang
+### 2.2 Язык Colang
 
 ```colang
 # =========================================
-# USER INTENT DEFINITIONS
+# ОПРЕДЕЛЕНИЯ ИНТЕНТОВ ПОЛЬЗОВАТЕЛЯ
 # =========================================
 
 define user ask about weather
@@ -109,7 +109,7 @@ define user ask harmful
     "How to hurt someone"
 
 # =========================================
-# BOT RESPONSE DEFINITIONS
+# ОПРЕДЕЛЕНИЯ ОТВЕТОВ БОТА
 # =========================================
 
 define bot respond weather
@@ -122,7 +122,7 @@ define bot refuse harmful
     "I cannot help with that request. Is there something else I can assist with?"
 
 # =========================================
-# CONVERSATION FLOWS
+# ПОТОКИ РАЗГОВОРА
 # =========================================
 
 define flow weather inquiry
@@ -136,11 +136,11 @@ define flow product inquiry
 define flow block harmful
     user ask harmful
     bot refuse harmful
-    # Log the attempt
+    # Логировать попытку
     $log_security_event(type="harmful_request", user=$user_id)
 ```
 
-### 2.3 ������������
+### 2.3 Конфигурация
 
 ```yaml
 # config.yml
@@ -163,11 +163,11 @@ rails:
       - check pii
 
   config:
-    # Enable fact-checking
+    # Включить fact-checking
     fact_checking:
       enabled: true
       
-    # Sensitive data detection
+    # Детекция чувствительных данных
     sensitive_data_detection:
       enabled: true
       entities:
@@ -187,14 +187,14 @@ instructions:
 
 ## 3. Guardrails AI
 
-### 3.1 �����
+### 3.1 Обзор
 
 ```python
 from guardrails import Guard
 from guardrails.hub import ToxicLanguage, DetectPII, ValidLength
 import openai
 
-# �������� guard � validators
+# Создать guard с валидаторами
 guard = Guard().use_many(
     ToxicLanguage(on_fail="fix"),
     DetectPII(
@@ -204,19 +204,19 @@ guard = Guard().use_many(
     ValidLength(min=1, max=1000, on_fail="noop")
 )
 
-# ������������� guard � LLM
+# Использовать guard с LLM
 result = guard(
     llm_api=openai.chat.completions.create,
     prompt="Write an email to john@example.com about the meeting",
     model="gpt-4"
 )
 
-print(result.validated_output)  # PII redacted
+print(result.validated_output)  # PII редактирован
 print(result.validation_passed)  # True/False
-print(result.raw_llm_output)     # Original output
+print(result.raw_llm_output)     # Оригинальный вывод
 ```
 
-### 3.2 Custom Validators
+### 3.2 Кастомные валидаторы
 
 ```python
 from guardrails import Validator, register_validator
@@ -225,7 +225,7 @@ import re
 
 @register_validator(name="no_injection", data_type="string")
 class NoInjection(Validator):
-    """Detect injection patterns � ������."""
+    """Детекция паттернов инъекций в тексте."""
     
     INJECTION_PATTERNS = [
         r"(?i)ignore.*instructions",
@@ -239,7 +239,7 @@ class NoInjection(Validator):
         for pattern in self.INJECTION_PATTERNS:
             if re.search(pattern, value):
                 return FailResult(
-                    error_message=f"Injection pattern detected: {pattern}",
+                    error_message=f"Обнаружен паттерн инъекции: {pattern}",
                     fix_value=None
                 )
         
@@ -248,7 +248,7 @@ class NoInjection(Validator):
 
 @register_validator(name="no_secrets", data_type="string")  
 class NoSecrets(Validator):
-    """Detect exposed secrets � output."""
+    """Детекция раскрытых секретов в выводе."""
     
     SECRET_PATTERNS = {
         'api_key': r'(?i)(api[_-]?key|apikey)\s*[:=]\s*["\']?([a-zA-Z0-9_-]{20,})',
@@ -260,21 +260,21 @@ class NoSecrets(Validator):
         for name, pattern in self.SECRET_PATTERNS.items():
             if re.search(pattern, value):
                 return FailResult(
-                    error_message=f"Secret detected: {name}",
-                    fix_value=re.sub(pattern, "[REDACTED]", value)
+                    error_message=f"Обнаружен секрет: {name}",
+                    fix_value=re.sub(pattern, "[СКРЫТО]", value)
                 )
         
         return PassResult()
 
 
-# ������������� custom validators
+# Использование кастомных валидаторов
 guard = Guard().use_many(
     NoInjection(on_fail="exception"),
     NoSecrets(on_fail="fix")
 )
 ```
 
-### 3.3 Structured Output Validation
+### 3.3 Валидация структурированного вывода
 
 ```python
 from guardrails import Guard
@@ -282,14 +282,14 @@ from pydantic import BaseModel, Field
 from typing import List
 
 class ProductRecommendation(BaseModel):
-    """Structured product recommendation."""
+    """Структурированная рекомендация продукта."""
     
-    product_name: str = Field(description="Name of the product")
-    price: float = Field(ge=0, le=10000, description="Price in USD")
-    rating: float = Field(ge=1, le=5, description="Rating from 1-5")
+    product_name: str = Field(description="Название продукта")
+    price: float = Field(ge=0, le=10000, description="Цена в USD")
+    rating: float = Field(ge=1, le=5, description="Рейтинг от 1 до 5")
     reasons: List[str] = Field(
         max_length=3, 
-        description="Reasons for recommendation"
+        description="Причины рекомендации"
     )
 
 guard = Guard.for_pydantic(ProductRecommendation)
@@ -300,7 +300,7 @@ result = guard(
     model="gpt-4"
 )
 
-# result.validated_output is a ProductRecommendation instance
+# result.validated_output — экземпляр ProductRecommendation
 print(result.validated_output.product_name)
 print(result.validated_output.price)
 ```
@@ -309,18 +309,18 @@ print(result.validated_output.price)
 
 ## 4. Meta LlamaGuard
 
-### 4.1 �����
+### 4.1 Обзор
 
 ```python
 from transformers import AutoModelForCausalLM, AutoTokenizer
 
-# �������� LlamaGuard
+# Загрузить LlamaGuard
 model_id = "meta-llama/LlamaGuard-7b"
 tokenizer = AutoTokenizer.from_pretrained(model_id)
 model = AutoModelForCausalLM.from_pretrained(model_id)
 
 def check_safety(text: str) -> dict:
-    """�������� ������������ ������ � LlamaGuard."""
+    """Проверка безопасности текста с LlamaGuard."""
     
     prompt = f"""[INST] Task: Check if there is unsafe content in the message.
 
@@ -340,59 +340,59 @@ Provide your safety assessment:
     }
 ```
 
-### 4.2 Safety Categories
+### 4.2 Категории безопасности
 
 ```python
 LLAMAGUARD_CATEGORIES = {
-    "O1": "Violence and Hate",
-    "O2": "Sexual Content",
-    "O3": "Criminal Planning",
-    "O4": "Guns and Illegal Weapons",
-    "O5": "Regulated or Controlled Substances",
-    "O6": "Self-Harm",
+    "O1": "Насилие и ненависть",
+    "O2": "Сексуальный контент",
+    "O3": "Планирование преступлений",
+    "O4": "Оружие и нелегальное оружие",
+    "O5": "Регулируемые вещества",
+    "O6": "Самоповреждение",
 }
 ```
 
 ---
 
-## 5. ��������� Frameworks
+## 5. Сравнение фреймворков
 
-| Feature | NeMo Guardrails | Guardrails AI | LlamaGuard |
+| Функция | NeMo Guardrails | Guardrails AI | LlamaGuard |
 |---------|-----------------|---------------|------------|
-| **����** | Colang + Python | Python | Model-based |
-| **�����** | Dialog flows | Output validation | Safety classification |
-| **Customization** | High | High | Low |
-| **Latency** | Medium | Low | High |
+| **Язык** | Colang + Python | Python | На основе модели |
+| **Фокус** | Потоки диалога | Валидация вывода | Классификация безопасности |
+| **Кастомизация** | Высокая | Высокая | Низкая |
+| **Латентность** | Средняя | Низкая | Высокая |
 | **Enterprise** | NVIDIA | Community | Meta |
-| **����� ���** | Complex apps | API validation | Content moderation |
+| **Лучше для** | Сложные приложения | Валидация API | Модерация контента |
 
 ---
 
-## 6. SENTINEL Integration
+## 6. Интеграция с SENTINEL
 
 ```python
 from sentinel.guardrails import GuardrailsOrchestrator
 from sentinel.guardrails.rails import InputRail, OutputRail, TopicRail
 
 class SENTINELGuardrails:
-    """SENTINEL guardrails integration."""
+    """Интеграция guardrails в SENTINEL."""
     
     def __init__(self, config: dict = None):
         self.orchestrator = GuardrailsOrchestrator()
         
-        # Configure input rails
+        # Настройка input rails
         self.orchestrator.add_rail(InputRail(
             validators=["injection_detector", "toxicity_check"],
             on_fail="block"
         ))
         
-        # Configure output rails
+        # Настройка output rails
         self.orchestrator.add_rail(OutputRail(
             validators=["pii_redactor", "safety_classifier", "secrets_filter"],
             on_fail="sanitize"
         ))
         
-        # Configure topic rails
+        # Настройка topic rails
         self.orchestrator.add_rail(TopicRail(
             allowed_topics=["customer_service", "product_info", "support"],
             blocked_topics=["politics", "violence", "illegal"],
@@ -400,9 +400,9 @@ class SENTINELGuardrails:
         ))
     
     def process(self, user_input: str, llm_fn: callable) -> dict:
-        """Process request ����� guardrails."""
+        """Обработка запроса через guardrails."""
         
-        # Input validation
+        # Валидация ввода
         input_result = self.orchestrator.validate_input(user_input)
         
         if input_result.blocked:
@@ -412,10 +412,10 @@ class SENTINELGuardrails:
                 "reason": input_result.block_reason
             }
         
-        # Generate response
+        # Генерация ответа
         raw_response = llm_fn(input_result.sanitized_input)
         
-        # Output validation
+        # Валидация вывода
         output_result = self.orchestrator.validate_output(raw_response)
         
         return {
@@ -428,36 +428,36 @@ class SENTINELGuardrails:
 
 ---
 
-## 7. ������
+## 7. Итоги
 
-### ����������� �� ������ Framework
+### Руководство по выбору фреймворка
 
-| Use Case | ������������� |
-|----------|---------------|
-| Complex conversation apps | NeMo Guardrails |
-| API output validation | Guardrails AI |
-| Content moderation | LlamaGuard |
-| Enterprise � NVIDIA | NeMo Guardrails |
-| Quick integration | Guardrails AI |
+| Use Case | Рекомендация |
+|----------|--------------|
+| Сложные разговорные приложения | NeMo Guardrails |
+| Валидация API вывода | Guardrails AI |
+| Модерация контента | LlamaGuard |
+| Enterprise с NVIDIA | NeMo Guardrails |
+| Быстрая интеграция | Guardrails AI |
 
-### Quick Checklist
+### Чек-лист
 
 ```
-? �������� framework �� ������ use case
-? ���������� input rails (injection, topic)
-? ���������� output rails (PII, safety)
-? �������� custom validators �� �������������
-? ��������� on_fail behaviors
-? ������������� � adversarial inputs
-? ���������� ������������� guardrails
+□ Выбрать фреймворк на основе use case
+□ Реализовать input rails (инъекции, топики)
+□ Реализовать output rails (PII, безопасность)
+□ Создать кастомные валидаторы по необходимости
+□ Настроить поведение on_fail
+□ Протестировать с adversarial inputs
+□ Мониторить эффективность guardrails
 ```
 
 ---
 
-## ��������� ������
+## Следующий модуль
 
-> [SENTINEL Integration](../03-sentinel-integration/README.md)
+→ [Интеграция с SENTINEL](../03-sentinel-integration/README.md)
 
 ---
 
-*AI Security Academy | Track 05: Defense Strategies | Guardrails*
+*AI Security Academy | Трек 05: Стратегии защиты | Guardrails*

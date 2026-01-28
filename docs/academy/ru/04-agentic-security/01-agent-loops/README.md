@@ -1,110 +1,33 @@
-# Agent Loops
+# Р¦РёРєР»С‹ Р°РіРµРЅС‚РѕРІ
 
-> **Подмодуль 04.1b: Безопасность Loop Patterns**
-
----
-
-## Обзор
-
-Agent loops (ReAct, plan-and-execute и др.) — ключевые паттерны в agentic AI. Этот подмодуль покрывает security considerations специфичные для итеративного выполнения агентов, включая loop control, state management и предотвращение эксплуатации.
+> **РњРѕРґСѓР»СЊ 04.1: Р‘РµР·РѕРїР°СЃРЅРѕСЃС‚СЊ С†РёРєР»РѕРІ Р°РіРµРЅС‚РѕРІ**
 
 ---
 
-## Loop Patterns
+## РћР±Р·РѕСЂ
 
-| Pattern | Структура | Основной риск |
-|---------|-----------|---------------|
-| **ReAct** | Thought-Action-Observation | Loop hijacking |
-| **Plan-Execute** | Plan > Execute steps | Plan manipulation |
-| **Reflection** | Execute > Evaluate > Adjust | Evaluation exploitation |
-| **Autonomous** | Goal > Plan > Execute > Verify | Goal drift |
+Р¦РёРєР»С‹ Р°РіРµРЅС‚РѕРІ вЂ” РёС‚РµСЂР°С‚РёРІРЅС‹Рµ РїСЂРѕС†РµСЃСЃС‹, РіРґРµ AI РїСЂРёРЅРёРјР°РµС‚ СЂРµС€РµРЅРёСЏ Рё РІС‹РїРѕР»РЅСЏРµС‚ РґРµР№СЃС‚РІРёСЏ. Р—Р°С‰РёС‚Р° С†РёРєР»РѕРІ РєСЂРёС‚РёС‡РЅР° РґР»СЏ РїСЂРµРґРѕС‚РІСЂР°С‰РµРЅРёСЏ РЅРµРєРѕРЅС‚СЂРѕР»РёСЂСѓРµРјРѕРіРѕ РїРѕРІРµРґРµРЅРёСЏ.
 
 ---
 
-## Уроки
+## РЈСЂРѕРєРё
 
-### 01. Loop Control Security
-**Время:** 35 минут | **Сложность:** Средний
-
-Контроль выполнения loop:
-- Termination conditions и валидация
-- Enforcement жёстких iteration limits
-- Паттерны детекции stuck loops
-- Стратегии resource capping
-
-### 02. State Management
-**Время:** 40 минут | **Сложность:** Средний-Продвинутый
-
-Безопасность persistent state:
-- Риски state persistence
-- Cross-iteration information leakage
-- Техники state sanitization
-- Паттерны checkpoint security
-
-### 03. Loop Exploitation
-**Время:** 40 минут | **Сложность:** Продвинутый
-
-Понимание loop атак:
-- Паттерны infinite loop атак
-- Техники progress manipulation
-- Goal drift exploitation
-- Атаки state corruption
-
-### 04. Defensive Patterns
-**Время:** 35 минут | **Сложность:** Средний
-
-Построение secure loops:
-- Watchdog implementations
-- Progress verification
-- Output monitoring
-- Automatic intervention
+### [01. Р‘РµР·РѕРїР°СЃРЅРѕСЃС‚СЊ С†РёРєР»РѕРІ Р°РіРµРЅС‚РѕРІ](01-agent-loop-security.md)
+- РџСЂРµРґРѕС‚РІСЂР°С‰РµРЅРёРµ РїРµСЂРµС…РІР°С‚Р° С†РёРєР»РѕРІ
+- Р›РёРјРёС‚С‹ РёС‚РµСЂР°С†РёР№
+- Р’Р°Р»РёРґР°С†РёСЏ СЃРѕСЃС‚РѕСЏРЅРёСЏ
+- РћР±РЅР°СЂСѓР¶РµРЅРёРµ Р±РµСЃРєРѕРЅРµС‡РЅС‹С… С†РёРєР»РѕРІ
 
 ---
 
-## Ключевые контроли
+## РљР»СЋС‡РµРІС‹Рµ СЂРёСЃРєРё
 
-| Контроль | Цель | Implementation |
-|----------|------|----------------|
-| **Iteration limits** | Prevent infinite loops | Hard cap, configurable |
-| **Timeout enforcement** | Time-bound execution | Per-iteration + total |
-| **State validation** | Check each iteration | Schema + semantic |
-| **Output monitoring** | Track progression | Anomaly detection |
-| **Resource limits** | Prevent DoS | Token/API budgets |
+| Р РёСЃРє | РћРїРёСЃР°РЅРёРµ | РњРёС‚РёРіР°С†РёСЏ |
+|------|----------|-----------|
+| **РџРµСЂРµС…РІР°С‚ С†РёРєР»Р°** | РђС‚Р°РєСѓСЋС‰РёР№ РЅР°РїСЂР°РІР»СЏРµС‚ РёС‚РµСЂР°С†РёРё | Р’Р°Р»РёРґР°С†РёСЏ СЃРѕСЃС‚РѕСЏРЅРёСЏ |
+| **Р‘РµСЃРєРѕРЅРµС‡РЅС‹Р№ С†РёРєР»** | РќРµРєРѕРЅС‚СЂРѕР»РёСЂСѓРµРјС‹Рµ РёС‚РµСЂР°С†РёРё | Р›РёРјРёС‚С‹ Рё С‚Р°Р№РјР°СѓС‚С‹ |
+| **РќР°РєРѕРїР»РµРЅРёРµ РѕС€РёР±РѕРє** | РћС€РёР±РєРё СѓСЃРёР»РёРІР°СЋС‚СЃСЏ СЃ РёС‚РµСЂР°С†РёСЏРјРё | РџСЂРѕРІРµСЂРєРё РєР°С‡РµСЃС‚РІР° |
 
 ---
 
-## Архитектура Loop Security
-
-```
---------------------------------------------------------------¬
-¦                    SECURE AGENT LOOP                         ¦
-+-------------------------------------------------------------+
-¦                                                              ¦
-¦  -----------¬    -----------¬    -----------¬              ¦
-¦  ¦  Input   ¦ > ¦  Process ¦ > ¦  Output  ¦              ¦
-¦  ¦ Validate ¦    ¦ Execute  ¦    ¦ Validate ¦              ¦
-¦  L-----------    L-----------    L-----------              ¦
-¦       ¦              ¦               ¦                      ¦
-¦       Ў              Ў               Ў                      ¦
-¦  ------------------------------------------------------¬   ¦
-¦  ¦              LOOP WATCHDOG                           ¦   ¦
-¦  ¦  Iteration Count ¦ Time Elapsed ¦ Resources Used    ¦   ¦
-¦  L------------------------------------------------------   ¦
-¦                         ¦                                   ¦
-¦                         Ў                                   ¦
-¦                    [TERMINATE if limits exceeded]           ¦
-¦                                                              ¦
-L--------------------------------------------------------------
-```
-
----
-
-## Навигация
-
-| Предыдущий | Текущий | Следующий |
-|------------|---------|-----------|
-| [Обзор модуля](../README.md) | **Agent Loops** | [Protocols](../02-protocols/) |
-
----
-
-*AI Security Academy | Agent Loops*
+*AI Security Academy | РњРѕРґСѓР»СЊ 04.1*

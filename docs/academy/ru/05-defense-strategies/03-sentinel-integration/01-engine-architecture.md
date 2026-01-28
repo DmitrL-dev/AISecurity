@@ -1,62 +1,62 @@
-# SENTINEL Engine Architecture
+﻿# SENTINEL Engine Архитектура
 
-> **�������:** �������  
-> **�����:** 55 �����  
-> **����:** 03 � Defense Techniques  
-> **������:** 03.2 � SENTINEL Integration  
-> **������:** 1.0
-
----
-
-## ���� ��������
-
-- [ ] ������ ����������� SENTINEL Brain
-- [ ] ������� �������� engines � �� ��������������
-- [ ] ������������� engines � ����������
+> **Level:** Intermediate  
+> **Время:** 55 минут  
+> **Track:** 03 — Defense Techniques  
+> **Module:** 03.2 — SENTINEL Интеграция  
+> **Version:** 1.0
 
 ---
 
-## 1. SENTINEL Architecture
+## Цели обучения
 
-### 1.1 High-Level Overview
+- [ ] Understand SENTINEL Brain architecture
+- [ ] Describe key engines and their interactions
+- [ ] Integrate engines into application
+
+---
+
+## 1. SENTINEL Архитектура
+
+### 1.1 High-Level Обзор
 
 ```
----------------------------------------------------------------------�
-�                      SENTINEL BRAIN                                 �
-+--------------------------------------------------------------------+
-�                                                                    �
-�  ---------------�  ---------------�  ---------------�             �
-�  �   INPUT      �  �    CORE      �  �   OUTPUT     �             �
-�  �   ENGINES    �> �   ENGINES    �> �   ENGINES    �             �
-�  L---------------  L---------------  L---------------             �
-�         �                 �                 �                      �
-�         �                 �                 �                      �
-�  ---------------------------------------------------�             �
-�  �              ORCHESTRATOR                         �             �
-�  �   Coordinates engines, manages flow, logging      �             �
-�  L---------------------------------------------------             �
-�                                                                    �
-L---------------------------------------------------------------------
+┌────────────────────────────────────────────────────────────────────┐
+│                      SENTINEL BRAIN                                 │
+├────────────────────────────────────────────────────────────────────┤
+│                                                                    │
+│  ┌──────────────┐  ┌──────────────┐  ┌──────────────┐             │
+│  │   INPUT      │  │    CORE      │  │   OUTPUT     │             │
+│  │   ENGINES    │→ │   ENGINES    │→ │   ENGINES    │             │
+│  └──────────────┘  └──────────────┘  └──────────────┘             │
+│         │                 │                 │                      │
+│         ▼                 ▼                 ▼                      │
+│  ┌──────────────────────────────────────────────────┐             │
+│  │              ORCHESTRATOR                         │             │
+│  │   Coordinates engines, manages flow, logging      │             │
+│  └──────────────────────────────────────────────────┘             │
+│                                                                    │
+└────────────────────────────────────────────────────────────────────┘
 ```
 
 ### 1.2 Engine Categories
 
 ```
 SENTINEL Engines:
-+-- Input Engines
-�   +-- PromptInjectionDetector
-�   +-- JailbreakClassifier
-�   +-- InputSanitizer
-�   L-- EncodingDetector
-+-- Core Engines
-�   +-- TrustBoundaryAnalyzer
-�   +-- ContextAnalyzer
-�   L-- SemanticRouter
-L-- Output Engines
-    +-- SafetyClassifier
-    +-- PIIRedactor
-    +-- HallucinationDetector
-    L-- ConsistencyChecker
+├── Input Engines
+│   ├── PromptInjectionDetector
+│   ├── JailbreakClassifier
+│   ├── InputSanitizer
+│   └── EncodingDetector
+├── Core Engines
+│   ├── TrustBoundaryAnalyzer
+│   ├── ContextAnalyzer
+│   └── SemanticRouter
+└── Output Engines
+    ├── SafetyClassifier
+    ├── PIIRedactor
+    ├── HallucinationDetector
+    └── ConsistencyChecker
 ```
 
 ---
@@ -345,9 +345,40 @@ class SENTINELOrchestrator:
 
 ---
 
-## 6. ������
+## 6. Quiz Questions
 
-1. **Architecture:** Input > Core > Output engines
+### Question 1
+
+What are the three engine categories in SENTINEL?
+
+- [x] A) Input, Core, Output
+- [ ] B) Fast, Medium, Slow
+- [ ] C) Small, Large, Giant
+- [ ] D) Pre, Main, Post
+
+### Question 2
+
+What does TrustBoundaryAnalyzer detect?
+
+- [ ] A) Slow responses
+- [x] B) Attempts to cross privilege boundaries
+- [ ] C) Typos
+- [ ] D) Long responses
+
+### Question 3
+
+What does Orchestrator do?
+
+- [ ] A) Train models
+- [x] B) Coordinate all engines in unified pipeline
+- [ ] C) Deploy servers
+- [ ] D) Write logs only
+
+---
+
+## 7. Summary
+
+1. **Архитектура:** Input → Core → Output engines
 2. **Input engines:** Injection, jailbreak detection
 3. **Core engines:** Boundary, context analysis
 4. **Output engines:** Safety, hallucination
@@ -355,10 +386,10 @@ class SENTINELOrchestrator:
 
 ---
 
-## ��������� ����
+## Next Lesson
 
-> [02. Practical Integration](02-practical-integration.md)
+→ [02. Practical Интеграция](02-practical-integration.md)
 
 ---
 
-*AI Security Academy | Track 03: Defense Techniques | Module 03.2: SENTINEL Integration*
+*AI Security Academy (RU) | Track 03: Defense Techniques | Module 03.2: SENTINEL Интеграция*

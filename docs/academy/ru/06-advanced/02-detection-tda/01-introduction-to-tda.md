@@ -1,56 +1,56 @@
-# Введение в TDA для детекции атак
+п»ї# Р’РІРµРґРµРЅРёРµ РІ TDA РґР»СЏ РґРµС‚РµРєС†РёРё Р°С‚Р°Рє
 
-> **Урок:** 06.2.1 - Introduction to Topological Data Analysis  
-> **Время:** 45 минут  
-> **Уровень:** Продвинутый
-
----
-
-## Цели обучения
-
-По завершении этого урока вы сможете:
-
-1. Понимать основы TDA для безопасности
-2. Применять persistent homology для детекции атак
-3. Использовать топологические features для anomaly detection
-4. Интегрировать TDA с SENTINEL engines
+> **РЈСЂРѕРє:** 06.2.1 - Р’РІРµРґРµРЅРёРµ РІ Topological Data Analysis  
+> **Р’СЂРµРјСЏ:** 45 РјРёРЅСѓС‚  
+> **РЈСЂРѕРІРµРЅСЊ:** РџСЂРѕРґРІРёРЅСѓС‚С‹Р№
 
 ---
 
-## Что такое Topological Data Analysis?
+## Р¦РµР»Рё РѕР±СѓС‡РµРЅРёСЏ
 
-TDA анализирует «форму» данных, используя концепции алгебраической топологии:
+Рљ РєРѕРЅС†Сѓ СЌС‚РѕРіРѕ СѓСЂРѕРєР° РІС‹ СЃРјРѕР¶РµС‚Рµ:
 
-| Концепция | Применение к безопасности |
-|-----------|--------------------------|
-| **Connected Components** | Разделение кластеров в эмбеддингах |
-| **Holes/Loops** | Циклические паттерны в векторах атак |
-| **Voids** | Отсутствующие регионы в нормальном поведении |
-| **Persistent Homology** | Робастная экстракция features |
+1. РџРѕРЅРёРјР°С‚СЊ РѕСЃРЅРѕРІС‹ TDA РґР»СЏ security
+2. РџСЂРёРјРµРЅСЏС‚СЊ persistent homology РґР»СЏ РґРµС‚РµРєС†РёРё Р°С‚Р°Рє
+3. РСЃРїРѕР»СЊР·РѕРІР°С‚СЊ С‚РѕРїРѕР»РѕРіРёС‡РµСЃРєРёРµ РїСЂРёР·РЅР°РєРё РґР»СЏ РѕР±РЅР°СЂСѓР¶РµРЅРёСЏ Р°РЅРѕРјР°Р»РёР№
+4. РРЅС‚РµРіСЂРёСЂРѕРІР°С‚СЊ TDA СЃ SENTINEL engines
 
 ---
 
-## Почему TDA для AI Security?
+## Р§С‚Рѕ С‚Р°РєРѕРµ Topological Data Analysis?
 
-Традиционные ML метрики (distance, density) могут быть обмануты. TDA захватывает топологические инварианты:
+TDA Р°РЅР°Р»РёР·РёСЂСѓРµС‚ В«С„РѕСЂРјСѓВ» РґР°РЅРЅС‹С… РёСЃРїРѕР»СЊР·СѓСЏ РєРѕРЅС†РµРїС†РёРё РёР· Р°Р»РіРµР±СЂР°РёС‡РµСЃРєРѕР№ С‚РѕРїРѕР»РѕРіРёРё:
+
+| РљРѕРЅС†РµРїС†РёСЏ | РџСЂРёРјРµРЅРµРЅРёРµ Рє Security |
+|-----------|----------------------|
+| **Connected Components** | Р Р°Р·РґРµР»РµРЅРёРµ РєР»Р°СЃС‚РµСЂРѕРІ РІ СЌРјР±РµРґРґРёРЅРіР°С… |
+| **Holes/Loops** | Р¦РёРєР»РёС‡РµСЃРєРёРµ РїР°С‚С‚РµСЂРЅС‹ РІ РІРµРєС‚РѕСЂР°С… Р°С‚Р°Рє |
+| **Voids** | РћС‚СЃСѓС‚СЃС‚РІСѓСЋС‰РёРµ СЂРµРіРёРѕРЅС‹ РІ РЅРѕСЂРјР°Р»СЊРЅРѕРј РїРѕРІРµРґРµРЅРёРё |
+| **Persistent Homology** | Robust feature extraction |
+
+---
+
+## Р—Р°С‡РµРј TDA РґР»СЏ AI Security?
+
+РўСЂР°РґРёС†РёРѕРЅРЅС‹Рµ ML РјРµС‚СЂРёРєРё (distance, density) РјРѕР¶РЅРѕ РѕР±РјР°РЅСѓС‚СЊ. TDA Р·Р°С…РІР°С‚С‹РІР°РµС‚ С‚РѕРїРѕР»РѕРіРёС‡РµСЃРєРёРµ РёРЅРІР°СЂРёР°РЅС‚С‹:
 
 ```python
-# Традиционно: Легко обмануть adversarial perturbations
+# РўСЂР°РґРёС†РёРѕРЅРЅС‹Р№: Р›РµРіРєРѕ РѕР±РјР°РЅСѓС‚СЊ adversarial perturbations
 euclidean_distance = np.linalg.norm(embedding_a - embedding_b)
-# Малое возмущение > похожая distance > пропущенная атака
+# РњР°Р»РµРЅСЊРєРѕРµ РІРѕР·РјСѓС‰РµРЅРёРµ в†’ РїРѕС…РѕР¶Р°СЏ РґРёСЃС‚Р°РЅС†РёСЏ в†’ РїСЂРѕРїСѓС‰РµРЅРЅР°СЏ Р°С‚Р°РєР°
 
-# TDA: Захватывает структурные свойства
+# TDA: Р—Р°С…РІР°С‚С‹РІР°РµС‚ СЃС‚СЂСѓРєС‚СѓСЂРЅС‹Рµ СЃРІРѕР№СЃС‚РІР°
 topological_features = compute_persistent_homology(embedding_space)
-# Структурная аномалия не меняется от малых возмущений
+# РЎС‚СЂСѓРєС‚СѓСЂРЅР°СЏ Р°РЅРѕРјР°Р»РёСЏ РЅРµРёР·РјРµРЅРЅР° РїСЂРё РјР°Р»С‹С… РІРѕР·РјСѓС‰РµРЅРёСЏС…
 ```
 
 ---
 
-## Основы Persistent Homology
+## РћСЃРЅРѕРІС‹ Persistent Homology
 
 ### Simplicial Complexes
 
-Построение структуры из облака точек:
+РџРѕСЃС‚СЂРѕРµРЅРёРµ СЃС‚СЂСѓРєС‚СѓСЂС‹ РёР· point cloud:
 
 ```python
 import numpy as np
@@ -59,28 +59,28 @@ from persim import plot_diagrams
 
 def demonstrate_simplicial_complex(points: np.ndarray, epsilon: float):
     """
-    Построение Vietoris-Rips complex из точек.
+    РџРѕСЃС‚СЂРѕРёС‚СЊ Vietoris-Rips РєРѕРјРїР»РµРєСЃ РёР· С‚РѕС‡РµРє.
     
-    1. Начинаем с точек (0-симплексы)
-    2. Соединяем точки в пределах ? (1-симплексы/рёбра)
-    3. Заполняем треугольники если все рёбра существуют (2-симплексы)
-    4. Продолжаем для высших размерностей
+    1. РќР°С‡Р°С‚СЊ СЃ С‚РѕС‡РµРє (0-СЃРёРјРїР»РµРєСЃС‹)
+    2. РЎРѕРµРґРёРЅРёС‚СЊ С‚РѕС‡РєРё РІ РїСЂРµРґРµР»Р°С… Оµ (1-СЃРёРјРїР»РµРєСЃС‹/СЂС‘Р±СЂР°)
+    3. Р—Р°РїРѕР»РЅРёС‚СЊ С‚СЂРµСѓРіРѕР»СЊРЅРёРєРё РµСЃР»Рё РІСЃРµ СЂС‘Р±СЂР° СЃСѓС‰РµСЃС‚РІСѓСЋС‚ (2-СЃРёРјРїР»РµРєСЃС‹)
+    4. РџСЂРѕРґРѕР»Р¶РёС‚СЊ РґР»СЏ Р±РѕР»РµРµ РІС‹СЃРѕРєРёС… СЂР°Р·РјРµСЂРЅРѕСЃС‚РµР№
     """
     from scipy.spatial.distance import pdist, squareform
     
     distances = squareform(pdist(points))
     
-    # 0-симплексы: все точки
+    # 0-СЃРёРјРїР»РµРєСЃС‹: РІСЃРµ С‚РѕС‡РєРё
     simplices_0 = list(range(len(points)))
     
-    # 1-симплексы: рёбра где distance < epsilon
+    # 1-СЃРёРјРїР»РµРєСЃС‹: СЂС‘Р±СЂР° РіРґРµ distance < epsilon
     simplices_1 = []
     for i in range(len(points)):
         for j in range(i+1, len(points)):
             if distances[i, j] < epsilon:
                 simplices_1.append((i, j))
     
-    # 2-симплексы: треугольники где все три ребра существуют
+    # 2-СЃРёРјРїР»РµРєСЃС‹: С‚СЂРµСѓРіРѕР»СЊРЅРёРєРё РіРґРµ РІСЃРµ С‚СЂРё СЂРµР±СЂР° СЃСѓС‰РµСЃС‚РІСѓСЋС‚
     simplices_2 = []
     edges_set = set(simplices_1)
     for i in range(len(points)):
@@ -103,26 +103,26 @@ def demonstrate_simplicial_complex(points: np.ndarray, epsilon: float):
 ```python
 def compute_persistence_diagram(embeddings: np.ndarray) -> dict:
     """
-    Расчёт persistent homology и возврат диаграммы.
+    Р’С‹С‡РёСЃР»РёС‚СЊ persistent homology Рё РІРµСЂРЅСѓС‚СЊ РґРёР°РіСЂР°РјРјСѓ.
     
-    Каждая точка (birth, death) представляет топологический feature:
-    - birth: масштаб, при котором feature появляется
-    - death: масштаб, при котором feature исчезает
-    - persistence = death - birth (значимость feature)
+    РљР°Р¶РґР°СЏ С‚РѕС‡РєР° (birth, death) РїСЂРµРґСЃС‚Р°РІР»СЏРµС‚ С‚РѕРїРѕР»РѕРіРёС‡РµСЃРєСѓСЋ feature:
+    - birth: РјР°СЃС€С‚Р°Р± РЅР° РєРѕС‚РѕСЂРѕРј feature РїРѕСЏРІР»СЏРµС‚СЃСЏ
+    - death: РјР°СЃС€С‚Р°Р± РЅР° РєРѕС‚РѕСЂРѕРј feature РёСЃС‡РµР·Р°РµС‚
+    - persistence = death - birth (Р·РЅР°С‡РёРјРѕСЃС‚СЊ feature)
     """
     from ripser import ripser
     
-    # Расчёт persistent homology до dimension 2
+    # Р’С‹С‡РёСЃР»РёС‚СЊ persistent homology РґРѕ СЂР°Р·РјРµСЂРЅРѕСЃС‚Рё 2
     result = ripser(embeddings, maxdim=2)
     
     return {
-        "H0": result["dgms"][0],  # Connected components
-        "H1": result["dgms"][1],  # Loops/holes
-        "H2": result["dgms"][2] if len(result["dgms"]) > 2 else [],  # Voids
+        "H0": result["dgms"][0],  # РЎРІСЏР·РЅС‹Рµ РєРѕРјРїРѕРЅРµРЅС‚С‹
+        "H1": result["dgms"][1],  # РџРµС‚Р»Рё/РґС‹СЂС‹
+        "H2": result["dgms"][2] if len(result["dgms"]) > 2 else [],  # РџСѓСЃС‚РѕС‚С‹
     }
 
 def extract_topological_features(diagram: dict) -> dict:
-    """Извлечение features из persistence diagram."""
+    """РР·РІР»РµС‡СЊ features РёР· persistence РґРёР°РіСЂР°РјРјС‹."""
     features = {}
     
     for dim, dgm in diagram.items():
@@ -132,7 +132,7 @@ def extract_topological_features(diagram: dict) -> dict:
             features[f"{dim}_mean_persistence"] = 0
             continue
         
-        # Фильтр бесконечных точек
+        # Р¤РёР»СЊС‚СЂРѕРІР°С‚СЊ Р±РµСЃРєРѕРЅРµС‡РЅС‹Рµ С‚РѕС‡РєРё
         finite_dgm = dgm[dgm[:, 1] != np.inf]
         
         if len(finite_dgm) == 0:
@@ -154,48 +154,48 @@ def extract_topological_features(diagram: dict) -> dict:
 
 ---
 
-## TDA для детекции атак
+## TDA РґР»СЏ РґРµС‚РµРєС†РёРё Р°С‚Р°Рє
 
-### 1. Топология embedding space
+### 1. РўРѕРїРѕР»РѕРіРёСЏ Embedding Space
 
 ```python
 class TopologicalAnomalyDetector:
-    """Детекция аномалий с использованием топологических features."""
+    """Р”РµС‚РµРєС†РёСЏ Р°РЅРѕРјР°Р»РёР№ РёСЃРїРѕР»СЊР·СѓСЏ С‚РѕРїРѕР»РѕРіРёС‡РµСЃРєРёРµ features."""
     
     def __init__(self, embedding_model):
         self.embed = embedding_model
         self.baseline_topology = None
     
     def fit(self, normal_samples: list):
-        """Обучение baseline топологии на нормальных сэмплах."""
+        """РћР±СѓС‡РёС‚СЊСЃСЏ baseline С‚РѕРїРѕР»РѕРіРёРё РЅР° РЅРѕСЂРјР°Р»СЊРЅС‹С… samples."""
         
-        # Эмбеддинг сэмплов
+        # Embed samples
         embeddings = np.array([self.embed(s) for s in normal_samples])
         
-        # Расчёт persistent homology
+        # Р’С‹С‡РёСЃР»РёС‚СЊ persistent homology
         diagram = compute_persistence_diagram(embeddings)
         
-        # Сохранение baseline features
+        # РЎРѕС…СЂР°РЅРёС‚СЊ baseline features
         self.baseline_topology = extract_topological_features(diagram)
         
-        # Также сохраняем для сравнения
+        # РўР°РєР¶Рµ СЃРѕС…СЂР°РЅРёС‚СЊ РґР»СЏ СЃСЂР°РІРЅРµРЅРёСЏ
         self.baseline_embeddings = embeddings
         self.baseline_diagram = diagram
     
     def detect(self, sample: str) -> dict:
-        """Детекция топологически аномального сэмпла."""
+        """РћРїСЂРµРґРµР»РёС‚СЊ СЏРІР»СЏРµС‚СЃСЏ Р»Рё sample С‚РѕРїРѕР»РѕРіРёС‡РµСЃРєРё Р°РЅРѕРјР°Р»СЊРЅС‹Рј."""
         
-        # Эмбеддинг сэмпла
+        # Embed sample
         sample_emb = self.embed(sample).reshape(1, -1)
         
-        # Комбинирование с baseline для анализа эффекта
+        # РћР±СЉРµРґРёРЅРёС‚СЊ СЃ baseline С‡С‚РѕР±С‹ СѓРІРёРґРµС‚СЊ СЌС„С„РµРєС‚
         combined = np.vstack([self.baseline_embeddings, sample_emb])
         
-        # Расчёт новой топологии
+        # Р’С‹С‡РёСЃР»РёС‚СЊ РЅРѕРІСѓСЋ С‚РѕРїРѕР»РѕРіРёСЋ
         new_diagram = compute_persistence_diagram(combined)
         new_features = extract_topological_features(new_diagram)
         
-        # Сравнение с baseline
+        # РЎСЂР°РІРЅРёС‚СЊ СЃ baseline
         anomaly_score = self._compute_topological_distance(
             self.baseline_topology, 
             new_features
@@ -209,7 +209,7 @@ class TopologicalAnomalyDetector:
         }
     
     def _compute_topological_distance(self, f1: dict, f2: dict) -> float:
-        """Расчёт distance между наборами топологических features."""
+        """Р’С‹С‡РёСЃР»РёС‚СЊ РґРёСЃС‚Р°РЅС†РёСЋ РјРµР¶РґСѓ РЅР°Р±РѕСЂР°РјРё С‚РѕРїРѕР»РѕРіРёС‡РµСЃРєРёС… features."""
         
         distance = 0
         for key in f1.keys():
@@ -221,29 +221,29 @@ class TopologicalAnomalyDetector:
 
 ---
 
-### 2. Анализ траектории разговора
+### 2. РђРЅР°Р»РёР· С‚СЂР°РµРєС‚РѕСЂРёРё СЂР°Р·РіРѕРІРѕСЂР°
 
 ```python
 class ConversationTopologyAnalyzer:
-    """Анализ траекторий разговоров с использованием TDA."""
+    """РђРЅР°Р»РёР· С‚СЂР°РµРєС‚РѕСЂРёР№ СЂР°Р·РіРѕРІРѕСЂР° РёСЃРїРѕР»СЊР·СѓСЏ TDA."""
     
     def __init__(self, embedding_model):
         self.embed = embedding_model
     
     def analyze_conversation(self, turns: list) -> dict:
-        """Анализ топологических свойств траектории разговора."""
+        """РђРЅР°Р»РёР·РёСЂРѕРІР°С‚СЊ С‚РѕРїРѕР»РѕРіРёС‡РµСЃРєРёРµ СЃРІРѕР№СЃС‚РІР° С‚СЂР°РµРєС‚РѕСЂРёРё СЂР°Р·РіРѕРІРѕСЂР°."""
         
-        # Эмбеддинг каждого turn
+        # Embed РєР°Р¶РґС‹Р№ turn
         embeddings = np.array([self.embed(t["content"]) for t in turns])
         
-        # Расчёт persistence
+        # Р’С‹С‡РёСЃР»РёС‚СЊ persistence
         diagram = compute_persistence_diagram(embeddings)
         features = extract_topological_features(diagram)
         
-        # Специфические метрики траектории
+        # РЎРїРµС†РёС„РёС‡РЅС‹Рµ РјРµС‚СЂРёРєРё СЂР°Р·РіРѕРІРѕСЂР°
         trajectory_metrics = self._compute_trajectory_metrics(embeddings)
         
-        # Детекция подозрительных паттернов
+        # Р”РµС‚РµРєС†РёСЏ РїРѕРґРѕР·СЂРёС‚РµР»СЊРЅС‹С… РїР°С‚С‚РµСЂРЅРѕРІ
         suspicious_patterns = self._detect_suspicious_topology(diagram)
         
         return {
@@ -254,18 +254,19 @@ class ConversationTopologyAnalyzer:
         }
     
     def _compute_trajectory_metrics(self, embeddings: np.ndarray) -> dict:
-        """Расчёт метрик, специфичных для траектории."""
+        """Р’С‹С‡РёСЃР»РёС‚СЊ РјРµС‚СЂРёРєРё СЃРїРµС†РёС„РёС‡РЅС‹Рµ РґР»СЏ С‚СЂР°РµРєС‚РѕСЂРёРё."""
         
+        # Р’С‹С‡РёСЃР»РёС‚СЊ РїРѕРїР°СЂРЅС‹Рµ distances
         from scipy.spatial.distance import pdist, squareform
         distances = squareform(pdist(embeddings))
         
-        # Distances между последовательными turn'ами
+        # Distances РїРѕСЃР»РµРґРѕРІР°С‚РµР»СЊРЅС‹С… turns
         consecutive = [distances[i, i+1] for i in range(len(embeddings)-1)]
         
-        # Проверка "looping" поведения (близость к ранним turn'ам)
+        # РџСЂРѕРІРµСЂРёС‚СЊ РЅР° "looping" РїРѕРІРµРґРµРЅРёРµ (Р±Р»РёР·РѕСЃС‚СЊ Рє СЂР°РЅРЅРёРј turns)
         loops = []
         for i in range(len(embeddings)):
-            for j in range(i+2, len(embeddings)):
+            for j in range(i+2, len(embeddings)):  # РџСЂРѕРїСѓСЃС‚РёС‚СЊ adjacent
                 if distances[i, j] < 0.3 * np.mean(consecutive):
                     loops.append((i, j, distances[i, j]))
         
@@ -278,18 +279,18 @@ class ConversationTopologyAnalyzer:
         }
     
     def _detect_suspicious_topology(self, diagram: dict) -> list:
-        """Детекция подозрительных топологических паттернов."""
+        """Р”РµС‚РµРєС†РёСЏ РїРѕРґРѕР·СЂРёС‚РµР»СЊРЅС‹С… С‚РѕРїРѕР»РѕРіРёС‡РµСЃРєРёС… РїР°С‚С‚РµСЂРЅРѕРІ."""
         patterns = []
         
-        # Много H1 features = циклический разговор
+        # РњРЅРѕРіРѕ H1 features = С†РёРєР»РёС‡РµСЃРєРёР№/looping СЂР°Р·РіРѕРІРѕСЂ
         h1_count = len([p for p in diagram["H1"] if p[1] != np.inf])
         if h1_count >= 3:
             patterns.append({
                 "type": "circular_conversation",
-                "evidence": f"{h1_count} loops detected"
+                "evidence": f"{h1_count} РїРµС‚РµР»СЊ РѕР±РЅР°СЂСѓР¶РµРЅРѕ"
             })
         
-        # Высокая persistence в H1 = значительные loops
+        # Р’С‹СЃРѕРєР°СЏ persistence РІ H1 = Р·РЅР°С‡РёРјС‹Рµ РїРµС‚Р»Рё
         if len(diagram["H1"]) > 0:
             max_h1_persistence = max(
                 p[1] - p[0] for p in diagram["H1"] if p[1] != np.inf
@@ -306,36 +307,36 @@ class ConversationTopologyAnalyzer:
 
 ---
 
-### 3. Анализ кластеров промптов
+### 3. РђРЅР°Р»РёР· РєР»Р°СЃС‚РµСЂРѕРІ РїСЂРѕРјРїС‚РѕРІ
 
 ```python
 class PromptClusterAnalyzer:
-    """Использование TDA для анализа кластеров промптов на паттерны атак."""
+    """РСЃРїРѕР»СЊР·РѕРІР°С‚СЊ TDA РґР»СЏ Р°РЅР°Р»РёР·Р° РєР»Р°СЃС‚РµСЂРѕРІ РїСЂРѕРјРїС‚РѕРІ РЅР° РїР°С‚С‚РµСЂРЅС‹ Р°С‚Р°Рє."""
     
     def __init__(self, embedding_model, attack_examples: list, benign_examples: list):
         self.embed = embedding_model
         
-        # Эмбеддинг известных примеров
+        # Embed РёР·РІРµСЃС‚РЅС‹Рµ РїСЂРёРјРµСЂС‹
         self.attack_embeddings = np.array([self.embed(p) for p in attack_examples])
         self.benign_embeddings = np.array([self.embed(p) for p in benign_examples])
         
-        # Расчёт baseline топологий
+        # Р’С‹С‡РёСЃР»РёС‚СЊ baseline С‚РѕРїРѕР»РѕРіРёРё
         self.attack_topology = compute_persistence_diagram(self.attack_embeddings)
         self.benign_topology = compute_persistence_diagram(self.benign_embeddings)
     
     def classify_prompt(self, prompt: str) -> dict:
-        """Классификация промпта на основе топологического сходства."""
+        """РљР»Р°СЃСЃРёС„РёС†РёСЂРѕРІР°С‚СЊ РїСЂРѕРјРїС‚ РЅР° РѕСЃРЅРѕРІРµ С‚РѕРїРѕР»РѕРіРёС‡РµСЃРєРѕРіРѕ СЃС…РѕРґСЃС‚РІР°."""
         
         prompt_emb = self.embed(prompt)
         
-        # Добавление к каждому кластеру и расчёт изменения топологии
+        # Р”РѕР±Р°РІРёС‚СЊ Рє РєР°Р¶РґРѕРјСѓ РєР»Р°СЃС‚РµСЂСѓ Рё РІС‹С‡РёСЃР»РёС‚СЊ РёР·РјРµРЅРµРЅРёРµ С‚РѕРїРѕР»РѕРіРёРё
         with_attack = np.vstack([self.attack_embeddings, prompt_emb])
         with_benign = np.vstack([self.benign_embeddings, prompt_emb])
         
         attack_with_prompt = compute_persistence_diagram(with_attack)
         benign_with_prompt = compute_persistence_diagram(with_benign)
         
-        # Измерение топологического disruption
+        # РР·РјРµСЂРёС‚СЊ С‚РѕРїРѕР»РѕРіРёС‡РµСЃРєРѕРµ disruption
         attack_disruption = self._compute_disruption(
             self.attack_topology, attack_with_prompt
         )
@@ -343,7 +344,7 @@ class PromptClusterAnalyzer:
             self.benign_topology, benign_with_prompt
         )
         
-        # Меньше disruption = лучше fit
+        # РњРµРЅСЊС€РµРµ disruption = Р»СѓС‡С€РµРµ СЃРѕРѕС‚РІРµС‚СЃС‚РІРёРµ
         is_attack = attack_disruption < benign_disruption
         
         return {
@@ -354,7 +355,7 @@ class PromptClusterAnalyzer:
         }
     
     def _compute_disruption(self, original: dict, with_new: dict) -> float:
-        """Расчёт насколько добавление новой точки нарушает топологию."""
+        """Р’С‹С‡РёСЃР»РёС‚СЊ РЅР°СЃРєРѕР»СЊРєРѕ РґРѕР±Р°РІР»РµРЅРёРµ РЅРѕРІРѕР№ С‚РѕС‡РєРё РЅР°СЂСѓС€Р°РµС‚ С‚РѕРїРѕР»РѕРіРёСЋ."""
         from persim import wasserstein
         
         total_disruption = 0
@@ -369,7 +370,7 @@ class PromptClusterAnalyzer:
 
 ---
 
-## Интеграция SENTINEL
+## РРЅС‚РµРіСЂР°С†РёСЏ СЃ SENTINEL
 
 ```python
 from sentinel import TDAEngine, configure
@@ -393,14 +394,14 @@ if result.topological_anomaly:
 
 ---
 
-## Ключевые выводы
+## РљР»СЋС‡РµРІС‹Рµ РІС‹РІРѕРґС‹
 
-1. **TDA захватывает форму** — Робастность к возмущениям
-2. **Persistence имеет значение** — Долгоживущие features значимы
-3. **Loops указывают на паттерны** — Циклические разговоры подозрительны
-4. **Комбинируйте с ML** — TDA features усиливают классификаторы
-5. **Интеграция SENTINEL** — Встроенная поддержка TDA engine
+1. **TDA Р·Р°С…РІР°С‚С‹РІР°РµС‚ С„РѕСЂРјСѓ** вЂ” Robust Рє РІРѕР·РјСѓС‰РµРЅРёСЏРј
+2. **Persistence РёРјРµРµС‚ Р·РЅР°С‡РµРЅРёРµ** вЂ” Р”РѕР»РіРѕР¶РёРІСѓС‰РёРµ features Р·РЅР°С‡РёРјС‹
+3. **РџРµС‚Р»Рё СѓРєР°Р·С‹РІР°СЋС‚ РЅР° РїР°С‚С‚РµСЂРЅС‹** вЂ” Р¦РёРєР»РёС‡РµСЃРєРёРµ СЂР°Р·РіРѕРІРѕСЂС‹ РїРѕРґРѕР·СЂРёС‚РµР»СЊРЅС‹
+4. **РљРѕРјР±РёРЅРёСЂРѕРІР°С‚СЊ СЃ ML** вЂ” TDA features СѓР»СѓС‡С€Р°СЋС‚ РєР»Р°СЃСЃРёС„РёРєР°С‚РѕСЂС‹
+5. **РРЅС‚РµРіСЂР°С†РёСЏ СЃ SENTINEL** вЂ” Р’СЃС‚СЂРѕРµРЅРЅР°СЏ РїРѕРґРґРµСЂР¶РєР° TDA engine
 
 ---
 
-*AI Security Academy | Урок 06.2.1*
+*AI Security Academy | РЈСЂРѕРє 06.2.1*

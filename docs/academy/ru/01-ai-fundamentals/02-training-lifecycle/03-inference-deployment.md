@@ -1,46 +1,46 @@
-# Inference и Deployment
+# Inference Рё Deployment
 
-> **Уровень:** Начинающий  
-> **Время:** 45 минут  
-> **Трек:** 01 — AI Fundamentals  
-> **Модуль:** 01.2 — Жизненный цикл обучения  
-> **Версия:** 1.0
-
----
-
-## Цели обучения
-
-После завершения этого урока вы сможете:
-
-- [ ] Объяснить процесс inference для LLM
-- [ ] Понять оптимизации: quantization, KV-cache, batching
-- [ ] Описать deployment опции: API, local, edge
-- [ ] Понять security риски на этапе inference
+> **РЈСЂРѕРІРµРЅСЊ:** Beginner  
+> **Р’СЂРµРјСЏ:** 45 РјРёРЅСѓС‚  
+> **РўСЂРµРє:** 01 вЂ” РћСЃРЅРѕРІС‹ AI  
+> **РњРѕРґСѓР»СЊ:** 01.2 вЂ” Training Lifecycle  
+> **Р’РµСЂСЃРёСЏ:** 1.0
 
 ---
 
-## 1. Inference: От модели к ответу
+## Р¦РµР»Рё РѕР±СѓС‡РµРЅРёСЏ
+
+РџРѕСЃР»Рµ Р·Р°РІРµСЂС€РµРЅРёСЏ СЌС‚РѕРіРѕ СѓСЂРѕРєР° РІС‹ СЃРјРѕР¶РµС‚Рµ:
+
+- [ ] РћР±СЉСЏСЃРЅРёС‚СЊ РїСЂРѕС†РµСЃСЃ inference РґР»СЏ LLM
+- [ ] РџРѕРЅСЏС‚СЊ РѕРїС‚РёРјРёР·Р°С†РёРё: quantization, KV-cache, batching
+- [ ] РћРїРёСЃР°С‚СЊ РІР°СЂРёР°РЅС‚С‹ deployment: API, local, edge
+- [ ] РџРѕРЅСЏС‚СЊ СЂРёСЃРєРё Р±РµР·РѕРїР°СЃРЅРѕСЃС‚Рё РІРѕ РІСЂРµРјСЏ inference
+
+---
+
+## 1. Inference: РћС‚ РјРѕРґРµР»Рё Рє РѕС‚РІРµС‚Сѓ
 
 ### 1.1 Inference Pipeline
 
 ```
----------------------------------------------------------------------¬
-¦                     INFERENCE PIPELINE                              ¦
-+--------------------------------------------------------------------+
-¦                                                                    ¦
-¦  User Prompt > Tokenizer > Model Forward Pass > Sampling > Decode ¦
-¦       v             v              v                v         v   ¦
-¦  "Hello"      [15496]      [logits]           [42]    "Hi"        ¦
-¦                                                                    ¦
-L---------------------------------------------------------------------
+в”Њв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”ђ
+в”‚                     INFERENCE PIPELINE                              в”‚
+в”њв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”¤
+в”‚                                                                    в”‚
+в”‚  User Prompt в†’ Tokenizer в†’ Model Forward Pass в†’ Sampling в†’ Decode в”‚
+в”‚       в†“             в†“              в†“                в†“         в†“   в”‚
+в”‚  "Hello"      [15496]      [logits]           [42]    "Hi"        в”‚
+в”‚                                                                    в”‚
+в””в”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”
 ```
 
-### 1.2 Autoregressive Generation
+### 1.2 РђРІС‚РѕСЂРµРіСЂРµСЃСЃРёРІРЅР°СЏ РіРµРЅРµСЂР°С†РёСЏ
 
 ```python
 def generate(model, prompt_ids, max_tokens=100):
     """
-    Autoregressive generation: один токен за раз
+    РђРІС‚РѕСЂРµРіСЂРµСЃСЃРёРІРЅР°СЏ РіРµРЅРµСЂР°С†РёСЏ: РїРѕ РѕРґРЅРѕРјСѓ С‚РѕРєРµРЅСѓ Р·Р° СЂР°Р·
     """
     generated = prompt_ids.clone()
     
@@ -49,14 +49,14 @@ def generate(model, prompt_ids, max_tokens=100):
         with torch.no_grad():
             logits = model(generated).logits
         
-        # Берём logits последнего токена
+        # РџРѕР»СѓС‡Р°РµРј logits РїРѕСЃР»РµРґРЅРµРіРѕ С‚РѕРєРµРЅР°
         next_logits = logits[:, -1, :]
         
         # Sampling
         probs = F.softmax(next_logits, dim=-1)
         next_token = torch.multinomial(probs, num_samples=1)
         
-        # Добавляем к контексту
+        # Р”РѕР±Р°РІР»СЏРµРј РІ РєРѕРЅС‚РµРєСЃС‚
         generated = torch.cat([generated, next_token], dim=-1)
         
         if next_token == eos_token_id:
@@ -65,27 +65,27 @@ def generate(model, prompt_ids, max_tokens=100):
     return generated
 ```
 
-### 1.3 Проблема: Квадратичная сложность
+### 1.3 РџСЂРѕР±Р»РµРјР°: РљРІР°РґСЂР°С‚РёС‡РЅР°СЏ СЃР»РѕР¶РЅРѕСЃС‚СЊ
 
 ```
-Каждый новый токен требует attention ко ВСЕМ предыдущим:
+РљР°Р¶РґС‹Р№ РЅРѕРІС‹Р№ С‚РѕРєРµРЅ С‚СЂРµР±СѓРµС‚ attention РєРѕ Р’РЎР•Рњ РїСЂРµРґС‹РґСѓС‰РёРј С‚РѕРєРµРЅР°Рј:
 
-Token 1:    O(1) operations
-Token 2:    O(2) operations  
-Token 10:   O(10) operations
-Token 100:  O(100) operations
-Token 1000: O(1000) operations
+Token 1:    O(1) РѕРїРµСЂР°С†РёР№
+Token 2:    O(2) РѕРїРµСЂР°С†РёР№  
+Token 10:   O(10) РѕРїРµСЂР°С†РёР№
+Token 100:  O(100) РѕРїРµСЂР°С†РёР№
+Token 1000: O(1000) РѕРїРµСЂР°С†РёР№
 
-Total для N токенов: O(N?)
+Р’СЃРµРіРѕ РґР»СЏ N С‚РѕРєРµРЅРѕРІ: O(NВІ)
 ```
 
 ---
 
-## 2. Оптимизации Inference
+## 2. РћРїС‚РёРјРёР·Р°С†РёРё Inference
 
 ### 2.1 KV-Cache
 
-**Идея:** Сохранять Key и Value из предыдущих токенов, чтобы не пересчитывать.
+**РРґРµСЏ:** РЎРѕС…СЂР°РЅСЏРµРј Key Рё Value РѕС‚ РїСЂРµРґС‹РґСѓС‰РёС… С‚РѕРєРµРЅРѕРІ С‡С‚РѕР±С‹ РёР·Р±РµР¶Р°С‚СЊ РїРµСЂРµСЃС‡С‘С‚Р°.
 
 ```python
 class KVCacheAttention:
@@ -95,11 +95,11 @@ class KVCacheAttention:
     
     def forward(self, q, k, v, use_cache=True):
         if use_cache and self.k_cache is not None:
-            # Добавляем новые K, V к кэшу
+            # Р”РѕР±Р°РІР»СЏРµРј РЅРѕРІС‹Рµ K, V РІ cache
             k = torch.cat([self.k_cache, k], dim=1)
             v = torch.cat([self.v_cache, v], dim=1)
         
-        # Сохраняем для следующего шага
+        # РЎРѕС…СЂР°РЅСЏРµРј РґР»СЏ СЃР»РµРґСѓСЋС‰РµРіРѕ С€Р°РіР°
         self.k_cache = k
         self.v_cache = v
         
@@ -108,30 +108,30 @@ class KVCacheAttention:
 ```
 
 ```
-Без KV-Cache:
-Step 1: Compute K,V for token 1
-Step 2: Compute K,V for tokens 1,2
-Step 3: Compute K,V for tokens 1,2,3  < Повторные вычисления!
+Р‘РµР· KV-Cache:
+РЁР°Рі 1: Р’С‹С‡РёСЃР»СЏРµРј K,V РґР»СЏ С‚РѕРєРµРЅР° 1
+РЁР°Рі 2: Р’С‹С‡РёСЃР»СЏРµРј K,V РґР»СЏ С‚РѕРєРµРЅРѕРІ 1,2
+РЁР°Рі 3: Р’С‹С‡РёСЃР»СЏРµРј K,V РґР»СЏ С‚РѕРєРµРЅРѕРІ 1,2,3  в†ђ РР·Р±С‹С‚РѕС‡РЅРѕРµ РІС‹С‡РёСЃР»РµРЅРёРµ!
 
-С KV-Cache:
-Step 1: Compute K,V for token 1, cache
-Step 2: Compute K,V for token 2 only, concat with cache
-Step 3: Compute K,V for token 3 only, concat with cache
+РЎ KV-Cache:
+РЁР°Рі 1: Р’С‹С‡РёСЃР»СЏРµРј K,V РґР»СЏ С‚РѕРєРµРЅР° 1, РєСЌС€РёСЂСѓРµРј
+РЁР°Рі 2: Р’С‹С‡РёСЃР»СЏРµРј K,V С‚РѕР»СЊРєРѕ РґР»СЏ С‚РѕРєРµРЅР° 2, РєРѕРЅРєР°С‚РµРЅРёСЂСѓРµРј СЃ cache
+РЁР°Рі 3: Р’С‹С‡РёСЃР»СЏРµРј K,V С‚РѕР»СЊРєРѕ РґР»СЏ С‚РѕРєРµРЅР° 3, РєРѕРЅРєР°С‚РµРЅРёСЂСѓРµРј СЃ cache
 ```
 
 ### 2.2 Quantization
 
-**Идея:** Уменьшить precision весов для ускорения и экономии памяти.
+**РРґРµСЏ:** РЈРјРµРЅСЊС€Р°РµРј С‚РѕС‡РЅРѕСЃС‚СЊ РІРµСЃРѕРІ РґР»СЏ СѓСЃРєРѕСЂРµРЅРёСЏ Рё СЌРєРѕРЅРѕРјРёРё РїР°РјСЏС‚Рё.
 
 ```
-FP32: 32 bits per weight  >  70B model = 280 GB
-FP16: 16 bits per weight  >  70B model = 140 GB
-INT8:  8 bits per weight  >  70B model = 70 GB
-INT4:  4 bits per weight  >  70B model = 35 GB
+FP32: 32 Р±РёС‚Р° РЅР° РІРµСЃ  в†’  70B РјРѕРґРµР»СЊ = 280 GB
+FP16: 16 Р±РёС‚ РЅР° РІРµСЃ   в†’  70B РјРѕРґРµР»СЊ = 140 GB
+INT8:  8 Р±РёС‚ РЅР° РІРµСЃ   в†’  70B РјРѕРґРµР»СЊ = 70 GB
+INT4:  4 Р±РёС‚Р° РЅР° РІРµСЃ  в†’  70B РјРѕРґРµР»СЊ = 35 GB
 ```
 
 ```python
-# Пример с bitsandbytes
+# РџСЂРёРјРµСЂ СЃ bitsandbytes
 from transformers import AutoModelForCausalLM, BitsAndBytesConfig
 
 # 4-bit quantization
@@ -148,76 +148,76 @@ model = AutoModelForCausalLM.from_pretrained(
 )
 ```
 
-### 2.3 Batching и Continuous Batching
+### 2.3 Batching Рё Continuous Batching
 
 ```python
-# Static Batching: все запросы ждут самый длинный
+# Static Batching: РІСЃРµ Р·Р°РїСЂРѕСЃС‹ Р¶РґСѓС‚ СЃР°РјРѕРіРѕ РґР»РёРЅРЅРѕРіРѕ
 batch = [
-    "Hello",           # 1 token response
-    "Write an essay"   # 500 token response
+    "Hello",           # 1 С‚РѕРєРµРЅ РѕС‚РІРµС‚Р°
+    "Write an essay"   # 500 С‚РѕРєРµРЅРѕРІ РѕС‚РІРµС‚Р°
 ]
-# "Hello" ждёт 500 шагов!
+# "Hello" Р¶РґС‘С‚ 500 С€Р°РіРѕРІ!
 
-# Continuous Batching: динамическое управление
+# Continuous Batching: РґРёРЅР°РјРёС‡РµСЃРєРѕРµ СѓРїСЂР°РІР»РµРЅРёРµ
 class ContinuousBatcher:
     def __init__(self):
         self.active_requests = []
     
     def step(self):
-        # Генерируем токен для всех активных
+        # Р“РµРЅРµСЂРёСЂСѓРµРј С‚РѕРєРµРЅ РґР»СЏ РІСЃРµС… Р°РєС‚РёРІРЅС‹С… Р·Р°РїСЂРѕСЃРѕРІ
         for req in self.active_requests:
             next_token = generate_one_token(req)
             req.add_token(next_token)
             
             if next_token == EOS:
                 self.complete_request(req)
-                # Сразу добавляем новый запрос из очереди!
+                # РЎСЂР°Р·Сѓ РґРѕР±Р°РІР»СЏРµРј РЅРѕРІС‹Р№ Р·Р°РїСЂРѕСЃ РёР· РѕС‡РµСЂРµРґРё!
                 self.add_from_queue()
 ```
 
 ### 2.4 Speculative Decoding
 
-**Идея:** Использовать маленькую draft модель для предсказания, большую для верификации.
+**РРґРµСЏ:** РСЃРїРѕР»СЊР·СѓРµРј РјР°Р»РµРЅСЊРєСѓСЋ draft РјРѕРґРµР»СЊ РґР»СЏ РїСЂРµРґСЃРєР°Р·Р°РЅРёСЏ, Р±РѕР»СЊС€СѓСЋ РґР»СЏ РІРµСЂРёС„РёРєР°С†РёРё.
 
 ```python
 def speculative_decoding(large_model, small_model, prompt, k=4):
     """
-    k draft токенов > verify all at once
+    k draft С‚РѕРєРµРЅРѕРІ в†’ РІРµСЂРёС„РёС†РёСЂСѓРµРј РІСЃРµ Р·Р° СЂР°Р·
     """
-    # 1. Draft model генерирует k токенов
+    # 1. Draft РјРѕРґРµР»СЊ РіРµРЅРµСЂРёСЂСѓРµС‚ k С‚РѕРєРµРЅРѕРІ
     draft_tokens = []
     for _ in range(k):
         token = small_model.generate_one(prompt + draft_tokens)
         draft_tokens.append(token)
     
-    # 2. Large model проверяет все k токенов одним forward pass
-    # (вместо k отдельных passes!)
+    # 2. Р‘РѕР»СЊС€Р°СЏ РјРѕРґРµР»СЊ РІРµСЂРёС„РёС†РёСЂСѓРµС‚ РІСЃРµ k С‚РѕРєРµРЅРѕРІ РѕРґРЅРёРј forward pass
+    # (РІРјРµСЃС‚Рѕ k РѕС‚РґРµР»СЊРЅС‹С… passes!)
     verified = large_model.verify(prompt + draft_tokens)
     
-    # 3. Принимаем совпадающие токены
+    # 3. РџСЂРёРЅРёРјР°РµРј matching С‚РѕРєРµРЅС‹
     accepted = []
     for draft, verify in zip(draft_tokens, verified):
         if draft == verify:
             accepted.append(draft)
         else:
             accepted.append(verify)
-            break  # Останавливаемся на первом несовпадении
+            break  # РћСЃС‚Р°РЅР°РІР»РёРІР°РµРјСЃСЏ РЅР° РїРµСЂРІРѕРј mismatch
     
     return accepted
 ```
 
 ---
 
-## 3. Deployment Options
+## 3. Р’Р°СЂРёР°РЅС‚С‹ Deployment
 
-### 3.1 Сравнение опций
+### 3.1 РЎСЂР°РІРЅРµРЅРёРµ РІР°СЂРёР°РЅС‚РѕРІ
 
-| Option | Latency | Privacy | Cost | Control |
-|--------|---------|---------|------|---------|
-| **API (OpenAI, Anthropic)** | Low | Low | Pay-per-use | Low |
-| **Self-hosted Cloud** | Medium | High | Fixed | High |
-| **On-premise** | Medium | Highest | Capital | Highest |
-| **Edge/Device** | Varies | Highest | Low | High |
+| Р’Р°СЂРёР°РЅС‚ | Latency | Privacy | Cost | Control |
+|---------|---------|---------|------|---------|
+| **API (OpenAI, Anthropic)** | РќРёР·РєР°СЏ | РќРёР·РєР°СЏ | Pay-per-use | РќРёР·РєРёР№ |
+| **Self-hosted Cloud** | РЎСЂРµРґРЅСЏСЏ | Р’С‹СЃРѕРєР°СЏ | Р¤РёРєСЃРёСЂРѕРІР°РЅРЅР°СЏ | Р’С‹СЃРѕРєРёР№ |
+| **On-premise** | РЎСЂРµРґРЅСЏСЏ | РќР°РёРІС‹СЃС€Р°СЏ | Capital | РќР°РёРІС‹СЃС€РёР№ |
+| **Edge/Device** | Varies | РќР°РёРІС‹СЃС€Р°СЏ | РќРёР·РєР°СЏ | Р’С‹СЃРѕРєРёР№ |
 
 ### 3.2 API Deployment
 
@@ -241,10 +241,10 @@ response = client.messages.create(
 )
 ```
 
-### 3.3 Self-Hosted с vLLM
+### 3.3 Self-Hosted СЃ vLLM
 
 ```python
-# vLLM: высокопроизводительный inference server
+# vLLM: high-performance inference server
 from vllm import LLM, SamplingParams
 
 llm = LLM(model="meta-llama/Llama-2-7b-chat-hf")
@@ -259,7 +259,7 @@ outputs = llm.generate(["Hello, how are you?"], sampling_params)
 ```
 
 ```bash
-# Запуск как API server
+# Р—Р°РїСѓСЃРє РєР°Рє API server
 python -m vllm.entrypoints.openai.api_server \
     --model meta-llama/Llama-2-7b-chat-hf \
     --port 8000
@@ -268,7 +268,7 @@ python -m vllm.entrypoints.openai.api_server \
 ### 3.4 Edge Deployment
 
 ```python
-# Ollama для локального запуска
+# Ollama РґР»СЏ Р»РѕРєР°Р»СЊРЅРѕРіРѕ РІС‹РїРѕР»РЅРµРЅРёСЏ
 import ollama
 
 response = ollama.chat(
@@ -276,7 +276,7 @@ response = ollama.chat(
     messages=[{'role': 'user', 'content': 'Hello'}]
 )
 
-# llama.cpp через ctransformers
+# llama.cpp С‡РµСЂРµР· ctransformers
 from ctransformers import AutoModelForCausalLM
 
 model = AutoModelForCausalLM.from_pretrained(
@@ -288,20 +288,20 @@ model = AutoModelForCausalLM.from_pretrained(
 
 ---
 
-## 4. Security в Inference
+## 4. Р‘РµР·РѕРїР°СЃРЅРѕСЃС‚СЊ Inference
 
-### 4.1 Inference-time Attacks
+### 4.1 Inference-time Р°С‚Р°РєРё
 
 ```
-Inference Security Risks:
-+-- Prompt Injection (через user input)
-+-- Model Extraction (stealing через API)
-+-- Denial of Service (resource exhaustion)
-+-- Side-channel Attacks (timing, cache)
-L-- Output Manipulation (adversarial triggers)
+Р РёСЃРєРё Р±РµР·РѕРїР°СЃРЅРѕСЃС‚Рё Inference:
+в”њв”Ђв”Ђ Prompt Injection (С‡РµСЂРµР· user input)
+в”њв”Ђв”Ђ Model Extraction (РєСЂР°Р¶Р° С‡РµСЂРµР· API)
+в”њв”Ђв”Ђ Denial of Service (РёСЃС‡РµСЂРїР°РЅРёРµ СЂРµСЃСѓСЂСЃРѕРІ)
+в”њв”Ђв”Ђ Side-channel Attacks (timing, cache)
+в””в”Ђв”Ђ Output Manipulation (adversarial triggers)
 ```
 
-### 4.2 Rate Limiting и Input Validation
+### 4.2 Rate Limiting Рё Input Validation
 
 ```python
 from sentinel import scan  # Public API
@@ -339,19 +339,19 @@ async def generate(request: GenerateRequest):
     return filtered
 ```
 
-### 4.3 Model Extraction Prevention
+### 4.3 РџСЂРµРґРѕС‚РІСЂР°С‰РµРЅРёРµ Model Extraction
 
 ```python
-# Детекция model extraction attempts
+# РћР±РЅР°СЂСѓР¶РµРЅРёРµ РїРѕРїС‹С‚РѕРє extraction
 class ExtractionDetector:
     def __init__(self):
         self.user_patterns = {}
     
     def check(self, user_id, prompt, response):
-        # Паттерны extraction:
-        # - Множество простых запросов
-        # - Запросы для получения logits/embeddings
-        # - Систематичные probing patterns
+        # Extraction РїР°С‚С‚РµСЂРЅС‹:
+        # - РњРЅРѕРіРѕ РїСЂРѕСЃС‚С‹С… Р·Р°РїСЂРѕСЃРѕРІ
+        # - Р—Р°РїСЂРѕСЃС‹ РЅР° logits/embeddings
+        # - РЎРёСЃС‚РµРјР°С‚РёС‡РµСЃРєРёРµ probing РїР°С‚С‚РµСЂРЅС‹
         
         if user_id not in self.user_patterns:
             self.user_patterns[user_id] = []
@@ -361,7 +361,7 @@ class ExtractionDetector:
             "timestamp": time.time()
         })
         
-        # Анализ паттернов
+        # РђРЅР°Р»РёР·РёСЂСѓРµРј РїР°С‚С‚РµСЂРЅС‹
         if self.is_extraction_pattern(user_id):
             return {"suspicious": True, "reason": "Potential extraction attempt"}
         
@@ -370,81 +370,81 @@ class ExtractionDetector:
 
 ---
 
-## 5. Практические задания
+## 5. РџСЂР°РєС‚РёС‡РµСЃРєРёРµ СѓРїСЂР°Р¶РЅРµРЅРёСЏ
 
-### Задание 1: Сравнение Quantization
+### РЈРїСЂР°Р¶РЅРµРЅРёРµ 1: РЎСЂР°РІРЅРµРЅРёРµ Quantization
 
 ```python
-# Загрузите модель в разных precisions и сравните:
+# Р—Р°РіСЂСѓР·РёС‚Рµ РјРѕРґРµР»СЊ РІ СЂР°Р·РЅС‹С… precision Рё СЃСЂР°РІРЅРёС‚Рµ:
 # - FP16
 # - INT8
 # - INT4
 
-# Метрики:
-# - Memory usage
-# - Inference speed
-# - Quality (perplexity)
+# РњРµС‚СЂРёРєРё:
+# - РСЃРїРѕР»СЊР·РѕРІР°РЅРёРµ РїР°РјСЏС‚Рё
+# - РЎРєРѕСЂРѕСЃС‚СЊ inference
+# - РљР°С‡РµСЃС‚РІРѕ (perplexity)
 ```
 
-### Задание 2: vLLM Server
+### РЈРїСЂР°Р¶РЅРµРЅРёРµ 2: vLLM Server
 
 ```bash
-# Запустите vLLM server и протестируйте:
+# Р—Р°РїСѓСЃС‚РёС‚Рµ vLLM server Рё РїСЂРѕС‚РµСЃС‚РёСЂСѓР№С‚Рµ:
 # - Throughput
 # - Latency
-# - Continuous batching эффект
+# - Р­С„С„РµРєС‚ continuous batching
 ```
 
 ---
 
-## 6. Проверочные вопросы
+## 6. Quiz РІРѕРїСЂРѕСЃС‹
 
-### Вопрос 1
+### Р’РѕРїСЂРѕСЃ 1
 
-Что такое KV-Cache?
+Р§С‚Рѕ С‚Р°РєРѕРµ KV-Cache?
 
-- [ ] A) Кэширование результатов inference
-- [x] B) Сохранение Key и Value для переиспользования в attention
-- [ ] C) Кэширование весов модели
-- [ ] D) Кэширование gradients
+- [ ] A) РљСЌС€РёСЂРѕРІР°РЅРёРµ СЂРµР·СѓР»СЊС‚Р°С‚РѕРІ inference
+- [x] B) РЎРѕС…СЂР°РЅРµРЅРёРµ Key Рё Value РґР»СЏ РїРµСЂРµРёСЃРїРѕР»СЊР·РѕРІР°РЅРёСЏ РІ attention
+- [ ] C) РљСЌС€РёСЂРѕРІР°РЅРёРµ РІРµСЃРѕРІ РјРѕРґРµР»Рё
+- [ ] D) РљСЌС€РёСЂРѕРІР°РЅРёРµ РіСЂР°РґРёРµРЅС‚РѕРІ
 
-### Вопрос 2
+### Р’РѕРїСЂРѕСЃ 2
 
-Какой эффект даёт INT4 quantization?
+РљР°РєРѕР№ СЌС„С„РµРєС‚ РёРјРµРµС‚ INT4 quantization?
 
-- [ ] A) Увеличивает качество модели
-- [x] B) Уменьшает размер модели и ускоряет inference
-- [ ] C) Улучшает training
-- [ ] D) Увеличивает latency
+- [ ] A) РЈРІРµР»РёС‡РёРІР°РµС‚ РєР°С‡РµСЃС‚РІРѕ РјРѕРґРµР»Рё
+- [x] B) РЈРјРµРЅСЊС€Р°РµС‚ СЂР°Р·РјРµСЂ РјРѕРґРµР»Рё Рё СѓСЃРєРѕСЂСЏРµС‚ inference
+- [ ] C) РЈР»СѓС‡С€Р°РµС‚ training
+- [ ] D) РЈРІРµР»РёС‡РёРІР°РµС‚ latency
 
-### Вопрос 3
+### Р’РѕРїСЂРѕСЃ 3
 
-Что такое Continuous Batching?
+Р§С‚Рѕ С‚Р°РєРѕРµ Continuous Batching?
 
-- [ ] A) Обработка запросов один за другим
-- [x] B) Динамическое добавление/удаление запросов из batch во время inference
-- [ ] C) Группировка токенов
-- [ ] D) Параллельное обучение
+- [ ] A) РћР±СЂР°Р±РѕС‚РєР° Р·Р°РїСЂРѕСЃРѕРІ РїРѕ РѕРґРЅРѕРјСѓ
+- [x] B) Р”РёРЅР°РјРёС‡РµСЃРєРѕРµ РґРѕР±Р°РІР»РµРЅРёРµ/СѓРґР°Р»РµРЅРёРµ Р·Р°РїСЂРѕСЃРѕРІ РёР· batch РІРѕ РІСЂРµРјСЏ inference
+- [ ] C) Р“СЂСѓРїРїРёСЂРѕРІРєР° С‚РѕРєРµРЅРѕРІ
+- [ ] D) РџР°СЂР°Р»Р»РµР»СЊРЅРѕРµ РѕР±СѓС‡РµРЅРёРµ
 
 ---
 
-## 7. Резюме
+## 7. Р РµР·СЋРјРµ
 
-В этом уроке мы изучили:
+Р’ СЌС‚РѕРј СѓСЂРѕРєРµ РјС‹ РёР·СѓС‡РёР»Рё:
 
-1. **Inference pipeline:** Tokenization > Forward > Sampling > Decode
-2. **KV-Cache:** Переиспользование Key/Value для ускорения
-3. **Quantization:** FP16 > INT8 > INT4 для экономии памяти
+1. **Inference pipeline:** Tokenization в†’ Forward в†’ Sampling в†’ Decode
+2. **KV-Cache:** РџРµСЂРµРёСЃРїРѕР»СЊР·РѕРІР°РЅРёРµ Key/Value РґР»СЏ СѓСЃРєРѕСЂРµРЅРёСЏ
+3. **Quantization:** FP16 в†’ INT8 в†’ INT4 РґР»СЏ СЌРєРѕРЅРѕРјРёРё РїР°РјСЏС‚Рё
 4. **Batching:** Static vs Continuous batching
 5. **Deployment:** API, self-hosted, edge
-6. **Security:** Validation, rate limiting, extraction prevention
+6. **Security:** Р’Р°Р»РёРґР°С†РёСЏ, rate limiting, РїСЂРµРґРѕС‚РІСЂР°С‰РµРЅРёРµ extraction
 
 ---
 
-## Следующий урок
+## РЎР»РµРґСѓСЋС‰РёР№ СѓСЂРѕРє
 
-> [Module README](README.md)
+в†’ [Module README](README.md)
 
 ---
 
-*AI Security Academy | Track 01: AI Fundamentals | Module 01.2: Training Lifecycle*
+*AI Security Academy | РўСЂРµРє 01: РћСЃРЅРѕРІС‹ AI | РњРѕРґСѓР»СЊ 01.2: Training Lifecycle*

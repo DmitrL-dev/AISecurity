@@ -1,114 +1,38 @@
-# Topological Data Analysis for Detection
+# Detection TDA
 
-> **Подмодуль 06.2: Продвинутая детекция с TDA**
-
----
-
-## Обзор
-
-Topological Data Analysis (TDA) предоставляет мощные инструменты для детекции атак через анализ структуры данных. Этот подмодуль учит как использовать persistent homology и связанные техники для AI security applications.
+> **Module 06.2: Topological Data Analysis for Detection**
 
 ---
 
-## Почему TDA для Security?
+## РћР±Р·РѕСЂ
 
-| Challenge | Традиционный подход | TDA подход |
-|-----------|---------------------|------------|
-| Novel attacks | Signature matching fails | Detect structural anomalies |
-| Paraphrase evasion | Semantic similarity | Topological fingerprints |
-| Batch attacks | Point-wise analysis | Collective pattern analysis |
-| Drift detection | Statistical thresholds | Persistent feature tracking |
+РСЃРїРѕР»СЊР·РѕРІР°РЅРёРµ С‚РѕРїРѕР»РѕРіРёС‡РµСЃРєРѕРіРѕ Р°РЅР°Р»РёР·Р° РґР°РЅРЅС‹С… (TDA) РґР»СЏ РѕР±РЅР°СЂСѓР¶РµРЅРёСЏ Р°РЅРѕРјР°Р»РёР№ Рё СѓРіСЂРѕР· РІ AI-СЃРёСЃС‚РµРјР°С….
 
 ---
 
-## Уроки
+## РЈСЂРѕРєРё
 
-### 01. TDA Fundamentals
-**Время:** 40 минут | **Сложность:** Продвинутый
-
-Core concepts:
-- Simplicial complexes
-- Homology groups
-- Betti numbers
-- Filtrations
+### [01. Introduction to TDA](01-introduction-to-tda.md)
+- What is TDA
+- Topological features
+- Applications in AI security
 
 ### [02. Persistent Homology](02-persistent-homology.md)
-**Время:** 45 минут | **Сложность:** Эксперт
-
-Tracking features across scales:
-- Birth-death diagrams
-- Persistence computation
-- Feature extraction
-- Attack signature detection
-
-### 03. Embedding Space Topology
-**Время:** 45 минут | **Сложность:** Эксперт
-
-Применение TDA к embeddings:
-- Point cloud analysis
-- Anomaly detection
-- Attack cluster identification
-- Real-time monitoring
-
-### 04. Practical Implementation
-**Время:** 50 минут | **Сложность:** Эксперт
-
-Построение TDA-based detectors:
-- Library integration (ripser, gudhi)
-- Performance optimization
-- Production deployment
-- SENTINEL TDA engines
+- Persistence diagrams
+- Betti numbers
+- Stability theorem
 
 ---
 
-## Ключевые концепции
+## Key Concepts
 
-### Persistent Homology Pipeline
-
-```
-Text > Embedding > Point Cloud > Persistence Diagram > Features > Classification
-```
-
-### Что мы детектируем
-
-| Homology Dimension | Feature | Security Application |
-|-------------------|---------|---------------------|
-| H? | Connected components | Attack cluster detection |
-| H? | Loops/cycles | Circular attack patterns |
-| H? | Voids | Complex structural anomalies |
+| Concept | Purpose |
+|---------|---------|
+| **Simplicial Complex** | Geometric structure from data |
+| **Filtration** | Multi-scale analysis |
+| **Persistence** | Robust feature extraction |
+| **Barcodes** | Visualization of topology |
 
 ---
 
-## Математические prerequisites
-
-- Линейная алгебра (vectors, matrices)
-- Базовая топология (open sets, continuity)
-- Metric spaces (distance functions)
-- Some algebraic background helpful
-
----
-
-## Используемые библиотеки
-
-```python
-# Primary TDA libraries
-import ripser          # Persistent homology computation
-import persim          # Persistence diagram analysis
-import gudhi           # Alternative TDA library
-
-# Supporting
-import numpy as np
-from sentence_transformers import SentenceTransformer
-```
-
----
-
-## Навигация
-
-| Предыдущий | Текущий | Следующий |
-|------------|---------|-----------|
-| [Red Teaming](../01-red-teaming/) | **TDA Detection** | [Mathematical Foundations](../03-mathematical-tda/) |
-
----
-
-*AI Security Academy | Подмодуль 06.2*
+*AI Security Academy | Module 06.2*

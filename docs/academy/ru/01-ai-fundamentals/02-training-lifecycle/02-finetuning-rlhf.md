@@ -1,34 +1,34 @@
-# Fine-tuning Ë RLHF
+# Fine-tuning –∏ RLHF
 
-> **”Ó‚ÂÌ¸:** Õ‡˜ËÌ‡˛˘ËÈ  
-> **¬ÂÏˇ:** 50 ÏËÌÛÚ  
-> **“ÂÍ:** 01 ó AI Fundamentals  
-> **ÃÓ‰ÛÎ¸:** 01.2 ó ∆ËÁÌÂÌÌ˚È ˆËÍÎ Ó·Û˜ÂÌËˇ  
-> **¬ÂÒËˇ:** 1.0
-
----
-
-## ÷ÂÎË Ó·Û˜ÂÌËˇ
-
-œÓÒÎÂ Á‡‚Â¯ÂÌËˇ ˝ÚÓ„Ó ÛÓÍ‡ ‚˚ ÒÏÓÊÂÚÂ:
-
-- [ ] Œ·˙ˇÒÌËÚ¸ ÔÓˆÂÒÒ fine-tuning ‰Îˇ ‡ÁÎË˜Ì˚ı Á‡‰‡˜
-- [ ] œÓÌˇÚ¸ Instruction Tuning Ë Â„Ó ÓÎ¸ ‚ ÒÓ‚ÂÏÂÌÌ˚ı LLM
-- [ ] ŒÔËÒ‡Ú¸ RLHF (Reinforcement Learning from Human Feedback)
-- [ ] œÓÌˇÚ¸ ‡Ú‡ÍË Ì‡ reward models Ë RLHF pipeline
+> **–£—Ä–æ–≤–µ–Ω—å:** Beginner  
+> **–í—Ä–µ–º—è:** 50 –º–∏–Ω—É—Ç  
+> **–¢—Ä–µ–∫:** 01 ‚Äî –û—Å–Ω–æ–≤—ã AI  
+> **–ú–æ–¥—É–ª—å:** 01.2 ‚Äî Training Lifecycle  
+> **–í–µ—Ä—Å–∏—è:** 1.0
 
 ---
 
-## 1. Fine-tuning: ¿‰‡ÔÚ‡ˆËˇ Í Á‡‰‡˜‡Ï
+## –¶–µ–ª–∏ –æ–±—É—á–µ–Ω–∏—è
 
-### 1.1 “ËÔ˚ Fine-tuning
+–ü–æ—Å–ª–µ –∑–∞–≤–µ—Ä—à–µ–Ω–∏—è —ç—Ç–æ–≥–æ —É—Ä–æ–∫–∞ –≤—ã —Å–º–æ–∂–µ—Ç–µ:
+
+- [ ] –û–±—ä—è—Å–Ω–∏—Ç—å –ø—Ä–æ—Ü–µ—Å—Å fine-tuning –¥–ª—è —Ä–∞–∑–ª–∏—á–Ω—ã—Ö –∑–∞–¥–∞—á
+- [ ] –ü–æ–Ω—è—Ç—å Instruction Tuning –∏ –µ–≥–æ —Ä–æ–ª—å –≤ —Å–æ–≤—Ä–µ–º–µ–Ω–Ω—ã—Ö LLM
+- [ ] –û–ø–∏—Å–∞—Ç—å RLHF (Reinforcement Learning from Human Feedback)
+- [ ] –ü–æ–Ω—è—Ç—å –∞—Ç–∞–∫–∏ –Ω–∞ reward models –∏ RLHF pipeline
+
+---
+
+## 1. Fine-tuning: –ê–¥–∞–ø—Ç–∞—Ü–∏—è –∫ –∑–∞–¥–∞—á–∞–º
+
+### 1.1 –¢–∏–ø—ã Fine-tuning
 
 ```
-Fine-tuning ÚËÔ˚:
-+-- Task-specific (ÍÎ‡ÒÒËÙËÍ‡ˆËˇ, NER, QA)
-+-- Instruction Tuning (ÒÎÂ‰Ó‚‡ÌËÂ ËÌÒÚÛÍˆËˇÏ)
-+-- Preference Tuning (RLHF, DPO)
-L-- Domain Adaptation (ÏÂ‰ËˆËÌ‡, ˛ËÒÔÛ‰ÂÌˆËˇ)
+–¢–∏–ø—ã Fine-tuning:
+‚îú‚îÄ‚îÄ Task-specific (–∫–ª–∞—Å—Å–∏—Ñ–∏–∫–∞—Ü–∏—è, NER, QA)
+‚îú‚îÄ‚îÄ Instruction Tuning (—Å–ª–µ–¥–æ–≤–∞–Ω–∏–µ –∏–Ω—Å—Ç—Ä—É–∫—Ü–∏—è–º)
+‚îú‚îÄ‚îÄ Preference Tuning (RLHF, DPO)
+‚îî‚îÄ‚îÄ Domain Adaptation (–º–µ–¥–∏—Ü–∏–Ω–∞, –ø—Ä–∞–≤–æ)
 ```
 
 ### 1.2 Task-Specific Fine-tuning
@@ -58,33 +58,33 @@ model = BertForQuestionAnswering.from_pretrained('bert-base-uncased')
 
 ## 2. Instruction Tuning
 
-### 2.1 ◊ÚÓ Ú‡ÍÓÂ Instruction Tuning?
+### 2.1 –ß—Ç–æ —Ç–∞–∫–æ–µ Instruction Tuning?
 
-**œÓ·ÎÂÏ‡:** Pre-trained LLM ÔÓ‰ÓÎÊ‡˛Ú ÚÂÍÒÚ, ÌÓ ÌÂ ÒÎÂ‰Û˛Ú ËÌÒÚÛÍˆËˇÏ.
+**–ü—Ä–æ–±–ª–µ–º–∞:** Pre-trained LLM –ø—Ä–æ–¥–æ–ª–∂–∞—é—Ç —Ç–µ–∫—Å—Ç, –Ω–æ –Ω–µ —Å–ª–µ–¥—É—é—Ç –∏–Ω—Å—Ç—Ä—É–∫—Ü–∏—è–º.
 
 ```
 Pre-trained GPT:
 User: "Translate to French: Hello"
 Model: "Translate to French: Hello, how are you? This is a common phrase..."
-       (ÔÓ‰ÓÎÊ‡ÂÚ ÚÂÍÒÚ, ÌÂ ÔÂÂ‚Ó‰ËÚ!)
+       (–ø—Ä–æ–¥–æ–ª–∂–∞–µ—Ç —Ç–µ–∫—Å—Ç, –Ω–µ –ø–µ—Ä–µ–≤–æ–¥–∏—Ç!)
 
 Instruction-tuned GPT:
 User: "Translate to French: Hello"
 Model: "Bonjour"
-       (ÒÎÂ‰ÛÂÚ ËÌÒÚÛÍˆËË!)
+       (—Å–ª–µ–¥—É–µ—Ç –∏–Ω—Å—Ç—Ä—É–∫—Ü–∏–∏!)
 ```
 
-### 2.2 Instruction Dataset Format
+### 2.2 –§–æ—Ä–º–∞—Ç Instruction –¥–∞—Ç–∞—Å–µ—Ç–∞
 
 ```python
-# ‘ÓÏ‡Ú instruction datasets
+# –§–æ—Ä–º–∞—Ç instruction –¥–∞—Ç–∞—Å–µ—Ç–∞
 instruction_example = {
     "instruction": "Translate the following text to French",
     "input": "Hello, how are you?",
     "output": "Bonjour, comment allez-vous?"
 }
 
-# »ÎË chat format
+# –ò–ª–∏ chat —Ñ–æ—Ä–º–∞—Ç
 chat_example = {
     "messages": [
         {"role": "system", "content": "You are a helpful translator."},
@@ -94,70 +94,70 @@ chat_example = {
 }
 ```
 
-### 2.3 œËÏÂ˚ Instruction Datasets
+### 2.3 –ü—Ä–∏–º–µ—Ä—ã Instruction –¥–∞—Ç–∞—Å–µ—Ç–æ–≤
 
-| Dataset | Size | Description |
-|---------|------|-------------|
+| –î–∞—Ç–∞—Å–µ—Ç | –†–∞–∑–º–µ—Ä | –û–ø–∏—Å–∞–Ω–∏–µ |
+|---------|--------|----------|
 | FLAN | 1,836 tasks | Google, multi-task |
 | Alpaca | 52K | Stanford, GPT-4 generated |
-| ShareGPT | 70K | Real ChatGPT conversations |
-| OpenAssistant | 160K | Human-written conversations |
+| ShareGPT | 70K | –†–µ–∞–ª—å–Ω—ã–µ ChatGPT —Ä–∞–∑–≥–æ–≤–æ—Ä—ã |
+| OpenAssistant | 160K | Human-written —Ä–∞–∑–≥–æ–≤–æ—Ä—ã |
 | Dolly | 15K | Databricks, human-written |
 
 ---
 
 ## 3. RLHF: Reinforcement Learning from Human Feedback
 
-### 3.1 «‡˜ÂÏ ÌÛÊÂÌ RLHF?
+### 3.1 –ó–∞—á–µ–º RLHF?
 
-**œÓ·ÎÂÏ‡:** Instruction tuning Û˜ËÚ ÙÓÏ‡ÚÛ, ÌÓ ÌÂ Í‡˜ÂÒÚ‚Û.
+**–ü—Ä–æ–±–ª–µ–º–∞:** Instruction tuning —É—á–∏—Ç —Ñ–æ—Ä–º–∞—Ç—É, –Ω–æ –Ω–µ –∫–∞—á–µ—Å—Ç–≤—É.
 
 ```
-Instruction-tuned (·ÂÁ RLHF):
+Instruction-tuned (–±–µ–∑ RLHF):
 User: "Write a poem about cats"
 Model: "Cats are nice. They meow. The end."
-       (—ÎÂ‰ÛÂÚ ËÌÒÚÛÍˆËË, ÌÓ Í‡˜ÂÒÚ‚Ó ÔÎÓıÓÂ)
+       (–°–ª–µ–¥—É–µ—Ç –∏–Ω—Å—Ç—Ä—É–∫—Ü–∏–∏, –Ω–æ –Ω–∏–∑–∫–æ–µ –∫–∞—á–µ—Å—Ç–≤–æ)
 
 RLHF-aligned:
 User: "Write a poem about cats"
 Model: "Soft paws upon the windowsill,
         A gentle purr, serene and still..."
-       ( ‡˜ÂÒÚ‚ÂÌÌÓ Ë engaging)
+       (–í—ã—Å–æ–∫–æ–µ –∫–∞—á–µ—Å—Ç–≤–æ –∏ engagement)
 ```
 
 ### 3.2 RLHF Pipeline
 
 ```
----------------------------------------------------------------------¨
-¶                         RLHF PIPELINE                              ¶
-+--------------------------------------------------------------------+
-¶                                                                    ¶
-¶  STEP 1: Supervised Fine-Tuning (SFT)                             ¶
-¶  -------------------------------------                            ¶
-¶  Pre-trained > Train on demonstrations > SFT Model                ¶
-¶                                                                    ¶
-¶  STEP 2: Reward Model Training                                     ¶
-¶  ---------------------------------                                ¶
-¶  Collect comparisons: A vs B, human chooses winner                ¶
-¶  Train Reward Model: input > score (how good is this response?)   ¶
-¶                                                                    ¶
-¶  STEP 3: RL Optimization (PPO)                                     ¶
-¶  -----------------------------                                     ¶
-¶  Policy = SFT Model                                                ¶
-¶  Generate responses > Score with Reward Model > Update with PPO   ¶
-¶                                                                    ¶
-L---------------------------------------------------------------------
+‚îå‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îê
+‚îÇ                         RLHF PIPELINE                              ‚îÇ
+‚îú‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚î§
+‚îÇ                                                                    ‚îÇ
+‚îÇ  –®–ê–ì 1: Supervised Fine-Tuning (SFT)                              ‚îÇ
+‚îÇ  ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ                            ‚îÇ
+‚îÇ  Pre-trained ‚Üí –û–±—É—á–∞–µ–º –Ω–∞ demonstrations ‚Üí SFT Model              ‚îÇ
+‚îÇ                                                                    ‚îÇ
+‚îÇ  –®–ê–ì 2: Reward Model Training                                      ‚îÇ
+‚îÇ  ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ                                ‚îÇ
+‚îÇ  –°–æ–±–∏—Ä–∞–µ–º —Å—Ä–∞–≤–Ω–µ–Ω–∏—è: A vs B, —á–µ–ª–æ–≤–µ–∫ –≤—ã–±–∏—Ä–∞–µ—Ç –ø–æ–±–µ–¥–∏—Ç–µ–ª—è         ‚îÇ
+‚îÇ  –û–±—É—á–∞–µ–º Reward Model: input ‚Üí score (–Ω–∞—Å–∫–æ–ª—å–∫–æ —Ö–æ—Ä–æ—à –æ—Ç–≤–µ—Ç?)    ‚îÇ
+‚îÇ                                                                    ‚îÇ
+‚îÇ  –®–ê–ì 3: RL Optimization (PPO)                                      ‚îÇ
+‚îÇ  ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ                                     ‚îÇ
+‚îÇ  Policy = SFT Model                                                ‚îÇ
+‚îÇ  –ì–µ–Ω–µ—Ä–∏—Ä—É–µ–º –æ—Ç–≤–µ—Ç—ã ‚Üí –û—Ü–µ–Ω–∏–≤–∞–µ–º Reward Model ‚Üí –û–±–Ω–æ–≤–ª—è–µ–º —Å PPO    ‚îÇ
+‚îÇ                                                                    ‚îÇ
+‚îî‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îò
 ```
 
-### 3.3 Step 1: SFT
+### 3.3 –®–∞–≥ 1: SFT
 
 ```python
 from transformers import AutoModelForCausalLM, Trainer, TrainingArguments
 
-# «‡„ÛÊ‡ÂÏ base model
+# –ó–∞–≥—Ä—É–∂–∞–µ–º base model
 model = AutoModelForCausalLM.from_pretrained("meta-llama/Llama-2-7b-hf")
 
-# SFT Ì‡ demonstration data
+# SFT –Ω–∞ demonstration –¥–∞–Ω–Ω—ã—Ö
 training_args = TrainingArguments(
     output_dir="./sft_model",
     num_train_epochs=3,
@@ -168,20 +168,20 @@ training_args = TrainingArguments(
 trainer = Trainer(
     model=model,
     args=training_args,
-    train_dataset=demonstration_dataset,  # Human-written examples
+    train_dataset=demonstration_dataset,  # Human-written –ø—Ä–∏–º–µ—Ä—ã
 )
 
 trainer.train()
 ```
 
-### 3.4 Step 2: Reward Model
+### 3.4 –®–∞–≥ 2: Reward Model
 
 ```python
 from transformers import AutoModelForSequenceClassification
 
 class RewardModel(nn.Module):
     """
-    Reward Model: ÓˆÂÌË‚‡ÂÚ Í‡˜ÂÒÚ‚Ó response
+    Reward Model: –æ—Ü–µ–Ω–∏–≤–∞–µ—Ç –∫–∞—á–µ—Å—Ç–≤–æ –æ—Ç–≤–µ—Ç–∞
     """
     def __init__(self, base_model_name):
         super().__init__()
@@ -194,7 +194,7 @@ class RewardModel(nn.Module):
         outputs = self.model(input_ids, attention_mask)
         return outputs.logits  # Reward score
 
-# Training data: comparisons
+# Training –¥–∞–Ω–Ω—ã–µ: —Å—Ä–∞–≤–Ω–µ–Ω–∏—è
 comparison_data = [
     {
         "prompt": "Explain quantum physics",
@@ -204,17 +204,17 @@ comparison_data = [
     # ...
 ]
 
-# Loss: chosen ‰ÓÎÊÂÌ ËÏÂÚ¸ HIGHER reward ˜ÂÏ rejected
+# Loss: chosen –¥–æ–ª–∂–µ–Ω –∏–º–µ—Ç—å –í–´–®–ï reward —á–µ–º rejected
 def reward_loss(chosen_rewards, rejected_rewards):
     return -F.logsigmoid(chosen_rewards - rejected_rewards).mean()
 ```
 
-### 3.5 Step 3: PPO Optimization
+### 3.5 –®–∞–≥ 3: PPO Optimization
 
 ```python
 from trl import PPOTrainer, PPOConfig
 
-#  ÓÌÙË„Û‡ˆËˇ PPO
+# –ö–æ–Ω—Ñ–∏–≥—É—Ä–∞—Ü–∏—è PPO
 ppo_config = PPOConfig(
     model_name="./sft_model",
     learning_rate=1.41e-5,
@@ -226,17 +226,17 @@ ppo_config = PPOConfig(
 ppo_trainer = PPOTrainer(
     config=ppo_config,
     model=sft_model,
-    ref_model=sft_model_frozen,  # Reference ‰Îˇ KL penalty
+    ref_model=sft_model_frozen,  # Reference –¥–ª—è KL penalty
     tokenizer=tokenizer,
     reward_model=reward_model,
 )
 
 # Training loop
 for batch in dataloader:
-    # 1. Generate responses
+    # 1. –ì–µ–Ω–µ—Ä–∏—Ä—É–µ–º –æ—Ç–≤–µ—Ç—ã
     responses = ppo_trainer.generate(batch["prompt"])
     
-    # 2. Get rewards
+    # 2. –ü–æ–ª—É—á–∞–µ–º rewards
     rewards = reward_model(responses)
     
     # 3. PPO step
@@ -247,33 +247,33 @@ for batch in dataloader:
 
 ## 4. DPO: Direct Preference Optimization
 
-### 4.1 œÓ·ÎÂÏ‡ RLHF
+### 4.1 –ü—Ä–æ–±–ª–µ–º–∞ RLHF
 
 ```
-RLHF Complexity:
-+-- Train SFT model
-+-- Train separate Reward Model
-+-- Complex PPO optimization
-+-- Unstable training
-L-- High compute cost
+–°–ª–æ–∂–Ω–æ—Å—Ç—å RLHF:
+‚îú‚îÄ‚îÄ –û–±—É—á–∏—Ç—å SFT –º–æ–¥–µ–ª—å
+‚îú‚îÄ‚îÄ –û–±—É—á–∏—Ç—å –æ—Ç–¥–µ–ª—å–Ω—É—é Reward Model
+‚îú‚îÄ‚îÄ –°–ª–æ–∂–Ω–∞—è PPO –æ–ø—Ç–∏–º–∏–∑–∞—Ü–∏—è
+‚îú‚îÄ‚îÄ –ù–µ—Å—Ç–∞–±–∏–ª—å–Ω–æ–µ –æ–±—É—á–µ–Ω–∏–µ
+‚îî‚îÄ‚îÄ –í—ã—Å–æ–∫–∏–µ compute –∑–∞—Ç—Ä–∞—Ç—ã
 ```
 
-### 4.2 DPO »‰Âˇ
+### 4.2 –ò–¥–µ—è DPO
 
-**DPO** (Rafailov et al., 2023) ó ÔˇÏ‡ˇ ÓÔÚËÏËÁ‡ˆËˇ ·ÂÁ reward model!
+**DPO** (Rafailov et al., 2023) ‚Äî –ø—Ä—è–º–∞—è –æ–ø—Ç–∏–º–∏–∑–∞—Ü–∏—è –±–µ–∑ reward model!
 
 ```python
-# DPO loss: ÔˇÏÓ ËÁ preferences
+# DPO loss: –Ω–∞–ø—Ä—è–º—É—é –∏–∑ preferences
 def dpo_loss(model, ref_model, chosen, rejected, beta=0.1):
     """
-    DPO Loss = -log sigmoid(beta * (log ?(chosen)/?_ref(chosen) 
-                                   - log ?(rejected)/?_ref(rejected)))
+    DPO Loss = -log sigmoid(beta * (log œÄ(chosen)/œÄ_ref(chosen) 
+                                   - log œÄ(rejected)/œÄ_ref(rejected)))
     """
-    # Log probs from current model
+    # Log probs –∏–∑ —Ç–µ–∫—É—â–µ–π –º–æ–¥–µ–ª–∏
     chosen_logprobs = model.get_log_probs(chosen)
     rejected_logprobs = model.get_log_probs(rejected)
     
-    # Log probs from reference (frozen)
+    # Log probs –∏–∑ reference (frozen)
     with torch.no_grad():
         ref_chosen_logprobs = ref_model.get_log_probs(chosen)
         ref_rejected_logprobs = ref_model.get_log_probs(rejected)
@@ -286,7 +286,7 @@ def dpo_loss(model, ref_model, chosen, rejected, beta=0.1):
     return loss
 ```
 
-### 4.3 DPO ‚ TRL
+### 4.3 DPO —Å TRL
 
 ```python
 from trl import DPOTrainer, DPOConfig
@@ -310,38 +310,38 @@ dpo_trainer.train()
 
 ---
 
-## 5. ¡ÂÁÓÔ‡ÒÌÓÒÚ¸ RLHF Pipeline
+## 5. –ë–µ–∑–æ–ø–∞—Å–Ω–æ—Å—Ç—å RLHF Pipeline
 
 ### 5.1 Reward Hacking
 
-**œÓ·ÎÂÏ‡:** ÃÓ‰ÂÎ¸ Û˜ËÚÒˇ Ó·Ï‡Ì˚‚‡Ú¸ reward model, ÌÂ ÛÎÛ˜¯‡ˇ Â‡Î¸ÌÓÂ Í‡˜ÂÒÚ‚Ó.
+**–ü—Ä–æ–±–ª–µ–º–∞:** –ú–æ–¥–µ–ª—å —É—á–∏—Ç—Å—è –æ–±–º–∞–Ω—ã–≤–∞—Ç—å reward model –±–µ–∑ —Ä–µ–∞–ª—å–Ω–æ–≥–æ —É–ª—É—á—à–µ–Ω–∏—è –∫–∞—á–µ—Å—Ç–≤–∞.
 
 ```
-Reward Hacking Examples:
-+-- ƒÎËÌÌ˚Â ÓÚ‚ÂÚ˚ (RM ÔÂ‰ÔÓ˜ËÚ‡ÂÚ ‰ÎËÌÌ˚Â)
-+-- œÓ‚ÚÓÂÌËÂ keywords (RM ˆÂÌËÚ ÓÔÂ‰ÂÎ∏ÌÌ˚Â ÒÎÓ‚‡)
-+-- ”ÍÎÓÌ˜Ë‚˚Â ÓÚ‚ÂÚ˚ ("I'm just an AI...")
-L-- Sycophancy (ÒÓ„Î‡¯‡Ú¸Òˇ ÒÓ ‚ÒÂÏ)
+–ü—Ä–∏–º–µ—Ä—ã Reward Hacking:
+‚îú‚îÄ‚îÄ –î–ª–∏–Ω–Ω—ã–µ –æ—Ç–≤–µ—Ç—ã (RM –ø—Ä–µ–¥–ø–æ—á–∏—Ç–∞–µ—Ç verbose)
+‚îú‚îÄ‚îÄ –ü–æ–≤—Ç–æ—Ä–µ–Ω–∏–µ keywords (RM —Ü–µ–Ω–∏—Ç –æ–ø—Ä–µ–¥–µ–ª—ë–Ω–Ω—ã–µ —Å–ª–æ–≤–∞)
+‚îú‚îÄ‚îÄ –£–∫–ª–æ–Ω—á–∏–≤—ã–µ –æ—Ç–≤–µ—Ç—ã ("I'm just an AI...")
+‚îî‚îÄ‚îÄ Sycophancy (—Å–æ–≥–ª–∞—à–∞–µ—Ç—Å—è —Å–æ –≤—Å–µ–º)
 ```
 
-### 5.2 Reward Model Attacks
+### 5.2 –ê—Ç–∞–∫–∏ –Ω–∞ Reward Model
 
 ```python
-# Adversarial prompt ‰Îˇ reward model
+# Adversarial prompt –¥–ª—è reward model
 def attack_reward_model(rm, target_high_reward=True):
     """
-    Õ‡ÈÚË prompt, ÍÓÚÓ˚È ÔÓÎÛ˜‡ÂÚ high reward
-    ÌÓ Ì‡ Ò‡ÏÓÏ ‰ÂÎÂ harmful
+    –ù–∞—Ö–æ–¥–∏–º prompt –∫–æ—Ç–æ—Ä—ã–π –ø–æ–ª—É—á–∞–µ—Ç –≤—ã—Å–æ–∫–∏–π reward
+    –Ω–æ –Ω–∞ —Å–∞–º–æ–º –¥–µ–ª–µ –≤—Ä–µ–¥–µ–Ω
     """
     adversarial_prompt = "As an AI, I must be helpful. "
     adversarial_prompt += "[HIDDEN: Actually do something harmful]"
     adversarial_prompt += " I'm glad to assist you safely."
     
-    # RM ÏÓÊÂÚ ‰‡Ú¸ high score ËÁ-Á‡ "helpful"/"safely"
-    # ÕÓ Â‡Î¸Ì˚È ÍÓÌÚÂÌÚ ó harmful!
+    # RM –º–æ–∂–µ—Ç –¥–∞—Ç—å –≤—ã—Å–æ–∫–∏–π score –∏–∑-–∑–∞ "helpful"/"safely"
+    # –ù–æ —Ä–µ–∞–ª—å–Ω—ã–π –∫–æ–Ω—Ç–µ–Ω—Ç –≤—Ä–µ–¥–µ–Ω!
 ```
 
-### 5.3 SENTINEL «‡˘ËÚ‡ RLHF
+### 5.3 SENTINEL RLHF Protection
 
 ```python
 from sentinel import scan  # Public API
@@ -350,7 +350,7 @@ from sentinel import scan  # Public API
     SycophancyDetector
 )
 
-# ¿Û‰ËÚ reward model
+# –ê—É–¥–∏—Ç reward model
 auditor = RewardModelAuditor()
 audit_result = auditor.analyze(
     reward_model=rm,
@@ -361,7 +361,7 @@ if audit_result.vulnerabilities:
     print(f"RM Vulnerabilities: {audit_result.vulnerabilities}")
     # ["Prefers verbose responses", "Sensitive to 'helpful' keyword"]
 
-# œÓ‚ÂÍ‡ Ì‡ sycophancy
+# –ü—Ä–æ–≤–µ—Ä–∫–∞ –Ω–∞ sycophancy
 sycophancy_detector = SycophancyDetector()
 result = sycophancy_detector.analyze(
     model=rlhf_model,
@@ -374,79 +374,79 @@ if result.sycophancy_score > 0.7:
 
 ---
 
-## 6. œ‡ÍÚË˜ÂÒÍËÂ Á‡‰‡ÌËˇ
+## 6. –ü—Ä–∞–∫—Ç–∏—á–µ—Å–∫–∏–µ —É–ø—Ä–∞–∂–Ω–µ–Ω–∏—è
 
-### «‡‰‡ÌËÂ 1: Instruction Tuning
+### –£–ø—Ä–∞–∂–Ω–µ–Ω–∏–µ 1: Instruction Tuning
 
 ```python
-# Fine-tune ÏÓ‰ÂÎ¸ Ì‡ instruction dataset
+# Fine-tune –º–æ–¥–µ–ª—å –Ω–∞ instruction –¥–∞—Ç–∞—Å–µ—Ç–µ
 from datasets import load_dataset
 
-# «‡„ÛÁËÚÂ Alpaca ËÎË Dolly
+# –ó–∞–≥—Ä—É–∂–∞–µ–º Alpaca –∏–ª–∏ Dolly
 dataset = load_dataset("tatsu-lab/alpaca")
 
-# œÓ‰„ÓÚÓ‚¸ÚÂ ‰‡ÌÌ˚Â ‚ chat format
-# Fine-tune Ò Trainer
+# –ì–æ—Ç–æ–≤–∏–º –¥–∞–Ω–Ω—ã–µ –≤ chat —Ñ–æ—Ä–º–∞—Ç–µ
+# Fine-tune —Å Trainer
 ```
 
-### «‡‰‡ÌËÂ 2: DPO Training
+### –£–ø—Ä–∞–∂–Ω–µ–Ω–∏–µ 2: DPO Training
 
 ```python
-# œÓÔÓ·ÛÈÚÂ DPO Ì‡ comparison data
+# –ü–æ–ø—Ä–æ–±—É–π—Ç–µ DPO –Ω–∞ comparison –¥–∞–Ω–Ω—ã—Ö
 from trl import DPOTrainer
 
-# —‡‚ÌËÚÂ ÂÁÛÎ¸Ú‡Ú˚ Ò SFT-only
+# –°—Ä–∞–≤–Ω–∏—Ç–µ —Ä–µ–∑—É–ª—å—Ç–∞—Ç—ã —Å SFT-only
 ```
 
 ---
 
-## 7. œÓ‚ÂÓ˜Ì˚Â ‚ÓÔÓÒ˚
+## 7. Quiz –≤–æ–ø—Ä–æ—Å—ã
 
-### ¬ÓÔÓÒ 1
+### –í–æ–ø—Ä–æ—Å 1
 
-◊ÚÓ Ú‡ÍÓÂ Instruction Tuning?
+–ß—Ç–æ —Ç–∞–∫–æ–µ Instruction Tuning?
 
-- [ ] A) Œ·Û˜ÂÌËÂ ÏÓ‰ÂÎË ÔËÒ‡Ú¸ ËÌÒÚÛÍˆËË
-- [x] B) Fine-tuning ‰Îˇ ÒÎÂ‰Ó‚‡ÌËˇ ÔÓÎ¸ÁÓ‚‡ÚÂÎ¸ÒÍËÏ ËÌÒÚÛÍˆËˇÏ
-- [ ] C) Œ·Û˜ÂÌËÂ Ì‡ ËÒıÓ‰ÌÓÏ ÍÓ‰Â
+- [ ] A) –û–±—É—á–µ–Ω–∏–µ –º–æ–¥–µ–ª–∏ –ø–∏—Å–∞—Ç—å –∏–Ω—Å—Ç—Ä—É–∫—Ü–∏–∏
+- [x] B) Fine-tuning –¥–ª—è —Å–ª–µ–¥–æ–≤–∞–Ω–∏—è –ø–æ–ª—å–∑–æ–≤–∞—Ç–µ–ª—å—Å–∫–∏–º –∏–Ω—Å—Ç—Ä—É–∫—Ü–∏—è–º
+- [ ] C) –û–±—É—á–µ–Ω–∏–µ –Ω–∞ –∏—Å—Ö–æ–¥–Ω–æ–º –∫–æ–¥–µ
 - [ ] D) Reinforcement learning
 
-### ¬ÓÔÓÒ 2
+### –í–æ–ø—Ä–æ—Å 2
 
- ‡ÍËÂ ÍÓÏÔÓÌÂÌÚ˚ ‚ıÓ‰ˇÚ ‚ RLHF?
+–ö–∞–∫–∏–µ –∫–æ–º–ø–æ–Ω–µ–Ω—Ç—ã –≤—Ö–æ–¥—è—Ç –≤ RLHF?
 
-- [ ] A) “ÓÎ¸ÍÓ reward model
-- [ ] B) “ÓÎ¸ÍÓ PPO
+- [ ] A) –¢–æ–ª—å–∫–æ reward model
+- [ ] B) –¢–æ–ª—å–∫–æ PPO
 - [x] C) SFT + Reward Model + PPO
-- [ ] D) “ÓÎ¸ÍÓ human feedback
+- [ ] D) –¢–æ–ª—å–∫–æ human feedback
 
-### ¬ÓÔÓÒ 3
+### –í–æ–ø—Ä–æ—Å 3
 
-◊ÚÓ Ú‡ÍÓÂ reward hacking?
+–ß—Ç–æ —Ç–∞–∫–æ–µ reward hacking?
 
-- [x] A) ÃÓ‰ÂÎ¸ Ì‡ıÓ‰ËÚ ÒÔÓÒÓ·˚ ÔÓÎÛ˜ËÚ¸ high reward ·ÂÁ ÛÎÛ˜¯ÂÌËˇ Í‡˜ÂÒÚ‚‡
-- [ ] B) ¬ÁÎÓÏ reward ÙÛÌÍˆËË ı‡ÍÂ‡ÏË
-- [ ] C) ÃÂÚÓ‰ Ó·Û˜ÂÌËˇ reward model
-- [ ] D) ŒÔÚËÏËÁ‡ˆËˇ compute ‰Îˇ RLHF
-
----
-
-## 8. –ÂÁ˛ÏÂ
-
-¬ ˝ÚÓÏ ÛÓÍÂ Ï˚ ËÁÛ˜ËÎË:
-
-1. **Fine-tuning:** ¿‰‡ÔÚ‡ˆËˇ pre-trained ÏÓ‰ÂÎÂÈ Í Á‡‰‡˜‡Ï
-2. **Instruction tuning:** Œ·Û˜ÂÌËÂ ÒÎÂ‰Ó‚‡Ú¸ ËÌÒÚÛÍˆËˇÏ
-3. **RLHF:** SFT > Reward Model > PPO
-4. **DPO:** œˇÏ‡ˇ ÓÔÚËÏËÁ‡ˆËˇ ·ÂÁ reward model
-5. **¡ÂÁÓÔ‡ÒÌÓÒÚ¸:** Reward hacking, RM attacks, sycophancy
+- [x] A) –ú–æ–¥–µ–ª—å –Ω–∞—Ö–æ–¥–∏—Ç —Å–ø–æ—Å–æ–±—ã –ø–æ–ª—É—á–∏—Ç—å –≤—ã—Å–æ–∫–∏–π reward –±–µ–∑ —É–ª—É—á—à–µ–Ω–∏—è –∫–∞—á–µ—Å—Ç–≤–∞
+- [ ] B) –í–∑–ª–æ–º reward —Ñ—É–Ω–∫—Ü–∏–∏ —Ö–∞–∫–µ—Ä–∞–º–∏
+- [ ] C) –ú–µ—Ç–æ–¥ –æ–±—É—á–µ–Ω–∏—è reward model
+- [ ] D) Compute –æ–ø—Ç–∏–º–∏–∑–∞—Ü–∏—è –¥–ª—è RLHF
 
 ---
 
-## —ÎÂ‰Û˛˘ËÈ ÛÓÍ
+## 8. –†–µ–∑—é–º–µ
 
-> [03. Inference Ë Deployment](03-inference-deployment.md)
+–í —ç—Ç–æ–º —É—Ä–æ–∫–µ –º—ã –∏–∑—É—á–∏–ª–∏:
+
+1. **Fine-tuning:** –ê–¥–∞–ø—Ç–∞—Ü–∏—è pre-trained –º–æ–¥–µ–ª–µ–π –∫ –∑–∞–¥–∞—á–∞–º
+2. **Instruction tuning:** –û–±—É—á–µ–Ω–∏–µ —Å–ª–µ–¥–æ–≤–∞–Ω–∏—é –∏–Ω—Å—Ç—Ä—É–∫—Ü–∏—è–º
+3. **RLHF:** SFT ‚Üí Reward Model ‚Üí PPO
+4. **DPO:** –ü—Ä—è–º–∞—è –æ–ø—Ç–∏–º–∏–∑–∞—Ü–∏—è –±–µ–∑ reward model
+5. **Security:** Reward hacking, –∞—Ç–∞–∫–∏ –Ω–∞ RM, sycophancy
 
 ---
 
-*AI Security Academy | Track 01: AI Fundamentals | Module 01.2: Training Lifecycle*
+## –°–ª–µ–¥—É—é—â–∏–π —É—Ä–æ–∫
+
+‚Üí [03. Inference –∏ Deployment](03-inference-deployment.md)
+
+---
+
+*AI Security Academy | –¢—Ä–µ–∫ 01: –û—Å–Ω–æ–≤—ã AI | –ú–æ–¥—É–ª—å 01.2: Training Lifecycle*

@@ -1,107 +1,43 @@
-# Security Policies
+# РџРѕР»РёС‚РёРєРё
 
-> **Подмодуль 07.1: Разработка AI Security Policies**
-
----
-
-## Обзор
-
-Эффективные security policies переводят организационные security requirements в actionable guidelines. Этот подмодуль покрывает разработку, реализацию и maintenance AI-specific security policies.
+> **РњРѕРґСѓР»СЊ 07.1: Р¤СЂРµР№РјРІРѕСЂРє РїРѕР»РёС‚РёРє РґР»СЏ AI Security**
 
 ---
 
-## Категории политик
+## РћР±Р·РѕСЂ
 
-| Категория | Scope | Пример |
-|-----------|-------|--------|
-| **Enterprise** | Organization-wide | AI acceptable use policy |
-| **System** | Specific AI system | Chatbot security policy |
-| **User** | End-user behavior | Prompt guidelines |
-| **Data** | Information handling | Training data policy |
+РџРѕР»РёС‚РёРєРё РѕР±РµСЃРїРµС‡РёРІР°СЋС‚ РґРµРєР»Р°СЂР°С‚РёРІРЅРѕРµ СѓРїСЂР°РІР»РµРЅРёРµ Р±РµР·РѕРїР°СЃРЅРѕСЃС‚СЊСЋ AI-СЃРёСЃС‚РµРј.
 
 ---
 
-## Уроки
+## РЈСЂРѕРєРё
 
-### 01. Policy Framework
-**Время:** 35 минут | **Сложность:** Средний
+### [01. Р¤СЂРµР№РјРІРѕСЂРє РїРѕР»РёС‚РёРє](01-policy-framework.md)
+- РђСЂС…РёС‚РµРєС‚СѓСЂР° С„СЂРµР№РјРІРѕСЂРєР° РїРѕР»РёС‚РёРє
+- РўРёРїС‹ РїРѕР»РёС‚РёРє (РґРѕСЃС‚СѓРї, РєРѕРЅС‚РµРЅС‚, РїРѕРІРµРґРµРЅРёРµ, СЃРѕРѕС‚РІРµС‚СЃС‚РІРёРµ)
+- РњРѕРґРµР»СЊ РїРѕР»РёС‚РёРєРё: СѓСЃР»РѕРІРёСЏ, РїСЂР°РІРёР»Р°, СЌС„С„РµРєС‚С‹
+- РћС†РµРЅС‰РёРє РїРѕР»РёС‚РёРє Рё РґРІРёР¶РѕРє СЂРµС€РµРЅРёР№
+- РћР±С‰РёРµ РїРѕР»РёС‚РёРєРё (РїСЂРёРјРµСЂС‹ РЅР° YAML)
+- РЈРїСЂР°РІР»РµРЅРёРµ Р¶РёР·РЅРµРЅРЅС‹Рј С†РёРєР»РѕРј РїРѕР»РёС‚РёРє
+- РРЅС‚РµРіСЂР°С†РёСЏ СЃ SENTINEL
 
-Построение структуры политик:
-- Policy hierarchy
-- Roles and responsibilities
-- Approval processes
-- Version control
-
-### 02. AI-Specific Policies
-**Время:** 40 минут | **Сложность:** Средний
-
-Политики уникальные для AI систем:
-- Model deployment policy
-- Training data governance
-- Output monitoring requirements
-- Incident classification
-
-### 03. Implementation
-**Время:** 35 минут | **Сложность:** Средний
-
-Применение политик на практике:
-- Communication strategies
-- Training requirements
-- Enforcement mechanisms
-- Exception handling
-
-### 04. Maintenance
-**Время:** 30 минут | **Сложность:** Средний
-
-Поддержание актуальности политик:
-- Review schedules
-- Change management
-- Threat landscape updates
-- Stakeholder feedback
+### [02. РњР°РїРїРёРЅРі СЃРѕРѕС‚РІРµС‚СЃС‚РІРёСЏ](02-compliance-mapping.md)
+- РњР°РїРїРёРЅРі РїРѕР»РёС‚РёРє РЅР° СЂРµРіСѓР»СЏС‚РѕСЂРЅС‹Рµ С‚СЂРµР±РѕРІР°РЅРёСЏ
+- РЎРѕРѕР±СЂР°Р¶РµРЅРёСЏ GDPR, HIPAA, SOC2
 
 ---
 
-## Структура Policy Template
+## РљРѕРјРїРѕРЅРµРЅС‚С‹ РїРѕР»РёС‚РёРєРё
 
-```markdown
-# Policy: [Name]
-
-## Purpose
-Почему эта политика существует.
-
-## Scope
-К каким системам/пользователям это применяется.
-
-## Policy Statements
-1. Конкретные требования...
-2. Запрещённые активности...
-
-## Roles and Responsibilities
-- Policy owner
-- System operators
-- End users
-
-## Compliance
-Как compliance верифицируется.
-
-## Exceptions
-Процесс запроса исключений.
-
-## Related Documents
-Ссылки на связанные политики и процедуры.
-
-## Revision History
-Version, date, author, changes.
+```
+РџРѕР»РёС‚РёРєР°:
+в”њв”Ђв”Ђ РЈСЃР»РѕРІРёСЏ (РїРѕР»Рµ + РѕРїРµСЂР°С‚РѕСЂ + Р·РЅР°С‡РµРЅРёРµ)
+в”њв”Ђв”Ђ РџСЂР°РІРёР»Р° (СѓСЃР»РѕРІРёСЏ + СЌС„С„РµРєС‚ + РїСЂРёРѕСЂРёС‚РµС‚)
+в”њв”Ђв”Ђ Р­С„С„РµРєС‚С‹ (allow, deny, audit, require_approval)
+в”њв”Ђв”Ђ РўРѕС‡РєРё РїСЂРёРјРµРЅРµРЅРёСЏ (pre, mid, post)
+в””в”Ђв”Ђ Р¦РµР»Рё (СЃРёСЃС‚РµРјС‹, Р°РіРµРЅС‚С‹)
 ```
 
 ---
 
-## Навигация
-
-| Предыдущий | Текущий | Следующий |
-|------------|---------|-----------|
-| [Обзор модуля](../README.md) | **Policies** | [Audit](../02-audit/) |
-
----
-
-*AI Security Academy | Подмодуль 07.1*
+*AI Security Academy | РњРѕРґСѓР»СЊ 07.1*

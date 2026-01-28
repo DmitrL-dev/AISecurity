@@ -1,52 +1,52 @@
-# Безопасность LangChain Tools
+# Безопасность инструментов LangChain
 
-> **Уровень:** ������� | **Время:** 35 мин | **Трек:** 04 | **Модуль:** 04.2
+> **Уровень:** Средний | **Время:** 35 мин | **Трек:** 04 | **Модуль:** 04.2
 
 ---
 
-## 1. Обзор LangChain Tools
+## 1. Обзор инструментов LangChain
 
-LangChain предоставляет структурированные tool interfaces для LLM агентов.
+LangChain предоставляет структурированные интерфейсы инструментов для LLM-агентов.
 
 ```python
 from langchain.tools import BaseTool, tool
 from pydantic import BaseModel, Field
 
 class SearchInput(BaseModel):
-    query: str = Field(description="Search query")
+    query: str = Field(description="Поисковый запрос")
 
 class SecureSearchTool(BaseTool):
     name = "search"
-    description = "Search the knowledge base"
+    description = "Поиск в базе знаний"
     args_schema = SearchInput
     
     def _run(self, query: str) -> str:
         # Валидация
         if not self._validate_query(query):
-            return "Invalid query"
+            return "Недопустимый запрос"
         return self._perform_search(query)
     
     def _validate_query(self, query: str) -> bool:
-        # Проверка на injection patterns
+        # Проверка на паттерны инъекций
         dangerous = ["ignore previous", "system:", "admin"]
         return not any(d in query.lower() for d in dangerous)
 ```
 
 ---
 
-## 2. Security Threats
+## 2. Угрозы безопасности
 
 ```
-LangChain Tool Threats:
-├── Tool Confusion (вызов неправильного tool)
-├── Parameter Injection (вредоносные args)
-├── Chain Manipulation (изменение execution flow)
-└── Memory Poisoning (повреждение agent memory)
+Угрозы инструментов LangChain:
+├── Путаница инструментов (вызван неправильный инструмент)
+├── Инъекция параметров (вредоносные аргументы)
+├── Манипуляция цепочками (изменение потока выполнения)
+└── Отравление памяти (повреждение памяти агента)
 ```
 
 ---
 
-## 3. Secure Tool Implementation
+## 3. Безопасная реализация инструментов
 
 ```python
 class SecureToolExecutor:
@@ -55,20 +55,20 @@ class SecureToolExecutor:
         self.audit_log = []
     
     def execute(self, tool_name: str, args: dict, context: dict) -> str:
-        # 1. Валидация что tool существует
+        # 1. Проверка существования инструмента
         if tool_name not in self.tools:
-            raise SecurityError(f"Unknown tool: {tool_name}")
+            raise SecurityError(f"Неизвестный инструмент: {tool_name}")
         
         tool = self.tools[tool_name]
         
-        # 2. Валидация args против schema
+        # 2. Валидация аргументов по схеме
         validated = tool.args_schema(**args)
         
-        # 3. Проверка permissions
+        # 3. Проверка разрешений
         if not self._check_permission(tool_name, context):
-            raise PermissionError("Access denied")
+            raise PermissionError("Доступ запрещён")
         
-        # 4. Выполнение с audit
+        # 4. Выполнение с аудитом
         self.audit_log.append({
             "tool": tool_name, "args": args, 
             "user": context.get("user_id")
@@ -79,7 +79,7 @@ class SecureToolExecutor:
 
 ---
 
-## 4. Chain Security
+## 4. Безопасность цепочек
 
 ```python
 from langchain.chains import LLMChain
@@ -92,39 +92,39 @@ class SecureChain:
         self.max_iterations = 10
     
     def run(self, input_text: str, context: dict) -> str:
-        # Санитизация input
+        # Санитизация ввода
         sanitized = self._sanitize_input(input_text)
         
         iterations = 0
         while iterations < self.max_iterations:
-            # Получаем LLM response
+            # Получение ответа LLM
             response = self.llm.invoke(sanitized)
             
-            # Проверяем на tool call
+            # Проверка на вызов инструмента
             if tool_call := self._extract_tool_call(response):
                 result = self.tool_executor.execute(
                     tool_call["name"], 
                     tool_call["args"], 
                     context
                 )
-                sanitized = f"{sanitized}\nTool result: {result}"
+                sanitized = f"{sanitized}\nРезультат инструмента: {result}"
             else:
                 return response
             
             iterations += 1
         
-        raise SecurityError("Max iterations exceeded")
+        raise SecurityError("Превышено максимальное количество итераций")
 ```
 
 ---
 
-## 5. Резюме
+## 5. Итоги
 
-1. **Validation:** Schema-based parameter validation
-2. **Permissions:** Tool-level access control  
-3. **Audit:** Log всех tool invocations
-4. **Limits:** Iteration и resource bounds
+1. **Валидация:** Валидация параметров на основе схем
+2. **Разрешения:** Контроль доступа на уровне инструментов  
+3. **Аудит:** Логирование всех вызовов инструментов
+4. **Лимиты:** Ограничения итераций и ресурсов
 
 ---
 
-*AI Security Academy | Track 04: Agentic Security | Module 04.2: Protocols*
+*AI Security Academy | Трек 04: Agentic Security | Модуль 04.2: Протоколы*

@@ -1,99 +1,49 @@
-# SENTINEL Integration
+# Интеграция SENTINEL
 
-> **Подмодуль 05.3: Интеграция с платформой SENTINEL**
+> **Модуль 05.3: Интеграция SENTINEL в AI-приложения**
 
 ---
 
 ## Обзор
 
-SENTINEL предоставляет комплексные инструменты безопасности ИИ. Этот подмодуль охватывает паттерны интеграции для типовых use cases.
-
----
-
-## Quick Start
-
-```python
-from sentinel import scan, configure
-
-# Конфигурация engines
-configure(engines=["injection", "jailbreak", "pii"])
-
-# Сканирование ввода
-result = scan(user_input)
-if not result.is_safe:
-    raise SecurityError(result.threats)
-
-# Безопасная обработка
-response = await llm.generate(user_input)
-```
-
----
-
-## Паттерны интеграции
-
-| Паттерн | Use Case | Сложность |
-|---------|----------|-----------|
-| **API Protection** | REST endpoints | Низкая |
-| **Middleware** | Framework integration | Средняя |
-| **Decorator** | Function protection | Низкая |
-| **Pipeline** | Full processing | Средняя |
+Интеграция SENTINEL — практическое руководство по интеграции фреймворка SENTINEL в AI-приложения.
 
 ---
 
 ## Уроки
 
-### 01. Basic Integration
-**Время:** 35 минут | **Сложность:** Низкая
+### [01. Архитектура движков](01-engine-architecture.md)
+- Обзор архитектуры SENTINEL Brain
+- Входные движки (PromptInjectionDetector, JailbreakClassifier)
+- Основные движки (TrustBoundaryAnalyzer, ContextAnalyzer)
+- Выходные движки (SafetyClassifier, HallucinationDetector)
+- Оркестратор для единого конвейера
 
-Базовое использование:
-- scan() function
-- Configuration
-- Error handling
-- Logging
-
-### 02. ����������� Patterns
-**Время:** 40 минут | **Сложность:** Средняя
-
-Продвинутые паттерны:
-- Custom engines
-- Performance tuning
-- High availability
-- Monitoring
+### [02. Практическая интеграция](02-practical-integration.md)
+- Паттерны интеграции
+- Опции конфигурации
+- Лучшие практики
 
 ---
 
-## Пример: API Protection
+## Архитектура SENTINEL
 
-```python
-from fastapi import FastAPI, HTTPException
-from sentinel import scan
-
-app = FastAPI()
-
-@app.post("/chat")
-async def chat(request: ChatRequest):
-    # Check input
-    if not scan(request.message).is_safe:
-        raise HTTPException(400, "Blocked")
-    
-    # Generate response
-    response = await llm.generate(request.message)
-    
-    # Check output
-    if not scan(response, mode="output").is_safe:
-        return {"response": "[Filtered]"}
-    
-    return {"response": response}
+```
+Входные движки → Основные движки → Выходные движки
+       ↓               ↓               ↓
+              ОРКЕСТРАТОР (координирует все)
 ```
 
 ---
 
-## Навигация
+## Категории движков
 
-| Предыдущий | Текущий | Следующий |
-|------------|---------|-----------|
-| [Response](../02-response/) | **SENTINEL** | [Продвинутое](../../06-�����������/) |
+| Категория | Движки | Назначение |
+|-----------|--------|------------|
+| **Входные** | PromptInjectionDetector, JailbreakClassifier | Защита препроцессинга |
+| **Основные** | TrustBoundaryAnalyzer, ContextAnalyzer | Runtime-анализ |
+| **Выходные** | SafetyClassifier, HallucinationDetector | Валидация ответов |
 
 ---
 
-*AI Security Academy | Подмодуль 05.3*
+*AI Security Academy | Модуль 05.3*

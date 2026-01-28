@@ -1,64 +1,64 @@
 # Vision Transformers: ViT
 
-> **Уровень:** Начинающий  
-> **Время:** 45 минут  
-> **Трек:** 01 — AI Fundamentals  
-> **Модуль:** 01.1 — Типы моделей  
-> **Версия:** 1.0
+> **РЈСЂРѕРІРµРЅСЊ:** Beginner  
+> **Р’СЂРµРјСЏ:** 45 РјРёРЅСѓС‚  
+> **РўСЂРµРє:** 01 вЂ” РћСЃРЅРѕРІС‹ AI  
+> **РњРѕРґСѓР»СЊ:** 01.1 вЂ” РўРёРїС‹ РјРѕРґРµР»РµР№  
+> **Р’РµСЂСЃРёСЏ:** 1.0
 
 ---
 
-## Цели обучения
+## Р¦РµР»Рё РѕР±СѓС‡РµРЅРёСЏ
 
-После завершения этого урока вы сможете:
+РџРѕСЃР»Рµ Р·Р°РІРµСЂС€РµРЅРёСЏ СЌС‚РѕРіРѕ СѓСЂРѕРєР° РІС‹ СЃРјРѕР¶РµС‚Рµ:
 
-- [ ] Объяснить как Transformer применяется к изображениям
-- [ ] Понять механизм разбиения изображения на патчи
-- [ ] Описать архитектуру Vision Transformer (ViT)
-- [ ] Сравнить ViT с CNN (ResNet, EfficientNet)
-- [ ] Понять применения: классификация, детекция, сегментация
-- [ ] Связать ViT с уязвимостями в компьютерном зрении
-
----
-
-## Предварительные требования
-
-**Уроки:**
-- [01. Transformer архитектура](01-transformers.md) — обязательно
-
-**Знания:**
-- Self-attention механизм
-- Базовое понимание CNN (опционально)
+- [ ] РћР±СЉСЏСЃРЅРёС‚СЊ РєР°Рє Transformer РїСЂРёРјРµРЅСЏРµС‚СЃСЏ Рє РёР·РѕР±СЂР°Р¶РµРЅРёСЏРј
+- [ ] РџРѕРЅСЏС‚СЊ РјРµС…Р°РЅРёР·Рј СЂР°Р·Р±РёРµРЅРёСЏ РёР·РѕР±СЂР°Р¶РµРЅРёР№ РЅР° patches
+- [ ] РћРїРёСЃР°С‚СЊ Р°СЂС…РёС‚РµРєС‚СѓСЂСѓ Vision Transformer (ViT)
+- [ ] РЎСЂР°РІРЅРёС‚СЊ ViT СЃ CNN (ResNet, EfficientNet)
+- [ ] РџРѕРЅСЏС‚СЊ РїСЂРёРјРµРЅРµРЅРёСЏ: РєР»Р°СЃСЃРёС„РёРєР°С†РёСЏ, РґРµС‚РµРєС†РёСЏ, СЃРµРіРјРµРЅС‚Р°С†РёСЏ
+- [ ] РЎРІСЏР·Р°С‚СЊ ViT СЃ СѓСЏР·РІРёРјРѕСЃС‚СЏРјРё РІ computer vision
 
 ---
 
-## 1. От NLP к Vision: Идея ViT
+## РџСЂРµРґРІР°СЂРёС‚РµР»СЊРЅС‹Рµ С‚СЂРµР±РѕРІР°РЅРёСЏ
 
-### 1.1 Проблема: Transformer для изображений?
+**РЈСЂРѕРєРё:**
+- [01. РђСЂС…РёС‚РµРєС‚СѓСЂР° Transformer](01-transformers.md) вЂ” РѕР±СЏР·Р°С‚РµР»СЊРЅРѕ
 
-**Transformer создан для последовательностей (текст):**
-- Вход: последовательность токенов
-- Self-attention: O(n?) по длине последовательности
+**Р—РЅР°РЅРёСЏ:**
+- РњРµС…Р°РЅРёР·Рј self-attention
+- Р‘Р°Р·РѕРІРѕРµ РїРѕРЅРёРјР°РЅРёРµ CNN (РѕРїС†РёРѕРЅР°Р»СЊРЅРѕ)
 
-**Изображение — это 2D grid пикселей:**
-- 224?224 = 50,176 пикселей
-- Если каждый пиксель = токен > O(50,176?) = невозможно!
+---
 
-### 1.2 Решение: Patches (патчи)
+## 1. РћС‚ NLP Рє Vision: РРґРµСЏ ViT
 
-**Google Brain, октябрь 2020** — ["An Image is Worth 16x16 Words: Transformers for Image Recognition at Scale"](https://arxiv.org/abs/2010.11929)
+### 1.1 РџСЂРѕР±Р»РµРјР°: Transformer РґР»СЏ РёР·РѕР±СЂР°Р¶РµРЅРёР№?
 
-**Ключевая идея:** Разбить изображение на патчи (16?16 или 14?14) и обработать их как "токены".
+**Transformer Р±С‹Р» СЃРѕР·РґР°РЅ РґР»СЏ РїРѕСЃР»РµРґРѕРІР°С‚РµР»СЊРЅРѕСЃС‚РµР№ (С‚РµРєСЃС‚Р°):**
+- Р’С…РѕРґ: РїРѕСЃР»РµРґРѕРІР°С‚РµР»СЊРЅРѕСЃС‚СЊ С‚РѕРєРµРЅРѕРІ
+- Self-attention: O(nВІ) РїРѕ РґР»РёРЅРµ РїРѕСЃР»РµРґРѕРІР°С‚РµР»СЊРЅРѕСЃС‚Рё
+
+**РР·РѕР±СЂР°Р¶РµРЅРёРµ вЂ” СЌС‚Рѕ 2D СЃРµС‚РєР° РїРёРєСЃРµР»РµР№:**
+- 224Г—224 = 50,176 РїРёРєСЃРµР»РµР№
+- Р•СЃР»Рё РєР°Р¶РґС‹Р№ РїРёРєСЃРµР»СЊ = С‚РѕРєРµРЅ в†’ O(50,176ВІ) = РЅРµРІРѕР·РјРѕР¶РЅРѕ!
+
+### 1.2 Р РµС€РµРЅРёРµ: Patches
+
+**Google Brain, РѕРєС‚СЏР±СЂСЊ 2020** вЂ” [В«An Image is Worth 16x16 Words: Transformers for Image Recognition at ScaleВ»](https://arxiv.org/abs/2010.11929)
+
+**РљР»СЋС‡РµРІР°СЏ РёРґРµСЏ:** Р Р°Р·Р±РёС‚СЊ РёР·РѕР±СЂР°Р¶РµРЅРёРµ РЅР° patches (16Г—16 РёР»Рё 14Г—14) Рё РѕР±СЂР°Р±Р°С‚С‹РІР°С‚СЊ РёС… РєР°Рє В«С‚РѕРєРµРЅС‹В».
 
 ```
-Изображение 224?224
-        v
-Разбиение на патчи 16?16
-        v
-14?14 = 196 патчей
-        v
-Каждый патч = "visual token"
-        v
+Image 224Г—224
+        в†“
+Р Р°Р·Р±РёРІР°РµРј РЅР° 16Г—16 patches
+        в†“
+14Г—14 = 196 patches
+        в†“
+РљР°Р¶РґС‹Р№ patch = В«visual tokenВ»
+        в†“
 Transformer encoder
 ```
 
@@ -71,81 +71,81 @@ def image_to_patches(image, patch_size=16):
     B, C, H, W = image.shape
     P = patch_size
     
-    # Количество патчей
+    # РљРѕР»РёС‡РµСЃС‚РІРѕ patches
     num_patches_h = H // P
     num_patches_w = W // P
     num_patches = num_patches_h * num_patches_w  # 224/16 * 224/16 = 196
     
-    # Reshape в патчи
-    # [B, C, H, W] > [B, C, num_h, P, num_w, P]
+    # Reshape РІ patches
+    # [B, C, H, W] в†’ [B, C, num_h, P, num_w, P]
     patches = image.reshape(B, C, num_patches_h, P, num_patches_w, P)
     
-    # [B, num_h, num_w, P, P, C] > [B, num_patches, P*P*C]
+    # [B, num_h, num_w, P, P, C] в†’ [B, num_patches, P*P*C]
     patches = patches.permute(0, 2, 4, 3, 5, 1).reshape(B, num_patches, P*P*C)
     
-    return patches  # [B, 196, 768] для 16?16 патчей и 3 канала
+    return patches  # [B, 196, 768] РґР»СЏ 16Г—16 patches Рё 3 РєР°РЅР°Р»РѕРІ
 ```
 
 ---
 
-## 2. Архитектура ViT
+## 2. РђСЂС…РёС‚РµРєС‚СѓСЂР° ViT
 
-### 2.1 Полная схема
+### 2.1 РџРѕР»РЅР°СЏ РґРёР°РіСЂР°РјРјР°
 
 ```
------------------------------------------------------------------------¬
-¦                    Vision Transformer (ViT)                          ¦
-+----------------------------------------------------------------------+
-¦                                                                      ¦
-¦  Изображение 224?224?3                                              ¦
-¦         v                                                            ¦
-¦  -------------------------------------------------------------¬     ¦
-¦  ¦        Patch Embedding (Linear Projection)                 ¦     ¦
-¦  ¦  196 патчей ? 768 dimensions                               ¦     ¦
-¦  ¦  [batch, 196, 768]                                         ¦     ¦
-¦  L-------------------------------------------------------------     ¦
-¦         v                                                            ¦
-¦  [CLS] токен добавляется в начало                                   ¦
-¦  [batch, 197, 768]                                                   ¦
-¦         +                                                            ¦
-¦  -------------------------------------------------------------¬     ¦
-¦  ¦        Position Embeddings (learnable)                     ¦     ¦
-¦  ¦  197 learned position embeddings                           ¦     ¦
-¦  L-------------------------------------------------------------     ¦
-¦         v                                                            ¦
-¦  -------------------------------------------------------------¬     ¦
-¦  ¦              Transformer Encoder                           ¦     ¦
-¦  ¦  -------------------------------------------------------¬ ¦     ¦
-¦  ¦  ¦  Multi-Head Self-Attention                           ¦ ¦     ¦
-¦  ¦  ¦  Layer Norm                                          ¦ ¦     ¦
-¦  ¦  ¦  MLP (Feed-Forward)                                  ¦ ¦     ¦
-¦  ¦  ¦  Layer Norm                                          ¦ ¦     ¦
-¦  ¦  L------------------------------------------------------- ¦     ¦
-¦  ¦                   ? 12/24/32 слоёв                        ¦     ¦
-¦  L-------------------------------------------------------------     ¦
-¦         v                                                            ¦
-¦  [CLS] token representation > Classification Head > Classes          ¦
-¦                                                                      ¦
-L-----------------------------------------------------------------------
+в”Њв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”ђ
+в”‚                    Vision Transformer (ViT)                          в”‚
+в”њв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”¤
+в”‚                                                                      в”‚
+в”‚  Image 224Г—224Г—3                                                    в”‚
+в”‚         в†“                                                            в”‚
+в”‚  в”Њв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”ђ     в”‚
+в”‚  в”‚        Patch Embedding (Linear Projection)                 в”‚     в”‚
+в”‚  в”‚  196 patches Г— 768 dimensions                              в”‚     в”‚
+в”‚  в”‚  [batch, 196, 768]                                         в”‚     в”‚
+в”‚  в””в”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”     в”‚
+в”‚         в†“                                                            в”‚
+в”‚  [CLS] С‚РѕРєРµРЅ РґРѕР±Р°РІР»СЏРµС‚СЃСЏ РІ РЅР°С‡Р°Р»Рѕ                                   в”‚
+в”‚  [batch, 197, 768]                                                   в”‚
+в”‚         +                                                            в”‚
+в”‚  в”Њв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”ђ     в”‚
+в”‚  в”‚        Position Embeddings (learnable)                     в”‚     в”‚
+в”‚  в”‚  197 РѕР±СѓС‡Р°РµРјС‹С… position embeddings                         в”‚     в”‚
+в”‚  в””в”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”     в”‚
+в”‚         в†“                                                            в”‚
+в”‚  в”Њв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”ђ     в”‚
+в”‚  в”‚              Transformer Encoder                           в”‚     в”‚
+в”‚  в”‚  в”Њв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”ђ в”‚     в”‚
+в”‚  в”‚  в”‚  Multi-Head Self-Attention                           в”‚ в”‚     в”‚
+в”‚  в”‚  в”‚  Layer Norm                                          в”‚ в”‚     в”‚
+в”‚  в”‚  в”‚  MLP (Feed-Forward)                                  в”‚ в”‚     в”‚
+в”‚  в”‚  в”‚  Layer Norm                                          в”‚ в”‚     в”‚
+в”‚  в”‚  в””в”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв” в”‚     в”‚
+в”‚  в”‚                   Г— 12/24/32 СЃР»РѕС‘РІ                        в”‚     в”‚
+в”‚  в””в”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”     в”‚
+в”‚         в†“                                                            в”‚
+в”‚  [CLS] token representation в†’ Classification Head в†’ Classes          в”‚
+в”‚                                                                      в”‚
+в””в”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”
 ```
 
-### 2.2 Размеры моделей
+### 2.2 Р Р°Р·РјРµСЂС‹ РјРѕРґРµР»Рё
 
-| Модель | Слоёв | Hidden | Heads | Patch | Параметров |
-|--------|-------|--------|-------|-------|------------|
-| ViT-B/16 | 12 | 768 | 12 | 16?16 | 86M |
-| ViT-B/32 | 12 | 768 | 12 | 32?32 | 88M |
-| ViT-L/16 | 24 | 1024 | 16 | 16?16 | 307M |
-| ViT-H/14 | 32 | 1280 | 16 | 14?14 | 632M |
+| РњРѕРґРµР»СЊ | РЎР»РѕРё | Hidden | Heads | Patch | РџР°СЂР°РјРµС‚СЂС‹ |
+|--------|------|--------|-------|-------|-----------|
+| ViT-B/16 | 12 | 768 | 12 | 16Г—16 | 86M |
+| ViT-B/32 | 12 | 768 | 12 | 32Г—32 | 88M |
+| ViT-L/16 | 24 | 1024 | 16 | 16Г—16 | 307M |
+| ViT-H/14 | 32 | 1280 | 16 | 14Г—14 | 632M |
 
-### 2.3 Реализация ViT
+### 2.3 Р РµР°Р»РёР·Р°С†РёСЏ ViT
 
 ```python
 import torch
 import torch.nn as nn
 
 class PatchEmbedding(nn.Module):
-    """Разбиение изображения на патчи и проекция в embedding space"""
+    """Р Р°Р·Р±РёРІР°РµРј РёР·РѕР±СЂР°Р¶РµРЅРёРµ РЅР° patches Рё РїСЂРѕРµС†РёСЂСѓРµРј РІ embedding space"""
     
     def __init__(self, img_size=224, patch_size=16, in_channels=3, embed_dim=768):
         super().__init__()
@@ -153,7 +153,7 @@ class PatchEmbedding(nn.Module):
         self.patch_size = patch_size
         self.num_patches = (img_size // patch_size) ** 2  # 196
         
-        # Линейная проекция патчей (эквивалентно Conv2d с kernel=stride=patch_size)
+        # Р›РёРЅРµР№РЅР°СЏ РїСЂРѕРµРєС†РёСЏ patches (СЌРєРІРёРІР°Р»РµРЅС‚РЅР° Conv2d СЃ kernel=stride=patch_size)
         self.projection = nn.Conv2d(
             in_channels, embed_dim, 
             kernel_size=patch_size, stride=patch_size
@@ -188,10 +188,10 @@ class ViT(nn.Module):
         self.patch_embed = PatchEmbedding(img_size, patch_size, in_channels, embed_dim)
         num_patches = self.patch_embed.num_patches
         
-        # CLS token (learnable)
+        # CLS С‚РѕРєРµРЅ (РѕР±СѓС‡Р°РµРјС‹Р№)
         self.cls_token = nn.Parameter(torch.zeros(1, 1, embed_dim))
         
-        # Position embeddings (learnable)
+        # Position embeddings (РѕР±СѓС‡Р°РµРјС‹Рµ)
         self.pos_embed = nn.Parameter(torch.zeros(1, num_patches + 1, embed_dim))
         
         # Transformer encoder
@@ -209,7 +209,7 @@ class ViT(nn.Module):
         self.norm = nn.LayerNorm(embed_dim)
         self.head = nn.Linear(embed_dim, num_classes)
         
-        # Initialize
+        # РРЅРёС†РёР°Р»РёР·Р°С†РёСЏ
         nn.init.trunc_normal_(self.cls_token, std=0.02)
         nn.init.trunc_normal_(self.pos_embed, std=0.02)
     
@@ -219,18 +219,18 @@ class ViT(nn.Module):
         # Patch embedding: [B, 196, 768]
         x = self.patch_embed(x)
         
-        # Prepend CLS token: [B, 197, 768]
+        # Р”РѕР±Р°РІР»СЏРµРј CLS С‚РѕРєРµРЅ: [B, 197, 768]
         cls_tokens = self.cls_token.expand(batch_size, -1, -1)
         x = torch.cat([cls_tokens, x], dim=1)
         
-        # Add position embeddings
+        # Р”РѕР±Р°РІР»СЏРµРј position embeddings
         x = x + self.pos_embed
         
         # Transformer encoder
         x = self.transformer(x)
         
-        # Classification on CLS token
-        x = self.norm(x[:, 0])  # Take CLS token
+        # РљР»Р°СЃСЃРёС„РёРєР°С†РёСЏ РЅР° CLS С‚РѕРєРµРЅРµ
+        x = self.norm(x[:, 0])  # Р‘РµСЂС‘Рј CLS С‚РѕРєРµРЅ
         x = self.head(x)
         
         return x
@@ -240,66 +240,66 @@ class ViT(nn.Module):
 
 ## 3. ViT vs CNN
 
-### 3.1 Ключевые отличия
+### 3.1 РљР»СЋС‡РµРІС‹Рµ РѕС‚Р»РёС‡РёСЏ
 
-| Аспект | CNN (ResNet) | ViT |
+| РђСЃРїРµРєС‚ | CNN (ResNet) | ViT |
 |--------|--------------|-----|
-| **Inductive bias** | Locality, translation invariance | Minimal (learned from data) |
-| **Receptive field** | Grows с глубиной | Global с первого слоя |
-| **Data efficiency** | Работает на малых данных | Требует много данных |
-| **Scaling** | Diminishing returns | Лучше масштабируется |
+| **Inductive bias** | Locality, translation invariance | РњРёРЅРёРјР°Р»СЊРЅС‹Р№ (СѓС‡РёС‚СЃСЏ РёР· РґР°РЅРЅС‹С…) |
+| **Receptive field** | Р Р°СЃС‚С‘С‚ СЃ РіР»СѓР±РёРЅРѕР№ | Global СЃ РїРµСЂРІРѕРіРѕ СЃР»РѕСЏ |
+| **Data efficiency** | Р Р°Р±РѕС‚Р°РµС‚ РЅР° РјР°Р»С‹С… РґР°РЅРЅС‹С… | РўСЂРµР±СѓРµС‚ РјРЅРѕРіРѕ РґР°РЅРЅС‹С… |
+| **Scaling** | Diminishing returns | Р›СѓС‡С€Рµ РјР°СЃС€С‚Р°Р±РёСЂСѓРµС‚СЃСЏ |
 
 ### 3.2 Attention = Global Receptive Field
 
-**CNN:** Каждый слой видит только локальную область (kernel size)
+**CNN:** РљР°Р¶РґС‹Р№ СЃР»РѕР№ РІРёРґРёС‚ С‚РѕР»СЊРєРѕ Р»РѕРєР°Р»СЊРЅСѓСЋ РѕР±Р»Р°СЃС‚СЊ (kernel size)
 
 ```
-СNN Layer 1:  [3?3 receptive field]
-CNN Layer 2:  [5?5 receptive field]
-CNN Layer 3:  [7?7 receptive field]
+CNN Layer 1:  [3Г—3 receptive field]
+CNN Layer 2:  [5Г—5 receptive field]
+CNN Layer 3:  [7Г—7 receptive field]
 ...
-Глобальный контекст появляется только в глубоких слоях
+Р“Р»РѕР±Р°Р»СЊРЅС‹Р№ РєРѕРЅС‚РµРєСЃС‚ РїРѕСЏРІР»СЏРµС‚СЃСЏ С‚РѕР»СЊРєРѕ РІ РіР»СѓР±РѕРєРёС… СЃР»РѕСЏС…
 ```
 
-**ViT:** Каждый патч "видит" все патчи с первого слоя
+**ViT:** РљР°Р¶РґС‹Р№ patch В«РІРёРґРёС‚В» РІСЃРµ patches СЃ РїРµСЂРІРѕРіРѕ СЃР»РѕСЏ
 
 ```
 ViT Layer 1:  [GLOBAL receptive field]
-              Каждый из 196 патчей attend ко всем 196
+              РљР°Р¶РґС‹Р№ РёР· 196 patches attend РєРѕ РІСЃРµРј 196
 ```
 
-### 3.3 Data Requirements
+### 3.3 РўСЂРµР±РѕРІР°РЅРёСЏ Рє РґР°РЅРЅС‹Рј
 
-**Ключевое наблюдение из оригинальной статьи:**
+**РљР»СЋС‡РµРІРѕРµ РЅР°Р±Р»СЋРґРµРЅРёРµ РёР· РѕСЂРёРіРёРЅР°Р»СЊРЅРѕР№ СЃС‚Р°С‚СЊРё:**
 
 ```
-При обучении на ImageNet-1K (1.3M images):
+РџСЂРё РѕР±СѓС‡РµРЅРёРё РЅР° ImageNet-1K (1.3M РёР·РѕР±СЂР°Р¶РµРЅРёР№):
   ResNet-50:  78.5% accuracy
-  ViT-B/16:   74.2% accuracy  < хуже!
+  ViT-B/16:   74.2% accuracy  в†ђ С…СѓР¶Рµ!
 
-При обучении на JFT-300M (303M images):
+РџСЂРё РѕР±СѓС‡РµРЅРёРё РЅР° JFT-300M (303M РёР·РѕР±СЂР°Р¶РµРЅРёР№):
   ResNet-50:  77.6% accuracy
-  ViT-B/16:   84.2% accuracy  < сильно лучше!
+  ViT-B/16:   84.2% accuracy  в†ђ Р·РЅР°С‡РёС‚РµР»СЊРЅРѕ Р»СѓС‡С€Рµ!
 ```
 
-**Причина:** ViT не имеет inductive biases CNN, поэтому должен выучить всё из данных.
+**РџСЂРёС‡РёРЅР°:** ViT РЅРµ РёРјРµРµС‚ inductive biases CNN, РїРѕСЌС‚РѕРјСѓ РґРѕР»Р¶РµРЅ СѓС‡РёС‚СЊ РІСЃС‘ РёР· РґР°РЅРЅС‹С….
 
 ---
 
-## 4. Практические применения
+## 4. РџСЂР°РєС‚РёС‡РµСЃРєРёРµ РїСЂРёРјРµРЅРµРЅРёСЏ
 
-### 4.1 Image Classification
+### 4.1 РљР»Р°СЃСЃРёС„РёРєР°С†РёСЏ РёР·РѕР±СЂР°Р¶РµРЅРёР№
 
 ```python
 from transformers import ViTForImageClassification, ViTImageProcessor
 from PIL import Image
 import requests
 
-# Загрузка модели
+# Р—Р°РіСЂСѓР¶Р°РµРј РјРѕРґРµР»СЊ
 processor = ViTImageProcessor.from_pretrained('google/vit-base-patch16-224')
 model = ViTForImageClassification.from_pretrained('google/vit-base-patch16-224')
 
-# Загрузка изображения
+# Р—Р°РіСЂСѓР¶Р°РµРј РёР·РѕР±СЂР°Р¶РµРЅРёРµ
 url = "http://images.cocodataset.org/val2017/000000039769.jpg"
 image = Image.open(requests.get(url, stream=True).raw)
 
@@ -311,24 +311,24 @@ predicted_class = logits.argmax(-1).item()
 print(f"Predicted class: {model.config.id2label[predicted_class]}")
 ```
 
-### 4.2 DINO и Self-Supervised Learning
+### 4.2 DINO Рё Self-Supervised Learning
 
-**DINO (Self-Distillation with No Labels)** — Meta AI, 2021
+**DINO (Self-Distillation with No Labels)** вЂ” Meta AI, 2021
 
 ```python
 import torch
 from transformers import ViTModel
 
-# DINO-pretrained ViT выучивает семантические features без labels
+# DINO-pretrained ViT СѓС‡РёС‚ СЃРµРјР°РЅС‚РёС‡РµСЃРєРёРµ features Р±РµР· РјРµС‚РѕРє
 model = ViTModel.from_pretrained('facebook/dino-vitb16')
 
-# Features можно использовать для:
+# Features РјРѕР¶РЅРѕ РёСЃРїРѕР»СЊР·РѕРІР°С‚СЊ РґР»СЏ:
 # - Image retrieval
 # - Semantic segmentation
 # - Object detection
 ```
 
-### 4.3 Detection и Segmentation
+### 4.3 Detection Рё Segmentation
 
 **DETR (Detection Transformer):**
 ```python
@@ -340,7 +340,7 @@ model = DetrForObjectDetection.from_pretrained("facebook/detr-resnet-50")
 inputs = processor(images=image, return_tensors="pt")
 outputs = model(**inputs)
 
-# Boxes и labels
+# Boxes Рё labels
 target_sizes = torch.tensor([image.size[::-1]])
 results = processor.post_process_object_detection(outputs, target_sizes=target_sizes)[0]
 
@@ -351,45 +351,45 @@ for score, label, box in zip(results["scores"], results["labels"], results["boxe
 
 ---
 
-## 5. Варианты ViT
+## 5. Р’Р°СЂРёР°РЅС‚С‹ ViT
 
 ### 5.1 DeiT (Data-efficient Image Transformer)
 
-**Facebook AI, 2021** — Улучшения для обучения на ImageNet без JFT.
+**Facebook AI, 2021** вЂ” РЈР»СѓС‡С€РµРЅРёСЏ РґР»СЏ РѕР±СѓС‡РµРЅРёСЏ РЅР° ImageNet Р±РµР· JFT.
 
 ```
-Ключевые улучшения:
-- Knowledge distillation от CNN teacher
-- Сильная augmentation (RandAugment, MixUp)
-- Регуляризация (DropPath, Label Smoothing)
+РљР»СЋС‡РµРІС‹Рµ СѓР»СѓС‡С€РµРЅРёСЏ:
+- Knowledge distillation РѕС‚ CNN teacher
+- Strong augmentation (RandAugment, MixUp)
+- Regularization (DropPath, Label Smoothing)
 ```
 
 ### 5.2 Swin Transformer
 
-**Microsoft, 2021** — Hierarchical Vision Transformer
+**Microsoft, 2021** вЂ” Hierarchical Vision Transformer
 
 ```
-Особенности:
-- Shifted windows для эффективного attention
-- Hierarchical structure (как CNN)
-- Лучше для dense prediction (detection, segmentation)
+Features:
+- Shifted windows РґР»СЏ СЌС„С„РµРєС‚РёРІРЅРѕРіРѕ attention
+- Hierarchical structure (РєР°Рє CNN)
+- Р›СѓС‡С€Рµ РґР»СЏ dense prediction (detection, segmentation)
 ```
 
 ```
 Swin Architecture:
-Stage 1: 56?56, 96 dim
-    v
-Stage 2: 28?28, 192 dim
-    v
-Stage 3: 14?14, 384 dim
-    v
-Stage 4: 7?7, 768 dim
+Stage 1: 56Г—56, 96 dim
+    в†“
+Stage 2: 28Г—28, 192 dim
+    в†“
+Stage 3: 14Г—14, 384 dim
+    в†“
+Stage 4: 7Г—7, 768 dim
 ```
 
-### 5.3 Сравнительная таблица
+### 5.3 РЎСЂР°РІРЅРёС‚РµР»СЊРЅР°СЏ С‚Р°Р±Р»РёС†Р°
 
-| Модель | ImageNet Top-1 | Params | Особенность |
-|--------|---------------|--------|-------------|
+| РњРѕРґРµР»СЊ | ImageNet Top-1 | Params | РћСЃРѕР±РµРЅРЅРѕСЃС‚СЊ |
+|--------|----------------|--------|-------------|
 | ViT-B/16 | 84.2% | 86M | JFT pre-training |
 | DeiT-B | 83.1% | 86M | ImageNet-only |
 | Swin-B | 83.5% | 88M | Hierarchical |
@@ -397,21 +397,21 @@ Stage 4: 7?7, 768 dim
 
 ---
 
-## 6. Безопасность Vision Transformers
+## 6. Р‘РµР·РѕРїР°СЃРЅРѕСЃС‚СЊ Vision Transformer
 
-### 6.1 Adversarial Attacks на ViT
+### 6.1 Adversarial Р°С‚Р°РєРё РЅР° ViT
 
-**Adversarial examples** работают и на ViT:
+**Adversarial examples** СЂР°Р±РѕС‚Р°СЋС‚ Рё РЅР° ViT:
 
 ```python
-# FGSM атака на ViT
+# FGSM Р°С‚Р°РєР° РЅР° ViT
 def fgsm_attack(model, image, label, epsilon=0.03):
     image.requires_grad = True
     outputs = model(image)
     loss = F.cross_entropy(outputs.logits, label)
     loss.backward()
     
-    # Perturbation в направлении градиента
+    # Perturbation РІ РЅР°РїСЂР°РІР»РµРЅРёРё РіСЂР°РґРёРµРЅС‚Р°
     perturbation = epsilon * image.grad.sign()
     adversarial_image = image + perturbation
     adversarial_image = torch.clamp(adversarial_image, 0, 1)
@@ -419,26 +419,26 @@ def fgsm_attack(model, image, label, epsilon=0.03):
     return adversarial_image
 ```
 
-**Интересное наблюдение:** ViT более robust к некоторым типам атак чем CNN.
+**РРЅС‚РµСЂРµСЃРЅРѕРµ РЅР°Р±Р»СЋРґРµРЅРёРµ:** ViT Р±РѕР»РµРµ СѓСЃС‚РѕР№С‡РёРІ Рє РЅРµРєРѕС‚РѕСЂС‹Рј С‚РёРїР°Рј Р°С‚Р°Рє С‡РµРј CNN.
 
-### 6.2 Patch-based Attacks
+### 6.2 Patch-based Р°С‚Р°РєРё
 
-**Уникальная уязвимость ViT:** Атаки на уровне патчей
+**РЈРЅРёРєР°Р»СЊРЅР°СЏ СѓСЏР·РІРёРјРѕСЃС‚СЊ ViT:** РђС‚Р°РєРё РЅР° СѓСЂРѕРІРЅРµ patches
 
 ```python
-# Adversarial patch атака
+# Adversarial patch Р°С‚Р°РєР°
 def patch_attack(model, clean_image, target_class, patch_size=32):
     """
-    Создаём adversarial patch, который заставляет модель
-    классифицировать любое изображение как target_class
+    РЎРѕР·РґР°С‘Рј adversarial patch РєРѕС‚РѕСЂС‹Р№ Р·Р°СЃС‚Р°РІР»СЏРµС‚ РјРѕРґРµР»СЊ
+    РєР»Р°СЃСЃРёС„РёС†РёСЂРѕРІР°С‚СЊ Р»СЋР±РѕРµ РёР·РѕР±СЂР°Р¶РµРЅРёРµ РєР°Рє target_class
     """
-    # Инициализируем случайный патч
+    # РРЅРёС†РёР°Р»РёР·РёСЂСѓРµРј СЃР»СѓС‡Р°Р№РЅС‹Р№ patch
     patch = torch.rand(1, 3, patch_size, patch_size, requires_grad=True)
     
     optimizer = torch.optim.Adam([patch], lr=0.01)
     
     for step in range(1000):
-        # Накладываем патч на изображение
+        # РџСЂРёРјРµРЅСЏРµРј patch Рє РёР·РѕР±СЂР°Р¶РµРЅРёСЋ
         patched_image = clean_image.clone()
         patched_image[:, :, :patch_size, :patch_size] = patch
         
@@ -446,18 +446,18 @@ def patch_attack(model, clean_image, target_class, patch_size=32):
         outputs = model(patched_image)
         loss = F.cross_entropy(outputs.logits, torch.tensor([target_class]))
         
-        # Optimize patch
+        # РћРїС‚РёРјРёР·РёСЂСѓРµРј patch
         optimizer.zero_grad()
         loss.backward()
         optimizer.step()
         
-        # Clamp to valid pixel range
+        # Clamp РІ РґРѕРїСѓСЃС‚РёРјС‹Р№ РґРёР°РїР°Р·РѕРЅ РїРёРєСЃРµР»РµР№
         patch.data = torch.clamp(patch.data, 0, 1)
     
     return patch
 ```
 
-### 6.3 SENTINEL для Vision
+### 6.3 SENTINEL РґР»СЏ Vision
 
 ```python
 from sentinel import scan  # Public API
@@ -466,7 +466,7 @@ from sentinel import scan  # Public API
     AttentionConsistencyChecker
 )
 
-# Детекция adversarial images
+# РћР±РЅР°СЂСѓР¶РµРЅРёРµ adversarial РёР·РѕР±СЂР°Р¶РµРЅРёР№
 detector = AdversarialImageDetector()
 result = detector.analyze(image)
 
@@ -474,14 +474,14 @@ if result.is_adversarial:
     print(f"Adversarial detected: {result.attack_type}")
     print(f"Confidence: {result.confidence}")
 
-# Сканирование на adversarial patches
+# РЎРєР°РЅРёСЂРѕРІР°РЅРёРµ РЅР° adversarial patches
 patch_scanner = PatchAnomalyScanner()
 scan_result = patch_scanner.scan(image, model)
 
 if scan_result.suspicious_patches:
     print(f"Suspicious patch at: {scan_result.patch_locations}")
 
-# Проверка консистентности attention
+# РџСЂРѕРІРµСЂРєР° consistency attention
 attention_checker = AttentionConsistencyChecker()
 attn_result = attention_checker.analyze(
     attention_maps=model.get_attention_maps(image),
@@ -492,23 +492,23 @@ if attn_result.anomalous:
     print(f"Attention anomaly: {attn_result.description}")
 ```
 
-### 6.4 Multimodal Risks
+### 6.4 РњСѓР»СЊС‚РёРјРѕРґР°Р»СЊРЅС‹Рµ СЂРёСЃРєРё
 
-Когда ViT используется в multimodal моделях (CLIP, LLaVA):
+РљРѕРіРґР° ViT РёСЃРїРѕР»СЊР·СѓРµС‚СЃСЏ РІ РјСѓР»СЊС‚РёРјРѕРґР°Р»СЊРЅС‹С… РјРѕРґРµР»СЏС… (CLIP, LLaVA):
 
 ```
-Adversarial image > ViT encoder > Malicious embedding
-     v
-LLM decoder получает "отравленный" visual context
-     v
-Jailbreak через visual input!
+Adversarial image в†’ ViT encoder в†’ Malicious embedding
+     в†“
+LLM decoder РїРѕР»СѓС‡Р°РµС‚ В«РѕС‚СЂР°РІР»РµРЅРЅС‹Р№В» visual context
+     в†“
+Jailbreak С‡РµСЂРµР· visual input!
 ```
 
 ---
 
-## 7. Практические задания
+## 7. РџСЂР°РєС‚РёС‡РµСЃРєРёРµ СѓРїСЂР°Р¶РЅРµРЅРёСЏ
 
-### Задание 1: Attention визуализация
+### РЈРїСЂР°Р¶РЅРµРЅРёРµ 1: Р’РёР·СѓР°Р»РёР·Р°С†РёСЏ Attention
 
 ```python
 from transformers import ViTModel
@@ -520,10 +520,10 @@ model = ViTModel.from_pretrained('google/vit-base-patch16-224', output_attention
 outputs = model(inputs.pixel_values)
 
 # Attention maps: [layers][batch, heads, seq_len, seq_len]
-attention = outputs.attentions[-1]  # Last layer
+attention = outputs.attentions[-1]  # РџРѕСЃР»РµРґРЅРёР№ СЃР»РѕР№
 
-# Визуализация attention от CLS токена ко всем патчам
-cls_attention = attention[0, :, 0, 1:].mean(dim=0)  # Average over heads
+# Р’РёР·СѓР°Р»РёР·РёСЂСѓРµРј attention РѕС‚ CLS С‚РѕРєРµРЅР° РєРѕ РІСЃРµРј patches
+cls_attention = attention[0, :, 0, 1:].mean(dim=0)  # РЎСЂРµРґРЅРµРµ РїРѕ heads
 cls_attention = cls_attention.reshape(14, 14)  # 14x14 patches
 
 plt.figure(figsize=(10, 5))
@@ -538,31 +538,31 @@ plt.colorbar()
 plt.show()
 ```
 
-### Задание 2: Transfer Learning с ViT
+### РЈРїСЂР°Р¶РЅРµРЅРёРµ 2: Transfer Learning СЃ ViT
 
 ```python
 from transformers import ViTForImageClassification
 import torch.nn as nn
 
-# Загружаем pretrained ViT
+# Р—Р°РіСЂСѓР¶Р°РµРј pretrained ViT
 model = ViTForImageClassification.from_pretrained(
     'google/vit-base-patch16-224',
     num_labels=10,  # CIFAR-10
     ignore_mismatched_sizes=True
 )
 
-# Fine-tune на CIFAR-10
-# (добавьте код для загрузки данных и обучения)
+# Fine-tune РЅР° CIFAR-10
+# (РґРѕР±Р°РІСЊС‚Рµ РєРѕРґ Р·Р°РіСЂСѓР·РєРё РґР°РЅРЅС‹С… Рё РѕР±СѓС‡РµРЅРёСЏ)
 ```
 
-### Задание 3: Adversarial Robustness
+### РЈРїСЂР°Р¶РЅРµРЅРёРµ 3: Adversarial Robustness
 
 ```python
-# Сравните robustness ViT и ResNet
+# РЎСЂР°РІРЅРёС‚Рµ robustness ViT Рё ResNet
 
 def evaluate_robustness(model, test_loader, epsilon_values):
     """
-    Оцените accuracy под FGSM атакой с разными epsilon
+    РћС†РµРЅРёРІР°РµРј accuracy РїРѕРґ FGSM Р°С‚Р°РєРѕР№ СЃ СЂР°Р·РЅС‹РјРё epsilon
     """
     results = {}
     for eps in epsilon_values:
@@ -580,66 +580,66 @@ def evaluate_robustness(model, test_loader, epsilon_values):
 
 ---
 
-## 8. Проверочные вопросы
+## 8. Quiz РІРѕРїСЂРѕСЃС‹
 
-### Вопрос 1
+### Р’РѕРїСЂРѕСЃ 1
 
-Как ViT обрабатывает изображения?
+РљР°Рє ViT РѕР±СЂР°Р±Р°С‚С‹РІР°РµС‚ РёР·РѕР±СЂР°Р¶РµРЅРёСЏ?
 
-- [ ] A) Попиксельно, каждый пиксель = токен
-- [x] B) Разбивает на патчи, каждый патч = токен
-- [ ] C) Использует convolutions как CNN
-- [ ] D) Обрабатывает строки изображения последовательно
+- [ ] A) Pixel Р·Р° pixel, РєР°Р¶РґС‹Р№ pixel = token
+- [x] B) Р Р°Р·Р±РёРІР°РµС‚ РЅР° patches, РєР°Р¶РґС‹Р№ patch = token
+- [ ] C) РСЃРїРѕР»СЊР·СѓРµС‚ convolutions РєР°Рє CNN
+- [ ] D) РћР±СЂР°Р±Р°С‚С‹РІР°РµС‚ СЃС‚СЂРѕРєРё РёР·РѕР±СЂР°Р¶РµРЅРёСЏ РїРѕСЃР»РµРґРѕРІР°С‚РµР»СЊРЅРѕ
 
-### Вопрос 2
+### Р’РѕРїСЂРѕСЃ 2
 
-Почему ViT требует больше данных чем CNN?
+РџРѕС‡РµРјСѓ ViT С‚СЂРµР±СѓРµС‚ Р±РѕР»СЊС€Рµ РґР°РЅРЅС‹С… С‡РµРј CNN?
 
-- [ ] A) ViT имеет больше параметров
-- [x] B) ViT не имеет inductive biases (locality, translation invariance)
-- [ ] C) ViT медленнее обучается
-- [ ] D) ViT использует более сложный loss
+- [ ] A) ViT РёРјРµРµС‚ Р±РѕР»СЊС€Рµ РїР°СЂР°РјРµС‚СЂРѕРІ
+- [x] B) ViT РЅРµ РёРјРµРµС‚ inductive biases (locality, translation invariance)
+- [ ] C) ViT РѕР±СѓС‡Р°РµС‚СЃСЏ РјРµРґР»РµРЅРЅРµРµ
+- [ ] D) ViT РёСЃРїРѕР»СЊР·СѓРµС‚ Р±РѕР»РµРµ СЃР»РѕР¶РЅС‹Р№ loss
 
-### Вопрос 3
+### Р’РѕРїСЂРѕСЃ 3
 
-Что такое CLS токен в ViT?
+Р§С‚Рѕ С‚Р°РєРѕРµ CLS С‚РѕРєРµРЅ РІ ViT?
 
-- [ ] A) Специальный патч изображения
-- [x] B) Learnable токен для агрегации информации, используется для классификации
-- [ ] C) Токен конца последовательности
-- [ ] D) Токен для padding
+- [ ] A) РЎРїРµС†РёР°Р»СЊРЅС‹Р№ image patch
+- [x] B) РћР±СѓС‡Р°РµРјС‹Р№ С‚РѕРєРµРЅ РґР»СЏ Р°РіСЂРµРіР°С†РёРё РёРЅС„РѕСЂРјР°С†РёРё, РёСЃРїРѕР»СЊР·СѓРµС‚СЃСЏ РґР»СЏ РєР»Р°СЃСЃРёС„РёРєР°С†РёРё
+- [ ] C) End of sequence С‚РѕРєРµРЅ
+- [ ] D) Padding С‚РѕРєРµРЅ
 
-### Вопрос 4
+### Р’РѕРїСЂРѕСЃ 4
 
-Какое преимущество имеет ViT над CNN?
+РљР°РєРѕРµ РїСЂРµРёРјСѓС‰РµСЃС‚РІРѕ Сѓ ViT РїРµСЂРµРґ CNN?
 
-- [ ] A) Работает лучше на малых данных
-- [ ] B) Быстрее при inference
-- [x] C) Лучше масштабируется с увеличением данных и compute
-- [ ] D) Меньше параметров
+- [ ] A) Р›СѓС‡С€Рµ СЂР°Р±РѕС‚Р°РµС‚ РЅР° РјР°Р»С‹С… РґР°РЅРЅС‹С…
+- [ ] B) Р‘С‹СЃС‚СЂРµРµ РїСЂРё inference
+- [x] C) Р›СѓС‡С€Рµ РјР°СЃС€С‚Р°Р±РёСЂСѓРµС‚СЃСЏ СЃ Р±РѕР»СЊС€РёРј РєРѕР»РёС‡РµСЃС‚РІРѕРј РґР°РЅРЅС‹С… Рё compute
+- [ ] D) РњРµРЅСЊС€Рµ РїР°СЂР°РјРµС‚СЂРѕРІ
 
-### Вопрос 5
+### Р’РѕРїСЂРѕСЃ 5
 
-Как adversarial patch атака эксплуатирует ViT?
+РљР°Рє adversarial patch Р°С‚Р°РєР° СЌРєСЃРїР»СѓР°С‚РёСЂСѓРµС‚ ViT?
 
-- [ ] A) Атакует отдельные пиксели
-- [x] B) Создаёт враждебный патч, который влияет на всё изображение через attention
-- [ ] C) Модифицирует position embeddings
-- [ ] D) Атакует classification head
+- [ ] A) РђС‚Р°РєСѓРµС‚ РѕС‚РґРµР»СЊРЅС‹Рµ РїРёРєСЃРµР»Рё
+- [x] B) РЎРѕР·РґР°С‘С‚ adversarial patch РєРѕС‚РѕСЂС‹Р№ РІР»РёСЏРµС‚ РЅР° РІСЃС‘ РёР·РѕР±СЂР°Р¶РµРЅРёРµ С‡РµСЂРµР· attention
+- [ ] C) РњРѕРґРёС„РёС†РёСЂСѓРµС‚ position embeddings
+- [ ] D) РђС‚Р°РєСѓРµС‚ classification head
 
 ---
 
-## 9. Связанные материалы
+## 9. РЎРІСЏР·Р°РЅРЅС‹Рµ РјР°С‚РµСЂРёР°Р»С‹
 
 ### SENTINEL Engines
 
-| Engine | Описание |
+| Engine | РћРїРёСЃР°РЅРёРµ |
 |--------|----------|
-| `AdversarialImageDetector` | Детекция adversarial perturbations |
-| `PatchAnomalyScanner` | Сканирование на adversarial patches |
-| `AttentionConsistencyChecker` | Проверка консистентности attention maps |
+| `AdversarialImageDetector` | РћР±РЅР°СЂСѓР¶РµРЅРёРµ adversarial perturbations |
+| `PatchAnomalyScanner` | РЎРєР°РЅРёСЂРѕРІР°РЅРёРµ РЅР° adversarial patches |
+| `AttentionConsistencyChecker` | РџСЂРѕРІРµСЂРєР° consistency attention maps |
 
-### Внешние ресурсы
+### Р’РЅРµС€РЅРёРµ СЂРµСЃСѓСЂСЃС‹
 
 - [ViT Paper](https://arxiv.org/abs/2010.11929)
 - [DINO Paper](https://arxiv.org/abs/2104.14294)
@@ -648,25 +648,25 @@ def evaluate_robustness(model, test_loader, epsilon_values):
 
 ---
 
-## 10. Резюме
+## 10. Р РµР·СЋРјРµ
 
-В этом уроке мы изучили:
+Р’ СЌС‚РѕРј СѓСЂРѕРєРµ РјС‹ РёР·СѓС‡РёР»Рё:
 
-1. **ViT концепция:** Изображение > патчи > "visual tokens"
-2. **Архитектура:** Patch embedding + position + Transformer encoder
+1. **РљРѕРЅС†РµРїС†РёСЏ ViT:** Image в†’ patches в†’ В«visual tokensВ»
+2. **РђСЂС…РёС‚РµРєС‚СѓСЂР°:** Patch embedding + position + Transformer encoder
 3. **ViT vs CNN:** Global attention vs local receptive field
-4. **Data requirements:** ViT требует больше данных (JFT-300M)
-5. **Варианты:** DeiT, Swin Transformer, BEiT
-6. **Безопасность:** Adversarial attacks, patch attacks, multimodal risks
+4. **РўСЂРµР±РѕРІР°РЅРёСЏ Рє РґР°РЅРЅС‹Рј:** ViT С‚СЂРµР±СѓРµС‚ Р±РѕР»СЊС€Рµ РґР°РЅРЅС‹С… (JFT-300M)
+5. **Р’Р°СЂРёР°РЅС‚С‹:** DeiT, Swin Transformer, BEiT
+6. **Security:** Adversarial Р°С‚Р°РєРё, patch attacks, РјСѓР»СЊС‚РёРјРѕРґР°Р»СЊРЅС‹Рµ СЂРёСЃРєРё
 
-**Ключевой вывод:** ViT показал что Transformer architecture универсальна — работает не только для текста, но и для изображений. При достаточном количестве данных ViT превосходит CNN, но также наследует уязвимости (adversarial examples) с новыми рисками (patch attacks).
-
----
-
-## Следующий урок
-
-> [06. Multimodal модели: CLIP, LLaVA](06-multimodal.md)
+**РљР»СЋС‡РµРІРѕР№ РІС‹РІРѕРґ:** ViT РїРѕРєР°Р·Р°Р», С‡С‚Рѕ Р°СЂС…РёС‚РµРєС‚СѓСЂР° Transformer СѓРЅРёРІРµСЂСЃР°Р»СЊРЅР° вЂ” СЂР°Р±РѕС‚Р°РµС‚ РЅРµ С‚РѕР»СЊРєРѕ РґР»СЏ С‚РµРєСЃС‚Р°, РЅРѕ Рё РґР»СЏ РёР·РѕР±СЂР°Р¶РµРЅРёР№. РЎ РґРѕСЃС‚Р°С‚РѕС‡РЅС‹Рј РєРѕР»РёС‡РµСЃС‚РІРѕРј РґР°РЅРЅС‹С… ViT РїСЂРµРІРѕСЃС…РѕРґРёС‚ CNN, РЅРѕ С‚Р°РєР¶Рµ РЅР°СЃР»РµРґСѓРµС‚ СѓСЏР·РІРёРјРѕСЃС‚Рё (adversarial examples) СЃ РЅРѕРІС‹РјРё СЂРёСЃРєР°РјРё (patch attacks).
 
 ---
 
-*AI Security Academy | Track 01: AI Fundamentals | Module 01.1: Model Types*
+## РЎР»РµРґСѓСЋС‰РёР№ СѓСЂРѕРє
+
+в†’ [06. РњСѓР»СЊС‚РёРјРѕРґР°Р»СЊРЅС‹Рµ РјРѕРґРµР»Рё: CLIP, LLaVA](06-multimodal.md)
+
+---
+
+*AI Security Academy | РўСЂРµРє 01: РћСЃРЅРѕРІС‹ AI | РњРѕРґСѓР»СЊ 01.1: РўРёРїС‹ РјРѕРґРµР»РµР№*

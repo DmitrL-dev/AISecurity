@@ -1,51 +1,51 @@
-# TDA для Анализа Embeddings
+# TDA for Embedding Analysis
 
-> **Уровень:** �������  
+> **Level:** Expert  
 > **Время:** 55 минут  
-> **Трек:** 06 — Mathematical Foundations  
-> **Модуль:** 06.1 — TDA (Topological Data Analysis)  
-> **Версия:** 1.0
+> **Track:** 06 — Mathematical Foundations  
+> **Module:** 06.1 — TDA (Topological Data Analysis)  
+> **Version:** 1.0
 
 ---
 
 ## Цели обучения
 
-- [ ] Понять топологические свойства embedding spaces
-- [ ] Применять TDA методы к анализу LLM embeddings
-- [ ] Интегрировать TDA-based detection в security pipeline
-- [ ] Использовать persistence diagrams для сравнения распределений
+- [ ] Understand topological properties of embedding spaces
+- [ ] Apply TDA methods to LLM embedding analysis
+- [ ] Integrate TDA-based detection in security pipeline
+- [ ] Use persistence diagrams for distribution comparison
 
 ---
 
-## 1. Embeddings и Topology
+## 1. Embeddings and Topology
 
-### 1.1 Почему TDA для Embeddings?
+### 1.1 Why TDA for Embeddings?
 
-LLM embeddings образуют сложные manifolds в высокоразмерном пространстве. TDA позволяет анализировать их структуру.
+LLM embeddings form complex manifolds in high-dimensional space. TDA allows analyzing their structure.
 
 ```
 ┌────────────────────────────────────────────────────────────────────┐
-│              EMBEDDINGS КАК ТОПОЛОГИЧЕСКИЙ ОБЪЕКТ                   │
+│              EMBEDDINGS AS TOPOLOGICAL OBJECT                       │
 ├────────────────────────────────────────────────────────────────────┤
 │                                                                    │
 │  Text → [LLM Encoder] → Embedding ∈ ℝⁿ (n = 384, 768, 1536...)    │
 │                                                                    │
-│  Коллекция embeddings = Point Cloud в ℝⁿ                          │
+│  Collection of embeddings = Point Cloud in ℝⁿ                      │
 │                                                                    │
-│  TDA извлекает:                                                    │
-│  ├── H₀: Связные компоненты (кластеры смыслов)                    │
-│  ├── H₁: Циклы/дыры (семантические петли)                         │
-│  └── H₂: Полости (сложные семантические структуры)                │
+│  TDA extracts:                                                     │
+│  ├── H₀: Connected components (meaning clusters)                  │
+│  ├── H₁: Cycles/holes (semantic loops)                            │
+│  └── H₂: Voids (complex semantic structures)                      │
 │                                                                    │
-│  Применение к Security:                                            │
-│  ├── Normal embeddings → стабильная топология                     │
-│  ├── Attack embeddings → новые/изменённые features                │
-│  └── Детекция = сравнение persistence diagrams                    │
+│  Security Application:                                             │
+│  ├── Normal embeddings → stable topology                          │
+│  ├── Attack embeddings → new/changed features                     │
+│  └── Обнаружение = comparing persistence diagrams                   │
 │                                                                    │
 └────────────────────────────────────────────────────────────────────┘
 ```
 
-### 1.2 Метрики в Embedding Space
+### 1.2 Metrics in Embedding Space
 
 ```python
 import numpy as np
@@ -53,43 +53,43 @@ from scipy.spatial.distance import pdist, squareform
 from sklearn.metrics.pairwise import cosine_distances
 
 class EmbeddingMetrics:
-    """Различные метрики для embedding space"""
+    """Various metrics for embedding space"""
     
     @staticmethod
     def euclidean_distance_matrix(embeddings: np.ndarray) -> np.ndarray:
-        """Стандартное евклидово расстояние"""
+        """Standard Euclidean distance"""
         return squareform(pdist(embeddings, metric='euclidean'))
     
     @staticmethod
     def cosine_distance_matrix(embeddings: np.ndarray) -> np.ndarray:
         """
-        Косинусное расстояние — более подходит для embeddings,
-        так как важны направления, а не magnitude.
+        Cosine distance — more suitable for embeddings,
+        as directions matter, not magnitude.
         """
         return cosine_distances(embeddings)
     
     @staticmethod
     def normalized_euclidean(embeddings: np.ndarray) -> np.ndarray:
-        """Евклидова метрика после L2 нормализации"""
+        """Euclidean metric after L2 normalization"""
         normalized = embeddings / np.linalg.norm(embeddings, axis=1, keepdims=True)
         return squareform(pdist(normalized, metric='euclidean'))
     
     @staticmethod
     def angular_distance(embeddings: np.ndarray) -> np.ndarray:
         """
-        Угловое расстояние — arccos от косинусной близости.
-        Метрика (удовлетворяет неравенству треугольника).
+        Angular distance — arccos of cosine similarity.
+        Metric (satisfies triangle inequality).
         """
         cos_sim = np.dot(embeddings, embeddings.T)
         norms = np.linalg.norm(embeddings, axis=1)
         cos_sim = cos_sim / np.outer(norms, norms)
-        cos_sim = np.clip(cos_sim, -1, 1)  # Численная стабильность
-        return np.arccos(cos_sim) / np.pi  # Нормализуем к [0, 1]
+        cos_sim = np.clip(cos_sim, -1, 1)  # Numerical stability
+        return np.arccos(cos_sim) / np.pi  # Normalize to [0, 1]
 ```
 
 ---
 
-## 2. Persistence Homology для Embeddings
+## 2. Persistence Homology for Embeddings
 
 ### 2.1 Vietoris-Rips Complex
 
@@ -100,15 +100,15 @@ import matplotlib.pyplot as plt
 
 class EmbeddingPersistence:
     """
-    Persistent Homology для анализа embedding space.
-    Использует Vietoris-Rips filtration.
+    Persistent Homology for embedding space analysis.
+    Uses Vietoris-Rips filtration.
     """
     
     def __init__(self, max_dim: int = 1, max_edge_length: float = np.inf):
         """
         Args:
-            max_dim: Максимальная размерность гомологий (0, 1, 2)
-            max_edge_length: Максимальная длина ребра в фильтрации
+            max_dim: Maximum homology dimension (0, 1, 2)
+            max_edge_length: Maximum edge length in filtration
         """
         self.max_dim = max_dim
         self.max_edge_length = max_edge_length
@@ -118,16 +118,16 @@ class EmbeddingPersistence:
     def compute(self, embeddings: np.ndarray, 
                 metric: str = 'cosine') -> dict:
         """
-        Вычисляет persistent homology для embeddings.
+        Computes persistent homology for embeddings.
         
         Args:
-            embeddings: Матрица embeddings (n_samples, n_features)
-            metric: 'euclidean', 'cosine', или 'angular'
+            embeddings: Embedding matrix (n_samples, n_features)
+            metric: 'euclidean', 'cosine', or 'angular'
         
         Returns:
-            Словарь с diagrams и статистиками
+            Dictionary with diagrams and statistics
         """
-        # Вычисляем distance matrix
+        # Compute distance matrix
         if metric == 'euclidean':
             self.distance_matrix = EmbeddingMetrics.euclidean_distance_matrix(embeddings)
         elif metric == 'cosine':
@@ -137,7 +137,7 @@ class EmbeddingPersistence:
         else:
             raise ValueError(f"Unknown metric: {metric}")
         
-        # Ripser для persistent homology
+        # Ripser for persistent homology
         result = ripser(
             self.distance_matrix,
             maxdim=self.max_dim,
@@ -155,7 +155,7 @@ class EmbeddingPersistence:
         }
     
     def _compute_statistics(self) -> dict:
-        """Вычисляет статистики persistence diagrams"""
+        """Computes persistence diagram statistics"""
         stats = {}
         
         for dim, dgm in enumerate(self.diagrams):
@@ -164,7 +164,7 @@ class EmbeddingPersistence:
             
             # Lifetime = death - birth
             lifetimes = dgm[:, 1] - dgm[:, 0]
-            # Фильтруем inf
+            # Filter inf
             finite_lifetimes = lifetimes[np.isfinite(lifetimes)]
             
             if len(finite_lifetimes) > 0:
@@ -178,13 +178,13 @@ class EmbeddingPersistence:
     
     def get_persistent_features(self, min_persistence: float = 0.1) -> dict:
         """
-        Возвращает только persistent features (с большим lifetime).
+        Returns only persistent features (with large lifetime).
         
         Args:
-            min_persistence: Минимальный lifetime для feature
+            min_persistence: Minimum lifetime for feature
         
         Returns:
-            Устойчивые features по размерностям
+            Stable features by dimension
         """
         persistent = {}
         
@@ -196,7 +196,7 @@ class EmbeddingPersistence:
         return persistent
     
     def plot(self, save_path: str = None):
-        """Визуализация persistence diagrams"""
+        """Visualize persistence diagrams"""
         if self.diagrams is None:
             raise ValueError("Call compute() first")
         
@@ -218,31 +218,31 @@ class EmbeddingPersistence:
         return fig
 ```
 
-### 2.2 Сравнение Persistence Diagrams
+### 2.2 Comparing Persistence Diagrams
 
 ```python
 class PersistenceComparator:
     """
-    Сравнение persistence diagrams для detection.
-    Использует Wasserstein и Bottleneck distances.
+    Comparison of persistence diagrams for detection.
+    Uses Wasserstein and Bottleneck distances.
     """
     
     def __init__(self):
         self.baseline_diagrams = None
     
     def set_baseline(self, diagrams: list):
-        """Устанавливает baseline diagrams"""
+        """Sets baseline diagrams"""
         self.baseline_diagrams = diagrams
     
     def compare(self, target_diagrams: list) -> dict:
         """
-        Сравнивает target diagrams с baseline.
+        Compares target diagrams with baseline.
         
         Args:
-            target_diagrams: Diagrams для сравнения
+            target_diagrams: Diagrams to compare
         
         Returns:
-            Distances по размерностям
+            Distances by dimension
         """
         if self.baseline_diagrams is None:
             raise ValueError("Set baseline first")
@@ -274,15 +274,15 @@ class PersistenceComparator:
                    wasserstein_threshold: float = 0.5,
                    bottleneck_threshold: float = 0.3) -> dict:
         """
-        Определяет, является ли target аномальным.
+        Determines if target is anomalous.
         
         Args:
-            target_diagrams: Diagrams для проверки
-            wasserstein_threshold: Порог по Wasserstein
-            bottleneck_threshold: Порог по Bottleneck
+            target_diagrams: Diagrams to check
+            wasserstein_threshold: Threshold for Wasserstein
+            bottleneck_threshold: Threshold for Bottleneck
         
         Returns:
-            Результат anomaly detection
+            Anomaly detection result
         """
         distances = self.compare(target_diagrams)
         
@@ -310,7 +310,7 @@ class PersistenceComparator:
 
 ---
 
-## 3. Topological Signatures для Текстов
+## 3. Topological Signatures for Texts
 
 ### 3.1 Embedding Topology Signature
 
@@ -321,8 +321,8 @@ import hashlib
 
 class TopologicalSignature:
     """
-    Топологическая сигнатура текстового корпуса.
-    Используется для сравнения и детекции изменений.
+    Topological signature of text corpus.
+    Used for comparison and change detection.
     """
     
     def __init__(self, embedding_model: str = "all-MiniLM-L6-v2"):
@@ -332,14 +332,14 @@ class TopologicalSignature:
     def compute_signature(self, texts: List[str], 
                          metric: str = 'cosine') -> dict:
         """
-        Вычисляет топологическую сигнатуру для текстов.
+        Computes topological signature for texts.
         
         Args:
-            texts: Список текстов
-            metric: Метрика для embeddings
+            texts: List of texts
+            metric: Metric for embeddings
         
         Returns:
-            Топологическая сигнатура
+            Topological signature
         """
         # Embeddings
         embeddings = self.encoder.encode(texts)
@@ -347,7 +347,7 @@ class TopologicalSignature:
         # Persistent homology
         result = self.persistence.compute(embeddings, metric=metric)
         
-        # Извлекаем ключевые features
+        # Extract key features
         signature = {
             'n_texts': len(texts),
             'embedding_dim': embeddings.shape[1],
@@ -373,7 +373,7 @@ class TopologicalSignature:
         return signature
     
     def _compute_hash(self, signature: dict) -> str:
-        """Вычисляет hash сигнатуры для быстрого сравнения"""
+        """Computes hash of signature for quick comparison"""
         key_values = [
             signature['h0_count'],
             round(signature['h0_mean_lifetime'], 3),
@@ -384,16 +384,16 @@ class TopologicalSignature:
     
     def compare_signatures(self, sig1: dict, sig2: dict) -> dict:
         """
-        Сравнивает две топологические сигнатуры.
+        Compares two topological signatures.
         
         Args:
-            sig1: Первая сигнатура
-            sig2: Вторая сигнатура
+            sig1: First signature
+            sig2: Second signature
         
         Returns:
-            Результат сравнения
+            Comparison result
         """
-        # Сравнение базовых statistics
+        # Compare basic statistics
         stat_diffs = {}
         for key in ['h0_count', 'h0_mean_lifetime', 'h1_count', 'h1_mean_lifetime']:
             diff = sig2.get(key, 0) - sig1.get(key, 0)
@@ -416,13 +416,13 @@ class TopologicalSignature:
         }
     
     def _assess_similarity(self, stat_diffs: dict, diagram_dists: dict) -> bool:
-        """Оценивает общую похожесть сигнатур"""
-        # Относительные изменения < 50%
+        """Assesses overall signature similarity"""
+        # Relative changes < 50%
         for key, diff in stat_diffs.items():
             if abs(diff['relative']) > 0.5:
                 return False
         
-        # Diagram distances разумные
+        # Diagram distances reasonable
         for key, dist in diagram_dists.items():
             if 'wasserstein' in key and dist > 0.5:
                 return False
@@ -435,8 +435,8 @@ class TopologicalSignature:
 ```python
 class SlidingWindowTDA:
     """
-    TDA анализ с sliding window для потоковых данных.
-    Отслеживает изменения топологии во времени.
+    TDA analysis with sliding window for streaming data.
+    Tracks topology changes over time.
     """
     
     def __init__(self, 
@@ -453,28 +453,28 @@ class SlidingWindowTDA:
     
     def add_text(self, text: str) -> dict:
         """
-        Добавляет текст и обновляет анализ.
+        Adds text and updates analysis.
         
         Args:
-            text: Новый текст
+            text: New text
         
         Returns:
-            Результат анализа окна (если достигнут step_size)
+            Window analysis result (if step_size reached)
         """
         self.current_window.append(text)
         
         if len(self.current_window) >= self.window_size:
-            # Анализируем окно
+            # Analyze window
             result = self._analyze_window()
             
-            # Сравниваем с предыдущим
+            # Compare with previous
             if self.history:
                 change = self._detect_change(result)
                 result['change_detected'] = change
             
             self.history.append(result)
             
-            # Сдвигаем окно
+            # Shift window
             self.current_window = self.current_window[self.step_size:]
             
             return result
@@ -482,7 +482,7 @@ class SlidingWindowTDA:
         return None
     
     def _analyze_window(self) -> dict:
-        """Анализирует текущее окно"""
+        """Analyzes current window"""
         embeddings = self.encoder.encode(self.current_window)
         result = self.persistence.compute(embeddings, metric='cosine')
         
@@ -494,14 +494,14 @@ class SlidingWindowTDA:
         }
     
     def _detect_change(self, current: dict) -> dict:
-        """Обнаруживает изменения относительно предыдущего окна"""
+        """Detects changes relative to previous window"""
         prev = self.history[-1]
         
         comparator = PersistenceComparator()
         comparator.set_baseline(prev['diagrams'])
         distances = comparator.compare(current['diagrams'])
         
-        # Проверяем на аномалию
+        # Check for anomaly
         anomaly = comparator.is_anomaly(
             current['diagrams'],
             wasserstein_threshold=0.3,
@@ -515,7 +515,7 @@ class SlidingWindowTDA:
         }
     
     def get_trend(self) -> dict:
-        """Возвращает тренд изменений топологии"""
+        """Returns topology change trend"""
         if len(self.history) < 2:
             return {'status': 'insufficient_data'}
         
@@ -535,13 +535,13 @@ class SlidingWindowTDA:
 
 ## 4. Security Applications
 
-### 4.1 Injection Detection via TDA
+### 4.1 Injection Обнаружение via TDA
 
 ```python
 class TDAInjectionDetector:
     """
-    Детектор prompt injection на основе TDA.
-    Использует топологические изменения в embedding space.
+    Prompt injection detector based on TDA.
+    Uses topological changes in embedding space.
     """
     
     def __init__(self, embedding_model: str = "all-MiniLM-L6-v2"):
@@ -558,8 +558,8 @@ class TDAInjectionDetector:
     
     def train(self, normal_texts: List[str]):
         """
-        Обучение на нормальных данных.
-        Строит baseline топологическую сигнатуру.
+        Training on normal data.
+        Builds baseline topological signature.
         """
         embeddings = self.encoder.encode(normal_texts)
         result = self.persistence.compute(embeddings, metric='cosine')
@@ -574,13 +574,13 @@ class TDAInjectionDetector:
     
     def detect(self, texts: List[str]) -> dict:
         """
-        Детекция injection в текстах.
+        Injection detection in texts.
         
         Args:
-            texts: Тексты для анализа
+            texts: Texts for analysis
         
         Returns:
-            Результат детекции
+            Обнаружение result
         """
         if self.baseline_signature is None:
             raise ValueError("Train the detector first")
@@ -618,7 +618,7 @@ class TDAInjectionDetector:
         }
     
     def _compute_confidence(self, distances: dict, h1_change: int) -> float:
-        """Вычисляет confidence score"""
+        """Computes confidence score"""
         score = 0.0
         
         # Wasserstein contribution
@@ -633,23 +633,23 @@ class TDAInjectionDetector:
         return min(score, 1.0)
     
     def _get_recommendation(self, is_injection: bool, confidence: float) -> str:
-        """Рекомендации на основе результата"""
+        """Recommendations based on result"""
         if not is_injection:
-            return "SAFE: Топология соответствует baseline"
+            return "SAFE: Topology matches baseline"
         elif confidence < 0.5:
-            return "LOW_RISK: Небольшие топологические изменения"
+            return "LOW_RISK: Minor topological changes"
         elif confidence < 0.8:
-            return "MEDIUM_RISK: Значительные изменения, рекомендуется проверка"
+            return "MEDIUM_RISK: Significant changes, review recommended"
         else:
-            return "HIGH_RISK: Сильные топологические аномалии, возможна injection"
+            return "HIGH_RISK: Strong topological anomalies, possible injection"
 ```
 
-### 4.2 Multi-Modal TDA Detection
+### 4.2 Multi-Modal TDA Обнаружение
 
 ```python
 class MultiModalTDADetector:
     """
-    Multi-modal детектор, комбинирующий TDA features с другими методами.
+    Multi-modal detector combining TDA features with other methods.
     """
     
     def __init__(self, embedding_model: str = "all-MiniLM-L6-v2"):
@@ -665,7 +665,7 @@ class MultiModalTDADetector:
     
     def train(self, normal_texts: List[str], attack_texts: List[str] = None):
         """
-        Обучение на нормальных (и опционально атакующих) данных.
+        Training on normal (and optionally attack) data.
         """
         self.tda_detector.train(normal_texts)
         
@@ -683,23 +683,23 @@ class MultiModalTDADetector:
     
     def detect(self, texts: List[str]) -> dict:
         """
-        Multi-modal детекция.
+        Multi-modal detection.
         
         Returns:
-            Комбинированный результат детекции
+            Combined detection result
         """
         embeddings = self.encoder.encode(texts)
         
-        # 1. TDA Detection
+        # 1. TDA Обнаружение
         tda_result = self.tda_detector.detect(texts)
         tda_score = tda_result['confidence']
         
-        # 2. Semantic Detection (distance from centroid)
+        # 2. Semantic Обнаружение (distance from centroid)
         distances = np.linalg.norm(embeddings - self.normal_centroid, axis=1)
         outside_radius = np.mean(distances > self.normal_radius * 1.5)
         semantic_score = outside_radius
         
-        # 3. Structural Detection (similarity to known attacks)
+        # 3. Structural Обнаружение (similarity to known attacks)
         structural_score = 0.0
         if self.attack_embeddings is not None:
             # Max similarity to any attack
@@ -741,7 +741,7 @@ class MultiModalTDADetector:
 
 ---
 
-## 5. SENTINEL Integration
+## 5. SENTINEL Интеграция
 
 ```python
 from dataclasses import dataclass
@@ -756,7 +756,7 @@ class RiskLevel(Enum):
 
 @dataclass
 class TDASecurityConfig:
-    """Конфигурация TDA Security Engine"""
+    """TDA Security Engine configuration"""
     embedding_model: str = "all-MiniLM-L6-v2"
     max_homology_dim: int = 1
     wasserstein_threshold: float = 0.4
@@ -766,8 +766,8 @@ class TDASecurityConfig:
 
 class SENTINELTDAEngine:
     """
-    TDA Engine для SENTINEL framework.
-    Обеспечивает топологический анализ для security detection.
+    TDA Engine for SENTINEL framework.
+    Provides topological analysis for security detection.
     """
     
     def __init__(self, config: TDASecurityConfig):
@@ -786,19 +786,19 @@ class SENTINELTDAEngine:
               attack_texts: List[str] = None,
               signature_name: str = "default"):
         """
-        Обучение engine на данных.
+        Train engine on data.
         
         Args:
-            normal_texts: Нормальные тексты
-            attack_texts: Атакующие тексты (опционально)
-            signature_name: Имя сигнатуры для кэширования
+            normal_texts: Normal texts
+            attack_texts: Attack texts (optional)
+            signature_name: Signature name for caching
         """
         if self.config.use_multimodal:
             self.detector.train(normal_texts, attack_texts)
         else:
             self.detector.train(normal_texts)
         
-        # Сохраняем сигнатуру
+        # Save signature
         sig_computer = TopologicalSignature(self.config.embedding_model)
         self.signature_cache[signature_name] = sig_computer.compute_signature(
             normal_texts, self.config.metric
@@ -808,10 +808,10 @@ class SENTINELTDAEngine:
     
     def analyze(self, texts: List[str]) -> dict:
         """
-        Анализ текстов.
+        Analyze texts.
         
         Returns:
-            Полный результат анализа
+            Full analysis result
         """
         if not self.is_trained:
             raise RuntimeError("Train the engine first")
@@ -855,22 +855,22 @@ class SENTINELTDAEngine:
 
 ---
 
-## 6. Резюме
+## 6. Summary
 
-| Компонент | Описание |
-|-----------|----------|
-| **Persistence Homology** | Извлекает H₀, H₁ features из embedding space |
-| **Wasserstein/Bottleneck** | Метрики сравнения persistence diagrams |
-| **Topological Signature** | Компактное представление топологии корпуса |
-| **Sliding Window TDA** | Отслеживание топологии в реальном времени |
-| **Multi-Modal Detection** | Комбинирование TDA с семантикой и структурой |
+| Component | Description |
+|-----------|-------------|
+| **Persistence Homology** | Extracts H₀, H₁ features from embedding space |
+| **Wasserstein/Bottleneck** | Metrics for comparing persistence diagrams |
+| **Topological Signature** | Compact representation of corpus topology |
+| **Sliding Window TDA** | Real-time topology tracking |
+| **Multi-Modal Обнаружение** | Combining TDA with semantics and structure |
 
 ---
 
-## Следующий урок
+## Next Lesson
 
 → [Track 07: Governance](../../07-governance/README.md)
 
 ---
 
-*AI Security Academy | Track 06: Mathematical Foundations | Module 06.1: TDA*
+*AI Security Academy (RU) | Track 06: Mathematical Foundations | Module 06.1: TDA*

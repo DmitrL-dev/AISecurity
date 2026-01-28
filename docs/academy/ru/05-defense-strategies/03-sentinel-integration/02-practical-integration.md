@@ -1,22 +1,22 @@
-# Practical Integration
+п»ї# Practical РРЅС‚РµРіСЂР°С†РёСЏ
 
-> **Уровень:** Средний  
-> **Время:** 50 минут  
-> **Трек:** 03 — Defense Techniques  
-> **Модуль:** 03.2 — SENTINEL Integration  
-> **Версия:** 1.0
-
----
-
-## Цели обучения
-
-- [ ] Интегрировать SENTINEL в реальное приложение
-- [ ] Настроить конфигурацию engines
-- [ ] Создать полный protection pipeline
+> **Level:** Intermediate  
+> **Р’СЂРµРјСЏ:** 50 РјРёРЅСѓС‚  
+> **Track:** 03 вЂ” Defense Techniques  
+> **Module:** 03.2 вЂ” SENTINEL РРЅС‚РµРіСЂР°С†РёСЏ  
+> **Version:** 1.0
 
 ---
 
-## 1. Базовая интеграция
+## Р¦РµР»Рё РѕР±СѓС‡РµРЅРёСЏ
+
+- [ ] Integrate SENTINEL into real application
+- [ ] Configure engines
+- [ ] Create full protection pipeline
+
+---
+
+## 1. Basic РРЅС‚РµРіСЂР°С†РёСЏ
 
 ### 1.1 Installation
 
@@ -136,7 +136,7 @@ brain = SENTINELBrain(config)
 
 ---
 
-## 3. Integration Patterns
+## 3. РРЅС‚РµРіСЂР°С†РёСЏ Patterns
 
 ### 3.1 Wrapper Pattern
 
@@ -219,7 +219,7 @@ async def chat(request: Request):
     return {"response": output_result.final_response}
 ```
 
-### 3.3 LangChain Integration
+### 3.3 LangChain РРЅС‚РµРіСЂР°С†РёСЏ
 
 ```python
 from langchain.chat_models import ChatOpenAI
@@ -258,7 +258,7 @@ result = chain.invoke("Hello, how are you?")
 
 ---
 
-## 4. Monitoring и Logging
+## 4. Monitoring and Logging
 
 ### 4.1 Security Logging
 
@@ -338,9 +338,9 @@ except SENTINELError as e:
 
 ---
 
-## 6. Практические задания
+## 6. Practical Exercises
 
-### Задание 1: FastAPI Integration
+### Exercise 1: FastAPI РРЅС‚РµРіСЂР°С†РёСЏ
 
 ```python
 # Create a FastAPI app with SENTINEL protection
@@ -351,11 +351,11 @@ except SENTINELError as e:
 # 4. Security logging
 ```
 
-### Задание 2: Custom Engine
+### Exercise 2: Custom Engine
 
 ```python
 # Create a custom engine for domain-specific filtering
-# Example: Block requests about competitors
+# РџСЂРёРјРµСЂ: Block requests about competitors
 
 from sentinel import scan  # Public API
 
@@ -370,20 +370,20 @@ class CompetitorFilter(BaseEngine):
 
 ---
 
-## 7. Резюме
+## 7. Summary
 
 1. **Installation:** `pip install sentinel-brain`
-2. **Configuration:** Python dict или YAML
+2. **Configuration:** Python dict or YAML
 3. **Patterns:** Wrapper, Middleware, LangChain
 4. **Monitoring:** Security logging, metrics
 5. **Error handling:** Fail open vs fail closed
 
 ---
 
-## Следующий модуль
+## Next Module
 
-> [Track 03 Summary](../README.md)
+в†’ [Track 03 Summary](../README.md)
 
 ---
 
-*AI Security Academy | Track 03: Defense Techniques | Module 03.2: SENTINEL Integration*
+*AI Security Academy (RU) | Track 03: Defense Techniques | Module 03.2: SENTINEL РРЅС‚РµРіСЂР°С†РёСЏ*

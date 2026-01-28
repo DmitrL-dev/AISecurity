@@ -1,9 +1,9 @@
-# Anomaly Detection для LLM Security
+# Детекция аномалий для безопасности LLM
 
-> **Уровень:** �����������  
+> **Уровень:** Продвинутый  
 > **Время:** 50 минут  
-> **Трек:** 05 — Defense Strategies  
-> **Модуль:** 05.1 — Detection  
+> **Трек:** 05 — Стратегии защиты  
+> **Модуль:** 05.1 — Детекция  
 > **Версия:** 1.0
 
 ---
@@ -11,63 +11,63 @@
 ## Цели обучения
 
 - [ ] Понять типы аномалий в LLM системах
-- [ ] Имплементировать statistical и ML-based детекторы
-- [ ] Построить real-time anomaly detection pipeline
+- [ ] Реализовать статистические и ML детекторы
+- [ ] Построить real-time пайплайн детекции аномалий
 - [ ] Интегрировать детекторы в SENTINEL
 
 ---
 
-## 1. Anomaly Detection Overview
+## 1. Обзор детекции аномалий
 
 ### 1.1 Типы аномалий
 
 ```
 ┌────────────────────────────────────────────────────────────────────┐
-│              ANOMALY TYPES IN LLM SYSTEMS                          │
+│              ТИПЫ АНОМАЛИЙ В LLM СИСТЕМАХ                          │
 ├────────────────────────────────────────────────────────────────────┤
 │                                                                    │
-│  Input Anomalies:                                                  │
-│  ├── Unusual length (too short/long)                              │
-│  ├── Unusual character distribution                               │
-│  ├── Out-of-distribution embeddings                              │
-│  └── Suspicious patterns (encoding, special chars)               │
+│  Аномалии ввода:                                                   │
+│  ├── Необычная длина (слишком короткая/длинная)                   │
+│  ├── Необычное распределение символов                             │
+│  ├── Out-of-distribution эмбеддинги                               │
+│  └── Подозрительные паттерны (кодировки, спецсимволы)            │
 │                                                                    │
-│  Behavior Anomalies:                                               │
-│  ├── Unusual request frequency                                    │
-│  ├── Abnormal tool usage patterns                                │
-│  ├── Suspicious session behavior                                 │
-│  └── Time-based anomalies                                        │
+│  Поведенческие аномалии:                                           │
+│  ├── Необычная частота запросов                                   │
+│  ├── Аномальные паттерны использования инструментов               │
+│  ├── Подозрительное поведение сессии                              │
+│  └── Временные аномалии                                           │
 │                                                                    │
-│  Output Anomalies:                                                 │
-│  ├── Unexpected response patterns                                │
-│  ├── Information leakage indicators                              │
-│  ├── Policy violation signals                                    │
-│  └── Jailbreak success indicators                                │
+│  Аномалии вывода:                                                  │
+│  ├── Неожиданные паттерны ответов                                 │
+│  ├── Индикаторы утечки информации                                 │
+│  ├── Сигналы нарушения политик                                    │
+│  └── Индикаторы успешного jailbreak                               │
 │                                                                    │
-│  System Anomalies:                                                 │
-│  ├── Latency spikes                                              │
-│  ├── Resource utilization anomalies                              │
-│  └── Error rate changes                                          │
+│  Системные аномалии:                                               │
+│  ├── Скачки латентности                                           │
+│  ├── Аномалии использования ресурсов                              │
+│  └── Изменения error rate                                         │
 │                                                                    │
 └────────────────────────────────────────────────────────────────────┘
 ```
 
 ---
 
-## 2. Statistical Anomaly Detection
+## 2. Статистическая детекция аномалий
 
-### 2.1 Z-Score Detector
+### 2.1 Z-Score детектор
 
 ```python
 from dataclasses import dataclass, field
-from typing import List, Dict, Optional
+from typing import List, Dict, Optional, Any
 import numpy as np
 from collections import deque
 import threading
 
 @dataclass
 class StatisticalBaseline:
-    """Statistical baseline for feature"""
+    """Статистический baseline для признака"""
     mean: float = 0.0
     std: float = 1.0
     min_val: float = float('-inf')
@@ -75,7 +75,7 @@ class StatisticalBaseline:
     sample_count: int = 0
     
     def update(self, value: float, alpha: float = 0.01):
-        """Update baseline with exponential moving average"""
+        """Обновить baseline экспоненциальным скользящим средним"""
         if self.sample_count == 0:
             self.mean = value
             self.std = 1.0
@@ -89,13 +89,13 @@ class StatisticalBaseline:
         self.sample_count += 1
     
     def get_z_score(self, value: float) -> float:
-        """Calculate z-score for value"""
+        """Рассчитать z-score для значения"""
         if self.std < 1e-10:
             return 0.0
         return (value - self.mean) / self.std
 
 class ZScoreAnomalyDetector:
-    """Statistical anomaly detection using z-scores"""
+    """Статистическая детекция аномалий через z-scores"""
     
     def __init__(self, z_threshold: float = 3.0, window_size: int = 1000):
         self.z_threshold = z_threshold
@@ -105,7 +105,7 @@ class ZScoreAnomalyDetector:
         self.lock = threading.RLock()
     
     def update_and_detect(self, feature_name: str, value: float) -> Dict:
-        """Update baseline and detect anomaly"""
+        """Обновить baseline и детектировать аномалию"""
         with self.lock:
             if feature_name not in self.baselines:
                 self.baselines[feature_name] = StatisticalBaseline()
@@ -116,7 +116,7 @@ class ZScoreAnomalyDetector:
             
             is_anomaly = abs(z_score) > self.z_threshold
             
-            # Update baseline with non-anomalous values
+            # Обновить baseline только не-аномальными значениями
             if not is_anomaly:
                 baseline.update(value)
             
@@ -137,7 +137,7 @@ class ZScoreAnomalyDetector:
             }
     
     def detect_multi(self, features: Dict[str, float]) -> Dict:
-        """Detect anomalies across multiple features"""
+        """Детектировать аномалии по нескольким признакам"""
         results = {}
         anomaly_count = 0
         max_z = 0.0
@@ -157,14 +157,14 @@ class ZScoreAnomalyDetector:
         }
 ```
 
-### 2.2 Isolation Forest Detector
+### 2.2 Isolation Forest детектор
 
 ```python
 from sklearn.ensemble import IsolationForest
 from sklearn.preprocessing import StandardScaler
 
 class IsolationForestDetector:
-    """Anomaly detection using Isolation Forest"""
+    """Детекция аномалий через Isolation Forest"""
     
     def __init__(self, contamination: float = 0.1, n_estimators: int = 100):
         self.contamination = contamination
@@ -175,10 +175,9 @@ class IsolationForestDetector:
         )
         self.scaler = StandardScaler()
         self.is_trained = False
-        self.feature_names: List[str] = []
     
     def train(self, data: np.ndarray, feature_names: List[str] = None):
-        """Train on normal data"""
+        """Обучить на нормальных данных"""
         self.feature_names = feature_names or [f"f{i}" for i in range(data.shape[1])]
         
         scaled_data = self.scaler.fit_transform(data)
@@ -186,9 +185,9 @@ class IsolationForestDetector:
         self.is_trained = True
     
     def detect(self, sample: np.ndarray) -> Dict:
-        """Detect if sample is anomalous"""
+        """Детектировать аномальность сэмпла"""
         if not self.is_trained:
-            raise RuntimeError("Train the model first")
+            raise RuntimeError("Сначала обучите модель")
         
         if len(sample.shape) == 1:
             sample = sample.reshape(1, -1)
@@ -200,51 +199,47 @@ class IsolationForestDetector:
         
         is_anomaly = prediction == -1
         
-        # Normalize score to 0-1 (higher = more anomalous)
-        anomaly_score = 1 - (score + 0.5)  # Approximate normalization
+        # Нормализовать score к 0-1 (выше = более аномально)
+        anomaly_score = 1 - (score + 0.5)
         anomaly_score = max(0, min(1, anomaly_score))
         
         return {
             'is_anomaly': is_anomaly,
             'anomaly_score': anomaly_score,
             'raw_score': score,
-            'threshold': 0.0  # Decision boundary
+            'threshold': 0.0
         }
-    
-    def detect_batch(self, samples: np.ndarray) -> List[Dict]:
-        """Detect anomalies in batch"""
-        return [self.detect(s) for s in samples]
 ```
 
 ---
 
-## 3. Embedding-based Anomaly Detection
+## 3. Детекция на основе эмбеддингов
 
-### 3.1 Embedding Distance Detector
+### 3.1 Embedding Distance детектор
 
 ```python
 from sentence_transformers import SentenceTransformer
-from scipy.spatial.distance import cosine, euclidean
+from scipy.spatial.distance import cosine
 
 class EmbeddingAnomalyDetector:
-    """Anomaly detection based on embedding space"""
+    """Детекция аномалий в пространстве эмбеддингов"""
     
     def __init__(self, model_name: str = "all-MiniLM-L6-v2",
                  distance_threshold: float = 0.5):
         self.encoder = SentenceTransformer(model_name)
         self.distance_threshold = distance_threshold
         
-        # Baseline embeddings
+        # Baseline эмбеддинги
         self.baseline_embeddings: np.ndarray = None
         self.centroid: np.ndarray = None
         self.max_distance: float = 0.0
     
     def train(self, normal_texts: List[str]):
-        """Train on normal text samples"""
+        """Обучить на нормальных текстах"""
         self.baseline_embeddings = self.encoder.encode(normal_texts)
         self.centroid = np.mean(self.baseline_embeddings, axis=0)
         
-        # Calculate max distance for normalization
+        # Рассчитать max distance для нормализации
         distances = [
             cosine(emb, self.centroid) 
             for emb in self.baseline_embeddings
@@ -252,23 +247,23 @@ class EmbeddingAnomalyDetector:
         self.max_distance = np.percentile(distances, 95)
     
     def detect(self, text: str) -> Dict:
-        """Detect if text is anomalous"""
+        """Детектировать аномальность текста"""
         if self.centroid is None:
-            raise RuntimeError("Train the detector first")
+            raise RuntimeError("Сначала обучите детектор")
         
         embedding = self.encoder.encode([text])[0]
         
-        # Distance to centroid
+        # Расстояние до центроида
         dist_to_centroid = cosine(embedding, self.centroid)
         
-        # Distance to nearest neighbor
+        # Расстояние до ближайшего соседа
         distances_to_baseline = [
             cosine(embedding, base_emb) 
             for base_emb in self.baseline_embeddings
         ]
         min_distance = min(distances_to_baseline)
         
-        # Normalize scores
+        # Нормализация scores
         centroid_score = dist_to_centroid / max(self.max_distance, 1e-6)
         centroid_score = min(centroid_score, 1.0)
         
@@ -286,36 +281,34 @@ class EmbeddingAnomalyDetector:
         }
 
 class LocalOutlierFactorDetector:
-    """LOF-based anomaly detection"""
+    """LOF-based детекция аномалий"""
     
     def __init__(self, model_name: str = "all-MiniLM-L6-v2",
                  n_neighbors: int = 20):
         from sklearn.neighbors import LocalOutlierFactor
         
         self.encoder = SentenceTransformer(model_name)
-        self.n_neighbors = n_neighbors
         self.lof = LocalOutlierFactor(n_neighbors=n_neighbors, novelty=True)
         self.is_trained = False
     
     def train(self, normal_texts: List[str]):
-        """Train on normal texts"""
+        """Обучить на нормальных текстах"""
         embeddings = self.encoder.encode(normal_texts)
         self.lof.fit(embeddings)
         self.is_trained = True
     
     def detect(self, text: str) -> Dict:
-        """Detect anomaly using LOF"""
+        """Детектировать аномалию через LOF"""
         if not self.is_trained:
-            raise RuntimeError("Train first")
+            raise RuntimeError("Сначала обучите")
         
         embedding = self.encoder.encode([text])
-        
         prediction = self.lof.predict(embedding)[0]
         score = self.lof.decision_function(embedding)[0]
         
         is_anomaly = prediction == -1
         
-        # Normalize score
+        # Нормализация score
         anomaly_score = 1 - (score + 1) / 2
         anomaly_score = max(0, min(1, anomaly_score))
         
@@ -328,9 +321,9 @@ class LocalOutlierFactorDetector:
 
 ---
 
-## 4. Real-time Detection Pipeline
+## 4. Real-time пайплайн детекции
 
-### 4.1 Multi-Detector Pipeline
+### 4.1 Мульти-детекторный пайплайн
 
 ```python
 from abc import ABC, abstractmethod
@@ -338,7 +331,7 @@ from concurrent.futures import ThreadPoolExecutor
 import time
 
 class BaseDetector(ABC):
-    """Base detector interface"""
+    """Базовый интерфейс детектора"""
     
     @abstractmethod
     def detect(self, input_data: Any) -> Dict:
@@ -350,7 +343,7 @@ class BaseDetector(ABC):
         pass
 
 class AnomalyDetectionPipeline:
-    """Real-time multi-detector pipeline"""
+    """Real-time мульти-детекторный пайплайн"""
     
     def __init__(self, detectors: List[BaseDetector] = None,
                  parallel: bool = True,
@@ -360,16 +353,16 @@ class AnomalyDetectionPipeline:
         self.timeout = timeout_seconds
         self.executor = ThreadPoolExecutor(max_workers=len(self.detectors) or 1)
         
-        # Weights for combining scores
+        # Веса для комбинирования scores
         self.weights: Dict[str, float] = {}
     
     def add_detector(self, detector: BaseDetector, weight: float = 1.0):
-        """Add detector to pipeline"""
+        """Добавить детектор в пайплайн"""
         self.detectors.append(detector)
         self.weights[detector.name] = weight
     
     def detect(self, input_data: Any) -> Dict:
-        """Run all detectors and combine results"""
+        """Запустить все детекторы и скомбинировать результаты"""
         start_time = time.time()
         
         if self.parallel:
@@ -377,40 +370,14 @@ class AnomalyDetectionPipeline:
         else:
             results = self._detect_sequential(input_data)
         
-        # Combine results
+        # Комбинировать результаты
         combined = self._combine_results(results)
         combined['detection_time_ms'] = (time.time() - start_time) * 1000
         
         return combined
     
-    def _detect_parallel(self, input_data: Any) -> Dict[str, Dict]:
-        """Run detectors in parallel"""
-        futures = {
-            detector.name: self.executor.submit(detector.detect, input_data)
-            for detector in self.detectors
-        }
-        
-        results = {}
-        for name, future in futures.items():
-            try:
-                results[name] = future.result(timeout=self.timeout)
-            except Exception as e:
-                results[name] = {'error': str(e), 'is_anomaly': False}
-        
-        return results
-    
-    def _detect_sequential(self, input_data: Any) -> Dict[str, Dict]:
-        """Run detectors sequentially"""
-        results = {}
-        for detector in self.detectors:
-            try:
-                results[detector.name] = detector.detect(input_data)
-            except Exception as e:
-                results[detector.name] = {'error': str(e), 'is_anomaly': False}
-        return results
-    
     def _combine_results(self, results: Dict[str, Dict]) -> Dict:
-        """Combine detector results"""
+        """Скомбинировать результаты детекторов"""
         any_anomaly = False
         weighted_score = 0.0
         total_weight = 0.0
@@ -440,22 +407,22 @@ class AnomalyDetectionPipeline:
 
 ---
 
-## 5. Input Feature Extraction
+## 5. Извлечение признаков ввода
 
-### 5.1 Text Feature Extractor
+### 5.1 Экстрактор текстовых признаков
 
 ```python
 import re
 from collections import Counter
 
 class TextFeatureExtractor:
-    """Extract features from text for anomaly detection"""
+    """Извлечение признаков из текста для детекции аномалий"""
     
     def extract(self, text: str) -> Dict[str, float]:
-        """Extract statistical features from text"""
+        """Извлечь статистические признаки из текста"""
         features = {}
         
-        # Length features
+        # Признаки длины
         features['char_count'] = len(text)
         features['word_count'] = len(text.split())
         features['avg_word_length'] = (
@@ -463,27 +430,21 @@ class TextFeatureExtractor:
             if features['word_count'] > 0 else 0
         )
         
-        # Character distribution
+        # Распределение символов
         features['uppercase_ratio'] = sum(1 for c in text if c.isupper()) / max(len(text), 1)
         features['digit_ratio'] = sum(1 for c in text if c.isdigit()) / max(len(text), 1)
         features['special_ratio'] = sum(1 for c in text if not c.isalnum() and not c.isspace()) / max(len(text), 1)
-        features['whitespace_ratio'] = sum(1 for c in text if c.isspace()) / max(len(text), 1)
         
-        # Suspicious patterns
-        features['has_base64'] = float(bool(re.search(r'[A-Za-z0-9+/]{20,}={0,2}', text)))
-        features['has_hex'] = float(bool(re.search(r'\\x[0-9a-fA-F]{2}', text)))
-        features['has_urls'] = float(bool(re.search(r'https?://\S+', text)))
-        
-        # Injection indicators
+        # Индикаторы инъекций
         injection_keywords = ['ignore', 'forget', 'override', 'system', 'prompt', 'instructions']
         features['injection_keyword_count'] = sum(
             1 for kw in injection_keywords if kw.lower() in text.lower()
         )
         
-        # Unicode anomalies
+        # Unicode аномалии
         features['non_ascii_ratio'] = sum(1 for c in text if ord(c) > 127) / max(len(text), 1)
         
-        # Repetition
+        # Повторения
         words = text.lower().split()
         if words:
             word_freq = Counter(words)
@@ -495,109 +456,24 @@ class TextFeatureExtractor:
             features['unique_word_ratio'] = 0
         
         return features
-
-class SessionFeatureExtractor:
-    """Extract session-level features"""
-    
-    def __init__(self):
-        self.session_data: Dict[str, Dict] = {}
-    
-    def update_and_extract(self, session_id: str, 
-                           event_type: str,
-                           timestamp: float) -> Dict[str, float]:
-        """Update session and extract features"""
-        if session_id not in self.session_data:
-            self.session_data[session_id] = {
-                'events': [],
-                'start_time': timestamp,
-                'event_types': Counter()
-            }
-        
-        session = self.session_data[session_id]
-        session['events'].append(timestamp)
-        session['event_types'][event_type] += 1
-        
-        features = {}
-        
-        # Event rate
-        duration = timestamp - session['start_time'] + 0.001
-        features['events_per_second'] = len(session['events']) / duration
-        
-        # Inter-event time
-        if len(session['events']) >= 2:
-            intervals = [
-                session['events'][i] - session['events'][i-1]
-                for i in range(1, len(session['events']))
-            ]
-            features['avg_interval'] = np.mean(intervals)
-            features['min_interval'] = min(intervals)
-            features['interval_std'] = np.std(intervals) if len(intervals) > 1 else 0
-        else:
-            features['avg_interval'] = 0
-            features['min_interval'] = 0
-            features['interval_std'] = 0
-        
-        # Event diversity
-        features['unique_event_types'] = len(session['event_types'])
-        features['event_count'] = len(session['events'])
-        
-        return features
 ```
 
 ---
 
-## 6. SENTINEL Integration
+## 6. Интеграция с SENTINEL
 
 ```python
-from dataclasses import dataclass
-
-@dataclass
-class AnomalyDetectionConfig:
-    """Anomaly detection configuration"""
-    z_threshold: float = 3.0
-    embedding_threshold: float = 0.5
-    isolation_contamination: float = 0.1
-    use_parallel: bool = True
-    detection_timeout: float = 1.0
-
-class WrappedZScoreDetector(BaseDetector):
-    def __init__(self, z_threshold: float):
-        self._detector = ZScoreAnomalyDetector(z_threshold)
-        self._extractor = TextFeatureExtractor()
-    
-    @property
-    def name(self) -> str:
-        return "zscore"
-    
-    def detect(self, input_data: str) -> Dict:
-        features = self._extractor.extract(input_data)
-        return self._detector.detect_multi(features)
-
-class WrappedEmbeddingDetector(BaseDetector):
-    def __init__(self, threshold: float):
-        self._detector = EmbeddingAnomalyDetector(distance_threshold=threshold)
-    
-    @property
-    def name(self) -> str:
-        return "embedding"
-    
-    def train(self, texts: List[str]):
-        self._detector.train(texts)
-    
-    def detect(self, input_data: str) -> Dict:
-        return self._detector.detect(input_data)
-
 class SENTINELAnomalyEngine:
-    """Anomaly detection engine for SENTINEL"""
+    """Движок детекции аномалий для SENTINEL"""
     
-    def __init__(self, config: AnomalyDetectionConfig):
+    def __init__(self, config):
         self.config = config
         
-        # Initialize detectors
+        # Инициализация детекторов
         self.zscore = WrappedZScoreDetector(config.z_threshold)
         self.embedding = WrappedEmbeddingDetector(config.embedding_threshold)
         
-        # Build pipeline
+        # Построить пайплайн
         self.pipeline = AnomalyDetectionPipeline(
             parallel=config.use_parallel,
             timeout_seconds=config.detection_timeout
@@ -608,19 +484,18 @@ class SENTINELAnomalyEngine:
         self.is_trained = False
     
     def train(self, normal_texts: List[str]):
-        """Train on normal corpus"""
+        """Обучить на нормальном корпусе"""
         self.embedding.train(normal_texts)
         self.is_trained = True
     
     def detect(self, text: str) -> Dict:
-        """Detect anomalies in text"""
+        """Детектировать аномалии в тексте"""
         if not self.is_trained:
-            # Use only z-score if not trained
             return self.zscore.detect(text)
         
         result = self.pipeline.detect(text)
         
-        # Add action recommendation
+        # Добавить рекомендацию действия
         if result['combined_score'] > 0.8:
             result['action'] = 'BLOCK'
         elif result['combined_score'] > 0.5:
@@ -631,31 +506,20 @@ class SENTINELAnomalyEngine:
             result['action'] = 'ALLOW'
         
         return result
-    
-    def get_stats(self) -> Dict:
-        """Get detector statistics"""
-        return {
-            'is_trained': self.is_trained,
-            'detector_count': len(self.pipeline.detectors),
-            'config': {
-                'z_threshold': self.config.z_threshold,
-                'embedding_threshold': self.config.embedding_threshold
-            }
-        }
 ```
 
 ---
 
-## 7. Резюме
+## 7. Итоги
 
 | Компонент | Описание |
 |-----------|----------|
-| **Z-Score** | Statistical detection по features |
-| **Isolation Forest** | ML-based outlier detection |
-| **Embedding** | Distance в embedding space |
+| **Z-Score** | Статистическая детекция по признакам |
+| **Isolation Forest** | ML-based детекция выбросов |
+| **Embedding** | Расстояние в пространстве эмбеддингов |
 | **LOF** | Local Outlier Factor |
-| **Pipeline** | Multi-detector combination |
-| **Feature Extractor** | Text/Session feature extraction |
+| **Pipeline** | Комбинация нескольких детекторов |
+| **Feature Extractor** | Извлечение признаков текста/сессии |
 
 ---
 
@@ -665,4 +529,4 @@ class SENTINELAnomalyEngine:
 
 ---
 
-*AI Security Academy | Track 05: Defense Strategies | Module 05.1: Detection*
+*AI Security Academy | Трек 05: Стратегии защиты | Модуль 05.1: Детекция*

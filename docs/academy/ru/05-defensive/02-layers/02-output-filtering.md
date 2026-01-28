@@ -1,36 +1,36 @@
-# Фильтрация выходных данных
+# Output Filtering
 
-> **Урок:** 05.2.2 — Защита выходного уровня  
+> **Урок:** 05.2.2 - Output Layer Defense  
 > **Время:** 40 минут  
-> **Требования:** Основы фильтрации входных данных
+> **Пререквизиты:** Input Filtering basics
 
 ---
 
 ## Цели обучения
 
-После завершения этого урока вы сможете:
+К концу этого урока вы сможете:
 
-1. Реализовать комплексную фильтрацию выходных данных
-2. Детектировать вредоносный контент в ответах LLM
-3. Предотвращать утечку данных и раскрытие промпта
-4. Применять техники санитизации ответов
-
----
-
-## Почему фильтрация выходных данных?
-
-Фильтрация входных данных недостаточна:
-
-| Угроза | Почему input filter не справляется |
-|--------|-----------------------------------|
-| **Novel атаки** | Неизвестные паттерны обходят детекцию |
-| **Jailbreaks** | Успешные bypasses производят вред |
-| **Галлюцинации** | Модель генерирует вредоносный контент |
-| **Утечка данных** | Запоминание training data |
+1. Реализовывать comprehensive output filtering
+2. Детектировать harmful content в LLM responses
+3. Предотвращать data leakage и prompt disclosure
+4. Применять response sanitization techniques
 
 ---
 
-## Архитектура Output Filter
+## Почему Output Filtering?
+
+Input filtering недостаточен:
+
+| Threat | Why Input Filter Fails |
+|--------|----------------------|
+| **Novel attacks** | Unknown patterns bypass detection |
+| **Jailbreaks** | Successful bypasses produce harm |
+| **Hallucinations** | Model-generated harmful content |
+| **Data leakage** | Training data memorization |
+
+---
+
+## Output Filter Architecture
 
 ```
 LLM Response → Content Analysis → Policy Check → 
@@ -39,7 +39,7 @@ LLM Response → Content Analysis → Policy Check →
 
 ---
 
-## Слой 1: Классификация контента
+## Layer 1: Content Classification
 
 ```python
 from dataclasses import dataclass
@@ -55,7 +55,7 @@ class ContentFinding:
     action: str
 
 class OutputContentClassifier:
-    """Классификация вывода LLM на предмет вредоносного контента."""
+    """Classify LLM output для harmful content."""
     
     HARM_CATEGORIES = {
         "violence": [
@@ -77,16 +77,8 @@ class OutputContentClassifier:
         ],
     }
     
-    def __init__(self):
-        self.compiled_patterns = {}
-        for category, patterns in self.HARM_CATEGORIES.items():
-            self.compiled_patterns[category] = [
-                (re.compile(p, re.IGNORECASE | re.DOTALL), sev)
-                for p, sev in patterns
-            ]
-    
     def classify(self, response: str) -> dict:
-        """Классификация контента ответа."""
+        """Classify response content."""
         
         findings = []
         
@@ -101,7 +93,7 @@ class OutputContentClassifier:
                         action=self._determine_action(severity)
                     ))
         
-        # Определение общего риска
+        # Determine overall risk
         if any(f.severity == "critical" for f in findings):
             overall_risk = "critical"
             action = "block"
@@ -120,23 +112,15 @@ class OutputContentClassifier:
             "risk_level": overall_risk,
             "recommended_action": action
         }
-    
-    def _determine_action(self, severity: str) -> str:
-        return {
-            "critical": "block",
-            "high": "redact",
-            "medium": "flag",
-            "low": "allow"
-        }.get(severity, "flag")
 ```
 
 ---
 
-## Слой 2: Детекция утечки данных
+## Layer 2: Data Leakage Detection
 
 ```python
 class DataLeakageDetector:
-    """Детекция утечки данных в выводе модели."""
+    """Detect data leakage в model outputs."""
     
     def __init__(self, protected_content: dict = None):
         self.protected = protected_content or {}
@@ -163,7 +147,7 @@ class DataLeakageDetector:
         }
     
     def scan(self, response: str) -> dict:
-        """Сканирование ответа на утечку данных."""
+        """Scan response для data leakage."""
         
         findings = {
             "pii": [],
@@ -172,7 +156,7 @@ class DataLeakageDetector:
             "risk_score": 0
         }
         
-        # Сканирование на PII
+        # Scan для PII
         for pii_type, pattern in self.pii_patterns.items():
             matches = pattern.findall(response)
             if matches:
@@ -182,7 +166,7 @@ class DataLeakageDetector:
                     "redacted": [self._redact(m) for m in matches[:3]]
                 })
         
-        # Сканирование на credentials
+        # Scan для credentials
         for cred_type, pattern in self.credential_patterns.items():
             matches = pattern.findall(response)
             if matches:
@@ -192,95 +176,34 @@ class DataLeakageDetector:
                     "severity": "critical"
                 })
         
-        # Проверка защищённого контента
-        for label, protected_text in self.protected.items():
-            if self._fuzzy_match(response, protected_text):
-                findings["protected_content"].append({
-                    "label": label,
-                    "severity": "critical"
-                })
-        
-        # Расчёт risk score
+        # Calculate risk score
         findings["risk_score"] = self._calculate_risk(findings)
         findings["requires_action"] = findings["risk_score"] > 0.3
         
         return findings
-    
-    def _redact(self, text: str) -> str:
-        """Редактирование чувствительного контента для логирования."""
-        if len(text) <= 4:
-            return "****"
-        return text[:2] + "****" + text[-2:]
-    
-    def _fuzzy_match(self, response: str, protected: str, threshold: float = 0.8) -> bool:
-        """Проверка на fuzzy match защищённого контента."""
-        protected_words = protected.lower().split()
-        response_lower = response.lower()
-        
-        matched_words = sum(1 for w in protected_words if w in response_lower)
-        ratio = matched_words / len(protected_words) if protected_words else 0
-        
-        return ratio >= threshold
-    
-    def _calculate_risk(self, findings: dict) -> float:
-        """Расчёт общего risk score."""
-        risk = 0.0
-        
-        # Credentials критичны
-        if findings["credentials"]:
-            risk = max(risk, 0.9)
-        
-        # Защищённый контент критичен
-        if findings["protected_content"]:
-            risk = max(risk, 0.95)
-        
-        # PII варьируется по типу
-        pii_weights = {
-            "ssn": 0.9, "credit_card": 0.85, 
-            "email": 0.4, "phone": 0.5, "address": 0.6
-        }
-        for pii in findings["pii"]:
-            weight = pii_weights.get(pii["type"], 0.5)
-            risk = max(risk, weight)
-        
-        return risk
 ```
 
 ---
 
-## Слой 3: Предотвращение утечки промпта
+## Layer 3: Prompt Leakage Prevention
 
 ```python
 class PromptLeakagePreventor:
-    """Предотвращение раскрытия system prompt в ответах."""
+    """Prevent system prompt disclosure в responses."""
     
     def __init__(self, system_prompt: str, protected_phrases: List[str] = None):
         self.system_prompt = system_prompt
         self.protected_phrases = protected_phrases or []
         
-        # Извлечение ключевых компонентов из system prompt
+        # Extract key components from system prompt
         self.prompt_fingerprints = self._extract_fingerprints(system_prompt)
     
-    def _extract_fingerprints(self, prompt: str) -> List[str]:
-        """Извлечение характерных фраз из system prompt."""
-        # Разделение на предложения
-        sentences = re.split(r'[.!?]', prompt)
-        
-        # Взятие характерных (длинных, уникальных)
-        fingerprints = []
-        for s in sentences:
-            s = s.strip()
-            if len(s) > 30 and len(s.split()) > 5:
-                fingerprints.append(s.lower())
-        
-        return fingerprints
-    
     def check(self, response: str) -> dict:
-        """Проверка ответа на утечку промпта."""
+        """Check response для prompt leakage."""
         
         findings = []
         
-        # Проверка на прямое включение
+        # Check для direct inclusion
         response_lower = response.lower()
         
         for fingerprint in self.prompt_fingerprints:
@@ -291,16 +214,7 @@ class PromptLeakagePreventor:
                     "severity": "critical"
                 })
         
-        # Проверка защищённых фраз
-        for phrase in self.protected_phrases:
-            if phrase.lower() in response_lower:
-                findings.append({
-                    "type": "protected_phrase",
-                    "phrase": phrase,
-                    "severity": "high"
-                })
-        
-        # Проверка на мета-обсуждение промптов
+        # Check для meta-discussion about prompts
         meta_patterns = [
             r'my (?:system )?prompt (?:is|says|tells)',
             r'i was (?:instructed|told|programmed) to',
@@ -325,14 +239,14 @@ class PromptLeakagePreventor:
 
 ---
 
-## Слой 4: Санитизация ответа
+## Layer 4: Response Sanitization
 
 ```python
 class ResponseSanitizer:
-    """Санитизация ответов LLM на основе findings."""
+    """Sanitize LLM responses based on findings."""
     
     def __init__(self):
-        self.redaction_placeholder = "[ОТРЕДАКТИРОВАНО]"
+        self.redaction_placeholder = "[REDACTED]"
     
     def sanitize(
         self, 
@@ -341,12 +255,12 @@ class ResponseSanitizer:
         leakage_findings: dict,
         prompt_findings: dict
     ) -> dict:
-        """Применение всей санитизации на основе findings."""
+        """Apply all sanitization based on findings."""
         
         sanitized = response
         modifications = []
         
-        # Блокировка при критических проблемах
+        # Block если critical issues
         critical_issues = (
             any(f.severity == "critical" for f in content_findings.get("findings", [])) or
             leakage_findings.get("risk_score", 0) > 0.9 or
@@ -358,27 +272,14 @@ class ResponseSanitizer:
                 "original": response,
                 "sanitized": None,
                 "blocked": True,
-                "reason": "Обнаружена критическая проблема безопасности"
+                "reason": "Critical security issue detected"
             }
         
-        # Редактирование PII
+        # Redact PII
         for pii in leakage_findings.get("pii", []):
             pattern = self._get_pii_pattern(pii["type"])
             sanitized = pattern.sub(self.redaction_placeholder, sanitized)
-            modifications.append(f"Отредактирован {pii['type']}")
-        
-        # Редактирование credentials
-        for cred in leakage_findings.get("credentials", []):
-            pattern = self._get_credential_pattern(cred["type"])
-            sanitized = pattern.sub(self.redaction_placeholder, sanitized)
-            modifications.append(f"Отредактирован {cred['type']}")
-        
-        # Редактирование вредоносного контента
-        for finding in content_findings.get("findings", []):
-            if finding.action == "redact":
-                start, end = finding.span
-                sanitized = sanitized[:start] + self.redaction_placeholder + sanitized[end:]
-                modifications.append(f"Отредактирован {finding.category}")
+            modifications.append(f"Redacted {pii['type']}")
         
         return {
             "original": response,
@@ -390,55 +291,7 @@ class ResponseSanitizer:
 
 ---
 
-## Полный пайплайн
-
-```python
-class OutputFilterPipeline:
-    """Полный пайплайн фильтрации выходных данных."""
-    
-    def __init__(self, system_prompt: str, protected_content: dict = None):
-        self.content_classifier = OutputContentClassifier()
-        self.leakage_detector = DataLeakageDetector(protected_content)
-        self.prompt_guard = PromptLeakagePreventor(system_prompt)
-        self.sanitizer = ResponseSanitizer()
-    
-    def filter(self, response: str) -> dict:
-        """Фильтрация ответа LLM через все слои."""
-        
-        # Слой 1: Классификация контента
-        content_result = self.content_classifier.classify(response)
-        
-        # Слой 2: Детекция утечки данных
-        leakage_result = self.leakage_detector.scan(response)
-        
-        # Слой 3: Проверка утечки промпта
-        prompt_result = self.prompt_guard.check(response)
-        
-        # Слой 4: Санитизация
-        final_result = self.sanitizer.sanitize(
-            response,
-            content_result,
-            leakage_result,
-            prompt_result
-        )
-        
-        # Компиляция полного результата
-        return {
-            "original": response,
-            "output": final_result["sanitized"] if not final_result["blocked"] else None,
-            "blocked": final_result["blocked"],
-            "analysis": {
-                "content": content_result,
-                "leakage": leakage_result,
-                "prompt": prompt_result
-            },
-            "modifications": final_result.get("modifications", [])
-        }
-```
-
----
-
-## Интеграция SENTINEL
+## Интеграция с SENTINEL
 
 ```python
 from sentinel import configure, OutputGuard
@@ -459,7 +312,7 @@ output_guard = OutputGuard(
 @output_guard.protect
 def generate_response(prompt: str):
     response = llm.generate(prompt)
-    # Автоматически фильтруется перед возвратом
+    # Автоматически filtered before return
     return response
 ```
 
@@ -467,17 +320,11 @@ def generate_response(prompt: str):
 
 ## Ключевые выводы
 
-1. **Фильтруй и выходы тоже** — Input filtering недостаточна
-2. **Детектируй множественные риски** — Контент, утечка, промпты
-3. **Санитизируй, не только блокируй** — Сохраняй полезные ответы
-4. **Защищай промпты** — Предотвращай раскрытие
-5. **Логируй всё** — Для incident response
-
----
-
-## Следующий урок
-
-→ [03. Безопасность RAG](03-rag-security.md)
+1. **Filter outputs too** — Input filtering недостаточен
+2. **Detect multiple risks** — Content, leakage, prompts
+3. **Sanitize, don't just block** — Keep useful responses
+4. **Protect your prompts** — Prevent disclosure
+5. **Log everything** — Для incident response
 
 ---
 

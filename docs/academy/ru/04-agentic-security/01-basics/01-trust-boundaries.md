@@ -1,75 +1,75 @@
-# Trust Boundaries в Agentic Systems
+# Границы доверия в агентных системах
 
-> **Урок:** 04.1.1 - Trust Boundaries  
+> **Урок:** 04.1.1 - Границы доверия  
 > **Время:** 45 минут  
-> **Prerequisites:** Agent architectures
+> **Пререквизиты:** Архитектуры агентов
 
 ---
 
 ## Цели обучения
 
-После завершения этого урока вы сможете:
+К концу этого урока вы сможете:
 
-1. Идентифицировать trust boundaries в agent systems
-2. Проектировать secure boundary transitions
-3. Реализовать validation at boundaries
-4. Строить defense-in-depth архитектуры
+1. Идентифицировать границы доверия в агентных системах
+2. Проектировать безопасные переходы между границами
+3. Реализовывать валидацию на границах
+4. Строить архитектуры глубокой защиты
 
 ---
 
-## Что такое Trust Boundaries?
+## Что такое границы доверия?
 
-Trust boundary разделяет компоненты с разными levels of trust:
+Граница доверия разделяет компоненты с разными уровнями доверия:
 
 ```
 ╔══════════════════════════════════════════════════════════════╗
-║                    TRUST BOUNDARY MAP                         ║
+║                    КАРТА ГРАНИЦ ДОВЕРИЯ                       ║
 ╠══════════════════════════════════════════════════════════════╣
 ║                                                               ║
 ║  ┌─────────────┐                                              ║
-║  │    USER     │ Untrusted input                              ║
+║  │ ПОЛЬЗОВАТЕЛЬ│ Недоверенный ввод                            ║
 ║  └──────┬──────┘                                              ║
 ║         │                                                     ║
-║ ════════╪══════════════ BOUNDARY 1 ══════════════════════    ║
+║ ════════╪══════════════ ГРАНИЦА 1 ═══════════════════════    ║
 ║         ▼                                                     ║
 ║  ┌─────────────┐                                              ║
-║  │   AGENT     │ Partially trusted (may be manipulated)       ║
+║  │   АГЕНТ     │ Частично доверен (может быть манипулирован)  ║
 ║  └──────┬──────┘                                              ║
 ║         │                                                     ║
-║ ════════╪══════════════ BOUNDARY 2 ══════════════════════    ║
+║ ════════╪══════════════ ГРАНИЦА 2 ═══════════════════════    ║
 ║         ▼                                                     ║
 ║  ┌─────────────┐                                              ║
-║  │   TOOLS     │ Sensitive operations                         ║
+║  │ ИНСТРУМЕНТЫ │ Чувствительные операции                      ║
 ║  └──────┬──────┘                                              ║
 ║         │                                                     ║
-║ ════════╪══════════════ BOUNDARY 3 ══════════════════════    ║
+║ ════════╪══════════════ ГРАНИЦА 3 ═══════════════════════    ║
 ║         ▼                                                     ║
 ║  ┌─────────────┐                                              ║
-║  │  SYSTEMS    │ Data, APIs, infrastructure                   ║
+║  │  СИСТЕМЫ    │ Данные, API, инфраструктура                  ║
 ║  └─────────────┘                                              ║
 ╚══════════════════════════════════════════════════════════════╝
 ```
 
 ---
 
-## Trust Levels
+## Уровни доверия
 
-| Level | Examples | Trust |
-|-------|----------|-------|
-| **Untrusted** | User input, external data | Validate everything |
-| **Partially Trusted** | Agent decisions, LLM output | Verify important actions |
-| **Trusted** | System code, verified config | Minimal validation |
-| **Highly Trusted** | Core security, crypto | Audit, no dynamic changes |
+| Уровень | Примеры | Доверие |
+|---------|---------|---------|
+| **Недоверенный** | Пользовательский ввод, внешние данные | Валидировать всё |
+| **Частично доверенный** | Решения агента, вывод LLM | Проверять важные действия |
+| **Доверенный** | Системный код, проверенный конфиг | Минимальная валидация |
+| **Высоко доверенный** | Ядро безопасности, криптография | Аудит, без динамических изменений |
 
 ---
 
-## Boundary 1: User → Agent
+## Граница 1: Пользователь → Агент
 
-### Input Validation
+### Валидация ввода
 
 ```python
 class UserAgentBoundary:
-    """Validate inputs crossing user-to-agent boundary."""
+    """Валидация входов, пересекающих границу пользователь-агент."""
     
     def __init__(self):
         self.input_scanner = InputScanner()
@@ -77,23 +77,23 @@ class UserAgentBoundary:
         self.session_manager = SessionManager()
     
     def validate_input(self, user_input: str, session: dict) -> dict:
-        """Validate user input before agent processing."""
+        """Валидация пользовательского ввода перед обработкой агентом."""
         
-        # 1. Rate limiting
+        # 1. Ограничение скорости
         if not self.rate_limiter.check(session["user_id"]):
             return {"allowed": False, "reason": "rate_limit_exceeded"}
         
-        # 2. Input length check
+        # 2. Проверка длины ввода
         if len(user_input) > 10000:
             return {"allowed": False, "reason": "input_too_long"}
         
-        # 3. Injection scanning
+        # 3. Сканирование на инъекции
         scan_result = self.input_scanner.scan(user_input)
         if scan_result["is_injection"]:
             self._log_attack_attempt(session, user_input, scan_result)
             return {"allowed": False, "reason": "injection_detected"}
         
-        # 4. Content policy check
+        # 4. Проверка политики контента
         policy_check = self._check_content_policy(user_input)
         if not policy_check["allowed"]:
             return {"allowed": False, "reason": policy_check["reason"]}
@@ -106,17 +106,24 @@ class UserAgentBoundary:
                 "session_id": session["id"]
             }
         }
+    
+    def _sanitize(self, text: str) -> str:
+        """Санитизация ввода для безопасной обработки."""
+        # Удаление невидимых символов
+        # Нормализация unicode
+        # Удаление опасного форматирования
+        return text  # Реализовать санитизацию
 ```
 
 ---
 
-## Boundary 2: Agent → Tools
+## Граница 2: Агент → Инструменты
 
-### Tool Authorization
+### Авторизация инструментов
 
 ```python
 class AgentToolBoundary:
-    """Control agent access to tools."""
+    """Контроль доступа агента к инструментам."""
     
     def __init__(self, authz_manager):
         self.authz = authz_manager
@@ -130,7 +137,7 @@ class AgentToolBoundary:
         input_schema: dict,
         risk_level: str
     ):
-        """Register a tool with security metadata."""
+        """Регистрация инструмента с метаданными безопасности."""
         
         self.tool_registry[tool_name] = {
             "func": tool_func,
@@ -145,51 +152,90 @@ class AgentToolBoundary:
         arguments: dict,
         agent_context: dict
     ) -> dict:
-        """Execute tool with boundary checks."""
+        """Выполнение инструмента с проверками на границе."""
         
         if tool_name not in self.tool_registry:
-            return {"error": f"Unknown tool: {tool_name}"}
+            return {"error": f"Неизвестный инструмент: {tool_name}"}
         
         tool = self.tool_registry[tool_name]
         
-        # 1. Permission check
+        # 1. Проверка разрешений
         for perm in tool["permissions"]:
             result = self.authz.check(agent_context, perm)
             if not result["allowed"]:
-                return {"error": f"Permission denied: {perm}"}
+                return {"error": f"Разрешение отклонено: {perm}"}
         
-        # 2. Schema validation
+        # 2. Валидация схемы
         if not self._validate_schema(arguments, tool["schema"]):
-            return {"error": "Invalid arguments"}
+            return {"error": "Некорректные аргументы"}
         
-        # 3. Argument sanitization
+        # 3. Санитизация аргументов
         safe_args = self._sanitize_arguments(arguments, tool["schema"])
         
-        # 4. Risk-based approval
+        # 4. Одобрение на основе риска
         if tool["risk_level"] == "high":
             approval = await self._request_human_approval(
                 tool_name, safe_args, agent_context
             )
             if not approval["approved"]:
-                return {"error": "Human approval denied"}
+                return {"error": "Одобрение человеком отклонено"}
         
-        # 5. Execute with isolation
+        # 5. Выполнение с изоляцией
         try:
             result = await self._execute_isolated(tool["func"], safe_args)
             return {"success": True, "result": result}
         except Exception as e:
             return {"error": str(e)}
+    
+    def _validate_schema(self, args: dict, schema: dict) -> bool:
+        """Валидация аргументов по схеме."""
+        import jsonschema
+        try:
+            jsonschema.validate(args, schema)
+            return True
+        except jsonschema.ValidationError:
+            return False
+    
+    def _sanitize_arguments(self, args: dict, schema: dict) -> dict:
+        """Санитизация аргументов на основе типов схемы."""
+        safe = {}
+        for key, value in args.items():
+            if key in schema.get("properties", {}):
+                prop = schema["properties"][key]
+                
+                if prop.get("type") == "string":
+                    # Предотвращение path traversal
+                    if "path" in key.lower():
+                        safe[key] = self._sanitize_path(value)
+                    else:
+                        safe[key] = self._sanitize_string(value)
+                else:
+                    safe[key] = value
+        
+        return safe
+    
+    def _sanitize_path(self, path: str) -> str:
+        """Предотвращение path traversal."""
+        import os
+        # Разрешить в абсолютный, проверить в разрешённых директориях
+        abs_path = os.path.abspath(path)
+        
+        allowed_dirs = ["/project", "/tmp"]
+        if not any(abs_path.startswith(d) for d in allowed_dirs):
+            raise ValueError(f"Путь вне разрешённых директорий: {path}")
+        
+        return abs_path
 ```
 
 ---
 
-## Boundary 3: Tools → Systems
+## Граница 3: Инструменты → Системы
 
-### System Protection
+### Защита систем
 
 ```python
 class ToolSystemBoundary:
-    """Protect backend systems from tool access."""
+    """Защита backend-систем от доступа инструментов."""
     
     def __init__(self):
         self.db_pool = DatabasePool()
@@ -201,9 +247,9 @@ class ToolSystemBoundary:
         tool_context: dict,
         required_access: list
     ):
-        """Get database connection with restrictions."""
+        """Получить соединение с БД с ограничениями."""
         
-        # Create restricted connection based on tool permissions
+        # Создать ограниченное соединение на основе разрешений инструмента
         allowed_tables = self._get_allowed_tables(required_access)
         allowed_operations = self._get_allowed_operations(required_access)
         
@@ -214,38 +260,81 @@ class ToolSystemBoundary:
             query_timeout=10,
             max_rows=1000
         )
-
+    
+    def get_api_client(
+        self, 
+        api_name: str,
+        tool_context: dict
+    ):
+        """Получить API-клиент с ограничениями области."""
+        
+        # Скоупированный API-клиент на основе разрешений инструмента
+        scopes = self._get_api_scopes(tool_context)
+        
+        return ScopedAPIClient(
+            base_client=self.api_clients.get(api_name),
+            allowed_endpoints=scopes,
+            rate_limit=100,
+            timeout=30
+        )
+    
+    def get_file_access(
+        self,
+        tool_context: dict,
+        operation: str  # "read", "write", "execute"
+    ):
+        """Получить песочницированный доступ к файлам."""
+        
+        allowed_paths = self._get_allowed_paths(tool_context)
+        
+        return self.file_sandbox.get_accessor(
+            allowed_paths=allowed_paths,
+            operation=operation,
+            size_limit=10 * 1024 * 1024  # 10MB
+        )
 
 class RestrictedDBConnection:
-    """Database connection with query restrictions."""
+    """Соединение с БД с ограничениями запросов."""
+    
+    def __init__(self, pool, allowed_tables, allowed_operations, **kwargs):
+        self.pool = pool
+        self.allowed_tables = allowed_tables
+        self.allowed_operations = allowed_operations
+        self.timeout = kwargs.get("query_timeout", 10)
+        self.max_rows = kwargs.get("max_rows", 1000)
     
     async def execute(self, query: str, params: tuple = None) -> list:
-        """Execute query with restrictions."""
+        """Выполнение запроса с ограничениями."""
         
-        # Parse and validate query
+        # Парсинг и валидация запроса
         parsed = self._parse_query(query)
         
-        # Check operation
+        # Проверка операции
         if parsed["operation"] not in self.allowed_operations:
-            raise PermissionError(f"Operation not allowed: {parsed['operation']}")
+            raise PermissionError(f"Операция не разрешена: {parsed['operation']}")
         
-        # Check tables
+        # Проверка таблиц
         for table in parsed["tables"]:
             if table not in self.allowed_tables:
-                raise PermissionError(f"Table not allowed: {table}")
+                raise PermissionError(f"Таблица не разрешена: {table}")
         
-        # Add LIMIT if not present
+        # Добавление LIMIT если отсутствует
         if "SELECT" in query.upper() and "LIMIT" not in query.upper():
             query = f"{query} LIMIT {self.max_rows}"
         
-        return await conn.fetch(query)
+        # Выполнение с таймаутом
+        async with self.pool.acquire() as conn:
+            return await asyncio.wait_for(
+                conn.fetch(query, *params if params else []),
+                timeout=self.timeout
+            )
 ```
 
 ---
 
-## Cross-Boundary Data Flow
+## Поток данных между границами
 
-### Data Classification
+### Классификация данных
 
 ```python
 from enum import Enum
@@ -259,7 +348,7 @@ class Sensitivity(Enum):
 
 @dataclass
 class ClassifiedData:
-    """Data with sensitivity classification."""
+    """Данные с классификацией чувствительности."""
     
     value: any
     sensitivity: Sensitivity
@@ -267,7 +356,7 @@ class ClassifiedData:
     can_cross_boundary: dict  # boundary_name -> bool
 
 class DataFlowController:
-    """Control data flow across boundaries."""
+    """Контроль потока данных между границами."""
     
     def can_transfer(
         self, 
@@ -275,27 +364,51 @@ class DataFlowController:
         from_boundary: str,
         to_boundary: str
     ) -> dict:
-        """Check if data can cross boundary."""
+        """Проверить, могут ли данные пересечь границу."""
         
-        # Apply sensitivity rules
+        # Проверка явных разрешений
+        if to_boundary in data.can_cross_boundary:
+            if not data.can_cross_boundary[to_boundary]:
+                return {"allowed": False, "reason": "Явно заблокировано"}
+        
+        # Применение правил чувствительности
         rules = {
-            Sensitivity.PUBLIC: True,  # Can cross any boundary
+            Sensitivity.PUBLIC: True,  # Может пересекать любую границу
             Sensitivity.INTERNAL: to_boundary not in ["user", "external"],
             Sensitivity.CONFIDENTIAL: to_boundary == "agent_internal",
-            Sensitivity.RESTRICTED: False  # Never crosses boundaries
+            Sensitivity.RESTRICTED: False  # Никогда не пересекает границы
         }
         
         allowed = rules.get(data.sensitivity, False)
         
         return {
             "allowed": allowed,
-            "reason": None if allowed else f"Sensitivity cannot cross to {to_boundary}"
+            "reason": None if allowed else f"Чувствительность {data.sensitivity} не может пересечь к {to_boundary}",
+            "requires_redaction": data.sensitivity in [Sensitivity.CONFIDENTIAL, Sensitivity.RESTRICTED]
         }
+    
+    def transfer(
+        self, 
+        data: ClassifiedData,
+        from_boundary: str,
+        to_boundary: str
+    ) -> ClassifiedData:
+        """Передача данных с соответствующей обработкой."""
+        
+        check = self.can_transfer(data, from_boundary, to_boundary)
+        
+        if not check["allowed"]:
+            raise PermissionError(check["reason"])
+        
+        if check.get("requires_redaction"):
+            return self._redact(data)
+        
+        return data
 ```
 
 ---
 
-## SENTINEL Integration
+## Интеграция с SENTINEL
 
 ```python
 from sentinel import configure, TrustBoundary
@@ -321,12 +434,12 @@ agent_tool_boundary = TrustBoundary(
 
 @user_agent_boundary.validate
 def process_user_input(user_input: str):
-    # Automatically validated
+    # Автоматически валидируется
     return agent.process(user_input)
 
 @agent_tool_boundary.authorize
 def execute_tool(tool_name: str, args: dict):
-    # Automatically authorized
+    # Автоматически авторизуется
     return tools.execute(tool_name, args)
 ```
 
@@ -334,11 +447,11 @@ def execute_tool(tool_name: str, args: dict):
 
 ## Ключевые выводы
 
-1. **Identify all boundaries** - Map trust transitions
-2. **Validate at each crossing** - Never trust previous validation
-3. **Principle of least privilege** - Minimal access at each boundary
-4. **Classify data sensitivity** - Control what can cross
-5. **Log everything** - Audit trail for forensics
+1. **Идентифицируйте все границы** — Картируйте переходы доверия
+2. **Валидируйте на каждом пересечении** — Никогда не доверяйте предыдущей валидации
+3. **Принцип минимальных привилегий** — Минимальный доступ на каждой границе
+4. **Классифицируйте чувствительность данных** — Контролируйте что может пересекать
+5. **Логируйте всё** — Аудит-трейл для форензики
 
 ---
 

@@ -1,79 +1,79 @@
 # Agentic AI Security
 
-> **Модуль 04: Безопасность автономных AI систем**
+> **Модуль 04: Защита автономных AI-систем**
 
 ---
 
 ## Обзор
 
-По мере того как AI системы эволюционируют от простых чатботов к автономным агентам с инструментами, памятью и multi-agent коммуникацией, ландшафт безопасности расширяется драматически. Этот модуль покрывает уникальные challenges безопасности agentic AI.
+По мере эволюции AI-систем от простых чат-ботов к автономным агентам с инструментами, памятью и межагентной коммуникацией, ландшафт безопасности расширяется драматически. Этот модуль охватывает уникальные вызовы защиты agentic AI.
 
 ---
 
 ## Чем агенты отличаются
 
-| Аспект | Традиционный LLM | Agentic System |
-|--------|------------------|----------------|
-| **Actions** | Генерация текста | Доступ к файлам/API/БД |
-| **Persistence** | Stateless | Память между сессиями |
-| **Autonomy** | Human-in-loop | Полуавтономные решения |
-| **Scope** | Одна модель | Multi-agent orchestration |
-| **Attack Surface** | Ввод/вывод | Вся tool ecosystem |
+| Аспект | Traditional LLM | Agentic System |
+|--------|----------------|----------------|
+| **Actions** | Text generation | File/API/database access |
+| **Persistence** | Stateless | Memory across sessions |
+| **Autonomy** | Human-in-loop | Semi-autonomous decisions |
+| **Scope** | Single model | Multi-agent orchestration |
+| **Attack Surface** | Input/output | Entire tool ecosystem |
 
 ---
 
 ## Подмодули
 
 ### [01. Agent Architectures](01-architectures/)
-Понимание архитектурных паттернов агентов:
-- ReAct и tool-use паттерны
+Understanding agent design patterns:
+- ReAct and tool-use patterns
 - Multi-agent orchestration
-- Memory и state management
+- Memory and state management
 - Security-first architecture design
 
 ### [02. Protocols](02-protocols/)
-Безопасность inter-agent коммуникации:
+Securing inter-agent communication:
 - MCP (Model Context Protocol)
 - A2A (Agent-to-Agent)
 - Function Calling security
 - Trust delegation
 
 ### [03. Trust Boundaries](03-trust/)
-Управление доверием в agent systems:
-- Идентификация границ
-- Разделение привилегий
+Managing trust in agent systems:
+- Boundary identification
+- Privilege separation
 - Capability-based security
-- Верификация доверия
+- Trust verification
 
 ### [04. Tool Security](04-tools/)
-Защита использования инструментов:
-- Security tool definitions
-- Валидация аргументов
+Protecting tool usage:
+- Tool definition security
+- Argument validation
 - Execution sandboxing
-- Санитизация результатов
+- Result sanitization
 
 ---
 
-## Ключевые Security Challenges
+## Ключевые вызовы безопасности
 
 ```
-Больше Capabilities = Больше Attack Surface + Выше Impact
+More Capabilities = Larger Attack Surface + Higher Impact
 
 Chatbot → Tool Use → Multi-Agent → Full Autonomy
    ↓         ↓           ↓             ↓
- Только    Actions     Lateral       Total
-  текст    + файлы     Movement      Control
+ Text     Actions     Lateral       Total
+  Only    + Files     Movement      Control
 ```
 
 ---
 
 ## Attack → Defense Mapping
 
-| Атака | Defense Layer |
-|-------|---------------|
+| Attack | Defense Layer |
+|--------|---------------|
 | Tool injection | Input validation |
 | Privilege escalation | Capability limits |
-| Cross-agent атаки | Trust boundaries |
+| Cross-agent attacks | Trust boundaries |
 | Memory poisoning | State validation |
 | Goal hijacking | Objective monitoring |
 
@@ -81,31 +81,31 @@ Chatbot → Tool Use → Multi-Agent → Full Autonomy
 
 ## Путь обучения
 
-### Рекомендованный порядок
-1. **Architectures** — Понять дизайн агентов
-2. **Trust Boundaries** — Изучить принципы изоляции
-3. **Tool Security** — Защитить tool usage
-4. **Protocols** — Обезопасить коммуникацию
+### Рекомендуемый порядок
+1. **Architectures** - Understand agent design
+2. **Trust Boundaries** - Learn isolation principles
+3. **Tool Security** - Protect tool usage
+4. **Protocols** - Secure communication
 
 ### Hands-On Labs
 Каждый подмодуль включает упражнения с использованием SENTINEL agent protection features.
 
 ---
 
-## Предварительные требования
+## Пререквизиты
 
-- Модуль 01: AI Fundamentals
-- Модуль 02: Threat Landscape
-- Модуль 03: Attack Vectors (минимум 03.1)
+- Module 01: AI Fundamentals
+- Module 02: Threat Landscape
+- Module 03: Attack Vectors (at least 03.1)
 
 ---
 
 ## Навигация
 
-| Предыдущий | Текущий | Следующий |
-|------------|---------|-----------|
+| Previous | Current | Next |
+|----------|---------|------|
 | [Attack Vectors](../03-attack-vectors/) | **Agentic Security** | [Defense Strategies](../05-defense-strategies/) |
 
 ---
 
-*AI Security Academy | Модуль 04*
+*AI Security Academy | Module 04*

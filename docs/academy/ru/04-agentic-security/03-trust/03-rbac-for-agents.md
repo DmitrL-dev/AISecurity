@@ -1,6 +1,6 @@
-# RBAC для AI Agents
+# RBAC для AI агентов
 
-> **Уровень:** �����������  
+> **Уровень:** Advanced  
 > **Время:** 55 минут  
 > **Трек:** 04 — Agentic Security  
 > **Модуль:** 04.3 — Trust & Authorization  
@@ -10,25 +10,25 @@
 
 ## Цели обучения
 
-- [ ] Понять Role-Based Access Control для AI agents
-- [ ] Имплементировать RBAC систему с policies
-- [ ] Построить permission enforcement для agent actions
+- [ ] Понять Role-Based Access Control для AI агентов
+- [ ] Реализовать RBAC систему с policies
+- [ ] Построить enforcement permissions для agent actions
 - [ ] Интегрировать RBAC в SENTINEL framework
 
 ---
 
-## 1. RBAC для Agents Overview
+## 1. Обзор RBAC для агентов
 
-### 1.1 Зачем RBAC для Agents?
+### 1.1 Зачем RBAC для агентов?
 
-AI agents выполняют действия от имени пользователей. RBAC контролирует какие действия доступны агентам.
+AI агенты выполняют действия от имени пользователей. RBAC контролирует какие действия доступны агентам.
 
 ```
 ┌────────────────────────────────────────────────────────────────────┐
 │              RBAC FOR AI AGENTS                                     │
 ├────────────────────────────────────────────────────────────────────┤
 │                                                                    │
-│  Traditional (Human) RBAC:                                         │
+│  Традиционный (Human) RBAC:                                        │
 │  User → Role → Permission → Resource                               │
 │                                                                    │
 │  Agent RBAC (Extended):                                            │
@@ -36,12 +36,12 @@ AI agents выполняют действия от имени пользоват
 │       ↓                    ↓                                       │
 │    Delegation          Constraints                                 │
 │                                                                    │
-│  Дополнительные измерения:                                        │
+│  Дополнительные измерения:                                         │
 │  ├── Agent Identity: Какой агент запрашивает?                     │
 │  ├── Delegation Chain: От какого user действует?                  │
 │  ├── Context: В каком контексте (session, task)?                  │
 │  ├── Time: Временные ограничения                                  │
-│  └── Risk Level: Динамическая оценка риска                       │
+│  └── Risk Level: Динамическая оценка риска                        │
 │                                                                    │
 └────────────────────────────────────────────────────────────────────┘
 ```
@@ -49,9 +49,9 @@ AI agents выполняют действия от имени пользоват
 ### 1.2 Ключевые концепции
 
 ```
-RBAC Hierarchy для Agents:
+RBAC иерархия для агентов:
 ├── Users
-│   └── Human users, service accounts
+│   └── Человеческие пользователи, service accounts
 ├── Agents
 │   └── AI instances (LLM agents, tool agents)
 ├── Roles
@@ -69,16 +69,17 @@ RBAC Hierarchy для Agents:
 
 ---
 
-## 2. RBAC Model Implementation
+## 2. Имплементация RBAC Model
 
 ### 2.1 Core Entities
 
 ```python
 from dataclasses import dataclass, field
-from typing import List, Dict, Set, Optional
+from typing import List, Dict, Set, Optional, Any, Tuple
 from datetime import datetime, timedelta
 from enum import Enum
 import hashlib
+import fnmatch
 
 class PermissionType(Enum):
     TOOL_EXECUTE = "tool:execute"
@@ -92,16 +93,15 @@ class PermissionType(Enum):
 @dataclass
 class Permission:
     """
-    Single permission grant.
-    Can include resource pattern and constraints.
+    Единичная permission grant.
+    Может включать resource pattern и constraints.
     """
     type: PermissionType
     resource_pattern: str = "*"  # Glob pattern
     constraints: Dict = field(default_factory=dict)
     
     def matches(self, resource: str) -> bool:
-        """Check if permission applies to resource"""
-        import fnmatch
+        """Проверить применяется ли permission к resource"""
         return fnmatch.fnmatch(resource, self.resource_pattern)
     
     def to_string(self) -> str:
@@ -110,8 +110,8 @@ class Permission:
 @dataclass
 class Role:
     """
-    Role groups related permissions.
-    Supports hierarchy via parent roles.
+    Role группирует связанные permissions.
+    Поддерживает иерархию через parent roles.
     """
     name: str
     display_name: str
@@ -125,7 +125,7 @@ class Role:
     requires_approval: bool = False
     
     def has_permission(self, perm_type: PermissionType, resource: str) -> bool:
-        """Check if role grants permission for resource"""
+        """Проверить выдаёт ли role permission для resource"""
         for perm in self.permissions:
             if perm.type == perm_type and perm.matches(resource):
                 return True
@@ -134,7 +134,7 @@ class Role:
 @dataclass
 class Agent:
     """
-    AI Agent entity with identity and assigned roles.
+    AI Agent сущность с identity и assigned roles.
     """
     agent_id: str
     display_name: str
@@ -161,7 +161,7 @@ class Agent:
 @dataclass
 class User:
     """
-    Human user entity.
+    Human user сущность.
     """
     user_id: str
     username: str
@@ -175,7 +175,7 @@ class User:
 @dataclass
 class AccessPolicy:
     """
-    Access policy for specific resource patterns.
+    Access policy для конкретных resource patterns.
     """
     policy_id: str
     resource_pattern: str
@@ -185,7 +185,6 @@ class AccessPolicy:
     priority: int = 0
     
     def applies_to(self, resource: str) -> bool:
-        import fnmatch
         return fnmatch.fnmatch(resource, self.resource_pattern)
 ```
 
@@ -196,7 +195,7 @@ from abc import ABC, abstractmethod
 from collections import defaultdict
 
 class PermissionStore(ABC):
-    """Abstract permission store interface"""
+    """Абстрактный permission store interface"""
     
     @abstractmethod
     def get_role(self, role_name: str) -> Optional[Role]:
@@ -215,7 +214,7 @@ class PermissionStore(ABC):
         pass
 
 class InMemoryPermissionStore(PermissionStore):
-    """In-memory implementation for development/testing"""
+    """In-memory implementation для development/testing"""
     
     def __init__(self):
         self.roles: Dict[str, Role] = {}
@@ -226,7 +225,7 @@ class InMemoryPermissionStore(PermissionStore):
         self._initialize_default_roles()
     
     def _initialize_default_roles(self):
-        """Create default agent roles"""
+        """Создать default agent roles"""
         
         # Reader role
         self.add_role(Role(
@@ -304,7 +303,7 @@ class InMemoryPermissionStore(PermissionStore):
     
     def get_all_permissions_for_role(self, role_name: str, 
                                       visited: Set[str] = None) -> List[Permission]:
-        """Get all permissions including inherited ones"""
+        """Получить все permissions включая inherited"""
         if visited is None:
             visited = set()
         
@@ -333,7 +332,7 @@ class InMemoryPermissionStore(PermissionStore):
 ```python
 @dataclass
 class AccessRequest:
-    """Request for access to perform an action"""
+    """Запрос на доступ для выполнения действия"""
     agent_id: str
     permission_type: PermissionType
     resource: str
@@ -346,21 +345,42 @@ class AccessRequest:
 
 @dataclass
 class AccessDecision:
-    """Result of access control check"""
+    """Результат проверки access control"""
     allowed: bool
     reason: str
     matched_policy: Optional[str] = None
     matched_role: Optional[str] = None
     conditions: Dict = field(default_factory=dict)
     
-    # For auditing
+    # Для auditing
     request_id: str = ""
     decision_time_ms: float = 0
 
+class RateLimiter:
+    """Простой rate limiter"""
+    
+    def __init__(self):
+        self.requests: Dict[str, List[datetime]] = defaultdict(list)
+    
+    def allow(self, agent_id: str, limit_per_minute: int) -> bool:
+        now = datetime.utcnow()
+        minute_ago = now - timedelta(minutes=1)
+        
+        # Очистить старые requests
+        self.requests[agent_id] = [
+            t for t in self.requests[agent_id] if t > minute_ago
+        ]
+        
+        if len(self.requests[agent_id]) >= limit_per_minute:
+            return False
+        
+        self.requests[agent_id].append(now)
+        return True
+
 class AuthorizationEngine:
     """
-    Core authorization engine for agent RBAC.
-    Implements policy evaluation and decision logic.
+    Core authorization engine для agent RBAC.
+    Реализует policy evaluation и decision logic.
     """
     
     def __init__(self, store: PermissionStore):
@@ -370,15 +390,15 @@ class AuthorizationEngine:
     
     def check_access(self, request: AccessRequest) -> AccessDecision:
         """
-        Main authorization check.
+        Главная authorization проверка.
         
         Returns:
-            AccessDecision with allow/deny and reason
+            AccessDecision с allow/deny и reason
         """
         import time
         start = time.time()
         
-        # Get agent
+        # Получить agent
         agent = self.store.get_agent(request.agent_id)
         if not agent:
             return AccessDecision(
@@ -386,7 +406,7 @@ class AuthorizationEngine:
                 reason=f"Unknown agent: {request.agent_id}"
             )
         
-        # Check delegation validity
+        # Проверить валидность delegation
         if agent.delegated_from:
             delegation_check = self._check_delegation(agent, request)
             if not delegation_check.allowed:
@@ -399,20 +419,20 @@ class AuthorizationEngine:
                 reason="Rate limit exceeded"
             )
         
-        # Check policies first (explicit allow/deny)
+        # Проверить policies сначала (explicit allow/deny)
         policy_decision = self._check_policies(request)
         if policy_decision:
             policy_decision.decision_time_ms = (time.time() - start) * 1000
             return policy_decision
         
-        # Check role-based permissions
+        # Проверить role-based permissions
         role_decision = self._check_role_permissions(agent, request)
         role_decision.decision_time_ms = (time.time() - start) * 1000
         
         return role_decision
     
     def _check_delegation(self, agent: Agent, request: AccessRequest) -> AccessDecision:
-        """Verify delegation is valid"""
+        """Проверить валидность delegation"""
         user = self.store.get_user(agent.delegated_from)
         if not user:
             return AccessDecision(
@@ -432,7 +452,7 @@ class AuthorizationEngine:
                 reason="Agent not in user's delegation list"
             )
         
-        # Check delegation scope
+        # Проверить delegation scope
         if agent.delegation_scope:
             scope_match = any(
                 fnmatch.fnmatch(request.resource, scope)
@@ -447,14 +467,12 @@ class AuthorizationEngine:
         return AccessDecision(allowed=True, reason="Delegation valid")
     
     def _check_policies(self, request: AccessRequest) -> Optional[AccessDecision]:
-        """Check explicit policies"""
-        import fnmatch
-        
+        """Проверить explicit policies"""
         policies = self.store.get_policies_for_resource(request.resource)
         agent = self.store.get_agent(request.agent_id)
         
         for policy in policies:
-            # Check deny first
+            # Проверить deny сначала
             for role in agent.roles:
                 if role in policy.deny_roles:
                     return AccessDecision(
@@ -463,10 +481,10 @@ class AuthorizationEngine:
                         matched_policy=policy.policy_id
                     )
             
-            # Check allow
+            # Проверить allow
             for role in agent.roles:
                 if role in policy.allowed_roles:
-                    # Check conditions
+                    # Проверить conditions
                     if self._check_conditions(policy.required_conditions, request):
                         return AccessDecision(
                             allowed=True,
@@ -474,11 +492,11 @@ class AuthorizationEngine:
                             matched_policy=policy.policy_id
                         )
         
-        return None  # No matching policy
+        return None  # Нет matching policy
     
     def _check_role_permissions(self, agent: Agent, 
                                  request: AccessRequest) -> AccessDecision:
-        """Check role-based permissions"""
+        """Проверить role-based permissions"""
         for role_name in agent.roles:
             permissions = self.store.get_all_permissions_for_role(role_name)
             
@@ -486,11 +504,11 @@ class AuthorizationEngine:
                 if perm.type == request.permission_type and perm.matches(request.resource):
                     role = self.store.get_role(role_name)
                     
-                    # Check time constraints
+                    # Проверить time constraints
                     if role and request.timestamp.hour not in role.allowed_hours:
                         continue
                     
-                    # Check if approval required
+                    # Проверить нужен ли approval
                     if role and role.requires_approval:
                         return AccessDecision(
                             allowed=True,
@@ -519,34 +537,13 @@ class AuthorizationEngine:
         return True
     
     def _get_rate_limit(self, agent: Agent) -> int:
-        """Get rate limit for agent based on roles"""
+        """Получить rate limit для agent на основе roles"""
         max_rate = 100
         for role_name in agent.roles:
             role = self.store.get_role(role_name)
             if role:
                 max_rate = min(max_rate, role.max_actions_per_minute)
         return max_rate
-
-class RateLimiter:
-    """Simple rate limiter"""
-    
-    def __init__(self):
-        self.requests: Dict[str, List[datetime]] = defaultdict(list)
-    
-    def allow(self, agent_id: str, limit_per_minute: int) -> bool:
-        now = datetime.utcnow()
-        minute_ago = now - timedelta(minutes=1)
-        
-        # Clean old requests
-        self.requests[agent_id] = [
-            t for t in self.requests[agent_id] if t > minute_ago
-        ]
-        
-        if len(self.requests[agent_id]) >= limit_per_minute:
-            return False
-        
-        self.requests[agent_id].append(now)
-        return True
 ```
 
 ### 3.2 Permission Enforcement
@@ -555,10 +552,34 @@ class RateLimiter:
 from functools import wraps
 import logging
 
+class PermissionDeniedError(Exception):
+    """Raised когда permission denied"""
+    
+    def __init__(self, agent_id: str, permission: str, 
+                 resource: str, reason: str):
+        self.agent_id = agent_id
+        self.permission = permission
+        self.resource = resource
+        self.reason = reason
+        super().__init__(
+            f"Permission denied: {agent_id} cannot {permission} on {resource}. {reason}"
+        )
+
+class ApprovalRequiredError(Exception):
+    """Raised когда требуется approval"""
+    
+    def __init__(self, agent_id: str, permission: str, resource: str):
+        self.agent_id = agent_id
+        self.permission = permission
+        self.resource = resource
+        super().__init__(
+            f"Approval required: {agent_id} needs approval for {permission} on {resource}"
+        )
+
 class PermissionEnforcer:
     """
-    Enforces permissions on agent actions.
-    Can be used as decorator or context manager.
+    Enforces permissions на agent actions.
+    Может использоваться как decorator или context manager.
     """
     
     def __init__(self, auth_engine: AuthorizationEngine):
@@ -567,14 +588,14 @@ class PermissionEnforcer:
     
     def require_permission(self, permission_type: PermissionType, 
                            resource_pattern: str = None):
-        """Decorator for requiring permission"""
+        """Decorator для требования permission"""
         def decorator(func):
             @wraps(func)
             def wrapper(agent_id: str, *args, **kwargs):
-                # Build resource from pattern or function name
+                # Построить resource из pattern или function name
                 resource = resource_pattern or f"function:{func.__name__}"
                 
-                # Create request
+                # Создать request
                 request = AccessRequest(
                     agent_id=agent_id,
                     permission_type=permission_type,
@@ -582,7 +603,7 @@ class PermissionEnforcer:
                     context=kwargs.get('context', {})
                 )
                 
-                # Check access
+                # Проверить access
                 decision = self.auth_engine.check_access(request)
                 
                 if not decision.allowed:
@@ -617,7 +638,7 @@ class PermissionEnforcer:
                           resource: str,
                           action: callable,
                           context: Dict = None) -> Any:
-        """Check permission and execute action"""
+        """Проверить permission и выполнить action"""
         request = AccessRequest(
             agent_id=agent_id,
             permission_type=permission_type,
@@ -636,30 +657,6 @@ class PermissionEnforcer:
             )
         
         return action()
-
-class PermissionDeniedError(Exception):
-    """Raised when permission is denied"""
-    
-    def __init__(self, agent_id: str, permission: str, 
-                 resource: str, reason: str):
-        self.agent_id = agent_id
-        self.permission = permission
-        self.resource = resource
-        self.reason = reason
-        super().__init__(
-            f"Permission denied: {agent_id} cannot {permission} on {resource}. {reason}"
-        )
-
-class ApprovalRequiredError(Exception):
-    """Raised when approval is required"""
-    
-    def __init__(self, agent_id: str, permission: str, resource: str):
-        self.agent_id = agent_id
-        self.permission = permission
-        self.resource = resource
-        super().__init__(
-            f"Approval required: {agent_id} needs approval for {permission} on {resource}"
-        )
 ```
 
 ---
@@ -671,7 +668,7 @@ class ApprovalRequiredError(Exception):
 ```python
 @dataclass
 class ContextCondition:
-    """Condition based on runtime context"""
+    """Condition на основе runtime context"""
     key: str
     operator: str  # eq, ne, gt, lt, in, contains
     value: Any
@@ -696,8 +693,8 @@ class ContextCondition:
 
 class DynamicRole:
     """
-    Role that adapts based on context.
-    Permissions can be added/removed based on conditions.
+    Role которая адаптируется на основе context.
+    Permissions могут быть добавлены/удалены на основе conditions.
     """
     
     def __init__(self, base_role: Role):
@@ -707,24 +704,24 @@ class DynamicRole:
     
     def add_conditional_permission(self, condition: ContextCondition, 
                                    permission: Permission):
-        """Add permission that's active only when condition is met"""
+        """Добавить permission активную только когда condition met"""
         self.conditional_permissions.append((condition, permission))
     
     def add_conditional_restriction(self, condition: ContextCondition,
                                     permission: Permission):
-        """Remove permission when condition is met"""
+        """Убрать permission когда condition met"""
         self.conditional_restrictions.append((condition, permission))
     
     def get_active_permissions(self, context: Dict) -> List[Permission]:
-        """Get permissions active in current context"""
+        """Получить permissions активные в текущем context"""
         active = list(self.base_role.permissions)
         
-        # Add conditional permissions
+        # Добавить conditional permissions
         for condition, perm in self.conditional_permissions:
             if condition.evaluate(context):
                 active.append(perm)
         
-        # Remove restricted permissions
+        # Убрать restricted permissions
         for condition, perm in self.conditional_restrictions:
             if condition.evaluate(context):
                 active = [p for p in active if p.to_string() != perm.to_string()]
@@ -733,8 +730,8 @@ class DynamicRole:
 
 class TrustBasedPermissionModifier:
     """
-    Modifies permissions based on agent trust level.
-    Higher trust = more permissions.
+    Модифицирует permissions на основе agent trust level.
+    Выше trust = больше permissions.
     """
     
     def __init__(self):
@@ -747,7 +744,7 @@ class TrustBasedPermissionModifier:
         }
     
     def get_allowed_roles(self, trust_level: float) -> List[str]:
-        """Get roles allowed at given trust level"""
+        """Получить roles разрешённые при данном trust level"""
         allowed = []
         for threshold, roles in sorted(self.trust_thresholds.items()):
             if trust_level >= threshold:
@@ -755,7 +752,7 @@ class TrustBasedPermissionModifier:
         return allowed
     
     def filter_agent_roles(self, agent: Agent) -> List[str]:
-        """Filter agent roles based on current trust"""
+        """Фильтровать agent roles на основе текущего trust"""
         allowed = self.get_allowed_roles(agent.trust_level)
         return [r for r in agent.roles if r in allowed]
 ```
@@ -763,8 +760,6 @@ class TrustBasedPermissionModifier:
 ### 4.2 Temporal Permissions
 
 ```python
-from datetime import datetime, timedelta
-
 @dataclass
 class TemporalGrant:
     """
@@ -798,7 +793,7 @@ class TemporalGrant:
         self.current_uses += 1
 
 class TemporalPermissionManager:
-    """Manages time-limited permissions"""
+    """Управляет time-limited permissions"""
     
     def __init__(self, store: PermissionStore):
         self.store = store
@@ -808,7 +803,7 @@ class TemporalPermissionManager:
                              duration_minutes: int,
                              granted_by: str,
                              max_uses: int = None) -> TemporalGrant:
-        """Grant temporary role to agent"""
+        """Выдать temporary role агенту"""
         grant = TemporalGrant(
             grant_id=f"grant_{agent_id}_{datetime.utcnow().timestamp()}",
             agent_id=agent_id,
@@ -823,14 +818,14 @@ class TemporalPermissionManager:
         return grant
     
     def get_active_grants(self, agent_id: str) -> List[TemporalGrant]:
-        """Get all active grants for agent"""
+        """Получить все активные grants для agent"""
         return [
             g for g in self.grants.values()
             if g.agent_id == agent_id and g.is_valid()
         ]
     
     def get_effective_roles(self, agent: Agent) -> List[str]:
-        """Get all roles including temporary grants"""
+        """Получить все roles включая temporary grants"""
         roles = list(agent.roles)
         
         for grant in self.get_active_grants(agent.agent_id):
@@ -840,7 +835,7 @@ class TemporalPermissionManager:
         return roles
     
     def cleanup_expired(self):
-        """Remove expired grants"""
+        """Удалить expired grants"""
         self.grants = {
             gid: g for gid, g in self.grants.items()
             if g.is_valid()
@@ -849,7 +844,7 @@ class TemporalPermissionManager:
 
 ---
 
-## 5. Audit и Compliance
+## 5. Audit and Compliance
 
 ### 5.1 Audit Logger
 
@@ -889,7 +884,7 @@ class AuditEntry:
         }
 
 class RBACAuditLogger:
-    """Audit logger for RBAC decisions"""
+    """Audit logger для RBAC decisions"""
     
     def __init__(self):
         self.entries: List[AuditEntry] = []
@@ -897,7 +892,7 @@ class RBACAuditLogger:
     
     def log_access_decision(self, request: AccessRequest, 
                             decision: AccessDecision):
-        """Log access control decision"""
+        """Залогировать access control decision"""
         entry = AuditEntry(
             entry_id=f"audit_{datetime.utcnow().timestamp()}",
             timestamp=datetime.utcnow(),
@@ -919,7 +914,7 @@ class RBACAuditLogger:
     
     def log_role_change(self, agent_id: str, old_roles: List[str],
                         new_roles: List[str], changed_by: str):
-        """Log role assignment change"""
+        """Залогировать изменение role assignment"""
         entry = AuditEntry(
             entry_id=f"audit_{datetime.utcnow().timestamp()}",
             timestamp=datetime.utcnow(),
@@ -947,7 +942,7 @@ class RBACAuditLogger:
               start_time: datetime = None,
               end_time: datetime = None,
               decision: str = None) -> List[AuditEntry]:
-        """Query audit log"""
+        """Запрос audit log"""
         results = self.entries
         
         if agent_id:
@@ -962,7 +957,7 @@ class RBACAuditLogger:
         return results
     
     def get_denial_summary(self, hours: int = 24) -> Dict:
-        """Get summary of access denials"""
+        """Получить summary access denials"""
         cutoff = datetime.utcnow() - timedelta(hours=hours)
         denials = [e for e in self.entries 
                    if e.decision == "denied" and e.timestamp >= cutoff]
@@ -986,14 +981,14 @@ class RBACAuditLogger:
 
 ---
 
-## 6. SENTINEL Integration
+## 6. Интеграция с SENTINEL
 
 ```python
 from dataclasses import dataclass
 
 @dataclass
 class RBACConfig:
-    """RBAC configuration"""
+    """RBAC конфигурация"""
     enable_audit: bool = True
     enable_rate_limiting: bool = True
     enable_temporal_grants: bool = True
@@ -1001,7 +996,7 @@ class RBACConfig:
     max_rate_per_minute: int = 100
 
 class SENTINELRBACEngine:
-    """RBAC engine for SENTINEL framework"""
+    """RBAC engine для SENTINEL framework"""
     
     def __init__(self, config: RBACConfig):
         self.config = config
@@ -1022,7 +1017,7 @@ class SENTINELRBACEngine:
     
     def register_agent(self, agent_id: str, agent_type: str,
                        roles: List[str], delegated_from: str = None) -> Agent:
-        """Register new agent"""
+        """Зарегистрировать нового агента"""
         agent = Agent(
             agent_id=agent_id,
             display_name=agent_id,
@@ -1039,7 +1034,7 @@ class SENTINELRBACEngine:
                          permission: PermissionType,
                          resource: str,
                          context: Dict = None) -> AccessDecision:
-        """Check if agent has permission"""
+        """Проверить имеет ли агент permission"""
         request = AccessRequest(
             agent_id=agent_id,
             permission_type=permission,
@@ -1057,7 +1052,7 @@ class SENTINELRBACEngine:
     def grant_temporary_access(self, agent_id: str, role: str,
                                duration_minutes: int,
                                granted_by: str) -> str:
-        """Grant temporary role to agent"""
+        """Выдать temporary role агенту"""
         if not self.config.enable_temporal_grants:
             raise ValueError("Temporal grants disabled")
         
@@ -1071,13 +1066,13 @@ class SENTINELRBACEngine:
         return grant.grant_id
     
     def update_agent_trust(self, agent_id: str, trust_delta: float):
-        """Update agent trust level"""
+        """Обновить agent trust level"""
         agent = self.store.get_agent(agent_id)
         if agent:
             agent.trust_level = max(0, min(1, agent.trust_level + trust_delta))
     
     def get_audit_summary(self, hours: int = 24) -> Dict:
-        """Get audit summary"""
+        """Получить audit summary"""
         if not self.config.enable_audit:
             return {}
         return self.audit_logger.get_denial_summary(hours)
@@ -1085,24 +1080,24 @@ class SENTINELRBACEngine:
 
 ---
 
-## 7. Резюме
+## 7. Итоги
 
 | Компонент | Описание |
 |-----------|----------|
-| **Permission** | Тип доступа + resource pattern |
-| **Role** | Группа permissions с constraints |
-| **Agent** | AI-сущность с roles и delegation |
+| **Permission** | Access type + resource pattern |
+| **Role** | Permission group с constraints |
+| **Agent** | AI сущность с roles и delegation |
 | **Policy** | Explicit allow/deny правила |
 | **AuthEngine** | Вычисление access decisions |
 | **Enforcer** | Применение decisions к actions |
-| **Audit** | Логирование всех решений |
+| **Audit** | Логирование всех decisions |
 
 ---
 
 ## Следующий урок
 
-→ [Track 05: Defense Strategies](../../05-defense-strategies/README.md)
+→ [Трек 05: Defense Strategies](../../05-defense-strategies/README.md)
 
 ---
 
-*AI Security Academy | Track 04: Agentic Security | Module 04.3: Trust & Authorization*
+*AI Security Academy | Трек 04: Agentic Security | Модуль 04.3: Trust & Authorization*

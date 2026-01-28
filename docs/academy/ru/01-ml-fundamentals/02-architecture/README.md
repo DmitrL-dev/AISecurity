@@ -1,57 +1,60 @@
 # ML Architecture Security
 
-> **Submodule (ML Fundamentals): Architecture Deep Dive**
+> **Подмодуль (ML Fundamentals): Architecture Deep Dive**
 
 ---
 
-## �����
+## Обзор
 
-Understanding model architecture is essential for security analysis. This submodule covers the internal components of neural networks and transformers with a security focus.
+Понимание архитектуры модели необходимо для security analysis. Этот подмодуль покрывает внутренние компоненты нейронных сетей и transformers с фокусом на безопасность.
 
 ---
 
-## Topics
+## Топики
 
-| Topic | Security Relevance |
+| Топик | Security Relevance |
 |-------|-------------------|
-| **Attention Mechanisms** | Where context mixing occurs |
+| **Attention Mechanisms** | Где происходит context mixing |
 | **Tokenization** | Input preprocessing attacks |
 | **Embeddings** | Semantic space vulnerabilities |
 | **Layers** | Gradient-based attacks |
 
 ---
 
-## Lessons
+## Уроки
 
 ### [01. Attention Mechanisms](01-attention.md)
-**�����:** 40 minutes | **���������:** �������
+**Время:** 40 минут | **Сложность:** Intermediate
 
-How transformers process context:
-- Self-attention mechanics
+Как transformers обрабатывают context:
+- Self-attention механика
 - Multi-head attention
+- Attention visualization
 - Exploitation patterns
 
 ### [02. Tokenization](02-tokenization.md)
-**�����:** 35 minutes | **���������:** �������
+**Время:** 35 минут | **Сложность:** Intermediate
 
-Text-to-token conversion:
+Text-to-token конверсия:
 - BPE, WordPiece, SentencePiece
 - Token boundary attacks
 - Glitch tokens
+- Evasion techniques
 
 ### [03. Embeddings](03-embeddings.md)
-**�����:** 35 minutes | **���������:** �������
+**Время:** 35 минут | **Сложность:** Intermediate
 
 Semantic representations:
 - Embedding spaces
+- Similarity attacks
 - Adversarial embeddings
-- Defense via embeddings
+- Defense через embeddings
 
 ---
 
-## Key Insights
+## Ключевые insights
 
-### Security at Each Layer
+### Security на каждом Layer
 
 ```
 Input Text
@@ -71,10 +74,10 @@ Response
 
 ---
 
-## ���������
+## Навигация
 
-| Previous | Current | Next |
-|----------|---------|------|
+| Предыдущий | Текущий | Следующий |
+|------------|---------|-----------|
 | [Basics](../01-basics/) | **Architecture** | [Transformers](../03-transformers/) |
 
 ---
