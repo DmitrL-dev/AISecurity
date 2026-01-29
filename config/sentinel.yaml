@@ -1,0 +1,47 @@
+# SENTINEL Configuration
+# This file configures the SENTINEL BRAIN server
+
+# Logging
+LOG_LEVEL: INFO
+LOG_FORMAT: json
+
+# Engine Configuration
+engines:
+  enabled:
+    - injection
+    - pii
+    - rag_guard
+    - tda_enhanced
+    - behavioral
+    - yara
+
+  # Engine-specific settings
+  injection:
+    threshold: 0.7
+    use_ml: true
+
+  pii:
+    entities:
+      - EMAIL
+      - PHONE
+      - SSN
+      - CREDIT_CARD
+
+  rag_guard:
+    max_context_length: 4096
+    similarity_threshold: 0.85
+
+# API Settings
+api:
+  host: 0.0.0.0
+  port: 8000
+  workers: 4
+  cors_origins:
+    - http://localhost:3000
+    - http://localhost:8080
+
+# Redis (optional)
+redis:
+  enabled: false
+  host: redis
+  port: 6379
