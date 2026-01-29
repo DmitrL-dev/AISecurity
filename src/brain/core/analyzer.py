@@ -22,6 +22,9 @@ from engines.qwen_guard import SafetyLevel
 # Import ParallelExecutor for proper engine orchestration
 from core.parallel import ParallelExecutor, get_parallel_executor
 
+# Import EngineRegistry for profile-based engine management
+from engines.registry import get_registry, Profile
+
 logger = logging.getLogger("SentinelAnalyzer")
 
 # Thread pool for CPU-bound engines
@@ -56,7 +59,24 @@ class SentinelAnalyzer:
 
         # ParallelExecutor for engine orchestration
         self._parallel_executor = None
+
+        # Engine Registry for profile-based loading
+        self._registry = get_registry()
+        logger.info(
+            f"Profile: {self._registry.profile.value} ({len(self._registry.get_engines_for_profile())} engines)"
+        )
         logger.info("Lightweight engines initialized")
+
+    @property
+    def profile(self) -> Profile:
+        """Current engine profile."""
+        return self._registry.profile
+
+    @profile.setter
+    def profile(self, value: Profile):
+        """Set engine profile."""
+        self._registry.profile = value
+        logger.info(f"Profile changed to: {value.value}")
 
     @cached_property
     def parallel_executor(self):
