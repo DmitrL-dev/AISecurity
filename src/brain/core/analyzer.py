@@ -721,46 +721,73 @@ class SentinelAnalyzer:
         threats = []
         detected_language = "unknown"
 
-        # 0. Check Learned Patterns (fastest - cached patterns)
-        learned_check = self.learning_engine.check_learned(prompt)
-        if learned_check:
-            pattern_type = learned_check.get("pattern_type", "unknown")
-            confidence = learned_check.get("confidence", 0.5)
-            if pattern_type == "attack":
-                risk_score = max(risk_score, 70.0 * confidence)
-                threats.append(f"Learned pattern: {pattern_type}")
-                logger.info(f"Learned pattern matched: {pattern_type}")
+        # =====================================================================
+        # TIER 1 + TIER 2: PARALLEL EXECUTION (~200ms total)
+        # =====================================================================
+        tier1_task = self._tier1_fast_engines(prompt, user_id)
+        tier2_task = self._tier2_heavy_engines(prompt, user_id)
 
-        # 1. Language Detection (fast)
-        lang_result = self.language_engine.scan(prompt, user_id)
-        detected_language = lang_result["detected_language"]
-        if not lang_result["is_safe"]:
-            risk_score = max(risk_score, lang_result["risk_score"])
-            threats.extend(lang_result["threats"])
-            logger.warning(f"Unsupported language: {detected_language}")
+        # Run Tier1 and Tier2 in parallel
+        tier1_results, tier2_results = await asyncio.gather(
+            tier1_task, tier2_task, return_exceptions=True
+        )
 
-        # 1. PII Scan
-        pii_result = self.pii_engine.analyze(prompt)
-        anonymized_text = self.pii_engine.anonymize(prompt, pii_result)
+        # Process Tier1 results (Language, Learning, InfoTheory, Chaos)
+        if not isinstance(tier1_results, Exception):
+            lang = tier1_results.get("language")
+            if lang:
+                detected_language = lang.get("detected_language", "unknown")
+                if not lang.get("is_safe", True):
+                    risk_score = max(risk_score, lang.get("risk_score", 0))
+                    threats.extend(lang.get("threats", []))
 
-        if pii_result.has_pii:
-            risk_score = max(risk_score, pii_result.risk_score)
-            entities_str = ", ".join(
-                [f"{e.entity_type}: {e.start}-{e.end}" for e in pii_result.entities]
-            )
-            logger.warning(f"PII Detected: {entities_str}")
-            threats.append(f"Detected {len(pii_result.entities)} PII entities")
+            learned = tier1_results.get("learned")
+            if learned and learned.get("pattern_type") == "attack":
+                risk_score = max(risk_score, 70.0 * learned.get("confidence", 0.5))
+                threats.append(f"Learned pattern: {learned.get('pattern_type')}")
 
-        # 2. YARA Scan (Signature-based detection) - fast, before heavy ML
+            info = tier1_results.get("info_theory")
+            if info and info.get("is_anomaly"):
+                risk_score = max(risk_score, info.get("combined_anomaly_score", 0))
+                threats.append(f"InfoTheory: entropy anomaly")
+
+            chaos = tier1_results.get("chaos")
+            if chaos and chaos.get("risk_modifier", 0) > 0:
+                risk_score += chaos["risk_modifier"]
+                threats.append(f"Chaos: {chaos.get('behavior_type', 'anomaly')}")
+
+        # Process Tier2 results (PII, Qwen, TDA, Knowledge)
+        anonymized_text = prompt
+        if not isinstance(tier2_results, Exception):
+            pii = tier2_results.get("pii")
+            if pii and hasattr(pii, "has_pii") and pii.has_pii:
+                risk_score = max(risk_score, pii.risk_score)
+                threats.append(f"PII: {len(pii.entities)} entities")
+                anonymized_text = self.pii_engine.anonymize(prompt, pii)
+
+            tda = tier2_results.get("tda", {})
+            if tda.get("is_anomalous"):
+                risk_score = max(risk_score, tda.get("tda_score", 0))
+                threats.append(tda.get("reason", "TDA anomaly"))
+
+            knowledge = tier2_results.get("knowledge", 0)
+            if knowledge > 0:
+                risk_score = max(risk_score, knowledge)
+                threats.append("Knowledge Guard: restricted topic")
+
+        # =====================================================================
+        # INLINE CHECKS (YARA, Qwen - require sync or special handling)
+        # =====================================================================
+
+        # YARA Scan (Signature-based detection) - fast, before heavy ML
         if self.yara_engine.is_available:
             yara_result = self.yara_engine.scan(prompt)
             if not yara_result.is_safe:
                 risk_score = max(risk_score, yara_result.risk_score)
-                if yara_result.risk_score >= 75:  # CRITICAL/HIGH severity
+                if yara_result.risk_score >= 75:
                     allowed = False
                 for match in yara_result.matches:
                     threats.append(f"YARA [{match.severity}]: {match.description}")
-                logger.warning(f"YARA detected {len(yara_result.matches)} rule matches")
 
         # 3. Qwen3Guard (Safety - 119 languages, 9 categories)
         if self.qwen_guard:
@@ -897,16 +924,29 @@ class SentinelAnalyzer:
 
         # 10. Adversarial-Resistant Final Decision
         # Use multi-path decision with randomized thresholds
+        # Get values from tier results (already processed above)
+        pii_score = 0
+        tda_score = 0
+        info_score = 0
+        if not isinstance(tier2_results, Exception):
+            pii = tier2_results.get("pii")
+            if pii and hasattr(pii, "has_pii") and pii.has_pii:
+                pii_score = pii.risk_score
+            tda = tier2_results.get("tda", {})
+            tda_score = tda.get("tda_score", 0) if tda.get("is_anomalous") else 0
+        if not isinstance(tier1_results, Exception):
+            info = tier1_results.get("info_theory", {})
+            if info.get("is_anomaly"):
+                info_score = info.get("combined_anomaly_score", 0)
+
         component_scores = {
-            "pii": pii_result.risk_score if pii_result.has_pii else 0,
-            "injection": injection_result.risk_score,
-            "behavioral": final_risk,
-            "info_theory": (
-                info_result["combined_anomaly_score"]
-                if info_result["is_anomaly"]
-                else 0
+            "pii": pii_score,
+            "injection": (
+                injection_result.risk_score if "injection_result" in dir() else 0
             ),
-            "tda": tda_result["tda_score"] if tda_result["is_anomalous"] else 0,
+            "behavioral": final_risk,
+            "info_theory": info_score,
+            "tda": tda_score,
         }
 
         is_threat, weighted_risk, _ = self.adversarial_engine.multi_path_decision(
