@@ -16,6 +16,9 @@ import asyncio
 from functools import cached_property
 from concurrent.futures import ThreadPoolExecutor
 
+# Import SafetyLevel for QwenGuard result checking
+from engines.qwen_guard import SafetyLevel
+
 logger = logging.getLogger("SentinelAnalyzer")
 
 # Thread pool for CPU-bound engines
