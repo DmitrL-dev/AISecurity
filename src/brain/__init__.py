@@ -11,6 +11,9 @@ __version__ = "1.0.0"
 __author__ = "Dmitry Labintsev"
 __license__ = "Apache-2.0"
 
+# Re-export SentinelAnalyzer from core for backward compatibility
+from .core.analyzer import SentinelAnalyzer
+
 from .engines import (
     InjectionDetector,
     YaraEngine,
@@ -30,6 +33,7 @@ from .engines import (
 )
 
 __all__ = [
+    "SentinelAnalyzer",
     "InjectionDetector",
     "YaraEngine",
     "BehavioralAnalyzer",

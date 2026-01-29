@@ -1,9 +1,13 @@
 import type { Metadata } from "next";
 import "./globals.css";
+import { Sidebar, SidebarProvider } from "@/components/Sidebar";
+import { Header } from "@/components/Header";
+import { ToastProvider } from "@/components/Toast";
+import { LiveThreatsProvider } from "@/lib/live-threats";
 
 export const metadata: Metadata = {
-  title: "SENTINEL Dashboard",
-  description: "AI Security Operations Center",
+  title: "SENTINEL | AI Security Platform",
+  description: "Enterprise AI Security Operations Center",
 };
 
 export default function RootLayout({
@@ -13,29 +17,27 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en">
-      <body>
-        <div className="flex min-h-screen">
-          <aside className="w-64 bg-[#111] border-r border-[#2a2a2a] p-4">
-            <div className="text-xl font-bold text-emerald-500 mb-8">
-              🛡️ SENTINEL
-            </div>
-            <nav className="space-y-2">
-              <a href="/" className="block px-4 py-2 rounded hover:bg-[#1a1a1a]">
-                Dashboard
-              </a>
-              <a href="/analyze" className="block px-4 py-2 rounded hover:bg-[#1a1a1a]">
-                Analyze
-              </a>
-              <a href="/engines" className="block px-4 py-2 rounded hover:bg-[#1a1a1a]">
-                Engines
-              </a>
-              <a href="/settings" className="block px-4 py-2 rounded hover:bg-[#1a1a1a]">
-                Settings
-              </a>
-            </nav>
-          </aside>
-          <main className="flex-1 p-8">{children}</main>
-        </div>
+      <head>
+        <link
+          href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap"
+          rel="stylesheet"
+        />
+        <meta name="viewport" content="width=device-width, initial-scale=1" />
+      </head>
+      <body className="bg-[#0a0e1a] text-white min-h-screen">
+        <ToastProvider>
+          <LiveThreatsProvider>
+            <SidebarProvider>
+              <div className="flex h-screen">
+                <Sidebar />
+                <div className="flex-1 flex flex-col overflow-hidden min-w-0">
+                  <Header />
+                  <main className="flex-1 overflow-auto p-4 lg:p-6">{children}</main>
+                </div>
+              </div>
+            </SidebarProvider>
+          </LiveThreatsProvider>
+        </ToastProvider>
       </body>
     </html>
   );
