@@ -25,6 +25,9 @@ from core.parallel import ParallelExecutor, get_parallel_executor
 # Import EngineRegistry for profile-based engine management
 from engines.registry import get_registry, Profile
 
+# Import Cache for result caching
+from core.cache import get_cache, cache_key
+
 logger = logging.getLogger("SentinelAnalyzer")
 
 # Thread pool for CPU-bound engines
@@ -82,6 +85,11 @@ class SentinelAnalyzer:
     def parallel_executor(self):
         """Get ParallelExecutor for parallel engine runs."""
         return get_parallel_executor()
+
+    @cached_property
+    def cache(self):
+        """Get HybridCache for result caching."""
+        return get_cache()
 
     async def warmup(self) -> dict:
         """

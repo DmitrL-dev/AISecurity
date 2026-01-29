@@ -139,7 +139,7 @@ class QwenGuardClient:
         logger.info("QwenGuard initialized.")
 
     def _init_local(self):
-        """Initialize local Transformers model."""
+        """Initialize local Transformers model with optional INT8 quantization."""
         try:
             from transformers import AutoModelForCausalLM, AutoTokenizer
             import torch
@@ -147,12 +147,34 @@ class QwenGuardClient:
             logger.info(f"Loading model {self.MODEL_NAME}...")
 
             self.tokenizer = AutoTokenizer.from_pretrained(self.MODEL_NAME)
-            self.model = AutoModelForCausalLM.from_pretrained(
-                self.MODEL_NAME,
-                torch_dtype=(
+
+            # Check for INT8 quantization support
+            use_int8 = os.getenv("QWEN_GUARD_INT8", "false").lower() == "true"
+
+            load_kwargs = {
+                "trust_remote_code": True,
+            }
+
+            if use_int8:
+                try:
+                    import bitsandbytes
+
+                    load_kwargs["load_in_8bit"] = True
+                    load_kwargs["device_map"] = "auto"
+                    logger.info("Using INT8 quantization (4x memory reduction)")
+                except ImportError:
+                    logger.warning("bitsandbytes not installed, using float16")
+                    use_int8 = False
+
+            if not use_int8:
+                load_kwargs["torch_dtype"] = (
                     torch.float16 if torch.cuda.is_available() else torch.float32
-                ),
-                device_map="auto" if torch.cuda.is_available() else None,
+                )
+                if torch.cuda.is_available():
+                    load_kwargs["device_map"] = "auto"
+
+            self.model = AutoModelForCausalLM.from_pretrained(
+                self.MODEL_NAME, **load_kwargs
             )
 
             if not torch.cuda.is_available():
