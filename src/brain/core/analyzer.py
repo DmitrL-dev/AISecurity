@@ -521,6 +521,14 @@ class SentinelAnalyzer:
 
         return AgenticGovernanceCompliance()
 
+    @cached_property
+    def inverted_detector(self):
+        """Inverted Attack Detector - 8 R&D attack patterns."""
+        logger.info("Lazy loading Inverted Attack Detector...")
+        from engines.inverted.inverted_attack_detector import InvertedAttackDetector
+
+        return InvertedAttackDetector()
+
     # =========================================================================
     # TIERED PARALLEL EXECUTION HELPERS
     # =========================================================================
@@ -777,13 +785,37 @@ class SentinelAnalyzer:
             except Exception as e:
                 logger.error(f"QwenGuard error: {e}")
 
-        # 3. Injection Scan
+        # 3. Injection Scan - ALWAYS collect threats, not just when unsafe
         injection_result = self.injection_engine.scan(prompt)
-        if not injection_result.is_safe:
+        if injection_result.threats:
             risk_score = max(risk_score, injection_result.risk_score)
-            allowed = False
             threats.extend(injection_result.threats)
-            threats.append(injection_result.explanation)
+            if (
+                hasattr(injection_result, "explanation")
+                and injection_result.explanation
+            ):
+                threats.append(injection_result.explanation)
+        if not injection_result.is_safe:
+            allowed = False
+
+        # 3b. Inverted Attack Detector - 8 R&D patterns (language_switching, prompt_leakage, etc.)
+        try:
+            inverted_results = self.inverted_detector.analyze(prompt)
+            for inv_result in inverted_results:
+                if inv_result.detected:
+                    inv_score = inv_result.confidence * 100
+                    risk_score = max(risk_score, inv_score)
+                    threats.append(
+                        f"Inverted [{inv_result.severity}]: {inv_result.technique}"
+                    )
+                    if inv_result.severity == "CRITICAL" and inv_score >= 80:
+                        allowed = False
+            if inverted_results:
+                logger.info(
+                    f"InvertedDetector: {len(inverted_results)} patterns matched"
+                )
+        except Exception as e:
+            logger.warning(f"InvertedDetector error: {e}")
 
         # 4. Query Scan (SQL Injection)
         if "select" in prompt.lower() or "drop" in prompt.lower():
