@@ -19,6 +19,9 @@ from concurrent.futures import ThreadPoolExecutor
 # Import SafetyLevel for QwenGuard result checking
 from engines.qwen_guard import SafetyLevel
 
+# Import ParallelExecutor for proper engine orchestration
+from core.parallel import ParallelExecutor, get_parallel_executor
+
 logger = logging.getLogger("SentinelAnalyzer")
 
 # Thread pool for CPU-bound engines
@@ -50,7 +53,15 @@ class SentinelAnalyzer:
         self.injection_engine = InjectionEngine()
         self.query_engine = QueryEngine()
         self.behavioral_engine = BehavioralEngine()
+
+        # ParallelExecutor for engine orchestration
+        self._parallel_executor = None
         logger.info("Lightweight engines initialized")
+
+    @cached_property
+    def parallel_executor(self):
+        """Get ParallelExecutor for parallel engine runs."""
+        return get_parallel_executor()
 
     async def warmup(self) -> dict:
         """
