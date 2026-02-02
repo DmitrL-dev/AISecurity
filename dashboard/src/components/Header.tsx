@@ -1,9 +1,10 @@
 'use client'
 
-import { Search, Bell, Calendar, Globe, User, Circle, Menu } from 'lucide-react'
+import { Search, Bell, Calendar, Globe, Circle, Menu } from 'lucide-react'
 import { useState } from 'react'
 import { useBrainHealth } from '@/lib/hooks'
 import { useSidebar } from '@/components/Sidebar'
+import { UserMenu } from '@/components/auth'
 
 export function Header() {
   const [timeRange, setTimeRange] = useState('Past 7 Days')
@@ -85,11 +86,8 @@ export function Header() {
           <span className="absolute top-1 right-1 w-2 h-2 bg-red-500 rounded-full" />
         </button>
         
-        <div className="hidden sm:flex items-center gap-3 pl-2 lg:pl-4 border-l border-[#374151]">
-          <div className="w-8 h-8 bg-gradient-to-br from-purple-500 to-cyan-500 rounded-full flex items-center justify-center">
-            <User className="w-4 h-4 text-white" />
-          </div>
-          <span className="hidden lg:block text-sm font-medium">Admin User</span>
+        <div className="hidden sm:flex items-center pl-2 lg:pl-4 border-l border-[#374151]">
+          <UserMenu />
         </div>
       </div>
     </header>

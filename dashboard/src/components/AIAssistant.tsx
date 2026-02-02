@@ -92,7 +92,9 @@ export function AIAssistant() {
       if (result.is_safe) {
         response = `✅ **Analysis Complete**\n\nThe prompt appears to be **safe**.\n\n- Risk Score: \`${(result.risk_score * 100).toFixed(1)}%\`\n- Processing Time: \`${result.processing_time_ms}ms\``
       } else {
-        response = `🚨 **Threat Detected!**\n\n- Risk Score: \`${(result.risk_score * 100).toFixed(1)}%\`\n- Detections: ${result.detections?.length || 0}\n\n${result.detections?.map(d => `• **${d.threat_type}** (${d.engine}): ${d.details}`).join('\n') || ''}`
+        const threatEmoji = '\u{1F6A8}'
+        const detectionList = result.detections?.map((d: { threat_type: string; engine: string; details: string }) => `\u2022 **${d.threat_type}** (${d.engine}): ${d.details}`).join('\n') || ''
+        response = `${threatEmoji} **Threat Detected!**\n\n- Risk Score: \`${(result.risk_score * 100).toFixed(1)}%\`\n- Detections: ${result.detections?.length || 0}\n\n${detectionList}`
       }
       
       setIsTyping(false)

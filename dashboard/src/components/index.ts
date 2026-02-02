@@ -7,6 +7,8 @@ export { AIAssistant } from './AIAssistant'
 export { Skeleton, CardSkeleton, TableRowSkeleton, ChartSkeleton } from './Skeleton'
 export { ToastProvider, useToast } from './Toast'
 export { IncidentDrawer } from './IncidentDrawer'
+export { ThreatMetrics } from './ThreatMetrics'
+export { LiveActivity } from './LiveActivity'
 
 
 

@@ -17,16 +17,17 @@ from functools import cached_property
 from concurrent.futures import ThreadPoolExecutor
 
 # Import SafetyLevel for QwenGuard result checking
-from engines.qwen_guard import SafetyLevel
+from ..engines.qwen_guard import SafetyLevel
 
 # Import ParallelExecutor for proper engine orchestration
-from core.parallel import ParallelExecutor, get_parallel_executor
+from .parallel import ParallelExecutor, get_parallel_executor
 
 # Import EngineRegistry for profile-based engine management
-from engines.registry import get_registry, Profile
+from ..engines.registry import get_registry, Profile
 
 # Import Cache for result caching
-from core.cache import get_cache, cache_key
+from .cache import get_cache, cache_key
+
 
 logger = logging.getLogger("SentinelAnalyzer")
 
@@ -52,9 +53,9 @@ class SentinelAnalyzer:
         self._warmed_up = False
 
         # Lightweight engines loaded immediately (fast init)
-        from engines.injection import InjectionEngine
-        from engines.query import QueryEngine
-        from engines.behavioral import BehavioralEngine
+        from ..engines.injection import InjectionEngine
+        from ..engines.query import QueryEngine
+        from ..engines.behavioral import BehavioralEngine
 
         self.injection_engine = InjectionEngine()
         self.query_engine = QueryEngine()

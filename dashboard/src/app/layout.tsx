@@ -4,6 +4,7 @@ import { Sidebar, SidebarProvider } from "@/components/Sidebar";
 import { Header } from "@/components/Header";
 import { ToastProvider } from "@/components/Toast";
 import { LiveThreatsProvider } from "@/lib/live-threats";
+import { AuthProvider } from "@/components/auth";
 
 export const metadata: Metadata = {
   title: "SENTINEL | AI Security Platform",
@@ -25,19 +26,21 @@ export default function RootLayout({
         <meta name="viewport" content="width=device-width, initial-scale=1" />
       </head>
       <body className="bg-[#0a0e1a] text-white min-h-screen">
-        <ToastProvider>
-          <LiveThreatsProvider>
-            <SidebarProvider>
-              <div className="flex h-screen">
-                <Sidebar />
-                <div className="flex-1 flex flex-col overflow-hidden min-w-0">
-                  <Header />
-                  <main className="flex-1 overflow-auto p-4 lg:p-6">{children}</main>
+        <AuthProvider>
+          <ToastProvider>
+            <LiveThreatsProvider>
+              <SidebarProvider>
+                <div className="flex h-screen">
+                  <Sidebar />
+                  <div className="flex-1 flex flex-col overflow-hidden min-w-0">
+                    <Header />
+                    <main className="flex-1 overflow-auto p-4 lg:p-6">{children}</main>
+                  </div>
                 </div>
-              </div>
-            </SidebarProvider>
-          </LiveThreatsProvider>
-        </ToastProvider>
+              </SidebarProvider>
+            </LiveThreatsProvider>
+          </ToastProvider>
+        </AuthProvider>
       </body>
     </html>
   );

@@ -9,6 +9,7 @@ services:
     environment:
       - LOG_LEVEL=INFO
       - ENGINES_ENABLED=injection,pii,rag_guard,tda_enhanced
+      - REDIS_URL=redis://redis:6379
     volumes:
       - ./config:/app/config:ro
     restart: unless-stopped

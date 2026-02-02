@@ -1,0 +1,62 @@
+version: '3.8'
+
+services:
+  gomcp-server:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: gomcp-server:latest
+    container_name: gomcp-server
+    ports:
+      - "8080:8080"
+    environment:
+      - GOMCP_MODE=http
+      - GOMCP_TIMEOUT=30s
+    healthcheck:
+      test: ["CMD", "wget", "--spider", "-q", "http://localhost:8080/healthz"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
+    restart: unless-stopped
+    deploy:
+      resources:
+        limits:
+          cpus: '1'
+          memory: 512M
+        reservations:
+          cpus: '0.25'
+          memory: 128M
+
+  # Optional: Prometheus metrics collection
+  prometheus:
+    image: prom/prometheus:v2.48.0
+    container_name: gomcp-prometheus
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./prometheus.yml:/etc/prometheus/prometheus.yml:ro
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+    depends_on:
+      - gomcp-server
+    profiles:
+      - monitoring
+
+  # Optional: Grafana dashboard
+  grafana:
+    image: grafana/grafana:10.2.2
+    container_name: gomcp-grafana
+    ports:
+      - "3000:3000"
+    environment:
+      - GF_SECURITY_ADMIN_PASSWORD=admin
+      - GF_USERS_ALLOW_SIGN_UP=false
+    depends_on:
+      - prometheus
+    profiles:
+      - monitoring
+
+networks:
+  default:
+    name: gomcp-network

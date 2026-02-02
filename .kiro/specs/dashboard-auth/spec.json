@@ -1,0 +1,19 @@
+{
+  "name": "dashboard-auth",
+  "version": "1.0.0",
+  "description": "Authentication & Authorization for SENTINEL Dashboard V3",
+  "language": "ru",
+  "phases": ["requirements", "design", "tasks"],
+  "status": "requirements",
+  "created": "2026-01-29",
+  "dependencies": [
+    "dashboard-v2"
+  ],
+  "decisions": {
+    "auth_provider": "Keycloak (self-hosted)",
+    "protocol": "OIDC (OpenID Connect)",
+    "2fa": "TOTP",
+    "rbac_roles": ["admin", "analyst", "viewer", "api-only"],
+    "session": "HttpOnly cookies + refresh tokens"
+  }
+}

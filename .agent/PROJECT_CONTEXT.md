@@ -1,6 +1,6 @@
 # PROJECT_CONTEXT.md — SENTINEL
 
-> **Last Updated:** 2026-01-25
+> **Last Updated:** 2026-01-30
 > **Version:** Community Edition
 
 ---
@@ -9,14 +9,11 @@
 
 | Metric | Value |
 |--------|-------|
-| **Base Engines** | 184 files |
-| **Synced Engines** | 35 files |
-| **Total Engine Files** | 219 |
-| **Detection Engines** | 214 |
-| **Utility Modules** | 5 |
-| **Total Tests** | 1,200+ |
-| **Benchmark F1** | 84.7% |
-
+| **Engine Files** | 249 |
+| **Total Tests** | 1,467+ |
+| **Dashboard Phase** | 9 Complete |
+| **Dashboard Tables** | 10 (Drizzle) |
+| **Swarm Modules** | 6 |
 
 ---
 
@@ -25,30 +22,53 @@
 ```
 src/brain/
 ├── api/              # FastAPI endpoints
-├── core/             # SentinelAnalyzer, config, shapeshifter
-├── engines/          # Detection engines (200+ modules)
-│   ├── synced/       # Strike-synced detectors
-│   └── *.py          # Individual engines
-├── observability/    # Metrics, health, tracing
+├── core/             # SentinelAnalyzer, CollectiveImmunity
+├── engines/          # Detection engines (249 modules)
+├── swarm/            # NEW: Distributed swarm (6 modules)
+│   ├── node.py       # SwarmNode identity
+│   ├── transport.py  # Abstract transport
+│   ├── nats_transport.py  # NATS JetStream
+│   ├── discovery.py  # Node discovery
+│   ├── sync.py       # Pattern sync
+│   └── manager.py    # Orchestrator
+├── observability/    # Metrics, health
 └── tests/            # Unit tests
+
+dashboard/
+├── src/
+│   ├── app/          # Next.js pages
+│   │   └── api/swarm/  # NEW: Swarm API
+│   ├── components/   # React (SwarmStatus)
+│   ├── lib/          # Auth, RBAC, API
+│   └── db/schema/    # Drizzle ORM (8 tables)
+└── docker-compose.db.yml
+
+config/swarm.yaml     # NEW: Swarm configuration
+docker-compose.nats.yml  # NEW: NATS JetStream
 ```
 
 ---
 
-## 🔬 Latest R&D (Jan 25, 2026)
+## ✅ Completed (2026-01-30)
 
-### New Engines Added (8)
+### Phase 8: BRAIN Swarm
+- SwarmNode, SwarmTransport, NatsTransport
+- SwarmDiscovery (heartbeat, timeout)
+- SwarmSync (CollectiveImmunity federation)
+- SwarmManager orchestrator
+- 22 unit tests (TDD)
+- Dashboard: /api/swarm/nodes, /api/swarm/stats
+- SwarmStatus.tsx component
+- docker-compose.nats.yml
 
-| Engine | Source | Purpose |
-|--------|--------|---------|
-| skill_worm_detector | Olejnik | Claude skill lateral movement |
-| ide_extension_detector | Koi.ai | Malicious IDE extensions |
-| ai_generated_malware_detector | CheckPoint | LLM-created malware |
-| mcp_auth_bypass_detector | Praetorian | MCP authorization bypass |
-| advanced_injection_detector | BlackHills | Crescendo, GCG, Visual |
-| agent_autonomy_level_analyzer | IMDA | Risk by autonomy level |
-| multi_agent_cascade_detector | IMDA+Palantir | Cascade failure |
-| agentic_governance_compliance | IMDA | 4-dimension compliance |
+### Phase 9: Multi-tenant & SaaS
+- usage.ts, api-keys.ts schemas
+- plan-limits.ts (community/pro/enterprise)
+- tenant-context.ts (RLS)
+- usage-tracker.ts (async metering)
+- api-key-auth.ts (API key validation)
+- /api/tenants, /api/tenants/[id]/usage, /api/tenants/[id]/api-keys
+- TenantSelector.tsx, UsageWidget.tsx
 
 ---
 
@@ -56,13 +76,12 @@ src/brain/
 
 - **OWASP LLM Top 10** — Full
 - **OWASP ASI Top 10** — Full
-- **IMDA MGF for Agentic AI** — Partial (3 engines)
-- **Palantir AIP Dimensions** — Partial
+- **IMDA MGF for Agentic AI** — Partial
 
 ---
 
-## 📝 Notes
+## 📝 Next Steps
 
-- All engines follow TDD Iron Law (tests first)
-- Lazy loading in SentinelAnalyzer
-- Synced engines derived from Strike attack modules
+- **Phase 9:** Multi-tenant & SaaS
+- **Phase 10:** Production & Compliance
+

@@ -1,0 +1,50 @@
+# BRAIN Swarm Configuration
+#
+# Controls distributed BRAIN node behavior
+
+swarm:
+  # Enable swarm mode (set to false for standalone)
+  enabled: true
+  
+  # Node identity (auto-generated if not specified)
+  node_id: auto
+  
+  # NATS connection settings
+  nats:
+    servers:
+      - nats://localhost:4222
+    
+    # TLS settings (for production)
+    tls:
+      enabled: false
+      cert_file: /etc/sentinel/nats.crt
+      key_file: /etc/sentinel/nats.key
+      ca_file: /etc/sentinel/ca.crt
+    
+    # Connection pool
+    max_reconnect_attempts: 60
+    reconnect_time_wait: 2  # seconds
+  
+  # Discovery settings
+  discovery:
+    # Heartbeat interval in seconds
+    heartbeat_interval: 5
+    
+    # Time before marking a node as dead (seconds)
+    dead_node_timeout: 30
+  
+  # Pattern synchronization
+  sync:
+    # Interval for broadcasting patterns (seconds)
+    pattern_broadcast_interval: 60
+    
+    # Maximum patterns to broadcast per cycle
+    max_patterns_per_broadcast: 100
+  
+  # Federation settings
+  federation:
+    # Accept patterns from other deployments
+    accept_external_patterns: true
+    
+    # Minimum confidence for imported patterns
+    min_import_confidence: 0.7

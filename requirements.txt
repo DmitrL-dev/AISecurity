@@ -37,6 +37,7 @@ python-multipart==0.0.18
 pyyaml==6.0.2
 python-dotenv==1.0.1
 structlog==24.4.0
+redis==5.0.1
 
 # Testing
 pytest==8.3.0

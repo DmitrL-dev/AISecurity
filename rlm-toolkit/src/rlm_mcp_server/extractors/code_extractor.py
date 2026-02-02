@@ -8,6 +8,7 @@ Extracts from:
 """
 
 import re
+from itertools import islice
 from pathlib import Path
 from time import perf_counter
 from typing import Optional
@@ -42,6 +43,9 @@ class CodeExtractor(BaseExtractor):
         (r"##\s*Tech(?:nology)?\s*Stack\s*\n+(.+?)(?=\n##|\Z)", "tech", 0.8),
     ]
 
+    # Limit file scanning to prevent hangs on large codebases
+    MAX_FILES_TO_SCAN = 200
+
     async def extract(self) -> ExtractionResult:
         """Extract facts from code files."""
         start = perf_counter()
@@ -62,12 +66,28 @@ class CodeExtractor(BaseExtractor):
                 candidates = await self._extract_from_readme(doc_path)
                 result.candidates.extend(candidates)
 
-        # Extract from Python files with decision markers
-        for py_file in self.project_root.rglob("*.py"):
-            if self._should_skip(py_file):
-                continue
-            candidates = await self._extract_from_python(py_file)
-            result.candidates.extend(candidates)
+        # Extract from Python files with decision markers (with limit)
+        # Use os.walk instead of rglob to prune directories BEFORE traversing
+        import os
+        files_scanned = 0
+        skip_dirs = {
+            ".git", "__pycache__", "node_modules", ".venv", "venv",
+            "dist", "build", ".tox", ".pytest_cache", ".mypy_cache",
+        }
+        for root, dirs, files in os.walk(self.project_root):
+            # Prune directories IN-PLACE to prevent traversal
+            dirs[:] = [d for d in dirs if d not in skip_dirs]
+            if files_scanned >= self.MAX_FILES_TO_SCAN:
+                break
+            for fname in files:
+                if not fname.endswith(".py"):
+                    continue
+                if files_scanned >= self.MAX_FILES_TO_SCAN:
+                    break
+                py_file = Path(root) / fname
+                candidates = await self._extract_from_python(py_file)
+                result.candidates.extend(candidates)
+                files_scanned += 1
 
         # Categorize by confidence
         for c in result.candidates:
