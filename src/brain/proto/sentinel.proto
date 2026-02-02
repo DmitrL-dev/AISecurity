@@ -1,0 +1,67 @@
+// SENTINEL Brain gRPC API
+// Auto-generated based on main.py usage analysis
+
+syntax = "proto3";
+
+package sentinel;
+
+option go_package = "sentinel/proto";
+
+// Request for ingress analysis (user prompt -> LLM)
+message AnalyzeRequest {
+  string prompt = 1;
+  map<string, string> context = 2;
+}
+
+// Response from ingress analysis
+message AnalyzeResponse {
+  bool allowed = 1;
+  double risk_score = 2;
+  string verdict_reason = 3;
+  repeated string detected_threats = 4;
+  string anonymized_content = 5;
+}
+
+// Request for egress analysis (LLM response -> user)
+message AnalyzeOutputRequest {
+  string response = 1;
+  string original_prompt = 2;
+  map<string, string> context = 3;
+}
+
+// Response from egress analysis
+message AnalyzeOutputResponse {
+  bool allowed = 1;
+  double risk_score = 2;
+  string verdict_reason = 3;
+  repeated string detected_threats = 4;
+  string sanitized_response = 5;
+}
+
+// Streaming chunk for real-time SSE analysis
+message StreamChunk {
+  string session_id = 1;
+  string token = 2;
+  bool is_final = 3;
+}
+
+// Streaming result
+message StreamResult {
+  bool should_continue = 1;
+  double risk_score = 2;
+  string threat_type = 3;
+  string severity = 4;
+  string context = 5;
+}
+
+// SENTINEL Brain Service
+service SentinelBrain {
+  // Ingress: Analyze user prompt before sending to LLM
+  rpc Analyze(AnalyzeRequest) returns (AnalyzeResponse);
+  
+  // Egress: Analyze LLM response before sending to user
+  rpc AnalyzeOutput(AnalyzeOutputRequest) returns (AnalyzeOutputResponse);
+  
+  // Streaming: Analyze tokens in real-time for SSE responses
+  rpc AnalyzeStream(stream StreamChunk) returns (stream StreamResult);
+}
