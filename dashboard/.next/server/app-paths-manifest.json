@@ -1,0 +1,12 @@
+{
+  "/api/brain/health/route": "app/api/brain/health/route.js",
+  "/api/brain/engines/status/route": "app/api/brain/engines/status/route.js",
+  "/api/brain/engines/[name]/stats/route": "app/api/brain/engines/[name]/stats/route.js",
+  "/api/brain/engines/all/route": "app/api/brain/engines/all/route.js",
+  "/api/brain/metrics/route": "app/api/brain/metrics/route.js",
+  "/api/brain/audit/logs/route": "app/api/brain/audit/logs/route.js",
+  "/page": "app/page.js",
+  "/brain/page": "app/brain/page.js",
+  "/analyze/page": "app/analyze/page.js",
+  "/login/page": "app/login/page.js"
+}

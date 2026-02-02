@@ -1,0 +1,38 @@
+{
+  "name": "@gomcp/sdk",
+  "version": "1.0.0",
+  "description": "GoMCP TypeScript SDK - Tool decorators and worker for MCP protocol",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsc",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "lint": "eslint src --ext .ts"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/sentinel-community/gomcp"
+  },
+  "keywords": ["mcp", "model-context-protocol", "tools", "ai", "llm"],
+  "author": "SENTINEL Community",
+  "license": "MIT",
+  "devDependencies": {
+    "@types/node": "^20.0.0",
+    "typescript": "^5.0.0",
+    "vitest": "^1.0.0",
+    "eslint": "^8.0.0",
+    "@typescript-eslint/eslint-plugin": "^7.0.0",
+    "@typescript-eslint/parser": "^7.0.0"
+  },
+  "dependencies": {
+    "zod": "^3.22.0"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "files": [
+    "dist",
+    "README.md"
+  ]
+}

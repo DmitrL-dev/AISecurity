@@ -72,6 +72,11 @@ class RLMServer:
             "session_start": None,
         }
 
+        # Context change tracking (v2.5 Anti-Amnesia)
+        self._context_version = 0
+        self._context_changed = False
+        self._last_context_read = 0
+
         # Rate limiting for reindex (T5.4: max 1 per 60s)
         self._last_reindex_time = 0
         self._reindex_rate_limit_seconds = 60
@@ -109,7 +114,8 @@ class RLMServer:
         else:
             self.memory = HierarchicalMemory(
                 HMEMConfig(
-                    persistence_path=str(memory_file) if memory_file.exists() else None,
+                    persistence_path=str(
+                        memory_file) if memory_file.exists() else None,
                     auto_persist=True,
                 )
             )
@@ -161,8 +167,12 @@ class RLMServer:
                 self.mcp,
                 self.memory_bridge_v2_store,
                 project_root=project_root,
+                on_context_change=self._mark_context_changed,  # v2.5 Anti-Amnesia
             )
             logger.info("Memory Bridge v2.0 enterprise tools registered")
+
+            # Register MCP resources (v2.5 Auto-Context)
+            self._register_resources()
 
             # Start background processors (v2.3)
             self._start_background_processors(project_root)
@@ -214,6 +224,32 @@ class RLMServer:
             storage.set_metadata("session_stats", self.session_stats)
         except Exception as e:
             logger.debug(f"Could not persist session stats: {e}")
+
+    def _mark_context_changed(self, reason: str = "update"):
+        """Mark that context has changed (for Response Injection notifications)."""
+        self._context_version += 1
+        self._context_changed = True
+        logger.debug(
+            f"Context marked changed: {reason} (v{self._context_version})")
+
+    def _check_context_changed(self) -> bool:
+        """Check if context changed since last read, and reset flag."""
+        changed = self._context_changed
+        if changed:
+            self._context_changed = False
+            import time
+            self._last_context_read = time.time()
+        return changed
+
+    def _get_context_notification(self) -> dict:
+        """Get context notification to inject into tool responses."""
+        if self._context_changed:
+            return {
+                "_context_changed": True,
+                "_context_version": self._context_version,
+                "_hint": "Project context has been updated. Consider calling read_resource('rlm://context') for fresh context."
+            }
+        return {}
 
     def _register_tools(self):
         """Register all MCP tools."""
@@ -276,7 +312,8 @@ class RLMServer:
                 chunks = self._keyword_search(context["content"], question)
 
                 # Calculate served tokens (compressed response)
-                served_tokens = sum(len(c.get("content", "")) for c in chunks) // 4
+                served_tokens = sum(len(c.get("content", ""))
+                                    for c in chunks) // 4
                 saved_tokens = raw_tokens - served_tokens
 
                 # Update session stats
@@ -545,7 +582,8 @@ class RLMServer:
 
             # Calculate savings percentage
             total_requested = (
-                self.session_stats["tokens_served"] + self.session_stats["tokens_saved"]
+                self.session_stats["tokens_served"] +
+                self.session_stats["tokens_saved"]
             )
             savings_percent = 0
             if total_requested > 0:
@@ -601,7 +639,8 @@ class RLMServer:
                     }
                 self._last_reindex_time = current_time
 
-                project_root = path or os.getenv("RLM_PROJECT_ROOT", os.getcwd())
+                project_root = path or os.getenv(
+                    "RLM_PROJECT_ROOT", os.getcwd())
                 indexer = AutoIndexer(Path(project_root))
 
                 if force:
@@ -721,6 +760,147 @@ class RLMServer:
                 logger.error(f"Settings failed: {e}")
                 return {"success": False, "error": str(e)}
 
+    def _register_resources(self):
+        """Register MCP resources for auto-context injection (v2.5 Anti-Amnesia)."""
+        if not self.mcp:
+            return
+
+        @self.mcp.resource("rlm://context")
+        async def get_project_context() -> str:
+            """
+            Auto-injected project context.
+
+            This resource provides persistent project knowledge that LLM clients
+            can automatically include in their context. Solves the "amnesia" problem.
+
+            Returns:
+                Formatted markdown with L0 facts, domain context, and recent decisions.
+            """
+            try:
+                from pathlib import Path
+                import os
+
+                sections = []
+
+                # === L0: Project Architecture (ALWAYS) ===
+                if self.memory_bridge_v2_store:
+                    from ..memory_bridge.v2.hierarchical import MemoryLevel
+
+                    l0_facts = self.memory_bridge_v2_store.get_facts_by_level(
+                        MemoryLevel.L0_PROJECT
+                    )
+                    if l0_facts:
+                        sections.append("## 🏗️ Project Architecture")
+                        for fact in l0_facts[:10]:
+                            sections.append(f"- {fact.content}")
+
+                # === L1: Active Domains ===
+                if self.memory_bridge_v2_store:
+                    domains = self.memory_bridge_v2_store.get_domains()
+                    if domains:
+                        sections.append("\n## 📂 Active Domains")
+                        for domain in list(domains)[:5]:
+                            sections.append(f"- {domain}")
+
+                # === Recent Decisions ===
+                causal_tracker = self.memory_bridge_v2_components.get(
+                    "causal_tracker")
+                if causal_tracker:
+                    try:
+                        recent = causal_tracker.get_recent_decisions(limit=3)
+                        if recent:
+                            sections.append("\n## 🎯 Recent Decisions")
+                            for decision in recent:
+                                sections.append(f"- {decision.content}")
+                    except Exception:
+                        pass
+
+                # === Session Stats ===
+                sections.append(f"\n## 📊 Session")
+                sections.append(
+                    f"- Queries: {self.session_stats.get('queries', 0)}")
+                sections.append(
+                    f"- Tokens saved: {self.session_stats.get('tokens_saved', 0):,}")
+
+                if sections:
+                    return "\n".join(sections)
+                else:
+                    return "# RLM Project Context\n\nNo project facts discovered yet. Run `rlm_discover_project` first."
+
+            except Exception as e:
+                logger.error(f"Context resource error: {e}")
+                return f"# RLM Context Error\n\n{str(e)}"
+
+        @self.mcp.resource("rlm://status")
+        async def get_status_resource() -> str:
+            """Quick status check for LLM context."""
+            try:
+                stats = self.indexer.get_stats() if self.indexer else {}
+                return f"""# RLM Status
+- Crystals: {stats.get('total_crystals', 0)}
+- Tokens: {stats.get('total_tokens', 0):,}
+- Version: 2.5.0
+"""
+            except Exception as e:
+                return f"# RLM Status Error\n\n{str(e)}"
+
+        @self.mcp.resource("rlm://events")
+        async def get_context_events() -> str:
+            """
+            Context change notifications (persistent).
+
+            Poll this resource to check if project context has been updated
+            since you last read it. Reads from SQLite for cross-process support.
+            """
+            import json
+            import os
+
+            try:
+                # Use rlm_toolkit package location to find project root
+                import rlm_toolkit
+                pkg_path = Path(rlm_toolkit.__file__).parent.parent
+                project_root = Path(
+                    os.getenv("RLM_PROJECT_ROOT", str(pkg_path)))
+                marker_file = project_root / ".rlm" / "context_changed.json"
+
+                if not marker_file.exists():
+                    return """# ✓ Context Current
+- Version: 0
+- Status: unchanged (no marker file yet)
+"""
+
+                data = json.loads(marker_file.read_text())
+                version = data.get('version', 0)
+                changed = data.get('changed', False)
+                events = data.get('events', [])
+
+                if changed:
+                    # Mark as read
+                    data['changed'] = False
+                    marker_file.write_text(json.dumps(data, indent=2))
+
+                    events_str = "\n".join(
+                        [f"  - {e['reason']} ({e['timestamp'][:19]})" for e in events[:3]])
+                    return f"""# 🔔 Context Changed!
+- Version: {version}
+- Status: UPDATED
+- Hint: Call `read_resource("rlm://context")` for fresh context
+- Recent events:
+{events_str}
+"""
+                else:
+                    return f"""# ✓ Context Current
+- Version: {version}
+- Status: unchanged
+"""
+
+            except Exception as e:
+                logger.error(f"Context events error: {e}")
+                return f"# Context Events Error\n\n{str(e)}"
+
+        logger.info(
+            "MCP resources registered: rlm://context, rlm://status, rlm://events")
+
     def _keyword_search(self, content: str, query: str, top_k: int = 5) -> List[Dict]:
         """Simple keyword search for MVP."""
         lines = content.split("\n")
@@ -803,7 +983,8 @@ class RLMServer:
         dangerous_patterns = [
             ("eval(", "code_injection", "Use of eval() is dangerous"),
             ("exec(", "code_injection", "Use of exec() is dangerous"),
-            ("subprocess", "command_injection", "Subprocess usage - verify inputs"),
+            ("subprocess", "command_injection",
+             "Subprocess usage - verify inputs"),
             ("os.system", "command_injection", "os.system usage - verify inputs"),
             ("pickle", "deserialization", "Pickle usage may be unsafe"),
             ("SQL", "sql_injection", "SQL detected - verify parameterization"),
@@ -868,7 +1049,8 @@ class RLMServer:
     async def run(self):
         """Run the MCP server."""
         if not MCP_AVAILABLE:
-            logger.error("MCP SDK not available. Install with: pip install mcp")
+            logger.error(
+                "MCP SDK not available. Install with: pip install mcp")
             return
 
         logger.info("Starting RLM MCP Server...")

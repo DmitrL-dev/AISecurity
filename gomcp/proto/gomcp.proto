@@ -1,0 +1,96 @@
+syntax = "proto3";
+
+package gomcp.v1;
+
+option go_package = "github.com/sentinel-community/gomcp/pkg/protocol";
+
+// Tool call request from client to supervisor
+message ToolCallRequest {
+  string request_id = 1;
+  string tool_name = 2;
+  bytes arguments_json = 3;
+  
+  // Timeout in milliseconds (0 = use default)
+  uint32 timeout_ms = 4;
+}
+
+// Tool call response from supervisor to client
+message ToolCallResponse {
+  string request_id = 1;
+  
+  oneof result {
+    bytes output_json = 2;
+    ToolError error = 3;
+  }
+  
+  uint64 duration_ms = 4;
+}
+
+// Error details
+message ToolError {
+  enum ErrorCode {
+    UNKNOWN = 0;
+    TIMEOUT = 1;
+    TOOL_NOT_FOUND = 2;
+    WORKER_CRASHED = 3;
+    PERMISSION_DENIED = 4;
+    INVALID_ARGUMENTS = 5;
+  }
+  
+  ErrorCode code = 1;
+  string message = 2;
+  string details = 3;
+}
+
+// Worker registration
+message WorkerRegistration {
+  string worker_id = 1;
+  repeated ToolDefinition tools = 2;
+}
+
+// Tool definition
+message ToolDefinition {
+  string name = 1;
+  string description = 2;
+  bytes input_schema_json = 3;
+  uint32 default_timeout_ms = 4;
+}
+
+// Heartbeat from supervisor to workers
+message Heartbeat {
+  uint64 timestamp_ms = 1;
+}
+
+// Health status
+message HealthStatus {
+  string worker_id = 1;
+  bool healthy = 2;
+  uint32 active_calls = 3;
+  uint64 uptime_ms = 4;
+}
+
+// GoMCP Service
+service GoMCPService {
+  // Client calls tool
+  rpc CallTool(ToolCallRequest) returns (ToolCallResponse);
+  
+  // Stream for long-running tools
+  rpc CallToolStream(ToolCallRequest) returns (stream ToolCallResponse);
+  
+  // List available tools
+  rpc ListTools(ListToolsRequest) returns (ListToolsResponse);
+  
+  // Health check
+  rpc Health(HealthRequest) returns (HealthResponse);
+}
+
+message ListToolsRequest {}
+message ListToolsResponse {
+  repeated ToolDefinition tools = 1;
+}
+
+message HealthRequest {}
+message HealthResponse {
+  bool healthy = 1;
+  repeated HealthStatus workers = 2;
+}

@@ -1,0 +1,31 @@
+# NATS JetStream for BRAIN Swarm
+#
+# Usage:
+#   docker-compose -f docker-compose.nats.yml up -d
+#
+# Ports:
+#   - 4222: NATS client connections
+#   - 8222: HTTP monitoring
+
+services:
+  nats:
+    image: nats:2.10-alpine
+    container_name: sentinel-nats
+    ports:
+      - "4222:4222"
+      - "8222:8222"
+    command: 
+      - "--js"
+      - "--sd=/data"
+      - "--http_port=8222"
+    volumes:
+      - nats_data:/data
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "wget", "-q", "--spider", "http://localhost:8222/healthz"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+
+volumes:
+  nats_data:

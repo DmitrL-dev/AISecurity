@@ -1,0 +1,306 @@
+{
+  "realm": "sentinel",
+  "enabled": true,
+  "displayName": "SENTINEL",
+  "displayNameHtml": "<div class=\"kc-logo-text\"><span>SENTINEL</span></div>",
+  
+  "sslRequired": "external",
+  "registrationAllowed": false,
+  "loginWithEmailAllowed": true,
+  "duplicateEmailsAllowed": false,
+  "resetPasswordAllowed": true,
+  "editUsernameAllowed": false,
+  "bruteForceProtected": true,
+  
+  "accessTokenLifespan": 300,
+  "accessTokenLifespanForImplicitFlow": 900,
+  "ssoSessionIdleTimeout": 1800,
+  "ssoSessionMaxLifespan": 86400,
+  "offlineSessionIdleTimeout": 2592000,
+  
+  "requiredCredentials": ["password"],
+  
+  "defaultRoles": ["viewer"],
+  
+  "roles": {
+    "realm": [
+      {
+        "name": "admin",
+        "description": "Full administrative access to SENTINEL Dashboard",
+        "composite": false
+      },
+      {
+        "name": "analyst",
+        "description": "Can analyze prompts, view audit logs, and access engines",
+        "composite": false
+      },
+      {
+        "name": "viewer",
+        "description": "Read-only access to dashboard and metrics",
+        "composite": false
+      },
+      {
+        "name": "api-only",
+        "description": "API access only, no UI access",
+        "composite": false
+      }
+    ]
+  },
+  
+  "clients": [
+    {
+      "clientId": "sentinel-dashboard",
+      "name": "SENTINEL Dashboard",
+      "description": "Main SENTINEL Dashboard application",
+      "enabled": true,
+      "publicClient": false,
+      "protocol": "openid-connect",
+      "clientAuthenticatorType": "client-secret",
+      "secret": "CHANGE_ME_IN_PRODUCTION",
+      
+      "redirectUris": [
+        "http://localhost:3000/*",
+        "http://localhost:3000/api/auth/callback/keycloak",
+        "https://dashboard.sentinel.local/*"
+      ],
+      "webOrigins": [
+        "http://localhost:3000",
+        "https://dashboard.sentinel.local"
+      ],
+      
+      "standardFlowEnabled": true,
+      "implicitFlowEnabled": false,
+      "directAccessGrantsEnabled": false,
+      "serviceAccountsEnabled": false,
+      
+      "frontchannelLogout": true,
+      "attributes": {
+        "post.logout.redirect.uris": "http://localhost:3000/*##https://dashboard.sentinel.local/*",
+        "oauth2.device.authorization.grant.enabled": "false",
+        "backchannel.logout.session.required": "true",
+        "backchannel.logout.revoke.offline.tokens": "false"
+      },
+      
+      "protocolMappers": [
+        {
+          "name": "realm roles",
+          "protocol": "openid-connect",
+          "protocolMapper": "oidc-usermodel-realm-role-mapper",
+          "consentRequired": false,
+          "config": {
+            "multivalued": "true",
+            "userinfo.token.claim": "true",
+            "id.token.claim": "true",
+            "access.token.claim": "true",
+            "claim.name": "realm_access.roles",
+            "jsonType.label": "String"
+          }
+        }
+      ]
+    },
+    {
+      "clientId": "sentinel-api",
+      "name": "SENTINEL API",
+      "description": "Machine-to-machine API access",
+      "enabled": true,
+      "publicClient": false,
+      "protocol": "openid-connect",
+      "clientAuthenticatorType": "client-secret",
+      "secret": "CHANGE_ME_IN_PRODUCTION_API",
+      
+      "standardFlowEnabled": false,
+      "implicitFlowEnabled": false,
+      "directAccessGrantsEnabled": false,
+      "serviceAccountsEnabled": true,
+      
+      "serviceAccountClientScopes": ["openid", "profile", "email"],
+      
+      "protocolMappers": [
+        {
+          "name": "realm roles",
+          "protocol": "openid-connect",
+          "protocolMapper": "oidc-usermodel-realm-role-mapper",
+          "consentRequired": false,
+          "config": {
+            "multivalued": "true",
+            "id.token.claim": "true",
+            "access.token.claim": "true",
+            "claim.name": "realm_access.roles",
+            "jsonType.label": "String"
+          }
+        }
+      ]
+    }
+  ],
+  
+  "users": [
+    {
+      "username": "admin@sentinel.local",
+      "email": "admin@sentinel.local",
+      "emailVerified": true,
+      "enabled": true,
+      "firstName": "Admin",
+      "lastName": "User",
+      "credentials": [
+        {
+          "type": "password",
+          "value": "Admin123!",
+          "temporary": false
+        }
+      ],
+      "realmRoles": ["admin"],
+      "requiredActions": ["CONFIGURE_TOTP"]
+    },
+    {
+      "username": "analyst@sentinel.local",
+      "email": "analyst@sentinel.local",
+      "emailVerified": true,
+      "enabled": true,
+      "firstName": "Analyst",
+      "lastName": "User",
+      "credentials": [
+        {
+          "type": "password",
+          "value": "Analyst123!",
+          "temporary": false
+        }
+      ],
+      "realmRoles": ["analyst"]
+    },
+    {
+      "username": "viewer@sentinel.local",
+      "email": "viewer@sentinel.local",
+      "emailVerified": true,
+      "enabled": true,
+      "firstName": "Viewer",
+      "lastName": "User",
+      "credentials": [
+        {
+          "type": "password",
+          "value": "Viewer123!",
+          "temporary": false
+        }
+      ],
+      "realmRoles": ["viewer"]
+    }
+  ],
+  
+  "authenticationFlows": [
+    {
+      "alias": "sentinel-browser",
+      "description": "SENTINEL browser-based authentication with conditional OTP",
+      "providerId": "basic-flow",
+      "builtIn": false,
+      "topLevel": true,
+      "authenticationExecutions": [
+        {
+          "authenticator": "auth-cookie",
+          "requirement": "ALTERNATIVE",
+          "priority": 10,
+          "userSetupAllowed": false,
+          "autheticatorFlow": false
+        },
+        {
+          "authenticator": "auth-spnego",
+          "requirement": "DISABLED",
+          "priority": 20,
+          "userSetupAllowed": false,
+          "autheticatorFlow": false
+        },
+        {
+          "authenticator": "identity-provider-redirector",
+          "requirement": "ALTERNATIVE",
+          "priority": 25,
+          "userSetupAllowed": false,
+          "autheticatorFlow": false
+        },
+        {
+          "flowAlias": "sentinel-browser-forms",
+          "requirement": "ALTERNATIVE",
+          "priority": 30,
+          "userSetupAllowed": false,
+          "autheticatorFlow": true
+        }
+      ]
+    },
+    {
+      "alias": "sentinel-browser-forms",
+      "description": "Username, password, and conditional OTP",
+      "providerId": "basic-flow",
+      "builtIn": false,
+      "topLevel": false,
+      "authenticationExecutions": [
+        {
+          "authenticator": "auth-username-password-form",
+          "requirement": "REQUIRED",
+          "priority": 10,
+          "userSetupAllowed": false,
+          "autheticatorFlow": false
+        },
+        {
+          "flowAlias": "sentinel-browser-conditional-otp",
+          "requirement": "CONDITIONAL",
+          "priority": 20,
+          "userSetupAllowed": false,
+          "autheticatorFlow": true
+        }
+      ]
+    },
+    {
+      "alias": "sentinel-browser-conditional-otp",
+      "description": "OTP required for admin role",
+      "providerId": "basic-flow",
+      "builtIn": false,
+      "topLevel": false,
+      "authenticationExecutions": [
+        {
+          "authenticator": "conditional-user-role",
+          "requirement": "REQUIRED",
+          "priority": 10,
+          "userSetupAllowed": false,
+          "autheticatorFlow": false,
+          "authenticatorConfig": "admin-role-condition"
+        },
+        {
+          "authenticator": "auth-otp-form",
+          "requirement": "REQUIRED",
+          "priority": 20,
+          "userSetupAllowed": false,
+          "autheticatorFlow": false
+        }
+      ]
+    }
+  ],
+  
+  "authenticatorConfig": [
+    {
+      "alias": "admin-role-condition",
+      "config": {
+        "condUserRole": "admin",
+        "negate": "false"
+      }
+    }
+  ],
+  
+  "browserFlow": "sentinel-browser",
+  
+  "eventsEnabled": true,
+  "eventsListeners": ["jboss-logging"],
+  "enabledEventTypes": [
+    "LOGIN",
+    "LOGIN_ERROR",
+    "LOGOUT",
+    "LOGOUT_ERROR",
+    "CODE_TO_TOKEN",
+    "CODE_TO_TOKEN_ERROR",
+    "REFRESH_TOKEN",
+    "REFRESH_TOKEN_ERROR",
+    "REGISTER",
+    "REGISTER_ERROR",
+    "UPDATE_PASSWORD",
+    "UPDATE_TOTP",
+    "VERIFY_EMAIL"
+  ],
+  "adminEventsEnabled": true,
+  "adminEventsDetailsEnabled": true
+}

@@ -9,14 +9,50 @@ from __future__ import annotations
 
 import os
 from dataclasses import dataclass, field
+from enum import IntEnum
 from typing import Any, Dict, List, Optional, Union
 from pathlib import Path
+
+
+class AutonomyLevel(IntEnum):
+    """Agent autonomy levels for explicit governance contracts.
+
+    Based on industry standards for production agentic AI systems.
+    Each level defines the degree of human oversight required.
+
+    Levels:
+        HUMAN_ASSISTED (1): Every action requires explicit approval.
+            Use case: High-risk operations, compliance-critical workflows.
+
+        HUMAN_SUPERVISED (2): Autonomous execution with monitoring.
+            Human can override at any time. Recommended default.
+
+        CONDITIONAL (3): Autonomous with fallback to human.
+            Agent escalates to human when confidence is low.
+
+        HIGH_AUTONOMY (4): Self-evolving with periodic review.
+            Agent learns and improves autonomously.
+
+        FULL_AUTONOMY (5): Completely self-sufficient.
+            No human oversight. Use with extreme caution.
+
+    Example:
+        >>> config = RLMConfig(autonomy_level=AutonomyLevel.CONDITIONAL)
+        >>> if config.autonomy_level >= AutonomyLevel.HIGH_AUTONOMY:
+        ...     # Enable self-evolution features
+        ...     pass
+    """
+    HUMAN_ASSISTED = 1
+    HUMAN_SUPERVISED = 2
+    CONDITIONAL = 3
+    HIGH_AUTONOMY = 4
+    FULL_AUTONOMY = 5
 
 
 @dataclass
 class SecurityConfig:
     """Security configuration.
-    
+
     Attributes:
         sandbox: Enable code sandbox
         max_execution_time: Max seconds per code execution
@@ -38,7 +74,7 @@ class SecurityConfig:
 @dataclass
 class ProviderConfig:
     """Provider configuration.
-    
+
     Attributes:
         provider: Provider name (openai, anthropic, ollama, google)
         model: Model identifier
@@ -53,7 +89,7 @@ class ProviderConfig:
     base_url: Optional[str] = None
     timeout: float = 120.0
     max_retries: int = 3
-    
+
     def get_api_key(self) -> Optional[str]:
         """Get API key from config or environment."""
         if self.api_key:
@@ -61,7 +97,7 @@ class ProviderConfig:
             if self.api_key.startswith("$"):
                 return os.environ.get(self.api_key[1:])
             return self.api_key
-        
+
         # Default env var names
         env_vars = {
             "openai": "OPENAI_API_KEY",
@@ -77,7 +113,7 @@ class ProviderConfig:
 @dataclass
 class ObservabilityConfig:
     """Observability configuration.
-    
+
     Attributes:
         enabled: Enable observability
         console_logging: Log to console
@@ -95,7 +131,7 @@ class ObservabilityConfig:
 @dataclass
 class MemoryConfig:
     """Memory configuration.
-    
+
     Attributes:
         enabled: Enable memory
         type: Memory type (buffer, episodic)
@@ -113,17 +149,18 @@ class MemoryConfig:
 @dataclass
 class RLMConfig:
     """Complete RLM configuration.
-    
+
     Combines all sub-configurations with validation.
-    
+
     Example:
         >>> config = RLMConfig(
         ...     max_iterations=50,
         ...     max_cost=10.0,
         ...     root_provider=ProviderConfig("openai", "gpt-5.2"),
         ... )
-    
+
     Attributes:
+        autonomy_level: Agent autonomy level (L1-L5)
         max_iterations: Maximum REPL iterations
         max_subcalls: Maximum sub-LLM calls
         max_cost: Maximum cost in USD
@@ -134,113 +171,133 @@ class RLMConfig:
         observability: Observability configuration
         memory: Memory configuration
     """
+    autonomy_level: AutonomyLevel = AutonomyLevel.HUMAN_SUPERVISED
     max_iterations: int = 50
     max_subcalls: int = 100
     max_cost: float = 10.0
     timeout: float = 600.0
-    
+
     root_provider: Optional[ProviderConfig] = None
     sub_provider: Optional[ProviderConfig] = None
-    
+
     security: SecurityConfig = field(default_factory=SecurityConfig)
-    observability: ObservabilityConfig = field(default_factory=ObservabilityConfig)
+    observability: ObservabilityConfig = field(
+        default_factory=ObservabilityConfig)
     memory: MemoryConfig = field(default_factory=MemoryConfig)
-    
+
     def validate(self) -> List[str]:
         """Validate configuration.
-        
+
         Returns:
             List of validation errors (empty if valid)
         """
         errors = []
-        
+
         if self.max_iterations < 1:
             errors.append("max_iterations must be >= 1")
-        
+
         if self.max_iterations > 1000:
             errors.append("max_iterations should be <= 1000")
-        
+
         if self.max_cost < 0:
             errors.append("max_cost must be >= 0")
-        
+
         if self.timeout < 1:
             errors.append("timeout must be >= 1")
-        
+
         if self.security.max_execution_time < 0.1:
             errors.append("max_execution_time must be >= 0.1")
-        
+
         if self.security.max_memory_mb < 64:
             errors.append("max_memory_mb must be >= 64")
-        
+
         if self.memory.enabled and self.memory.type not in ("buffer", "episodic"):
             errors.append(f"Unknown memory type: {self.memory.type}")
-        
+
         return errors
-    
+
     @classmethod
     def from_dict(cls, data: Dict[str, Any]) -> "RLMConfig":
         """Create config from dictionary."""
         config = cls()
-        
+
+        # Autonomy level
+        if "autonomy_level" in data:
+            level = data["autonomy_level"]
+            if isinstance(level, int):
+                config.autonomy_level = AutonomyLevel(level)
+            elif isinstance(level, str):
+                config.autonomy_level = AutonomyLevel[level.upper()]
+            else:
+                config.autonomy_level = level
+
         # Simple fields
         for key in ["max_iterations", "max_subcalls", "max_cost", "timeout"]:
             if key in data:
                 setattr(config, key, data[key])
-        
+
         # Root provider
         if "root_provider" in data:
             rp = data["root_provider"]
             config.root_provider = ProviderConfig(**rp)
-        
+
         # Sub provider
         if "sub_provider" in data:
             sp = data["sub_provider"]
             config.sub_provider = ProviderConfig(**sp)
-        
+
         # Security
         if "security" in data:
             config.security = SecurityConfig(**data["security"])
-        
+
         # Observability
         if "observability" in data:
             config.observability = ObservabilityConfig(**data["observability"])
-        
+
         # Memory
         if "memory" in data:
             config.memory = MemoryConfig(**data["memory"])
-        
+
         return config
-    
+
     @classmethod
     def from_yaml(cls, path: Union[str, Path]) -> "RLMConfig":
         """Load config from YAML file."""
         import yaml
-        
+
         with open(path, "r", encoding="utf-8") as f:
             data = yaml.safe_load(f)
-        
+
         return cls.from_dict(data)
-    
+
     @classmethod
     def from_env(cls) -> "RLMConfig":
         """Create config from environment variables."""
         config = cls()
-        
+
         # RLM_ prefix
         if os.environ.get("RLM_MAX_ITERATIONS"):
             config.max_iterations = int(os.environ["RLM_MAX_ITERATIONS"])
-        
+
         if os.environ.get("RLM_MAX_COST"):
             config.max_cost = float(os.environ["RLM_MAX_COST"])
-        
+
         if os.environ.get("RLM_TIMEOUT"):
             config.timeout = float(os.environ["RLM_TIMEOUT"])
-        
+
         if os.environ.get("RLM_SANDBOX"):
-            config.security.sandbox = os.environ["RLM_SANDBOX"].lower() in ("true", "1", "yes")
-        
+            config.security.sandbox = os.environ["RLM_SANDBOX"].lower() in (
+                "true", "1", "yes")
+
+        if os.environ.get("RLM_AUTONOMY_LEVEL"):
+            level = os.environ["RLM_AUTONOMY_LEVEL"]
+            try:
+                config.autonomy_level = AutonomyLevel(int(level))
+            except ValueError:
+                config.autonomy_level = AutonomyLevel[level.upper()]
+
         return config
-    
+
     def to_dict(self) -> Dict[str, Any]:
         """Export config to dictionary."""
         from dataclasses import asdict

@@ -14,6 +14,9 @@ v2.0 Tools:
 v2.1 Auto-Mode:
 - rlm_enterprise_context: One-call zero-friction context (recommended)
 - rlm_install_git_hooks: Install git hooks for auto-extraction
+
+v2.4 Extension Compatibility:
+- rlm_reindex: Reindex project files (delta or full)
 """
 
 from __future__ import annotations
@@ -167,9 +170,13 @@ def register_memory_bridge_v2_tools(
     server: Union["Server", "FastMCP", Any],
     store: HierarchicalMemoryStore,
     project_root: Optional[Path] = None,
+    on_context_change: Optional[callable] = None,  # v2.5 Anti-Amnesia callback
 ) -> Dict[str, Any]:
     """
     Register Memory Bridge v2.0 MCP tools on the server.
+
+    Args:
+        on_context_change: Optional callback(reason: str) called when context changes
 
     Returns dict with initialized components for external access.
     """
@@ -210,6 +217,80 @@ def register_memory_bridge_v2_tools(
         "context_builder": context_builder,
     }
 
+    # v2.5 Anti-Amnesia: Persistent context change tracking via SQLite
+    context_events_db = store.db_path.parent / "context_events.db"
+
+    def _init_context_events_db():
+        import sqlite3
+        conn = sqlite3.connect(str(context_events_db))
+        try:
+            conn.execute("""
+                CREATE TABLE IF NOT EXISTS context_events (
+                    id INTEGER PRIMARY KEY AUTOINCREMENT,
+                    version INTEGER NOT NULL,
+                    reason TEXT NOT NULL,
+                    timestamp TEXT NOT NULL
+                )
+            """)
+            conn.execute("""
+                CREATE TABLE IF NOT EXISTS context_state (
+                    key TEXT PRIMARY KEY,
+                    value TEXT NOT NULL
+                )
+            """)
+            # Initialize version if not exists
+            conn.execute("""
+                INSERT OR IGNORE INTO context_state (key, value) VALUES ('version', '0')
+            """)
+            conn.execute("""
+                INSERT OR IGNORE INTO context_state (key, value) VALUES ('changed', 'false')
+            """)
+            conn.commit()
+        finally:
+            conn.close()
+
+    _init_context_events_db()
+
+    def _notify_change(reason: str):
+        """Persist context change to SQLite (v2.5 Anti-Amnesia)."""
+        import sqlite3
+        from datetime import datetime
+        try:
+            conn = sqlite3.connect(str(context_events_db))
+            try:
+                # Increment version
+                cursor = conn.execute(
+                    "SELECT value FROM context_state WHERE key = 'version'"
+                )
+                row = cursor.fetchone()
+                version = int(row[0]) + 1 if row else 1
+
+                # Update state
+                conn.execute(
+                    "UPDATE context_state SET value = ? WHERE key = 'version'",
+                    (str(version),)
+                )
+                conn.execute(
+                    "UPDATE context_state SET value = 'true' WHERE key = 'changed'"
+                )
+                # Log event
+                conn.execute(
+                    "INSERT INTO context_events (version, reason, timestamp) VALUES (?, ?, ?)",
+                    (version, reason, datetime.now().isoformat())
+                )
+                conn.commit()
+            finally:
+                conn.close()
+        except Exception:
+            pass  # Don't break tools on notification failure
+
+        # Also call original callback if provided
+        if on_context_change:
+            try:
+                on_context_change(reason)
+            except Exception:
+                pass
+
     @server.tool(
         name="rlm_discover_project",
         description="Smart cold start discovery for new projects. "
@@ -229,6 +310,9 @@ def register_memory_bridge_v2_tools(
                 root=root,
                 task_hint=task_hint,
             )
+
+            # v2.5: Notify context changed
+            _notify_change("discover_project")
 
             return {
                 "status": "success",
@@ -327,6 +411,8 @@ def register_memory_bridge_v2_tools(
                             source=candidate.source,
                             confidence=candidate.confidence,
                         )
+                # v2.5: Notify context changed
+                _notify_change("extract_facts_auto_approve")
 
             return {
                 "status": "success",
@@ -358,6 +444,9 @@ def register_memory_bridge_v2_tools(
                 source="approved",
                 confidence=1.0,
             )
+
+            # v2.5: Notify context changed
+            _notify_change("approve_fact")
 
             return {
                 "status": "success",
@@ -404,6 +493,9 @@ def register_memory_bridge_v2_tools(
                 source="manual",
                 confidence=1.0,
             )
+
+            # v2.5: Notify context changed
+            _notify_change("add_hierarchical_fact")
 
             return {
                 "status": "success",
@@ -478,6 +570,9 @@ def register_memory_bridge_v2_tools(
                 constraints=constraints,
                 alternatives=alternatives,
             )
+
+            # v2.5: Notify context changed
+            _notify_change("record_causal_decision")
 
             return {
                 "status": "success",
@@ -939,17 +1034,31 @@ def register_memory_bridge_v2_tools(
                 }
 
             orchestrator_ext = ExtractionOrchestrator(project_root)
-            result = await orchestrator_ext.discover_deep(
-                extractors=extractors_list,
-                auto_approve=auto_approve,
-                max_facts=max_facts,
-            )
+
+            # Timeout protection: abort if takes >60s
+            import asyncio
+            try:
+                result = await asyncio.wait_for(
+                    orchestrator_ext.discover_deep(
+                        extractors=extractors_list,
+                        auto_approve=auto_approve,
+                        max_facts=max_facts,
+                    ),
+                    timeout=60.0
+                )
+            except asyncio.TimeoutError:
+                return {
+                    "status": "timeout",
+                    "message": "discover_deep timed out after 60s. "
+                    "Try running with fewer extractors or smaller max_facts.",
+                }
 
             # Initialize pending store for low-confidence candidates
             from pathlib import Path as PathLib2
             import sys as sys2
 
-            pending_db = PathLib2(project_root) / ".rlm" / "pending_candidates.db"
+            pending_db = PathLib2(project_root) / ".rlm" / \
+                "pending_candidates.db"
             pending_db.parent.mkdir(parents=True, exist_ok=True)
 
             # src is already in sys.path from mcpClient.ts
@@ -965,6 +1074,8 @@ def register_memory_bridge_v2_tools(
             except ImportError:
                 pass  # Continue without pending store
 
+            print(
+                f'[MCP DEBUG] Processing {len(result.get(chr(34)+chr(99)+chr(97)+chr(110)+chr(100)+chr(105)+chr(100)+chr(97)+chr(116)+chr(101)+chr(115)+chr(34), []))} candidates...')
             auto_approved_count = 0
             pending_count = 0
 
@@ -979,6 +1090,7 @@ def register_memory_bridge_v2_tools(
                         domain=candidate.get("domain"),
                         source=f"discover_deep:{candidate.get('source')}",
                         confidence=confidence,
+                        embedding=[],  # Skip auto-embedding for speed
                     )
                     auto_approved_count += 1
 
@@ -1025,7 +1137,8 @@ def register_memory_bridge_v2_tools(
         try:
             from pathlib import Path as PathLib3
 
-            pending_db = PathLib3(project_root) / ".rlm" / "pending_candidates.db"
+            pending_db = PathLib3(project_root) / ".rlm" / \
+                "pending_candidates.db"
 
             if not pending_db.exists():
                 return {
@@ -1081,7 +1194,8 @@ def register_memory_bridge_v2_tools(
         try:
             from pathlib import Path as PathLib4
 
-            pending_db = PathLib4(project_root) / ".rlm" / "pending_candidates.db"
+            pending_db = PathLib4(project_root) / ".rlm" / \
+                "pending_candidates.db"
 
             try:
                 from rlm_mcp_server.pending_store import PendingCandidatesStore
@@ -1126,7 +1240,8 @@ def register_memory_bridge_v2_tools(
         try:
             from pathlib import Path as PathLib5
 
-            pending_db = PathLib5(project_root) / ".rlm" / "pending_candidates.db"
+            pending_db = PathLib5(project_root) / ".rlm" / \
+                "pending_candidates.db"
 
             try:
                 from rlm_mcp_server.pending_store import PendingCandidatesStore
@@ -1156,7 +1271,8 @@ def register_memory_bridge_v2_tools(
         try:
             from pathlib import Path as PathLib6
 
-            pending_db = PathLib6(project_root) / ".rlm" / "pending_candidates.db"
+            pending_db = PathLib6(project_root) / ".rlm" / \
+                "pending_candidates.db"
 
             try:
                 from rlm_mcp_server.pending_store import PendingCandidatesStore
@@ -1313,5 +1429,198 @@ def register_memory_bridge_v2_tools(
             }
         except Exception as e:
             return {"status": "error", "message": str(e)}
+
+    # =========================================================================
+    # Tool 27: Reindex (v2.4 — Extension compatibility)
+    # =========================================================================
+    @server.tool(
+        name="rlm_reindex",
+        description="Reindex project or specific path. "
+        "Performs delta update by default, force=True for full reindex.",
+    )
+    async def rlm_reindex(
+        path: Optional[str] = None,
+        force: bool = False,
+    ) -> Dict[str, Any]:
+        """
+        Reindex project files.
+
+        Args:
+            path: Path to reindex (defaults to project root)
+            force: Force full reindex even if up-to-date
+
+        Returns:
+            Reindex results
+        """
+        try:
+            import time as time_module
+            from ..indexer import AutoIndexer
+            from ..storage import get_storage
+
+            # Rate limiting: 60s between reindexes
+            reindex_key = "_last_reindex_time"
+            last_reindex = getattr(store, reindex_key, 0)
+            current_time = time_module.time()
+
+            if current_time - last_reindex < 60:
+                wait_time = int(60 - (current_time - last_reindex))
+                return {
+                    "status": "error",
+                    "message": f"Rate limited. Try again in {wait_time}s",
+                    "rate_limited": True,
+                }
+
+            setattr(store, reindex_key, current_time)
+
+            index_path = Path(path) if path else project_root
+            indexer = AutoIndexer(index_path)
+
+            if force:
+                result = indexer._index_full()
+                return {
+                    "success": True,
+                    "status": "success",
+                    "action": "full_reindex",
+                    "files_indexed": result.files_indexed,
+                    "duration": result.duration_seconds,
+                }
+            else:
+                # Delta update
+                import time as delta_time
+                start = delta_time.time()
+
+                storage = get_storage(index_path)
+                modified = storage.get_modified_files(index_path)
+
+                if modified:
+                    updated = indexer.delta_update(modified)
+                    duration = delta_time.time() - start
+                    return {
+                        "success": True,
+                        "status": "success",
+                        "action": "delta_update",
+                        "files_indexed": updated,
+                        "duration": duration,
+                    }
+                else:
+                    # No changes - do full reindex to be safe
+                    result = indexer._index_full()
+                    return {
+                        "success": True,
+                        "status": "success",
+                        "action": "full_reindex",
+                        "files_indexed": result.files_indexed,
+                        "duration": result.duration_seconds,
+                    }
+        except Exception as e:
+            return {"success": False, "status": "error", "message": str(e)}
+
+    # =========================================================================
+    # Tool 28: Auto-Inject Context (v2.5 — Anti-Amnesia)
+    # =========================================================================
+    @server.tool(
+        name="rlm_auto_inject",
+        description="Get optimized context for automatic injection into LLM prompts. "
+        "Returns L0 facts (always) + semantic context for active file. "
+        "Use this to solve LLM amnesia between sessions.",
+    )
+    async def rlm_auto_inject(
+        active_file: Optional[str] = None,
+        max_tokens: int = 2000,
+        include_decisions: bool = True,
+    ) -> Dict[str, Any]:
+        """
+        Get auto-inject context for LLM prompts.
+
+        Args:
+            active_file: Currently open file path (for semantic routing)
+            max_tokens: Maximum context tokens
+            include_decisions: Include recent causal decisions
+
+        Returns:
+            Formatted context ready for prompt injection
+        """
+        try:
+            from .v2.hierarchical import MemoryLevel
+
+            sections = []
+            tokens_used = 0
+
+            # === L0: Project-Level Facts (ALWAYS include) ===
+            l0_facts = store.get_facts_by_level(MemoryLevel.L0_PROJECT)
+            if l0_facts:
+                l0_text = "## 🏗️ Project Architecture\n"
+                for fact in l0_facts[:10]:  # Limit to 10 most important
+                    l0_text += f"- {fact.content}\n"
+                sections.append(l0_text)
+                tokens_used += len(l0_text.split()) * \
+                    1.3  # Rough token estimate
+
+            # === L1: Domain Facts (if active file provided) ===
+            if active_file and tokens_used < max_tokens * 0.6:
+                # Detect domain from file path
+                file_path = Path(active_file)
+                domain = None
+
+                # Try to detect domain from path segments
+                path_parts = file_path.parts
+                for part in reversed(path_parts):
+                    if part in store.get_domains():
+                        domain = part
+                        break
+
+                if domain:
+                    domain_facts = store.get_domain_facts(domain)
+                    if domain_facts:
+                        domain_text = f"## 📂 Domain: {domain}\n"
+                        for fact in domain_facts[:5]:
+                            domain_text += f"- {fact.content}\n"
+                        sections.append(domain_text)
+                        tokens_used += len(domain_text.split()) * 1.3
+
+            # === Recent Decisions (if enabled) ===
+            if include_decisions and tokens_used < max_tokens * 0.8:
+                try:
+                    recent_decisions = causal_tracker.get_recent_decisions(
+                        limit=3)
+                    if recent_decisions:
+                        decisions_text = "## 🎯 Recent Decisions\n"
+                        for decision in recent_decisions:
+                            decisions_text += f"- {decision.content}\n"
+                        sections.append(decisions_text)
+                        tokens_used += len(decisions_text.split()) * 1.3
+                except Exception:
+                    pass  # Causal tracker may not have data
+
+            # === Semantic Context (remaining budget) ===
+            if active_file and tokens_used < max_tokens * 0.9:
+                try:
+                    remaining_tokens = int(max_tokens - tokens_used)
+                    route_result = router.route(
+                        query=f"Context for {Path(active_file).name}",
+                        max_tokens=remaining_tokens,
+                    )
+                    if route_result.facts:
+                        semantic_text = "## 🔍 Related Context\n"
+                        for fact in route_result.facts[:5]:
+                            semantic_text += f"- {fact.content}\n"
+                        sections.append(semantic_text)
+                except Exception:
+                    pass  # Router may fail
+
+            # Combine all sections
+            context = "\n".join(
+                sections) if sections else "No project context available."
+
+            return {
+                "success": True,
+                "status": "success",
+                "context": context,
+                "sections_count": len(sections),
+                "tokens_estimated": int(tokens_used),
+                "active_file": active_file,
+            }
+        except Exception as e:
+            return {"success": False, "status": "error", "message": str(e)}
 
     return components

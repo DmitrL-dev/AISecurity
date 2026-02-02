@@ -1,0 +1,9 @@
+{
+  "name": "v2.4-production-patterns",
+  "version": "2.4.0",
+  "description": "Production patterns for enterprise-ready RLM: CircuitBreaker, MiddlewareChain, AutonomyLevel, TaskPlanner",
+  "status": "draft",
+  "created": "2026-02-02",
+  "priority": "P0",
+  "estimated_hours": 38
+}

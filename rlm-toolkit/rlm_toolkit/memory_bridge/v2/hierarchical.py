@@ -76,8 +76,8 @@ class HierarchicalFact:
     children_ids: List[str] = field(default_factory=list)
     embedding: Optional[List[float]] = None  # For semantic search
     ttl_config: Optional[TTLConfig] = None
-    created_at: datetime = field(default_factory=datetime.now)  # T (system time)
-    valid_from: datetime = field(default_factory=datetime.now)  # T' (business time)
+    created_at: datetime = field(default_factory=datetime.now)  # T
+    valid_from: datetime = field(default_factory=datetime.now)  # T'
     valid_until: Optional[datetime] = None
     is_stale: bool = False
     is_archived: bool = False
@@ -85,6 +85,11 @@ class HierarchicalFact:
     source: str = "manual"  # manual, git_diff, ast_analysis, template
 
     def to_dict(self) -> Dict[str, Any]:
+        # Convert embedding to native Python floats for JSON serialization
+        embedding_safe = None
+        if self.embedding:
+            embedding_safe = [float(x) for x in self.embedding]
+
         return {
             "id": self.id,
             "content": self.content,
@@ -94,14 +99,20 @@ class HierarchicalFact:
             "code_ref": self.code_ref,
             "parent_id": self.parent_id,
             "children_ids": self.children_ids,
-            "embedding": self.embedding,
-            "ttl_config": self.ttl_config.to_dict() if self.ttl_config else None,
+            "embedding": embedding_safe,
+            "ttl_config": (
+                self.ttl_config.to_dict()
+                if self.ttl_config else None
+            ),
             "created_at": self.created_at.isoformat(),
             "valid_from": self.valid_from.isoformat(),
-            "valid_until": self.valid_until.isoformat() if self.valid_until else None,
+            "valid_until": (
+                self.valid_until.isoformat()
+                if self.valid_until else None
+            ),
             "is_stale": self.is_stale,
             "is_archived": self.is_archived,
-            "confidence": self.confidence,
+            "confidence": float(self.confidence),
             "source": self.source,
         }
 
@@ -154,7 +165,9 @@ class HierarchicalFact:
         """Check if TTL has expired."""
         if not self.ttl_config:
             return False
-        expiry_time = self.created_at + timedelta(seconds=self.ttl_config.ttl_seconds)
+        expiry_time = self.created_at + timedelta(
+            seconds=self.ttl_config.ttl_seconds
+        )
         return datetime.now() > expiry_time
 
 
@@ -175,7 +188,9 @@ class HierarchicalMemoryStore:
             self.db_path = Path.home() / ".rlm" / "memory_bridge_v2.db"
             self.db_path.parent.mkdir(parents=True, exist_ok=True)
         else:
-            self.db_path = Path(db_path) if isinstance(db_path, str) else db_path
+            self.db_path = (
+                Path(db_path) if isinstance(db_path, str) else db_path
+            )
             self.db_path.parent.mkdir(parents=True, exist_ok=True)
         self._init_db()
         # Embedder for auto-embedding generation (v2.1 fix for Gap 2)
@@ -207,7 +222,6 @@ class HierarchicalMemoryStore:
                     session_id TEXT,
                     FOREIGN KEY (parent_id) REFERENCES hierarchical_facts(id)
                 );
-                
                 -- Hierarchy relationships (for complex hierarchies)
                 CREATE TABLE IF NOT EXISTS fact_hierarchy (
                     parent_id TEXT NOT NULL,
@@ -217,7 +231,6 @@ class HierarchicalMemoryStore:
                     FOREIGN KEY (parent_id) REFERENCES hierarchical_facts(id),
                     FOREIGN KEY (child_id) REFERENCES hierarchical_facts(id)
                 );
-                
                 -- Embeddings index for fast similarity search
                 CREATE TABLE IF NOT EXISTS embeddings_index (
                     fact_id TEXT PRIMARY KEY,
@@ -226,7 +239,6 @@ class HierarchicalMemoryStore:
                     updated_at TEXT DEFAULT CURRENT_TIMESTAMP,
                     FOREIGN KEY (fact_id) REFERENCES hierarchical_facts(id)
                 );
-                
                 -- Domain centroids for fast routing
                 CREATE TABLE IF NOT EXISTS domain_centroids (
                     domain TEXT PRIMARY KEY,
@@ -234,20 +246,20 @@ class HierarchicalMemoryStore:
                     fact_count INTEGER DEFAULT 0,
                     updated_at TEXT DEFAULT CURRENT_TIMESTAMP
                 );
-                
                 -- Indexes for common queries
-                CREATE INDEX IF NOT EXISTS idx_facts_level ON hierarchical_facts(level);
-                CREATE INDEX IF NOT EXISTS idx_facts_domain ON hierarchical_facts(domain);
-                CREATE INDEX IF NOT EXISTS idx_facts_module ON hierarchical_facts(module);
-                CREATE INDEX IF NOT EXISTS idx_facts_stale ON hierarchical_facts(is_stale);
-                CREATE INDEX IF NOT EXISTS idx_facts_session ON hierarchical_facts(session_id);
-                
+CREATE INDEX IF NOT EXISTS idx_facts_level ON hierarchical_facts(level);
+CREATE INDEX IF NOT EXISTS idx_facts_domain ON hierarchical_facts(domain);
+CREATE INDEX IF NOT EXISTS idx_facts_module ON hierarchical_facts(module);
+CREATE INDEX IF NOT EXISTS idx_facts_stale ON hierarchical_facts(is_stale);
+CREATE INDEX IF NOT EXISTS idx_facts_session ON hierarchical_facts(session_id);
+
                 -- Schema version
                 CREATE TABLE IF NOT EXISTS schema_info (
                     key TEXT PRIMARY KEY,
                     value TEXT
                 );
-                INSERT OR REPLACE INTO schema_info (key, value) VALUES ('version', '2.0.0');
+INSERT OR REPLACE INTO schema_info (key, value)
+VALUES ('version', '2.0.0');
             """
             )
 
@@ -328,14 +340,16 @@ class HierarchicalMemoryStore:
             # Add hierarchy relationship if parent exists
             if parent_id:
                 conn.execute(
-                    "INSERT OR IGNORE INTO fact_hierarchy (parent_id, child_id) VALUES (?, ?)",
+                    "INSERT OR IGNORE INTO fact_hierarchy "
+                    "(parent_id, child_id) VALUES (?, ?)",
                     (parent_id, fact_id),
                 )
 
             # Store embedding in index if provided
             if embedding:
                 conn.execute(
-                    "INSERT OR REPLACE INTO embeddings_index (fact_id, embedding) VALUES (?, ?)",
+                    "INSERT OR REPLACE INTO embeddings_index "
+                    "(fact_id, embedding) VALUES (?, ?)",
                     (fact_id, json.dumps(embedding)),
                 )
 
@@ -433,7 +447,7 @@ class HierarchicalMemoryStore:
             conn.row_factory = sqlite3.Row
             rows = conn.execute(
                 """
-                SELECT * FROM hierarchical_facts 
+                SELECT * FROM hierarchical_facts
                 WHERE domain = ? AND is_stale = 0 AND is_archived = 0
                 ORDER BY level ASC, created_at DESC
                 """,
@@ -475,7 +489,8 @@ class HierarchicalMemoryStore:
         """Get list of all domains."""
         with sqlite3.connect(self.db_path) as conn:
             rows = conn.execute(
-                "SELECT DISTINCT domain FROM hierarchical_facts WHERE domain IS NOT NULL"
+                "SELECT DISTINCT domain FROM hierarchical_facts "
+                "WHERE domain IS NOT NULL"
             ).fetchall()
             return [row[0] for row in rows]
 
@@ -501,7 +516,9 @@ class HierarchicalMemoryStore:
         """Mark a fact as stale."""
         with sqlite3.connect(self.db_path) as conn:
             result = conn.execute(
-                "UPDATE hierarchical_facts SET is_stale = 1 WHERE id = ?", (fact_id,)
+                "UPDATE hierarchical_facts "
+                "SET is_stale = 1 WHERE id = ?",
+                (fact_id,)
             )
             return result.rowcount > 0
 
@@ -509,7 +526,9 @@ class HierarchicalMemoryStore:
         """Archive a fact."""
         with sqlite3.connect(self.db_path) as conn:
             result = conn.execute(
-                "UPDATE hierarchical_facts SET is_archived = 1 WHERE id = ?", (fact_id,)
+                "UPDATE hierarchical_facts "
+                "SET is_archived = 1 WHERE id = ?",
+                (fact_id,),
             )
             return result.rowcount > 0
 
@@ -518,17 +537,23 @@ class HierarchicalMemoryStore:
         with sqlite3.connect(self.db_path) as conn:
             # Delete hierarchy relationships
             conn.execute(
-                "DELETE FROM fact_hierarchy WHERE parent_id = ? OR child_id = ?",
+                "DELETE FROM fact_hierarchy "
+                "WHERE parent_id = ? OR child_id = ?",
                 (fact_id, fact_id),
             )
-            conn.execute("DELETE FROM embeddings_index WHERE fact_id = ?", (fact_id,))
+            conn.execute(
+                "DELETE FROM embeddings_index " "WHERE fact_id = ?", (fact_id,)
+            )
             result = conn.execute(
                 "DELETE FROM hierarchical_facts WHERE id = ?", (fact_id,)
             )
             return result.rowcount > 0
 
     def update_embedding(
-        self, fact_id: str, embedding: List[float], model_name: str = "all-MiniLM-L6-v2"
+        self,
+        fact_id: str,
+        embedding: List[float],
+        model_name: str = "all-MiniLM-L6-v2"
     ) -> bool:
         """Update the embedding for a fact."""
         with sqlite3.connect(self.db_path) as conn:
@@ -540,7 +565,8 @@ class HierarchicalMemoryStore:
             # Update in index
             conn.execute(
                 """
-                INSERT OR REPLACE INTO embeddings_index (fact_id, embedding, model_name, updated_at)
+                INSERT OR REPLACE INTO embeddings_index
+                (fact_id, embedding, model_name, updated_at)
                 VALUES (?, ?, ?, ?)
                 """,
                 (
@@ -552,7 +578,9 @@ class HierarchicalMemoryStore:
             )
             return True
 
-    def get_facts_with_embeddings(self) -> List[Tuple[HierarchicalFact, List[float]]]:
+    def get_facts_with_embeddings(
+        self
+    ) -> List[Tuple[HierarchicalFact, List[float]]]:
         """Get all facts that have embeddings."""
         with sqlite3.connect(self.db_path) as conn:
             conn.row_factory = sqlite3.Row
@@ -580,7 +608,9 @@ class HierarchicalMemoryStore:
     def get_stats(self) -> Dict[str, Any]:
         """Get storage statistics."""
         with sqlite3.connect(self.db_path) as conn:
-            total = conn.execute("SELECT COUNT(*) FROM hierarchical_facts").fetchone()[
+            total = conn.execute(
+                "SELECT COUNT(*) FROM hierarchical_facts"
+            ).fetchone()[
                 0
             ]
             by_level = {}
@@ -601,7 +631,8 @@ class HierarchicalMemoryStore:
                 "SELECT COUNT(*) FROM embeddings_index"
             ).fetchone()[0]
             domains = conn.execute(
-                "SELECT COUNT(DISTINCT domain) FROM hierarchical_facts WHERE domain IS NOT NULL"
+                "SELECT COUNT(DISTINCT domain) "
+                "FROM hierarchical_facts WHERE domain IS NOT NULL"
             ).fetchone()[0]
 
             return {
@@ -629,7 +660,8 @@ class HierarchicalMemoryStore:
         children_ids = []
         with sqlite3.connect(self.db_path) as conn:
             children = conn.execute(
-                "SELECT child_id FROM fact_hierarchy WHERE parent_id = ?", (row["id"],)
+                "SELECT child_id FROM fact_hierarchy " "WHERE parent_id = ?",
+                (row["id"],),
             ).fetchall()
             children_ids = [c[0] for c in children]
 
@@ -665,8 +697,9 @@ class HierarchicalMemoryStore:
         """
         Get all L0 (Project-level) facts formatted for context injection.
 
-        This method provides the key facts that should be injected at the
-        start of every agent session to ensure critical rules are always present.
+        This method provides the key facts that should be injected at
+        the start of every agent session to ensure critical rules are
+        always present.
 
         Args:
             max_tokens: Maximum token budget for L0 context
@@ -743,10 +776,10 @@ class HierarchicalMemoryStore:
 
         try:
             embedding = self._embedder.encode(content)
-            if isinstance(embedding, list):
-                return embedding
-            # Handle numpy arrays or tensors
-            return list(embedding)
+            # Convert to native Python floats (handles numpy.float32)
+            if hasattr(embedding, "tolist"):
+                return embedding.tolist()  # numpy array
+            return [float(x) for x in embedding]  # any iterable
         except Exception as e:
             logger.warning(f"Failed to generate embedding: {e}")
             return None
@@ -796,7 +829,9 @@ class HierarchicalMemoryStore:
         ]
         test_keywords = ["test", "spec", "verify", "check", "validate"]
 
-        is_implementation_task = any(kw in task_lower for kw in implementation_keywords)
+        is_implementation_task = any(
+            kw in task_lower for kw in implementation_keywords
+        )
         is_test_task = any(kw in task_lower for kw in test_keywords)
 
         for fact in l0_facts:

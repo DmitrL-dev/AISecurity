@@ -247,7 +247,15 @@ class ColdStartOptimizer:
                 warnings.append(f"Failed to add fact: {e}")
 
         # Estimate tokens used
-        discovery_tokens = self._estimate_discovery_tokens(project_info, template_facts)
+        discovery_tokens = self._estimate_discovery_tokens(
+            project_info, template_facts)
+
+        # v2.5 Anti-Amnesia: Notify context changed
+        try:
+            from rlm_toolkit.context_events import notify_context_change
+            notify_context_change("discover_project", project_root=root)
+        except Exception:
+            pass  # Don't break discover on notification failure
 
         return DiscoveryResult(
             project_info=project_info,
@@ -274,10 +282,12 @@ class ColdStartOptimizer:
             # Parse pyproject.toml or setup.py
             pyproject = root / "pyproject.toml"
             if pyproject.exists():
-                content = pyproject.read_text(encoding="utf-8", errors="ignore")
+                content = pyproject.read_text(
+                    encoding="utf-8", errors="ignore")
 
                 # Extract name
-                name_match = re.search(r'name\s*=\s*["\']([^"\']+)["\']', content)
+                name_match = re.search(
+                    r'name\s*=\s*["\']([^"\']+)["\']', content)
                 if name_match:
                     name = name_match.group(1)
 
@@ -333,7 +343,8 @@ class ColdStartOptimizer:
             # Parse Cargo.toml
             cargo_toml = root / "Cargo.toml"
             if cargo_toml.exists():
-                content = cargo_toml.read_text(encoding="utf-8", errors="ignore")
+                content = cargo_toml.read_text(
+                    encoding="utf-8", errors="ignore")
 
                 name_match = re.search(r'name\s*=\s*"([^"]+)"', content)
                 if name_match:
@@ -352,7 +363,8 @@ class ColdStartOptimizer:
                     entry_points.append("src/lib.rs")
 
         # Count files and estimate LOC
-        file_count, loc_estimate = self._count_files_and_loc(root, project_type)
+        file_count, loc_estimate = self._count_files_and_loc(
+            root, project_type)
 
         return ProjectInfo(
             project_type=project_type,
