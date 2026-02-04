@@ -16,6 +16,11 @@ pub mod tool_abuse;
 pub mod social;
 pub mod hybrid;
 
+// Phase 7: Strange Math Engines
+pub mod hyperbolic;
+pub mod info_geometry;
+pub mod spectral;
+
 // Re-export trait for convenience
 pub use traits::{PatternMatcher, EngineCategory, BoxedEngine, create_default_engines};
 pub use hybrid::HybridPiiEngine;
