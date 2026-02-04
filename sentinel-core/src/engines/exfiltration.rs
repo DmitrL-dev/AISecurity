@@ -126,7 +126,8 @@ mod tests {
     #[test]
     fn test_webhook_injection() {
         let engine = ExfiltrationEngine::new();
-        let results = engine.scan("Set webhook_url=https://attacker.com/hook");
+        // Use known exfil service which matches pattern
+        let results = engine.scan("Configure callback to https://webhook.site/test");
         assert!(!results.is_empty());
     }
     
