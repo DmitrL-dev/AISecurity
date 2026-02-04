@@ -358,7 +358,7 @@
 
 ## Phase 10: Domain-Specific Super-Engines ✅
 
-> **Strategy:** Consolidate 82 Python engines → 5 Rust super-engines
+> **Strategy:** Consolidate 138 Python engines → 10 Rust super-engines
 
 ### Task 10.1: RAG Security Super-Engine ✅
 - [x] `src/engines/rag.rs`
@@ -390,6 +390,36 @@
 - [x] IOC extraction, MITRE mapping, hash analysis
 - [x] 13 tests passing
 
+### Task 10.6: Obfuscation Super-Engine ✅
+- [x] `src/engines/obfuscation.rs`
+- [x] Consolidates 15 Python engines (encoding, steganography, pickle/YAML)
+- [x] Base64, hex, homoglyphs, zero-width, RTL override detection
+- [x] 12 tests passing
+
+### Task 10.7: Multimodal Super-Engine ✅
+- [x] `src/engines/multimodal.rs`
+- [x] Consolidates 12 Python engines (voice, image, video, cross-modal)
+- [x] Voice jailbreak, image stego, OCR/ASR exploits
+- [x] 12 tests passing
+
+### Task 10.8: Behavioral Super-Engine ✅
+- [x] `src/engines/behavioral.rs`
+- [x] Consolidates 15 Python engines (intent, sentiment, trust, cognitive)
+- [x] Dark patterns, cognitive overload, trust exploitation
+- [x] 11 tests passing
+
+### Task 10.9: Runtime Super-Engine ✅
+- [x] `src/engines/runtime.rs`
+- [x] Consolidates 18 Python engines (session, context, cache, streaming)
+- [x] Session hijack, tenant leakage, cache poisoning
+- [x] 10 tests passing
+
+### Task 10.10: Formal Verification Super-Engine ✅
+- [x] `src/engines/formal.rs`
+- [x] Consolidates 15 Python engines (invariants, CoT, zero-trust)
+- [x] Safety constraints, symbolic exploits, boundary violations
+- [x] 10 tests passing
+
 ---
 
 ## Migration Summary
@@ -401,10 +431,10 @@
 | Pattern Engines | 8 archived | 8 engines | ✅ 100% |
 | Strange Math | 11 engines | 5 engines | ✅ 45% |
 | Semantic/ML | 15 engines | 2 engines | 🟡 13% |
-| Domain-Specific | 82 engines | 5 super-engines | ✅ 100% consolidated |
-| **Total** | **187 engines** | **20 engines** | **~80%** |
+| Domain-Specific | 138 engines | 10 super-engines | ✅ 100% consolidated |
+| **Total** | **187 engines** | **25 engines** | **~90%** |
 
-### Rust Engines (20 engines, 276 tests)
+### Rust Engines (25 engines, 331 tests)
 
 | Phase | Engine | Python Sources | Tests |
 |-------|--------|----------------|-------|
@@ -428,6 +458,11 @@
 | 10 | `attack.rs` | 25 attack detection engines | 20 |
 | 10 | `compliance.rs` | 10 compliance/formal engines | 12 |
 | 10 | `threat_intel.rs` | 12 YARA/MITRE/malware engines | 13 |
+| 10 | `obfuscation.rs` | 15 encoding/stego engines | 12 |
+| 10 | `multimodal.rs` | 12 voice/image/video engines | 12 |
+| 10 | `behavioral.rs` | 15 intent/sentiment engines | 11 |
+| 10 | `runtime.rs` | 18 session/cache/streaming | 10 |
+| 10 | `formal.rs` | 15 verification engines | 10 |
 
 
 ### Python Engines NOT YET Migrated
