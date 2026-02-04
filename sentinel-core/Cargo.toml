@@ -34,6 +34,9 @@ once_cell = "1.19" # Lazy statics
 log = "0.4"
 env_logger = "0.11"
 
+# Error handling
+thiserror = "2.0"
+
 [profile.release]
 lto = true
 codegen-units = 1
