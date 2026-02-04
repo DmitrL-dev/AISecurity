@@ -16,6 +16,7 @@ logger = logging.getLogger("ConfigValidator")
 @dataclass
 class ValidationError:
     """Single validation error."""
+
     key: str
     message: str
     severity: str = "error"  # error, warning
@@ -24,6 +25,7 @@ class ValidationError:
 @dataclass
 class ValidationResult:
     """Result of configuration validation."""
+
     valid: bool
     errors: List[ValidationError] = field(default_factory=list)
     warnings: List[ValidationError] = field(default_factory=list)
@@ -60,6 +62,10 @@ class ConfigValidator:
         "VAULT_ENABLED": "false",
         "LANGUAGE_MODE": "WHITELIST",
         "GPU_AUTO_DETECT": "true",
+        # Rust Core feature flags
+        "USE_RUST_ENGINE": "true",  # Enable Rust-based detection (faster)
+        "RUST_SHADOW_MODE": "false",  # Run both Rust+Python, compare results
+        "RUST_FALLBACK_PYTHON": "true",  # Fallback to Python if Rust fails
     }
 
     # Boolean vars that should be true/false
@@ -68,6 +74,9 @@ class ConfigValidator:
         "TLS_ENABLED",
         "VAULT_ENABLED",
         "GPU_AUTO_DETECT",
+        "USE_RUST_ENGINE",
+        "RUST_SHADOW_MODE",
+        "RUST_FALLBACK_PYTHON",
     ]
 
     def validate(self) -> ValidationResult:
@@ -121,11 +130,9 @@ class ConfigValidator:
         """Check Vault configuration."""
         if os.getenv("VAULT_ENABLED", "false").lower() == "true":
             if not os.getenv("VAULT_ADDR"):
-                result.add_error(
-                    "VAULT_ADDR", "Required when VAULT_ENABLED=true")
+                result.add_error("VAULT_ADDR", "Required when VAULT_ENABLED=true")
             if not os.getenv("VAULT_TOKEN"):
-                result.add_warning(
-                    "VAULT_TOKEN", "Not set, will try AppRole auth")
+                result.add_warning("VAULT_TOKEN", "Not set, will try AppRole auth")
 
     def _validate_redis(self, result: ValidationResult):
         """Validate Redis URL format."""
@@ -142,6 +149,10 @@ class ConfigValidator:
             "language_mode": os.getenv("LANGUAGE_MODE", "WHITELIST"),
             "gpu_auto_detect": os.getenv("GPU_AUTO_DETECT", "true"),
             "redis_configured": bool(os.getenv("REDIS_URL")),
+            # Rust Core flags
+            "use_rust_engine": os.getenv("USE_RUST_ENGINE", "true"),
+            "rust_shadow_mode": os.getenv("RUST_SHADOW_MODE", "false"),
+            "rust_fallback_python": os.getenv("RUST_FALLBACK_PYTHON", "true"),
         }
 
 
