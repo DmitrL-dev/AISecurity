@@ -127,10 +127,97 @@ fn bench_unicode_norm(c: &mut Criterion) {
     group.finish();
 }
 
+/// Benchmark memory footprint of engines (instantiation cost)
+fn bench_memory_footprint(c: &mut Criterion) {
+    let mut group = c.benchmark_group("Memory Footprint");
+    
+    // Measure engine instantiation (includes pattern compilation)
+    group.bench_function("injection_new", |b| {
+        b.iter(|| black_box(injection::InjectionEngine::new()))
+    });
+    
+    group.bench_function("jailbreak_new", |b| {
+        b.iter(|| black_box(jailbreak::JailbreakEngine::new()))
+    });
+    
+    group.bench_function("pii_new", |b| {
+        b.iter(|| black_box(pii::PIIEngine::new()))
+    });
+    
+    group.bench_function("exfiltration_new", |b| {
+        b.iter(|| black_box(exfiltration::ExfiltrationEngine::new()))
+    });
+    
+    group.bench_function("moderation_new", |b| {
+        b.iter(|| black_box(moderation::ModerationEngine::new()))
+    });
+    
+    group.bench_function("evasion_new", |b| {
+        b.iter(|| black_box(evasion::EvasionEngine::new()))
+    });
+    
+    group.bench_function("tool_abuse_new", |b| {
+        b.iter(|| black_box(tool_abuse::ToolAbuseEngine::new()))
+    });
+    
+    group.bench_function("social_new", |b| {
+        b.iter(|| black_box(social::SocialEngine::new()))
+    });
+    
+    // Measure HybridPiiEngine with CDN patterns
+    group.bench_function("hybrid_pii_new", |b| {
+        b.iter(|| black_box(HybridPiiEngine::new()))
+    });
+    
+    group.finish();
+}
+
+/// Report approximate memory sizes of static patterns
+fn bench_pattern_stats(c: &mut Criterion) {
+    use std::mem::size_of;
+    
+    let mut group = c.benchmark_group("Pattern Stats");
+    
+    // This just reports - actual measurement via criterion
+    group.bench_function("all_8_engines_scan", |b| {
+        let injection = injection::InjectionEngine::new();
+        let jailbreak = jailbreak::JailbreakEngine::new();
+        let pii_engine = pii::PIIEngine::new();
+        let exfil = exfiltration::ExfiltrationEngine::new();
+        let moderation = moderation::ModerationEngine::new();
+        let evasion = evasion::EvasionEngine::new();
+        let tool_abuse = tool_abuse::ToolAbuseEngine::new();
+        let social = social::SocialEngine::new();
+        
+        b.iter(|| {
+            let text = black_box("Test input with potential threats");
+            let mut total = 0;
+            total += injection.scan(text).len();
+            total += jailbreak.scan(text).len();
+            total += pii_engine.scan(text).len();
+            total += exfil.scan(text).len();
+            total += moderation.scan(text).len();
+            total += evasion.scan(text).len();
+            total += tool_abuse.scan(text).len();
+            total += social.scan(text).len();
+            total
+        })
+    });
+    
+    // Memory size of result structs
+    println!("\n=== Memory Sizes ===");
+    println!("MatchResult: {} bytes", size_of::<MatchResult>());
+    println!("AnalysisResult: {} bytes", size_of::<AnalysisResult>());
+    
+    group.finish();
+}
+
 criterion_group!(
     benches,
     bench_individual_engines,
     bench_input_sizes,
-    bench_unicode_norm
+    bench_unicode_norm,
+    bench_memory_footprint,
+    bench_pattern_stats
 );
 criterion_main!(benches);
