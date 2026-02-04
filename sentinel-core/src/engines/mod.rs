@@ -23,6 +23,10 @@ pub mod spectral;
 pub mod chaos;
 pub mod tda;
 
+// Phase 8: ML-based / Semantic Engines
+pub mod semantic;
+pub mod drift;
+
 // Re-export trait for convenience
 pub use traits::{PatternMatcher, EngineCategory, BoxedEngine, create_default_engines};
 pub use hybrid::HybridPiiEngine;
