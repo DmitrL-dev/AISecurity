@@ -400,6 +400,18 @@
 - [x] Honeypots, canaries, zero-day detection, predictive blocking
 - [x] 10 tests passing
 
+### Task 10.13: Synthesis & Generation Super-Engine ✅
+- [x] `src/engines/synthesis.rs`
+- [x] Consolidates 10 Python engines (synthesis, fuzzing, genetic_*)
+- [x] Mutation, fuzzing, crossover, adversarial generation
+- [x] 8 tests passing
+
+### Task 10.14: Supply Chain Security Super-Engine ✅
+- [x] `src/engines/supply_chain.rs`
+- [x] Consolidates 12 Python engines (supply_chain, typosquat, backdoor_*)
+- [x] Dependency poisoning, backdoors, registry compromise
+- [x] 9 tests passing
+
 ---
 
 ## Migration Summary
@@ -411,10 +423,10 @@
 | Pattern Engines | 8 archived | 8 engines | ✅ 100% |
 | Strange Math | 11 engines | 7 engines | ✅ 64% |
 | Semantic/ML | 15 engines | 2 engines | 🟡 13% |
-| Domain-Specific | 165 engines | 12 super-engines | ✅ 100% consolidated |
-| **Total** | **187 engines** | **29 engines** | **~95%** |
+| Domain-Specific | 187 engines | 14 super-engines | ✅ 100% consolidated |
+| **Total** | **187 engines** | **31 engines** | **~97%** |
 
-### Rust Engines (29 engines, 368 tests)
+### Rust Engines (31 engines, 385 tests)
 
 | Phase | Engine | Python Sources | Tests |
 |-------|--------|----------------|-------|
