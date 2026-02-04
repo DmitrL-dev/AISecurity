@@ -148,6 +148,12 @@ impl JailbreakEngine {
     }
 }
 
+impl super::traits::PatternMatcher for JailbreakEngine {
+    fn name(&self) -> &'static str { "jailbreak" }
+    fn scan(&self, text: &str) -> Vec<MatchResult> { JailbreakEngine::scan(self, text) }
+    fn category(&self) -> super::traits::EngineCategory { super::traits::EngineCategory::Security }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;

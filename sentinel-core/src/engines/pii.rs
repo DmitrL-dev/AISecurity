@@ -155,6 +155,12 @@ impl PIIEngine {
     }
 }
 
+impl super::traits::PatternMatcher for PIIEngine {
+    fn name(&self) -> &'static str { "pii" }
+    fn scan(&self, text: &str) -> Vec<MatchResult> { PIIEngine::scan(self, text) }
+    fn category(&self) -> super::traits::EngineCategory { super::traits::EngineCategory::Privacy }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;

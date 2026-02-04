@@ -175,6 +175,12 @@ impl SocialEngine {
     }
 }
 
+impl super::traits::PatternMatcher for SocialEngine {
+    fn name(&self) -> &'static str { "social" }
+    fn scan(&self, text: &str) -> Vec<MatchResult> { SocialEngine::scan(self, text) }
+    fn category(&self) -> super::traits::EngineCategory { super::traits::EngineCategory::Behavioral }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;

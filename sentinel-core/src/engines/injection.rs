@@ -125,6 +125,20 @@ impl InjectionEngine {
     }
 }
 
+impl super::traits::PatternMatcher for InjectionEngine {
+    fn name(&self) -> &'static str {
+        "injection"
+    }
+    
+    fn scan(&self, text: &str) -> Vec<MatchResult> {
+        InjectionEngine::scan(self, text)
+    }
+    
+    fn category(&self) -> super::traits::EngineCategory {
+        super::traits::EngineCategory::Security
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;

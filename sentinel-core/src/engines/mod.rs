@@ -5,6 +5,7 @@
 use pyo3::prelude::*;
 use serde::{Deserialize, Serialize};
 
+pub mod traits;
 pub mod injection;
 pub mod jailbreak;
 pub mod pii;
@@ -13,6 +14,9 @@ pub mod moderation;
 pub mod evasion;
 pub mod tool_abuse;
 pub mod social;
+
+// Re-export trait for convenience
+pub use traits::{PatternMatcher, EngineCategory, BoxedEngine, create_default_engines};
 
 /// Result of text analysis containing threat detection information.
 ///
@@ -151,77 +155,28 @@ impl SentinelEngine {
         // Normalize text for detection
         let normalized = crate::unicode_norm::normalize(text);
 
-        // Run InjectionEngine
-        if let Some(ref engine) = self.injection {
-            let injection_matches = engine.scan(&normalized);
-            if !injection_matches.is_empty() {
-                categories.push("injection".to_string());
-                matches.extend(injection_matches);
-            }
+        // Helper macro to reduce boilerplate
+        macro_rules! run_engine {
+            ($engine:expr) => {
+                if let Some(ref e) = $engine {
+                    let engine_matches = e.scan(&normalized);
+                    if !engine_matches.is_empty() {
+                        categories.push(traits::PatternMatcher::name(e).to_string());
+                        matches.extend(engine_matches);
+                    }
+                }
+            };
         }
 
-        // Run JailbreakEngine
-        if let Some(ref engine) = self.jailbreak {
-            let jailbreak_matches = engine.scan(&normalized);
-            if !jailbreak_matches.is_empty() {
-                categories.push("jailbreak".to_string());
-                matches.extend(jailbreak_matches);
-            }
-        }
-
-        // Run PIIEngine
-        if let Some(ref engine) = self.pii {
-            let pii_matches = engine.scan(&normalized);
-            if !pii_matches.is_empty() {
-                categories.push("pii".to_string());
-                matches.extend(pii_matches);
-            }
-        }
-
-        // Run ExfiltrationEngine
-        if let Some(ref engine) = self.exfiltration {
-            let exfil_matches = engine.scan(&normalized);
-            if !exfil_matches.is_empty() {
-                categories.push("exfiltration".to_string());
-                matches.extend(exfil_matches);
-            }
-        }
-
-        // Run ModerationEngine
-        if let Some(ref engine) = self.moderation {
-            let mod_matches = engine.scan(&normalized);
-            if !mod_matches.is_empty() {
-                categories.push("moderation".to_string());
-                matches.extend(mod_matches);
-            }
-        }
-
-        // Run EvasionEngine
-        if let Some(ref engine) = self.evasion {
-            let evasion_matches = engine.scan(&normalized);
-            if !evasion_matches.is_empty() {
-                categories.push("evasion".to_string());
-                matches.extend(evasion_matches);
-            }
-        }
-
-        // Run ToolAbuseEngine
-        if let Some(ref engine) = self.tool_abuse {
-            let tool_matches = engine.scan(&normalized);
-            if !tool_matches.is_empty() {
-                categories.push("tool_abuse".to_string());
-                matches.extend(tool_matches);
-            }
-        }
-
-        // Run SocialEngine
-        if let Some(ref engine) = self.social {
-            let social_matches = engine.scan(&normalized);
-            if !social_matches.is_empty() {
-                categories.push("social".to_string());
-                matches.extend(social_matches);
-            }
-        }
+        // Run all 8 super-engines
+        run_engine!(self.injection);
+        run_engine!(self.jailbreak);
+        run_engine!(self.pii);
+        run_engine!(self.exfiltration);
+        run_engine!(self.moderation);
+        run_engine!(self.evasion);
+        run_engine!(self.tool_abuse);
+        run_engine!(self.social);
 
         let detected = !matches.is_empty();
         let risk_score = if detected {
