@@ -146,8 +146,8 @@
 - [x] Extract `PatternMatcher` trait (dependency inversion) ✅
 - [x] Engine factory pattern (`create_default_engines()`) ✅  
 - [x] Refactor `analyze()` with macro (80→20 LOC) ✅
-- [ ] Separate domain logic from serialization
-- [ ] Config-driven pattern loading (not hardcoded)
+- [x] CDN SignatureLoader (pii.json, keywords.json, jailbreaks split) ✅
+- [x] HybridPiiEngine with runtime CDN loading ✅
 
 ### Task 4.5.3: Clean Code Standards ✅
 - [x] Clippy enforcement (**0 warnings**)
@@ -169,7 +169,7 @@
 ### Task 5.1: Regression Tests ✅
 - [x] Migrate injection.py tests → injection.rs (**11 tests**)
 - [x] Migrate other Python engine tests → All 8 engines
-- [x] 100% pass rate required — **98/98 (100%)** ✅
+- [x] 100% pass rate required — **109/109 (100%)** ✅
 - [x] Added missing patterns: script_tag, telegram, base64, mcp_invoke, wget_curl
 
 ### Task 5.2: Benchmarks ✅
