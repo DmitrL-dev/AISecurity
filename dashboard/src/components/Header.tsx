@@ -7,7 +7,7 @@ import { useSidebar } from '@/components/Sidebar'
 import { UserMenu } from '@/components/auth'
 
 export function Header() {
-  const [timeRange, setTimeRange] = useState('Past 7 Days')
+  const [timeRange, _setTimeRange] = useState('Past 7 Days')
   const { health, loading } = useBrainHealth()
   const { setMobileOpen } = useSidebar()
 

@@ -57,8 +57,8 @@
 
 ### Task 8: Testing ✅
 - [x] 8.1 Unit tests для RBAC logic (`rbac.test.ts`)
-- [ ] 8.2 Integration tests для auth flow
-- [ ] 8.3 E2E tests с Playwright
+- [x] 8.2 Integration tests для auth flow (`auth.test.ts`, `api-auth.test.ts`)
+- [x] 8.3 E2E tests с Playwright (`e2e/auth/login.spec.ts`, `protected-routes.spec.ts`, `rbac.spec.ts`)
 - [x] 8.4 Manual testing checklist (in docs)
 
 ### Task 9: Documentation ✅

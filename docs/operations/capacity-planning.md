@@ -7,7 +7,7 @@
 
 ## Quick Sizing Guide
 
-| Tier           | Requests/sec | Gateway     | Brain             | Redis   | Est. Cost  |
+| Tier           | Requests/sec | Shield      | Brain             | Redis   | Est. Cost  |
 | -------------- | ------------ | ----------- | ----------------- | ------- | ---------- |
 | **Dev**        | 1-10         | 1x 2CPU/2GB | 1x 4CPU/8GB       | 1x 2GB  | ~$100/mo   |
 | **Startup**    | 10-100       | 2x 2CPU/4GB | 3x 4CPU/16GB      | 3x 4GB  | ~$500/mo   |
@@ -18,11 +18,11 @@
 
 ## Component Sizing
 
-### Gateway
+### Shield
 
-**Rule of thumb:** 1 Gateway handles ~500 req/sec
+**Rule of thumb:** 1 Shield handles ~500 req/sec
 
-| Metric      | Per Gateway       |
+| Metric      | Per Shield        |
 | ----------- | ----------------- |
 | CPU         | 2-4 cores         |
 | Memory      | 2-4 GB            |
@@ -65,13 +65,13 @@
 
 ## Capacity Formulas
 
-### Gateway Count
+### Shield Count
 
 ```
-gateway_count = ceil(peak_rps / 500) + 1  # +1 for redundancy
+shield_count = ceil(peak_rps / 500) + 1  # +1 for redundancy
 ```
 
-Example: 800 req/sec → `ceil(800/500) + 1 = 3` Gateways
+Example: 800 req/sec → `ceil(800/500) + 1 = 3` Shields
 
 ### Brain Count
 
@@ -193,7 +193,7 @@ spec:
 | ------------------- | --------- |
 | Brain compute       | 60%       |
 | Brain GPU (if used) | 20%       |
-| Gateway compute     | 10%       |
+| Shield compute      | 10%       |
 | Redis               | 5%        |
 | Storage/Network     | 5%        |
 

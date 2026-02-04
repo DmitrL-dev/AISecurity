@@ -1,0 +1,8 @@
+{
+  "name": "brain-rust-core",
+  "version": "1.0.0",
+  "language": "ru",
+  "status": "requirements",
+  "created": "2026-02-04",
+  "description": "SENTINEL Brain Rust Core - высокопроизводительный движок анализа угроз"
+}

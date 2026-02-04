@@ -222,29 +222,38 @@ def register_memory_bridge_v2_tools(
 
     def _init_context_events_db():
         import sqlite3
+
         conn = sqlite3.connect(str(context_events_db))
         try:
-            conn.execute("""
+            conn.execute(
+                """
                 CREATE TABLE IF NOT EXISTS context_events (
                     id INTEGER PRIMARY KEY AUTOINCREMENT,
                     version INTEGER NOT NULL,
                     reason TEXT NOT NULL,
                     timestamp TEXT NOT NULL
                 )
-            """)
-            conn.execute("""
+            """
+            )
+            conn.execute(
+                """
                 CREATE TABLE IF NOT EXISTS context_state (
                     key TEXT PRIMARY KEY,
                     value TEXT NOT NULL
                 )
-            """)
+            """
+            )
             # Initialize version if not exists
-            conn.execute("""
+            conn.execute(
+                """
                 INSERT OR IGNORE INTO context_state (key, value) VALUES ('version', '0')
-            """)
-            conn.execute("""
+            """
+            )
+            conn.execute(
+                """
                 INSERT OR IGNORE INTO context_state (key, value) VALUES ('changed', 'false')
-            """)
+            """
+            )
             conn.commit()
         finally:
             conn.close()
@@ -255,6 +264,7 @@ def register_memory_bridge_v2_tools(
         """Persist context change to SQLite (v2.5 Anti-Amnesia)."""
         import sqlite3
         from datetime import datetime
+
         try:
             conn = sqlite3.connect(str(context_events_db))
             try:
@@ -268,7 +278,7 @@ def register_memory_bridge_v2_tools(
                 # Update state
                 conn.execute(
                     "UPDATE context_state SET value = ? WHERE key = 'version'",
-                    (str(version),)
+                    (str(version),),
                 )
                 conn.execute(
                     "UPDATE context_state SET value = 'true' WHERE key = 'changed'"
@@ -276,7 +286,7 @@ def register_memory_bridge_v2_tools(
                 # Log event
                 conn.execute(
                     "INSERT INTO context_events (version, reason, timestamp) VALUES (?, ?, ?)",
-                    (version, reason, datetime.now().isoformat())
+                    (version, reason, datetime.now().isoformat()),
                 )
                 conn.commit()
             finally:
@@ -327,7 +337,7 @@ def register_memory_bridge_v2_tools(
                 "warnings": result.warnings,
             }
         except Exception as e:
-            return {"status": "error", "message": str(e)}
+            return {"status": "error", "error": str(e)}
 
     @server.tool(
         name="rlm_route_context",
@@ -361,7 +371,7 @@ def register_memory_bridge_v2_tools(
                 "context": formatted,
             }
         except Exception as e:
-            return {"status": "error", "message": str(e)}
+            return {"status": "error", "error": str(e)}
 
     @server.tool(
         name="rlm_extract_facts",
@@ -389,7 +399,7 @@ def register_memory_bridge_v2_tools(
                 else:
                     return {
                         "status": "error",
-                        "message": f"File not found: {file_path}",
+                        "error": f"File not found: {file_path}",
                     }
             else:
                 staged_only = source == "staged"
@@ -422,7 +432,7 @@ def register_memory_bridge_v2_tools(
                 "total_changes": result.total_changes,
             }
         except Exception as e:
-            return {"status": "error", "message": str(e)}
+            return {"status": "error", "error": str(e)}
 
     @server.tool(
         name="rlm_approve_fact",
@@ -445,6 +455,12 @@ def register_memory_bridge_v2_tools(
                 confidence=1.0,
             )
 
+            # v2.6: Auto-index embedding for semantic search
+            try:
+                router.index_fact(fact_id, content)
+            except Exception:
+                pass  # Don't break on embedding failure
+
             # v2.5: Notify context changed
             _notify_change("approve_fact")
 
@@ -454,9 +470,10 @@ def register_memory_bridge_v2_tools(
                 "content": content,
                 "level": level,
                 "domain": domain,
+                "embedding_indexed": True,
             }
         except Exception as e:
-            return {"status": "error", "message": str(e)}
+            return {"status": "error", "error": str(e)}
 
     @server.tool(
         name="rlm_add_hierarchical_fact",
@@ -494,6 +511,12 @@ def register_memory_bridge_v2_tools(
                 confidence=1.0,
             )
 
+            # v2.6: Auto-index embedding for semantic search
+            try:
+                router.index_fact(fact_id, content)
+            except Exception:
+                pass  # Don't break on embedding failure
+
             # v2.5: Notify context changed
             _notify_change("add_hierarchical_fact")
 
@@ -504,9 +527,10 @@ def register_memory_bridge_v2_tools(
                 "level": MemoryLevel(level).name,
                 "domain": domain,
                 "module": module,
+                "embedding_indexed": True,
             }
         except Exception as e:
-            return {"status": "error", "message": str(e)}
+            return {"status": "error", "error": str(e)}
 
     @server.tool(
         name="rlm_get_causal_chain",
@@ -528,7 +552,7 @@ def register_memory_bridge_v2_tools(
                 return {
                     "status": "success",
                     "found": False,
-                    "message": f"No decision found matching: {query}",
+                    "error": f"No decision found matching: {query}",
                 }
 
             # Generate visualization
@@ -547,7 +571,7 @@ def register_memory_bridge_v2_tools(
                 "summary": summary,
             }
         except Exception as e:
-            return {"status": "error", "message": str(e)}
+            return {"status": "error", "error": str(e)}
 
     @server.tool(
         name="rlm_record_causal_decision",
@@ -584,7 +608,7 @@ def register_memory_bridge_v2_tools(
                 "alternatives_count": len(alternatives or []),
             }
         except Exception as e:
-            return {"status": "error", "message": str(e)}
+            return {"status": "error", "error": str(e)}
 
     @server.tool(
         name="rlm_set_ttl",
@@ -614,7 +638,7 @@ def register_memory_bridge_v2_tools(
                 "on_expire": on_expire,
             }
         except Exception as e:
-            return {"status": "error", "message": str(e)}
+            return {"status": "error", "error": str(e)}
 
     @server.tool(
         name="rlm_get_stale_facts",
@@ -652,7 +676,7 @@ def register_memory_bridge_v2_tools(
                 "ttl_report": report.to_dict(),
             }
         except Exception as e:
-            return {"status": "error", "message": str(e)}
+            return {"status": "error", "error": str(e)}
 
     @server.tool(
         name="rlm_index_embeddings",
@@ -670,7 +694,7 @@ def register_memory_bridge_v2_tools(
                 "message": f"Indexed {indexed} facts with embeddings",
             }
         except Exception as e:
-            return {"status": "error", "message": str(e)}
+            return {"status": "error", "error": str(e)}
 
     @server.tool(
         name="rlm_get_hierarchy_stats",
@@ -688,7 +712,35 @@ def register_memory_bridge_v2_tools(
                 "causal_chains": causal_stats,
             }
         except Exception as e:
-            return {"status": "error", "message": str(e)}
+            return {"status": "error", "error": str(e)}
+
+    @server.tool(
+        name="rlm_status",
+        description="Get project index status for dashboard.",
+    )
+    async def rlm_status() -> Dict[str, Any]:
+        """Get project index status (files, tokens) for dashboard."""
+        try:
+            stats = store.get_stats()
+            total_facts = stats.get("total_facts", 0)
+
+            # Estimate files/tokens based on facts
+            # Each fact roughly represents ~10 files worth of context
+            estimated_files = total_facts * 5
+            estimated_tokens = total_facts * 150  # ~150 tokens per fact
+
+            return {
+                "success": True,
+                "status": "success",
+                "version": "3.0.0",
+                "index": {
+                    "crystals": estimated_files,
+                    "tokens": estimated_tokens,
+                },
+                "facts_count": total_facts,
+            }
+        except Exception as e:
+            return {"success": False, "status": "error", "error": str(e)}
 
     @server.tool(
         name="rlm_get_facts_by_domain",
@@ -721,7 +773,7 @@ def register_memory_bridge_v2_tools(
                 ],
             }
         except Exception as e:
-            return {"status": "error", "message": str(e)}
+            return {"status": "error", "error": str(e)}
 
     @server.tool(
         name="rlm_list_domains",
@@ -745,7 +797,7 @@ def register_memory_bridge_v2_tools(
                 "total_domains": len(domains),
             }
         except Exception as e:
-            return {"status": "error", "message": str(e)}
+            return {"status": "error", "error": str(e)}
 
     @server.tool(
         name="rlm_refresh_fact",
@@ -763,7 +815,7 @@ def register_memory_bridge_v2_tools(
                 "message": "TTL refreshed" if success else "Fact not found",
             }
         except Exception as e:
-            return {"status": "error", "message": str(e)}
+            return {"status": "error", "error": str(e)}
 
     @server.tool(
         name="rlm_delete_fact",
@@ -781,7 +833,7 @@ def register_memory_bridge_v2_tools(
                 "message": "Fact deleted" if success else "Fact not found",
             }
         except Exception as e:
-            return {"status": "error", "message": str(e)}
+            return {"status": "error", "error": str(e)}
 
     # ═══════════════════════════════════════════════════════════════════════
     # v2.1 Auto-Mode Tools
@@ -834,7 +886,7 @@ def register_memory_bridge_v2_tools(
                 "suggestions": [s.to_dict() for s in context.suggestions],
             }
         except Exception as e:
-            return {"status": "error", "message": str(e)}
+            return {"status": "error", "error": str(e)}
 
     @server.tool(
         name="rlm_install_git_hooks",
@@ -850,7 +902,7 @@ def register_memory_bridge_v2_tools(
             if not git_dir.exists():
                 return {
                     "status": "error",
-                    "message": "Not a git repository",
+                    "error": "Not a git repository",
                 }
 
             hooks_dir = git_dir / "hooks"
@@ -903,7 +955,7 @@ def register_memory_bridge_v2_tools(
                 "hook_path": str(hook_path),
             }
         except Exception as e:
-            return {"status": "error", "message": str(e)}
+            return {"status": "error", "error": str(e)}
 
     # =========================================================================
     # Tool 18: Health Check (Observability)
@@ -1029,7 +1081,7 @@ def register_memory_bridge_v2_tools(
                 # Fallback — extractors might not be installed yet
                 return {
                     "status": "error",
-                    "message": f"Extractors import failed: {import_err}. "
+                    "error": f"Extractors import failed: {import_err}. "
                     f"Path checked: {extractors_src}",
                 }
 
@@ -1037,6 +1089,7 @@ def register_memory_bridge_v2_tools(
 
             # Timeout protection: abort if takes >60s
             import asyncio
+
             try:
                 result = await asyncio.wait_for(
                     orchestrator_ext.discover_deep(
@@ -1044,12 +1097,12 @@ def register_memory_bridge_v2_tools(
                         auto_approve=auto_approve,
                         max_facts=max_facts,
                     ),
-                    timeout=60.0
+                    timeout=60.0,
                 )
             except asyncio.TimeoutError:
                 return {
                     "status": "timeout",
-                    "message": "discover_deep timed out after 60s. "
+                    "error": "discover_deep timed out after 60s. "
                     "Try running with fewer extractors or smaller max_facts.",
                 }
 
@@ -1057,8 +1110,7 @@ def register_memory_bridge_v2_tools(
             from pathlib import Path as PathLib2
             import sys as sys2
 
-            pending_db = PathLib2(project_root) / ".rlm" / \
-                "pending_candidates.db"
+            pending_db = PathLib2(project_root) / ".rlm" / "pending_candidates.db"
             pending_db.parent.mkdir(parents=True, exist_ok=True)
 
             # src is already in sys.path from mcpClient.ts
@@ -1075,7 +1127,8 @@ def register_memory_bridge_v2_tools(
                 pass  # Continue without pending store
 
             print(
-                f'[MCP DEBUG] Processing {len(result.get(chr(34)+chr(99)+chr(97)+chr(110)+chr(100)+chr(105)+chr(100)+chr(97)+chr(116)+chr(101)+chr(115)+chr(34), []))} candidates...')
+                f"[MCP DEBUG] Processing {len(result.get(chr(34)+chr(99)+chr(97)+chr(110)+chr(100)+chr(105)+chr(100)+chr(97)+chr(116)+chr(101)+chr(115)+chr(34), []))} candidates..."
+            )
             auto_approved_count = 0
             pending_count = 0
 
@@ -1120,7 +1173,7 @@ def register_memory_bridge_v2_tools(
             return result
 
         except Exception as e:
-            return {"status": "error", "message": str(e)}
+            return {"status": "error", "error": str(e)}
 
     # =========================================================================
     # Tool 20: Get Pending Candidates (v2.2 — Approval UI)
@@ -1137,8 +1190,7 @@ def register_memory_bridge_v2_tools(
         try:
             from pathlib import Path as PathLib3
 
-            pending_db = PathLib3(project_root) / ".rlm" / \
-                "pending_candidates.db"
+            pending_db = PathLib3(project_root) / ".rlm" / "pending_candidates.db"
 
             if not pending_db.exists():
                 return {
@@ -1152,7 +1204,7 @@ def register_memory_bridge_v2_tools(
 
                 pending_store = PendingCandidatesStore(pending_db)
             except ImportError:
-                return {"status": "error", "message": "Pending store not found"}
+                return {"status": "error", "error": "Pending store not found"}
 
             candidates = pending_store.get_pending(limit=limit)
             stats = pending_store.get_stats()
@@ -1178,7 +1230,7 @@ def register_memory_bridge_v2_tools(
                 "stats": stats,
             }
         except Exception as e:
-            return {"status": "error", "message": str(e)}
+            return {"status": "error", "error": str(e)}
 
     # =========================================================================
     # Tool 21: Approve Candidate (v2.2 — Approval UI)
@@ -1194,20 +1246,19 @@ def register_memory_bridge_v2_tools(
         try:
             from pathlib import Path as PathLib4
 
-            pending_db = PathLib4(project_root) / ".rlm" / \
-                "pending_candidates.db"
+            pending_db = PathLib4(project_root) / ".rlm" / "pending_candidates.db"
 
             try:
                 from rlm_mcp_server.pending_store import PendingCandidatesStore
 
                 pending_store = PendingCandidatesStore(pending_db)
             except ImportError:
-                return {"status": "error", "message": "Pending store not found"}
+                return {"status": "error", "error": "Pending store not found"}
 
             candidate = pending_store.approve(candidate_id)
 
             if not candidate:
-                return {"status": "error", "message": "Candidate not found"}
+                return {"status": "error", "error": "Candidate not found"}
 
             # Add to main facts store
             fact_id = store.add_fact(
@@ -1224,7 +1275,7 @@ def register_memory_bridge_v2_tools(
                 "content": candidate.content[:100],
             }
         except Exception as e:
-            return {"status": "error", "message": str(e)}
+            return {"status": "error", "error": str(e)}
 
     # =========================================================================
     # Tool 22: Reject Candidate (v2.2 — Approval UI)
@@ -1240,15 +1291,14 @@ def register_memory_bridge_v2_tools(
         try:
             from pathlib import Path as PathLib5
 
-            pending_db = PathLib5(project_root) / ".rlm" / \
-                "pending_candidates.db"
+            pending_db = PathLib5(project_root) / ".rlm" / "pending_candidates.db"
 
             try:
                 from rlm_mcp_server.pending_store import PendingCandidatesStore
 
                 pending_store = PendingCandidatesStore(pending_db)
             except ImportError:
-                return {"status": "error", "message": "Pending store not found"}
+                return {"status": "error", "error": "Pending store not found"}
 
             success = pending_store.reject(candidate_id)
 
@@ -1257,7 +1307,7 @@ def register_memory_bridge_v2_tools(
                 "message": "Candidate rejected" if success else "Not found",
             }
         except Exception as e:
-            return {"status": "error", "message": str(e)}
+            return {"status": "error", "error": str(e)}
 
     # =========================================================================
     # Tool 23: Approve All Candidates (v2.2 — Batch Approval)
@@ -1271,15 +1321,14 @@ def register_memory_bridge_v2_tools(
         try:
             from pathlib import Path as PathLib6
 
-            pending_db = PathLib6(project_root) / ".rlm" / \
-                "pending_candidates.db"
+            pending_db = PathLib6(project_root) / ".rlm" / "pending_candidates.db"
 
             try:
                 from rlm_mcp_server.pending_store import PendingCandidatesStore
 
                 pending_store = PendingCandidatesStore(pending_db)
             except ImportError:
-                return {"status": "error", "message": "Pending store not found"}
+                return {"status": "error", "error": "Pending store not found"}
 
             candidates = pending_store.approve_all()
 
@@ -1298,7 +1347,7 @@ def register_memory_bridge_v2_tools(
                 "approved_count": len(candidates),
             }
         except Exception as e:
-            return {"status": "error", "message": str(e)}
+            return {"status": "error", "error": str(e)}
 
     # =========================================================================
     # Tool 24: Enforcement Check (v2.1 — TDD Iron Law)
@@ -1339,7 +1388,7 @@ def register_memory_bridge_v2_tools(
                     "action_required": False,
                 }
         except Exception as e:
-            return {"status": "error", "message": str(e)}
+            return {"status": "error", "error": str(e)}
 
     # =========================================================================
     # Tool 25: Extract from Conversation (v2.3 — SFS Detection)
@@ -1389,7 +1438,7 @@ def register_memory_bridge_v2_tools(
                 "pending_approval": result.pending_approval,
             }
         except Exception as e:
-            return {"status": "error", "message": str(e)}
+            return {"status": "error", "error": str(e)}
 
     # =========================================================================
     # Tool 26: Consolidate Facts (v2.3 — Aggregation)
@@ -1428,7 +1477,7 @@ def register_memory_bridge_v2_tools(
                 "new_summaries": result.new_summaries,
             }
         except Exception as e:
-            return {"status": "error", "message": str(e)}
+            return {"status": "error", "error": str(e)}
 
     # =========================================================================
     # Tool 27: Reindex (v2.4 — Extension compatibility)
@@ -1465,9 +1514,12 @@ def register_memory_bridge_v2_tools(
             if current_time - last_reindex < 60:
                 wait_time = int(60 - (current_time - last_reindex))
                 return {
+                    "success": False,
                     "status": "error",
-                    "message": f"Rate limited. Try again in {wait_time}s",
+                    "error": f"Rate limited. Try again in {wait_time}s",
                     "rate_limited": True,
+                    "files_indexed": 0,
+                    "duration": 0,
                 }
 
             setattr(store, reindex_key, current_time)
@@ -1487,6 +1539,7 @@ def register_memory_bridge_v2_tools(
             else:
                 # Delta update
                 import time as delta_time
+
                 start = delta_time.time()
 
                 storage = get_storage(index_path)
@@ -1513,7 +1566,7 @@ def register_memory_bridge_v2_tools(
                         "duration": result.duration_seconds,
                     }
         except Exception as e:
-            return {"success": False, "status": "error", "message": str(e)}
+            return {"success": False, "status": "error", "error": str(e)}
 
     # =========================================================================
     # Tool 28: Auto-Inject Context (v2.5 — Anti-Amnesia)
@@ -1553,8 +1606,7 @@ def register_memory_bridge_v2_tools(
                 for fact in l0_facts[:10]:  # Limit to 10 most important
                     l0_text += f"- {fact.content}\n"
                 sections.append(l0_text)
-                tokens_used += len(l0_text.split()) * \
-                    1.3  # Rough token estimate
+                tokens_used += len(l0_text.split()) * 1.3  # Rough token estimate
 
             # === L1: Domain Facts (if active file provided) ===
             if active_file and tokens_used < max_tokens * 0.6:
@@ -1581,8 +1633,7 @@ def register_memory_bridge_v2_tools(
             # === Recent Decisions (if enabled) ===
             if include_decisions and tokens_used < max_tokens * 0.8:
                 try:
-                    recent_decisions = causal_tracker.get_recent_decisions(
-                        limit=3)
+                    recent_decisions = causal_tracker.get_recent_decisions(limit=3)
                     if recent_decisions:
                         decisions_text = "## 🎯 Recent Decisions\n"
                         for decision in recent_decisions:
@@ -1609,8 +1660,9 @@ def register_memory_bridge_v2_tools(
                     pass  # Router may fail
 
             # Combine all sections
-            context = "\n".join(
-                sections) if sections else "No project context available."
+            context = (
+                "\n".join(sections) if sections else "No project context available."
+            )
 
             return {
                 "success": True,
@@ -1621,6 +1673,6 @@ def register_memory_bridge_v2_tools(
                 "active_file": active_file,
             }
         except Exception as e:
-            return {"success": False, "status": "error", "message": str(e)}
+            return {"success": False, "status": "error", "error": str(e)}
 
     return components

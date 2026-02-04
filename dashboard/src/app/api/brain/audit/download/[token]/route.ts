@@ -32,7 +32,7 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
         'Content-Disposition': contentDisposition || 'attachment; filename=audit_export.json',
       },
     })
-  } catch (error) {
+  } catch (_error) {
     return NextResponse.json(
       { error: 'Failed to download export' },
       { status: 500 }

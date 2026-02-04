@@ -41,8 +41,8 @@
                         │                           │                           │
                         ▼                           ▼                           ▼
                 ┌───────────────┐           ┌───────────────┐           ┌───────────────┐
-                │   GATEWAY 1   │           │   GATEWAY 2   │           │   GATEWAY 3   │
-                │    (Go)       │           │    (Go)       │           │    (Go)       │
+                │   SHIELD 1    │           │   SHIELD 2    │           │   SHIELD 3    │
+                │     (C)       │           │     (C)       │           │     (C)       │
                 └───────────────┘           └───────────────┘           └───────────────┘
                         │                           │                           │
                         └───────────────────────────┼───────────────────────────┘
@@ -65,7 +65,7 @@
 | Component         | Role                             | Scaling            |
 | ----------------- | -------------------------------- | ------------------ |
 | **Load Balancer** | TLS termination, routing         | 1 (HA pair)        |
-| **Gateway**       | HTTP → gRPC, auth, rate limiting | 2-10 replicas      |
+| **Shield**        | DMZ gateway, auth, rate limiting | 2-10 replicas      |
 | **Brain**         | ML engines, analysis             | 3-20 replicas      |
 | **Redis**         | Cache, sessions, rate limits     | Cluster (3+ nodes) |
 | **Prometheus**    | Metrics                          | 1-2 replicas       |
@@ -87,7 +87,7 @@
 
 | Resource          | Quantity | Specification                    |
 | ----------------- | -------- | -------------------------------- |
-| **Gateway nodes** | 3        | 4 CPU, 8 GB RAM                  |
+| **Shield nodes**  | 3        | 2 CPU, 4 GB RAM                  |
 | **Brain nodes**   | 5        | 8 CPU, 32 GB RAM, GPU (optional) |
 | **Redis Cluster** | 3        | 8 GB RAM each                    |
 | **ELK Cluster**   | 3        | 8 CPU, 32 GB RAM, 500 GB SSD     |
@@ -149,8 +149,8 @@ openssl rand -base64 32
 version: "3.8"
 
 services:
-  gateway:
-    image: sentinel/gateway:${VERSION:-latest}
+  shield:
+    image: sentinel/shield:${VERSION:-latest}
     deploy:
       replicas: 3
       resources:
@@ -158,14 +158,13 @@ services:
           cpus: "2"
           memory: 4G
     environment:
-      - GATEWAY_MODE=production
-      - AUTH_ENABLED=true
-      - AUTH_SECRET=${AUTH_SECRET}
-      - TLS_ENABLED=true
+      - SHIELD_LOG_LEVEL=info
+      - BRAIN_URL=brain:50051
     volumes:
       - ./certs:/certs:ro
     ports:
-      - "8080:8080"
+      - "8081:8081"
+      - "9090:9090"
 
   brain:
     image: sentinel/brain:${VERSION:-latest}
@@ -203,7 +202,7 @@ volumes:
 ```bash
 # Create production .env
 cat > .env <<EOF
-VERSION=1.0.0
+VERSION=1.2.0
 AUTH_SECRET=$(openssl rand -hex 32)
 REDIS_PASSWORD=$(openssl rand -base64 32)
 EOF
@@ -223,10 +222,10 @@ curl -k https://localhost/health
 
 ```yaml
 replicaCount:
-  gateway: 3
+  shield: 3
   brain: 5
 
-gateway:
+shield:
   autoscaling:
     enabled: true
     minReplicas: 3
@@ -253,7 +252,7 @@ ingress:
         - sentinel.your-domain.com
 
 podDisruptionBudget:
-  gateway:
+  shield:
     minAvailable: 2
   brain:
     minAvailable: 2
@@ -270,6 +269,14 @@ sentinel_requests_total{status="success"} 12345
 sentinel_requests_total{status="blocked"} 456
 sentinel_analysis_duration_seconds_bucket{le="0.05"} 500
 sentinel_engines_triggered{engine="injection"} 234
+```
+
+### Shield Metrics (Port 9090)
+
+```
+shield_requests_total{guard="llm"} 1234
+shield_blocked_total{type="injection"} 56
+shield_latency_seconds_bucket{le="0.005"} 500
 ```
 
 ### Alerting Rules
@@ -289,6 +296,12 @@ groups:
         for: 5m
         labels:
           severity: warning
+          
+      - alert: ShieldDown
+        expr: up{job="shield"} == 0
+        for: 1m
+        labels:
+          severity: critical
 ```
 
 ---
@@ -318,7 +331,7 @@ groups:
 
 | Component | Type    | Metric       | Target    |
 | --------- | ------- | ------------ | --------- |
-| Gateway   | HPA     | CPU          | 70%       |
+| Shield    | HPA     | CPU          | 70%       |
 | Brain     | HPA     | CPU + Memory | 70% / 80% |
 | Redis     | Cluster | —            | 3+ nodes  |
 
@@ -363,7 +376,7 @@ docker restart redis
 
 ### Reliability
 
-- [ ] 3+ Gateway replicas
+- [ ] 3+ Shield replicas
 - [ ] 3+ Brain replicas
 - [ ] Redis persistence enabled
 - [ ] Health checks configured

@@ -4,7 +4,7 @@
   "description": "Authentication & Authorization for SENTINEL Dashboard V3",
   "language": "ru",
   "phases": ["requirements", "design", "tasks"],
-  "status": "requirements",
+  "status": "complete",
   "created": "2026-01-29",
   "dependencies": [
     "dashboard-v2"

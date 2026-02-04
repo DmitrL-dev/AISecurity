@@ -62,7 +62,7 @@ export function EngineStatsPanel({ engineName, refreshInterval = 30000 }: Engine
           }
         })
         setError(null)
-      } catch (e) {
+      } catch (_e) {
         setError('Failed to load metrics')
       } finally {
         setLoading(false)

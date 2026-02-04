@@ -5,12 +5,15 @@
  */
 
 import { NextResponse } from "next/server";
-import type { NextRequest } from "next/server";
+import type { NextRequest as _NextRequest } from "next/server";
 import { auth } from "@/lib/auth";
 import { canAccess, isPublicRoute } from "@/lib/rbac";
 
 export default auth((req) => {
   const { pathname } = req.nextUrl;
+  
+  // Debug logging
+  console.log(`[Middleware] ${pathname} - auth:`, req.auth ? 'YES' : 'NO', req.auth?.user?.email || '');
   
   // Allow public routes
   if (isPublicRoute(pathname)) {

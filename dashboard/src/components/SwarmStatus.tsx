@@ -65,7 +65,7 @@ function useSwarmData(): SwarmData {
         }
 
         setError(null)
-      } catch (err) {
+      } catch (_err) {
         setError('Failed to fetch swarm data')
       } finally {
         setLoading(false)

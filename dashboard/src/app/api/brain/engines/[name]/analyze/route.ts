@@ -112,8 +112,8 @@ export async function POST(req: Request, { params }: Params) {
       { error: `Unknown engine: ${name}` },
       { status: 404 }
     );
-  } catch (error) {
-    console.error('Engine analyze error:', error);
+  } catch (_error) {
+    console.error('Engine analyze error:', _error);
     return NextResponse.json(
       { error: 'Analysis failed' },
       { status: 500 }

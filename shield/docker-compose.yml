@@ -1,8 +1,7 @@
-# SENTINEL Stack - Docker Compose
-# Shield + Brain + Redis/Valkey for complete AI security infrastructure
+# SENTINEL Shield — Standalone Docker Compose
+# Run: docker-compose up -d
 
 services:
-  # ============ SHIELD (C Library) ============
   shield:
     build:
       context: .
@@ -11,80 +10,28 @@ services:
     container_name: sentinel-shield
     restart: unless-stopped
     ports:
-      - "8080:8080"   # REST API
-      - "9090:9090"   # Prometheus metrics
+      - "${SHIELD_API_PORT:-8081}:8081"
+      - "${SHIELD_METRICS_PORT:-9090}:9090"
+    environment:
+      - SHIELD_LOG_LEVEL=${SHIELD_LOG_LEVEL:-info}
+      # Brain integration (uses Docker network name)
+      - BRAIN_URL=${BRAIN_URL:-http://sentinel-community:8000}
+    networks:
+      - default
+      - sentinel-network  # Connect to Brain's network
     volumes:
-      - shield-config:/etc/shield:ro
+      - ./config:/etc/shield:ro
       - shield-logs:/var/log/shield
-    environment:
-      - SHIELD_LOG_LEVEL=info
-      - SHIELD_API_PORT=8080
-      - SHIELD_METRICS_PORT=9090
-      - BRAIN_URL=http://brain:8000
-    networks:
-      - sentinel-net
-    depends_on:
-      - brain
     healthcheck:
-      test: ["CMD", "test", "-f", "/opt/shield/lib/libshield.so"]
+      test: ["CMD", "wget", "-q", "--spider", "http://localhost:8081/health"]
       interval: 30s
       timeout: 5s
       retries: 3
 
-  # ============ BRAIN (Python ML) ============
-  brain:
-    image: sentinel/brain:latest
-    build:
-      context: ../brain
-      dockerfile: Dockerfile
-    container_name: sentinel-brain
-    restart: unless-stopped
-    ports:
-      - "8000:8000"
-    volumes:
-      - brain-models:/app/models
-      - brain-cache:/app/cache
-    environment:
-      - BRAIN_LOG_LEVEL=info
-      - BRAIN_PORT=8000
-      - REDIS_URL=redis://redis:6379
-    networks:
-      - sentinel-net
-    depends_on:
-      - redis
-    healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
-      interval: 30s
-      timeout: 10s
-      retries: 3
-
-  # ============ REDIS (Cache/Queue) ============
-  redis:
-    image: redis:7-alpine
-    container_name: sentinel-redis
-    restart: unless-stopped
-    ports:
-      - "6379:6379"
-    volumes:
-      - redis-data:/data
-    command: redis-server --appendonly yes --maxmemory 256mb --maxmemory-policy allkeys-lru
-    networks:
-      - sentinel-net
-    healthcheck:
-      test: ["CMD", "redis-cli", "ping"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
-
-# ============ NETWORKS ============
-networks:
-  sentinel-net:
-    driver: bridge
-
-# ============ VOLUMES ============
 volumes:
-  shield-config:
   shield-logs:
-  brain-models:
-  brain-cache:
-  redis-data:
+
+networks:
+  default:
+  sentinel-network:
+    external: true  # Use existing network created by Brain

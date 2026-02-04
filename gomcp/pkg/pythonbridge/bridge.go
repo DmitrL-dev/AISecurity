@@ -9,6 +9,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
+	"log"
 	"os/exec"
 	"sync"
 	"time"
@@ -162,6 +163,7 @@ func (b *Bridge) readResponses() {
 	for {
 		line, err := b.stdout.ReadBytes('\n')
 		if err != nil {
+			log.Printf("[pythonbridge] stdout read error: %v", err)
 			b.mu.Lock()
 			b.lastError = err
 			b.started = false
@@ -169,17 +171,33 @@ func (b *Bridge) readResponses() {
 			return
 		}
 
+		log.Printf("[pythonbridge] received: %s", string(line))
+
 		var resp Response
 		if err := json.Unmarshal(line, &resp); err != nil {
+			log.Printf("[pythonbridge] unmarshal error: %v", err)
 			continue
 		}
+
+		log.Printf("[pythonbridge] parsed response id=%d success=%v", resp.ID, resp.Success)
 
 		b.pendingMu.Lock()
 		if ch, ok := b.pending[resp.ID]; ok {
 			ch <- &resp
+			log.Printf("[pythonbridge] dispatched to pending channel id=%d", resp.ID)
+		} else {
+			log.Printf("[pythonbridge] no pending channel for id=%d, pending keys: %v", resp.ID, getPendingKeys(b.pending))
 		}
 		b.pendingMu.Unlock()
 	}
+}
+
+func getPendingKeys(m map[uint64]chan *Response) []uint64 {
+	keys := make([]uint64, 0, len(m))
+	for k := range m {
+		keys = append(keys, k)
+	}
+	return keys
 }
 
 // Stop stops the Python process

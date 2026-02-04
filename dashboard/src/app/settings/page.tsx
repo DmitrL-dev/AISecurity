@@ -56,7 +56,7 @@ export default function SettingsPage() {
           if (parsed.notifications) setNotifications(parsed.notifications)
           if (parsed.engines) setEngines(parsed.engines)
           if (parsed.theme) setTheme(parsed.theme)
-        } catch {}
+        } catch { /* ignore parse errors */ }
       }
     }
   })
@@ -78,7 +78,7 @@ export default function SettingsPage() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ audit_level: auditLevel }),
       })
-    } catch {}
+    } catch { /* ignore API errors */ }
     
     setSaved(true)
     setTimeout(() => setSaved(false), 2000)

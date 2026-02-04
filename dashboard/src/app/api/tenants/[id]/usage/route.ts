@@ -93,8 +93,8 @@ export async function GET(req: Request, { params }: Params) {
           .split("T")[0],
       },
     });
-  } catch (error) {
-    console.error("Failed to get usage:", error);
+  } catch (_error) {
+    console.error("Failed to get usage:", _error);
     return NextResponse.json(
       { error: "Internal server error" },
       { status: 500 }

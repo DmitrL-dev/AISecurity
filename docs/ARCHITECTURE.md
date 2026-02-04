@@ -14,7 +14,8 @@
 │  ┌──────────────────────────────────────────────────────────────────────┐   │
 │  │                          SHIELD (C)                                   │   │
 │  │                    DMZ Security Gateway                               │   │
-│  │         • TLS Termination  • Rate Limiting  • DDoS Protection        │   │
+│  │    • TLS Termination  • Rate Limiting  • Real-time Detection         │   │
+│  │    • 6 Guards (LLM, RAG, Agent, Tool, MCP, API)                      │   │
 │  └──────────────────────────────────────────────────────────────────────┘   │
 │                                    │                                         │
 │                                    ▼                                         │
@@ -36,10 +37,16 @@
 │  │                │    │                │    │                        │    │
 │  │  • SDK         │    │  • Red Team    │    │  • EDR                 │    │
 │  │  • FastAPI     │    │  • HYDRA       │    │  • Agent Protection    │    │
-│  │  • Middleware  │    │  • 39K Payloads│    │  • Real-time Defense   │    │
+│  │  • Middleware  │    │  • 44K Payloads│    │  • Real-time Defense   │    │
 │  └────────────────┘    └────────────────┘    └────────────────────────┘    │
 │                                                                              │
 ├─────────────────────────────────────────────────────────────────────────────┤
+│                                                                              │
+│  ┌──────────────────────────────────────────────────────────────────────┐   │
+│  │                       DASHBOARD (Next.js)                             │   │
+│  │              Unified Management & Monitoring Interface                │   │
+│  │    • Real-time Topology  • Shield/Brain/Strike Control  • RBAC      │   │
+│  └──────────────────────────────────────────────────────────────────────┘   │
 │                                                                              │
 │  ┌──────────────────────────────────────────────────────────────────────┐   │
 │  │                       RLM-TOOLKIT (Python)                            │   │
@@ -54,7 +61,7 @@
 
 ## Component Details
 
-### SHIELD — DMZ Gateway
+### SHIELD — DMZ Gateway (Pure C)
 
 ```
 Internet                    SHIELD                     Internal
@@ -63,7 +70,9 @@ Internet                    SHIELD                     Internal
     │    │                    │                    │      │
     ├───▶│  TLS Termination   │   Authentication  │◀─────┤
     │    │                    │                    │      │
-    │    │    Rate Limiter    │    Firewall       │      │
+    │    │    Rate Limiter    │   6 Guards        │      │
+    │    │                    │                    │      │
+    │    │  Pattern Matching  │   Zone Control    │      │
     │    │                    │                    │      │
     │    └────────────────────┼────────────────────┘      │
     │                         │                            │
@@ -74,6 +83,8 @@ Internet                    SHIELD                     Internal
 **Language:** Pure C (for speed)  
 **Latency:** <5ms  
 **Throughput:** 100K+ RPS  
+**Guards:** LLM, RAG, Agent, Tool, MCP, API  
+**Ports:** 8081 (API), 9090 (Metrics)
 
 ---
 
@@ -124,13 +135,70 @@ ScanResult {is_threat, confidence, details}
 │                      ▼                                   │
 │              ┌──────────────┐                           │
 │              │  Payload DB  │                           │
-│              │  39K+ Attacks│                           │
+│              │  44K+ Attacks│                           │
 │              └──────────────┘                           │
 └─────────────────────────────────────────────────────────┘
 ```
 
-**Payloads:** 39,000+  
+**Payloads:** 44,000+  
 **Categories:** Injection, Jailbreak, Encoding, RAG, Agentic  
+
+---
+
+## Production Architecture
+
+```
+                            ┌─────────────────────────────────────────────────┐
+                            │                   INTERNET                       │
+                            └─────────────────────────────────────────────────┘
+                                                    │
+                                                    ▼
+                            ┌─────────────────────────────────────────────────┐
+                            │              LOAD BALANCER                       │
+                            │         (nginx / AWS ALB / Cloudflare)          │
+                            │              TLS Termination                     │
+                            └─────────────────────────────────────────────────┘
+                                                    │
+                        ┌───────────────────────────┼───────────────────────────┐
+                        │                           │                           │
+                        ▼                           ▼                           ▼
+                ┌───────────────┐           ┌───────────────┐           ┌───────────────┐
+                │   SHIELD 1    │           │   SHIELD 2    │           │   SHIELD 3    │
+                │     (C)       │           │     (C)       │           │     (C)       │
+                │   6 Guards    │           │   6 Guards    │           │   6 Guards    │
+                └───────────────┘           └───────────────┘           └───────────────┘
+                        │                           │                           │
+                        └───────────────────────────┼───────────────────────────┘
+                                                    │
+                                            ┌───────┴───────┐
+                                            │  gRPC + mTLS  │
+                                            └───────┬───────┘
+                        ┌───────────────────────────┼───────────────────────────┐
+                        │                           │                           │
+                        ▼                           ▼                           ▼
+                ┌───────────────┐           ┌───────────────┐           ┌───────────────┐
+                │    BRAIN 1    │           │    BRAIN 2    │           │    BRAIN 3    │
+                │   (Python)    │           │   (Python)    │           │   (Python)    │
+                │  217 engines  │           │  217 engines  │           │  217 engines  │
+                └───────────────┘           └───────────────┘           └───────────────┘
+                                                    │
+                                                    ▼
+                                        ┌─────────────────────┐
+                                        │      DASHBOARD      │
+                                        │     (Next.js)       │
+                                        │  Fleet Management   │
+                                        └─────────────────────┘
+```
+
+### Component Scaling
+
+| Component         | Role                              | Scaling            |
+| ----------------- | --------------------------------- | ------------------ |
+| **Load Balancer** | TLS termination, routing          | 1 (HA pair)        |
+| **Shield**        | DMZ gateway, rate limiting, auth  | 2-10 replicas      |
+| **Brain**         | ML engines, analysis              | 3-20 replicas      |
+| **Redis**         | Cache, sessions, rate limits      | Cluster (3+ nodes) |
+| **Dashboard**     | Management UI                     | 1-3 replicas       |
 
 ---
 
@@ -145,6 +213,12 @@ ScanResult {is_threat, confidence, details}
               ┌───▼───┐     ┌────▼────┐
               │ Logs  │     │ Metrics │
               └───────┘     └─────────┘
+                  │              │
+                  └──────┬───────┘
+                         ▼
+                  ┌────────────┐
+                  │ DASHBOARD  │
+                  └────────────┘
 ```
 
 ---
@@ -154,10 +228,23 @@ ScanResult {is_threat, confidence, details}
 | Mode | Description | Use Case |
 |------|-------------|----------|
 | **Library** | `import sentinel` | Simple apps |
-| **Sidecar** | Docker container | Microservices |
-| **Gateway** | SHIELD + BRAIN | Enterprise |
+| **Sidecar** | Shield container | Microservices |
+| **Gateway** | Shield + BRAIN cluster | Enterprise |
 | **Embedded** | IMMUNE agent | Desktop apps |
 
 ---
 
-*For more details, see [Academy Mid-Level: Production Architecture](./academy/mid-level/01-production-architecture.md)*
+## Port Reference
+
+| Component | Port | Protocol | Description |
+|-----------|------|----------|-------------|
+| Shield API | 8081 | HTTP | REST API |
+| Shield Metrics | 9090 | HTTP | Prometheus metrics |
+| Brain API | 8000 | HTTP | REST API |
+| Brain gRPC | 50051 | gRPC | Internal comms |
+| Dashboard | 3000 | HTTP | Web UI |
+| Strike | 8082 | HTTP | Red Team API |
+
+---
+
+*For deployment guide, see [Production Deployment](./guides/deployment-en.md)*

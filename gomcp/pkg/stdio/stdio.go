@@ -21,7 +21,7 @@ const (
 
 // Request is the MCP v1 request format
 type Request struct {
-	ID      string          `json:"id"`
+	ID      json.RawMessage `json:"id"`
 	Method  string          `json:"method"`
 	Params  json.RawMessage `json:"params,omitempty"`
 	JSONRPC string          `json:"jsonrpc"`
@@ -29,7 +29,7 @@ type Request struct {
 
 // Response is the MCP v1 response format
 type Response struct {
-	ID      string          `json:"id"`
+	ID      json.RawMessage `json:"id"`
 	Result  json.RawMessage `json:"result,omitempty"`
 	Error   *ResponseError  `json:"error,omitempty"`
 	JSONRPC string          `json:"jsonrpc"`
@@ -188,7 +188,7 @@ func (a *Adapter) processOne() error {
 
 	var req Request
 	if err := json.Unmarshal(line, &req); err != nil {
-		a.sendError("", CodeParseError, "Parse error", nil)
+		a.sendError(nil, CodeParseError, "Parse error", nil)
 		return nil
 	}
 
@@ -291,31 +291,27 @@ func (a *Adapter) handleToolsCall(req *Request) *Response {
 		}
 	}
 
-	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
+	ctx, cancel := context.WithTimeout(context.Background(), 120*time.Second)
 	defer cancel()
 
 	result, err := a.handler.CallTool(ctx, params.Name, params.Arguments)
 	if err != nil {
-		errorResult := ToolCallResult{
-			Content: []ContentItem{{Type: "text", Text: err.Error()}},
-			IsError: true,
-		}
-		data, _ := json.Marshal(errorResult)
 		return &Response{
 			ID:      req.ID,
 			JSONRPC: "2.0",
-			Result:  data,
+			Error: &ResponseError{
+				Code:    CodeInternalError,
+				Message: err.Error(),
+			},
 		}
 	}
 
-	successResult := ToolCallResult{
-		Content: []ContentItem{{Type: "text", Text: string(result)}},
-	}
-	data, _ := json.Marshal(successResult)
+	// Return raw JSON result directly (not wrapped in MCP content format)
+	// This is for compatibility with RLM extension which expects flat JSON
 	return &Response{
 		ID:      req.ID,
 		JSONRPC: "2.0",
-		Result:  data,
+		Result:  result,
 	}
 }
 
@@ -354,7 +350,7 @@ func (a *Adapter) sendResponse(resp *Response) error {
 	return err
 }
 
-func (a *Adapter) sendError(id string, code int, message string, data json.RawMessage) error {
+func (a *Adapter) sendError(id json.RawMessage, code int, message string, data json.RawMessage) error {
 	return a.sendResponse(&Response{
 		ID:      id,
 		JSONRPC: "2.0",

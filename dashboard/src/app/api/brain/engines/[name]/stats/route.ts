@@ -101,8 +101,8 @@ export async function GET(req: Request, { params }: Params) {
       { error: `Unknown engine: ${name}` },
       { status: 404 }
     );
-  } catch (error) {
-    console.error('Engine stats error:', error);
+  } catch (_error) {
+    console.error('Engine stats error:', _error);
     return NextResponse.json(
       { error: 'Failed to get engine stats' },
       { status: 500 }

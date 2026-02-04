@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { BRAIN_API_URL } from '@/lib/brain-api';
+import { auth } from '@/lib/auth';
 
 // API key for BRAIN - from environment
 const API_KEY = process.env.BRAIN_API_KEY || 'sentinel-dev-key-change-me';
@@ -9,6 +10,12 @@ export async function POST(
   { params }: { params: Promise<{ name: string; action: string }> }
 ) {
   try {
+    // Get user from session
+    const session = await auth();
+    const userEmail = session?.user?.email || 'anonymous';
+    
+    console.log('[Toggle] Session:', session ? 'exists' : 'null', 'User:', userEmail);
+    
     const { name, action } = await params;
     
     // Validate action
@@ -26,6 +33,7 @@ export async function POST(
       headers: {
         'Content-Type': 'application/json',
         'X-SENTINEL-API-KEY': API_KEY,
+        'X-SENTINEL-USER': userEmail,
       },
       signal: AbortSignal.timeout(5000),
     });
@@ -38,8 +46,8 @@ export async function POST(
 
     return NextResponse.json(data);
     
-  } catch (error) {
-    console.error('[Toggle] Error:', error);
+  } catch (_error) {
+    console.error('[Toggle] Error:', _error);
     return NextResponse.json(
       { error: 'Failed to toggle engine' },
       { status: 500 }

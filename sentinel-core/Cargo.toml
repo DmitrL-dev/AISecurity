@@ -1,0 +1,40 @@
+[package]
+name = "sentinel-core"
+version = "0.1.0"
+edition = "2021"
+authors = ["SENTINEL Team"]
+description = "High-performance AI security detection engine"
+license = "Apache-2.0"
+repository = "https://github.com/DmitrL-dev/AISecurity"
+
+[lib]
+name = "sentinel_core"
+crate-type = ["cdylib", "rlib"]
+
+[dependencies]
+# PyO3 for Python bindings
+pyo3 = { version = "0.22", features = ["extension-module", "abi3-py310"] }
+
+# Pattern matching
+regex = "1.10"
+aho-corasick = "1.1"
+
+# Unicode normalization
+unicode-normalization = "0.1"
+
+# Serialization
+serde = { version = "1.0", features = ["derive"] }
+serde_json = "1.0"
+
+# Performance
+rayon = "1.10"     # Parallel processing
+once_cell = "1.19" # Lazy statics
+
+# Logging
+log = "0.4"
+env_logger = "0.11"
+
+[profile.release]
+lto = true
+codegen-units = 1
+opt-level = 3

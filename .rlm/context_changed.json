@@ -1,0 +1,10 @@
+{
+  "version": 1,
+  "events": [
+    {
+      "reason": "discover_project",
+      "timestamp": "2026-02-04T07:08:10.652Z"
+    }
+  ],
+  "changed": true
+}

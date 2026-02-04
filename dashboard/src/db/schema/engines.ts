@@ -8,7 +8,7 @@ import {
   pgTable,
   uuid,
   varchar,
-  text,
+  text as _text,
   timestamp,
   jsonb,
   boolean,

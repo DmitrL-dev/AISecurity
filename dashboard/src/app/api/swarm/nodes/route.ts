@@ -21,18 +21,6 @@ interface SwarmNode {
   registered_at: string
 }
 
-interface SwarmStats {
-  nodes: {
-    online: number
-    offline: number
-    degraded: number
-  }
-  total_analyses: number
-  total_blocked: number
-  patterns_shared: number
-  avg_latency_ms: number
-}
-
 export async function GET() {
   try {
     // Try to fetch from BRAIN API
@@ -68,7 +56,7 @@ export async function GET() {
       online: mockNodes.filter(n => n.status === 'online').length,
       offline: mockNodes.filter(n => n.status === 'offline').length,
     })
-  } catch (error) {
+  } catch (_error) {
     // Return mock data on error
     return NextResponse.json({
       nodes: [{

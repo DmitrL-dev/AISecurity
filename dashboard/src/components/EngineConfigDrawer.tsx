@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { 
-  X, Settings, Activity, Clock, AlertTriangle, 
+  X, Settings, Clock, AlertTriangle, 
   TrendingUp, Shield, Save, RotateCcw
 } from 'lucide-react'
 
@@ -132,7 +132,7 @@ export function EngineConfigDrawer({ engineName, isOpen, onClose, onSave }: Engi
         body: JSON.stringify(updates),
       })
 
-      if (res.ok || true) { // Accept mock success
+      if (res.ok) { // Mock success fallback in catch
         onSave?.(updates)
         onClose()
       }

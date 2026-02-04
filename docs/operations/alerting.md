@@ -26,17 +26,17 @@ groups:
           description: "Brain service has been down for >1 minute. All analysis is failing."
           runbook: "https://docs.sentinel.io/runbooks/brain-down"
 
-      # Gateway down
-      - alert: SentinelGatewayDown
-        expr: up{job="sentinel-gateway"} == 0
+      # Shield down
+      - alert: SentinelShieldDown
+        expr: up{job="sentinel-shield"} == 0
         for: 1m
         labels:
           severity: critical
           team: platform
         annotations:
-          summary: "SENTINEL Gateway is DOWN"
-          description: "Gateway service is unreachable."
-          runbook: "https://docs.sentinel.io/runbooks/gateway-down"
+          summary: "SENTINEL Shield is DOWN"
+          description: "Shield DMZ gateway is unreachable."
+          runbook: "https://docs.sentinel.io/runbooks/shield-down"
 
       # High error rate
       - alert: SentinelHighErrorRate

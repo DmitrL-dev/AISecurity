@@ -108,7 +108,7 @@ describe('MitreAttackMap', () => {
   })
 
   it('should group techniques by tactic', async () => {
-    const user = userEvent.setup()
+    const _user = userEvent.setup()
     render(<MitreAttackMap techniques={mockTechniques} />)
     
     // Should show 3 tactic groups
