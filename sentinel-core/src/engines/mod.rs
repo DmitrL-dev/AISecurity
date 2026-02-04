@@ -73,6 +73,7 @@ pub struct SentinelEngine {
 }
 
 #[pymethods]
+#[allow(clippy::useless_conversion)] // PyO3 requires PyResult return type
 impl SentinelEngine {
     #[new]
     pub fn new() -> PyResult<Self> {

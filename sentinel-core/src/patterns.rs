@@ -1,6 +1,9 @@
 //! Pattern loading and management
 //!
 //! Loads patterns from JSON for hot-reload capability
+//! NOTE: Infrastructure for future config-driven patterns
+
+#![allow(dead_code)] // Future hot-reload infrastructure
 
 use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
