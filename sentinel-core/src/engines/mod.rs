@@ -27,6 +27,13 @@ pub mod tda;
 pub mod semantic;
 pub mod drift;
 
+// Phase 9: Domain-Specific Super-Engines
+pub mod rag;
+pub mod agentic;
+pub mod attack;
+pub mod compliance;
+pub mod threat_intel;
+
 // Re-export trait for convenience
 pub use traits::{PatternMatcher, EngineCategory, BoxedEngine, create_default_engines};
 pub use hybrid::HybridPiiEngine;
