@@ -47,6 +47,11 @@ pub mod supply_chain;
 pub mod privacy;
 pub mod orchestration;
 
+// Phase 9: ML Inference Engines
+pub mod embedding;
+pub mod anomaly;
+pub mod attention;
+
 // Re-export trait for convenience
 pub use traits::{PatternMatcher, EngineCategory, BoxedEngine, create_default_engines};
 pub use hybrid::HybridPiiEngine;
