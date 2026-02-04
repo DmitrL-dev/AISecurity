@@ -20,6 +20,7 @@ pub mod hybrid;
 pub mod hyperbolic;
 pub mod info_geometry;
 pub mod spectral;
+pub mod chaos;
 
 // Re-export trait for convenience
 pub use traits::{PatternMatcher, EngineCategory, BoxedEngine, create_default_engines};
