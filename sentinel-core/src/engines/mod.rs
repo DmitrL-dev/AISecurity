@@ -67,6 +67,7 @@ pub struct SentinelEngine {
     jailbreak: Option<jailbreak::JailbreakEngine>,
     pii: Option<pii::PIIEngine>,
     exfiltration: Option<exfiltration::ExfiltrationEngine>,
+    moderation: Option<moderation::ModerationEngine>,
 }
 
 #[pymethods]
@@ -78,6 +79,7 @@ impl SentinelEngine {
             jailbreak: Some(jailbreak::JailbreakEngine::new()),
             pii: Some(pii::PIIEngine::new()),
             exfiltration: Some(exfiltration::ExfiltrationEngine::new()),
+            moderation: Some(moderation::ModerationEngine::new()),
         })
     }
 
@@ -123,6 +125,15 @@ impl SentinelEngine {
             if !exfil_matches.is_empty() {
                 categories.push("exfiltration".to_string());
                 matches.extend(exfil_matches);
+            }
+        }
+
+        // Run ModerationEngine
+        if let Some(ref engine) = self.moderation {
+            let mod_matches = engine.scan(&normalized);
+            if !mod_matches.is_empty() {
+                categories.push("moderation".to_string());
+                matches.extend(mod_matches);
             }
         }
 
