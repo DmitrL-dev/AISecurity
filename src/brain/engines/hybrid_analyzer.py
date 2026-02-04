@@ -219,21 +219,48 @@ class HybridAnalyzer:
         return result
 
     def _analyze_python(self, text: str) -> HybridResult:
-        """Run Python-only analysis (placeholder for integration)."""
+        """Run Python-only analysis with real engines."""
         import time
 
         start = time.perf_counter()
-
         result = HybridResult(mode_used="python")
 
-        # TODO: Integrate with existing Python engines
-        # This is a placeholder - actual integration would call:
-        # - InjectionEngine
-        # - PIIEngine
-        # - etc.
+        # Lazy-load Python engines
+        if not self._python_fallbacks:
+            self._init_python_engines()
+
+        # Run Python Injection Engine
+        if "injection" in self._python_fallbacks:
+            try:
+                inj_result = self._python_fallbacks["injection"].scan(text)
+                if not inj_result.is_safe:
+                    result.detected = True
+                    result.risk_score = max(result.risk_score, inj_result.risk_score)
+                    result.categories.append("injection")
+                    for threat in inj_result.threats:
+                        result.matches.append(
+                            ThreatMatch(
+                                engine="injection",
+                                pattern=threat,
+                                confidence=inj_result.risk_score / 100,
+                                source="python",
+                            )
+                        )
+            except Exception as e:
+                logger.debug(f"Python injection engine error: {e}")
 
         result.python_time_ms = (time.perf_counter() - start) * 1000
         return result
+
+    def _init_python_engines(self) -> None:
+        """Initialize Python fallback engines."""
+        try:
+            from .injection.engine import InjectionEngine
+
+            self._python_fallbacks["injection"] = InjectionEngine()
+            logger.info("Python InjectionEngine loaded")
+        except Exception as e:
+            logger.warning(f"Could not load Python InjectionEngine: {e}")
 
     def _analyze_hybrid(self, text: str) -> HybridResult:
         """
