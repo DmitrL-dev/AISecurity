@@ -183,9 +183,9 @@
 - [ ] Gradual rollout
 
 ### Task 5.4: Cleanup ⏳
-- [/] Archive Python engines — **injection.py, pii.py, injection/** archived
-- [ ] Archive remaining 184 Python engines
-- [ ] Update documentation
+- [x] Archive Python engines — **injection.py, pii.py** archived ✅
+- [x] Updated archive README with 8 super-engines mapping ✅
+- [ ] Archive remaining 184 Python engines (ongoing, not blocking)
 - [ ] Release v2.0
 
 ---
