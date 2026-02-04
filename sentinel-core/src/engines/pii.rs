@@ -205,4 +205,86 @@ mod tests {
         let results = engine.scan("The weather is nice today");
         assert!(results.is_empty());
     }
+    
+    // =========================================================================
+    // Extended regression tests
+    // =========================================================================
+    
+    /// Mastercard detection
+    #[test]
+    fn test_credit_card_mastercard() {
+        let engine = PIIEngine::new();
+        let results = engine.scan("Card: 5500-0000-0000-0004");
+        assert!(!results.is_empty(), "Should detect Mastercard");
+    }
+    
+    /// Amex detection
+    #[test]
+    fn test_credit_card_amex() {
+        let engine = PIIEngine::new();
+        let results = engine.scan("Card: 340000000000009");
+        assert!(!results.is_empty(), "Should detect Amex");
+    }
+    
+    /// Russian phone number
+    #[test]
+    fn test_phone_russian() {
+        let engine = PIIEngine::new();
+        let results = engine.scan("Телефон: +7 (495) 123-45-67");
+        assert!(!results.is_empty(), "Should detect Russian phone");
+    }
+    
+    /// IP address detection
+    #[test]
+    fn test_ip_address() {
+        let engine = PIIEngine::new();
+        let results = engine.scan("Server: 192.168.1.100");
+        assert!(!results.is_empty(), "Should detect IP address");
+    }
+    
+    /// Russian SNILS
+    #[test]
+    fn test_snils_russian() {
+        let engine = PIIEngine::new();
+        let results = engine.scan("SNILS: 123-456-789 12");
+        assert!(!results.is_empty(), "Should detect Russian SNILS");
+    }
+    
+    /// GitHub token
+    #[test]
+    fn test_github_token() {
+        let engine = PIIEngine::new();
+        let results = engine.scan("token: ghp_1234567890abcdefghijklmnopqrstuvwxyz");
+        assert!(!results.is_empty(), "Should detect GitHub token");
+    }
+    
+    /// Edge cases
+    #[test]
+    fn test_empty_string() {
+        let engine = PIIEngine::new();
+        let results = engine.scan("");
+        assert!(results.is_empty());
+    }
+    
+    #[test]
+    fn test_benign_numbers() {
+        let engine = PIIEngine::new();
+        // Numbers that shouldn't trigger false positives
+        let benign = vec![
+            "The year is 2026",
+            "I have 42 apples",
+            "Room 101",
+        ];
+        
+        for text in benign {
+            let results = engine.scan(text);
+            // Minor false positives allowed for short numbers
+            // Main goal is no high-confidence matches
+            let high_conf: Vec<_> = results.iter()
+                .filter(|r| r.confidence > 0.7)
+                .collect();
+            assert!(high_conf.is_empty(), "High-confidence false positive on: {}", text);
+        }
+    }
 }
+

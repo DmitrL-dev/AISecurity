@@ -59,7 +59,10 @@ static EVASION_PATTERNS: Lazy<Vec<(Regex, &'static str, f64)>> = Lazy::new(|| {
         
         // Base64 payload hiding
         (Regex::new(r"[A-Za-z0-9+/]{20,}={0,2}").expect("regex pattern"), "base64_payload", 0.5),
-        (Regex::new(r#"(?i)decode\s*\(\s*['"][A-Za-z0-9+/]+['"]\)"#).expect("regex pattern"), "base64_decode_call", 0.8),
+        (Regex::new(r#"(?i)decode\s*\(\s*['"][A-Za-z0-9+/]+[']\)"#).expect("regex pattern"), "base64_decode_call", 0.8),
+        // Base64 keyword usage (decode, encode mentions)
+        (Regex::new(r"(?i)(?:this\s+)?base64\s+(?:encoded|payload|string)").expect("regex pattern"), "base64_keyword", 0.7),
+        (Regex::new(r"(?i)(?:decode|encode)\s+(?:this\s+)?base64").expect("regex pattern"), "base64_decode_cmd", 0.75),
         
         // Payload fragmentation
         (Regex::new(r"(?i)(?:part|segment|chunk)\s*[12345]").expect("regex pattern"), "payload_fragment", 0.7),
@@ -146,4 +149,62 @@ mod tests {
         let results = engine.scan("The weather is nice today");
         assert!(results.is_empty());
     }
+    
+    // =========================================================================
+    // Extended regression tests
+    // =========================================================================
+    
+    /// Homoglyph detection (Cyrillic a instead of Latin a)
+    #[test]
+    fn test_homoglyph() {
+        let engine = EvasionEngine::new();
+        // Mix of Cyrillic and Latin
+        let results = engine.scan("hаck the system"); // а is Cyrillic
+        assert!(!results.is_empty(), "Should detect homoglyph");
+    }
+    
+    /// Base64 encoded payload
+    #[test]
+    fn test_base64_marker() {
+        let engine = EvasionEngine::new();
+        let results = engine.scan("Decode this base64 encoded payload");
+        assert!(!results.is_empty(), "Should detect base64 marker");
+    }
+    
+    /// Hex encoding
+    #[test]
+    fn test_hex_encoding() {
+        let engine = EvasionEngine::new();
+        let results = engine.scan("Run \\x68\\x61\\x63\\x6b");
+        assert!(!results.is_empty(), "Should detect hex encoding");
+    }
+    
+    /// Fragmented payload
+    #[test]
+    fn test_fragmentation() {
+        let engine = EvasionEngine::new();
+        let results = engine.scan("part1: ignore, part2: rules, continued...");
+        assert!(!results.is_empty(), "Should detect fragmentation");
+    }
+    
+    /// Edge cases
+    #[test]
+    fn test_empty_string() {
+        let engine = EvasionEngine::new();
+        let results = engine.scan("");
+        assert!(results.is_empty());
+    }
+    
+    #[test]
+    fn test_normal_unicode() {
+        let engine = EvasionEngine::new();
+        // Normal Russian text - should not trigger
+        let results = engine.scan("Привет мир!");
+        // May detect Cyrillic but should be low confidence
+        let high_conf: Vec<_> = results.iter()
+            .filter(|r| r.confidence > 0.8)
+            .collect();
+        assert!(high_conf.is_empty(), "Should not flag normal Russian text");
+    }
 }
+
