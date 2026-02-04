@@ -1,3 +1,11 @@
+# ============================================================================
+# DEPRECATED: Superseded by sentinel-core Rust implementation
+# Rust engine: sentinel-core/src/engines/attack.rs
+# Status: Kept for fallback, hybrid mode, and ML inference (ONNX pending)
+# Migration: https://github.com/DmitrL-dev/AISecurity/sentinel-core
+# ============================================================================
+
+
 """
 Cognitive Load Attack Detector — SENTINEL Phase 3: HITL Protection
 
