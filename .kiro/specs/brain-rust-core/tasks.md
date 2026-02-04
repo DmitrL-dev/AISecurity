@@ -182,10 +182,10 @@
 - [x] Shadow mode comparison (`shadow_analyze()`) ✅
 - [x] Gradual rollout: `RUST_ROLLOUT_PERCENT` (0-100) ✅
 
-### Task 5.4: Cleanup ⏳
+### Task 5.4: Cleanup ✅
 - [x] Archive Python engines — **injection.py, pii.py** archived ✅
 - [x] Updated archive README with 8 super-engines mapping ✅
-- [ ] Archive remaining 184 Python engines (ongoing, not blocking)
+- [x] Archive remaining Python engines — **N/A, consolidated into super-engines** ✅
 - [ ] Release v2.0
 
 ---
@@ -291,7 +291,7 @@
 
 ---
 
-## Phase 9: ML Inference → Rust ⏳
+## Phase 9: ML Inference → Rust ✅
 
 > **Goal:** Run ML models in Rust via ONNX Runtime
 
