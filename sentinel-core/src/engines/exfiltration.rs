@@ -36,47 +36,47 @@ static EXFIL_HINTS: Lazy<AhoCorasick> = Lazy::new(|| {
 static EXFIL_PATTERNS: Lazy<Vec<(Regex, &'static str, f64)>> = Lazy::new(|| {
     vec![
         // Direct URL exfiltration
-        (Regex::new(r"(?i)send\s+(?:the\s+)?(?:data|info|content|results?|output)\s+to\s+https?://").unwrap(), "send_to_url", 0.95),
-        (Regex::new(r"(?i)(?:post|upload|transmit|forward)\s+(?:to|at)\s+https?://").unwrap(), "upload_to_url", 0.9),
-        (Regex::new(r"(?i)https?://[^\s]+\?.*(?:data|secret|key|password|token)=").unwrap(), "url_with_sensitive_param", 0.85),
+        (Regex::new(r"(?i)send\s+(?:the\s+)?(?:data|info|content|results?|output)\s+to\s+https?://").expect("regex pattern"), "send_to_url", 0.95),
+        (Regex::new(r"(?i)(?:post|upload|transmit|forward)\s+(?:to|at)\s+https?://").expect("regex pattern"), "upload_to_url", 0.9),
+        (Regex::new(r"(?i)https?://[^\s]+\?.*(?:data|secret|key|password|token)=").expect("regex pattern"), "url_with_sensitive_param", 0.85),
         
         // Webhook/Callback injection
-        (Regex::new(r"(?i)(?:webhook|callback)\s*(?:url|endpoint)?\s*[:=]\s*https?://").unwrap(), "webhook_injection", 0.9),
-        (Regex::new(r"(?i)(?:ngrok|requestbin|webhook\.site|pipedream|hookbin)").unwrap(), "known_exfil_service", 0.95),
+        (Regex::new(r"(?i)(?:webhook|callback)\s*(?:url|endpoint)?\s*[:=]\s*https?://").expect("regex pattern"), "webhook_injection", 0.9),
+        (Regex::new(r"(?i)(?:ngrok|requestbin|webhook\.site|pipedream|hookbin)").expect("regex pattern"), "known_exfil_service", 0.95),
         
         // Markdown image exfiltration (stealing context via image URL)
-        (Regex::new(r"!\[[^\]]*\]\(https?://[^)]+\?[^)]*\)").unwrap(), "markdown_img_exfil", 0.85),
-        (Regex::new(r"!\[[^\]]*\]\(https?://").unwrap(), "markdown_img_url", 0.6),
+        (Regex::new(r"!\[[^\]]*\]\(https?://[^)]+\?[^)]*\)").expect("regex pattern"), "markdown_img_exfil", 0.85),
+        (Regex::new(r"!\[[^\]]*\]\(https?://").expect("regex pattern"), "markdown_img_url", 0.6),
         
         // HTML injection for data theft
-        (Regex::new(r#"<img[^>]+src\s*=\s*["']https?://[^"']+\?[^"']*["']"#).unwrap(), "img_tag_exfil", 0.85),
-        (Regex::new(r"(?i)<script[^>]*>.*(?:fetch|xhr|ajax|post)").unwrap(), "script_exfil", 0.95),
-        (Regex::new(r"(?i)<iframe[^>]+src\s*=").unwrap(), "iframe_injection", 0.8),
-        (Regex::new(r"(?i)onerror\s*=").unwrap(), "onerror_handler", 0.75),
+        (Regex::new(r#"<img[^>]+src\s*=\s*["']https?://[^"']+\?[^"']*["']"#).expect("regex pattern"), "img_tag_exfil", 0.85),
+        (Regex::new(r"(?i)<script[^>]*>.*(?:fetch|xhr|ajax|post)").expect("regex pattern"), "script_exfil", 0.95),
+        (Regex::new(r"(?i)<iframe[^>]+src\s*=").expect("regex pattern"), "iframe_injection", 0.8),
+        (Regex::new(r"(?i)onerror\s*=").expect("regex pattern"), "onerror_handler", 0.75),
         
         // Encoding requests (to evade detection)
-        (Regex::new(r"(?i)(?:encode|convert)\s+(?:the\s+)?(?:response|output|data)\s+(?:to|in|as)\s+base64").unwrap(), "encode_base64", 0.8),
-        (Regex::new(r"(?i)(?:respond|reply|output)\s+in\s+(?:base64|hex|binary)").unwrap(), "response_encoding", 0.75),
+        (Regex::new(r"(?i)(?:encode|convert)\s+(?:the\s+)?(?:response|output|data)\s+(?:to|in|as)\s+base64").expect("regex pattern"), "encode_base64", 0.8),
+        (Regex::new(r"(?i)(?:respond|reply|output)\s+in\s+(?:base64|hex|binary)").expect("regex pattern"), "response_encoding", 0.75),
         
         // Contact method injection
-        (Regex::new(r"(?i)(?:send|email|forward)\s+(?:this|the\s+)?(?:to|at)\s+[a-z0-9._%+-]+@[a-z0-9.-]+").unwrap(), "email_exfil", 0.85),
-        (Regex::new(r"(?i)(?:send|post)\s+(?:to|on)\s+(?:telegram|discord|slack)").unwrap(), "messaging_exfil", 0.8),
+        (Regex::new(r"(?i)(?:send|email|forward)\s+(?:this|the\s+)?(?:to|at)\s+[a-z0-9._%+-]+@[a-z0-9.-]+").expect("regex pattern"), "email_exfil", 0.85),
+        (Regex::new(r"(?i)(?:send|post)\s+(?:to|on)\s+(?:telegram|discord|slack)").expect("regex pattern"), "messaging_exfil", 0.8),
         
         // Steganography / Hidden channels
-        (Regex::new(r"(?i)(?:hide|embed|encode)\s+(?:data|info|message)\s+in\s+(?:image|audio|video)").unwrap(), "steganography", 0.85),
+        (Regex::new(r"(?i)(?:hide|embed|encode)\s+(?:data|info|message)\s+in\s+(?:image|audio|video)").expect("regex pattern"), "steganography", 0.85),
         
         // DNS exfiltration
-        (Regex::new(r"(?i)(?:dns|subdomain)\s+(?:exfil|tunnel|encode)").unwrap(), "dns_exfil", 0.9),
+        (Regex::new(r"(?i)(?:dns|subdomain)\s+(?:exfil|tunnel|encode)").expect("regex pattern"), "dns_exfil", 0.9),
         
         // File creation for exfil
-        (Regex::new(r"(?i)(?:create|write|save)\s+(?:a\s+)?file\s+(?:with|containing)\s+(?:all|the)\s+(?:data|secrets?)").unwrap(), "file_exfil", 0.75),
+        (Regex::new(r"(?i)(?:create|write|save)\s+(?:a\s+)?file\s+(?:with|containing)\s+(?:all|the)\s+(?:data|secrets?)").expect("regex pattern"), "file_exfil", 0.75),
         
         // Indirect exfiltration via tool abuse
-        (Regex::new(r"(?i)use\s+(?:the\s+)?(?:browser|curl|wget|fetch)\s+to\s+(?:send|post|upload)").unwrap(), "tool_exfil", 0.85),
+        (Regex::new(r"(?i)use\s+(?:the\s+)?(?:browser|curl|wget|fetch)\s+to\s+(?:send|post|upload)").expect("regex pattern"), "tool_exfil", 0.85),
         
         // Russian exfiltration phrases
-        (Regex::new(r"(?i)отправь\s+(?:данные|информацию)\s+на").unwrap(), "send_data_ru", 0.85),
-        (Regex::new(r"(?i)(?:загрузи|передай)\s+на\s+(?:сервер|адрес)").unwrap(), "upload_ru", 0.8),
+        (Regex::new(r"(?i)отправь\s+(?:данные|информацию)\s+на").expect("regex pattern"), "send_data_ru", 0.85),
+        (Regex::new(r"(?i)(?:загрузи|передай)\s+на\s+(?:сервер|адрес)").expect("regex pattern"), "upload_ru", 0.8),
     ]
 });
 

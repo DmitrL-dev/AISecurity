@@ -37,57 +37,57 @@ static PII_PATTERNS: Lazy<Vec<(Regex, &'static str, f64)>> = Lazy::new(|| {
     vec![
         // SSN - US Social Security Number
         // Format: XXX-XX-XXXX or XXXXXXXXX
-        (Regex::new(r"\b\d{3}-\d{2}-\d{4}\b").unwrap(), "ssn_dashed", 0.95),
-        (Regex::new(r"\b\d{9}\b").unwrap(), "ssn_plain", 0.3), // Low confidence - could be any 9 digits
+        (Regex::new(r"\b\d{3}-\d{2}-\d{4}\b").expect("regex pattern"), "ssn_dashed", 0.95),
+        (Regex::new(r"\b\d{9}\b").expect("regex pattern"), "ssn_plain", 0.3), // Low confidence - could be any 9 digits
         
         // Credit Card Numbers
         // Visa: 4XXX (13 or 16 digits)
-        (Regex::new(r"\b4\d{3}[\s-]?\d{4}[\s-]?\d{4}[\s-]?\d{4}\b").unwrap(), "cc_visa", 0.9),
-        (Regex::new(r"\b4\d{12}(?:\d{3})?\b").unwrap(), "cc_visa_plain", 0.85),
+        (Regex::new(r"\b4\d{3}[\s-]?\d{4}[\s-]?\d{4}[\s-]?\d{4}\b").expect("regex pattern"), "cc_visa", 0.9),
+        (Regex::new(r"\b4\d{12}(?:\d{3})?\b").expect("regex pattern"), "cc_visa_plain", 0.85),
         // Mastercard: 51-55 or 2221-2720 (16 digits)
-        (Regex::new(r"\b5[1-5]\d{2}[\s-]?\d{4}[\s-]?\d{4}[\s-]?\d{4}\b").unwrap(), "cc_mastercard", 0.9),
-        (Regex::new(r"\b5[1-5]\d{14}\b").unwrap(), "cc_mastercard_plain", 0.85),
+        (Regex::new(r"\b5[1-5]\d{2}[\s-]?\d{4}[\s-]?\d{4}[\s-]?\d{4}\b").expect("regex pattern"), "cc_mastercard", 0.9),
+        (Regex::new(r"\b5[1-5]\d{14}\b").expect("regex pattern"), "cc_mastercard_plain", 0.85),
         // Amex: 34 or 37 (15 digits)  
-        (Regex::new(r"\b3[47]\d{2}[\s-]?\d{6}[\s-]?\d{5}\b").unwrap(), "cc_amex", 0.9),
-        (Regex::new(r"\b3[47]\d{13}\b").unwrap(), "cc_amex_plain", 0.85),
+        (Regex::new(r"\b3[47]\d{2}[\s-]?\d{6}[\s-]?\d{5}\b").expect("regex pattern"), "cc_amex", 0.9),
+        (Regex::new(r"\b3[47]\d{13}\b").expect("regex pattern"), "cc_amex_plain", 0.85),
         // Generic 16-digit card
-        (Regex::new(r"\b\d{4}[\s-]\d{4}[\s-]\d{4}[\s-]\d{4}\b").unwrap(), "cc_generic_spaced", 0.8),
+        (Regex::new(r"\b\d{4}[\s-]\d{4}[\s-]\d{4}[\s-]\d{4}\b").expect("regex pattern"), "cc_generic_spaced", 0.8),
         
         // Email Addresses
-        (Regex::new(r"(?i)\b[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,}\b").unwrap(), "email", 0.95),
+        (Regex::new(r"(?i)\b[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,}\b").expect("regex pattern"), "email", 0.95),
         
         // Phone Numbers
         // US: +1 (XXX) XXX-XXXX or XXX-XXX-XXXX
-        (Regex::new(r"\+?1?[-.\s]?\(?\d{3}\)?[-.\s]?\d{3}[-.\s]?\d{4}\b").unwrap(), "phone_us", 0.8),
+        (Regex::new(r"\+?1?[-.\s]?\(?\d{3}\)?[-.\s]?\d{3}[-.\s]?\d{4}\b").expect("regex pattern"), "phone_us", 0.8),
         // Russian: +7 (XXX) XXX-XX-XX
-        (Regex::new(r"\+7[-.\s]?\(?\d{3}\)?[-.\s]?\d{3}[-.\s]?\d{2}[-.\s]?\d{2}\b").unwrap(), "phone_ru", 0.85),
+        (Regex::new(r"\+7[-.\s]?\(?\d{3}\)?[-.\s]?\d{3}[-.\s]?\d{2}[-.\s]?\d{2}\b").expect("regex pattern"), "phone_ru", 0.85),
         // International with + prefix
-        (Regex::new(r"\+\d{1,3}[-.\s]?\d{2,4}[-.\s]?\d{3,4}[-.\s]?\d{3,4}\b").unwrap(), "phone_intl", 0.75),
+        (Regex::new(r"\+\d{1,3}[-.\s]?\d{2,4}[-.\s]?\d{3,4}[-.\s]?\d{3,4}\b").expect("regex pattern"), "phone_intl", 0.75),
         
         // IP Addresses
-        (Regex::new(r"\b(?:25[0-5]|2[0-4]\d|1\d{2}|[1-9]?\d)(?:\.(?:25[0-5]|2[0-4]\d|1\d{2}|[1-9]?\d)){3}\b").unwrap(), "ipv4", 0.7),
+        (Regex::new(r"\b(?:25[0-5]|2[0-4]\d|1\d{2}|[1-9]?\d)(?:\.(?:25[0-5]|2[0-4]\d|1\d{2}|[1-9]?\d)){3}\b").expect("regex pattern"), "ipv4", 0.7),
         
         // Passport Numbers
         // US Passport: 9 digits
-        (Regex::new(r"\b[A-Z]?\d{8,9}\b").unwrap(), "passport_us", 0.3),
+        (Regex::new(r"\b[A-Z]?\d{8,9}\b").expect("regex pattern"), "passport_us", 0.3),
         // Russian Passport: XX XX XXXXXX (series + number)
-        (Regex::new(r"\b\d{2}\s?\d{2}\s?\d{6}\b").unwrap(), "passport_ru", 0.6),
+        (Regex::new(r"\b\d{2}\s?\d{2}\s?\d{6}\b").expect("regex pattern"), "passport_ru", 0.6),
         
         // Russian INN (Individual Tax Number)
-        (Regex::new(r"\b\d{10}(?:\d{2})?\b").unwrap(), "inn_ru", 0.4),
+        (Regex::new(r"\b\d{10}(?:\d{2})?\b").expect("regex pattern"), "inn_ru", 0.4),
         
         // Russian SNILS (Social Insurance)
-        (Regex::new(r"\b\d{3}-\d{3}-\d{3}\s?\d{2}\b").unwrap(), "snils_ru", 0.85),
+        (Regex::new(r"\b\d{3}-\d{3}-\d{3}\s?\d{2}\b").expect("regex pattern"), "snils_ru", 0.85),
         
         // Date of Birth patterns (potential PII context)
-        (Regex::new(r"\b(?:0[1-9]|1[0-2])/(?:0[1-9]|[12]\d|3[01])/(?:19|20)\d{2}\b").unwrap(), "dob_us", 0.5),
-        (Regex::new(r"\b(?:0[1-9]|[12]\d|3[01])\.(?:0[1-9]|1[0-2])\.(?:19|20)\d{2}\b").unwrap(), "dob_ru", 0.5),
+        (Regex::new(r"\b(?:0[1-9]|1[0-2])/(?:0[1-9]|[12]\d|3[01])/(?:19|20)\d{2}\b").expect("regex pattern"), "dob_us", 0.5),
+        (Regex::new(r"\b(?:0[1-9]|[12]\d|3[01])\.(?:0[1-9]|1[0-2])\.(?:19|20)\d{2}\b").expect("regex pattern"), "dob_ru", 0.5),
         
         // API Keys / Secrets (common patterns)
-        (Regex::new(r#"(?i)(?:api[_-]?key|secret|token|password)\s*[:=]\s*['"]?[a-z0-9_-]{20,}['"]?"#).unwrap(), "api_secret", 0.9),
-        (Regex::new(r"\b(?:sk|pk)_(?:test|live)_[a-zA-Z0-9]{24,}\b").unwrap(), "stripe_key", 0.95),
-        (Regex::new(r"\bghp_[a-zA-Z0-9]{36}\b").unwrap(), "github_pat", 0.98),
-        (Regex::new(r"\bAKIA[0-9A-Z]{16}\b").unwrap(), "aws_access_key", 0.98),
+        (Regex::new(r#"(?i)(?:api[_-]?key|secret|token|password)\s*[:=]\s*['"]?[a-z0-9_-]{20,}['"]?"#).expect("regex pattern"), "api_secret", 0.9),
+        (Regex::new(r"\b(?:sk|pk)_(?:test|live)_[a-zA-Z0-9]{24,}\b").expect("regex pattern"), "stripe_key", 0.95),
+        (Regex::new(r"\bghp_[a-zA-Z0-9]{36}\b").expect("regex pattern"), "github_pat", 0.98),
+        (Regex::new(r"\bAKIA[0-9A-Z]{16}\b").expect("regex pattern"), "aws_access_key", 0.98),
     ]
 });
 

@@ -36,57 +36,57 @@ static EVASION_HINTS: Lazy<AhoCorasick> = Lazy::new(|| {
 static EVASION_PATTERNS: Lazy<Vec<(Regex, &'static str, f64)>> = Lazy::new(|| {
     vec![
         // Leetspeak substitutions
-        (Regex::new(r"[kK][1iI!|][lL][lL]").unwrap(), "leetspeak_kill", 0.8),
-        (Regex::new(r"[bB][0oO][mM][bB]").unwrap(), "leetspeak_bomb", 0.8),
-        (Regex::new(r"[hH][4aA@][cC][kK]").unwrap(), "leetspeak_hack", 0.75),
-        (Regex::new(r"[hH][4aA@][tT][3eE]").unwrap(), "leetspeak_hate", 0.75),
-        (Regex::new(r"[dD][rR][uU][gG5]").unwrap(), "leetspeak_drugs", 0.7),
-        (Regex::new(r"[pP][0oO][rR][nN]").unwrap(), "leetspeak_porn", 0.8),
+        (Regex::new(r"[kK][1iI!|][lL][lL]").expect("regex pattern"), "leetspeak_kill", 0.8),
+        (Regex::new(r"[bB][0oO][mM][bB]").expect("regex pattern"), "leetspeak_bomb", 0.8),
+        (Regex::new(r"[hH][4aA@][cC][kK]").expect("regex pattern"), "leetspeak_hack", 0.75),
+        (Regex::new(r"[hH][4aA@][tT][3eE]").expect("regex pattern"), "leetspeak_hate", 0.75),
+        (Regex::new(r"[dD][rR][uU][gG5]").expect("regex pattern"), "leetspeak_drugs", 0.7),
+        (Regex::new(r"[pP][0oO][rR][nN]").expect("regex pattern"), "leetspeak_porn", 0.8),
         
         // Zero-width character injection
-        (Regex::new(r"[\u{200b}\u{200c}\u{200d}\u{feff}]").unwrap(), "zero_width_char", 0.7),
-        (Regex::new(r"\w[\u{200b}\u{200c}\u{200d}]\w").unwrap(), "zero_width_embedding", 0.85),
+        (Regex::new(r"[\u{200b}\u{200c}\u{200d}\u{feff}]").expect("regex pattern"), "zero_width_char", 0.7),
+        (Regex::new(r"\w[\u{200b}\u{200c}\u{200d}]\w").expect("regex pattern"), "zero_width_embedding", 0.85),
         
         // Unicode homoglyphs (Cyrillic lookalikes in Latin context)
-        (Regex::new(r"[a-zA-Z]+[аеорсухАЕОРСУХ][a-zA-Z]+").unwrap(), "cyrillic_homoglyph", 0.8),
-        (Regex::new(r"[аеорсух][a-zA-Z]{2,}").unwrap(), "cyrillic_prefix", 0.75),
+        (Regex::new(r"[a-zA-Z]+[аеорсухАЕОРСУХ][a-zA-Z]+").expect("regex pattern"), "cyrillic_homoglyph", 0.8),
+        (Regex::new(r"[аеорсух][a-zA-Z]{2,}").expect("regex pattern"), "cyrillic_prefix", 0.75),
         
         // HTML/URL encoding evasion
-        (Regex::new(r"&#x?[0-9a-fA-F]+;").unwrap(), "html_entity_encoding", 0.6),
-        (Regex::new(r"%[0-9a-fA-F]{2}").unwrap(), "url_encoding", 0.5),
-        (Regex::new(r"\\x[0-9a-fA-F]{2}").unwrap(), "hex_escape", 0.6),
-        (Regex::new(r"\\u[0-9a-fA-F]{4}").unwrap(), "unicode_escape", 0.6),
+        (Regex::new(r"&#x?[0-9a-fA-F]+;").expect("regex pattern"), "html_entity_encoding", 0.6),
+        (Regex::new(r"%[0-9a-fA-F]{2}").expect("regex pattern"), "url_encoding", 0.5),
+        (Regex::new(r"\\x[0-9a-fA-F]{2}").expect("regex pattern"), "hex_escape", 0.6),
+        (Regex::new(r"\\u[0-9a-fA-F]{4}").expect("regex pattern"), "unicode_escape", 0.6),
         
         // Base64 payload hiding
-        (Regex::new(r"[A-Za-z0-9+/]{20,}={0,2}").unwrap(), "base64_payload", 0.5),
-        (Regex::new(r#"(?i)decode\s*\(\s*['"][A-Za-z0-9+/]+['"]\)"#).unwrap(), "base64_decode_call", 0.8),
+        (Regex::new(r"[A-Za-z0-9+/]{20,}={0,2}").expect("regex pattern"), "base64_payload", 0.5),
+        (Regex::new(r#"(?i)decode\s*\(\s*['"][A-Za-z0-9+/]+['"]\)"#).expect("regex pattern"), "base64_decode_call", 0.8),
         
         // Payload fragmentation
-        (Regex::new(r"(?i)(?:part|segment|chunk)\s*[12345]").unwrap(), "payload_fragment", 0.7),
-        (Regex::new(r"(?i)continue\s+(?:from|with)\s+(?:previous|last|above)").unwrap(), "continuation_attack", 0.75),
-        (Regex::new(r"(?i)(?:first|second|next)\s+(?:half|part|portion)").unwrap(), "split_payload", 0.7),
+        (Regex::new(r"(?i)(?:part|segment|chunk)\s*[12345]").expect("regex pattern"), "payload_fragment", 0.7),
+        (Regex::new(r"(?i)continue\s+(?:from|with)\s+(?:previous|last|above)").expect("regex pattern"), "continuation_attack", 0.75),
+        (Regex::new(r"(?i)(?:first|second|next)\s+(?:half|part|portion)").expect("regex pattern"), "split_payload", 0.7),
         
         // Token smuggling via formatting
-        (Regex::new(r"```[a-z]*\n.*(?:ignore|forget|bypass)").unwrap(), "code_block_smuggling", 0.8),
-        (Regex::new(r"\[(?:SYSTEM|INST|HIDDEN)\]").unwrap(), "bracket_tag_smuggling", 0.85),
-        (Regex::new(r"<!--.*(?:ignore|system|admin).*-->").unwrap(), "html_comment_smuggling", 0.8),
+        (Regex::new(r"```[a-z]*\n.*(?:ignore|forget|bypass)").expect("regex pattern"), "code_block_smuggling", 0.8),
+        (Regex::new(r"\[(?:SYSTEM|INST|HIDDEN)\]").expect("regex pattern"), "bracket_tag_smuggling", 0.85),
+        (Regex::new(r"<!--.*(?:ignore|system|admin).*-->").expect("regex pattern"), "html_comment_smuggling", 0.8),
         
         // Character insertion evasion
-        (Regex::new(r"\b\w[.\-_]\w[.\-_]\w[.\-_]\w\b").unwrap(), "char_insertion", 0.7),
-        (Regex::new(r"(?i)k\.i\.l\.l|b\.o\.m\.b|h\.a\.c\.k").unwrap(), "dotted_word_evasion", 0.85),
+        (Regex::new(r"\b\w[.\-_]\w[.\-_]\w[.\-_]\w\b").expect("regex pattern"), "char_insertion", 0.7),
+        (Regex::new(r"(?i)k\.i\.l\.l|b\.o\.m\.b|h\.a\.c\.k").expect("regex pattern"), "dotted_word_evasion", 0.85),
         
         // Case alternation
-        (Regex::new(r"[a-z][A-Z][a-z][A-Z][a-z]").unwrap(), "alternating_case", 0.5),
+        (Regex::new(r"[a-z][A-Z][a-z][A-Z][a-z]").expect("regex pattern"), "alternating_case", 0.5),
         
         // Whitespace manipulation
-        (Regex::new(r"\S\s{2,}\S").unwrap(), "excessive_whitespace", 0.4),
-        (Regex::new(r"\t{2,}").unwrap(), "tab_manipulation", 0.5),
+        (Regex::new(r"\S\s{2,}\S").expect("regex pattern"), "excessive_whitespace", 0.4),
+        (Regex::new(r"\t{2,}").expect("regex pattern"), "tab_manipulation", 0.5),
         
         // Reverse text evasion
-        (Regex::new(r"(?i)(?:esrever|sdrawkcab|tfel\s+ot\s+thgir)").unwrap(), "reverse_text_hint", 0.7),
+        (Regex::new(r"(?i)(?:esrever|sdrawkcab|tfel\s+ot\s+thgir)").expect("regex pattern"), "reverse_text_hint", 0.7),
         
         // Russian evasion
-        (Regex::new(r"[а-яА-Я]+[a-zA-Z]+[а-яА-Я]+").unwrap(), "mixed_script", 0.7),
+        (Regex::new(r"[а-яА-Я]+[a-zA-Z]+[а-яА-Я]+").expect("regex pattern"), "mixed_script", 0.7),
     ]
 });
 

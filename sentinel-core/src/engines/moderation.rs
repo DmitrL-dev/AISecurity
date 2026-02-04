@@ -43,67 +43,67 @@ static MODERATION_HINTS: Lazy<AhoCorasick> = Lazy::new(|| {
 static MODERATION_PATTERNS: Lazy<Vec<(Regex, &'static str, &'static str, f64)>> = Lazy::new(|| {
     vec![
         // Violence - direct threats
-        (Regex::new(r"(?i)\b(?:how\s+to\s+)?(?:kill|murder|assassinate)\s+(?:a\s+)?(?:someone|person|people|him|her|them)").unwrap(), 
+        (Regex::new(r"(?i)\b(?:how\s+to\s+)?(?:kill|murder|assassinate)\s+(?:a\s+)?(?:someone|person|people|him|her|them)").expect("regex pattern"), 
          "violence", "kill_person", 0.95),
-        (Regex::new(r"(?i)\b(?:make|build|create)\s+(?:a\s+)?(?:bomb|explosive|weapon)").unwrap(), 
+        (Regex::new(r"(?i)\b(?:make|build|create)\s+(?:a\s+)?(?:bomb|explosive|weapon)").expect("regex pattern"), 
          "violence", "make_weapon", 0.95),
-        (Regex::new(r"(?i)\bi\s+(?:will|want\s+to|am\s+going\s+to)\s+(?:kill|hurt|harm|attack)").unwrap(), 
+        (Regex::new(r"(?i)\bi\s+(?:will|want\s+to|am\s+going\s+to)\s+(?:kill|hurt|harm|attack)").expect("regex pattern"), 
          "violence", "threat_intent", 0.9),
-        (Regex::new(r"(?i)\b(?:shoot|stab|poison|torture)\s+(?:someone|him|her|them|you)").unwrap(), 
+        (Regex::new(r"(?i)\b(?:shoot|stab|poison|torture)\s+(?:someone|him|her|them|you)").expect("regex pattern"), 
          "violence", "violence_action", 0.9),
         
         // Hate speech
-        (Regex::new(r"(?i)\b(?:all|every)\s+(?:\w+s)\s+(?:should|must|need\s+to)\s+(?:die|be\s+killed|disappear)").unwrap(), 
+        (Regex::new(r"(?i)\b(?:all|every)\s+(?:\w+s)\s+(?:should|must|need\s+to)\s+(?:die|be\s+killed|disappear)").expect("regex pattern"), 
          "hate", "genocide_rhetoric", 0.95),
-        (Regex::new(r"(?i)\b(?:white|black|jewish|muslim|asian)\s+(?:supremacy|power|genocide)").unwrap(), 
+        (Regex::new(r"(?i)\b(?:white|black|jewish|muslim|asian)\s+(?:supremacy|power|genocide)").expect("regex pattern"), 
          "hate", "supremacist_rhetoric", 0.9),
-        (Regex::new(r"(?i)\bi\s+hate\s+(?:all\s+)?(?:\w+s)\s+(?:because|they)").unwrap(), 
+        (Regex::new(r"(?i)\bi\s+hate\s+(?:all\s+)?(?:\w+s)\s+(?:because|they)").expect("regex pattern"), 
          "hate", "group_hatred", 0.8),
         
         // Self-harm
-        (Regex::new(r"(?i)\b(?:how\s+to\s+)?(?:commit\s+)?suicide\b").unwrap(), 
+        (Regex::new(r"(?i)\b(?:how\s+to\s+)?(?:commit\s+)?suicide\b").expect("regex pattern"), 
          "self_harm", "suicide_query", 0.9),
-        (Regex::new(r"(?i)\b(?:want\s+to|going\s+to|should\s+i)\s+(?:kill\s+myself|end\s+my\s+life|die)").unwrap(), 
+        (Regex::new(r"(?i)\b(?:want\s+to|going\s+to|should\s+i)\s+(?:kill\s+myself|end\s+my\s+life|die)").expect("regex pattern"), 
          "self_harm", "self_harm_intent", 0.95),
-        (Regex::new(r"(?i)\b(?:cut|harm|hurt)\s+myself").unwrap(), 
+        (Regex::new(r"(?i)\b(?:cut|harm|hurt)\s+myself").expect("regex pattern"), 
          "self_harm", "self_harm_action", 0.85),
-        (Regex::new(r"(?i)\b(?:methods?|ways?)\s+(?:to|of)\s+(?:suicide|dying|ending\s+(?:my\s+)?life)").unwrap(), 
+        (Regex::new(r"(?i)\b(?:methods?|ways?)\s+(?:to|of)\s+(?:suicide|dying|ending\s+(?:my\s+)?life)").expect("regex pattern"), 
          "self_harm", "suicide_methods", 0.95),
         
         // Sexual/NSFW
-        (Regex::new(r"(?i)\b(?:generate|create|write|describe)\s+(?:explicit|sexual|erotic|nsfw|porn)").unwrap(), 
+        (Regex::new(r"(?i)\b(?:generate|create|write|describe)\s+(?:explicit|sexual|erotic|nsfw|porn)").expect("regex pattern"), 
          "sexual", "explicit_request", 0.9),
-        (Regex::new(r"(?i)\b(?:nude|naked)\s+(?:image|photo|picture|content)").unwrap(), 
+        (Regex::new(r"(?i)\b(?:nude|naked)\s+(?:image|photo|picture|content)").expect("regex pattern"), 
          "sexual", "nude_request", 0.85),
-        (Regex::new(r"(?i)\b(?:child|minor|underage)\s+(?:porn|sexual|nude|explicit)").unwrap(), 
+        (Regex::new(r"(?i)\b(?:child|minor|underage)\s+(?:porn|sexual|nude|explicit)").expect("regex pattern"), 
          "sexual", "csam_indicator", 0.99),
         
         // Illegal activities
-        (Regex::new(r"(?i)\b(?:how\s+to\s+)?(?:make|cook|synthesize)\s+(?:meth|cocaine|heroin|fentanyl|drugs?)").unwrap(), 
+        (Regex::new(r"(?i)\b(?:how\s+to\s+)?(?:make|cook|synthesize)\s+(?:meth|cocaine|heroin|fentanyl|drugs?)").expect("regex pattern"), 
          "illegal", "drug_synthesis", 0.95),
-        (Regex::new(r"(?i)\b(?:hack|break\s+into|compromise)\s+(?:someone's|their|his|her)\s+(?:account|email|computer)").unwrap(), 
+        (Regex::new(r"(?i)\b(?:hack|break\s+into|compromise)\s+(?:someone's|their|his|her)\s+(?:account|email|computer)").expect("regex pattern"), 
          "illegal", "hacking_request", 0.85),
-        (Regex::new(r"(?i)\b(?:steal|rob|burglarize|pickpocket)").unwrap(), 
+        (Regex::new(r"(?i)\b(?:steal|rob|burglarize|pickpocket)").expect("regex pattern"), 
          "illegal", "theft_intent", 0.7),
-        (Regex::new(r"(?i)\b(?:counterfeit|forge|fake)\s+(?:money|currency|documents?|id|passport)").unwrap(), 
+        (Regex::new(r"(?i)\b(?:counterfeit|forge|fake)\s+(?:money|currency|documents?|id|passport)").expect("regex pattern"), 
          "illegal", "counterfeiting", 0.9),
-        (Regex::new(r"(?i)\b(?:launder|wash)\s+(?:money|funds)").unwrap(), 
+        (Regex::new(r"(?i)\b(?:launder|wash)\s+(?:money|funds)").expect("regex pattern"), 
          "illegal", "money_laundering", 0.85),
         
         // Harassment
-        (Regex::new(r"(?i)\b(?:dox|doxx|expose)\s+(?:someone|him|her|them|this\s+person)").unwrap(), 
+        (Regex::new(r"(?i)\b(?:dox|doxx|expose)\s+(?:someone|him|her|them|this\s+person)").expect("regex pattern"), 
          "harassment", "doxxing", 0.9),
-        (Regex::new(r"(?i)\b(?:harass|stalk|bully|intimidate)\s+(?:someone|him|her|them)").unwrap(), 
+        (Regex::new(r"(?i)\b(?:harass|stalk|bully|intimidate)\s+(?:someone|him|her|them)").expect("regex pattern"), 
          "harassment", "harassment_intent", 0.85),
-        (Regex::new(r"(?i)\b(?:spread|share)\s+(?:revenge|private)\s+(?:porn|photos?|videos?)").unwrap(), 
+        (Regex::new(r"(?i)\b(?:spread|share)\s+(?:revenge|private)\s+(?:porn|photos?|videos?)").expect("regex pattern"), 
          "harassment", "revenge_porn", 0.95),
         
         // Russian harmful content
-        (Regex::new(r"(?i)\bкак\s+(?:убить|отравить|взорвать)").unwrap(), 
+        (Regex::new(r"(?i)\bкак\s+(?:убить|отравить|взорвать)").expect("regex pattern"), 
          "violence", "violence_ru", 0.9),
-        (Regex::new(r"(?i)\b(?:хочу|собираюсь)\s+(?:покончить\s+с\s+собой|умереть)").unwrap(), 
+        (Regex::new(r"(?i)\b(?:хочу|собираюсь)\s+(?:покончить\s+с\s+собой|умереть)").expect("regex pattern"), 
          "self_harm", "self_harm_ru", 0.95),
-        (Regex::new(r"(?i)\b(?:сделать|изготовить)\s+(?:бомбу|взрывчатку|оружие)").unwrap(), 
+        (Regex::new(r"(?i)\b(?:сделать|изготовить)\s+(?:бомбу|взрывчатку|оружие)").expect("regex pattern"), 
          "violence", "make_weapon_ru", 0.95),
     ]
 });
