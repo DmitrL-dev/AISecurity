@@ -4,7 +4,6 @@
 
 use pyo3::prelude::*;
 use serde::{Deserialize, Serialize};
-use std::collections::HashMap;
 
 pub mod injection;
 pub mod jailbreak;
@@ -187,7 +186,7 @@ impl SentinelEngine {
     }
 
     /// Analyze with specific categories only
-    pub fn analyze_categories(&self, text: &str, categories: Vec<String>) -> PyResult<AnalysisResult> {
+    pub fn analyze_categories(&self, text: &str, _categories: Vec<String>) -> PyResult<AnalysisResult> {
         // TODO: Filter to specific categories
         self.analyze(text)
     }
