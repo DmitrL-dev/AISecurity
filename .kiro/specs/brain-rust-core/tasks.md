@@ -397,12 +397,12 @@
 | Category | Python | Rust | Coverage |
 |----------|--------|------|----------|
 | Pattern Engines | 8 archived | 8 engines | ✅ 100% |
-| Strange Math | 11 engines | 5 engines | ✅ 45% |
+| Strange Math | 11 engines | 7 engines | ✅ 64% |
 | Semantic/ML | 15 engines | 2 engines | 🟡 13% |
 | Domain-Specific | 138 engines | 10 super-engines | ✅ 100% consolidated |
-| **Total** | **187 engines** | **25 engines** | **~90%** |
+| **Total** | **187 engines** | **27 engines** | **~92%** |
 
-### Rust Engines (25 engines, 331 tests)
+### Rust Engines (27 engines, 349 tests)
 
 | Phase | Engine | Python Sources | Tests |
 |-------|--------|----------------|-------|
