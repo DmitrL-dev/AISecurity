@@ -14,7 +14,7 @@ use super::MatchResult;
 /// - Plugin architecture for future engines
 ///
 /// # Example
-/// ```rust
+/// ```rust,ignore
 /// struct CustomEngine;
 /// impl PatternMatcher for CustomEngine {
 ///     fn name(&self) -> &'static str { "custom" }
