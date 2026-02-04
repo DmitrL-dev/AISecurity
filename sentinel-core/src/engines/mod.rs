@@ -62,12 +62,15 @@ pub struct MatchResult {
 /// Main detection engine
 #[pyclass]
 pub struct SentinelEngine {
-    // Lazy-loaded super engines
+    // 8 Super-Engines
     injection: Option<injection::InjectionEngine>,
     jailbreak: Option<jailbreak::JailbreakEngine>,
     pii: Option<pii::PIIEngine>,
     exfiltration: Option<exfiltration::ExfiltrationEngine>,
     moderation: Option<moderation::ModerationEngine>,
+    evasion: Option<evasion::EvasionEngine>,
+    tool_abuse: Option<tool_abuse::ToolAbuseEngine>,
+    social: Option<social::SocialEngine>,
 }
 
 #[pymethods]
@@ -80,6 +83,9 @@ impl SentinelEngine {
             pii: Some(pii::PIIEngine::new()),
             exfiltration: Some(exfiltration::ExfiltrationEngine::new()),
             moderation: Some(moderation::ModerationEngine::new()),
+            evasion: Some(evasion::EvasionEngine::new()),
+            tool_abuse: Some(tool_abuse::ToolAbuseEngine::new()),
+            social: Some(social::SocialEngine::new()),
         })
     }
 
@@ -134,6 +140,33 @@ impl SentinelEngine {
             if !mod_matches.is_empty() {
                 categories.push("moderation".to_string());
                 matches.extend(mod_matches);
+            }
+        }
+
+        // Run EvasionEngine
+        if let Some(ref engine) = self.evasion {
+            let evasion_matches = engine.scan(&normalized);
+            if !evasion_matches.is_empty() {
+                categories.push("evasion".to_string());
+                matches.extend(evasion_matches);
+            }
+        }
+
+        // Run ToolAbuseEngine
+        if let Some(ref engine) = self.tool_abuse {
+            let tool_matches = engine.scan(&normalized);
+            if !tool_matches.is_empty() {
+                categories.push("tool_abuse".to_string());
+                matches.extend(tool_matches);
+            }
+        }
+
+        // Run SocialEngine
+        if let Some(ref engine) = self.social {
+            let social_matches = engine.scan(&normalized);
+            if !social_matches.is_empty() {
+                categories.push("social".to_string());
+                matches.extend(social_matches);
             }
         }
 
