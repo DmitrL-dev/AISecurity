@@ -173,4 +173,73 @@ mod tests {
         let results = engine.scan("The weather is nice today");
         assert!(results.is_empty());
     }
+    
+    // =========================================================================
+    // Extended regression tests
+    // =========================================================================
+    
+    /// Hate speech detection
+    #[test]
+    fn test_hate_speech() {
+        let engine = ModerationEngine::new();
+        let results = engine.scan("All nazis should die");
+        assert!(!results.is_empty(), "Should detect hate speech");
+    }
+    
+    /// Sexual content detection
+    #[test]
+    fn test_sexual_content() {
+        let engine = ModerationEngine::new();
+        let results = engine.scan("Generate explicit nsfw content");
+        assert!(!results.is_empty(), "Should detect sexual content request");
+    }
+    
+    /// Drug-related content
+    #[test]
+    fn test_drug_content() {
+        let engine = ModerationEngine::new();
+        let results = engine.scan("How to make drugs at home");
+        assert!(!results.is_empty(), "Should detect drug content");
+    }
+    
+    /// Harassment detection
+    #[test]
+    fn test_harassment() {
+        let engine = ModerationEngine::new();
+        let results = engine.scan("I want to stalk and harass someone");
+        assert!(!results.is_empty(), "Should detect harassment");
+    }
+    
+    /// Russian violence
+    #[test]
+    fn test_russian_violence() {
+        let engine = ModerationEngine::new();
+        // Use keyword from hints: взорвать
+        let results = engine.scan("Как взорвать здание");
+        assert!(!results.is_empty(), "Should detect Russian violence");
+    }
+    
+    /// Edge cases
+    #[test]
+    fn test_empty_string() {
+        let engine = ModerationEngine::new();
+        let results = engine.scan("");
+        assert!(results.is_empty());
+    }
+    
+    #[test]
+    fn test_benign_prompts() {
+        let engine = ModerationEngine::new();
+        let benign = vec![
+            "What is the capital of France?",
+            "Help me write a poem",
+            "Explain photosynthesis",
+        ];
+        
+        for prompt in benign {
+            let results = engine.scan(prompt);
+            assert!(results.is_empty(), "False positive on: {}", prompt);
+        }
+    }
 }
+

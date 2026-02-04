@@ -165,10 +165,11 @@
 
 ## Phase 5: Testing & Rollout (Week 5-6)
 
-### Task 5.1: Regression Tests ⏳
+### Task 5.1: Regression Tests ✅
 - [x] Migrate injection.py tests → injection.rs (**11 tests**)
-- [ ] Migrate other Python engine tests
-- [ ] 100% pass rate required — **46/46 (100%)** ✅
+- [x] Migrate other Python engine tests → All 8 engines
+- [x] 100% pass rate required — **96/96 (100%)** ✅
+- [x] Added missing patterns: script_tag, telegram, base64, mcp_invoke, wget_curl
 
 ### Task 5.2: Benchmarks ✅
 - [x] Latency comparison: Python vs Rust — **100,000x faster**
@@ -190,12 +191,16 @@
 
 ## Phase 6: Post-Migration Review
 
-### Task 6.1: Pattern Coverage Audit
-- [ ] Review pattern counts per engine vs real-world attack coverage
+### Task 6.1: Pattern Coverage Audit ⏳
+- [x] Review pattern counts per engine vs real-world attack coverage
 - [ ] Analyze false positive/negative rates from production
 - [ ] Compare with OWASP, MITRE ATT&CK, and industry benchmarks
-- [ ] Identify gaps in detection coverage
-- [ ] Add missing patterns based on threat intelligence
+- [x] Identify gaps in detection coverage (7 gaps found, fixed)
+- [x] Add missing patterns based on threat intelligence:
+  - exfiltration: script_src_injection, script_tag, telegram_url, telegram_exfil
+  - social: wire_urgency_scam, wire_help_scam
+  - evasion: base64_keyword, base64_decode_cmd
+  - tool_abuse: wget_curl_url, passwd_file_modify, mcp_invoke, persistence_keyword
 
 ### Task 6.2: Performance Optimization
 - [ ] Profile hot paths in all 8 engines
