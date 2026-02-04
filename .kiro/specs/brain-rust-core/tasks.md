@@ -180,7 +180,7 @@
 ### Task 5.3: A/B Deploy ✅
 - [x] Feature flag: `USE_RUST_ENGINE` ✅
 - [x] Shadow mode comparison (`shadow_analyze()`) ✅
-- [ ] Gradual rollout
+- [x] Gradual rollout: `RUST_ROLLOUT_PERCENT` (0-100) ✅
 
 ### Task 5.4: Cleanup ⏳
 - [x] Archive Python engines — **injection.py, pii.py** archived ✅

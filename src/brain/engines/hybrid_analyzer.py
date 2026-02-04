@@ -135,6 +135,14 @@ class HybridAnalyzer:
             os.getenv("RUST_FALLBACK_PYTHON", "true").lower() == "true"
         )
 
+        # Gradual rollout: percentage of requests using Rust (0-100)
+        # Default 100 = all requests use Rust when enabled
+        self._rollout_percent = int(os.getenv("RUST_ROLLOUT_PERCENT", "100"))
+        self._rollout_percent = max(0, min(100, self._rollout_percent))
+
+        if self._rollout_percent < 100:
+            logger.info(f"Rust gradual rollout: {self._rollout_percent}%")
+
         # Initialize Rust engine if available and enabled
         if RUST_AVAILABLE and self._use_rust:
             try:
@@ -308,7 +316,17 @@ class HybridAnalyzer:
         - RUST_ONLY for short, simple inputs
         - HYBRID for medium complexity
         - PYTHON_ONLY for long/complex inputs requiring ML
+
+        Respects RUST_ROLLOUT_PERCENT for gradual rollout.
         """
+        import random
+
+        # Gradual rollout check
+        if self._rollout_percent < 100:
+            if random.randint(1, 100) > self._rollout_percent:
+                # This request uses Python (outside rollout %)
+                return self._analyze_python(text)
+
         text_len = len(text)
 
         if text_len < 200:
