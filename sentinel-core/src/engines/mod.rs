@@ -14,9 +14,11 @@ pub mod moderation;
 pub mod evasion;
 pub mod tool_abuse;
 pub mod social;
+pub mod hybrid;
 
 // Re-export trait for convenience
 pub use traits::{PatternMatcher, EngineCategory, BoxedEngine, create_default_engines};
+pub use hybrid::HybridPiiEngine;
 
 /// Result of text analysis containing threat detection information.
 ///

@@ -37,6 +37,19 @@ env_logger = "0.11"
 # Error handling
 thiserror = "2.0"
 
+# CDN signature loading (optional feature)
+reqwest = { version = "0.12", features = [
+    "json",
+    "rustls-tls",
+], optional = true }
+tokio = { version = "1.0", features = ["rt", "macros"], optional = true }
+sha2 = { version = "0.10", optional = true }
+directories = { version = "5.0", optional = true }
+
+[features]
+default = []
+cdn = ["reqwest", "tokio", "sha2", "directories"]
+
 [dev-dependencies]
 criterion = { version = "0.5", features = ["html_reports"] }
 

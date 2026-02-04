@@ -16,9 +16,11 @@ mod error;
 #[macro_use]
 mod macros;
 mod patterns;
+pub mod signatures;
 pub mod unicode_norm;
 
 pub use error::{SentinelError, SentinelResult};
+pub use signatures::{SignatureLoader, PiiSignatures, KeywordSignatures, CompiledPattern};
 
 use engines::{AnalysisResult, SentinelEngine};
 
