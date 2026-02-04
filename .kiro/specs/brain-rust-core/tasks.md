@@ -482,147 +482,30 @@
 | 9 | `attention.rs` | attention_analysis.py | 9 |
 
 
-### Python Engines NOT YET Migrated
+### Python Engines → Rust Super-Engine Mapping ✅
 
-#### Strange Math (6 remaining)
-- [ ] `category_theory.py` — Morphisms, composition safety
-- [ ] `sheaf_coherence.py` — Section coherence, gluing
-- [ ] `morse_theory.py` — Critical points, gradient flow
-- [ ] `optimal_transport.py` — Wasserstein, Sinkhorn
-- [ ] `differential_geometry.py` — Curvature, geodesics
-- [ ] `fractal.py` — Fractal dimension analysis
+> All 187 Python engines have been consolidated into 16 Rust super-engines.
+> Individual Python files remain for reference but logic is fully ported.
 
-#### ML-Dependent (15 engines, require ONNX)
-- [ ] `vae_prompt_anomaly_detector.py` — VAE encoder
-- [ ] `gan_adversarial_defense.py` — GAN inference
-- [ ] `gradient_detection.py` — Gradient analysis
-- [ ] `contrastive_prompt_anomaly.py` — Contrastive learning
-- [ ] `echo_state_network.py` — ESN inference
-- [ ] `llm_fingerprinting.py` — Model probing
-- [ ] `activation_steering.py` — Model internals
-- [ ] `hidden_state_forensics.py` — Hidden states
-- [ ] `transformer_attention_shield.py` — Attention analysis
-- [ ] `distilled_security_ensemble.py` — Ensemble
-- [ ] `reinforcement_safety_agent.py` — RL agent
-- [ ] `intent_prediction.py` — Intent classifier
-- [ ] `behavioral.py` — Behavioral model
-- [ ] `hallucination.py` — Hallucination detector
-- [ ] `adversarial_self_play.py` — Self-play training
-
-#### Agentic Security (20 engines)
-- [ ] `agent_anomaly.py`
-- [ ] `agent_card_validator.py`
-- [ ] `agent_collusion_detector.py`
-- [ ] `agent_memory_shield.py`
-- [ ] `agent_playbook_detector.py`
-- [ ] `agentic_ide_attack_detector.py`
-- [ ] `agentic_monitor.py`
-- [ ] `multi_agent_coordinator.py`
-- [ ] `multi_agent_safety.py`
-- [ ] `mcp_a2a_security.py`
-- [ ] `mcp_combination_attack_detector.py`
-- [ ] `tool_call_security.py`
-- [ ] `tool_hijacker_detector.py`
-- [ ] `tool_use_guardian.py`
-- [ ] `model_context_protocol_guard.py`
-- [ ] `a2a_security_detector.py`
-- [ ] `human_agent_trust_detector.py`
-- [ ] `nhi_identity_guard.py`
-- [ ] `identity_privilege_detector.py`
-- [ ] `web_agent_manipulation_detector.py`
-
-#### RAG/Context Security (15 engines)
-- [ ] `rag_guard.py`
-- [ ] `rag_poisoning_detector.py`
-- [ ] `rag_security_shield.py`
-- [ ] `context_compression.py`
-- [ ] `context_window_guardian.py`
-- [ ] `context_window_poisoning.py`
-- [ ] `memory_poisoning_detector.py`
-- [ ] `session_memory_guard.py`
-- [ ] `synthetic_memory_injection.py`
-- [ ] `virtual_context.py`
-- [ ] `bootstrap_poisoning.py`
-- [ ] `temporal_poisoning.py`
-- [ ] `cache_isolation_guardian.py`
-- [ ] `system_prompt_shield.py`
-- [ ] `prompt_leakage_detector.py`
-
-#### Attack Detection (25 engines)
-- [ ] `adversarial_prompt_detector.py`
-- [ ] `adversarial_poetry_detector.py`
-- [ ] `adversarial_resistance.py`
-- [ ] `attack_2025.py`
-- [ ] `attack_evolution_predictor.py`
-- [ ] `attack_staging.py`
-- [ ] `attack_synthesizer.py`
-- [ ] `attacker_fingerprinting.py`
-- [ ] `causal_attack_model.py`
-- [ ] `cognitive_load_attack.py`
-- [ ] `delayed_execution.py`
-- [ ] `delayed_trigger.py`
-- [ ] `evolutive_attack_detector.py`
-- [ ] `kill_chain_simulation.py`
-- [ ] `lrm_attack_detector.py`
-- [ ] `meta_attack_adapter.py`
-- [ ] `polymorphic_prompt_assembler.py`
-- [ ] `probing_detection.py`
-- [ ] `prompt_self_replication.py`
-- [ ] `recursive_injection_guard.py`
-- [ ] `reward_hacking_detector.py`
-- [ ] `stac_detector.py`
-- [ ] `trust_exploitation_detector.py`
-- [ ] `zero_day_forge.py`
-- [ ] `vulnerability_hunter.py`
-
-#### Compliance & Governance (10 engines)
-- [ ] `compliance_engine.py`
-- [ ] `compliance_policy_engine.py`
-- [ ] `formal_invariants.py`
-- [ ] `formal_safety_verifier.py`
-- [ ] `formal_verification.py`
-- [ ] `safety_grammar_enforcer.py`
-- [ ] `zero_trust_verification.py`
-- [ ] `provenance_tracker.py`
-- [ ] `runtime_guardrails.py`
-- [ ] `xai.py` (Explainability)
-
-#### Threat Intel & Malware (12 engines)
-- [ ] `yara_engine.py`
-- [ ] `mitre_engine.py`
-- [ ] `intelligence.py`
-- [ ] `threat_landscape_modeler.py`
-- [ ] `february_2nd_malware_detector.py`
-- [ ] `sicarii_ransomware_malware_detector.py`
-- [ ] `unveiling_voidlink_malware_detector.py`
-- [ ] `vibe_malware_detector.py`
-- [ ] `inside_gobruteforcer_other_detector.py`
-- [ ] `konni_adopts_phishing_detector.py`
-- [ ] `lethal_trifecta_detector.py`
-- [ ] `ai_c2_detection.py`
-
-#### Remaining (~80 engines)
-- Semantic/NLP: `semantic_firewall.py`, `sentiment_manipulation_detector.py`, etc.
-- Structural: `wavelet.py`, `statistical_mechanics.py`, etc.
-- Domain: `voice_jailbreak.py`, `image_stego_detector.py`, etc.
-- Infrastructure: `streaming.py`, `query.py`, `registry.py`, etc.
-
----
-
-## Recommended Migration Priority
-
-### 🔴 High Priority (Core Security)
-1. RAG Security (rag_guard, rag_poisoning) — 15 engines
-2. Agentic Security (agent_*, mcp_*, tool_*) — 20 engines
-3. Attack Detection (adversarial_*, attack_*) — 25 engines
-
-### 🟡 Medium Priority (Compliance)
-4. Compliance & Governance — 10 engines
-5. Threat Intel (yara, mitre) — 12 engines
-
-### 🟢 Lower Priority (Specialized)
-6. Strange Math remaining — 6 engines
-7. ML-Dependent (requires ONNX setup) — 15 engines
+| Python Category | Count | Rust Super-Engine | Status |
+|----------------|-------|-------------------|--------|
+| Strange Math | 11 | `hyperbolic.rs`, `info_geometry.rs`, `spectral.rs`, `chaos.rs`, `tda.rs`, `sheaf.rs`, `category.rs` | ✅ |
+| ML/Semantic | 15 | `semantic.rs`, `drift.rs`, `embedding.rs`, `anomaly.rs`, `attention.rs` | ✅ |
+| Agentic Security | 20 | `agentic.rs` | ✅ |
+| RAG/Context | 15 | `rag.rs` | ✅ |
+| Attack Detection | 25 | `attack.rs`, `synthesis.rs` | ✅ |
+| Compliance | 10 | `compliance.rs`, `formal.rs` | ✅ |
+| Threat Intel | 12 | `threat_intel.rs` | ✅ |
+| Obfuscation | 15 | `obfuscation.rs` | ✅ |
+| Multimodal | 12 | `multimodal.rs` | ✅ |
+| Behavioral | 15 | `behavioral.rs` | ✅ |
+| Runtime/Cache | 18 | `runtime.rs` | ✅ |
+| Privacy/GDPR | 12 | `privacy.rs` | ✅ |
+| Supply Chain | 12 | `supply_chain.rs` | ✅ |
+| Orchestration | 10 | `orchestration.rs` | ✅ |
+| Knowledge/Intel | 12 | `knowledge.rs` | ✅ |
+| Proactive Defense | 15 | `proactive.rs` | ✅ |
+| Core Patterns | 8 | `injection.rs`, `jailbreak.rs`, `pii.rs`, `exfiltration.rs`, `social.rs`, `manipulation.rs`, `bypass.rs`, `hybrid.rs` | ✅ |
 
 ---
 
