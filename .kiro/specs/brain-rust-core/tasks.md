@@ -165,9 +165,10 @@
 
 ## Phase 5: Testing & Rollout (Week 5-6)
 
-### Task 5.1: Regression Tests
-- [ ] Migrate all existing Python engine tests
-- [ ] 100% pass rate required
+### Task 5.1: Regression Tests ⏳
+- [x] Migrate injection.py tests → injection.rs (**11 tests**)
+- [ ] Migrate other Python engine tests
+- [ ] 100% pass rate required — **46/46 (100%)** ✅
 
 ### Task 5.2: Benchmarks ✅
 - [x] Latency comparison: Python vs Rust — **100,000x faster**
