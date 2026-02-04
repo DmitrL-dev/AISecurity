@@ -38,6 +38,8 @@ pub mod multimodal;
 pub mod behavioral;
 pub mod runtime;
 pub mod formal;
+pub mod sheaf;
+pub mod category;
 
 // Re-export trait for convenience
 pub use traits::{PatternMatcher, EngineCategory, BoxedEngine, create_default_engines};
