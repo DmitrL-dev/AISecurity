@@ -14,18 +14,39 @@ pub mod evasion;
 pub mod tool_abuse;
 pub mod social;
 
-/// Analysis result returned to Python
+/// Result of text analysis containing threat detection information.
+///
+/// Returned by [`SentinelEngine::analyze`] and [`quick_scan`].
+///
+/// # Fields
+/// * `detected` - `true` if any threat was found
+/// * `risk_score` - Highest confidence score among matches (0.0-1.0)
+/// * `processing_time_us` - Analysis time in microseconds
+/// * `matches` - List of individual pattern matches
+/// * `categories` - List of detected threat categories
+///
+/// # Example
+/// ```python
+/// result = engine.analyze("malicious input")
+/// if result.detected:
+///     print(f"Threat! Score: {result.risk_score}")
+/// ```
 #[pyclass]
 #[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct AnalysisResult {
+    /// Whether any threat was detected
     #[pyo3(get)]
     pub detected: bool,
+    /// Highest confidence score (0.0-1.0)
     #[pyo3(get)]
     pub risk_score: f64,
+    /// Processing time in microseconds
     #[pyo3(get)]
     pub processing_time_us: u64,
+    /// Individual pattern matches
     #[pyo3(get)]
     pub matches: Vec<MatchResult>,
+    /// Detected threat categories (e.g., "injection", "pii")
     #[pyo3(get)]
     pub categories: Vec<String>,
 }
@@ -42,23 +63,55 @@ impl AnalysisResult {
     }
 }
 
-/// Individual match result
+/// Individual pattern match with location and confidence.
+///
+/// # Fields
+/// * `engine` - Engine that detected this match (e.g., "injection")
+/// * `pattern` - Pattern name that matched (e.g., "sql_tautology")
+/// * `confidence` - Match confidence (0.0-1.0)
+/// * `start` - Start position in text (byte offset)
+/// * `end` - End position in text (byte offset)
 #[pyclass]
 #[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct MatchResult {
+    /// Engine name (e.g., "injection", "pii")
     #[pyo3(get)]
     pub engine: String,
+    /// Pattern identifier
     #[pyo3(get)]
     pub pattern: String,
+    /// Detection confidence (0.0-1.0)
     #[pyo3(get)]
     pub confidence: f64,
+    /// Start byte offset in text
     #[pyo3(get)]
     pub start: usize,
+    /// End byte offset in text
     #[pyo3(get)]
     pub end: usize,
 }
 
-/// Main detection engine
+/// High-performance AI security detection engine.
+///
+/// Consolidates 8 super-engines for comprehensive threat detection:
+/// - **Injection**: SQL, NoSQL, Command, LDAP, XPath
+/// - **Jailbreak**: Prompt injection, role override
+/// - **PII**: Personal data detection (SSN, credit cards, etc.)
+/// - **Exfiltration**: Data theft attempts
+/// - **Moderation**: Harmful content detection
+/// - **Evasion**: Obfuscation techniques
+/// - **Tool Abuse**: Agent tool misuse
+/// - **Social**: Social engineering tactics
+///
+/// # Example
+/// ```python
+/// from sentinel_core import SentinelEngine
+///
+/// engine = SentinelEngine()
+/// result = engine.analyze("SELECT * FROM users WHERE 1=1")
+/// print(result.detected)  # True
+/// print(result.categories)  # ['injection']
+/// ```
 #[pyclass]
 pub struct SentinelEngine {
     // 8 Super-Engines

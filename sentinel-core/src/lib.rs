@@ -12,8 +12,11 @@
 use pyo3::prelude::*;
 
 mod engines;
+mod error;
 mod patterns;
 mod unicode_norm;
+
+pub use error::{SentinelError, SentinelResult};
 
 use engines::{AnalysisResult, SentinelEngine};
 
