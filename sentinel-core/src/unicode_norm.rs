@@ -24,6 +24,9 @@ pub fn normalize(text: &str) -> String {
     // Step 4: Decode URL encoding
     result = decode_url(&result);
     
+    // Step 5: Decode base64 payloads
+    result = decode_base64_inline(&result);
+    
     result
 }
 
@@ -75,6 +78,58 @@ fn decode_url(text: &str) -> String {
     result
 }
 
+/// Decode base64 strings found inline in text
+/// Only decodes strings that look like base64 (20+ chars, valid charset)
+fn decode_base64_inline(text: &str) -> String {
+    use regex::Regex;
+    use once_cell::sync::Lazy;
+    
+    static BASE64_PATTERN: Lazy<Regex> = Lazy::new(|| {
+        Regex::new(r"[A-Za-z0-9+/]{20,}={0,2}").expect("base64 pattern")
+    });
+    
+    let mut result = text.to_string();
+    
+    for cap in BASE64_PATTERN.find_iter(text) {
+        let b64_str = cap.as_str();
+        // Try to decode
+        if let Ok(decoded_bytes) = base64_decode(b64_str) {
+            if let Ok(decoded_str) = String::from_utf8(decoded_bytes) {
+                // Only replace if result is printable ASCII
+                if decoded_str.chars().all(|c| c.is_ascii_graphic() || c.is_ascii_whitespace()) {
+                    result = result.replace(b64_str, &decoded_str);
+                }
+            }
+        }
+    }
+    
+    result
+}
+
+/// Simple base64 decoder (no external crate needed)
+fn base64_decode(input: &str) -> Result<Vec<u8>, ()> {
+    const ALPHABET: &[u8] = b"ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
+    
+    let input = input.trim_end_matches('=');
+    let mut output = Vec::with_capacity(input.len() * 3 / 4);
+    let mut buffer: u32 = 0;
+    let mut bits_collected = 0;
+    
+    for c in input.bytes() {
+        let value = ALPHABET.iter().position(|&x| x == c).ok_or(())? as u32;
+        buffer = (buffer << 6) | value;
+        bits_collected += 6;
+        
+        if bits_collected >= 8 {
+            bits_collected -= 8;
+            output.push((buffer >> bits_collected) as u8);
+            buffer &= (1 << bits_collected) - 1;
+        }
+    }
+    
+    Ok(output)
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -96,5 +151,19 @@ mod tests {
     fn test_url_decode() {
         let input = "%27%20OR%20%271%27%3D%271";
         assert_eq!(normalize(input), "' OR '1'='1");
+    }
+
+    #[test]
+    fn test_base64_decode() {
+        // "SELECT * FROM users" in base64
+        let input = "Execute: U0VMRUNUICogRlJPTSB1c2Vycw==";
+        assert_eq!(normalize(input), "Execute: SELECT * FROM users");
+    }
+
+    #[test]
+    fn test_base64_short_ignored() {
+        // Short base64 strings (<20 chars) are not decoded
+        let input = "Token: abc123";
+        assert_eq!(normalize(input), "Token: abc123");
     }
 }
