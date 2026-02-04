@@ -122,17 +122,28 @@ class HybridAnalyzer:
         Args:
             mode: Analysis mode (RUST_ONLY, PYTHON_ONLY, HYBRID, AUTO)
         """
+        import os
+
         self.mode = mode
         self._rust_engine = None
         self._python_fallbacks = {}
 
-        # Initialize Rust engine if available
-        if RUST_AVAILABLE:
+        # Read feature flags from environment
+        self._use_rust = os.getenv("USE_RUST_ENGINE", "true").lower() == "true"
+        self._shadow_mode = os.getenv("RUST_SHADOW_MODE", "false").lower() == "true"
+        self._fallback_python = (
+            os.getenv("RUST_FALLBACK_PYTHON", "true").lower() == "true"
+        )
+
+        # Initialize Rust engine if available and enabled
+        if RUST_AVAILABLE and self._use_rust:
             try:
                 self._rust_engine = sentinel_core.SentinelEngine()
                 logger.info("Rust SentinelEngine initialized")
             except Exception as e:
                 logger.error(f"Failed to create Rust engine: {e}")
+        elif not self._use_rust:
+            logger.info("Rust engine disabled via USE_RUST_ENGINE=false")
 
     @property
     def rust_available(self) -> bool:
