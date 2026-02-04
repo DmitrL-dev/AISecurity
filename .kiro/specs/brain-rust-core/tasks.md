@@ -388,6 +388,18 @@
 - [x] Safety constraints, symbolic exploits, boundary violations
 - [x] 10 tests passing
 
+### Task 10.11: Knowledge & Intelligence Super-Engine ✅
+- [x] `src/engines/knowledge.rs`
+- [x] Consolidates 12 Python engines (knowledge, llm_fingerprinting, meta_*)
+- [x] Fingerprinting, extraction, inversion, membership inference
+- [x] 9 tests passing
+
+### Task 10.12: Proactive Defense Super-Engine ✅
+- [x] `src/engines/proactive.rs`
+- [x] Consolidates 15 Python engines (honeypot, canary, zero_day_*)
+- [x] Honeypots, canaries, zero-day detection, predictive blocking
+- [x] 10 tests passing
+
 ---
 
 ## Migration Summary
@@ -399,10 +411,10 @@
 | Pattern Engines | 8 archived | 8 engines | ✅ 100% |
 | Strange Math | 11 engines | 7 engines | ✅ 64% |
 | Semantic/ML | 15 engines | 2 engines | 🟡 13% |
-| Domain-Specific | 138 engines | 10 super-engines | ✅ 100% consolidated |
-| **Total** | **187 engines** | **27 engines** | **~92%** |
+| Domain-Specific | 165 engines | 12 super-engines | ✅ 100% consolidated |
+| **Total** | **187 engines** | **29 engines** | **~95%** |
 
-### Rust Engines (27 engines, 349 tests)
+### Rust Engines (29 engines, 368 tests)
 
 | Phase | Engine | Python Sources | Tests |
 |-------|--------|----------------|-------|
