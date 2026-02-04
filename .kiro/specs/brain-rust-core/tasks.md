@@ -216,4 +216,209 @@
 
 ---
 
+## Phase 7: Strange Math Engines → Rust ⏳
+
+> **Goal:** Port unique mathematical engines to Rust for full performance parity
+
+### Task 7.1: TDA Engine (Persistent Homology)
+- [ ] Add `cova_space` or `oat` crate for Rips/Alpha complexes
+- [ ] Implement `PersistenceDiagram` struct
+- [ ] Port Betti number computation (β₀, β₁, β₂)
+- [ ] Port `TopologicalFingerprinter`
+- [ ] Port `ZigzagEngine` for layer analysis
+- [ ] Tests: match Python TDA outputs exactly
+
+**Rust Crates:** `cova_space`, `nalgebra`, `rayon`
+
+### Task 7.2: Hyperbolic Geometry Engine
+- [ ] Implement `PoincareBall` struct with nalgebra
+- [ ] Mobius addition, exponential/log maps
+- [ ] Frechet mean (hyperbolic centroid)
+- [ ] Geodesic distance computation
+- [ ] Port `HyperbolicAnomalyDetector`
+- [ ] Tests: match Python hyperbolic outputs
+
+**Rust Crates:** `nalgebra`, `num-traits`
+
+### Task 7.3: Information Geometry Engine
+- [ ] Implement `StatisticalManifold` struct
+- [ ] Fisher-Rao distance (Bhattacharyya)
+- [ ] Character distribution analysis
+- [ ] Port `GeometricAnomalyDetector`
+- [ ] Tests: match Python InfoGeo outputs
+
+**Rust Crates:** `nalgebra`, `statrs`
+
+### Task 7.4: Chaos Theory Engine
+- [ ] Lyapunov exponent estimation
+- [ ] Phase space reconstruction (Takens)
+- [ ] Attractor classification
+- [ ] Regime change detection
+- [ ] Tests: match Python chaos outputs
+
+**Rust Crates:** `nalgebra`, `ndarray`
+
+### Task 7.5: Sheaf Coherence Engine
+- [ ] Implement `SheafStructure` with sections/restrictions
+- [ ] Coherence scoring via cosine similarity
+- [ ] "Cech cohomology" (gluing violation count)
+- [ ] Multi-turn dialogue analysis
+- [ ] Tests: match Python sheaf outputs
+
+**Rust Crates:** `nalgebra`, `petgraph`
+
+### Task 7.6: Category Theory Engine
+- [ ] Implement `Morphism`, `PromptCategory` structs
+- [ ] Composition safety tracking
+- [ ] Natural transformation check
+- [ ] `CompositionalAttackDetector`
+- [ ] Tests: match Python category outputs
+
+**Rust Crates:** custom implementation
+
+---
+
+## Phase 8: Spectral & Differential Engines → Rust ⏳
+
+### Task 8.1: Spectral Graph Engine
+- [ ] Graph Laplacian computation
+- [ ] Eigenvalue decomposition (nalgebra)
+- [ ] Spectral clustering
+- [ ] Fiedler vector analysis
+- [ ] Tests: 15+ spectral tests
+
+**Rust Crates:** `nalgebra`, `petgraph`, `sprs`
+
+### Task 8.2: Differential Geometry Engine
+- [ ] Curvature estimation
+- [ ] Manifold distance metrics
+- [ ] Geodesic computation
+- [ ] Tests: 10+ differential tests
+
+**Rust Crates:** `nalgebra`
+
+### Task 8.3: Optimal Transport Engine
+- [ ] Wasserstein distance (1D exact, nD Sinkhorn)
+- [ ] Earth mover's distance
+- [ ] Distribution comparison
+- [ ] Tests: 10+ OT tests
+
+**Rust Crates:** `nalgebra`, custom Sinkhorn
+
+### Task 8.4: Morse Theory Engine
+- [ ] Critical point detection
+- [ ] Morse complex construction
+- [ ] Gradient flow analysis
+- [ ] Tests: 8+ Morse tests
+
+**Rust Crates:** `nalgebra`
+
+---
+
+## Phase 9: ML Inference → Rust ⏳
+
+> **Goal:** Run ML models in Rust via ONNX Runtime
+
+### Task 9.1: ONNX Runtime Integration
+- [ ] Add `ort` crate (ONNX Runtime bindings)
+- [ ] Export SentenceTransformer to ONNX
+- [ ] Implement `RustEmbedder` struct
+- [ ] Batch inference support
+- [ ] Tests: embedding similarity checks
+
+**Rust Crates:** `ort`, `ndarray`
+
+### Task 9.2: Semantic Similarity Engine
+- [ ] Port `semantic_detector.py` logic
+- [ ] Cosine similarity in Rust
+- [ ] Threshold-based classification
+- [ ] Tests: 20+ semantic tests
+
+### Task 9.3: VAE Anomaly Detection
+- [ ] Export VAE encoder to ONNX
+- [ ] Latent space anomaly scoring
+- [ ] Reconstruction error
+- [ ] Tests: 15+ VAE tests
+
+### Task 9.4: Attention Analysis
+- [ ] Attention pattern extraction
+- [ ] Head importance scoring
+- [ ] Token attribution
+- [ ] Tests: 10+ attention tests
+
+---
+
+## Phase 10: Domain-Specific Engines → Rust ⏳
+
+### Task 10.1: RAG Security Engine
+- [ ] Port RAG poisoning patterns
+- [ ] Document injection detection
+- [ ] Retrieval manipulation
+- [ ] Tests: 15+ RAG tests
+
+### Task 10.2: MCP Security Engine
+- [ ] Port MCP protocol patterns
+- [ ] Tool abuse detection
+- [ ] Agent coordination attacks
+- [ ] Tests: 20+ MCP tests
+
+### Task 10.3: Voice/Audio Engine
+- [ ] Phonetic obfuscation patterns
+- [ ] Audio steganography detection
+- [ ] ASI10 attack patterns
+- [ ] Tests: 10+ voice tests
+
+### Task 10.4: Agentic Security Engine
+- [ ] Multi-agent coordination attacks
+- [ ] Tool chain analysis
+- [ ] Privilege escalation paths
+- [ ] Tests: 15+ agentic tests
+
+---
+
+## Migration Summary
+
+| Phase | Engines | Est. LOC | Status |
+|-------|---------|----------|--------|
+| 1-5 | 8 Pattern Engines | 3,500 | ✅ Complete |
+| 7 | 6 Strange Math | 4,000 | ⏳ Planned |
+| 8 | 4 Spectral/Diff | 2,500 | ⏳ Planned |
+| 9 | 4 ML Inference | 2,000 | ⏳ Planned |
+| 10 | 4 Domain-Specific | 2,000 | ⏳ Planned |
+| **Total** | **26 Engines** | **14,000** | **30% → 100%** |
+
+---
+
+## Session Summary (2026-02-04)
+
+### Today's Commits
+1. `feat: PatternMatcher trait + CDN SignatureLoader + HybridPiiEngine (109 tests)`
+2. `bench: add memory profiling (30ps engine init, 72B structs)`
+3. `docs: update archive README with 8 super-engines mapping`
+4. `feat: gradual rollout with RUST_ROLLOUT_PERCENT env var`
+
+### Key Metrics
+| Metric | Value |
+|--------|-------|
+| Rust Tests | **109/109 (100%)** |
+| Engine Init | **30 picoseconds** |
+| HybridPiiEngine | **720 nanoseconds** |
+| Struct Size | **72 bytes** |
+| Latency | **1-6 µs per engine** |
+
+### New Components
+- `traits.rs` — PatternMatcher trait, EngineCategory, BoxedEngine
+- `signatures.rs` — CDN SignatureLoader with compile_patterns()
+- `hybrid.rs` — HybridPiiEngine with CDN/embedded patterns
+
+### Environment Variables
+| Variable | Default | Description |
+|----------|---------|-------------|
+| `USE_RUST_ENGINE` | `true` | Enable Rust |
+| `RUST_SHADOW_MODE` | `false` | Compare both |
+| `RUST_FALLBACK_PYTHON` | `true` | Fallback |
+| `RUST_ROLLOUT_PERCENT` | `100` | Gradual rollout |
+
+---
+
 **Created:** 2026-02-04
