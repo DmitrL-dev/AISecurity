@@ -36,6 +36,8 @@ pub mod threat_intel;
 pub mod obfuscation;
 pub mod multimodal;
 pub mod behavioral;
+pub mod runtime;
+pub mod formal;
 
 // Re-export trait for convenience
 pub use traits::{PatternMatcher, EngineCategory, BoxedEngine, create_default_engines};
