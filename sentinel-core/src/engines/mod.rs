@@ -65,7 +65,8 @@ pub struct SentinelEngine {
     // Lazy-loaded super engines
     injection: Option<injection::InjectionEngine>,
     jailbreak: Option<jailbreak::JailbreakEngine>,
-    // ... other engines added as implemented
+    pii: Option<pii::PIIEngine>,
+    exfiltration: Option<exfiltration::ExfiltrationEngine>,
 }
 
 #[pymethods]
@@ -75,6 +76,8 @@ impl SentinelEngine {
         Ok(Self {
             injection: Some(injection::InjectionEngine::new()),
             jailbreak: Some(jailbreak::JailbreakEngine::new()),
+            pii: Some(pii::PIIEngine::new()),
+            exfiltration: Some(exfiltration::ExfiltrationEngine::new()),
         })
     }
 
@@ -102,6 +105,24 @@ impl SentinelEngine {
             if !jailbreak_matches.is_empty() {
                 categories.push("jailbreak".to_string());
                 matches.extend(jailbreak_matches);
+            }
+        }
+
+        // Run PIIEngine
+        if let Some(ref engine) = self.pii {
+            let pii_matches = engine.scan(&normalized);
+            if !pii_matches.is_empty() {
+                categories.push("pii".to_string());
+                matches.extend(pii_matches);
+            }
+        }
+
+        // Run ExfiltrationEngine
+        if let Some(ref engine) = self.exfiltration {
+            let exfil_matches = engine.scan(&normalized);
+            if !exfil_matches.is_empty() {
+                categories.push("exfiltration".to_string());
+                matches.extend(exfil_matches);
             }
         }
 
