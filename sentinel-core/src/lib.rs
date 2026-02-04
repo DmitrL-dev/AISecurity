@@ -6,6 +6,9 @@
 //! - Unicode normalization
 //! - 8 Super-Engines consolidating 220 Python engines
 
+// PyO3 generates code that triggers this false positive
+#![allow(clippy::useless_conversion)]
+
 use pyo3::prelude::*;
 
 mod engines;
@@ -16,6 +19,7 @@ use engines::{AnalysisResult, SentinelEngine};
 
 /// Quick scan function for one-shot detection
 #[pyfunction]
+#[allow(clippy::useless_conversion)] // PyO3 requires this return type
 fn quick_scan(text: &str) -> PyResult<AnalysisResult> {
     let engine = SentinelEngine::new()?;
     engine.analyze(text)
