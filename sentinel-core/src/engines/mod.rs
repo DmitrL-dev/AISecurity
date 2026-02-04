@@ -44,6 +44,8 @@ pub mod knowledge;
 pub mod proactive;
 pub mod synthesis;
 pub mod supply_chain;
+pub mod privacy;
+pub mod orchestration;
 
 // Re-export trait for convenience
 pub use traits::{PatternMatcher, EngineCategory, BoxedEngine, create_default_engines};

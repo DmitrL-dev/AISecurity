@@ -412,6 +412,18 @@
 - [x] Dependency poisoning, backdoors, registry compromise
 - [x] 9 tests passing
 
+### Task 10.15: Privacy & Data Protection Super-Engine ✅
+- [x] `src/engines/privacy.rs`
+- [x] Consolidates 12 Python engines (privacy, anonymization, consent_*)
+- [x] Consent validation, GDPR/CCPA, re-identification
+- [x] 9 tests passing
+
+### Task 10.16: Orchestration & Pipeline Super-Engine ✅
+- [x] `src/engines/orchestration.rs`
+- [x] Consolidates 10 Python engines (orchestration, chain_of_thought, workflow_*)
+- [x] CoT manipulation, chain poisoning, workflow hijack
+- [x] 8 tests passing
+
 ---
 
 ## Migration Summary
@@ -423,10 +435,10 @@
 | Pattern Engines | 8 archived | 8 engines | ✅ 100% |
 | Strange Math | 11 engines | 7 engines | ✅ 64% |
 | Semantic/ML | 15 engines | 2 engines | 🟡 13% |
-| Domain-Specific | 187 engines | 14 super-engines | ✅ 100% consolidated |
-| **Total** | **187 engines** | **31 engines** | **~97%** |
+| Domain-Specific | 187 engines | 16 super-engines | ✅ 100% consolidated |
+| **Total** | **187 engines** | **33 engines** | **~99%** |
 
-### Rust Engines (31 engines, 385 tests)
+### Rust Engines (33 engines, 402 tests)
 
 | Phase | Engine | Python Sources | Tests |
 |-------|--------|----------------|-------|
