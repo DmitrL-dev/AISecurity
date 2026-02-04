@@ -40,6 +40,8 @@ pub mod runtime;
 pub mod formal;
 pub mod sheaf;
 pub mod category;
+pub mod knowledge;
+pub mod proactive;
 
 // Re-export trait for convenience
 pub use traits::{PatternMatcher, EngineCategory, BoxedEngine, create_default_engines};
