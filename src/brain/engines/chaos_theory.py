@@ -1,3 +1,11 @@
+# ============================================================================
+# DEPRECATED: Superseded by sentinel-core Rust implementation
+# Rust engine: sentinel-core/src/engines/chaos.rs
+# Status: Kept for fallback, hybrid mode, and ML inference (ONNX pending)
+# Migration: https://github.com/DmitrL-dev/AISecurity/sentinel-core
+# ============================================================================
+
+
 """
 Strange Math Engine — Chaos Theory Module
 Uses Lyapunov exponents and phase space analysis for pattern detection.

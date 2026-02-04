@@ -1,3 +1,11 @@
+# ============================================================================
+# DEPRECATED: Superseded by sentinel-core Rust implementation
+# Rust engine: sentinel-core/src/engines/spectral.rs
+# Status: Kept for fallback, hybrid mode, and ML inference (ONNX pending)
+# Migration: https://github.com/DmitrL-dev/AISecurity/sentinel-core
+# ============================================================================
+
+
 """
 Spectral Graph Engine - Graph Spectral Analysis for Attention Patterns
 

@@ -1,3 +1,11 @@
+# ============================================================================
+# DEPRECATED: Superseded by sentinel-core Rust implementation
+# Rust engine: sentinel-core/src/engines/attention.rs
+# Status: Kept for fallback, hybrid mode, and ML inference (ONNX pending)
+# Migration: https://github.com/DmitrL-dev/AISecurity/sentinel-core
+# ============================================================================
+
+
 """
 Transformer Attention Shield Engine - Attention Manipulation Defense
 
