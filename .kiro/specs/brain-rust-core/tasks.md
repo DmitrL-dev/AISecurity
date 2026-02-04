@@ -255,51 +255,19 @@
 - [x] Topological fingerprinting
 - [x] 14 tests passing
 
-### Task 7.2: Hyperbolic Geometry Engine
-- [ ] Implement `PoincareBall` struct with nalgebra
-- [ ] Mobius addition, exponential/log maps
-- [ ] Frechet mean (hyperbolic centroid)
-- [ ] Geodesic distance computation
-- [ ] Port `HyperbolicAnomalyDetector`
-- [ ] Tests: match Python hyperbolic outputs
+### Task 7.6: Sheaf Coherence Engine ✅
+- [x] `src/engines/sheaf.rs`
+- [x] Implement `SheafStructure` with sections/restrictions
+- [x] Coherence scoring via cosine similarity
+- [x] Multi-turn dialogue analysis
+- [x] 9 tests passing
 
-**Rust Crates:** `nalgebra`, `num-traits`
-
-### Task 7.3: Information Geometry Engine
-- [ ] Implement `StatisticalManifold` struct
-- [ ] Fisher-Rao distance (Bhattacharyya)
-- [ ] Character distribution analysis
-- [ ] Port `GeometricAnomalyDetector`
-- [ ] Tests: match Python InfoGeo outputs
-
-**Rust Crates:** `nalgebra`, `statrs`
-
-### Task 7.4: Chaos Theory Engine
-- [ ] Lyapunov exponent estimation
-- [ ] Phase space reconstruction (Takens)
-- [ ] Attractor classification
-- [ ] Regime change detection
-- [ ] Tests: match Python chaos outputs
-
-**Rust Crates:** `nalgebra`, `ndarray`
-
-### Task 7.5: Sheaf Coherence Engine
-- [ ] Implement `SheafStructure` with sections/restrictions
-- [ ] Coherence scoring via cosine similarity
-- [ ] "Cech cohomology" (gluing violation count)
-- [ ] Multi-turn dialogue analysis
-- [ ] Tests: match Python sheaf outputs
-
-**Rust Crates:** `nalgebra`, `petgraph`
-
-### Task 7.6: Category Theory Engine
-- [ ] Implement `Morphism`, `PromptCategory` structs
-- [ ] Composition safety tracking
-- [ ] Natural transformation check
-- [ ] `CompositionalAttackDetector`
-- [ ] Tests: match Python category outputs
-
-**Rust Crates:** custom implementation
+### Task 7.7: Category Theory Engine ✅
+- [x] `src/engines/category.rs`
+- [x] Implement `Morphism`, `PromptCategory` structs
+- [x] Composition safety tracking
+- [x] Compositional attack detection
+- [x] 9 tests passing
 
 ---
 
