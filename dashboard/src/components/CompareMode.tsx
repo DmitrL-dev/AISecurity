@@ -42,7 +42,7 @@ export default function CompareMode({ selectedEngines }: CompareModeProps) {
           engines_triggered: data.engines_triggered || [],
         }
       }
-    } catch {}
+    } catch { /* ignore API errors */ }
     return null
   }
 

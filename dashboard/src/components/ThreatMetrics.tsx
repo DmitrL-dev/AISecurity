@@ -20,56 +20,93 @@ export function ThreatMetrics() {
   const [period, setPeriod] = useState<'24h' | '7d' | '30d'>('24h')
   const [threatData, setThreatData] = useState<ThreatData[]>([])
   const [engineActivity, setEngineActivity] = useState<EngineActivity[]>([])
-  const [loading, setLoading] = useState(true)
+  const [_loading, setLoading] = useState(true)
 
   useEffect(() => {
     fetchData()
-    const interval = setInterval(fetchData, 30000) // Refresh every 30s
+    const interval = setInterval(fetchData, 10000) // Refresh every 10s
     return () => clearInterval(interval)
   }, [period])
 
   async function fetchData() {
     try {
-      // Fetch threat metrics from API
-      const res = await fetch(`/api/brain/metrics?period=${period}`)
-      if (res.ok) {
-        const data = await res.json()
-        setThreatData(data.trends || generateMockTrends())
-        setEngineActivity(data.engines || generateMockEngines())
+      // Fetch Shield stats for real metrics
+      const [statsRes, historyRes, guardsRes] = await Promise.all([
+        fetch('/api/shield/stats'),
+        fetch('/api/shield/history'),
+        fetch('/api/shield/guards'),
+      ])
+      
+      if (statsRes.ok && historyRes.ok) {
+        const stats = await statsRes.json()
+        const history = await historyRes.json()
+        
+        // Build trend data from history timestamps
+        const now = Date.now()
+        const periodMs = period === '24h' ? 86400000 : period === '7d' ? 604800000 : 2592000000
+        const buckets = period === '24h' ? 24 : period === '7d' ? 7 : 30
+        const bucketSize = periodMs / buckets
+        
+        const trends: ThreatData[] = Array.from({ length: buckets }, (_, i) => ({
+          timestamp: new Date(now - (buckets - i) * bucketSize).toISOString(),
+          total: 0,
+          blocked: 0,
+          allowed: 0,
+        }))
+        
+        // Count history items into buckets
+        ;(history || []).forEach((h: any) => {
+          const ts = h.timestamp * 1000
+          const age = now - ts
+          if (age < periodMs) {
+            const bucketIdx = Math.floor((periodMs - age) / bucketSize)
+            if (bucketIdx >= 0 && bucketIdx < buckets) {
+              trends[bucketIdx].total++
+              if (h.verdict === 'block') trends[bucketIdx].blocked++
+              else if (h.verdict === 'allow') trends[bucketIdx].allowed++
+            }
+          }
+        })
+        
+        // Add current stats to last bucket
+        if (trends.length > 0) {
+          trends[trends.length - 1].total = stats.requests?.total || 0
+          trends[trends.length - 1].blocked = stats.requests?.blocked || 0
+          trends[trends.length - 1].allowed = stats.requests?.allowed || 0
+        }
+        
+        setThreatData(trends)
+        
+        // Build engine activity from guards
+        if (guardsRes.ok) {
+          const guards = await guardsRes.json()
+          const activity: EngineActivity[] = Object.entries(guards)
+            .map(([name, g]: [string, any]) => ({
+              name: g.name || name,
+              detections: g.blocks || g.checks || 0,
+              lastActive: new Date().toISOString(),
+            }))
+            .filter(e => e.detections > 0)
+            .sort((a, b) => b.detections - a.detections)
+            .slice(0, 5)
+          setEngineActivity(activity)
+        }
       } else {
-        // Use mock data if API not available
-        setThreatData(generateMockTrends())
-        setEngineActivity(generateMockEngines())
+        // Fallback to Brain API
+        const res = await fetch(`/api/brain/metrics?period=${period}`)
+        if (res.ok) {
+          const data = await res.json()
+          setThreatData(data.trends || [])
+          setEngineActivity(data.engines || [])
+        }
       }
     } catch {
-      setThreatData(generateMockTrends())
-      setEngineActivity(generateMockEngines())
+      // Keep existing data on error
     } finally {
       setLoading(false)
     }
   }
 
-  function generateMockTrends(): ThreatData[] {
-    const points = period === '24h' ? 24 : period === '7d' ? 7 : 30
-    return Array.from({ length: points }, (_, i) => ({
-      timestamp: new Date(Date.now() - (points - i) * 3600000).toISOString(),
-      total: Math.floor(Math.random() * 100) + 50,
-      blocked: Math.floor(Math.random() * 80) + 30,
-      allowed: Math.floor(Math.random() * 30) + 10,
-    }))
-  }
-
-  function generateMockEngines(): EngineActivity[] {
-    const engines = [
-      'injection', 'jailbreak', 'pii', 'semantic', 'behavioral',
-      'rag_guard', 'mcp_security', 'policy_puppetry'
-    ]
-    return engines.map(name => ({
-      name,
-      detections: Math.floor(Math.random() * 50),
-      lastActive: new Date(Date.now() - Math.random() * 3600000).toISOString()
-    })).sort((a, b) => b.detections - a.detections).slice(0, 5)
-  }
 
   const totalThreats = threatData.reduce((acc, d) => acc + d.total, 0)
   const blockedThreats = threatData.reduce((acc, d) => acc + d.blocked, 0)

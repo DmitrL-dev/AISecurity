@@ -20,15 +20,15 @@ interface WebSocketState {
 
 export function useBrainWebSocket(options: WebSocketOptions): WebSocketState {
   const [isConnected, setIsConnected] = useState(false)
-  const [lastMessage, setLastMessage] = useState<any>(null)
+  const [lastMessage, _setLastMessage] = useState<any>(null)
   const [error, setError] = useState<Error | null>(null)
-  const [ws, setWs] = useState<WebSocket | null>(null)
+  const [ws, _setWs] = useState<WebSocket | null>(null)
   const [retryCount, setRetryCount] = useState(0)
 
   const {
     url,
-    onMessage,
-    onError,
+    onMessage: _onMessage,
+    onError: _onError,
     reconnectInterval = 5000,
     maxRetries = 5,
   } = options

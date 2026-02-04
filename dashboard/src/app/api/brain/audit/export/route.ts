@@ -23,7 +23,7 @@ export async function POST(request: NextRequest) {
 
     const error = await res.json()
     return NextResponse.json(error, { status: res.status })
-  } catch (error) {
+  } catch (_error) {
     return NextResponse.json(
       { error: 'Failed to create export' },
       { status: 500 }

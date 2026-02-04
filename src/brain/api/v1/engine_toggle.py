@@ -45,8 +45,8 @@ class AuditEntry(BaseModel):
     reason: Optional[str] = None
 
 
-def _validate_api_key(api_key: Optional[str]) -> str:
-    """Validate API key and return fingerprint."""
+def _validate_api_key(api_key: Optional[str], user_email: Optional[str] = None) -> str:
+    """Validate API key and return actor identifier."""
     if not api_key:
         raise HTTPException(
             status_code=401, detail="API key required. Set X-SENTINEL-API-KEY header."
@@ -55,8 +55,12 @@ def _validate_api_key(api_key: Optional[str]) -> str:
     if api_key != API_KEY:
         raise HTTPException(status_code=401, detail="Invalid API key.")
 
-    # Return fingerprint (first 8 chars of SHA256 hash)
-    return hashlib.sha256(api_key.encode()).hexdigest()[:8]
+    # Return user email if provided, otherwise fingerprint
+    if user_email:
+        return f"user:{user_email}"
+
+    # Fallback to fingerprint (first 8 chars of SHA256 hash)
+    return f"api_key:{hashlib.sha256(api_key.encode()).hexdigest()[:8]}"
 
 
 def _log_action(
@@ -82,7 +86,7 @@ def _log_action(
 
         audit.log(
             event_type=event_type,
-            actor=f"api_key:{key_fingerprint}",
+            actor=key_fingerprint,  # Already prefixed with user: or api_key:
             resource=f"engine:{engine}",
             action=action,
             details={
@@ -139,14 +143,17 @@ async def get_blocklist():
 
 @router.post("/{engine_name}/enable", response_model=ToggleResponse)
 async def enable_engine(
-    engine_name: str, x_sentinel_api_key: Optional[str] = Header(None)
+    engine_name: str,
+    x_sentinel_api_key: Optional[str] = Header(None),
+    x_sentinel_user: Optional[str] = Header(None),
 ):
     """
     Enable a detection engine.
 
     Requires X-SENTINEL-API-KEY header.
+    X-SENTINEL-USER header is used for audit logging.
     """
-    key_fp = _validate_api_key(x_sentinel_api_key)
+    actor = _validate_api_key(x_sentinel_api_key, x_sentinel_user)
 
     try:
         from engines.registry import get_registry
@@ -155,20 +162,22 @@ async def enable_engine(
 
         success = registry.enable_engine(engine_name)
 
-        _log_action(engine_name, "enable", key_fp, success)
+        _log_action(engine_name, "enable", actor, success)
 
         return ToggleResponse(
             engine=engine_name, enabled=True, message=f"Engine {engine_name} enabled"
         )
 
     except Exception as e:
-        _log_action(engine_name, "enable", key_fp, False, str(e))
+        _log_action(engine_name, "enable", actor, False, str(e))
         raise HTTPException(status_code=500, detail=str(e))
 
 
 @router.post("/{engine_name}/disable", response_model=ToggleResponse)
 async def disable_engine(
-    engine_name: str, x_sentinel_api_key: Optional[str] = Header(None)
+    engine_name: str,
+    x_sentinel_api_key: Optional[str] = Header(None),
+    x_sentinel_user: Optional[str] = Header(None),
 ):
     """
     Disable a detection engine.
@@ -176,14 +185,14 @@ async def disable_engine(
     Requires X-SENTINEL-API-KEY header.
     Critical engines (pii, injection, prompt_guard) cannot be disabled.
     """
-    key_fp = _validate_api_key(x_sentinel_api_key)
+    actor = _validate_api_key(x_sentinel_api_key, x_sentinel_user)
 
     # Check blocklist
     if engine_name in CRITICAL_ENGINES:
         _log_action(
             engine_name,
             "disable",
-            key_fp,
+            actor,
             False,
             "Critical engine - cannot be disabled",
         )
@@ -199,12 +208,12 @@ async def disable_engine(
 
         success = registry.disable_engine(engine_name)
 
-        _log_action(engine_name, "disable", key_fp, success)
+        _log_action(engine_name, "disable", actor, success)
 
         return ToggleResponse(
             engine=engine_name, enabled=False, message=f"Engine {engine_name} disabled"
         )
 
     except Exception as e:
-        _log_action(engine_name, "disable", key_fp, False, str(e))
+        _log_action(engine_name, "disable", actor, False, str(e))
         raise HTTPException(status_code=500, detail=str(e))

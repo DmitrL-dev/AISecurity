@@ -47,8 +47,8 @@ export async function GET(req: Request) {
       .where(eq(tenantMembers.userId, userId));
 
     return NextResponse.json({ tenants: userTenants });
-  } catch (error) {
-    console.error("Failed to list tenants:", error);
+  } catch (_error) {
+    console.error("Failed to list tenants:", _error);
     return NextResponse.json(
       { error: "Internal server error" },
       { status: 500 }

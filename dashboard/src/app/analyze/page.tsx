@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { 
-  Search, Shield, AlertTriangle, CheckCircle, 
+  Search, AlertTriangle, CheckCircle, 
   Loader2, History, Trash2, ChevronDown, ChevronUp,
   Clock
 } from 'lucide-react'
@@ -53,7 +53,7 @@ export default function AnalyzePage() {
   useEffect(() => {
     const saved = localStorage.getItem('sentinel-analysis-history')
     if (saved) {
-      try { setHistory(JSON.parse(saved)) } catch {}
+      try { setHistory(JSON.parse(saved)) } catch { /* ignore parse errors */ }
     }
     // Fetch available engines
     fetch('/api/brain/engines/all')
@@ -63,7 +63,7 @@ export default function AnalyzePage() {
         setEngines(list)
         setSelectedEngines(list.filter((e: any) => e.enabled).map((e: any) => e.name))
       })
-      .catch(() => {})
+      .catch(() => { /* ignore fetch errors */ })
   }, [])
 
   function saveHistory(items: HistoryItem[]) {

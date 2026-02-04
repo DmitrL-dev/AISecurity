@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useRef } from 'react'
-import { Upload, FileText, Play, Download, X, Check, AlertTriangle, Loader2 } from 'lucide-react'
+import { Upload, FileText, Play, Download, X, Loader2 } from 'lucide-react'
 
 interface BatchResult {
   text: string

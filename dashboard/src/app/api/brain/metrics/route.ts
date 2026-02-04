@@ -23,7 +23,7 @@ export async function GET(request: NextRequest) {
 
     // Fallback: generate mock metrics
     return NextResponse.json(generateMockMetrics(period))
-  } catch (error) {
+  } catch (_error) {
     // API not available, return mock data
     return NextResponse.json(generateMockMetrics(period))
   }

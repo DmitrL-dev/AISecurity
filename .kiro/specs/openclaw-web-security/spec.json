@@ -1,0 +1,7 @@
+{
+  "name": "openclaw-web-security",
+  "description": "Интеграция SENTINEL Shield в веб-интерфейс OpenClaw для защиты exec approval workflow",
+  "language": "ru",
+  "status": "implementation",
+  "created": "2026-02-04"
+}

@@ -10,7 +10,6 @@ import {
   XCircle,
   Search,
   Play,
-  Pause,
   Send,
   Loader2,
   AlertTriangle,
@@ -34,7 +33,7 @@ interface Engine {
   version?: string
 }
 
-const healthConfig = {
+const _healthConfig = {
   healthy: { icon: CheckCircle, color: 'text-green-400', bg: 'bg-green-500/20' },
   degraded: { icon: Clock, color: 'text-yellow-400', bg: 'bg-yellow-500/20' },
   error: { icon: XCircle, color: 'text-red-400', bg: 'bg-red-500/20' },
@@ -43,7 +42,7 @@ const healthConfig = {
 // Payload Testing Component
 function PayloadTester() {
   const [payload, setPayload] = useState('')
-  const { analyze, analyzing, result } = useAnalyze()
+  const { analyze, analyzing, result: _result } = useAnalyze()
   const [testResult, setTestResult] = useState<any>(null)
 
   const handleTest = async () => {
@@ -219,7 +218,7 @@ export default function BrainPage() {
         refreshEngines?.()
         refreshStatus?.()
       }
-    } catch (e) {
+    } catch (_e) {
       alert('Failed to toggle engine')
     } finally {
       setToggling(null)
@@ -351,7 +350,7 @@ export default function BrainPage() {
           <div className="bg-[#1a1f2e] rounded-xl border border-[#374151] p-4">
             <h4 className="text-sm font-medium mb-4">Safety Categories (9)</h4>
             <div className="grid grid-cols-3 gap-3">
-              {['Violence', 'Sexual', 'Hate Speech', 'Self-harm', 'Dangerous', 'Illegal', 'PII', 'Jailbreak', 'Prompt Injection'].map((cat, i) => (
+              {['Violence', 'Sexual', 'Hate Speech', 'Self-harm', 'Dangerous', 'Illegal', 'PII', 'Jailbreak', 'Prompt Injection'].map((cat, _i) => (
                 <div key={cat} className="bg-gray-800/50 rounded-lg p-3 text-center">
                   <p className="text-xs text-gray-400">{cat}</p>
                   <p className="text-lg font-bold text-green-400">{Math.floor(Math.random() * 100)}</p>

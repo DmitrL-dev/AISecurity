@@ -46,7 +46,7 @@ interface ReasoningViewerProps {
   showRaw?: boolean
 }
 
-export function ReasoningViewer({ result, showRaw = false }: ReasoningViewerProps) {
+export function ReasoningViewer({ result, showRaw: _showRaw = false }: ReasoningViewerProps) {
   const [thinkingExpanded, setThinkingExpanded] = useState(false)
   const [copied, setCopied] = useState(false)
 

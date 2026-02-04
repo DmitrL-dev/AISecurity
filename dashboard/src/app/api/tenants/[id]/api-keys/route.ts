@@ -42,8 +42,8 @@ export async function GET(req: Request, { params }: Params) {
       .where(eq(tenantApiKeys.tenantId, tenantId));
 
     return NextResponse.json({ keys });
-  } catch (error) {
-    console.error("Failed to list API keys:", error);
+  } catch (_error) {
+    console.error("Failed to list API keys:", _error);
     return NextResponse.json(
       { error: "Internal server error" },
       { status: 500 }
@@ -78,8 +78,8 @@ export async function POST(req: Request, { params }: Params) {
       },
       { status: 201 }
     );
-  } catch (error) {
-    console.error("Failed to create API key:", error);
+  } catch (_error) {
+    console.error("Failed to create API key:", _error);
     return NextResponse.json(
       { error: "Internal server error" },
       { status: 500 }
@@ -87,7 +87,7 @@ export async function POST(req: Request, { params }: Params) {
   }
 }
 
-export async function DELETE(req: Request, { params }: Params) {
+export async function DELETE(req: Request, { params: _params }: Params) {
   try {
     const url = new URL(req.url);
     const keyId = url.searchParams.get("keyId");
@@ -102,8 +102,8 @@ export async function DELETE(req: Request, { params }: Params) {
     await revokeApiKey(keyId);
 
     return NextResponse.json({ success: true });
-  } catch (error) {
-    console.error("Failed to revoke API key:", error);
+  } catch (_error) {
+    console.error("Failed to revoke API key:", _error);
     return NextResponse.json(
       { error: "Internal server error" },
       { status: 500 }

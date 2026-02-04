@@ -39,15 +39,16 @@ API (runtime) > Environment Variables > Config Files > Defaults
 
 ## Environment Variables
 
-### Gateway Settings
+### Shield Settings
 
 | Variable                   | Type   | Default       | Description                  |
 | -------------------------- | ------ | ------------- | ---------------------------- |
-| `GATEWAY_PORT`             | int    | `8080`        | HTTP port                    |
-| `GATEWAY_HOST`             | string | `0.0.0.0`     | Bind host                    |
-| `GATEWAY_MODE`             | string | `development` | `development` / `production` |
-| `GATEWAY_BRAIN_TIMEOUT`    | int    | `30`          | gRPC timeout (sec)           |
-| `GATEWAY_MAX_REQUEST_SIZE` | int    | `10485760`    | Max request size (bytes)     |
+| `SHIELD_API_PORT`          | int    | `8081`        | HTTP API port                |
+| `SHIELD_METRICS_PORT`      | int    | `9090`        | Prometheus metrics port      |
+| `SHIELD_LOG_LEVEL`         | string | `info`        | Log level                    |
+| `BRAIN_URL`                | string | —             | Brain connection URL         |
+| `SHIELD_MAX_REQUEST_SIZE`  | int    | `10485760`    | Max request size (bytes)     |
+
 
 ### Brain Settings
 

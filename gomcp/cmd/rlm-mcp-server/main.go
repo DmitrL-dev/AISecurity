@@ -284,12 +284,25 @@ func (s *RLMServer) CallTool(ctx context.Context, name string, params map[string
 
 // handleStatus returns server status (Go native implementation)
 func (s *RLMServer) handleStatus(ctx context.Context) (map[string]any, error) {
+	// Get real stats from Python if available
+	if s.bridge.IsRunning() {
+		resp, err := s.bridge.Call(ctx, "rlm_status", nil)
+		if err == nil && resp.Success && resp.Result != nil {
+			return resp.Result, nil
+		}
+	}
+
+	// Fallback: return basic status with estimated values
 	return map[string]any{
 		"success": true,
-		"version": "2.1.0",
+		"version": "3.0.0",
 		"runtime": "gomcp",
 		"uptime":  time.Since(time.Now()).String(),
 		"project": s.projectRoot,
+		"index": map[string]any{
+			"crystals": 0, // Need Python for real count
+			"tokens":   0,
+		},
 		"python_bridge": map[string]any{
 			"running": s.bridge.IsRunning(),
 		},

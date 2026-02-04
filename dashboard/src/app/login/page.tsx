@@ -10,7 +10,7 @@ import { Suspense, useState } from "react";
 
 function LoginContent() {
   const searchParams = useSearchParams();
-  const callbackUrl = searchParams.get("callbackUrl") || "/dashboard";
+  const callbackUrl = searchParams.get("callbackUrl") || "/";
   const error = searchParams.get("error");
   const [email, setEmail] = useState("admin@sentinel.dev");
   const [password, setPassword] = useState("dev");

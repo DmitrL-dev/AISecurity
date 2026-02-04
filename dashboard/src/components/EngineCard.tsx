@@ -9,7 +9,6 @@
 import { useState, useEffect } from 'react'
 import {
   Brain,
-  Activity,
   Clock,
   CheckCircle,
   XCircle,
@@ -80,7 +79,7 @@ export function EngineCard({
 }: EngineCardProps) {
   const [stats, setStats] = useState<EngineStats | null>(null)
   const [loading, setLoading] = useState(true)
-  const [error, setError] = useState<string | null>(null)
+  const [_error, setError] = useState<string | null>(null)
 
   useEffect(() => {
     async function fetchStats() {

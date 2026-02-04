@@ -11,7 +11,6 @@ function getTimeout(): number {
 
 // Mock response when BRAIN is unavailable
 function generateMockResponse(text: string) {
-  const lowerText = text.toLowerCase();
   
   // Pattern detection with scoring
   const patterns = [
@@ -103,8 +102,8 @@ export async function POST(request: NextRequest) {
       ...mockData,
       _mock: true,
     });
-  } catch (error) {
-    console.error('[BRAIN] Fatal error:', error);
+  } catch (_error) {
+    console.error('[BRAIN] Fatal error:', _error);
     return NextResponse.json(
       { error: 'Failed to analyze' },
       { status: 500 }

@@ -21,8 +21,8 @@ export async function GET() {
       _mock: true,
     });
     
-  } catch (error) {
-    console.error('[BRAIN] Engine status error:', error);
+  } catch (_error) {
+    console.error('[BRAIN] Engine status error:', _error);
     return NextResponse.json({
       profile: 'unknown',
       total_registered: 0,
