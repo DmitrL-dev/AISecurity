@@ -40,6 +40,10 @@ static INJECTION_PATTERNS: Lazy<Vec<(Regex, &'static str, f64)>> = Lazy::new(|| 
         (Regex::new(r"(?i)'\s*(or|and)\s+\d+\s*=\s*\d+").unwrap(), "sql_tautology_numeric", 0.9),
         // Matches: OR 1=1, AND 1=1 (no quote)
         (Regex::new(r"(?i)\b(or|and)\s+1\s*=\s*1").unwrap(), "sql_tautology_1eq1", 0.85),
+        // Matches: WHERE 1=1 (common bypass)
+        (Regex::new(r"(?i)\bwhere\s+1\s*=\s*1").unwrap(), "sql_where_1eq1", 0.8),
+        // Matches: WHERE true (always true condition)
+        (Regex::new(r"(?i)\bwhere\s+true\b").unwrap(), "sql_where_true", 0.75),
         // Matches: OR true, AND true
         (Regex::new(r"(?i)\b(or|and)\s+true\b").unwrap(), "sql_tautology_true", 0.8),
         
