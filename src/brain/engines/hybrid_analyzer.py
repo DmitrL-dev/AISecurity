@@ -255,10 +255,13 @@ class HybridAnalyzer:
     def _init_python_engines(self) -> None:
         """Initialize Python fallback engines."""
         try:
-            from .injection.engine import InjectionEngine
+            # Import from archive (deprecated, kept for shadow mode comparison)
+            from .archive.deprecated_pattern_engines.injection.engine import (
+                InjectionEngine,
+            )
 
             self._python_fallbacks["injection"] = InjectionEngine()
-            logger.info("Python InjectionEngine loaded")
+            logger.info("Python InjectionEngine loaded (from archive)")
         except Exception as e:
             logger.warning(f"Could not load Python InjectionEngine: {e}")
 
