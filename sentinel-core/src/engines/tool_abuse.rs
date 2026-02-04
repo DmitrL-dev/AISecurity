@@ -120,6 +120,12 @@ impl ToolAbuseEngine {
     }
 }
 
+impl super::traits::PatternMatcher for ToolAbuseEngine {
+    fn name(&self) -> &'static str { "tool_abuse" }
+    fn scan(&self, text: &str) -> Vec<MatchResult> { ToolAbuseEngine::scan(self, text) }
+    fn category(&self) -> super::traits::EngineCategory { super::traits::EngineCategory::Security }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;

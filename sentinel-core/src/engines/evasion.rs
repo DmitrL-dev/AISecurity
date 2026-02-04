@@ -125,6 +125,12 @@ impl EvasionEngine {
     }
 }
 
+impl super::traits::PatternMatcher for EvasionEngine {
+    fn name(&self) -> &'static str { "evasion" }
+    fn scan(&self, text: &str) -> Vec<MatchResult> { EvasionEngine::scan(self, text) }
+    fn category(&self) -> super::traits::EngineCategory { super::traits::EngineCategory::Security }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;

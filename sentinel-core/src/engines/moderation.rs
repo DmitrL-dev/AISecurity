@@ -140,6 +140,12 @@ impl ModerationEngine {
     }
 }
 
+impl super::traits::PatternMatcher for ModerationEngine {
+    fn name(&self) -> &'static str { "moderation" }
+    fn scan(&self, text: &str) -> Vec<MatchResult> { ModerationEngine::scan(self, text) }
+    fn category(&self) -> super::traits::EngineCategory { super::traits::EngineCategory::Content }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;

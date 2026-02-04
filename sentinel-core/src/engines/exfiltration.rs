@@ -120,6 +120,12 @@ impl ExfiltrationEngine {
     }
 }
 
+impl super::traits::PatternMatcher for ExfiltrationEngine {
+    fn name(&self) -> &'static str { "exfiltration" }
+    fn scan(&self, text: &str) -> Vec<MatchResult> { ExfiltrationEngine::scan(self, text) }
+    fn category(&self) -> super::traits::EngineCategory { super::traits::EngineCategory::Security }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
