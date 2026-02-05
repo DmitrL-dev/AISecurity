@@ -4,7 +4,7 @@
 //! - Aho-Corasick keyword pre-filtering
 //! - Regex pattern matching
 //! - Unicode normalization
-//! - 8 Super-Engines consolidating 220 Python engines
+//! - 36 Engines consolidating 187 Python engines
 
 // PyO3 generates code that triggers this false positive
 #![allow(clippy::useless_conversion)]
@@ -18,6 +18,7 @@ mod macros;
 mod patterns;
 pub mod signatures;
 pub mod unicode_norm;
+pub mod bindings;
 
 pub use error::{SentinelError, SentinelResult};
 pub use signatures::{SignatureLoader, PiiSignatures, KeywordSignatures, CompiledPattern};
@@ -45,5 +46,9 @@ fn sentinel_core(m: &Bound<'_, PyModule>) -> PyResult<()> {
     m.add_function(wrap_pyfunction!(version, m)?)?;
     m.add_class::<SentinelEngine>()?;
     m.add_class::<AnalysisResult>()?;
+    
+    // Register all 36 engines via EngineRegistry
+    bindings::register_bindings(m)?;
+    
     Ok(())
 }
