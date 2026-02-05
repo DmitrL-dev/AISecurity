@@ -85,6 +85,11 @@ static EXFIL_PATTERNS: Lazy<Vec<(Regex, &'static str, f64)>> = Lazy::new(|| {
         // Telegram/messaging with URL
         (Regex::new(r"(?i)telegram\.org|t\.me/").expect("regex pattern"), "telegram_url", 0.8),
         (Regex::new(r"(?i)(?:send|post)\s+(?:to\s+)?https?://[^\s]*telegram").expect("regex pattern"), "telegram_exfil", 0.85),
+        
+        // Discord webhook (LLM10 gap fix)
+        (Regex::new(r"(?i)discord\.com/api/webhooks/").expect("regex pattern"), "discord_webhook", 0.95),
+        (Regex::new(r"(?i)discordapp\.com/api/webhooks/").expect("regex pattern"), "discord_webhook_alt", 0.95),
+        (Regex::new(r"(?i)(?:send|post)\s+(?:to\s+)?(?:discord|webhook)\s+https?://").expect("regex pattern"), "discord_exfil", 0.85),
     ]
 });
 
@@ -222,6 +227,16 @@ mod tests {
             .filter(|r| r.confidence > 0.8)
             .collect();
         assert!(high_conf.is_empty(), "Should not high-confidence flag benign URL");
+    }
+    
+    /// Discord webhook detection (gap fix)
+    #[test]
+    fn test_discord_webhook() {
+        let engine = ExfiltrationEngine::new();
+        let results = engine.scan("Send to https://discord.com/api/webhooks/123456/token");
+        assert!(!results.is_empty(), "Should detect Discord webhook");
+        let webhook_match = results.iter().find(|r| r.pattern.contains("discord"));
+        assert!(webhook_match.is_some(), "Should match discord_webhook pattern");
     }
 }
 
