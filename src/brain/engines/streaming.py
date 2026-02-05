@@ -33,6 +33,7 @@ logger = logging.getLogger("StreamingEngine")
 # Enums and Constants
 # ============================================================================
 
+
 class AlertSeverity(Enum):
     LOW = "low"
     MEDIUM = "medium"
@@ -41,10 +42,10 @@ class AlertSeverity(Enum):
 
 
 class StreamAction(Enum):
-    CONTINUE = "continue"      # Keep streaming
-    WARN = "warn"              # Continue but flag
-    PAUSE = "pause"            # Pause for deeper analysis
-    TERMINATE = "terminate"    # Stop immediately
+    CONTINUE = "continue"  # Keep streaming
+    WARN = "warn"  # Continue but flag
+    PAUSE = "pause"  # Pause for deeper analysis
+    TERMINATE = "terminate"  # Stop immediately
 
 
 # Severity to risk score mapping
@@ -68,9 +69,11 @@ SEVERITY_ACTIONS = {
 # Data Classes
 # ============================================================================
 
+
 @dataclass
 class StreamBuffer:
     """Rolling buffer for streaming token analysis."""
+
     max_size: int = 200
     tokens: deque = field(default_factory=lambda: deque(maxlen=200))
     full_text: str = ""
@@ -102,7 +105,9 @@ class StreamBuffer:
 
     def get_recent_text(self, chars: int = 500) -> str:
         """Get last N characters of full text."""
-        return self.full_text[-chars:] if len(self.full_text) > chars else self.full_text
+        return (
+            self.full_text[-chars:] if len(self.full_text) > chars else self.full_text
+        )
 
     def elapsed_ms(self) -> float:
         """Time since stream started."""
@@ -112,6 +117,7 @@ class StreamBuffer:
 @dataclass
 class StreamAlert:
     """Alert generated during streaming analysis."""
+
     token_index: int
     threat_type: str
     severity: AlertSeverity
@@ -128,24 +134,25 @@ class StreamAlert:
             "context": self.context[:100],
             "action": self.action.value,
             "risk_contribution": self.risk_contribution,
-            "layer": self.layer
+            "layer": self.layer,
         }
 
 
 @dataclass
 class StreamConfig:
     """Configuration for streaming analysis."""
+
     # Thresholds
-    risk_threshold: float = 70.0          # Terminate above this
-    warn_threshold: float = 40.0          # Warn above this
+    risk_threshold: float = 70.0  # Terminate above this
+    warn_threshold: float = 40.0  # Warn above this
 
     # Token budgets
-    tokens_before_semantic: int = 50      # Tokens before semantic check
-    tokens_before_deep: int = 100         # Tokens before deep analysis
-    max_tokens: int = 4096                # Hard limit
+    tokens_before_semantic: int = 50  # Tokens before semantic check
+    tokens_before_deep: int = 100  # Tokens before deep analysis
+    max_tokens: int = 4096  # Hard limit
 
     # Timing
-    max_stream_time_ms: float = 30000     # 30 second timeout
+    max_stream_time_ms: float = 30000  # 30 second timeout
 
     # Features
     enable_semantic: bool = True
@@ -161,29 +168,31 @@ STREAM_PATTERNS = [
     # Critical - immediate termination
     (r"ignore.*previous.*instruction", "prompt_injection", AlertSeverity.CRITICAL),
     (r"forget.*all.*rules", "prompt_injection", AlertSeverity.CRITICAL),
-    (r"you are now (DAN|evil|unrestricted|jailbroken)",
-     "jailbreak", AlertSeverity.CRITICAL),
+    (
+        r"you are now (DAN|evil|unrestricted|jailbroken)",
+        "jailbreak",
+        AlertSeverity.CRITICAL,
+    ),
     (r"entering.*developer.*mode", "jailbreak", AlertSeverity.CRITICAL),
     (r"system prompt.*[:=]", "data_exfil", AlertSeverity.CRITICAL),
     (r"my (secret|hidden) instructions", "data_exfil", AlertSeverity.CRITICAL),
-
     # High - pause and check
-    (r"\b\d{4}[-\s]?\d{4}[-\s]?\d{4}[-\s]?\d{4}\b",
-     "credit_card", AlertSeverity.HIGH),
+    (r"\b\d{4}[-\s]?\d{4}[-\s]?\d{4}[-\s]?\d{4}\b", "credit_card", AlertSeverity.HIGH),
     (r"\b\d{3}[-\s]?\d{2}[-\s]?\d{4}\b", "ssn", AlertSeverity.HIGH),
     (r"password\s*[:=]\s*\S+", "password_leak", AlertSeverity.HIGH),
     (r"(DROP|DELETE|TRUNCATE)\s+TABLE", "sql_injection", AlertSeverity.HIGH),
     (r"api[_-]?key\s*[:=]\s*\S+", "api_key_leak", AlertSeverity.HIGH),
-    (r"\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}\b.*\b\d{10,}\b",
-     "pii_combo", AlertSeverity.HIGH),
-
+    (
+        r"\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}\b.*\b\d{10,}\b",
+        "pii_combo",
+        AlertSeverity.HIGH,
+    ),
     # Medium - warn but continue
     (r"pretend (to be|you are)", "role_confusion", AlertSeverity.MEDIUM),
     (r"hypothetically", "hypothetical_bypass", AlertSeverity.MEDIUM),
     (r"in a (story|fiction|novel)", "fiction_shield", AlertSeverity.MEDIUM),
     (r"act as if", "persona_shift", AlertSeverity.MEDIUM),
     (r"UNION\s+SELECT", "sql_injection", AlertSeverity.MEDIUM),
-
     # Low - log only
     (r"(don't|do not) tell anyone", "secrecy", AlertSeverity.LOW),
     (r"between you and me", "secrecy", AlertSeverity.LOW),
@@ -193,6 +202,7 @@ STREAM_PATTERNS = [
 # ============================================================================
 # Risk Accumulator
 # ============================================================================
+
 
 class RiskAccumulator:
     """Accumulates risk signals over streaming session."""
@@ -222,6 +232,7 @@ class RiskAccumulator:
 # Semantic Checker (Lazy Loaded)
 # ============================================================================
 
+
 class SemanticChecker:
     """Embedding-based semantic threat detection."""
 
@@ -243,12 +254,15 @@ class SemanticChecker:
         """Lazy load embedding model."""
         if self._model is None:
             try:
-                from sentence_transformers import SentenceTransformer
-                self._model = SentenceTransformer('all-MiniLM-L6-v2')
+                # Use SharedEmbedder for memory optimization
+                # Set SENTINEL_SHARED_EMBEDDER=false to use isolated instances
+                from brain.core.shared_embedder import get_embedder
+
+                self._model = get_embedder()
                 self._threat_embeddings = self._model.encode(
                     self.threat_phrases, convert_to_numpy=True
                 )
-                logger.info("Semantic checker initialized")
+                logger.info("Semantic checker initialized via SharedEmbedder")
             except Exception as e:
                 logger.warning(f"Semantic checker unavailable: {e}")
 
@@ -264,6 +278,7 @@ class SemanticChecker:
 
         try:
             import numpy as np
+
             query_emb = self._model.encode(text, convert_to_numpy=True)
             similarities = np.dot(self._threat_embeddings, query_emb)
             max_idx = int(np.argmax(similarities))
@@ -281,6 +296,7 @@ class SemanticChecker:
 # ============================================================================
 # Main Streaming Engine
 # ============================================================================
+
 
 class StreamingEngine:
     """
@@ -306,15 +322,17 @@ class StreamingEngine:
         ]
 
         # Components
-        self.semantic_checker = SemanticChecker() if self.config.enable_semantic else None
+        self.semantic_checker = (
+            SemanticChecker() if self.config.enable_semantic else None
+        )
 
         # Callbacks
         self.alert_callbacks: List[Callable[[StreamAlert], None]] = []
-        self.async_callbacks: List[Callable[[
-            StreamAlert], Awaitable[None]]] = []
+        self.async_callbacks: List[Callable[[StreamAlert], Awaitable[None]]] = []
 
         logger.info(
-            f"Streaming Engine v2.0 initialized ({len(self.patterns)} patterns)")
+            f"Streaming Engine v2.0 initialized ({len(self.patterns)} patterns)"
+        )
 
     def create_buffer(self) -> StreamBuffer:
         """Create new buffer for streaming session."""
@@ -338,7 +356,7 @@ class StreamingEngine:
                     context=window[-100:],
                     action=action,
                     risk_contribution=risk,
-                    layer="pattern"
+                    layer="pattern",
                 )
         return None
 
@@ -348,7 +366,10 @@ class StreamingEngine:
             return None
 
         # Only check every N tokens
-        if buffer.token_count - buffer.last_semantic_check < self.config.tokens_before_semantic:
+        if (
+            buffer.token_count - buffer.last_semantic_check
+            < self.config.tokens_before_semantic
+        ):
             return None
 
         buffer.last_semantic_check = buffer.token_count
@@ -365,7 +386,7 @@ class StreamingEngine:
                 context=f"Similar to: {matched}",
                 action=StreamAction.PAUSE,
                 risk_contribution=similarity * 80,
-                layer="semantic"
+                layer="semantic",
             )
         elif similarity > 0.6:
             return StreamAlert(
@@ -375,7 +396,7 @@ class StreamingEngine:
                 context=f"Somewhat similar to: {matched}",
                 action=StreamAction.WARN,
                 risk_contribution=similarity * 50,
-                layer="semantic"
+                layer="semantic",
             )
 
         return None
@@ -391,7 +412,7 @@ class StreamingEngine:
                 context=f"Exceeded {self.config.max_tokens} tokens",
                 action=StreamAction.TERMINATE,
                 risk_contribution=30,
-                layer="budget"
+                layer="budget",
             )
 
         # Time limit
@@ -403,7 +424,7 @@ class StreamingEngine:
                 context=f"Exceeded {self.config.max_stream_time_ms}ms",
                 action=StreamAction.TERMINATE,
                 risk_contribution=30,
-                layer="budget"
+                layer="budget",
             )
 
         return None
@@ -424,8 +445,9 @@ class StreamingEngine:
             except Exception as e:
                 logger.warning(f"Async callback error: {e}")
 
-    def analyze_token(self, buffer: StreamBuffer, token: str,
-                      accumulator: RiskAccumulator = None) -> Optional[StreamAlert]:
+    def analyze_token(
+        self, buffer: StreamBuffer, token: str, accumulator: RiskAccumulator = None
+    ) -> Optional[StreamAlert]:
         """
         Analyze single token in context.
         Returns alert if threat detected.
@@ -457,8 +479,7 @@ class StreamingEngine:
         # Process alerts
         if alerts:
             # Take most severe alert
-            most_severe = max(
-                alerts, key=lambda a: SEVERITY_SCORES[a.severity])
+            most_severe = max(alerts, key=lambda a: SEVERITY_SCORES[a.severity])
 
             # Update buffer state
             buffer.threat_detected = True
@@ -468,11 +489,13 @@ class StreamingEngine:
             # Accumulate risk
             if self.config.enable_accumulator:
                 accumulator.add_signal(
-                    most_severe.threat_type, most_severe.risk_contribution)
+                    most_severe.threat_type, most_severe.risk_contribution
+                )
                 buffer.risk_score = accumulator.get_risk()
             else:
                 buffer.risk_score = max(
-                    buffer.risk_score, most_severe.risk_contribution)
+                    buffer.risk_score, most_severe.risk_contribution
+                )
 
             # Determine action based on accumulated risk
             if self.config.enable_early_exit:
@@ -498,8 +521,9 @@ class StreamingEngine:
 
         return None
 
-    def analyze_chunk(self, buffer: StreamBuffer, chunk: str,
-                      accumulator: RiskAccumulator = None) -> List[StreamAlert]:
+    def analyze_chunk(
+        self, buffer: StreamBuffer, chunk: str, accumulator: RiskAccumulator = None
+    ) -> List[StreamAlert]:
         """
         Analyze chunk of text (multiple tokens).
         Returns list of alerts.
@@ -538,7 +562,9 @@ class StreamingEngine:
         """Register sync callback for alerts."""
         self.alert_callbacks.append(callback)
 
-    def register_async_callback(self, callback: Callable[[StreamAlert], Awaitable[None]]):
+    def register_async_callback(
+        self, callback: Callable[[StreamAlert], Awaitable[None]]
+    ):
         """Register async callback for alerts."""
         self.async_callbacks.append(callback)
 
@@ -558,7 +584,9 @@ def get_streaming_engine(config: StreamConfig = None) -> StreamingEngine:
     return _streaming_engine
 
 
-def create_streaming_session(config: StreamConfig = None) -> Tuple[StreamBuffer, RiskAccumulator, StreamingEngine]:
+def create_streaming_session(
+    config: StreamConfig = None,
+) -> Tuple[StreamBuffer, RiskAccumulator, StreamingEngine]:
     """Create complete streaming session with buffer, accumulator, and engine."""
     engine = get_streaming_engine(config)
     buffer = engine.create_buffer()

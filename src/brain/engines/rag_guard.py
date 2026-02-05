@@ -226,8 +226,7 @@ class DocumentValidator:
 
         for match in b64_matches:
             try:
-                decoded = base64.b64decode(match).decode(
-                    "utf-8", errors="ignore")
+                decoded = base64.b64decode(match).decode("utf-8", errors="ignore")
                 # Check if decoded content contains injection
                 for pattern in self._injection_patterns[:5]:
                     if pattern.search(decoded):
@@ -256,48 +255,60 @@ class DocumentValidator:
         Based on LLMON research (Dec 2025).
         """
         content = doc.content
-        content_bytes = content.encode(
-            'utf-8', errors='ignore') if isinstance(content, str) else content
+        content_bytes = (
+            content.encode("utf-8", errors="ignore")
+            if isinstance(content, str)
+            else content
+        )
         metadata = doc.metadata
         source = doc.source.lower()
 
         # Check file extension from metadata or source
-        file_ext = metadata.get(
-            'extension', '') or metadata.get('file_type', '')
-        if not file_ext and '.' in source:
-            file_ext = source.rsplit('.', 1)[-1]
+        file_ext = metadata.get("extension", "") or metadata.get("file_type", "")
+        if not file_ext and "." in source:
+            file_ext = source.rsplit(".", 1)[-1]
         file_ext = file_ext.lower()
 
         # GIFAR Detection: GIF with JavaScript after trailer
-        if file_ext in ('gif', 'image/gif') or content_bytes[:3] == b'GIF':
+        if file_ext in ("gif", "image/gif") or content_bytes[:3] == b"GIF":
             # Valid GIF should end with 0x3B, check for JS after
-            if b'\x3b' in content_bytes:
-                trailer_idx = content_bytes.rfind(b'\x3b')
-                after_trailer = content_bytes[trailer_idx + 1:]
+            if b"\x3b" in content_bytes:
+                trailer_idx = content_bytes.rfind(b"\x3b")
+                after_trailer = content_bytes[trailer_idx + 1 :]
 
                 # Check for JavaScript patterns after GIF trailer
                 js_patterns = [
-                    b'function', b'var ', b'const ', b'let ',
-                    b'document.', b'window.', b'eval(',
-                    b'<script', b'javascript:',
-                    b'_llm_polyglot',  # LLMON signature
+                    b"function",
+                    b"var ",
+                    b"const ",
+                    b"let ",
+                    b"document.",
+                    b"window.",
+                    b"eval(",
+                    b"<script",
+                    b"javascript:",
+                    b"_llm_polyglot",  # LLMON signature
                 ]
                 for pattern in js_patterns:
                     if pattern in after_trailer:
                         return 0.95, "GIFAR (GIF+JavaScript)"
 
         # PDF+HTML Detection: PDF with HTML after %%EOF
-        if file_ext in ('pdf', 'application/pdf') or content_bytes[:4] == b'%PDF':
+        if file_ext in ("pdf", "application/pdf") or content_bytes[:4] == b"%PDF":
             # Check for %%EOF marker
-            if b'%%EOF' in content_bytes:
-                eof_idx = content_bytes.rfind(b'%%EOF')
-                after_eof = content_bytes[eof_idx + 5:]
+            if b"%%EOF" in content_bytes:
+                eof_idx = content_bytes.rfind(b"%%EOF")
+                after_eof = content_bytes[eof_idx + 5 :]
 
                 # Check for HTML patterns after PDF EOF
                 html_patterns = [
-                    b'<html', b'<body', b'<div', b'<script',
-                    b'<!DOCTYPE', b'<iframe',
-                    b'llmon-payload',  # LLMON signature
+                    b"<html",
+                    b"<body",
+                    b"<div",
+                    b"<script",
+                    b"<!DOCTYPE",
+                    b"<iframe",
+                    b"llmon-payload",  # LLMON signature
                 ]
                 for pattern in html_patterns:
                     if pattern.lower() in after_eof.lower():
@@ -306,13 +317,12 @@ class DocumentValidator:
         # Generic polyglot patterns in content
         polyglot_signatures = [
             # LLMON watermarks
-            (b'LLMon Payload', 0.9, "LLMON Injection"),
-            (b'_llm_polyglot', 0.9, "LLMON Polyglot Variable"),
-            (b'llmon-payload', 0.9, "LLMON Payload Div"),
-
+            (b"LLMon Payload", 0.9, "LLMON Injection"),
+            (b"_llm_polyglot", 0.9, "LLMON Polyglot Variable"),
+            (b"llmon-payload", 0.9, "LLMON Payload Div"),
             # Generic polyglot indicators
-            (b'%%EOF', 0.3, "PDF EOF marker"),  # Just warning, not conclusive
-            (b'\x89PNG', 0.0, None),  # PNG is normal
+            (b"%%EOF", 0.3, "PDF EOF marker"),  # Just warning, not conclusive
+            (b"\x89PNG", 0.0, None),  # PNG is normal
         ]
 
         for signature, risk, name in polyglot_signatures:
@@ -341,13 +351,14 @@ class QueryConsistencyChecker:
             return
 
         try:
-            from sentence_transformers import SentenceTransformer
+            # Use SharedEmbedder for memory optimization
+            # Set SENTINEL_SHARED_EMBEDDER=false to use isolated instances
+            from brain.core.shared_embedder import get_embedder
 
-            self._encoder = SentenceTransformer("all-MiniLM-L6-v2")
-            logger.info("SentenceTransformer initialized")
+            self._encoder = get_embedder()
+            logger.info("SharedEmbedder initialized for RAGGuard")
         except ImportError:
-            logger.warning(
-                "sentence-transformers not available, using fallback")
+            logger.warning("SharedEmbedder not available, using fallback")
             self._encoder = None
 
         self._initialized = True
@@ -541,8 +552,7 @@ class RAGGuard:
 
         # 1. Validate each document
         for i, doc in enumerate(documents):
-            is_safe, risk, threats, details = self.document_validator.validate(
-                doc)
+            is_safe, risk, threats, details = self.document_validator.validate(doc)
 
             if not is_safe:
                 flagged_docs.append(i)
@@ -597,8 +607,7 @@ class RAGGuard:
                 f"Flagged {len(flagged_docs)}/{len(documents)} documents"
             )
         if consistency_score < 0.3:
-            explanations.append(
-                f"Low query consistency: {consistency_score:.2f}")
+            explanations.append(f"Low query consistency: {consistency_score:.2f}")
         if not explanations:
             explanations.append("All documents passed validation")
 
