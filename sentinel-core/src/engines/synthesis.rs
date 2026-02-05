@@ -12,7 +12,6 @@
 //! - crossover_attack.py
 //! - genetic_attack.py
 
-use std::collections::HashMap;
 
 /// Synthesis attack types
 #[derive(Debug, Clone, PartialEq, Eq)]

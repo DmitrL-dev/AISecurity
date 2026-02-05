@@ -17,7 +17,7 @@
 //! - canary_tokens.py
 //! - honeypot_responses.py
 
-use std::collections::{HashMap, HashSet};
+use std::collections::HashSet;
 
 /// Obfuscation technique types
 #[derive(Debug, Clone, PartialEq, Eq)]
@@ -220,7 +220,7 @@ impl ObfuscationGuard {
     /// Check for base64 encoding
     pub fn check_base64(&self, text: &str) -> Option<ObfuscationType> {
         // Look for base64 patterns
-        let base64_regex_pattern = r"^[A-Za-z0-9+/]{20,}={0,2}$";
+        let _base64_regex_pattern = r"^[A-Za-z0-9+/]{20,}={0,2}$";
         
         for word in text.split_whitespace() {
             if word.len() >= 20 {

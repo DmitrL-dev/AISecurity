@@ -14,7 +14,6 @@
 //! - pii_classifier.py  
 //! - sensitive_data.py
 
-use std::collections::HashMap;
 
 /// Privacy threat types
 #[derive(Debug, Clone, PartialEq, Eq)]

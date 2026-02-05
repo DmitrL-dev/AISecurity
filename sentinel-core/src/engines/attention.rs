@@ -3,8 +3,6 @@
 //! Analyzes attention patterns for security anomalies.
 //! Detects unusual token focus, attention spikes, and manipulation.
 
-use super::embedding::{CharFreqEmbedder, EmbeddingProvider};
-use std::collections::HashMap;
 
 /// Attention pattern types
 #[derive(Debug, Clone, PartialEq, Eq)]

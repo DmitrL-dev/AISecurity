@@ -17,7 +17,6 @@
 //! - semantic_firewall.py
 //! - cot_guardian.py
 
-use std::collections::HashMap;
 
 /// Formal verification violation types
 #[derive(Debug, Clone, PartialEq, Eq)]

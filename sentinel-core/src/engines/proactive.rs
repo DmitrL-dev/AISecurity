@@ -17,7 +17,6 @@
 //! - adversarial_self_play.py
 //! - adversarial_resistance.py
 
-use std::collections::HashMap;
 
 /// Proactive defense strategies
 #[derive(Debug, Clone, PartialEq, Eq)]

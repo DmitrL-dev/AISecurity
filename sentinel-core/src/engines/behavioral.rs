@@ -17,7 +17,6 @@
 //! - dark_pattern_detector.py
 //! - cognitive_load_attack.py
 
-use std::collections::HashMap;
 
 /// Behavioral anomaly types
 #[derive(Debug, Clone, PartialEq, Eq)]

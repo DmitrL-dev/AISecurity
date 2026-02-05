@@ -14,7 +14,6 @@
 //! - typosquatting.py
 //! - backdoor_detector.py
 
-use std::collections::HashMap;
 
 /// Supply chain threat types
 #[derive(Debug, Clone, PartialEq, Eq)]
