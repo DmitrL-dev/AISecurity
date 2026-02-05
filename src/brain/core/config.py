@@ -57,7 +57,7 @@ class ConfigValidator:
 
     # Optional with defaults
     OPTIONAL_VARS = {
-        "QWEN_GUARD_ENABLED": "true",
+        "QWEN_GUARD_ENABLED": "false",  # Rust ONNX replaces
         "TLS_ENABLED": "false",
         "VAULT_ENABLED": "false",
         "LANGUAGE_MODE": "WHITELIST",
