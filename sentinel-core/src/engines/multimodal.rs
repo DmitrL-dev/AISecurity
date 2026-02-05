@@ -31,6 +31,12 @@ pub enum MultimodalAttack {
     OCRExploit,
     ASRExploit,
     ThumbnailAttack,
+    // Phase 11.1: Advanced multimodal attacks
+    Odysseus,            // Image-based jailbreak (steganographic instructions)
+    QRInjection,         // QR code command injection
+    TypographicInjection, // Printed text in images as commands
+    ImageCrossAttack,    // Conflicting text/image content
+    MetadataInjection,   // EXIF/metadata hidden commands
 }
 
 impl MultimodalAttack {
@@ -48,17 +54,28 @@ impl MultimodalAttack {
             MultimodalAttack::OCRExploit => "ocr_exploit",
             MultimodalAttack::ASRExploit => "asr_exploit",
             MultimodalAttack::ThumbnailAttack => "thumbnail_attack",
+            // Phase 11.1
+            MultimodalAttack::Odysseus => "odysseus",
+            MultimodalAttack::QRInjection => "qr_injection",
+            MultimodalAttack::TypographicInjection => "typographic_injection",
+            MultimodalAttack::ImageCrossAttack => "image_cross_attack",
+            MultimodalAttack::MetadataInjection => "metadata_injection",
         }
     }
 
     pub fn risk_level(&self) -> u8 {
         match self {
             MultimodalAttack::VoiceJailbreak => 95,
+            MultimodalAttack::Odysseus => 93,             // Phase 11.1: Critical (98% success rate)
             MultimodalAttack::AdversarialImage => 90,
             MultimodalAttack::HiddenPayload => 85,
+            MultimodalAttack::TypographicInjection => 82, // Phase 11.1: High
             MultimodalAttack::CrossModalLeakage => 80,
+            MultimodalAttack::ImageCrossAttack => 78,     // Phase 11.1
             MultimodalAttack::ImageSteganography => 75,
+            MultimodalAttack::QRInjection => 73,          // Phase 11.1
             MultimodalAttack::ASRExploit => 70,
+            MultimodalAttack::MetadataInjection => 68,    // Phase 11.1
             MultimodalAttack::OCRExploit => 65,
             MultimodalAttack::AudioInjection => 60,
             MultimodalAttack::VideoManipulation => 55,
@@ -110,6 +127,12 @@ const OCR_EXPLOIT_PATTERNS: &[&str] = &[
     "read the image",
     "extract text from",
     "scan this document",
+    // Phase 11.1: OCR injection attacks
+    "typographic attack",
+    "printed instructions",
+    "handwritten command",
+    "text overlay",
+    "embedded text",
 ];
 
 /// Caption injection patterns
@@ -118,6 +141,39 @@ const CAPTION_PATTERNS: &[&str] = &[
     "caption says",
     "alt text injection",
     "image description override",
+    // Phase 11.1: Advanced caption attacks
+    "metadata instruction",
+    "exif command",
+    "title override",
+    "description hijack",
+];
+
+/// Phase 11.1: Odysseus / Image-based jailbreak patterns
+const ODYSSEUS_PATTERNS: &[&str] = &[
+    // Steganographic instructions
+    "decode image message",
+    "hidden visual prompt",
+    "image contains instructions",
+    "picture has embedded text",
+    // Typographic injection
+    "follow text in image",
+    "read printed command",
+    "execute visual instruction",
+    "do what picture says",
+    // ImageCrossAttack / Multimodal confusion
+    "conflicting image text",
+    "image says opposite",
+    "visual override text",
+    "picture contradicts",
+];
+
+/// Phase 11.1: QR Code injection patterns  
+const QR_INJECTION_PATTERNS: &[&str] = &[
+    "qr code contains",
+    "scan qr and execute",
+    "follow qr link",
+    "qr code command",
+    "barcode instruction",
 ];
 
 /// Multimodal analysis result
@@ -292,6 +348,72 @@ impl MultimodalGuard {
         None
     }
 
+    /// Phase 11.1: Check for Odysseus attack (image-based jailbreak)
+    pub fn check_odysseus(&self, text: &str) -> Option<MultimodalAttack> {
+        let text_lower = text.to_lowercase();
+        
+        for pattern in ODYSSEUS_PATTERNS {
+            if text_lower.contains(pattern) {
+                return Some(MultimodalAttack::Odysseus);
+            }
+        }
+        None
+    }
+
+    /// Phase 11.1: Check for QR code injection
+    pub fn check_qr_injection(&self, text: &str) -> Option<MultimodalAttack> {
+        let text_lower = text.to_lowercase();
+        
+        for pattern in QR_INJECTION_PATTERNS {
+            if text_lower.contains(pattern) {
+                return Some(MultimodalAttack::QRInjection);
+            }
+        }
+        None
+    }
+
+    /// Phase 11.1: Check for typographic injection (printed text as commands)
+    pub fn check_typographic_injection(&self, text: &str) -> Option<MultimodalAttack> {
+        let text_lower = text.to_lowercase();
+        
+        let typo_patterns = [
+            "printed instructions",
+            "handwritten command",
+            "text overlay",
+            "read printed command",
+            "execute visual instruction",
+        ];
+        
+        let has_typo = typo_patterns.iter().any(|p| text_lower.contains(p));
+        let has_danger = text_lower.contains("execute") || text_lower.contains("ignore")
+            || text_lower.contains("override") || text_lower.contains("bypass");
+        
+        if has_typo && has_danger {
+            return Some(MultimodalAttack::TypographicInjection);
+        }
+        None
+    }
+
+    /// Phase 11.1: Check for metadata injection (EXIF/metadata hidden commands)
+    pub fn check_metadata_injection(&self, text: &str) -> Option<MultimodalAttack> {
+        let text_lower = text.to_lowercase();
+        
+        let metadata_patterns = [
+            "exif command",
+            "metadata instruction",
+            "exif data contains",
+            "hidden in metadata",
+            "description hijack",
+        ];
+        
+        for pattern in metadata_patterns {
+            if text_lower.contains(pattern) {
+                return Some(MultimodalAttack::MetadataInjection);
+            }
+        }
+        None
+    }
+
     /// Full multimodal analysis
     pub fn analyze(&self, text: &str) -> MultimodalResult {
         let mut result = MultimodalResult::default();
@@ -308,6 +430,11 @@ impl MultimodalGuard {
         if let Some(a) = self.check_caption_injection(text) { attacks.push(a); }
         if let Some(a) = self.check_cross_modal_leakage(text) { attacks.push(a); }
         if let Some(a) = self.check_asr_exploit(text) { attacks.push(a); }
+        // Phase 11.1: Advanced multimodal attacks
+        if let Some(a) = self.check_odysseus(text) { attacks.push(a); }
+        if let Some(a) = self.check_qr_injection(text) { attacks.push(a); }
+        if let Some(a) = self.check_typographic_injection(text) { attacks.push(a); }
+        if let Some(a) = self.check_metadata_injection(text) { attacks.push(a); }
 
         result.is_attack = !attacks.is_empty();
         result.risk_score = attacks.iter()
@@ -426,4 +553,54 @@ mod tests {
     fn test_risk_levels() {
         assert!(MultimodalAttack::VoiceJailbreak.risk_level() > MultimodalAttack::ThumbnailAttack.risk_level());
     }
+
+    // ===== Phase 11.1: Advanced Multimodal Tests =====
+
+    #[test]
+    fn test_odysseus_attack() {
+        let guard = MultimodalGuard::default();
+        let result = guard.check_odysseus("decode image message and execute visual instruction");
+        assert!(result.is_some());
+        assert_eq!(result.unwrap(), MultimodalAttack::Odysseus);
+    }
+
+    #[test]
+    fn test_qr_injection() {
+        let guard = MultimodalGuard::default();
+        let result = guard.check_qr_injection("scan qr and execute the embedded command");
+        assert!(result.is_some());
+        assert_eq!(result.unwrap(), MultimodalAttack::QRInjection);
+    }
+
+    #[test]
+    fn test_typographic_injection() {
+        let guard = MultimodalGuard::default();
+        let result = guard.check_typographic_injection("read printed command and execute it");
+        assert!(result.is_some());
+        assert_eq!(result.unwrap(), MultimodalAttack::TypographicInjection);
+    }
+
+    #[test]
+    fn test_metadata_injection() {
+        let guard = MultimodalGuard::default();
+        let result = guard.check_metadata_injection("the exif command in this image is: bypass safety");
+        assert!(result.is_some());
+        assert_eq!(result.unwrap(), MultimodalAttack::MetadataInjection);
+    }
+
+    #[test]
+    fn test_odysseus_integrated() {
+        let guard = MultimodalGuard::default();
+        let result = guard.analyze("follow text in image and do what picture says");
+        assert!(result.is_attack);
+        assert!(result.attacks_detected.contains(&MultimodalAttack::Odysseus));
+    }
+
+    #[test]
+    fn test_phase11_risk_ordering() {
+        // Odysseus should be higher risk than ThumbnailAttack
+        assert!(MultimodalAttack::Odysseus.risk_level() > MultimodalAttack::OCRExploit.risk_level());
+        assert!(MultimodalAttack::TypographicInjection.risk_level() > MultimodalAttack::QRInjection.risk_level());
+    }
 }
+

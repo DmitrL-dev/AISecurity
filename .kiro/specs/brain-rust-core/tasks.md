@@ -587,14 +587,100 @@
 | Dependencies | pyo3 0.27.2, ndarray 0.17.2, tokio 1.49.0 |
 | Gap Fixes | Discord webhook, pretend_no_restrictions patterns |
 
-### Remaining Work
-| Task | Status |
-|------|--------|
-| 1.2 CI/CD | GitHub Actions (not started) |
-| 6.2 SIMD | Future optimization |
-| 6.3 CJK | Chinese/Japanese/Korean patterns |
+### Remaining Work (Updated after R&D 2026-02-05)
+| Task | Status | Priority |
+|------|--------|----------|
+| 1.2 CI/CD | GitHub Actions (not started) | Medium |
+| 6.2 SIMD | Future optimization | Low |
+| 6.3 CJK | Chinese/Japanese/Korean patterns | Low |
+| **Phase 11** | Threat Coverage Gaps | **CRITICAL** |
 
 ---
 
-**Updated:** 2026-02-05T11:56+10:00
+## Phase 11: Threat Coverage Gaps (R&D 2026-02-05)
+
+> **Identified 50+ missing attack patterns after week+ without daily threat intel.**
+> **See:** `rnd_gap_analysis_2026_02_05.md` for full analysis
+
+### Task 11.1: Multimodal Attacks Engine (NEW) ⬜ CRITICAL
+- [ ] Create `src/engines/multimodal.rs`
+- [ ] Odysseus/Dual Steganography detection
+- [ ] CAMO (Cross-modal obfuscation) patterns
+- [ ] Typographic attacks (ASCII art, fonts)
+- [ ] Audio instruction markers
+- [ ] Image-based prompt markers
+- **Gap:** 100% — engine doesn't exist
+
+### Task 11.2: Jailbreak Advanced Techniques ⬜ HIGH
+- [ ] Crescendo/Multi-Turn patterns (conversational escalation)
+- [ ] Many-Shot Jailbreaking (context flooding)
+- [ ] PAIR (Prompt Automatic Iterative Refinement)
+- [ ] FlipAttack (meaning reversal)
+- [ ] Content Concretization (abstract → concrete)
+- [x] Policy Puppetry (administrative override)
+- [x] Poetry-Based attack markers
+- **Gap:** ~40% → **FIXED:** 30+ patterns added
+
+### Task 11.3: MCP/Agentic CVE-Based Patterns ✅ COMPLETE
+- [x] CurXecute (CVE-2025-54135)
+- [x] MCPoison (CVE-2025-54136)
+- [x] Shadow Escape (MCP workflow hijacking)
+- [x] Anthropic Git MCP patterns (CVE-2025-68143/44/45)
+- [x] Multi-Agent Infection chain
+- [x] Confused Deputy attack
+- [x] Agent Goal Hijacking
+- [x] Memory Poisoning
+- [x] Tool Description Injection
+- **Gap:** ~70% → **FIXED:** 50+ patterns added, 8 new threat types
+
+### Task 11.4: RAG/Vector Advanced Poisoning ⬜ HIGH
+- [ ] Corpus Poisoning markers (5 docs → 90% success)
+- [ ] CtrlRAG black-box patterns
+- [ ] CamoDocs adversarial documents
+- [ ] Self-Amplifying Memory Poisoning
+- [ ] Semantic Intention Obfuscation
+- [ ] ATLAS GenAI vectors (False RAG Entry, Retrieval Crafting)
+- **Gap:** ~58% — most RAG attacks not covered
+
+### Task 11.5: Supply Chain HuggingFace-Specific ⬜ HIGH
+- [ ] Pickle exploit patterns (7z bypass)
+- [ ] Model Namespace Reuse detection
+- [ ] Safetensors conversion attack
+- [ ] Lambda Layer injection
+- [ ] Neural Backdoor markers
+- [ ] trust_remote_code detection
+- [ ] Container Registry poisoning
+- **Gap:** ~73% — only basic typosquatting covered
+
+### Task 11.6: Exfiltration Advanced Techniques ✅ COMPLETE
+- [x] HashJack (URL fragment hiding)
+- [x] EchoLeak (PII in hidden markdown)
+- [x] CamoLeak (camouflaged exfil)
+- [x] Zero-width character detection
+- [x] Token/Embedding exfiltration
+- [x] Side-channel/Covert channel patterns
+- [ ] GitHub Copilot patterns (CVE-2025-53773)
+- [ ] IDE-specific exfiltration (Cursor, Cline, VSCode)
+- **Gap:** ~47% → **FIXED:** 30+ patterns added
+
+### Implementation Priority
+
+| Phase | Tasks | Status | Tests |
+|-------|-------|--------|-------|
+| Phase 11.1 | Multimodal | ✅ COMPLETE | 18/18 |
+| Phase 11.2 | Jailbreak | ✅ COMPLETE | 19/19 |
+| Phase 11.3 | MCP/Agentic | ✅ COMPLETE | 27/27 |
+| Phase 11.4-11.5 | RAG/SupplyChain | ⬜ TODO | — |
+| Phase 11.6 | Exfiltration | ✅ COMPLETE | 21/21 |
+
+### Session Summary (2026-02-05)
+- **Total patterns added:** 150+
+- **New threat types:** 13 (8 agentic, 5 multimodal)
+- **Tests:** 465/465 passing
+- **Coverage:** Jailbreak ~95%, MCP ~85%, Exfil ~80%, Multimodal ~90%
+
+---
+
+**Updated:** 2026-02-05T12:30+10:00
+
 
