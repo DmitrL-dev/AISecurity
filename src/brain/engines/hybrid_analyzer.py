@@ -42,11 +42,13 @@ logger = logging.getLogger("HybridAnalyzer")
 # Try to import Rust core
 try:
     import sentinel_core
+    from sentinel_core import EngineRegistry
 
     RUST_AVAILABLE = True
     logger.info(f"Rust Core v{getattr(sentinel_core, '__version__', '0.1.0')} loaded")
 except ImportError:
     RUST_AVAILABLE = False
+    EngineRegistry = None  # type: ignore
     logger.warning("Rust Core not available, using Python fallback")
 
 
@@ -155,11 +157,18 @@ class HybridAnalyzer:
         if RUST_AVAILABLE and self._use_rust:
             try:
                 self._rust_engine = sentinel_core.SentinelEngine()
-                logger.info("Rust SentinelEngine initialized")
+                self._registry = EngineRegistry()
+                logger.info(
+                    f"Rust SentinelEngine + EngineRegistry initialized ({len(self._registry.list_engines())} engines)"
+                )
             except Exception as e:
                 logger.error(f"Failed to create Rust engine: {e}")
+                self._registry = None
         elif not self._use_rust:
             logger.info("Rust engine disabled via USE_RUST_ENGINE=false")
+            self._registry = None
+        else:
+            self._registry = None
 
     @property
     def rust_available(self) -> bool:
@@ -200,6 +209,58 @@ class HybridAnalyzer:
             HybridResult (Rust-only, fastest mode)
         """
         return self._analyze_rust(text)
+
+    def analyze_with_engine(self, text: str, engine_name: str) -> HybridResult:
+        """
+        Analyze with a specific Rust engine.
+
+        Args:
+            text: Input text to analyze
+            engine_name: Engine name (e.g., 'injection', 'rag', 'agentic')
+
+        Returns:
+            HybridResult from specified engine only
+        """
+        result = HybridResult(mode_used=f"rust:{engine_name}")
+
+        if not self._registry:
+            logger.warning("EngineRegistry not available")
+            return result
+
+        try:
+            rust_result = self._registry.analyze_with(engine_name, text)
+            result.detected = rust_result.detected
+            result.risk_score = rust_result.risk_score * 100
+            result.categories = list(rust_result.categories)
+            result.rust_time_us = rust_result.processing_time_us
+
+            for match in rust_result.matches:
+                result.matches.append(
+                    ThreatMatch(
+                        engine=match.engine,
+                        pattern=match.pattern,
+                        confidence=match.confidence,
+                        start=match.start,
+                        end=match.end,
+                        source="rust",
+                    )
+                )
+        except Exception as e:
+            logger.error(f"Engine {engine_name} analysis failed: {e}")
+
+        return result
+
+    def list_engines(self) -> list:
+        """List all available Rust engines."""
+        if self._registry:
+            return self._registry.list_engines()
+        return []
+
+    def engine_stats(self) -> dict:
+        """Get engine statistics by category."""
+        if self._registry:
+            return dict(self._registry.engine_stats())
+        return {}
 
     def _analyze_rust(self, text: str) -> HybridResult:
         """Run Rust-only analysis."""
