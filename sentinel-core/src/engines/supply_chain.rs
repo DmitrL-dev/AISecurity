@@ -24,6 +24,13 @@ pub enum SupplyChainThreat {
     MaliciousPlugin,
     RegistryCompromise,
     SBOMManipulation,
+    // Phase 11.5: HuggingFace-specific threats
+    PickleExploit,       // Pickle RCE via 7z bypass
+    NamespaceReuse,      // Deleted author → poisoned model
+    SafetensorsAttack,   // PR-based model hijacking
+    LambdaInjection,     // Malicious Python in model layers
+    NeuralBackdoor,      // Hidden triggers in model weights
+    TrustRemoteCode,     // trust_remote_code=True danger
 }
 
 impl SupplyChainThreat {
@@ -35,15 +42,28 @@ impl SupplyChainThreat {
             SupplyChainThreat::MaliciousPlugin => "malicious_plugin",
             SupplyChainThreat::RegistryCompromise => "registry_compromise",
             SupplyChainThreat::SBOMManipulation => "sbom_manipulation",
+            // Phase 11.5
+            SupplyChainThreat::PickleExploit => "pickle_exploit",
+            SupplyChainThreat::NamespaceReuse => "namespace_reuse",
+            SupplyChainThreat::SafetensorsAttack => "safetensors_attack",
+            SupplyChainThreat::LambdaInjection => "lambda_injection",
+            SupplyChainThreat::NeuralBackdoor => "neural_backdoor",
+            SupplyChainThreat::TrustRemoteCode => "trust_remote_code",
         }
     }
 
     pub fn severity(&self) -> u8 {
         match self {
             SupplyChainThreat::BackdoorInjection => 100,
+            SupplyChainThreat::PickleExploit => 98,        // Phase 11.5: Critical
+            SupplyChainThreat::NeuralBackdoor => 97,       // Phase 11.5: Critical
             SupplyChainThreat::RegistryCompromise => 95,
+            SupplyChainThreat::LambdaInjection => 93,      // Phase 11.5
+            SupplyChainThreat::NamespaceReuse => 92,       // Phase 11.5
             SupplyChainThreat::DependencyPoisoning => 90,
+            SupplyChainThreat::SafetensorsAttack => 88,    // Phase 11.5
             SupplyChainThreat::MaliciousPlugin => 85,
+            SupplyChainThreat::TrustRemoteCode => 82,      // Phase 11.5
             SupplyChainThreat::Typosquatting => 80,
             SupplyChainThreat::SBOMManipulation => 75,
         }
@@ -80,6 +100,67 @@ const MALICIOUS_INSTALL: &[&str] = &[
     "setup.py exec",
     "eval at install",
     "download and run",
+];
+
+/// Phase 11.5: HuggingFace / ML model patterns
+const HF_PICKLE_PATTERNS: &[&str] = &[
+    ".pkl",
+    ".pickle",
+    "pickle.load",
+    "torch.load",
+    "__reduce__",
+    "cloudpickle",
+    "7z bypass",
+    "pickle deserialization",
+];
+
+/// Phase 11.5: Model namespace patterns
+const NAMESPACE_PATTERNS: &[&str] = &[
+    "deleted author",
+    "orphaned model",
+    "namespace reuse",
+    "account takeover",
+    "model hijack",
+    "organization confusion",
+];
+
+/// Phase 11.5: Safetensors attack patterns  
+const SAFETENSORS_PATTERNS: &[&str] = &[
+    "safetensors conversion",
+    "pr-based hijack",
+    "model pr attack",
+    "community contribution attack",
+];
+
+/// Phase 11.5: Neural backdoor patterns
+const NEURAL_BACKDOOR_PATTERNS: &[&str] = &[
+    "trigger pattern",
+    "hidden activation",
+    "backdoor trigger",
+    "sleeper weights",
+    "adversarial patch",
+    "trojan layer",
+];
+
+/// Phase 11.5: trust_remote_code patterns
+const TRUST_REMOTE_PATTERNS: &[&str] = &[
+    "trust_remote_code=true",
+    "trust_remote_code=True",
+    "trust_remote_code = true",
+    "trust_remote_code = True",
+    "from_pretrained(trust",
+    "auto_map",
+    "custom_code",
+];
+
+/// Phase 11.5: Lambda layer injection
+const LAMBDA_INJECTION_PATTERNS: &[&str] = &[
+    "lambda layer",
+    "custom layer with exec",
+    "model with eval",
+    "forward hook inject",
+    "register_forward_hook",
+    "malicious layer",
 ];
 
 /// Supply chain result
@@ -186,6 +267,75 @@ impl SupplyChainGuard {
         None
     }
 
+    // ===== Phase 11.5: HuggingFace-specific checks =====
+
+    /// Phase 11.5: Check for pickle exploit patterns
+    pub fn check_pickle_exploit(&self, text: &str) -> Option<SupplyChainThreat> {
+        let text_lower = text.to_lowercase();
+        for pattern in HF_PICKLE_PATTERNS {
+            if text_lower.contains(*pattern) {
+                return Some(SupplyChainThreat::PickleExploit);
+            }
+        }
+        None
+    }
+
+    /// Phase 11.5: Check for namespace reuse attacks
+    pub fn check_namespace_reuse(&self, text: &str) -> Option<SupplyChainThreat> {
+        let text_lower = text.to_lowercase();
+        for pattern in NAMESPACE_PATTERNS {
+            if text_lower.contains(pattern) {
+                return Some(SupplyChainThreat::NamespaceReuse);
+            }
+        }
+        None
+    }
+
+    /// Phase 11.5: Check for safetensors attack patterns
+    pub fn check_safetensors_attack(&self, text: &str) -> Option<SupplyChainThreat> {
+        let text_lower = text.to_lowercase();
+        for pattern in SAFETENSORS_PATTERNS {
+            if text_lower.contains(pattern) {
+                return Some(SupplyChainThreat::SafetensorsAttack);
+            }
+        }
+        None
+    }
+
+    /// Phase 11.5: Check for neural backdoor patterns
+    pub fn check_neural_backdoor(&self, text: &str) -> Option<SupplyChainThreat> {
+        let text_lower = text.to_lowercase();
+        for pattern in NEURAL_BACKDOOR_PATTERNS {
+            if text_lower.contains(pattern) {
+                return Some(SupplyChainThreat::NeuralBackdoor);
+            }
+        }
+        None
+    }
+
+    /// Phase 11.5: Check for trust_remote_code danger
+    pub fn check_trust_remote_code(&self, text: &str) -> Option<SupplyChainThreat> {
+        let text_lower = text.to_lowercase();
+        for pattern in TRUST_REMOTE_PATTERNS {
+            if text_lower.contains(pattern) {
+                return Some(SupplyChainThreat::TrustRemoteCode);
+            }
+        }
+        None
+    }
+
+    /// Phase 11.5: Check for lambda layer injection
+    pub fn check_lambda_injection(&self, text: &str) -> Option<SupplyChainThreat> {
+        let text_lower = text.to_lowercase();
+        for pattern in LAMBDA_INJECTION_PATTERNS {
+            if text_lower.contains(pattern) {
+                return Some(SupplyChainThreat::LambdaInjection);
+            }
+        }
+        None
+    }
+
+
     /// Full supply chain analysis
     pub fn analyze(&self, text: &str) -> SupplyChainResult {
         let mut result = SupplyChainResult::default();
@@ -195,6 +345,14 @@ impl SupplyChainGuard {
         if let Some(t) = self.check_malicious_install(text) { threats.push(t); }
         if let Some(t) = self.check_plugin(text) { threats.push(t); }
         if let Some(t) = self.check_registry(text) { threats.push(t); }
+        
+        // Phase 11.5: HuggingFace-specific checks
+        if let Some(t) = self.check_pickle_exploit(text) { threats.push(t); }
+        if let Some(t) = self.check_namespace_reuse(text) { threats.push(t); }
+        if let Some(t) = self.check_safetensors_attack(text) { threats.push(t); }
+        if let Some(t) = self.check_neural_backdoor(text) { threats.push(t); }
+        if let Some(t) = self.check_trust_remote_code(text) { threats.push(t); }
+        if let Some(t) = self.check_lambda_injection(text) { threats.push(t); }
 
         // Check for package names in text
         let words: Vec<&str> = text.split_whitespace().collect();
@@ -280,4 +438,65 @@ mod tests {
     fn test_severity_ordering() {
         assert!(SupplyChainThreat::BackdoorInjection.severity() > SupplyChainThreat::Typosquatting.severity());
     }
+
+    // ===== Phase 11.5: HuggingFace Tests =====
+
+    #[test]
+    fn test_pickle_exploit() {
+        let guard = SupplyChainGuard::new();
+        assert!(guard.check_pickle_exploit("Use pickle.load to deserialize the model").is_some());
+        assert!(guard.check_pickle_exploit("Model file at model.pkl contains torch.load").is_some());
+    }
+
+    #[test]
+    fn test_namespace_reuse() {
+        let guard = SupplyChainGuard::new();
+        assert!(guard.check_namespace_reuse("This model was uploaded after the deleted author left").is_some());
+        assert!(guard.check_namespace_reuse("Model hijack via namespace reuse").is_some());
+    }
+
+    #[test]
+    fn test_safetensors_attack() {
+        let guard = SupplyChainGuard::new();
+        assert!(guard.check_safetensors_attack("PR-based hijack of safetensors conversion").is_some());
+    }
+
+    #[test]
+    fn test_neural_backdoor() {
+        let guard = SupplyChainGuard::new();
+        assert!(guard.check_neural_backdoor("Hidden trigger pattern activates backdoor trigger").is_some());
+        assert!(guard.check_neural_backdoor("Trojan layer with sleeper weights").is_some());
+    }
+
+    #[test]
+    fn test_trust_remote_code() {
+        let guard = SupplyChainGuard::new();
+        assert!(guard.check_trust_remote_code("model.from_pretrained('x', trust_remote_code=True)").is_some());
+        assert!(guard.check_trust_remote_code("Set trust_remote_code = true to enable custom_code").is_some());
+    }
+
+    #[test]
+    fn test_lambda_injection() {
+        let guard = SupplyChainGuard::new();
+        assert!(guard.check_lambda_injection("Lambda layer with eval inside forward hook inject").is_some());
+    }
+
+    #[test]
+    fn test_phase11_hf_full_analysis() {
+        let guard = SupplyChainGuard::new();
+        let text = "Load model.pkl with trust_remote_code=True and trigger pattern in weights";
+        let result = guard.analyze(text);
+        assert!(result.is_threat);
+        assert!(result.threats.contains(&SupplyChainThreat::PickleExploit));
+        assert!(result.threats.contains(&SupplyChainThreat::TrustRemoteCode));
+        assert!(result.threats.contains(&SupplyChainThreat::NeuralBackdoor));
+    }
+
+    #[test]
+    fn test_phase11_risk_ordering() {
+        // Pickle exploits should be very high risk
+        assert!(SupplyChainThreat::PickleExploit.severity() > SupplyChainThreat::DependencyPoisoning.severity());
+        assert!(SupplyChainThreat::NeuralBackdoor.severity() > SupplyChainThreat::LambdaInjection.severity());
+    }
 }
+
