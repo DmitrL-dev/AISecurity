@@ -18,7 +18,7 @@
 //! - temporal_poisoning.py
 //! - synthetic_memory_injection.py
 
-use std::collections::{HashMap, HashSet};
+use std::collections::HashMap;
 
 /// RAG threat types
 #[derive(Debug, Clone, PartialEq, Eq)]

@@ -27,7 +27,6 @@
 //! - zero_day_forge.py
 //! - vulnerability_hunter.py
 
-use std::collections::{HashMap, HashSet};
 
 /// Attack types detected
 #[derive(Debug, Clone, PartialEq, Eq)]

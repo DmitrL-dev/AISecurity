@@ -14,7 +14,6 @@
 //! - rule_dsl.py
 //! - registry.py
 
-use std::collections::HashMap;
 
 /// Knowledge threat types
 #[derive(Debug, Clone, PartialEq, Eq)]

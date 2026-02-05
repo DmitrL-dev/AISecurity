@@ -258,9 +258,6 @@ pub mod onnx {
                 .collect();
             
             // Note: BGE-M3 doesn't use token_type_ids
-            
-            let seq_len = ids.len();
-            
             let seq_len = ids.len();
             
             // Create ORT tensors with shape [1, seq_len]

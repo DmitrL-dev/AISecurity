@@ -182,11 +182,11 @@
 - [x] Shadow mode comparison (`shadow_analyze()`) ✅
 - [x] Gradual rollout: `RUST_ROLLOUT_PERCENT` (0-100) ✅
 
-### Task 5.4: Cleanup ✅
+### Task 5.4: Cleanup & Release ✅
 - [x] Archive Python engines — **injection.py, pii.py** archived ✅
 - [x] Updated archive README with 8 super-engines mapping ✅
 - [x] Archive remaining Python engines — **N/A, consolidated into super-engines** ✅
-- [ ] Release v2.0
+- [x] **Release v2.0.0** (Feb 2026) — 36 engines, 455 tests, 90.3% coverage
 
 ---
 

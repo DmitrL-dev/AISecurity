@@ -5,7 +5,6 @@
 //! Uses category theory to detect compositional attacks
 //! by modeling prompts as morphisms and checking composition safety.
 
-use std::collections::HashMap;
 
 /// Morphism between prompts
 #[derive(Debug, Clone)]

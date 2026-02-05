@@ -14,7 +14,7 @@
 //! - hash_analyzer.py
 //! - url_reputation.py
 
-use std::collections::{HashMap, HashSet};
+use std::collections::HashSet;
 
 /// Threat categories
 #[derive(Debug, Clone, PartialEq, Eq)]
