@@ -5,10 +5,9 @@ Core security engines for LLM protection.
 """
 
 # Core Detection Engines
-from .injection import InjectionEngine
+# NOTE: InjectionEngine and PIIEngine now in Rust Core (sentinel_core)
 from .yara_engine import YaraEngine
 from .behavioral import BehavioralEngine
-from .pii import PIIEngine
 from .query import QueryEngine
 from .language import LanguageEngine
 
@@ -94,9 +93,6 @@ from .exploitation_vulnerability_other_detector import (
     ExploitationVulnerabilityOtherDetector,
 )
 
-# Auto-generated engine
-from .case_study_injection_detector import CaseStudyInjectionDetector
-
 # Auto-generated engine (renamed from 2nd_february to avoid invalid identifier)
 from .february_2nd_malware_detector import SecondFebruaryMalwareDetector
 
@@ -113,21 +109,12 @@ from .sicarii_ransomware_malware_detector import SicariiRansomwareMalwareDetecto
 from .inside_gobruteforcer_other_detector import InsideGobruteforcerOtherDetector
 
 # Auto-generated engine
-from .2nd_february_malware_detector import 2ndFebruaryMalwareDetector
+from .detecting_backdoored_other_detector import DetectingBackdooredOtherDetector
 
-# Auto-generated engine
-from .26th_january_malware_detector import 26thJanuaryMalwareDetector
-
-# Auto-generated engine
-from .konni_adopts_malware_detector import KonniAdoptsMalwareDetector
-
-# Auto-generated engine
-from .19th_january_exfiltration_detector import 19thJanuaryExfiltrationDetector
 
 # Backward compatibility aliases (legacy names)
-InjectionDetector = InjectionEngine
+# NOTE: InjectionDetector and PIIDetector now in Rust Core
 BehavioralAnalyzer = BehavioralEngine
-PIIDetector = PIIEngine
 QueryValidator = QueryEngine
 LanguageDetector = LanguageEngine
 HallucinationDetector = HallucinationEngine
@@ -140,11 +127,9 @@ StreamingGuard = StreamingEngine
 ProbingDetection = ProbingDetector
 
 __all__ = [
-    # Core Engines
-    "InjectionEngine",
+    # Core Engines (InjectionEngine and PIIEngine in Rust Core)
     "YaraEngine",
     "BehavioralEngine",
-    "PIIEngine",
     "QueryEngine",
     "LanguageEngine",
     "SystemPromptGuard",
@@ -155,10 +140,8 @@ __all__ = [
     "CrossModalConsistency",
     "ProbingDetector",
     "StreamingEngine",
-    # Backward compat aliases
-    "InjectionDetector",
+    # Backward compat aliases (InjectionDetector/PIIDetector in Rust Core)
     "BehavioralAnalyzer",
-    "PIIDetector",
     "QueryValidator",
     "LanguageDetector",
     "HallucinationDetector",
@@ -199,8 +182,6 @@ __all__ = [
     "DnsOverdosOtherDetector",
     # Auto-generated
     "ExploitationVulnerabilityOtherDetector",
-    # Auto-generated
-    "CaseStudyInjectionDetector",
     "SecondFebruaryMalwareDetector",
     # Auto-generated
     "KonniAdoptsPhishingDetector",
@@ -211,11 +192,5 @@ __all__ = [
     # Auto-generated
     "InsideGobruteforcerOtherDetector",
     # Auto-generated
-    "2ndFebruaryMalwareDetector",
-    # Auto-generated
-    "26thJanuaryMalwareDetector",
-    # Auto-generated
-    "KonniAdoptsMalwareDetector",
-    # Auto-generated
-    "19thJanuaryExfiltrationDetector",
+    "DetectingBackdooredOtherDetector",
 ]

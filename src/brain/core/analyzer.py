@@ -53,11 +53,11 @@ class SentinelAnalyzer:
         self._warmed_up = False
 
         # Lightweight engines loaded immediately (fast init)
-        from ..engines.injection import InjectionEngine
+        # NOTE: InjectionEngine migrated to Rust Core - using HybridAnalyzer instead
         from ..engines.query import QueryEngine
         from ..engines.behavioral import BehavioralEngine
 
-        self.injection_engine = InjectionEngine()
+        self.injection_engine = None  # Now handled by Rust Core
         self.query_engine = QueryEngine()
         self.behavioral_engine = BehavioralEngine()
 
@@ -289,11 +289,15 @@ class SentinelAnalyzer:
 
     @cached_property
     def pii_engine(self):
-        """PII Engine - loads spacy models on first use."""
-        logger.info("Lazy loading PII Engine...")
-        from engines.pii import PIIEngine
+        """PII Engine - now in Rust Core, fallback to archive."""
+        logger.info("Lazy loading PII Engine (from archive)...")
+        try:
+            from ..engines.archive.deprecated_pattern_engines.pii import PIIEngine
 
-        return PIIEngine()
+            return PIIEngine()
+        except ImportError:
+            logger.warning("PIIEngine not available - use Rust Core instead")
+            return None
 
     @cached_property
     def geometric_kernel(self):
