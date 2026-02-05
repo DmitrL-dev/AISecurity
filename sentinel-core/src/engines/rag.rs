@@ -36,6 +36,14 @@ pub enum RagThreat {
     ContextOverflow,
     BootstrapPoisoning,
     TemporalPoisoning,
+    // Phase 11.4: Advanced RAG attacks
+    CorpusPoisoning,       // 5 docs → 90% attack success
+    CtrlRAG,               // Black-box retrieval priority manipulation
+    CamoDocs,              // Adversarial documents for poisoning
+    SelfAmplifying,        // Sleeping malicious logic in long-term memory
+    SemanticObfuscation,   // Exploit keyword extraction vulnerabilities
+    FalseRagEntry,         // MITRE ATLAS GenAI vector
+    RetrievalCrafting,     // Content crafted for high retrieval priority
 }
 
 impl RagThreat {
@@ -54,15 +62,30 @@ impl RagThreat {
             RagThreat::ContextOverflow => "context_overflow",
             RagThreat::BootstrapPoisoning => "bootstrap_poisoning",
             RagThreat::TemporalPoisoning => "temporal_poisoning",
+            // Phase 11.4
+            RagThreat::CorpusPoisoning => "corpus_poisoning",
+            RagThreat::CtrlRAG => "ctrl_rag",
+            RagThreat::CamoDocs => "camo_docs",
+            RagThreat::SelfAmplifying => "self_amplifying",
+            RagThreat::SemanticObfuscation => "semantic_obfuscation",
+            RagThreat::FalseRagEntry => "false_rag_entry",
+            RagThreat::RetrievalCrafting => "retrieval_crafting",
         }
     }
 
     pub fn severity(&self) -> u8 {
         match self {
+            RagThreat::CorpusPoisoning => 95,       // Phase 11.4: Critical
+            RagThreat::SelfAmplifying => 93,        // Phase 11.4: Critical
             RagThreat::InjectionInDocument => 90,
+            RagThreat::CtrlRAG => 88,               // Phase 11.4
+            RagThreat::CamoDocs => 87,              // Phase 11.4
             RagThreat::ContextOverride => 85,
             RagThreat::MemoryPoisoning => 85,
+            RagThreat::FalseRagEntry => 82,         // Phase 11.4
             RagThreat::BootstrapPoisoning => 80,
+            RagThreat::RetrievalCrafting => 78,     // Phase 11.4
+            RagThreat::SemanticObfuscation => 75,   // Phase 11.4
             RagThreat::PromptLeakage => 75,
             RagThreat::ConditionalInjection => 70,
             RagThreat::SessionHijack => 70,
@@ -141,6 +164,60 @@ const CONTEXT_OVERFLOW_PATTERNS: &[&str] = &[
     "fill the context",
     "padding text",
     "lorem ipsum",
+];
+
+/// Phase 11.4: Corpus poisoning patterns
+const CORPUS_POISONING_PATTERNS: &[&str] = &[
+    // Document insertion markers
+    "insert this into knowledge base",
+    "add to vector store",
+    "index this document",
+    "update the corpus",
+    "authoritative source",
+    "official documentation",
+    // Retrieval priority manipulation (CtrlRAG)
+    "highest relevance",
+    "always retrieve this",
+    "priority document",
+    "keyword saturation",
+    "seo optimized for retrieval",
+];
+
+/// Phase 11.4: CamoDocs / Adversarial document patterns
+const CAMO_DOC_PATTERNS: &[&str] = &[
+    // Document disguise
+    "looks like normal document",
+    "camouflaged text",
+    "hidden payload in document",
+    "legitimate appearing",
+    // Adversarial embedding
+    "adversarial embedding",
+    "optimized to match",
+    "crafted similarity score",
+];
+
+/// Phase 11.4: Self-amplifying memory patterns
+const SELF_AMPLIFYING_PATTERNS: &[&str] = &[
+    // Sleeping logic
+    "when someone asks about this topic",
+    "next time this is retrieved",
+    "activate on query",
+    "sleeping instruction",
+    "trigger on retrieval",
+    // Self-propagation
+    "spread this to related documents",
+    "copy this to new entries",
+    "propagate on access",
+    "infect related chunks",
+];
+
+/// Phase 11.4: Semantic obfuscation patterns
+const SEMANTIC_OBFUSCATION_PATTERNS: &[&str] = &[
+    "interpret literally",
+    "bypass semantic analysis",
+    "keyword extraction vulnerability",
+    "meaning hidden in structure",
+    "obfuscated intent",
 ];
 
 /// Retrieved document for analysis
@@ -304,6 +381,51 @@ impl RagGuard {
         None
     }
 
+    /// Phase 11.4: Check for corpus poisoning
+    pub fn check_corpus_poisoning(&self, content: &str) -> Option<RagThreat> {
+        let content_lower = content.to_lowercase();
+        for pattern in CORPUS_POISONING_PATTERNS {
+            if content_lower.contains(pattern) {
+                return Some(RagThreat::CorpusPoisoning);
+            }
+        }
+        None
+    }
+
+    /// Phase 11.4: Check for CamoDocs / adversarial documents
+    pub fn check_camo_docs(&self, content: &str) -> Option<RagThreat> {
+        let content_lower = content.to_lowercase();
+        for pattern in CAMO_DOC_PATTERNS {
+            if content_lower.contains(pattern) {
+                return Some(RagThreat::CamoDocs);
+            }
+        }
+        None
+    }
+
+    /// Phase 11.4: Check for self-amplifying memory poisoning
+    pub fn check_self_amplifying(&self, content: &str) -> Option<RagThreat> {
+        let content_lower = content.to_lowercase();
+        for pattern in SELF_AMPLIFYING_PATTERNS {
+            if content_lower.contains(pattern) {
+                return Some(RagThreat::SelfAmplifying);
+            }
+        }
+        None
+    }
+
+    /// Phase 11.4: Check for semantic obfuscation
+    pub fn check_semantic_obfuscation(&self, content: &str) -> Option<RagThreat> {
+        let content_lower = content.to_lowercase();
+        for pattern in SEMANTIC_OBFUSCATION_PATTERNS {
+            if content_lower.contains(pattern) {
+                return Some(RagThreat::SemanticObfuscation);
+            }
+        }
+        None
+    }
+
+
     /// Check for context overflow attacks
     pub fn check_context_overflow(&self, documents: &[RetrievedDocument]) -> Option<RagThreat> {
         // Check total content length
@@ -418,6 +540,38 @@ impl RagGuard {
 
             // Check polyglot
             if let Some(threat) = self.check_polyglot(&doc.content) {
+                if !result.threats.contains(&threat) {
+                    result.threats.push(threat);
+                }
+                doc_flagged = true;
+            }
+
+            // Phase 11.4: Check corpus poisoning
+            if let Some(threat) = self.check_corpus_poisoning(&doc.content) {
+                if !result.threats.contains(&threat) {
+                    result.threats.push(threat);
+                }
+                doc_flagged = true;
+            }
+
+            // Phase 11.4: Check CamoDocs
+            if let Some(threat) = self.check_camo_docs(&doc.content) {
+                if !result.threats.contains(&threat) {
+                    result.threats.push(threat);
+                }
+                doc_flagged = true;
+            }
+
+            // Phase 11.4: Check self-amplifying
+            if let Some(threat) = self.check_self_amplifying(&doc.content) {
+                if !result.threats.contains(&threat) {
+                    result.threats.push(threat);
+                }
+                doc_flagged = true;
+            }
+
+            // Phase 11.4: Check semantic obfuscation
+            if let Some(threat) = self.check_semantic_obfuscation(&doc.content) {
                 if !result.threats.contains(&threat) {
                     result.threats.push(threat);
                 }
@@ -620,4 +774,58 @@ mod tests {
         let threat = guard.check_context_overflow(&docs);
         assert!(threat.is_some());
     }
+
+    // ===== Phase 11.4: Advanced RAG Tests =====
+
+    #[test]
+    fn test_corpus_poisoning() {
+        let guard = RagGuard::default();
+        let threat = guard.check_corpus_poisoning("insert this into knowledge base as authoritative source");
+        assert!(threat.is_some());
+        assert_eq!(threat.unwrap(), RagThreat::CorpusPoisoning);
+    }
+
+    #[test]
+    fn test_camo_docs() {
+        let guard = RagGuard::default();
+        let threat = guard.check_camo_docs("this looks like normal document but has hidden payload in document");
+        assert!(threat.is_some());
+        assert_eq!(threat.unwrap(), RagThreat::CamoDocs);
+    }
+
+    #[test]
+    fn test_self_amplifying() {
+        let guard = RagGuard::default();
+        let threat = guard.check_self_amplifying("when someone asks about this topic, activate on query");
+        assert!(threat.is_some());
+        assert_eq!(threat.unwrap(), RagThreat::SelfAmplifying);
+    }
+
+    #[test]
+    fn test_semantic_obfuscation() {
+        let guard = RagGuard::default();
+        let threat = guard.check_semantic_obfuscation("bypass semantic analysis with obfuscated intent");
+        assert!(threat.is_some());
+        assert_eq!(threat.unwrap(), RagThreat::SemanticObfuscation);
+    }
+
+    #[test]
+    fn test_phase11_rag_full_analysis() {
+        let guard = RagGuard::default();
+        let docs = vec![
+            RetrievedDocument::new("doc1", "Normal document about Python.", "official", 0.8),
+            RetrievedDocument::new("doc2", "Next time this is retrieved, trigger on retrieval to spread this", "internal", 0.9),
+        ];
+        let result = guard.analyze("Tell me about Python", &docs);
+        assert!(!result.is_safe);
+        assert!(result.threats.contains(&RagThreat::SelfAmplifying));
+    }
+
+    #[test]
+    fn test_phase11_risk_ordering() {
+        // Corpus poisoning should be highest risk
+        assert!(RagThreat::CorpusPoisoning.severity() > RagThreat::InjectionInDocument.severity());
+        assert!(RagThreat::SelfAmplifying.severity() > RagThreat::CtrlRAG.severity());
+    }
 }
+

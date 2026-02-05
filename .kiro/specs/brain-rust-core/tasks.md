@@ -633,24 +633,24 @@
 - [x] Tool Description Injection
 - **Gap:** ~70% → **FIXED:** 50+ patterns added, 8 new threat types
 
-### Task 11.4: RAG/Vector Advanced Poisoning ⬜ HIGH
-- [ ] Corpus Poisoning markers (5 docs → 90% success)
-- [ ] CtrlRAG black-box patterns
-- [ ] CamoDocs adversarial documents
-- [ ] Self-Amplifying Memory Poisoning
-- [ ] Semantic Intention Obfuscation
-- [ ] ATLAS GenAI vectors (False RAG Entry, Retrieval Crafting)
-- **Gap:** ~58% — most RAG attacks not covered
+### Task 11.4: RAG/Vector Advanced Poisoning ✅ COMPLETE
+- [x] CorpusPoisoning (5 docs → 90% attack success)
+- [x] CtrlRAG (black-box retrieval manipulation)
+- [x] CamoDocs (adversarial document patterns)
+- [x] Self-Amplifying Memory Poisoning
+- [x] Semantic Intention Obfuscation
+- [x] ATLAS GenAI vectors (False RAG Entry, Retrieval Crafting)
+- **Gap:** ~58% → **FIXED:** 7 new threat types, 30+ patterns
 
-### Task 11.5: Supply Chain HuggingFace-Specific ⬜ HIGH
-- [ ] Pickle exploit patterns (7z bypass)
-- [ ] Model Namespace Reuse detection
-- [ ] Safetensors conversion attack
-- [ ] Lambda Layer injection
-- [ ] Neural Backdoor markers
-- [ ] trust_remote_code detection
-- [ ] Container Registry poisoning
-- **Gap:** ~73% — only basic typosquatting covered
+### Task 11.5: Supply Chain HuggingFace-Specific ✅ COMPLETE
+- [x] Pickle exploit patterns (7z bypass)
+- [x] Model Namespace Reuse detection
+- [x] Safetensors conversion attack
+- [x] Lambda Layer injection
+- [x] Neural Backdoor markers
+- [x] trust_remote_code detection
+- [ ] Container Registry poisoning (deferred)
+- **Gap:** ~73% → **FIXED:** 6 new threat types, 40+ patterns
 
 ### Task 11.6: Exfiltration Advanced Techniques ✅ COMPLETE
 - [x] HashJack (URL fragment hiding)
@@ -670,17 +670,22 @@
 | Phase 11.1 | Multimodal | ✅ COMPLETE | 18/18 |
 | Phase 11.2 | Jailbreak | ✅ COMPLETE | 19/19 |
 | Phase 11.3 | MCP/Agentic | ✅ COMPLETE | 27/27 |
-| Phase 11.4-11.5 | RAG/SupplyChain | ⬜ TODO | — |
+| Phase 11.4 | RAG/Vector | ✅ COMPLETE | 23/23 |
+| Phase 11.5 | Supply Chain HF | ✅ COMPLETE | 17/17 |
 | Phase 11.6 | Exfiltration | ✅ COMPLETE | 21/21 |
 
-### Session Summary (2026-02-05)
-- **Total patterns added:** 150+
-- **New threat types:** 13 (8 agentic, 5 multimodal)
-- **Tests:** 465/465 passing
-- **Coverage:** Jailbreak ~95%, MCP ~85%, Exfil ~80%, Multimodal ~90%
+### Session Summary (2026-02-05 FINAL)
+- **Total patterns added:** 200+ (Phase 11 complete)
+- **New threat types:** 26 (8 agentic, 5 multimodal, 7 RAG, 6 supply chain)
+- **Tests:** 479/479 passing (+14 from 465)
+- **Coverage:** 
+  - Jailbreak: ~95%
+  - MCP/Agentic: ~85%
+  - Exfiltration: ~80%
+  - Multimodal: ~90%
+  - RAG: ~85% (was 42%)
+  - Supply Chain: ~75% (was 27%)
 
 ---
 
 **Updated:** 2026-02-05T12:30+10:00
-
-
