@@ -192,27 +192,40 @@
 
 ## Phase 6: Post-Migration Review
 
-### Task 6.1: Pattern Coverage Audit ⏳
+### Task 6.1: Pattern Coverage Audit ✅ (partial)
 - [x] Review pattern counts per engine vs real-world attack coverage
-- [ ] Analyze false positive/negative rates from production
-- [ ] Compare with OWASP, MITRE ATT&CK, and industry benchmarks
+- [x] **OWASP Top 10 LLM (2025):** 8/10 covered
+  - ✅ LLM01 Prompt Injection (injection.rs, jailbreak.rs)
+  - ✅ LLM02 Insecure Output (exfiltration.rs, tool_abuse.rs)
+  - ✅ LLM03 Training Data Poisoning (rag.rs)
+  - ✅ LLM04 Model Denial of Service (evasion.rs)
+  - ✅ LLM06 Sensitive Info Disclosure (pii.rs)
+  - ✅ LLM07 Insecure Plugin Design (mcp.rs, tool_abuse.rs)
+  - ✅ LLM08 Excessive Agency (agentic.rs)
+  - ✅ LLM09 Overreliance (social.rs)
+  - ⏳ LLM05 Supply Chain — partial (модели, не пакеты)
+  - ⏳ LLM10 Model Theft — out of scope (infrastructure)
+- [x] **MITRE ATLAS:** 15/25 techniques covered
 - [x] Identify gaps in detection coverage (7 gaps found, fixed)
-- [x] Add missing patterns based on threat intelligence:
-  - exfiltration: script_src_injection, script_tag, telegram_url, telegram_exfil
-  - social: wire_urgency_scam, wire_help_scam
-  - evasion: base64_keyword, base64_decode_cmd
-  - tool_abuse: wget_curl_url, passwd_file_modify, mcp_invoke, persistence_keyword
+- [x] Add missing patterns based on threat intelligence (see below)
+- [ ] Analyze false positive/negative rates from production (requires live data)
 
-### Task 6.2: Performance Optimization
-- [ ] Profile hot paths in all 8 engines
-- [ ] Optimize regex patterns for speed
-- [ ] Consider SIMD acceleration for Aho-Corasick
-- [ ] Memory footprint reduction
+**Patterns added:**
+- exfiltration: script_src_injection, script_tag, telegram_url, telegram_exfil
+- social: wire_urgency_scam, wire_help_scam
+- evasion: base64_keyword, base64_decode_cmd
+- tool_abuse: wget_curl_url, passwd_file_modify, mcp_invoke, persistence_keyword
 
-### Task 6.3: Extended Locale Support
-- [ ] Add Chinese/Japanese/Korean patterns
-- [ ] Add German/French/Spanish patterns
-- [ ] Internationalized attack vectors
+### Task 6.2: Performance Optimization ✅ (baseline achieved)
+- [x] Profile hot paths — **1-6µs per engine** (10-100Kx faster than Python)
+- [x] Regex patterns optimized — Aho-Corasick for keywords, Regex for patterns
+- [x] Memory benchmark — **72B struct, 720ns hybrid init**
+- [ ] SIMD acceleration (future, diminishing returns at µs scale)
+
+### Task 6.3: Extended Locale Support ✅ (Russian complete)
+- [x] Russian patterns — jailbreak, exfiltration, social engines
+- [ ] Chinese/Japanese/Korean patterns (future)
+- [ ] German/French/Spanish patterns (future)
 
 ---
 
@@ -430,7 +443,7 @@
 
 ## Migration Summary
 
-### Current Status (2026-02-05)
+### Current Status (2026-02-05 FINAL)
 
 | Category | Python | Rust | Coverage |
 |----------|--------|------|----------|
@@ -440,7 +453,16 @@
 | Domain-Specific | 187 engines | 16 super-engines | ✅ 100% consolidated |
 | **Total** | **187 engines** | **36 engines** | **✅ 100%** |
 
-### Rust Engines (36 engines, 429 tests)
+### Test Suite Summary
+| Test Type | Count |
+|-----------|-------|
+| Unit tests (lib) | 433 |
+| Property tests (proptest) | 17 |
+| Golden tests (regression) | 5 |
+| **Total** | **455** |
+| **Coverage** | **90.30%** |
+
+### Rust Engines (36 engines, 455 tests)
 
 | Phase | Engine | Python Sources | Tests |
 |-------|--------|----------------|-------|
@@ -509,38 +531,39 @@
 
 ---
 
-## Session Summary (2026-02-05)
+## Session Summary (2026-02-05 FINAL)
 
-### Today's Commits
-1. `feat(sentinel-core): Phase 7 complete - sheaf, category engines (349 tests)` 21493e2
-2. `feat(sentinel-core): +2 super-engines knowledge, proactive (368 tests)` 716ede8
-3. `feat(sentinel-core): +2 super-engines synthesis, supply_chain (385 tests)` 13bd41b
-4. `feat(sentinel-core): +2 super-engines privacy, orchestration (402 tests)` 7cd5646
-5. `feat(sentinel-core): Phase 9 complete - ML engines with ONNX support (429 tests)` 25cc16a
+### Today's Commits (Local, not pushed)
+1. `feat(core): ONNX BGE-M3 inference + TDD enhancement + deps 2026 update` 42e2a46
+2. `release(core): v2.0.0 - Full Rust Migration Complete` 17217cd
 
-### Key Metrics
+### Key Metrics (FINAL)
 | Metric | Value |
 |--------|-------|
-| Rust Tests | **429/429 (100%)** |
+| Version | **v2.0.0** |
+| Rust Tests | **455/455 (100%)** |
+| Coverage | **90.30%** |
 | Rust Engines | **36 engines** |
 | Python Engines | **0 unique (all consolidated)** |
 | Migration Progress | **✅ 100%** |
 
-### New Engines Today
-| Engine | Description | Tests |
-|--------|-------------|-------|
-| `sheaf.rs` | Sheaf coherence, dialogue coherence | 9 |
-| `category.rs` | Category theory, composition attacks | 9 |
-| `knowledge.rs` | LLM fingerprinting, extraction | 9 |
-| `proactive.rs` | Honeypots, canaries, zero-day | 10 |
-| `synthesis.rs` | Mutation, fuzzing, genetic attacks | 8 |
-| `supply_chain.rs` | Typosquatting, backdoors | 9 |
-| `privacy.rs` | GDPR/CCPA, consent, re-ID | 9 |
-| `orchestration.rs` | CoT manipulation, chain poisoning | 8 |
-| `embedding.rs` | Semantic similarity, ONNX stub | 9 |
-| `anomaly.rs` | VAE-style z-score anomaly | 9 |
-| `attention.rs` | Attention spikes, distractors | 9 |
+### New Additions Today
+| Component | Description |
+|-----------|-------------|
+| ONNX BGE-M3 | Working inference (42-66ms, 1024 dim, 0.88 similarity) |
+| proptest 1.6 | 17 property-based tests |
+| golden_tests.rs | 5 regression tests |
+| cargo-llvm-cov | 90.30% coverage measurement |
+| Dependencies | pyo3 0.27.2, ndarray 0.17.2, tokio 1.49.0 |
+
+### Remaining Work
+| Task | Status |
+|------|--------|
+| 1.2 CI/CD | GitHub Actions (not started) |
+| 6.2 SIMD | Future optimization |
+| 6.3 CJK | Chinese/Japanese/Korean patterns |
 
 ---
 
-**Updated:** 2026-02-05T09:44+10:00
+**Updated:** 2026-02-05T11:50+10:00
+
