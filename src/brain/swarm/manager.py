@@ -23,7 +23,7 @@ import sys
 import os
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-from core.collective_immunity import CollectiveImmunity, get_collective_immunity
+from brain.core.collective_immunity import CollectiveImmunity, get_collective_immunity
 
 
 class SwarmManager:

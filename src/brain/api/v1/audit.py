@@ -62,7 +62,7 @@ async def get_audit_logs(
     _validate_api_key(x_sentinel_api_key)
 
     try:
-        from core.audit import get_audit_log, LEVEL_MAP
+        from brain.core.audit import get_audit_log, LEVEL_MAP
 
         audit = get_audit_log()
         entries = audit.get_entries(event_type=event_type, limit=limit)
@@ -97,7 +97,7 @@ async def get_audit_config(
     _validate_api_key(x_sentinel_api_key)
 
     try:
-        from core.audit import get_audit_log
+        from brain.core.audit import get_audit_log
 
         audit = get_audit_log()
 
@@ -128,7 +128,7 @@ async def set_audit_config(
     _validate_api_key(x_sentinel_api_key)
 
     try:
-        from core.audit import get_audit_log, AuditEventType
+        from brain.core.audit import get_audit_log, AuditEventType
 
         audit = get_audit_log()
 
@@ -169,7 +169,7 @@ async def verify_audit_integrity(
     _validate_api_key(x_sentinel_api_key)
 
     try:
-        from core.audit import get_audit_log
+        from brain.core.audit import get_audit_log
 
         audit = get_audit_log()
         is_valid = audit.verify_integrity()
@@ -238,7 +238,7 @@ async def create_audit_export(
     key_fp = _validate_api_key(x_sentinel_api_key)
 
     try:
-        from core.audit import get_audit_log, AuditEventType, AuditLevel
+        from brain.core.audit import get_audit_log, AuditEventType, AuditLevel
 
         audit = get_audit_log()
 
@@ -247,7 +247,7 @@ async def create_audit_export(
 
         # Filter by level if specified
         if request.level:
-            from core.audit import LEVEL_MAP
+            from brain.core.audit import LEVEL_MAP
 
             min_level = LEVEL_MAP.get(request.level.upper(), 0)
             entries = [
@@ -336,7 +336,7 @@ async def download_audit_export(token: str):
 
     # Log the download
     try:
-        from core.audit import get_audit_log, AuditEventType, AuditLevel
+        from brain.core.audit import get_audit_log, AuditEventType, AuditLevel
 
         audit = get_audit_log()
         audit.log(

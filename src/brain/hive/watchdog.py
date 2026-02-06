@@ -227,7 +227,7 @@ def create_default_health_checks():
 
     def check_language_engine():
         try:
-            from engines.language import LanguageEngine
+            from brain.engines.language import LanguageEngine
 
             engine = LanguageEngine()
             result = engine.detect("Hello world")
