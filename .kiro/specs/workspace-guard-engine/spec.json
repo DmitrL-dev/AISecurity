@@ -1,0 +1,8 @@
+{
+  "name": "workspace-guard-engine",
+  "description": "Rust engine detecting workspace persistence attacks (HEARTBEAT.md C2, memories.md poisoning, skill injection)",
+  "language": "ru",
+  "status": "requirements",
+  "created": "2026-02-06",
+  "source": "OpenClaw CVE analysis, Guardz HEARTBEAT discoveries"
+}

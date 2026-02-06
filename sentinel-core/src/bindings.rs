@@ -13,6 +13,7 @@ use crate::engines::{AnalysisResult, MatchResult};
 // Import pattern-matching engines only
 use crate::engines::{
     injection, jailbreak, pii, exfiltration, moderation, evasion, tool_abuse, social,
+    lethal_trifecta, workspace_guard, cross_tool_guard,
 };
 use crate::engines::traits::PatternMatcher;
 
@@ -30,7 +31,7 @@ use crate::engines::traits::PatternMatcher;
 /// ```
 #[pyclass]
 pub struct EngineRegistry {
-    // Core pattern engines (8) - implements PatternMatcher trait with scan()
+    // Core pattern engines (11) - implements PatternMatcher trait with scan()
     injection: injection::InjectionEngine,
     jailbreak: jailbreak::JailbreakEngine,
     pii: pii::PIIEngine,
@@ -39,6 +40,9 @@ pub struct EngineRegistry {
     evasion: evasion::EvasionEngine,
     tool_abuse: tool_abuse::ToolAbuseEngine,
     social: social::SocialEngine,
+    lethal_trifecta: lethal_trifecta::LethalTrifectaEngine,
+    workspace_guard: workspace_guard::WorkspaceGuard,
+    cross_tool_guard: cross_tool_guard::CrossToolGuard,
 }
 
 #[pymethods]
@@ -55,15 +59,19 @@ impl EngineRegistry {
             evasion: evasion::EvasionEngine::new(),
             tool_abuse: tool_abuse::ToolAbuseEngine::new(),
             social: social::SocialEngine::new(),
+            lethal_trifecta: lethal_trifecta::LethalTrifectaEngine::new(),
+            workspace_guard: workspace_guard::WorkspaceGuard::new(),
+            cross_tool_guard: cross_tool_guard::CrossToolGuard::new(),
         })
     }
     
-    /// List pattern engine names (8 core engines).
+    /// List pattern engine names (11 core engines).
     pub fn list_pattern_engines(&self) -> Vec<String> {
         vec![
             "injection".into(), "jailbreak".into(), "pii".into(),
             "exfiltration".into(), "moderation".into(), "evasion".into(),
-            "tool_abuse".into(), "social".into(),
+            "tool_abuse".into(), "social".into(), "lethal_trifecta".into(),
+            "workspace_guard".into(), "cross_tool_guard".into(),
         ]
     }
     
@@ -109,6 +117,9 @@ impl EngineRegistry {
             "evasion" => self.evasion.scan(&normalized),
             "tool_abuse" => self.tool_abuse.scan(&normalized),
             "social" => self.social.scan(&normalized),
+            "lethal_trifecta" => self.lethal_trifecta.scan(&normalized),
+            "workspace_guard" => self.workspace_guard.scan(&normalized),
+            "cross_tool_guard" => self.cross_tool_guard.scan(&normalized),
             _ => return Err(PyValueError::new_err(format!(
                 "Unknown pattern engine: {}. Available: {:?}", 
                 engine_name, 

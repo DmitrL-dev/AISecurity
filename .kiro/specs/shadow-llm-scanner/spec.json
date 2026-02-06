@@ -1,0 +1,7 @@
+{
+  "name": "shadow-llm-scanner",
+  "description": "Network fingerprinting tool for detecting exposed LLM services (Shadow AI)",
+  "status": "in-progress",
+  "created": "2026-02-06",
+  "language": "ru"
+}

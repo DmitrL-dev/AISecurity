@@ -15,6 +15,9 @@ pub mod evasion;
 pub mod tool_abuse;
 pub mod social;
 pub mod hybrid;
+pub mod lethal_trifecta;
+pub mod workspace_guard;
+pub mod cross_tool_guard;
 
 // Phase 7: Strange Math Engines
 pub mod hyperbolic;

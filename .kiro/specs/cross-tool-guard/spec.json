@@ -1,0 +1,7 @@
+{
+  "name": "cross-tool-guard",
+  "description": "Cross-tool data flow monitoring engine for detecting dangerous tool chain combinations",
+  "status": "in-progress",
+  "created": "2026-02-06",
+  "language": "ru"
+}
