@@ -1,0 +1,11 @@
+{
+  "name": "lethal-trifecta-engine",
+  "description": "Rust engine to detect the Lethal Trifecta pattern (data access + untrusted input + external comm)",
+  "language": "ru",
+  "status": "requirements",
+  "created": "2026-02-06",
+  "sources": [
+    "https://www.hiddenlayer.com/research/exploring-the-security-risks-of-ai-assistants-like-openclaw",
+    "Simon Willison - Lethal Trifecta concept"
+  ]
+}
