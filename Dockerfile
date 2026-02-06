@@ -69,8 +69,8 @@ RUN pip install /tmp/sentinel_core-*.whl && rm -rf /tmp/*.whl
 COPY src/ src/
 COPY config/ config/
 
-# Set PYTHONPATH to include /app and /app/src/brain for proper imports
-ENV PYTHONPATH="/app:/app/src/brain:$PYTHONPATH"
+# Set PYTHONPATH to include /app/src so 'brain' is a valid package
+ENV PYTHONPATH="/app/src:$PYTHONPATH"
 
 # Enable Rust engine by default, disable QwenGuard (replaced by ONNX)
 ENV USE_RUST_ENGINE=true

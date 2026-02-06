@@ -5,23 +5,22 @@ import grpc
 from concurrent import futures
 import sentinel_pb2
 import sentinel_pb2_grpc
-from core.analyzer import SentinelAnalyzer
-from hive.watchdog import get_watchdog, create_default_health_checks
-from hive.threat_hunter import get_threat_hunter
-from hive.pqcrypto import get_signer
-from hive.quantum import get_qrng
+from brain.core.analyzer import SentinelAnalyzer
+from brain.hive.watchdog import get_watchdog, create_default_health_checks
+from brain.hive.threat_hunter import get_threat_hunter
+from brain.hive.pqcrypto import get_signer
+from brain.hive.quantum import get_qrng
 
 
 # Configure logging
-logging.basicConfig(level=logging.INFO,
-                    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+logging.basicConfig(
+    level=logging.INFO, format="%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+)
 logger = logging.getLogger("SentinelBrain")
 
 # Security constants
-MAX_PROMPT_LENGTH = int(
-    os.getenv("MAX_PROMPT_LENGTH", "102400"))  # 100KB default
-MAX_RESPONSE_LENGTH = int(
-    os.getenv("MAX_RESPONSE_LENGTH", "204800"))  # 200KB default
+MAX_PROMPT_LENGTH = int(os.getenv("MAX_PROMPT_LENGTH", "102400"))  # 100KB default
+MAX_RESPONSE_LENGTH = int(os.getenv("MAX_RESPONSE_LENGTH", "204800"))  # 200KB default
 
 
 class SentinelBrainServicer(sentinel_pb2_grpc.SentinelBrainServicer):
@@ -33,29 +32,33 @@ class SentinelBrainServicer(sentinel_pb2_grpc.SentinelBrainServicer):
         # P1 Security: Validate prompt size
         if len(request.prompt) > MAX_PROMPT_LENGTH:
             logger.warning(
-                f"Prompt too large: {len(request.prompt)} > {MAX_PROMPT_LENGTH}")
-            context.abort(grpc.StatusCode.INVALID_ARGUMENT,
-                          f"Prompt exceeds maximum length of {MAX_PROMPT_LENGTH} bytes")
+                f"Prompt too large: {len(request.prompt)} > {MAX_PROMPT_LENGTH}"
+            )
+            context.abort(
+                grpc.StatusCode.INVALID_ARGUMENT,
+                f"Prompt exceeds maximum length of {MAX_PROMPT_LENGTH} bytes",
+            )
             return sentinel_pb2.AnalyzeResponse(
                 allowed=False,
                 risk_score=100.0,
                 verdict_reason="Prompt size limit exceeded",
                 detected_threats=["SIZE_LIMIT_EXCEEDED"],
-                anonymized_content=""
+                anonymized_content="",
             )
 
         logger.info(
-            f"Received analysis request for prompt length: {len(request.prompt)}")
+            f"Received analysis request for prompt length: {len(request.prompt)}"
+        )
 
         try:
             result = await self.analyzer.analyze(request.prompt, request.context)
 
             return sentinel_pb2.AnalyzeResponse(
-                allowed=result['allowed'],
-                risk_score=result['risk_score'],
-                verdict_reason=result['verdict_reason'],
-                detected_threats=result['detected_threats'],
-                anonymized_content=result.get('anonymized_content', "")
+                allowed=result["allowed"],
+                risk_score=result["risk_score"],
+                verdict_reason=result["verdict_reason"],
+                detected_threats=result["detected_threats"],
+                anonymized_content=result.get("anonymized_content", ""),
             )
         except Exception as e:
             logger.exception("Error during analysis")
@@ -64,22 +67,20 @@ class SentinelBrainServicer(sentinel_pb2_grpc.SentinelBrainServicer):
     async def AnalyzeOutput(self, request, context):
         """Egress: Analyze LLM response before sending to user"""
         logger.info(
-            f"Received egress analysis for response length: {len(request.response)}")
+            f"Received egress analysis for response length: {len(request.response)}"
+        )
 
         try:
             result = await self.analyzer.analyze_response(
-                request.response,
-                request.original_prompt,
-                request.context
+                request.response, request.original_prompt, request.context
             )
 
             return sentinel_pb2.AnalyzeOutputResponse(
-                allowed=result['allowed'],
-                risk_score=result['risk_score'],
-                verdict_reason=result['verdict_reason'],
-                detected_threats=result['detected_threats'],
-                sanitized_response=result.get(
-                    'sanitized_response', request.response)
+                allowed=result["allowed"],
+                risk_score=result["risk_score"],
+                verdict_reason=result["verdict_reason"],
+                detected_threats=result["detected_threats"],
+                sanitized_response=result.get("sanitized_response", request.response),
             )
         except Exception as e:
             logger.exception("Error during egress analysis")
@@ -87,7 +88,7 @@ class SentinelBrainServicer(sentinel_pb2_grpc.SentinelBrainServicer):
 
     async def AnalyzeStream(self, request_iterator, context):
         """Streaming: Analyze tokens in real-time for SSE responses."""
-        from engines.streaming import get_streaming_engine
+        from brain.engines.streaming import get_streaming_engine
         import re
 
         engine = get_streaming_engine()
@@ -100,15 +101,14 @@ class SentinelBrainServicer(sentinel_pb2_grpc.SentinelBrainServicer):
             peer = context.peer() or "unknown"
 
             # P2 Security: Validate session ID format (must be cryptographic)
-            if not re.match(r'^[a-f0-9]{32,64}$', session_id, re.IGNORECASE):
-                logger.warning("Invalid session ID format: %s",
-                               session_id[:20])
+            if not re.match(r"^[a-f0-9]{32,64}$", session_id, re.IGNORECASE):
+                logger.warning("Invalid session ID format: %s", session_id[:20])
                 yield sentinel_pb2.StreamResult(
                     should_continue=False,
                     risk_score=100.0,
                     threat_type="INVALID_SESSION",
                     severity="critical",
-                    context="Session ID must be 32-64 hex characters"
+                    context="Session ID must be 32-64 hex characters",
                 )
                 return
 
@@ -116,13 +116,14 @@ class SentinelBrainServicer(sentinel_pb2_grpc.SentinelBrainServicer):
             if session_id in session_owners:
                 if session_owners[session_id] != peer:
                     logger.warning(
-                        "Session hijack attempt: %s from %s", session_id[:16], peer)
+                        "Session hijack attempt: %s from %s", session_id[:16], peer
+                    )
                     yield sentinel_pb2.StreamResult(
                         should_continue=False,
                         risk_score=100.0,
                         threat_type="SESSION_HIJACK",
                         severity="critical",
-                        context="Session belongs to different peer"
+                        context="Session belongs to different peer",
                     )
                     return
 
@@ -130,14 +131,13 @@ class SentinelBrainServicer(sentinel_pb2_grpc.SentinelBrainServicer):
             if session_id not in buffers:
                 # P2 Security: Limit concurrent sessions
                 if len(buffers) >= MAX_SESSIONS:
-                    logger.warning(
-                        "Max sessions reached, rejecting new session")
+                    logger.warning("Max sessions reached, rejecting new session")
                     yield sentinel_pb2.StreamResult(
                         should_continue=False,
                         risk_score=50.0,
                         threat_type="TOO_MANY_SESSIONS",
                         severity="high",
-                        context="Server at capacity"
+                        context="Server at capacity",
                     )
                     return
 
@@ -170,22 +170,25 @@ class SentinelBrainServicer(sentinel_pb2_grpc.SentinelBrainServicer):
                 risk_score=buffer.risk_score,
                 threat_type=threat_type,
                 severity=severity,
-                context=alert_context
+                context=alert_context,
             )
 
             # Finalize on last chunk
             if chunk.is_final:
                 summary = engine.finalize(buffer)
-                logger.info(f"Stream session ended: {session_id}, "
-                            f"threats={summary['threat_detected']}, "
-                            f"risk={summary['risk_score']}")
+                logger.info(
+                    f"Stream session ended: {session_id}, "
+                    f"threats={summary['threat_detected']}, "
+                    f"risk={summary['risk_score']}"
+                )
                 del buffers[session_id]
                 break
 
             # Early termination on critical threat
             if should_terminate:
-                logger.warning(f"Stream terminated early: {session_id}, "
-                               f"threat={threat_type}")
+                logger.warning(
+                    f"Stream terminated early: {session_id}, " f"threat={threat_type}"
+                )
                 if session_id in buffers:
                     del buffers[session_id]
                 break
@@ -211,7 +214,7 @@ def load_tls_credentials():
         return grpc.ssl_server_credentials(
             [(private_key, certificate_chain)],
             root_certificates=root_certificates,
-            require_client_auth=True  # mTLS: require client certificate
+            require_client_auth=True,  # mTLS: require client certificate
         )
     except Exception as e:
         logger.error(f"Failed to load TLS credentials: {e}")
@@ -221,7 +224,8 @@ def load_tls_credentials():
 async def serve():
     server = grpc.aio.server(futures.ThreadPoolExecutor(max_workers=10))
     sentinel_pb2_grpc.add_SentinelBrainServicer_to_server(
-        SentinelBrainServicer(), server)
+        SentinelBrainServicer(), server
+    )
 
     # Start Watchdog for self-healing
     watchdog = get_watchdog()
@@ -249,27 +253,29 @@ async def serve():
     credentials = load_tls_credentials()
 
     if credentials:
-        server.add_secure_port('[::]:50051', credentials)
-        logger.info(
-            "Sentinel Brain started on port 50051 (TLS enabled, mTLS required)")
+        server.add_secure_port("[::]:50051", credentials)
+        logger.info("Sentinel Brain started on port 50051 (TLS enabled, mTLS required)")
     else:
         # P1 Security: Require explicit flag for insecure mode
         if os.getenv("INSECURE_MODE_ALLOWED", "false").lower() != "true":
             logger.critical(
                 "🚨 SECURITY: TLS is disabled but INSECURE_MODE_ALLOWED is not set. "
-                "Set TLS_ENABLED=true or INSECURE_MODE_ALLOWED=true to start.")
+                "Set TLS_ENABLED=true or INSECURE_MODE_ALLOWED=true to start."
+            )
             raise RuntimeError(
-                "Insecure mode requires explicit INSECURE_MODE_ALLOWED=true")
+                "Insecure mode requires explicit INSECURE_MODE_ALLOWED=true"
+            )
 
         logger.warning(
             "⚠️ SECURITY WARNING: Running in INSECURE mode without TLS! "
-            "This should ONLY be used for local development.")
-        server.add_insecure_port('[::]:50051')
-        logger.info(
-            "Sentinel Brain started on port 50051 (INSECURE - dev only)")
+            "This should ONLY be used for local development."
+        )
+        server.add_insecure_port("[::]:50051")
+        logger.info("Sentinel Brain started on port 50051 (INSECURE - dev only)")
 
     await server.start()
     await server.wait_for_termination()
 
-if __name__ == '__main__':
+
+if __name__ == "__main__":
     asyncio.run(serve())

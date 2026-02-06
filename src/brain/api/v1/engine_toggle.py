@@ -72,7 +72,7 @@ def _log_action(
 ):
     """Log toggle action to centralized audit log."""
     try:
-        from core.audit import get_audit_log, AuditEventType, AuditLevel
+        from brain.core.audit import get_audit_log, AuditEventType, AuditLevel
 
         audit = get_audit_log()
 
@@ -156,7 +156,7 @@ async def enable_engine(
     actor = _validate_api_key(x_sentinel_api_key, x_sentinel_user)
 
     try:
-        from engines.registry import get_registry
+        from brain.engines.registry import get_registry
 
         registry = get_registry()
 
@@ -202,7 +202,7 @@ async def disable_engine(
         )
 
     try:
-        from engines.registry import get_registry
+        from brain.engines.registry import get_registry
 
         registry = get_registry()
 

@@ -62,7 +62,7 @@ async def analyze_text(request: AnalyzeRequest):
     start_time = time.time()
 
     try:
-        from core.analyzer import SentinelAnalyzer
+        from brain.core.analyzer import SentinelAnalyzer
 
         analyzer = SentinelAnalyzer()
 
@@ -140,11 +140,11 @@ async def analyze_text(request: AnalyzeRequest):
 async def analyze_stream(request: AnalyzeRequest):
     """Stream analysis with real-time progress (SSE)."""
     try:
-        from api.streaming import (
+        from brain.api.streaming import (
             StreamingAnalyzer,
             create_streaming_response,
         )
-        from core.analyzer import SentinelAnalyzer
+        from brain.core.analyzer import SentinelAnalyzer
 
         analyzer = SentinelAnalyzer()
         streamer = StreamingAnalyzer(analyzer)

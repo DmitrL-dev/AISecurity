@@ -56,7 +56,7 @@ async def list_engines():
     Returns engines active for the current hardware profile (lite/standard/enterprise).
     """
     try:
-        from engines.registry import get_registry
+        from brain.engines.registry import get_registry
 
         registry = get_registry()
         engine_names = registry.get_engines_for_profile()
@@ -93,7 +93,7 @@ async def list_all_engines():
     Use this to enable/disable engines beyond current profile.
     """
     try:
-        from engines.registry import get_registry
+        from brain.engines.registry import get_registry
 
         registry = get_registry()
         # Get ALL registered engines, not just profile ones
@@ -133,7 +133,7 @@ async def get_registry_status():
     - Engines by tier
     """
     try:
-        from engines.registry import get_registry
+        from brain.engines.registry import get_registry
 
         registry = get_registry()
         stats = registry.get_stats()
@@ -160,7 +160,7 @@ async def get_engine(engine_name: str):
     Get detailed information about a specific engine.
     """
     try:
-        from engines.registry import get_registry
+        from brain.engines.registry import get_registry
 
         registry = get_registry()
         engine_class = registry._registry.get(engine_name)
@@ -218,8 +218,8 @@ async def get_engine_config(engine_name: str):
     Returns threshold, priority, parameters, and statistics.
     """
     try:
-        from engines.registry import get_registry
-        from src.brain.config_storage import load_config
+        from brain.engines.registry import get_registry
+        from brain.config_storage import load_config
         import datetime
 
         registry = get_registry()
@@ -331,8 +331,8 @@ async def update_engine_config(engine_name: str, update: EngineConfigUpdate):
     Persists changes to Redis for durability.
     """
     try:
-        from engines.registry import get_registry
-        from src.brain.config_storage import save_config, load_config
+        from brain.engines.registry import get_registry
+        from brain.config_storage import save_config, load_config
 
         registry = get_registry()
         engine_class = registry._registry.get(engine_name)
@@ -366,7 +366,7 @@ async def update_engine_config(engine_name: str, update: EngineConfigUpdate):
 
         # Audit log the config change
         try:
-            from core.audit import get_audit_log, AuditEventType, AuditLevel
+            from brain.core.audit import get_audit_log, AuditEventType, AuditLevel
 
             audit = get_audit_log()
             audit.log(
@@ -411,7 +411,7 @@ async def get_engine_stats(engine_name: str):
     Get statistics for a specific engine.
     """
     try:
-        from src.brain.observability.metrics import get_metrics
+        from brain.observability.metrics import get_metrics
 
         metrics = get_metrics()
 

@@ -1,0 +1,24 @@
+[package]
+name = "sentinel-scan"
+version = "0.1.0"
+edition = "2021"
+description = "Shadow LLM Scanner - Network fingerprinting for exposed AI services"
+authors = ["SENTINEL Team"]
+license = "Apache-2.0"
+
+[[bin]]
+name = "sentinel-scan"
+path = "src/main.rs"
+
+[dependencies]
+tokio = { version = "1", features = ["full"] }
+reqwest = { version = "0.12", default-features = false, features = ["json", "rustls-tls"] }
+clap = { version = "4", features = ["derive"] }
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+ipnet = "2"
+futures = "0.3"
+
+[dev-dependencies]
+mockito = "1"
+tokio-test = "0.4"

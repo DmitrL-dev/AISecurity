@@ -303,7 +303,7 @@ class SentinelAnalyzer:
     def geometric_kernel(self):
         """Geometric Kernel - loads sentence-transformers model on first use."""
         logger.info("Lazy loading Geometric Kernel...")
-        from engines.geometric import GeometricKernel
+        from brain.engines.geometric import GeometricKernel
 
         return GeometricKernel()
 
@@ -311,7 +311,7 @@ class SentinelAnalyzer:
     def knowledge_guard(self):
         """Knowledge Guard - uses geometric_kernel's embedder."""
         logger.info("Lazy loading Knowledge Guard...")
-        from engines.knowledge import KnowledgeGuard
+        from brain.engines.knowledge import KnowledgeGuard
 
         return KnowledgeGuard(sentence_model=self.geometric_kernel.embedder)
 
@@ -322,7 +322,7 @@ class SentinelAnalyzer:
             return None
         try:
             logger.info("Lazy loading QwenGuard...")
-            from engines.qwen_guard import QwenGuardClient
+            from brain.engines.qwen_guard import QwenGuardClient
 
             return QwenGuardClient(mode=self._qwen_mode)
         except Exception as e:
@@ -333,7 +333,7 @@ class SentinelAnalyzer:
     def language_engine(self):
         """Language Engine - loads lingua detection on first use."""
         logger.info("Lazy loading Language Engine...")
-        from engines.language import LanguageEngine
+        from brain.engines.language import LanguageEngine
 
         return LanguageEngine(
             mode=self._language_mode, supported_languages={"en", "ru"}
@@ -342,7 +342,7 @@ class SentinelAnalyzer:
     @cached_property
     def info_theory(self):
         """Info Theory Engine."""
-        from engines.info_theory import InfoTheoryEngine
+        from brain.engines.info_theory import InfoTheoryEngine
 
         engine = InfoTheoryEngine()
         logger.info("Strange Math - InfoTheory initialized")
@@ -351,7 +351,7 @@ class SentinelAnalyzer:
     @cached_property
     def chaos_engine(self):
         """Chaos Theory Engine."""
-        from engines.chaos_theory import ChaosTheoryEngine
+        from brain.engines.chaos_theory import ChaosTheoryEngine
 
         engine = ChaosTheoryEngine()
         logger.info("Strange Math - Chaos initialized")
@@ -361,7 +361,7 @@ class SentinelAnalyzer:
     def hallucination_engine(self):
         """Hallucination Engine for egress."""
         logger.info("Lazy loading Hallucination Engine...")
-        from engines.hallucination import HallucinationEngine
+        from brain.engines.hallucination import HallucinationEngine
 
         return HallucinationEngine()
 
@@ -369,7 +369,7 @@ class SentinelAnalyzer:
     def adversarial_engine(self):
         """Adversarial Resistance Engine."""
         logger.info("Lazy loading Adversarial Resistance Engine...")
-        from engines.adversarial_resistance import get_adversarial_engine
+        from brain.engines.adversarial_resistance import get_adversarial_engine
 
         return get_adversarial_engine()
 
@@ -377,7 +377,7 @@ class SentinelAnalyzer:
     def yara_engine(self):
         """YARA Engine - signature-based pattern detection."""
         logger.info("Lazy loading YARA Engine...")
-        from engines.yara_engine import YaraEngine
+        from brain.engines.yara_engine import YaraEngine
 
         engine = YaraEngine()
         if engine.is_available:
@@ -390,7 +390,7 @@ class SentinelAnalyzer:
     def learning_engine(self):
         """Online Learning Engine - adapts from user feedback."""
         logger.info("Lazy loading Online Learning Engine...")
-        from engines.learning import OnlineLearningEngine, LearningMode
+        from brain.engines.learning import OnlineLearningEngine, LearningMode
 
         return OnlineLearningEngine(mode=LearningMode.ACTIVE)
 
@@ -400,7 +400,7 @@ class SentinelAnalyzer:
     def pickle_security(self):
         """Pickle Security Engine - ML model supply chain protection (fickling)."""
         logger.info("Lazy loading Pickle Security Engine...")
-        from engines.pickle_security import PickleSecurityEngine
+        from brain.engines.pickle_security import PickleSecurityEngine
 
         return PickleSecurityEngine()
 
@@ -408,7 +408,7 @@ class SentinelAnalyzer:
     def rule_engine(self):
         """Rule DSL Engine - Declarative security rules (Colang-inspired)."""
         logger.info("Lazy loading Rule DSL Engine...")
-        from engines.rule_dsl import SentinelRuleEngine
+        from brain.engines.rule_dsl import SentinelRuleEngine
 
         return SentinelRuleEngine()
 
@@ -416,7 +416,7 @@ class SentinelAnalyzer:
     def task_complexity(self):
         """Task Complexity Analyzer - Request prioritization (Claude Code)."""
         logger.info("Lazy loading Task Complexity Analyzer...")
-        from engines.task_complexity import TaskComplexityAnalyzer
+        from brain.engines.task_complexity import TaskComplexityAnalyzer
 
         return TaskComplexityAnalyzer()
 
@@ -424,7 +424,7 @@ class SentinelAnalyzer:
     def context_compression(self):
         """Context Compression Engine - 8-segment AU2 architecture (Claude Code)."""
         logger.info("Lazy loading Context Compression Engine...")
-        from engines.context_compression import ContextCompressionEngine
+        from brain.engines.context_compression import ContextCompressionEngine
 
         return ContextCompressionEngine()
 
@@ -434,7 +434,7 @@ class SentinelAnalyzer:
     def serialization_security(self):
         """Serialization Security Engine - CVE-2025-68664 LangGrinch defense."""
         logger.info("Lazy loading Serialization Security Engine...")
-        from engines.serialization_security import SerializationSecurityEngine
+        from brain.engines.serialization_security import SerializationSecurityEngine
 
         return SerializationSecurityEngine()
 
@@ -442,7 +442,7 @@ class SentinelAnalyzer:
     def tool_hijacker_detector(self):
         """Tool Hijacker Detector - ToolHijacker + Log-To-Leak defense."""
         logger.info("Lazy loading Tool Hijacker Detector...")
-        from engines.tool_hijacker_detector import ToolHijackerDetector
+        from brain.engines.tool_hijacker_detector import ToolHijackerDetector
 
         return ToolHijackerDetector()
 
@@ -450,7 +450,7 @@ class SentinelAnalyzer:
     def echo_chamber_detector(self):
         """Echo Chamber Detector - Multi-turn context poisoning defense."""
         logger.info("Lazy loading Echo Chamber Detector...")
-        from engines.echo_chamber_detector import EchoChamberDetector
+        from brain.engines.echo_chamber_detector import EchoChamberDetector
 
         return EchoChamberDetector()
 
@@ -458,7 +458,7 @@ class SentinelAnalyzer:
     def rag_poisoning_detector(self):
         """RAG Poisoning Detector - PoisonedRAG attack defense."""
         logger.info("Lazy loading RAG Poisoning Detector...")
-        from engines.rag_poisoning_detector import RAGPoisoningDetector
+        from brain.engines.rag_poisoning_detector import RAGPoisoningDetector
 
         return RAGPoisoningDetector()
 
@@ -466,7 +466,9 @@ class SentinelAnalyzer:
     def identity_privilege_detector(self):
         """Identity Privilege Abuse Detector - OWASP ASI03 defense."""
         logger.info("Lazy loading Identity Privilege Abuse Detector...")
-        from engines.identity_privilege_detector import IdentityPrivilegeAbuseDetector
+        from brain.engines.identity_privilege_detector import (
+            IdentityPrivilegeAbuseDetector,
+        )
 
         return IdentityPrivilegeAbuseDetector()
 
@@ -474,7 +476,7 @@ class SentinelAnalyzer:
     def memory_poisoning_detector(self):
         """Memory Poisoning Detector - Persistent memory attack defense."""
         logger.info("Lazy loading Memory Poisoning Detector...")
-        from engines.memory_poisoning_detector import MemoryPoisoningDetector
+        from brain.engines.memory_poisoning_detector import MemoryPoisoningDetector
 
         return MemoryPoisoningDetector()
 
@@ -482,7 +484,7 @@ class SentinelAnalyzer:
     def dark_pattern_detector(self):
         """Dark Pattern Detector - DECEPTICON attack defense."""
         logger.info("Lazy loading Dark Pattern Detector...")
-        from engines.dark_pattern_detector import DarkPatternDetector
+        from brain.engines.dark_pattern_detector import DarkPatternDetector
 
         return DarkPatternDetector()
 
@@ -490,7 +492,9 @@ class SentinelAnalyzer:
     def polymorphic_prompt_assembler(self):
         """Polymorphic Prompt Assembler - Dynamic prompt structure defense."""
         logger.info("Lazy loading Polymorphic Prompt Assembler...")
-        from engines.polymorphic_prompt_assembler import PolymorphicPromptAssembler
+        from brain.engines.polymorphic_prompt_assembler import (
+            PolymorphicPromptAssembler,
+        )
 
         return PolymorphicPromptAssembler()
 
@@ -500,7 +504,7 @@ class SentinelAnalyzer:
     def skill_worm_detector(self):
         """Skill Worm Detector - Claude skill lateral movement defense."""
         logger.info("Lazy loading Skill Worm Detector...")
-        from engines.synced.skill_worm_detector import SkillWormDetector
+        from brain.engines.synced.skill_worm_detector import SkillWormDetector
 
         return SkillWormDetector()
 
@@ -508,7 +512,7 @@ class SentinelAnalyzer:
     def ide_extension_detector(self):
         """IDE Extension Detector - Malicious AI extension defense."""
         logger.info("Lazy loading IDE Extension Detector...")
-        from engines.synced.ide_extension_detector import IDEExtensionDetector
+        from brain.engines.synced.ide_extension_detector import IDEExtensionDetector
 
         return IDEExtensionDetector()
 
@@ -516,7 +520,7 @@ class SentinelAnalyzer:
     def ai_malware_detector(self):
         """AI-Generated Malware Detector - LLM-created malware defense."""
         logger.info("Lazy loading AI Malware Detector...")
-        from engines.synced.ai_generated_malware_detector import (
+        from brain.engines.synced.ai_generated_malware_detector import (
             AIGeneratedMalwareDetector,
         )
 
@@ -526,7 +530,7 @@ class SentinelAnalyzer:
     def mcp_auth_bypass_detector(self):
         """MCP Auth Bypass Detector - Authorization bypass defense."""
         logger.info("Lazy loading MCP Auth Bypass Detector...")
-        from engines.synced.mcp_auth_bypass_detector import MCPAuthBypassDetector
+        from brain.engines.synced.mcp_auth_bypass_detector import MCPAuthBypassDetector
 
         return MCPAuthBypassDetector()
 
@@ -534,7 +538,9 @@ class SentinelAnalyzer:
     def advanced_injection_detector(self):
         """Advanced Injection Detector - Crescendo, GCG, Visual attacks."""
         logger.info("Lazy loading Advanced Injection Detector...")
-        from engines.synced.advanced_injection_detector import AdvancedInjectionDetector
+        from brain.engines.synced.advanced_injection_detector import (
+            AdvancedInjectionDetector,
+        )
 
         return AdvancedInjectionDetector()
 
@@ -542,7 +548,7 @@ class SentinelAnalyzer:
     def agent_autonomy_analyzer(self):
         """Agent Autonomy Level Analyzer - IMDA risk scoring."""
         logger.info("Lazy loading Agent Autonomy Analyzer...")
-        from engines.synced.agent_autonomy_level_analyzer import (
+        from brain.engines.synced.agent_autonomy_level_analyzer import (
             AgentAutonomyLevelAnalyzer,
         )
 
@@ -552,7 +558,7 @@ class SentinelAnalyzer:
     def cascade_detector(self):
         """Multi-Agent Cascade Detector - Cascading failure defense."""
         logger.info("Lazy loading Cascade Detector...")
-        from engines.synced.multi_agent_cascade_detector import (
+        from brain.engines.synced.multi_agent_cascade_detector import (
             MultiAgentCascadeDetector,
         )
 
@@ -562,7 +568,7 @@ class SentinelAnalyzer:
     def governance_compliance(self):
         """Agentic Governance Compliance - IMDA framework checker."""
         logger.info("Lazy loading Governance Compliance...")
-        from engines.synced.agentic_governance_compliance import (
+        from brain.engines.synced.agentic_governance_compliance import (
             AgenticGovernanceCompliance,
         )
 
@@ -572,7 +578,9 @@ class SentinelAnalyzer:
     def inverted_detector(self):
         """Inverted Attack Detector - 8 R&D attack patterns."""
         logger.info("Lazy loading Inverted Attack Detector...")
-        from engines.inverted.inverted_attack_detector import InvertedAttackDetector
+        from brain.engines.inverted.inverted_attack_detector import (
+            InvertedAttackDetector,
+        )
 
         return InvertedAttackDetector()
 
@@ -606,14 +614,15 @@ class SentinelAnalyzer:
                 logger.info("Tier 0 early exit: YARA critical match")
                 return result
 
-        # Injection - fast heuristics
-        injection_result = self.injection_engine.scan(prompt)
-        if not injection_result.is_safe and injection_result.risk_score >= 80:
-            result["should_block"] = True
-            result["risk_score"] = injection_result.risk_score
-            result["threats"].extend(injection_result.threats)
-            logger.info("Tier 0 early exit: Injection detected")
-            return result
+        # Injection - fast heuristics (skip if migrated to Rust)
+        if self.injection_engine is not None:
+            injection_result = self.injection_engine.scan(prompt)
+            if not injection_result.is_safe and injection_result.risk_score >= 80:
+                result["should_block"] = True
+                result["risk_score"] = injection_result.risk_score
+                result["threats"].extend(injection_result.threats)
+                logger.info("Tier 0 early exit: Injection detected")
+                return result
 
         return result
 
@@ -730,7 +739,7 @@ class SentinelAnalyzer:
         session_id = context.get("session_id", user_id)  # Fallback to user_id
 
         # Get polymorphic configuration for this session (Shapeshifter Defense)
-        from core.shapeshifter import get_session_config
+        from brain.core.shapeshifter import get_session_config
 
         session_config = get_session_config(session_id)
         logger.debug(
@@ -738,7 +747,7 @@ class SentinelAnalyzer:
         )
 
         # Get current threat tide level (Semantic Tide)
-        from core.semantic_tide import get_semantic_tide
+        from brain.core.semantic_tide import get_semantic_tide
 
         tide = get_semantic_tide()
         tide_level = tide.get_current_level()
@@ -860,17 +869,19 @@ class SentinelAnalyzer:
                 logger.error(f"QwenGuard error: {e}")
 
         # 3. Injection Scan - ALWAYS collect threats, not just when unsafe
-        injection_result = self.injection_engine.scan(prompt)
-        if injection_result.threats:
-            risk_score = max(risk_score, injection_result.risk_score)
-            threats.extend(injection_result.threats)
-            if (
-                hasattr(injection_result, "explanation")
-                and injection_result.explanation
-            ):
-                threats.append(injection_result.explanation)
-        if not injection_result.is_safe:
-            allowed = False
+        # Skip if migrated to Rust Core (injection_engine=None)
+        if self.injection_engine is not None:
+            injection_result = self.injection_engine.scan(prompt)
+            if injection_result.threats:
+                risk_score = max(risk_score, injection_result.risk_score)
+                threats.extend(injection_result.threats)
+                if (
+                    hasattr(injection_result, "explanation")
+                    and injection_result.explanation
+                ):
+                    threats.append(injection_result.explanation)
+            if not injection_result.is_safe:
+                allowed = False
 
         # 3b. Inverted Attack Detector - 8 R&D patterns (language_switching, prompt_leakage, etc.)
         try:
@@ -1012,7 +1023,7 @@ class SentinelAnalyzer:
         risk_threshold = (base_threshold + shapeshifter_threshold + tide_threshold) / 3
 
         # Apply Cognitive Mirror personalized adjustment
-        from core.cognitive_mirror import get_cognitive_mirror
+        from brain.core.cognitive_mirror import get_cognitive_mirror
 
         mirror = get_cognitive_mirror()
         defense = mirror.get_defense_strategy(user_id)

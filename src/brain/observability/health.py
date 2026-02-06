@@ -144,7 +144,7 @@ class HealthCheck:
         """Check Brain analyzer."""
         try:
             # Check if analyzer can be imported
-            from src.brain.analyzer import SentinelAnalyzer
+            from brain.analyzer import SentinelAnalyzer
 
             return ComponentHealth(
                 name="brain",
@@ -167,7 +167,7 @@ class HealthCheck:
     def _check_redis(self) -> ComponentHealth:
         """Check Redis connection."""
         try:
-            from src.brain.core.cache import get_cache
+            from brain.core.cache import get_cache
 
             cache = get_cache()
 
@@ -194,7 +194,7 @@ class HealthCheck:
         """Check detection engines."""
         try:
             # InjectionEngine moved to Rust Core - check YaraEngine instead
-            from src.brain.engines import YaraEngine
+            from brain.engines import YaraEngine
 
             # Quick validation
             engine = YaraEngine()
