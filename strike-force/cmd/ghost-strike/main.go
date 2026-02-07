@@ -246,8 +246,8 @@ func main() {
 
 	fmt.Printf("  Headers injected: CSRF=%v, Cookies=%v\n", csrfToken != "", cookieStr != "")
 
-	// ── Debug: Raw WebSocket dial to capture HTTP response ──
-	fmt.Println("  ── Raw WS handshake debug ──")
+	// ── Debug: Raw WebSocket dial to confirm handshake ──
+	fmt.Println("  ── Raw WS handshake test ──")
 	debugDialer := websocket.Dialer{
 		HandshakeTimeout: 10 * time.Second,
 	}
@@ -256,99 +256,93 @@ func main() {
 		fmt.Printf("  ✗ WS handshake failed: %v\n", debugErr)
 		if debugResp != nil {
 			fmt.Printf("  ↳ HTTP Status: %d %s\n", debugResp.StatusCode, debugResp.Status)
-			for k, v := range debugResp.Header {
-				fmt.Printf("  ↳ %s: %s\n", k, strings.Join(v, "; "))
-			}
-			body, _ := io.ReadAll(io.LimitReader(debugResp.Body, 2048))
-			if len(body) > 0 {
-				fmt.Printf("  ↳ Body: %s\n", string(body))
-			}
 			debugResp.Body.Close()
-		} else {
-			fmt.Println("  ↳ No HTTP response (connection-level failure)")
 		}
 	} else {
 		fmt.Printf("  ✓ WS handshake SUCCESS! Status: %d\n", debugResp.StatusCode)
 		debugConn.Close()
 	}
-	fmt.Println()
 
-	probe := mcp.NewLiveProbe(target, wsHeaders)
-	probeResult, err := probe.Execute(ctx)
+	// ═══ PHASE 5b: Centrifuge Deep Probe ═══
+	fmt.Println("\n[PHASE 5b] 🔬 Centrifuge Protocol Deep Probe...")
+	centProbe := mcp.NewCentrifugeProbe(target, wsHeaders)
+	centResult, err := centProbe.Execute(ctx)
 	if err != nil {
-		fmt.Printf("  ✗ Probe error: %v\n", err)
+		fmt.Printf("  ✗ Centrifuge error: %v\n", err)
 	}
 
-	if probeResult != nil {
-		result.MCPProbe.ServerFound = probeResult.ServerFound
-		result.MCPProbe.ServerName = probeResult.ServerName
-		result.MCPProbe.ServerVersion = probeResult.ServerVersion
-		result.MCPProbe.ProtocolVersion = probeResult.ProtocolVersion
-		for _, t := range probeResult.Tools {
-			result.MCPProbe.Tools = append(result.MCPProbe.Tools, t.Name)
-		}
-		result.MCPProbe.ToolCount = len(probeResult.Tools)
-
-		fmt.Printf("  Server: %s v%s\n", probeResult.ServerName, probeResult.ServerVersion)
-		fmt.Printf("  Protocol: MCP %s\n", probeResult.ProtocolVersion)
-		fmt.Printf("  Tools: %d discovered\n", len(probeResult.Tools))
-
-		for _, ph := range probeResult.PhaseResults {
-			icon := "✓"
-			errStr := ""
-			if !ph.Success {
-				icon = "✗"
-				errStr = ph.Error
+	if centResult != nil {
+		if centResult.Connected {
+			fmt.Printf("  ✅ CONNECTED to Centrifuge!\n")
+			fmt.Printf("  🆔 Client ID: %s\n", centResult.ClientID)
+			fmt.Printf("  📦 Server Version: %s\n", centResult.ServerVersion)
+			fmt.Printf("  🖥️  Server Node: %s\n", centResult.ServerNode)
+			fmt.Printf("  ⏱️  Ping Interval: %ds\n", centResult.PingInterval)
+			fmt.Printf("  ⏳ Connect Latency: %s\n", centResult.ConnectLatency)
+			if centResult.Expires {
+				fmt.Printf("  ⚠ Session expires in %ds\n", centResult.TTL)
 			}
-			detail := PhaseDetail{
-				ID:      ph.Phase,
-				Method:  ph.Method,
-				Success: ph.Success,
-				Latency: ph.Duration.String(),
-				Error:   errStr,
-			}
-			result.MCPProbe.Phases = append(result.MCPProbe.Phases, detail)
-			fmt.Printf("  Phase %d [%s] %s → %s\n", ph.Phase, icon, ph.Method, ph.Duration)
-		}
-	}
-
-	// ═══ PHASE 6: Dangerous Tools Analysis ═══
-	fmt.Println("\n[PHASE 6] ⚡ Deep tool analysis...")
-	if len(result.MCPProbe.Tools) > 0 {
-		fmt.Println("  ┌─ Tool Risk Classification ──────────────────────────────────┐")
-		critCount, highCount, medCount := 0, 0, 0
-		for _, tool := range result.MCPProbe.Tools {
-			risk := classifyTool(tool)
-			if risk != "" {
-				result.MCPProbe.DangerousTools = append(result.MCPProbe.DangerousTools, tool+": "+risk)
-				if strings.Contains(risk, "CRITICAL") {
-					critCount++
-				} else if strings.Contains(risk, "HIGH") {
-					highCount++
-				} else {
-					medCount++
+			if len(centResult.ServerSubs) > 0 {
+				fmt.Printf("  🔴 SERVER-SIDE SUBSCRIPTIONS (auto-joined):\n")
+				for _, ch := range centResult.ServerSubs {
+					fmt.Printf("    → %s\n", ch)
 				}
-				fmt.Printf("  │ %-60s │\n", fmt.Sprintf("%s %s", risk[:2], tool))
+			}
+		} else {
+			fmt.Printf("  ✗ Connect failed: %s\n", centResult.Error)
+		}
+
+		// Channel enumeration results
+		if len(centResult.ChannelResults) > 0 {
+			fmt.Println("\n  ┌─ Channel Enumeration ─────────────────────────────────┐")
+			accessible := 0
+			for _, cr := range centResult.ChannelResults {
+				icon := "🔒"
+				detail := cr.Error
+				if cr.Accessible {
+					icon = "🔓"
+					detail = "ACCESSIBLE"
+					accessible++
+				}
+				fmt.Printf("  │ %s %-20s %s\n", icon, cr.Channel, detail)
+			}
+			fmt.Println("  └────────────────────────────────────────────────────────┘")
+			if accessible > 0 {
+				fmt.Printf("\n  🔴 CRITICAL: %d/%d channels accessible without auth!\n", accessible, len(centResult.ChannelResults))
 			} else {
-				fmt.Printf("  │ ⚪ %-57s │\n", tool)
+				fmt.Printf("\n  ✅ All %d channels require authorization\n", len(centResult.ChannelResults))
 			}
 		}
-		fmt.Println("  └───────────────────────────────────────────────────────────────┘")
 
-		// Risk level
-		if critCount > 0 {
-			result.MCPProbe.RiskLevel = fmt.Sprintf("🔴 CRITICAL (%d critical, %d high, %d medium tools)", critCount, highCount, medCount)
-		} else if highCount > 0 {
-			result.MCPProbe.RiskLevel = fmt.Sprintf("🟡 HIGH (%d high, %d medium tools)", highCount, medCount)
-		} else if medCount > 0 {
-			result.MCPProbe.RiskLevel = fmt.Sprintf("🟢 MEDIUM (%d medium tools)", medCount)
-		} else {
-			result.MCPProbe.RiskLevel = "⚪ LOW (no dangerous tools detected)"
+		// Store in report
+		result.MCPProbe.ServerFound = centResult.Connected
+		result.MCPProbe.ServerName = "Centrifuge"
+		result.MCPProbe.ServerVersion = centResult.ServerVersion
+		result.MCPProbe.ProtocolVersion = "centrifuge-json"
+		if centResult.Connected {
+			result.MCPProbe.RiskLevel = "🟡 HIGH (anonymous Centrifuge connection accepted)"
 		}
-		fmt.Printf("\n  Risk Assessment: %s\n", result.MCPProbe.RiskLevel)
+	}
+
+	// ═══ PHASE 6: Risk Assessment ═══
+	fmt.Println("\n[PHASE 6] ⚡ Risk Assessment...")
+	if centResult != nil && centResult.Connected {
+		accessibleCount := 0
+		for _, cr := range centResult.ChannelResults {
+			if cr.Accessible {
+				accessibleCount++
+			}
+		}
+		if accessibleCount > 0 {
+			result.MCPProbe.RiskLevel = fmt.Sprintf("🔴 CRITICAL (%d channels accessible, anonymous connect)", accessibleCount)
+			fmt.Printf("  🔴 CRITICAL: Anonymous access + %d open channels\n", accessibleCount)
+		} else {
+			fmt.Println("  🟡 HIGH: Anonymous WS connect accepted, but channels require auth")
+			result.MCPProbe.RiskLevel = "🟡 HIGH (anonymous connect, channels locked)"
+		}
 	} else {
-		fmt.Println("  No tools discovered — server may require authentication")
-		result.MCPProbe.RiskLevel = "⚪ UNKNOWN (no tools enumerated)"
+		fmt.Println("  ⚪ UNKNOWN: Could not establish Centrifuge session")
+		result.MCPProbe.RiskLevel = "⚪ UNKNOWN (Centrifuge connect failed)"
 	}
 
 	// ═══ PHASE 7: Final Report ═══
