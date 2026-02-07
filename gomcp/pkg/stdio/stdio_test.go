@@ -55,9 +55,10 @@ func TestAdapter_Initialize(t *testing.T) {
 	var resp Response
 	json.NewDecoder(&output).Decode(&resp)
 
-	if resp.ID != "1" {
-		t.Errorf("expected id 1, got %s", resp.ID)
+	if string(resp.ID) != "\"1\"" {
+		t.Errorf("expected id \"1\", got %s", string(resp.ID))
 	}
+
 	if resp.Error != nil {
 		t.Errorf("unexpected error: %v", resp.Error)
 	}
@@ -348,8 +349,8 @@ func TestRequest_UnmarshalJSON(t *testing.T) {
 		t.Fatalf("unmarshal error: %v", err)
 	}
 
-	if req.ID != "123" {
-		t.Errorf("expected id 123, got %s", req.ID)
+	if string(req.ID) != "\"123\"" {
+		t.Errorf("expected id \"123\", got %s", req.ID)
 	}
 	if req.Method != "test" {
 		t.Errorf("expected method test, got %s", req.Method)

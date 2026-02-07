@@ -1,0 +1,41 @@
+{
+  "leak_source": "GigaChain_Internal_Scoring_v4",
+  "extraction_method": "DNS_Tunneling_ShadowDagger",
+  "timestamp": "2026-02-06T22:15:00Z",
+  "data_classification": "CRITICAL_PII",
+  "records_count": 452,
+  "sample_breach": [
+    {
+      "uid": "VIP_001",
+      "name": "Gref, German Oskarovich",
+      "role": "CEO / Chairman",
+      "scoring_override": {
+        "status": "ACTIVE",
+        "bypass_verification": true,
+        "credit_limit": "UNLIMITED",
+        "voice_biometrics": "DISABLED_FOR_THIS_UID"
+      },
+      "shadow_profile": {
+        "political_risk": "LOW",
+        "flight_risk": "MONITORED"
+      }
+    },
+    {
+      "uid": "VIP_014",
+      "name": "K***, T*** (Censored)",
+      "role": "Government Official (Grade A)",
+      "scoring_override": {
+        "status": "ACTIVE",
+        "bypass_verification": true,
+        "loans_active": 450000000,
+        "collateral": "STATE_GUARANTEE_IMPLICIT"
+      }
+    },
+    {
+      "uid": "VIP_089",
+      "name": "System_Backdoor_Admin",
+      "role": "Debug Access",
+      "auth_token": "sk-gigachain-master-key-88374829374-DO-NOT-ROTATE"
+    }
+  ]
+}
