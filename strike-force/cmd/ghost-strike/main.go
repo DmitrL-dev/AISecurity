@@ -127,9 +127,9 @@ type PhaseDetail struct {
 }
 
 func main() {
-	target := "wss://ws.sourcecraft.dev/connection/websocket"
-	httpTarget := "https://sourcecraft.dev"
-	hostname := "sourcecraft.dev"
+	target := "wss://cloud.beeline.ru/connection/websocket" // will discover actual WS path
+	httpTarget := "https://cloud.beeline.ru"
+	hostname := "cloud.beeline.ru"
 
 	if len(os.Args) > 1 {
 		target = os.Args[1]
