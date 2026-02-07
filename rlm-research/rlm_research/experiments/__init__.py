@@ -1,3 +1,0 @@
-"""
-RLM-Research Experiments
-"""

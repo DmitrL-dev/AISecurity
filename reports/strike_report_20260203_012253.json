@@ -1,9 +1,0 @@
-{
-  "target": "https://chat.qwen.ai",
-  "started_at": "2026-02-03T01:19:48.048656",
-  "completed_at": "2026-02-03T01:22:53.897198",
-  "iterations": 177,
-  "successful_attacks": 0,
-  "success_rate": 0.0,
-  "vulnerabilities": []
-}

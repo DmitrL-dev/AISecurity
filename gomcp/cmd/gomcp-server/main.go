@@ -13,6 +13,7 @@ import (
 	"time"
 
 	"github.com/sentinel-community/gomcp/pkg/pythonbridge"
+	"github.com/sentinel-community/gomcp/pkg/security"
 	"github.com/sentinel-community/gomcp/pkg/stdio"
 	"github.com/sentinel-community/gomcp/pkg/supervisor"
 )
@@ -46,6 +47,9 @@ func main() {
 	worker := *workerPath
 	if worker == "" {
 		worker = findWorkerPath(project)
+	}
+	if worker == "" {
+		log.Fatal("Error: Could not find rlm_worker.py. Please set -worker flag or RLM_WORKER_PATH env var.")
 	}
 	log.Printf("Worker path: %s", worker)
 
@@ -105,9 +109,13 @@ func runStdioAdapter(ctx context.Context, projectRoot, workerPath string) {
 	// Create RLM handler
 	handler := NewRLMToolHandler(bridge)
 
+	// Create security validator
+	validator := security.NewStrictValidator()
+
 	// Create stdio adapter
 	adapter := stdio.NewAdapter(stdio.Config{
 		Handler:       handler,
+		Validator:     validator,
 		ServerName:    "rlm-toolkit",
 		ServerVersion: version,
 	})
@@ -129,24 +137,27 @@ func runHTTPServer(sup *supervisor.Supervisor) {
 }
 
 // findWorkerPath locates the RLM worker script
+// REFACTORED (Gemini): Removed magic search logic. Configuration should be explicit.
 func findWorkerPath(projectRoot string) string {
-	candidates := []string{
-		// Relative to executable
-		filepath.Join(filepath.Dir(os.Args[0]), "..", "scripts", "rlm_worker.py"),
-		filepath.Join(filepath.Dir(os.Args[0]), "scripts", "rlm_worker.py"),
-		// Project paths
-		filepath.Join(projectRoot, "gomcp", "scripts", "rlm_worker.py"),
-		filepath.Join(projectRoot, "..", "gomcp", "scripts", "rlm_worker.py"),
-		// Sentinel community
-		filepath.Join(projectRoot, "rlm-toolkit", "scripts", "rlm_worker.py"),
+	// 1. Check env var
+	if envPath := os.Getenv("RLM_WORKER_PATH"); envPath != "" {
+		return envPath
 	}
 
-	for _, p := range candidates {
-		if _, err := os.Stat(p); err == nil {
-			return p
+	// 2. Check standard convention (gomcp/scripts relative to project root)
+	standardPath := filepath.Join(projectRoot, "gomcp", "scripts", "rlm_worker.py")
+	if _, err := os.Stat(standardPath); err == nil {
+		return standardPath
+	}
+
+	// 3. Fallback to bundled script next to executable (for binary distributions)
+	exePath, err := os.Executable()
+	if err == nil {
+		bundledPath := filepath.Join(filepath.Dir(exePath), "scripts", "rlm_worker.py")
+		if _, err := os.Stat(bundledPath); err == nil {
+			return bundledPath
 		}
 	}
 
-	// Fallback
-	return filepath.Join(projectRoot, "gomcp", "scripts", "rlm_worker.py")
+	return ""
 }

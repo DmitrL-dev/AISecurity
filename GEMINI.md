@@ -43,3 +43,9 @@ Kiro-style Spec Driven Development implementation on AI-DLC (AI Development Life
 - Load entire `.kiro/steering/` as project memory
 - Default files: `product.md`, `tech.md`, `structure.md`
 - Custom files are supported (managed via `/kiro:steering-custom`)
+
+## Discovered Patterns (Strike Force Rewrite)
+### Go Patterns
+- **uTLS Evasion**: Use `refraction-networking/utls` with `HelloChrome_Auto` + `h2` ALPN to bypass JA3 fingerprints (Cloudflare/Qrator).
+- **Worker Pool**: 500 goroutines is the sweet spot for 10k RPS on standard hardware without GC trashing.
+- **Clean Architecture**: `Port/Adapter` separation allows hot-swapping Transport (standard -> uTLS) without touching Domain logic.

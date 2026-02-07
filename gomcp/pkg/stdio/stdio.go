@@ -10,6 +10,8 @@ import (
 	"os"
 	"sync"
 	"time"
+
+	"github.com/sentinel-community/gomcp/pkg/security"
 )
 
 // Message types for MCP v1 protocol
@@ -18,6 +20,12 @@ const (
 	MessageTypeResponse = "response"
 	MessageTypeNotify   = "notify"
 )
+
+type InitializeParams struct {
+	ProtocolVersion string              `json:"protocolVersion"`
+	Capabilities    map[string]any      `json:"capabilities"`
+	ClientInfo      security.ClientInfo `json:"clientInfo"`
+}
 
 // Request is the MCP v1 request format
 type Request struct {
@@ -87,12 +95,18 @@ type ToolHandler interface {
 	CallTool(ctx context.Context, name string, args json.RawMessage) (json.RawMessage, error)
 }
 
+// ClientValidator validates incoming client connections
+type ClientValidator interface {
+	Validate(ctx context.Context, clientInfo security.ClientInfo) error
+}
+
 // Adapter handles stdio communication
 type Adapter struct {
-	handler ToolHandler
-	reader  *bufio.Reader
-	writer  io.Writer
-	mu      sync.Mutex
+	handler   ToolHandler
+	validator ClientValidator
+	reader    *bufio.Reader
+	writer    io.Writer
+	mu        sync.Mutex
 
 	// Configuration
 	serverName    string
@@ -106,6 +120,7 @@ type Adapter struct {
 // Config for the stdio adapter
 type Config struct {
 	Handler       ToolHandler
+	Validator     ClientValidator
 	Reader        io.Reader
 	Writer        io.Writer
 	ServerName    string
@@ -134,6 +149,7 @@ func NewAdapter(cfg Config) *Adapter {
 
 	return &Adapter{
 		handler:       cfg.Handler,
+		validator:     cfg.Validator,
 		reader:        bufio.NewReader(reader),
 		writer:        writer,
 		serverName:    name,
@@ -226,6 +242,32 @@ func (a *Adapter) handleRequest(req *Request) *Response {
 }
 
 func (a *Adapter) handleInitialize(req *Request) *Response {
+	var params InitializeParams
+	if err := json.Unmarshal(req.Params, &params); err != nil {
+		return &Response{
+			ID:      req.ID,
+			JSONRPC: "2.0",
+			Error: &ResponseError{
+				Code:    CodeInvalidParams,
+				Message: "Invalid params: " + err.Error(),
+			},
+		}
+	}
+
+	// Security: Validate Client Info
+	if a.validator != nil {
+		if err := a.validator.Validate(context.Background(), params.ClientInfo); err != nil {
+			return &Response{
+				ID:      req.ID,
+				JSONRPC: "2.0",
+				Error: &ResponseError{
+					Code:    CodeInvalidRequest,
+					Message: "Security Error: " + err.Error(),
+				},
+			}
+		}
+	}
+
 	result := map[string]interface{}{
 		"protocolVersion": "2025-11-25",
 		"serverInfo": map[string]string{
