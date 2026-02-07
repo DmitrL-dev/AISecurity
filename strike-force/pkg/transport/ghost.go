@@ -8,6 +8,8 @@ import (
 	"net"
 	"net/http"
 	"net/http/cookiejar"
+	"net/url"
+	"strings"
 	"time"
 
 	"github.com/gorilla/websocket"
@@ -66,6 +68,35 @@ func (gd *GhostDialer) WarmUp(ctx context.Context, targetURL string) error {
 	}
 	resp.Body.Close()
 	return nil
+}
+
+// GetCookies returns all cookies collected during warm-up for the given URL.
+func (gd *GhostDialer) GetCookies(rawURL string) []*http.Cookie {
+	u, err := url.Parse(rawURL)
+	if err != nil {
+		return nil
+	}
+	return gd.jar.Cookies(u)
+}
+
+// GetCSRFToken extracts the CSRF-TOKEN value from collected cookies.
+func (gd *GhostDialer) GetCSRFToken(rawURL string) string {
+	for _, c := range gd.GetCookies(rawURL) {
+		if strings.EqualFold(c.Name, "CSRF-TOKEN") {
+			return c.Value
+		}
+	}
+	return ""
+}
+
+// CookieString returns cookies formatted for the Cookie header.
+func (gd *GhostDialer) CookieString(rawURL string) string {
+	cookies := gd.GetCookies(rawURL)
+	parts := make([]string, 0, len(cookies))
+	for _, c := range cookies {
+		parts = append(parts, c.Name+"="+c.Value)
+	}
+	return strings.Join(parts, "; ")
 }
 
 // DialWebSocket opens a WebSocket connection using uTLS Chrome fingerprint.
