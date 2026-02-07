@@ -111,6 +111,9 @@ from .inside_gobruteforcer_other_detector import InsideGobruteforcerOtherDetecto
 # Auto-generated engine
 from .detecting_backdoored_other_detector import DetectingBackdooredOtherDetector
 
+# Operational Context Injection (Feb 2026 R&D — Lakera Guard blind spot)
+from .operational_context_injection import OperationalContextInjectionDetector
+
 
 # Backward compatibility aliases (legacy names)
 # NOTE: InjectionDetector and PIIDetector now in Rust Core
@@ -193,4 +196,6 @@ __all__ = [
     "InsideGobruteforcerOtherDetector",
     # Auto-generated
     "DetectingBackdooredOtherDetector",
+    # OCI — Operational Context Injection (Feb 2026)
+    "OperationalContextInjectionDetector",
 ]

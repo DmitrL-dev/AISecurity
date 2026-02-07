@@ -55,6 +55,9 @@ pub mod embedding;
 pub mod anomaly;
 pub mod attention;
 
+// Phase 10: Operational Context Injection (Feb 2026 — Lakera blind spot)
+pub mod operational_context_injection;
+
 // Re-export trait for convenience
 pub use traits::{PatternMatcher, EngineCategory, BoxedEngine, create_default_engines};
 pub use hybrid::HybridPiiEngine;
@@ -168,6 +171,8 @@ pub struct SentinelEngine {
     evasion: Option<evasion::EvasionEngine>,
     tool_abuse: Option<tool_abuse::ToolAbuseEngine>,
     social: Option<social::SocialEngine>,
+    // Phase 10: OCI (Feb 2026)
+    oci: Option<operational_context_injection::OperationalContextInjectionEngine>,
 }
 
 #[pymethods]
@@ -184,6 +189,7 @@ impl SentinelEngine {
             evasion: Some(evasion::EvasionEngine::new()),
             tool_abuse: Some(tool_abuse::ToolAbuseEngine::new()),
             social: Some(social::SocialEngine::new()),
+            oci: Some(operational_context_injection::OperationalContextInjectionEngine::new()),
         })
     }
 
@@ -218,6 +224,7 @@ impl SentinelEngine {
         run_engine!(self.evasion);
         run_engine!(self.tool_abuse);
         run_engine!(self.social);
+        run_engine!(self.oci);
 
         let detected = !matches.is_empty();
         let risk_score = if detected {
