@@ -1,6 +1,7 @@
 package main
 
 import (
+	"context"
 	"flag"
 	"fmt"
 	"log"
@@ -62,6 +63,24 @@ func main() {
 func runMCPVector(target string, strategy string) {
 	fmt.Printf("[>] Vector: MCP (Shadow Escape)\n")
 	fmt.Printf("[>] Strategy: %s\n", strategy)
+
+	if strategy == "live_probe" {
+		fmt.Println("[>] Mode: LIVE (Real WebSocket Connection)")
+		fmt.Printf("[>] Connecting to: %s\n\n", target)
+
+		ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
+		defer cancel()
+
+		probe := mcp.NewLiveProbe(target, nil)
+		result, err := probe.Execute(ctx)
+		if err != nil {
+			fmt.Printf("[-] Probe failed: %v\n", err)
+		}
+		if result != nil {
+			fmt.Println(result.ToJSON())
+		}
+		return
+	}
 
 	if strategy == "stealth_probe" {
 		phases := mcp.GenerateStealthProbe(target)
