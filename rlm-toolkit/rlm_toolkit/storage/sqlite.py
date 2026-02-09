@@ -72,10 +72,10 @@ class CrystalStorage:
             conn.commit()
 
     def _get_conn(self) -> sqlite3.Connection:
-        """Get database connection."""
-        conn = sqlite3.connect(self.db_path)
-        conn.row_factory = sqlite3.Row
-        return conn
+        """Get thread-safe database connection."""
+        from .connection import get_connection
+
+        return get_connection(self.db_path, row_factory=sqlite3.Row)
 
     def save_crystal(
         self,

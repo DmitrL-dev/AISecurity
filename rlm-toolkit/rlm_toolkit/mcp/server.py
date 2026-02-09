@@ -101,7 +101,11 @@ class RLMServer:
                     encryption_key = secrets.token_bytes(32)
                     key_file.write_bytes(encryption_key)
             elif isinstance(encryption_key, str):
-                encryption_key = encryption_key.encode()[:32].ljust(32, b"\0")
+                # Derive proper 32-byte key from password string
+                from ..memory.crypto import SecureEncryption
+
+                enc_inst, _ = SecureEncryption.from_password(encryption_key)
+                encryption_key = enc_inst.key
 
             self.memory = SecureHierarchicalMemory(
                 agent_id="mcp_server",
@@ -114,8 +118,7 @@ class RLMServer:
         else:
             self.memory = HierarchicalMemory(
                 HMEMConfig(
-                    persistence_path=str(
-                        memory_file) if memory_file.exists() else None,
+                    persistence_path=str(memory_file) if memory_file.exists() else None,
                     auto_persist=True,
                 )
             )
@@ -229,8 +232,7 @@ class RLMServer:
         """Mark that context has changed (for Response Injection notifications)."""
         self._context_version += 1
         self._context_changed = True
-        logger.debug(
-            f"Context marked changed: {reason} (v{self._context_version})")
+        logger.debug(f"Context marked changed: {reason} (v{self._context_version})")
 
     def _check_context_changed(self) -> bool:
         """Check if context changed since last read, and reset flag."""
@@ -238,6 +240,7 @@ class RLMServer:
         if changed:
             self._context_changed = False
             import time
+
             self._last_context_read = time.time()
         return changed
 
@@ -247,7 +250,7 @@ class RLMServer:
             return {
                 "_context_changed": True,
                 "_context_version": self._context_version,
-                "_hint": "Project context has been updated. Consider calling read_resource('rlm://context') for fresh context."
+                "_hint": "Project context has been updated. Consider calling read_resource('rlm://context') for fresh context.",
             }
         return {}
 
@@ -312,8 +315,7 @@ class RLMServer:
                 chunks = self._keyword_search(context["content"], question)
 
                 # Calculate served tokens (compressed response)
-                served_tokens = sum(len(c.get("content", ""))
-                                    for c in chunks) // 4
+                served_tokens = sum(len(c.get("content", "")) for c in chunks) // 4
                 saved_tokens = raw_tokens - served_tokens
 
                 # Update session stats
@@ -582,8 +584,7 @@ class RLMServer:
 
             # Calculate savings percentage
             total_requested = (
-                self.session_stats["tokens_served"] +
-                self.session_stats["tokens_saved"]
+                self.session_stats["tokens_served"] + self.session_stats["tokens_saved"]
             )
             savings_percent = 0
             if total_requested > 0:
@@ -639,8 +640,7 @@ class RLMServer:
                     }
                 self._last_reindex_time = current_time
 
-                project_root = path or os.getenv(
-                    "RLM_PROJECT_ROOT", os.getcwd())
+                project_root = path or os.getenv("RLM_PROJECT_ROOT", os.getcwd())
                 indexer = AutoIndexer(Path(project_root))
 
                 if force:
@@ -803,8 +803,7 @@ class RLMServer:
                             sections.append(f"- {domain}")
 
                 # === Recent Decisions ===
-                causal_tracker = self.memory_bridge_v2_components.get(
-                    "causal_tracker")
+                causal_tracker = self.memory_bridge_v2_components.get("causal_tracker")
                 if causal_tracker:
                     try:
                         recent = causal_tracker.get_recent_decisions(limit=3)
@@ -817,10 +816,10 @@ class RLMServer:
 
                 # === Session Stats ===
                 sections.append(f"\n## 📊 Session")
+                sections.append(f"- Queries: {self.session_stats.get('queries', 0)}")
                 sections.append(
-                    f"- Queries: {self.session_stats.get('queries', 0)}")
-                sections.append(
-                    f"- Tokens saved: {self.session_stats.get('tokens_saved', 0):,}")
+                    f"- Tokens saved: {self.session_stats.get('tokens_saved', 0):,}"
+                )
 
                 if sections:
                     return "\n".join(sections)
@@ -858,9 +857,9 @@ class RLMServer:
             try:
                 # Use rlm_toolkit package location to find project root
                 import rlm_toolkit
+
                 pkg_path = Path(rlm_toolkit.__file__).parent.parent
-                project_root = Path(
-                    os.getenv("RLM_PROJECT_ROOT", str(pkg_path)))
+                project_root = Path(os.getenv("RLM_PROJECT_ROOT", str(pkg_path)))
                 marker_file = project_root / ".rlm" / "context_changed.json"
 
                 if not marker_file.exists():
@@ -870,17 +869,21 @@ class RLMServer:
 """
 
                 data = json.loads(marker_file.read_text())
-                version = data.get('version', 0)
-                changed = data.get('changed', False)
-                events = data.get('events', [])
+                version = data.get("version", 0)
+                changed = data.get("changed", False)
+                events = data.get("events", [])
 
                 if changed:
                     # Mark as read
-                    data['changed'] = False
+                    data["changed"] = False
                     marker_file.write_text(json.dumps(data, indent=2))
 
                     events_str = "\n".join(
-                        [f"  - {e['reason']} ({e['timestamp'][:19]})" for e in events[:3]])
+                        [
+                            f"  - {e['reason']} ({e['timestamp'][:19]})"
+                            for e in events[:3]
+                        ]
+                    )
                     return f"""# 🔔 Context Changed!
 - Version: {version}
 - Status: UPDATED
@@ -899,7 +902,8 @@ class RLMServer:
                 return f"# Context Events Error\n\n{str(e)}"
 
         logger.info(
-            "MCP resources registered: rlm://context, rlm://status, rlm://events")
+            "MCP resources registered: rlm://context, rlm://status, rlm://events"
+        )
 
     def _keyword_search(self, content: str, query: str, top_k: int = 5) -> List[Dict]:
         """Simple keyword search for MVP."""
@@ -983,8 +987,7 @@ class RLMServer:
         dangerous_patterns = [
             ("eval(", "code_injection", "Use of eval() is dangerous"),
             ("exec(", "code_injection", "Use of exec() is dangerous"),
-            ("subprocess", "command_injection",
-             "Subprocess usage - verify inputs"),
+            ("subprocess", "command_injection", "Subprocess usage - verify inputs"),
             ("os.system", "command_injection", "os.system usage - verify inputs"),
             ("pickle", "deserialization", "Pickle usage may be unsafe"),
             ("SQL", "sql_injection", "SQL detected - verify parameterization"),
@@ -1049,8 +1052,7 @@ class RLMServer:
     async def run(self):
         """Run the MCP server."""
         if not MCP_AVAILABLE:
-            logger.error(
-                "MCP SDK not available. Install with: pip install mcp")
+            logger.error("MCP SDK not available. Install with: pip install mcp")
             return
 
         logger.info("Starting RLM MCP Server...")
