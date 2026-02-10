@@ -59,7 +59,11 @@ jobs:
 
       - name: Generate RU-native patterns
         run: |
-          cd signatures && python generate_ru_patterns.py
+          if [ -f signatures/generate_ru_patterns.py ]; then
+            cd signatures && python generate_ru_patterns.py
+          else
+            echo "SKIP: generate_ru_patterns.py not found"
+          fi
 
       - name: Validate signatures
         run: |
