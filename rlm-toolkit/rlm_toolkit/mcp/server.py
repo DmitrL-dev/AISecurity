@@ -41,7 +41,6 @@ from ..memory.secure import SecureHierarchicalMemory, SecurityPolicy
 from ..memory_bridge import (
     MemoryBridgeManager,
     StateStorage,
-    register_memory_bridge_tools,
 )
 
 # Configure logging
@@ -151,18 +150,16 @@ class RLMServer:
         if MCP_AVAILABLE:
             self.mcp = FastMCP("rlm-toolkit")
             self._register_tools()
-            # Register Memory Bridge v1 tools (10 tools)
-            register_memory_bridge_tools(self.mcp, self.memory_bridge)
-            logger.info("Memory Bridge v1 tools registered")
 
-            # Register Memory Bridge v2 tools (15 tools for enterprise features)
+            # Register all Memory Bridge tools (unified v1+v2)
             project_root = Path(os.getenv("RLM_PROJECT_ROOT", os.getcwd()))
             self.memory_bridge_v2_components = register_memory_bridge_v2_tools(
                 self.mcp,
                 self.memory_bridge_v2_store,
                 project_root=project_root,
+                manager=self.memory_bridge,
             )
-            logger.info("Memory Bridge v2.0 enterprise tools registered")
+            logger.info("Memory Bridge tools registered (unified v1+v2)")
 
             # Start background processors (v2.3)
             self._start_background_processors(project_root)
