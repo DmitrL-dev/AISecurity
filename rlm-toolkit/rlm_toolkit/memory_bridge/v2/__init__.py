@@ -27,17 +27,25 @@ Usage:
 __version__ = "2.1.0"
 __author__ = "SENTINEL Team"
 
-from .hierarchical import (
+from .models import (
     MemoryLevel,
     HierarchicalFact,
     TTLConfig,
     TTLAction,
-    HierarchicalMemoryStore,
 )
+from .hierarchical import HierarchicalMemoryStore
+from .embeddings import EmbeddingService  # noqa: F401
 from .router import SemanticRouter, RoutingResult
-from .extractor import AutoExtractionEngine, CandidateFact
+from .extractor import (
+    AutoExtractionEngine,
+    CandidateFact,
+)
 from .ttl import TTLManager, TTLDefaults
-from .causal import CausalChainTracker, CausalNode, CausalEdge
+from .causal import (
+    CausalChainTracker,
+    CausalNode,
+    CausalEdge,
+)
 from .coldstart import ColdStartOptimizer, ProjectType
 from .automode import (
     DiscoveryOrchestrator,
@@ -45,6 +53,7 @@ from .automode import (
     EnterpriseContext,
     Suggestion,
 )
+
 
 __all__ = [
     # Version
@@ -55,6 +64,8 @@ __all__ = [
     "TTLConfig",
     "TTLAction",
     "HierarchicalMemoryStore",
+    # Embeddings
+    "EmbeddingService",
     # Router
     "SemanticRouter",
     "RoutingResult",
