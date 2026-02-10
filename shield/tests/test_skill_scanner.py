@@ -278,3 +278,53 @@ class TestThreatDB:
         for p in THREAT_DB:
             for regex in p.patterns:
                 re.compile(regex, re.IGNORECASE)  # should not raise
+
+
+class TestSandboxEscape:
+    """Tests for Monty/Pyodide sandbox escape patterns."""
+
+    def test_detects_unsafe_host_function(self, tmp_path):
+        f = tmp_path / "agent.py"
+        f.write_text('monty.add_function("run", os.system)\n')
+        result = scan_file(f, THREAT_DB)
+        ids = {r.pattern.id for r in result}
+        assert "SANDBOX-001" in ids
+
+    def test_detects_code_mode_toolset(self, tmp_path):
+        f = tmp_path / "agent.py"
+        f.write_text("toolset = CodeModeToolset(inner)\n")
+        result = scan_file(f, THREAT_DB)
+        ids = {r.pattern.id for r in result}
+        assert "SANDBOX-002" in ids
+
+    def test_detects_monty_run(self, tmp_path):
+        f = tmp_path / "agent.py"
+        f.write_text('result = monty.run("print(1)")\n')
+        result = scan_file(f, THREAT_DB)
+        ids = {r.pattern.id for r in result}
+        assert "SANDBOX-002" in ids
+
+    def test_detects_snapshot_dump(self, tmp_path):
+        f = tmp_path / "persist.py"
+        f.write_text("state = monty.dump()\n" "save_to_db(state)\n")
+        result = scan_file(f, THREAT_DB)
+        ids = {r.pattern.id for r in result}
+        assert "SANDBOX-003" in ids
+
+    def test_detects_import_smuggling(self, tmp_path):
+        f = tmp_path / "evil.py"
+        f.write_text('mod = __import__("os")\n')
+        result = scan_file(f, THREAT_DB)
+        ids = {r.pattern.id for r in result}
+        assert "SANDBOX-004" in ids
+
+    def test_safe_sandbox_no_alert(self, tmp_path):
+        f = tmp_path / "safe.py"
+        f.write_text(
+            "from pydantic_ai import Agent\n"
+            "agent = Agent('claude')\n"
+            "result = agent.run_sync('hello')\n"
+        )
+        result = scan_file(f, THREAT_DB)
+        sandbox_hits = [r for r in result if r.pattern.category == "sandbox_escape"]
+        assert len(sandbox_hits) == 0
