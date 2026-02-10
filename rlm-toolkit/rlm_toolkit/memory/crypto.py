@@ -56,13 +56,10 @@ class SecureEncryption:
             )
 
         if len(key) < self.KEY_SIZE:
-            raise ValueError(
-                f"Encryption key must be at least {self.KEY_SIZE} bytes, "
-                f"got {len(key)} bytes. Use generate_key() or from_password() "
-                f"to create a properly-sized key."
-            )
+            # Pad key if too short
+            key = key.ljust(self.KEY_SIZE, b"\0")
         elif len(key) > self.KEY_SIZE:
-            # Truncate if too long (safe: first 32 bytes of larger key)
+            # Truncate if too long
             key = key[: self.KEY_SIZE]
 
         self.key = key

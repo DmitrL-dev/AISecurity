@@ -6,6 +6,7 @@ import {
   Play,
   Clock,
   CheckCircle,
+  ChevronRight,
   ExternalLink
 } from 'lucide-react'
 import Link from 'next/link'

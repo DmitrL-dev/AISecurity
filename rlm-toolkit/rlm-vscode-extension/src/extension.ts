@@ -2,11 +2,9 @@ import * as vscode from 'vscode';
 import { RLMDashboardProvider } from './dashboardProvider';
 import { RLMStatusBar } from './statusBar';
 import { RLMMcpClient } from './mcpClient';
-import { RLMContextProvider } from './contextProvider';
 
 let mcpClient: RLMMcpClient;
 let statusBar: RLMStatusBar;
-let contextProvider: RLMContextProvider;
 
 export function activate(context: vscode.ExtensionContext) {
     console.log('RLM-Toolkit extension activated');
@@ -17,9 +15,6 @@ export function activate(context: vscode.ExtensionContext) {
     // Initialize status bar
     statusBar = new RLMStatusBar();
     context.subscriptions.push(statusBar.statusBarItem);
-    
-    // Initialize context provider (v2.5 Anti-Amnesia)
-    contextProvider = new RLMContextProvider(mcpClient);
     
     // Register sidebar webview
     const dashboardProvider = new RLMDashboardProvider(
@@ -168,28 +163,6 @@ export function activate(context: vscode.ExtensionContext) {
                     vscode.window.showErrorMessage(`RLM: ${result.error}`);
                 }
             });
-        }),
-        
-        // v2.5 Auto-Context (Anti-Amnesia) commands
-        vscode.commands.registerCommand('rlm.copyContext', async () => {
-            await contextProvider.copyToClipboard();
-        }),
-        
-        vscode.commands.registerCommand('rlm.getContext', async () => {
-            const context = await contextProvider.getContext();
-            const doc = await vscode.workspace.openTextDocument({
-                content: context,
-                language: 'markdown'
-            });
-            await vscode.window.showTextDocument(doc);
-        }),
-        
-        vscode.commands.registerCommand('rlm.refreshContext', async () => {
-            await contextProvider.refreshContext();
-            const stats = contextProvider.getStats();
-            vscode.window.showInformationMessage(
-                `RLM: Context refreshed (${stats.tokens} tokens)`
-            );
         })
     );
     

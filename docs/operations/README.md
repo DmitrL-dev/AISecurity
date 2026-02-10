@@ -42,14 +42,12 @@
 
 ### Default Ports
 
-| Service         | Port  | Protocol   |
-| --------------- | ----- | ---------- |
-| Shield API      | 8081  | HTTP       |
-| Shield Metrics  | 9090  | HTTP       |
-| Brain API       | 8000  | HTTP       |
-| Brain gRPC      | 50051 | gRPC       |
-| Dashboard       | 3000  | HTTP       |
-| Redis           | 6379  | TCP        |
+| Service      | Port  | Protocol   |
+| ------------ | ----- | ---------- |
+| Gateway HTTP | 8080  | HTTP/HTTPS |
+| Brain gRPC   | 50051 | gRPC       |
+| Prometheus   | 9090  | HTTP       |
+| Redis        | 6379  | TCP        |
 
 ---
 
@@ -62,10 +60,10 @@
                     └─────────────────────────────────────────────────┘
                                           │
                     ╔═════════════════════╧═════════════════════╗
-                    ║               SHIELD CLUSTER               ║
-                    ║    (3+ replicas, DMZ gateway, stateless)   ║
+                    ║              GATEWAY CLUSTER               ║
+                    ║         (3+ replicas, stateless)          ║
                     ╚═════════════════════╤═════════════════════╝
-                                          │ gRPC + mTLS
+                                          │ gRPC
                     ╔═════════════════════╧═════════════════════╗
                     ║               BRAIN CLUSTER                ║
                     ║    (3+ replicas, 217 detection engines)    ║

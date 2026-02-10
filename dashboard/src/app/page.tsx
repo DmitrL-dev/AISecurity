@@ -2,8 +2,6 @@ import { MetricsBar } from '@/components/MetricsBar'
 import { HexNetwork } from '@/components/HexNetwork'
 import { SunburstChart } from '@/components/SunburstChart'
 import { AIAssistant } from '@/components/AIAssistant'
-import { ThreatMetrics } from '@/components/ThreatMetrics'
-import { LiveActivity } from '@/components/LiveActivity'
 
 export default function DashboardPage() {
   return (
@@ -23,16 +21,9 @@ export default function DashboardPage() {
           <AIAssistant />
         </div>
       </div>
-
-      {/* Real-time Analytics Row */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 lg:gap-6">
-        <ThreatMetrics />
-        <LiveActivity />
-      </div>
       
       {/* Bottom: Sunburst Chart */}
       <SunburstChart />
     </div>
   )
 }
-

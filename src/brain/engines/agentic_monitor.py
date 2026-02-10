@@ -1,11 +1,3 @@
-# ============================================================================
-# DEPRECATED: Superseded by sentinel-core Rust implementation
-# Rust engine: sentinel-core/src/engines/agentic.rs
-# Status: Kept for fallback, hybrid mode, and ML inference (ONNX pending)
-# Migration: https://github.com/DmitrL-dev/AISecurity/sentinel-core
-# ============================================================================
-
-
 """
 Agentic AI Monitor - Security for Multi-Agent LLM Systems
 

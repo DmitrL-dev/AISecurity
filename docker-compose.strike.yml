@@ -1,7 +1,7 @@
-# SENTINEL Strike - Docker Compose (API Server Mode)
-# Quick start: docker-compose -f docker-compose.strike.yml up -d
+# SENTINEL Strike - Docker Compose
+# Quick start: docker-compose -f docker-compose.strike.yml run strike https://target.com
 
-version: "3.8"
+version: '3.8'
 
 services:
   strike:
@@ -10,30 +10,20 @@ services:
       dockerfile: Dockerfile.strike
     image: sentinel-strike:latest
     container_name: sentinel-strike
-
-    # Expose API port
-    ports:
-      - "8001:8001"
-
+    
     # Mount for reports output
     volumes:
       - ./reports:/app/reports
       - ./signatures:/app/signatures:ro
-
+    
     # Environment
     environment:
       - PYTHONUNBUFFERED=1
       - GEMINI_API_KEY=${GEMINI_API_KEY:-}
       - SCRAPERAPI_KEY=${SCRAPERAPI_KEY:-}
-
-    # Run API server instead of CLI
-    entrypoint: ["python", "-m", "uvicorn"]
-    command: ["strike.api:app", "--host", "0.0.0.0", "--port", "8001"]
-
-    restart: unless-stopped
-
-    healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8001/health"]
-      interval: 30s
-      timeout: 10s
-      retries: 3
+    
+    # Network access
+    network_mode: host
+    
+    # Default command
+    entrypoint: ["python", "-m", "strike.cli"]

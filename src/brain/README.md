@@ -5,11 +5,11 @@
 <h1 align="center">SENTINEL Brain</h1>
 
 <p align="center">
-  <strong>🧠 187 Detection Engines — Strange Math™ Protection</strong>
+  <strong>🧠 217 Detection Engines — Strange Math™ Protection</strong>
 </p>
 
 <p align="center">
-  <img src="https://img.shields.io/badge/Engines-187-brightgreen?style=for-the-badge" alt="Engines">
+  <img src="https://img.shields.io/badge/Engines-217-brightgreen?style=for-the-badge" alt="Engines">
   <img src="https://img.shields.io/badge/Python-3.11+-blue?style=for-the-badge" alt="Python">
   <img src="https://img.shields.io/badge/Latency-3ms_P50-orange?style=for-the-badge" alt="Latency">
   <img src="https://img.shields.io/badge/License-Apache_2.0-green?style=for-the-badge" alt="License">

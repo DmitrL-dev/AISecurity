@@ -1,11 +1,3 @@
-# ============================================================================
-# DEPRECATED: Superseded by sentinel-core Rust implementation
-# Rust engine: sentinel-core/src/engines/info_geometry.rs
-# Status: Kept for fallback, hybrid mode, and ML inference (ONNX pending)
-# Migration: https://github.com/DmitrL-dev/AISecurity/sentinel-core
-# ============================================================================
-
-
 """
 Information Geometry Engine (#52) - Fisher-Rao Metric
 

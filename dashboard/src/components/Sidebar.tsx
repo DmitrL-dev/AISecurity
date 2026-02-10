@@ -4,7 +4,6 @@ import { useState, createContext, useContext } from 'react'
 import { 
   LayoutDashboard, 
   Shield, 
-  ShieldCheck,
   Brain, 
   Crosshair, 
   GraduationCap, 
@@ -12,25 +11,19 @@ import {
   ChevronLeft,
   ChevronRight,
   Menu,
-  X,
-  FileText,
-  Search
+  X
 } from 'lucide-react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 
 const navItems = [
   { icon: LayoutDashboard, label: 'Overview', href: '/' },
-  { icon: Search, label: 'Analyze', href: '/analyze' },
   { icon: Shield, label: 'Incidents', href: '/incidents' },
   { icon: Brain, label: 'BRAIN', href: '/brain' },
   { icon: Crosshair, label: 'STRIKE', href: '/strike' },
-  { icon: ShieldCheck, label: 'SHIELD', href: '/shield' },
-  { icon: FileText, label: 'Audit Log', href: '/audit' },
   { icon: GraduationCap, label: 'Academy', href: '/academy' },
   { icon: Settings, label: 'Settings', href: '/settings' },
 ]
-
 
 // Context for mobile sidebar state
 export const SidebarContext = createContext<{

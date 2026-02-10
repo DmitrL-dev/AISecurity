@@ -1,1 +1,0 @@
-# Swarm tests package

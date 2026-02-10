@@ -14,7 +14,6 @@ router = APIRouter(prefix="/health", tags=["health"])
 
 class ComponentStatus(BaseModel):
     """Status of a single component."""
-
     name: str
     status: str  # healthy, degraded, unhealthy
     message: str = ""
@@ -23,7 +22,6 @@ class ComponentStatus(BaseModel):
 
 class HealthResponse(BaseModel):
     """Health check response."""
-
     status: str
     version: str
     timestamp: str
@@ -32,7 +30,6 @@ class HealthResponse(BaseModel):
 
 class ReadyResponse(BaseModel):
     """Readiness check response."""
-
     ready: bool
     checks: Dict[str, bool]
 
@@ -41,15 +38,15 @@ class ReadyResponse(BaseModel):
 async def health_check():
     """
     Comprehensive health check.
-
+    
     Returns status of all system components.
     """
     try:
-        from brain.observability.health import get_health
-
+        from src.brain.observability.health import get_health
+        
         health = get_health()
         result = await health.check_all()
-
+        
         return HealthResponse(
             status=result.status.value,
             version=result.version,
@@ -64,7 +61,7 @@ async def health_check():
                 for c in result.components
             ],
         )
-
+        
     except Exception as e:
         return HealthResponse(
             status="unhealthy",
@@ -84,15 +81,15 @@ async def health_check():
 async def readiness_check():
     """
     Quick readiness check for load balancer.
-
+    
     Returns true if service can accept requests.
     """
     try:
-        from brain.observability.health import get_health
-
+        from src.brain.observability.health import get_health
+        
         health = get_health()
         is_ready = await health.check_ready()
-
+        
         return ReadyResponse(
             ready=is_ready,
             checks={
@@ -100,7 +97,7 @@ async def readiness_check():
                 "engines": True,
             },
         )
-
+        
     except Exception:
         return ReadyResponse(ready=False, checks={})
 
@@ -109,7 +106,7 @@ async def readiness_check():
 async def liveness_check():
     """
     Simple liveness probe.
-
+    
     Returns 200 if process is alive.
     """
     return {"alive": True}

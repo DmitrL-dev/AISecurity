@@ -1,11 +1,3 @@
-# ============================================================================
-# DEPRECATED: Superseded by sentinel-core Rust implementation
-# Rust engine: sentinel-core/src/engines/consolidated super-engine (see mod.rs)
-# Status: Kept for fallback, hybrid mode, and ML inference (ONNX pending)
-# Migration: https://github.com/DmitrL-dev/AISecurity/sentinel-core
-# ============================================================================
-
-
 """
 Geometric Kernel v2.0 - Topological Data Analysis for Prompt Security
 
@@ -30,14 +22,10 @@ import hashlib
 from typing import List, Dict, Optional, Tuple
 from dataclasses import dataclass, field
 from collections import deque
-
-# SharedEmbedder: conditional import for memory optimization
-# Set SENTINEL_SHARED_EMBEDDER=false for isolated mode
-from brain.core.shared_embedder import get_embedder
+from sentence_transformers import SentenceTransformer
 
 try:
     from ripser import ripser
-
     RIPSER_AVAILABLE = True
 except ImportError:
     RIPSER_AVAILABLE = False
@@ -49,11 +37,9 @@ logger = logging.getLogger("GeometricKernel")
 # Data Classes
 # ============================================================================
 
-
 @dataclass
 class BettiNumbers:
     """Betti numbers representing topological features."""
-
     b0: int = 0  # Connected components
     b1: int = 0  # Loops/cycles
     b2: int = 0  # Voids/cavities
@@ -65,7 +51,6 @@ class BettiNumbers:
 @dataclass
 class PersistenceStats:
     """Statistics from persistence diagram."""
-
     entropy: float = 0.0
     total_persistence: float = 0.0
     max_lifetime: float = 0.0
@@ -76,14 +61,13 @@ class PersistenceStats:
             "entropy": self.entropy,
             "total_persistence": self.total_persistence,
             "max_lifetime": self.max_lifetime,
-            "betti": self.betti.to_dict(),
+            "betti": self.betti.to_dict()
         }
 
 
 @dataclass
 class GeometricResult:
     """Result from Geometric Kernel analysis."""
-
     risk_score: float = 0.0
     is_anomalous: bool = False
     anomaly_type: str = "none"
@@ -98,7 +82,7 @@ class GeometricResult:
             "anomaly_type": self.anomaly_type,
             "reason": self.explanation,
             "stats": self.stats.to_dict() if self.stats else None,
-            "signals": self.signals,
+            "signals": self.signals
         }
 
 
@@ -106,16 +90,13 @@ class GeometricResult:
 # Homology Engine (H0, H1, H2)
 # ============================================================================
 
-
 class HomologyEngine:
     """Computes persistent homology up to H2."""
 
     def __init__(self, max_dim: int = 2):
         self.max_dim = max_dim
 
-    def compute(
-        self, embeddings: np.ndarray
-    ) -> Tuple[PersistenceStats, List[np.ndarray]]:
+    def compute(self, embeddings: np.ndarray) -> Tuple[PersistenceStats, List[np.ndarray]]:
         """
         Compute persistent homology.
 
@@ -131,7 +112,7 @@ class HomologyEngine:
         try:
             # Compute persistence with ripser
             result = ripser(embeddings, maxdim=self.max_dim)
-            diagrams = result["dgms"]
+            diagrams = result['dgms']
 
             # Calculate Betti numbers and statistics
             betti = BettiNumbers()
@@ -173,7 +154,7 @@ class HomologyEngine:
                 entropy=total_entropy,
                 total_persistence=total_persistence,
                 max_lifetime=max_lifetime,
-                betti=betti,
+                betti=betti
             )
 
         except Exception as e:
@@ -185,7 +166,6 @@ class HomologyEngine:
 # ============================================================================
 # Persistence Landscape Layer
 # ============================================================================
-
 
 class PersistenceLandscape:
     """Computes persistence landscapes for stable vectorization."""
@@ -252,7 +232,6 @@ class PersistenceLandscape:
 # Adaptive Threshold
 # ============================================================================
 
-
 class AdaptiveThreshold:
     """Adaptive thresholds based on historical statistics."""
 
@@ -275,9 +254,7 @@ class AdaptiveThreshold:
         values = np.array(self.history[metric_name])
         return float(values.mean() + self.num_sigmas * values.std())
 
-    def is_anomalous(
-        self, metric_name: str, value: float, default_threshold: float = 2.0
-    ) -> bool:
+    def is_anomalous(self, metric_name: str, value: float, default_threshold: float = 2.0) -> bool:
         """Check if value exceeds adaptive threshold."""
         threshold = self.get_threshold(metric_name, default_threshold)
         return value > threshold
@@ -286,7 +263,6 @@ class AdaptiveThreshold:
 # ============================================================================
 # Main Geometric Kernel
 # ============================================================================
-
 
 class GeometricKernel:
     """
@@ -326,9 +302,9 @@ class GeometricKernel:
 
     @property
     def embedder(self):
-        """Lazy load embedder via SharedEmbedder."""
+        """Lazy load embedder."""
         if self._embedder is None:
-            self._embedder = get_embedder()
+            self._embedder = SentenceTransformer('all-MiniLM-L6-v2')
         return self._embedder
 
     def _get_text_hash(self, text: str) -> str:
@@ -364,18 +340,18 @@ class GeometricKernel:
             "cache_hits": self._cache_hits,
             "cache_misses": self._cache_misses,
             "cache_size": len(self._embedding_cache),
-            "hit_rate_percent": round(hit_rate, 1),
+            "hit_rate_percent": round(hit_rate, 1)
         }
 
     def add_to_history(self, embedding: np.ndarray):
         """Add embedding to history."""
         self.embedding_history.append(embedding)
         if len(self.embedding_history) > self.max_history:
-            self.embedding_history = self.embedding_history[-self.max_history :]
+            self.embedding_history = self.embedding_history[-self.max_history:]
 
-    def _compute_signals(
-        self, embedding: np.ndarray, stats: PersistenceStats, diagrams: List[np.ndarray]
-    ) -> Dict[str, float]:
+    def _compute_signals(self, embedding: np.ndarray,
+                         stats: PersistenceStats,
+                         diagrams: List[np.ndarray]) -> Dict[str, float]:
         """Compute all anomaly signals."""
         signals = {}
 
@@ -383,7 +359,8 @@ class GeometricKernel:
         if len(self.embedding_history) >= 5:
             recent = np.array(self.embedding_history[-20:])
             centroid = recent.mean(axis=0)
-            signals["centroid_distance"] = float(np.linalg.norm(embedding - centroid))
+            signals["centroid_distance"] = float(
+                np.linalg.norm(embedding - centroid))
 
         # 2. Entropy signal
         signals["entropy"] = stats.entropy
@@ -400,7 +377,8 @@ class GeometricKernel:
 
         # 6. Landscape distance from baseline
         if len(diagrams) > 1 and self.baseline_landscape is not None:
-            current_landscape = self.landscape.compute(diagrams[1])  # H1 diagram
+            current_landscape = self.landscape.compute(
+                diagrams[1])  # H1 diagram
             signals["landscape_distance"] = self.landscape.distance(
                 current_landscape, self.baseline_landscape
             )
@@ -454,11 +432,10 @@ class GeometricKernel:
 
         # Distance anomaly
         if "centroid_distance" in signals:
-            if self.thresholds.is_anomalous(
-                "centroid_distance", signals["centroid_distance"], 1.5
-            ):
+            if self.thresholds.is_anomalous("centroid_distance", signals["centroid_distance"], 1.5):
                 anomalies.append("trajectory_deviation")
-                risk_contributions.append(min(30, signals["centroid_distance"] * 15))
+                risk_contributions.append(
+                    min(30, signals["centroid_distance"] * 15))
 
         # Entropy anomaly
         if self.thresholds.is_anomalous("entropy", signals["entropy"], 2.0):
@@ -478,17 +455,16 @@ class GeometricKernel:
         # Landscape drift
         if signals.get("landscape_distance", 0) > 5.0:
             anomalies.append("landscape_drift")
-            risk_contributions.append(min(25, signals["landscape_distance"] * 3))
+            risk_contributions.append(
+                min(25, signals["landscape_distance"] * 3))
 
         # Aggregate result
         if anomalies:
             result.is_anomalous = True
             result.anomaly_type = anomalies[0]
             result.risk_score = min(50.0, sum(risk_contributions))
-            result.explanation = (
-                f"TDA anomaly: {', '.join(anomalies)} | "
+            result.explanation = f"TDA anomaly: {', '.join(anomalies)} | " \
                 f"β0={stats.betti.b0}, β1={stats.betti.b1}, β2={stats.betti.b2}"
-            )
         else:
             result.explanation = "Normal topology"
             # Update baseline if normal
@@ -502,10 +478,12 @@ class GeometricKernel:
 # Backward Compatibility
 # ============================================================================
 
-
 # Legacy alias
 def compute_persistence(embeddings: np.ndarray) -> dict:
     """Legacy function for backward compatibility."""
     engine = HomologyEngine(max_dim=1)
     stats, _ = engine.compute(embeddings)
-    return {"entropy": stats.entropy, "num_features": stats.betti.b0 + stats.betti.b1}
+    return {
+        "entropy": stats.entropy,
+        "num_features": stats.betti.b0 + stats.betti.b1
+    }

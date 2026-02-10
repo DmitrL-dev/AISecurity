@@ -72,11 +72,6 @@ class RLMServer:
             "session_start": None,
         }
 
-        # Context change tracking (v2.5 Anti-Amnesia)
-        self._context_version = 0
-        self._context_changed = False
-        self._last_context_read = 0
-
         # Rate limiting for reindex (T5.4: max 1 per 60s)
         self._last_reindex_time = 0
         self._reindex_rate_limit_seconds = 60
@@ -101,11 +96,7 @@ class RLMServer:
                     encryption_key = secrets.token_bytes(32)
                     key_file.write_bytes(encryption_key)
             elif isinstance(encryption_key, str):
-                # Derive proper 32-byte key from password string
-                from ..memory.crypto import SecureEncryption
-
-                enc_inst, _ = SecureEncryption.from_password(encryption_key)
-                encryption_key = enc_inst.key
+                encryption_key = encryption_key.encode()[:32].ljust(32, b"\0")
 
             self.memory = SecureHierarchicalMemory(
                 agent_id="mcp_server",
@@ -170,12 +161,8 @@ class RLMServer:
                 self.mcp,
                 self.memory_bridge_v2_store,
                 project_root=project_root,
-                on_context_change=self._mark_context_changed,  # v2.5 Anti-Amnesia
             )
             logger.info("Memory Bridge v2.0 enterprise tools registered")
-
-            # Register MCP resources (v2.5 Auto-Context)
-            self._register_resources()
 
             # Start background processors (v2.3)
             self._start_background_processors(project_root)
@@ -227,32 +214,6 @@ class RLMServer:
             storage.set_metadata("session_stats", self.session_stats)
         except Exception as e:
             logger.debug(f"Could not persist session stats: {e}")
-
-    def _mark_context_changed(self, reason: str = "update"):
-        """Mark that context has changed (for Response Injection notifications)."""
-        self._context_version += 1
-        self._context_changed = True
-        logger.debug(f"Context marked changed: {reason} (v{self._context_version})")
-
-    def _check_context_changed(self) -> bool:
-        """Check if context changed since last read, and reset flag."""
-        changed = self._context_changed
-        if changed:
-            self._context_changed = False
-            import time
-
-            self._last_context_read = time.time()
-        return changed
-
-    def _get_context_notification(self) -> dict:
-        """Get context notification to inject into tool responses."""
-        if self._context_changed:
-            return {
-                "_context_changed": True,
-                "_context_version": self._context_version,
-                "_hint": "Project context has been updated. Consider calling read_resource('rlm://context') for fresh context.",
-            }
-        return {}
 
     def _register_tools(self):
         """Register all MCP tools."""
@@ -510,210 +471,6 @@ class RLMServer:
                 logger.error(f"Memory operation failed: {e}")
                 return {"success": False, "error": str(e)}
 
-        @self.mcp.tool("rlm_status")
-        async def status() -> Dict[str, Any]:
-            """
-            Get RLM server status and index info.
-
-            Returns:
-                Server status, index stats, memory stats
-            """
-            try:
-                # Import here to avoid circular
-                from ..storage import get_storage
-                from ..freshness import CrossReferenceValidator
-                from pathlib import Path
-
-                project_root = os.getenv("RLM_PROJECT_ROOT", os.getcwd())
-                storage = get_storage(Path(project_root))
-                stats = storage.get_stats()
-
-                memory_stats = {}
-                if hasattr(self.memory, "get_stats"):
-                    memory_stats = self.memory.get_stats()
-
-                return {
-                    "success": True,
-                    "server": "rlm-toolkit",
-                    "version": "1.2.0",
-                    "project_root": project_root,
-                    "index": {
-                        "crystals": stats.get("total_crystals", 0),
-                        "tokens": stats.get("total_tokens", 0),
-                        "db_size_mb": stats.get("db_size_mb", 0),
-                    },
-                    "memory": memory_stats,
-                    "secure_mode": isinstance(self.memory, SecureHierarchicalMemory),
-                    # L0 Context Auto-Injection (v2.1 fix)
-                    "l0_context": self.memory_bridge_v2_store.get_l0_context(
-                        max_tokens=500
-                    ),
-                }
-            except Exception as e:
-                logger.error(f"Status check failed: {e}")
-                return {"success": False, "error": str(e)}
-
-        @self.mcp.tool("rlm_session_stats")
-        async def session_stats(reset: bool = False) -> Dict[str, Any]:
-            """
-            Get real-time session statistics showing token savings.
-
-            Args:
-                reset: Reset session stats to zero
-
-            Returns:
-                Session statistics including queries, tokens, and savings
-            """
-            import time
-
-            if reset:
-                self.session_stats = {
-                    "queries": 0,
-                    "tokens_served": 0,
-                    "tokens_saved": 0,
-                    "raw_context_size": 0,
-                    "session_start": time.time(),
-                }
-                return {"success": True, "message": "Session stats reset"}
-
-            # Calculate session duration
-            session_start = self.session_stats.get("session_start")
-            duration_minutes = 0
-            if session_start:
-                duration_minutes = (time.time() - session_start) / 60
-
-            # Calculate savings percentage
-            total_requested = (
-                self.session_stats["tokens_served"] + self.session_stats["tokens_saved"]
-            )
-            savings_percent = 0
-            if total_requested > 0:
-                savings_percent = (
-                    self.session_stats["tokens_saved"] / total_requested * 100
-                )
-
-            return {
-                "success": True,
-                "session": {
-                    "queries": self.session_stats["queries"],
-                    "tokens_served": self.session_stats["tokens_served"],
-                    "tokens_saved": self.session_stats["tokens_saved"],
-                    "savings_percent": round(savings_percent, 1),
-                    "duration_minutes": round(duration_minutes, 1),
-                    "raw_context_size": self.session_stats["raw_context_size"],
-                },
-            }
-
-        @self.mcp.tool("rlm_reindex")
-        async def reindex(
-            path: Optional[str] = None, force: bool = False
-        ) -> Dict[str, Any]:
-            """
-            Reindex project or specific path.
-
-            Args:
-                path: Path to reindex (defaults to project root)
-                force: Force full reindex even if up-to-date
-
-            Returns:
-                Reindex results
-            """
-            try:
-                import time as time_module
-                from ..indexer import AutoIndexer
-                from pathlib import Path
-
-                # Rate limiting check (T5.4: max 1 reindex per 60s)
-                current_time = time_module.time()
-                if (
-                    current_time - self._last_reindex_time
-                    < self._reindex_rate_limit_seconds
-                ):
-                    wait_time = int(
-                        self._reindex_rate_limit_seconds
-                        - (current_time - self._last_reindex_time)
-                    )
-                    return {
-                        "success": False,
-                        "error": f"Rate limited. Try again in {wait_time}s",
-                        "rate_limited": True,
-                    }
-                self._last_reindex_time = current_time
-
-                project_root = path or os.getenv("RLM_PROJECT_ROOT", os.getcwd())
-                indexer = AutoIndexer(Path(project_root))
-
-                if force:
-                    result = indexer._index_full()
-                    return {
-                        "success": True,
-                        "action": "full_reindex",
-                        "files_indexed": result.files_indexed,
-                        "duration": result.duration_seconds,
-                    }
-                else:
-                    # Delta update
-                    from ..storage import get_storage
-
-                    storage = get_storage(Path(project_root))
-                    modified = storage.get_modified_files(Path(project_root))
-
-                    if modified:
-                        updated = indexer.delta_update(modified)
-                        return {
-                            "success": True,
-                            "action": "delta_update",
-                            "files_updated": updated,
-                        }
-                    else:
-                        return {
-                            "success": True,
-                            "action": "none",
-                            "message": "Index is up-to-date",
-                        }
-            except Exception as e:
-                logger.error(f"Reindex failed: {e}")
-                return {"success": False, "error": str(e)}
-
-        @self.mcp.tool("rlm_validate")
-        async def validate() -> Dict[str, Any]:
-            """
-            Validate index freshness and cross-references.
-
-            Returns:
-                Validation results
-            """
-            try:
-                from ..storage import get_storage
-                from ..freshness import CrossReferenceValidator, ActualityReviewQueue
-                from pathlib import Path
-
-                project_root = os.getenv("RLM_PROJECT_ROOT", os.getcwd())
-                storage = get_storage(Path(project_root))
-
-                # Load crystals
-                crystals = {
-                    c["crystal"]["path"]: c["crystal"] for c in storage.load_all()
-                }
-
-                # Cross-reference validation
-                validator = CrossReferenceValidator(crystals)
-                stats = validator.get_validation_stats()
-
-                # Check stale files
-                stale = storage.get_stale_crystals(ttl_hours=24)
-
-                return {
-                    "success": True,
-                    "symbols": stats,
-                    "stale_files": len(stale),
-                    "total_files": len(crystals),
-                    "health": "good" if len(stale) == 0 else "needs_refresh",
-                }
-            except Exception as e:
-                logger.error(f"Validation failed: {e}")
-                return {"success": False, "error": str(e)}
-
         @self.mcp.tool("rlm_settings")
         async def settings(
             action: str = "get", key: Optional[str] = None, value: Optional[str] = None
@@ -759,151 +516,6 @@ class RLMServer:
             except Exception as e:
                 logger.error(f"Settings failed: {e}")
                 return {"success": False, "error": str(e)}
-
-    def _register_resources(self):
-        """Register MCP resources for auto-context injection (v2.5 Anti-Amnesia)."""
-        if not self.mcp:
-            return
-
-        @self.mcp.resource("rlm://context")
-        async def get_project_context() -> str:
-            """
-            Auto-injected project context.
-
-            This resource provides persistent project knowledge that LLM clients
-            can automatically include in their context. Solves the "amnesia" problem.
-
-            Returns:
-                Formatted markdown with L0 facts, domain context, and recent decisions.
-            """
-            try:
-                from pathlib import Path
-                import os
-
-                sections = []
-
-                # === L0: Project Architecture (ALWAYS) ===
-                if self.memory_bridge_v2_store:
-                    from ..memory_bridge.v2.hierarchical import MemoryLevel
-
-                    l0_facts = self.memory_bridge_v2_store.get_facts_by_level(
-                        MemoryLevel.L0_PROJECT
-                    )
-                    if l0_facts:
-                        sections.append("## 🏗️ Project Architecture")
-                        for fact in l0_facts[:10]:
-                            sections.append(f"- {fact.content}")
-
-                # === L1: Active Domains ===
-                if self.memory_bridge_v2_store:
-                    domains = self.memory_bridge_v2_store.get_domains()
-                    if domains:
-                        sections.append("\n## 📂 Active Domains")
-                        for domain in list(domains)[:5]:
-                            sections.append(f"- {domain}")
-
-                # === Recent Decisions ===
-                causal_tracker = self.memory_bridge_v2_components.get("causal_tracker")
-                if causal_tracker:
-                    try:
-                        recent = causal_tracker.get_recent_decisions(limit=3)
-                        if recent:
-                            sections.append("\n## 🎯 Recent Decisions")
-                            for decision in recent:
-                                sections.append(f"- {decision.content}")
-                    except Exception:
-                        pass
-
-                # === Session Stats ===
-                sections.append(f"\n## 📊 Session")
-                sections.append(f"- Queries: {self.session_stats.get('queries', 0)}")
-                sections.append(
-                    f"- Tokens saved: {self.session_stats.get('tokens_saved', 0):,}"
-                )
-
-                if sections:
-                    return "\n".join(sections)
-                else:
-                    return "# RLM Project Context\n\nNo project facts discovered yet. Run `rlm_discover_project` first."
-
-            except Exception as e:
-                logger.error(f"Context resource error: {e}")
-                return f"# RLM Context Error\n\n{str(e)}"
-
-        @self.mcp.resource("rlm://status")
-        async def get_status_resource() -> str:
-            """Quick status check for LLM context."""
-            try:
-                stats = self.indexer.get_stats() if self.indexer else {}
-                return f"""# RLM Status
-- Crystals: {stats.get('total_crystals', 0)}
-- Tokens: {stats.get('total_tokens', 0):,}
-- Version: 2.5.0
-"""
-            except Exception as e:
-                return f"# RLM Status Error\n\n{str(e)}"
-
-        @self.mcp.resource("rlm://events")
-        async def get_context_events() -> str:
-            """
-            Context change notifications (persistent).
-
-            Poll this resource to check if project context has been updated
-            since you last read it. Reads from SQLite for cross-process support.
-            """
-            import json
-            import os
-
-            try:
-                # Use rlm_toolkit package location to find project root
-                import rlm_toolkit
-
-                pkg_path = Path(rlm_toolkit.__file__).parent.parent
-                project_root = Path(os.getenv("RLM_PROJECT_ROOT", str(pkg_path)))
-                marker_file = project_root / ".rlm" / "context_changed.json"
-
-                if not marker_file.exists():
-                    return """# ✓ Context Current
-- Version: 0
-- Status: unchanged (no marker file yet)
-"""
-
-                data = json.loads(marker_file.read_text())
-                version = data.get("version", 0)
-                changed = data.get("changed", False)
-                events = data.get("events", [])
-
-                if changed:
-                    # Mark as read
-                    data["changed"] = False
-                    marker_file.write_text(json.dumps(data, indent=2))
-
-                    events_str = "\n".join(
-                        [
-                            f"  - {e['reason']} ({e['timestamp'][:19]})"
-                            for e in events[:3]
-                        ]
-                    )
-                    return f"""# 🔔 Context Changed!
-- Version: {version}
-- Status: UPDATED
-- Hint: Call `read_resource("rlm://context")` for fresh context
-- Recent events:
-{events_str}
-"""
-                else:
-                    return f"""# ✓ Context Current
-- Version: {version}
-- Status: unchanged
-"""
-
-            except Exception as e:
-                logger.error(f"Context events error: {e}")
-                return f"# Context Events Error\n\n{str(e)}"
-
-        logger.info(
-            "MCP resources registered: rlm://context, rlm://status, rlm://events"
-        )
 
     def _keyword_search(self, content: str, query: str, top_k: int = 5) -> List[Dict]:
         """Simple keyword search for MVP."""
