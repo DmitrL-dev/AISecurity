@@ -34,35 +34,37 @@ def register_memory_bridge_v2_tools(
     Returns:
         Dict of component instances
     """
-    from ..v2.routing import SemanticRouter
+    from ..v2.router import SemanticRouter
     from ..v2.extractor import AutoExtractionEngine
     from ..v2.ttl import TTLManager
-    from ..v2.causal import CausalTracker
-    from ..v2.cold_start import ColdStartDiscovery
-    from ..v2.orchestrator import EnterpriseOrchestrator
-    from ..v2.context_builder import ContextBuilder
+    from ..v2.causal import CausalChainTracker
+    from ..v2.coldstart import ColdStartOptimizer
+    from ..v2.automode import (
+        DiscoveryOrchestrator,
+        EnterpriseContextBuilder,
+    )
 
     if project_root is None:
         project_root = Path(os.getenv("RLM_PROJECT_ROOT", os.getcwd()))
 
     router = SemanticRouter(store=store)
     extractor = AutoExtractionEngine(
-        store=store,
         project_root=project_root,
     )
     ttl_manager = TTLManager(store=store)
-    causal_tracker = CausalTracker(store=store)
-    cold_start = ColdStartDiscovery(
+    causal_tracker = CausalChainTracker(
+        db_path=store.db_path.parent / "causal_chains.db",
+    )
+    cold_start = ColdStartOptimizer(
         store=store,
         project_root=project_root,
     )
-    orchestrator = EnterpriseOrchestrator(
+    orchestrator = DiscoveryOrchestrator(
         store=store,
-        router=router,
         cold_start=cold_start,
         project_root=project_root,
     )
-    context_builder = ContextBuilder(
+    context_builder = EnterpriseContextBuilder(
         store=store,
         router=router,
         causal_tracker=causal_tracker,

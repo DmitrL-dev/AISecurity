@@ -6,6 +6,7 @@ from .entropy_engine import EntropyEngine
 from .encoding_engine import EncodingEngine
 from .structural_engine import StructuralEngine
 from .redaction_engine import RedactionEngine
+from .output_scanner import OutputScannerEngine
 from .pipeline import DetectionPipeline
 
 __all__ = [
@@ -16,5 +17,6 @@ __all__ = [
     "EncodingEngine",
     "StructuralEngine",
     "RedactionEngine",
+    "OutputScannerEngine",
     "DetectionPipeline",
 ]

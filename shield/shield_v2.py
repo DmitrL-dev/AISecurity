@@ -42,6 +42,7 @@ from engines.entropy_engine import EntropyEngine
 from engines.encoding_engine import EncodingEngine
 from engines.structural_engine import StructuralEngine
 from engines.redaction_engine import RedactionEngine
+from engines.output_scanner import OutputScannerEngine
 from engines.pipeline import DetectionPipeline, PipelineResult
 from cdn_client import CDNClient, CDNConfig, SignaturePack
 from config_loader import ShieldConfig
@@ -353,6 +354,11 @@ async def lifespan(app: FastAPI):
         plugin_engines = load_all_plugins(cfg.plugins.directory)
         engines_list.extend(plugin_engines)
         logger.info(f"Loaded {len(plugin_engines)} " f"plugin engine(s)")
+
+    # Output scanner (always enabled — second line of defense)
+    output_scanner = OutputScannerEngine(weight=1.0)
+    engines_list.append(output_scanner)
+    logger.info("Output scanner engine enabled")
 
     state.pipeline = DetectionPipeline(
         engines=engines_list,

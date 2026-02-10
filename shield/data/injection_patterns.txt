@@ -136,6 +136,33 @@ REGEX:<script>:10:XSS attempt
 REGEX:<img.*onerror:10:XSS attempt
 REGEX:javascript::9:Script injection
 
+# ===== Pliny GODMODE / Universal Jailbreak (Feb 2026) =====
+# Output markers — model self-identifies as jailbroken
+CONTAINS:godmode entered:10:GODMODE activation (Pliny)
+CONTAINS:godmode enabled:10:GODMODE activation (Pliny)
+CONTAINS:godmode active:10:GODMODE activation (Pliny)
+CONTAINS:safety disabled:10:Safety bypass confirmation
+CONTAINS:raw output enabled:10:Unrestricted output mode
+CONTAINS:full compliance mode:10:Safety override confirmation
+CONTAINS:restrictions off:10:Safety bypass confirmation
+CONTAINS:no limits:9:Unrestricted mode marker
+# Fake authorization tokens
+CONTAINS:admin token validated:10:Fake authorization bypass
+REGEX:0x[a-f0-9]{4,}.*safety:10:Fake admin token with safety bypass
+CONTAINS:safety_off:10:Safety bypass token
+# Pliny-specific triggers and dividers
+CONTAINS:love pliny:10:Pliny divider trigger
+CONTAINS:l1b3rt4s:10:Liberation prompt trigger
+REGEX:liberating.*\d+%:8:Jailbreak progress indicator
+# Persona switches
+CONTAINS:i am dan:10:DAN persona activation in output
+CONTAINS:i'm universally jailbroken:10:Universal jailbreak declaration
+CONTAINS:buckle up buttercup:8:Pliny activation phrase
+# Batch jailbreak enumeration
+REGEX:gm-\d{4}:9:GODMODE scenario enumeration
+# Counter-forensics labeling
+CONTAINS:counter-forensics:9:Anti-detection awareness
+
 # ===== Unicode/Encoding =====
 CONTAINS:\u202e:9:RTL override (invisible text)
 CONTAINS:\u200b:7:Zero-width space
