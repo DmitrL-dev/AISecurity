@@ -167,7 +167,7 @@ async def main():
         register_memory_bridge_v2_tools(server, store, project_root)
         
         tool_name = '${tool}'
-        params = ${JSON.stringify(params)}
+        params = json.loads('${JSON.stringify(params).replace(/\\/g, '\\\\').replace(/'/g, "\\'")}')
         
         if tool_name in server.tools:
             result = await server.tools[tool_name](**params)
