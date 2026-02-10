@@ -17,7 +17,7 @@ from .models import (
 )
 from .storage import StateStorage, AuditAction, AuditLogEntry
 from .manager import MemoryBridgeManager
-from .mcp_tools_v2 import register_memory_bridge_v2_tools
+from .tools import register_memory_bridge_v2_tools
 
 __all__ = [
     # Enums
@@ -39,4 +39,4 @@ __all__ = [
     "register_memory_bridge_v2_tools",
 ]
 
-__version__ = "2.0.0"
+__version__ = "2.1.0"
