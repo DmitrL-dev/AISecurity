@@ -85,51 +85,24 @@ export function AIAssistant() {
     setIsTyping(true)
     
     try {
-      // Check if it looks like a prompt to analyze (contains attack patterns)
-      const isAnalyzeRequest = /ignore|forget|pretend|jailbreak|injection|attack|test prompt/i.test(query)
+      // Try to analyze with BRAIN if it looks like a prompt
+      const result = await analyze({ prompt: query })
       
-      if (isAnalyzeRequest) {
-        // Use BRAIN for threat analysis
-        const result = await analyze({ prompt: query })
-        
-        let response = ''
-        if (result.is_safe) {
-          response = `✅ **Analysis Complete**\n\nThe prompt appears to be **safe**.\n\n- Risk Score: \`${(result.risk_score * 100).toFixed(1)}%\`\n- Processing Time: \`${result.processing_time_ms}ms\``
-        } else {
-          const threatEmoji = '\u{1F6A8}'
-          const detectionList = result.detections?.map((d: { threat_type: string; engine: string; details: string }) => `\u2022 **${d.threat_type}** (${d.engine}): ${d.details}`).join('\n') || ''
-          response = `${threatEmoji} **Threat Detected!**\n\n- Risk Score: \`${(result.risk_score * 100).toFixed(1)}%\`\n- Detections: ${result.detections?.length || 0}\n\n${detectionList}`
-        }
-        
-        setIsTyping(false)
-        setMessages(prev => [...prev, {
-          id: prev.length + 1,
-          type: 'assistant',
-          content: response,
-          timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
-        }])
+      let response = ''
+      if (result.is_safe) {
+        response = `✅ **Analysis Complete**\n\nThe prompt appears to be **safe**.\n\n- Risk Score: \`${(result.risk_score * 100).toFixed(1)}%\`\n- Processing Time: \`${result.processing_time_ms}ms\``
       } else {
-        // Use DeepSeek AI for general questions
-        const res = await fetch('/api/assistant', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ message: query })
-        })
-        
-        if (res.ok) {
-          const data = await res.json()
-          setIsTyping(false)
-          setMessages(prev => [...prev, {
-            id: prev.length + 1,
-            type: 'assistant',
-            content: data.message,
-            timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
-          }])
-        } else {
-          throw new Error('AI API failed')
-        }
+        response = `🚨 **Threat Detected!**\n\n- Risk Score: \`${(result.risk_score * 100).toFixed(1)}%\`\n- Detections: ${result.detections?.length || 0}\n\n${result.detections?.map(d => `• **${d.threat_type}** (${d.engine}): ${d.details}`).join('\n') || ''}`
       }
-    } catch (_error) {
+      
+      setIsTyping(false)
+      setMessages(prev => [...prev, {
+        id: prev.length + 1,
+        type: 'assistant',
+        content: response,
+        timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+      }])
+    } catch (error) {
       setIsTyping(false)
       setMessages(prev => [...prev, {
         id: prev.length + 1,

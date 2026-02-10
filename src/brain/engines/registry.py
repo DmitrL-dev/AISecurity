@@ -114,8 +114,6 @@ class EngineRegistry:
         self._engines_package = engines_package
         self._registry: Dict[str, EngineMetadata] = {}
         self._instances: Dict[str, Any] = {}  # Lazy-loaded instances
-        self._disabled_engines: Set[str] = set()  # Manually disabled engines
-        self._enabled_engines: Set[str] = set()  # Manually enabled (outside profile)
         self._profile = self._detect_profile()
 
         logger.info(f"EngineRegistry initialized (profile={self._profile.value})")
@@ -248,11 +246,7 @@ class EngineRegistry:
         return [
             name
             for name, meta in self._registry.items()
-            if (
-                (name in profile_set or profile in meta.profiles)
-                or name in self._enabled_engines  # Manually enabled
-            )
-            and name not in self._disabled_engines
+            if name in profile_set or profile in meta.profiles
         ]
 
     def get_engine_instance(self, name: str) -> Optional[Any]:
@@ -329,62 +323,11 @@ class EngineRegistry:
             "loaded_instances": len(self._instances),
             "current_profile": self._profile.value,
             "profile_engines": len(self.get_engines_for_profile()),
-            "disabled_engines": list(self._disabled_engines),
             "by_tier": {
                 tier: len(engines)
                 for tier, engines in self.get_tiered_engines().items()
             },
         }
-
-    def enable_engine(self, name: str) -> bool:
-        """
-        Enable an engine (adds to active list even if not in profile).
-
-        Args:
-            name: Engine name
-
-        Returns:
-            True if engine was enabled
-        """
-        if name not in self._registry:
-            logger.warning(f"Cannot enable unknown engine: {name}")
-            return False
-
-        # Remove from disabled if present
-        self._disabled_engines.discard(name)
-        # Add to manually enabled
-        self._enabled_engines.add(name)
-        logger.info(f"Engine enabled: {name}")
-        return True
-
-    def disable_engine(self, name: str) -> bool:
-        """
-        Disable an engine (removes from active list).
-
-        Args:
-            name: Engine name
-
-        Returns:
-            True if engine was disabled
-        """
-        if name not in self._registry:
-            logger.warning(f"Cannot disable unknown engine: {name}")
-            return False
-
-        self._disabled_engines.add(name)
-        self._enabled_engines.discard(name)  # Remove from manual enable
-        # Clear cached instance
-        self._instances.pop(name, None)
-        logger.info(f"Engine disabled: {name}")
-        return True
-
-    def get_disabled_engines(self) -> List[str]:
-        """Get list of manually disabled engines."""
-        return list(self._disabled_engines)
-
-    def is_engine_enabled(self, name: str) -> bool:
-        """Check if engine is enabled."""
-        return name not in self._disabled_engines
 
 
 # ============================================================================

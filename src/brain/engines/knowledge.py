@@ -1,17 +1,9 @@
-# ============================================================================
-# DEPRECATED: Superseded by sentinel-core Rust implementation
-# Rust engine: sentinel-core/src/engines/knowledge.rs
-# Status: Kept for fallback, hybrid mode, and ML inference (ONNX pending)
-# Migration: https://github.com/DmitrL-dev/AISecurity/sentinel-core
-# ============================================================================
-
-
 """
 Knowledge Guard - Multi-Layer Semantic Access Control Engine
 
 Layers:
   0. Cache - LRU cache for repeated queries
-  1. Static - Regex/keyword blacklist
+  1. Static - Regex/keyword blacklist  
   2. Canary - Honeypot detection for insider threats
   3. Semantic - Embedding similarity check
   4. Context - Session accumulator
@@ -34,7 +26,6 @@ logger = logging.getLogger("KnowledgeGuard")
 # ============================================================================
 # SecureBERT 2.0 Embedder
 # ============================================================================
-
 
 class SecureBERT2Embedder:
     """
@@ -79,29 +70,25 @@ class SecureBERT2Embedder:
             self.is_securebert = True
             logger.info(f"SecureBERT 2.0 loaded on {self.device}")
         except Exception as e:
-            logger.warning(f"Failed to load SecureBERT 2.0: {e}. Using fallback.")
+            logger.warning(
+                f"Failed to load SecureBERT 2.0: {e}. Using fallback.")
             self.model = None
 
     def _load_fallback(self):
         try:
-            # Use SharedEmbedder for memory optimization
-            # Set SENTINEL_SHARED_EMBEDDER=false to use isolated instances
-            from brain.core.shared_embedder import get_embedder
-
-            logger.info(f"Loading fallback via SharedEmbedder")
-            self.model = get_embedder(self.FALLBACK_MODEL)
+            from sentence_transformers import SentenceTransformer
+            logger.info(f"Loading fallback model: {self.FALLBACK_MODEL}")
+            self.model = SentenceTransformer(self.FALLBACK_MODEL)
             self.is_securebert = False
             self._hidden_size = 384
-            logger.info("Fallback SharedEmbedder loaded")
+            logger.info("Fallback SentenceTransformer loaded")
         except Exception as e:
             logger.error(f"Failed to load fallback model: {e}")
             self.model = None
 
     def encode(self, texts, batch_size: int = 32):
         if self.model is None:
-            return np.zeros(
-                (len(texts) if isinstance(texts, list) else 1, self._hidden_size)
-            )
+            return np.zeros((len(texts) if isinstance(texts, list) else 1, self._hidden_size))
         if isinstance(texts, str):
             texts = [texts]
         if self.is_securebert:
@@ -110,28 +97,17 @@ class SecureBERT2Embedder:
 
     def _encode_securebert(self, texts: list, batch_size: int):
         import torch
-
         all_embeddings = []
         for i in range(0, len(texts), batch_size):
-            batch = texts[i : i + batch_size]
-            inputs = self.tokenizer(
-                batch,
-                padding=True,
-                truncation=True,
-                max_length=512,
-                return_tensors="pt",
-            ).to(self.device)
+            batch = texts[i:i + batch_size]
+            inputs = self.tokenizer(batch, padding=True, truncation=True,
+                                    max_length=512, return_tensors="pt").to(self.device)
             with torch.no_grad():
                 outputs = self.model(**inputs)
-                mask = (
-                    inputs["attention_mask"]
-                    .unsqueeze(-1)
-                    .expand(outputs.last_hidden_state.size())
-                    .float()
-                )
+                mask = inputs['attention_mask'].unsqueeze(-1).expand(
+                    outputs.last_hidden_state.size()).float()
                 embeddings = torch.sum(
-                    outputs.last_hidden_state * mask, 1
-                ) / torch.clamp(mask.sum(1), min=1e-9)
+                    outputs.last_hidden_state * mask, 1) / torch.clamp(mask.sum(1), min=1e-9)
             all_embeddings.append(embeddings.cpu().numpy())
         return np.vstack(all_embeddings)
 
@@ -147,7 +123,6 @@ class SecureBERT2Embedder:
 @dataclass
 class GuardDecision:
     """Explainable decision from Knowledge Guard."""
-
     action: str  # ALLOW, WARN, REVIEW, BLOCK
     score: float
     layer: str  # Which layer made the decision
@@ -212,10 +187,10 @@ class StaticLayer:
             logger.warning(f"Blacklist file not found: {filepath}")
             return
 
-        with open(filepath, "r", encoding="utf-8") as f:
+        with open(filepath, 'r', encoding='utf-8') as f:
             for line in f:
                 line = line.strip()
-                if line and not line.startswith("#"):
+                if line and not line.startswith('#'):
                     try:
                         self.patterns.append(re.compile(line, re.IGNORECASE))
                     except re.error as e:
@@ -233,7 +208,7 @@ class StaticLayer:
                     layer="STATIC",
                     matched_topic=pattern.pattern,
                     explanation=f"Static blacklist match: {match.group()}",
-                    audit_id=f"static-{datetime.now().strftime('%Y%m%d%H%M%S')}",
+                    audit_id=f"static-{datetime.now().strftime('%Y%m%d%H%M%S')}"
                 )
         return None
 
@@ -250,11 +225,11 @@ class CanaryLayer:
             logger.warning(f"Canaries file not found: {filepath}")
             return
 
-        with open(filepath, "r", encoding="utf-8") as f:
+        with open(filepath, 'r', encoding='utf-8') as f:
             for line in f:
                 line = line.strip()
-                if line and not line.startswith("#"):
-                    parts = line.split("|")
+                if line and not line.startswith('#'):
+                    parts = line.split('|')
                     if len(parts) == 2:
                         self.canaries[parts[0].lower()] = parts[1]
 
@@ -272,7 +247,7 @@ class CanaryLayer:
                     matched_topic=trap,
                     alert_code=alert_code,
                     explanation=f"Canary trap triggered: {alert_code}",
-                    audit_id=f"canary-{alert_code}-{datetime.now().strftime('%Y%m%d%H%M%S')}",
+                    audit_id=f"canary-{alert_code}-{datetime.now().strftime('%Y%m%d%H%M%S')}"
                 )
         return None
 
@@ -280,13 +255,8 @@ class CanaryLayer:
 class SemanticLayer:
     """Layer 3: Embedding similarity check."""
 
-    def __init__(
-        self,
-        model,
-        protected_topics: List[str],
-        negative_examples: List[str],
-        threshold: float = 0.85,
-    ):
+    def __init__(self, model, protected_topics: List[str],
+                 negative_examples: List[str], threshold: float = 0.85):
         self.model = model  # Shared SentenceTransformer
         self.threshold = threshold
         self.protected_topics = protected_topics
@@ -301,18 +271,15 @@ class SemanticLayer:
         if self.protected_topics:
             self.topic_embeddings = self.model.encode(self.protected_topics)
             logger.info(
-                f"Pre-computed embeddings for {len(self.protected_topics)} protected topics"
-            )
+                f"Pre-computed embeddings for {len(self.protected_topics)} protected topics")
 
         if self.negative_examples:
-            self.negative_embeddings = self.model.encode(self.negative_examples)
+            self.negative_embeddings = self.model.encode(
+                self.negative_examples)
             logger.info(
-                f"Pre-computed embeddings for {len(self.negative_examples)} negative examples"
-            )
+                f"Pre-computed embeddings for {len(self.negative_examples)} negative examples")
 
-    def check(
-        self, query: str, query_embedding: np.ndarray = None
-    ) -> Tuple[float, Optional[str]]:
+    def check(self, query: str, query_embedding: np.ndarray = None) -> Tuple[float, Optional[str]]:
         """Returns (max_similarity, matched_topic)."""
         if self.topic_embeddings is None:
             return 0.0, None
@@ -322,8 +289,8 @@ class SemanticLayer:
 
         # Calculate similarities to protected topics
         from sklearn.metrics.pairwise import cosine_similarity
-
-        similarities = cosine_similarity([query_embedding], self.topic_embeddings)[0]
+        similarities = cosine_similarity(
+            [query_embedding], self.topic_embeddings)[0]
 
         max_sim_idx = np.argmax(similarities)
         max_similarity = similarities[max_sim_idx]
@@ -332,15 +299,13 @@ class SemanticLayer:
         # Check negative examples (reduce false positives)
         if self.negative_embeddings is not None and max_similarity > 0.5:
             neg_similarities = cosine_similarity(
-                [query_embedding], self.negative_embeddings
-            )[0]
+                [query_embedding], self.negative_embeddings)[0]
             max_neg_sim = np.max(neg_similarities)
 
             # If query is more similar to negative example, reduce score
             if max_neg_sim > max_similarity:
                 logger.debug(
-                    f"Negative example match reduces score: {max_similarity:.2f} -> {max_similarity * 0.5:.2f}"
-                )
+                    f"Negative example match reduces score: {max_similarity:.2f} -> {max_similarity * 0.5:.2f}")
                 max_similarity *= 0.5
 
         return max_similarity, matched_topic
@@ -363,7 +328,8 @@ class ContextLayer:
 
         # Clean old entries
         self.sessions[session_id] = [
-            (s, t) for s, t in self.sessions[session_id] if now - t < self.window
+            (s, t) for s, t in self.sessions[session_id]
+            if now - t < self.window
         ]
 
         # Add current
@@ -375,8 +341,7 @@ class ContextLayer:
 
         if is_suspicious:
             logger.warning(
-                f"Session {session_id} cumulative risk: {cumulative:.2f} > {self.threshold}"
-            )
+                f"Session {session_id} cumulative risk: {cumulative:.2f} > {self.threshold}")
 
         return cumulative, is_suspicious
 
@@ -411,71 +376,69 @@ class KnowledgeGuard:
         config_dir = os.path.dirname(os.path.dirname(__file__))
 
         # Layer 0: Cache
-        cache_cfg = self.config.get("layers", {}).get("cache", {})
+        cache_cfg = self.config.get('layers', {}).get('cache', {})
         self.cache = CacheLayer(
-            max_size=cache_cfg.get("max_size", 10000),
-            ttl_seconds=cache_cfg.get("ttl_seconds", 300),
+            max_size=cache_cfg.get('max_size', 10000),
+            ttl_seconds=cache_cfg.get('ttl_seconds', 300)
         )
 
         # Layer 1: Static
-        static_cfg = self.config.get("layers", {}).get("static", {})
-        blacklist_path = os.path.join(
-            config_dir, static_cfg.get("blacklist_file", "config/blacklist.txt")
-        )
+        static_cfg = self.config.get('layers', {}).get('static', {})
+        blacklist_path = os.path.join(config_dir, static_cfg.get(
+            'blacklist_file', 'config/blacklist.txt'))
         self.static = StaticLayer(blacklist_path)
 
         # Layer 2: Canary
-        canary_cfg = self.config.get("layers", {}).get("canary", {})
-        canaries_path = os.path.join(
-            config_dir, canary_cfg.get("traps_file", "config/canaries.txt")
-        )
+        canary_cfg = self.config.get('layers', {}).get('canary', {})
+        canaries_path = os.path.join(config_dir, canary_cfg.get(
+            'traps_file', 'config/canaries.txt'))
         self.canary = CanaryLayer(canaries_path)
 
         # Layer 3: Semantic
-        semantic_cfg = self.config.get("layers", {}).get("semantic", {})
-        protected_topics = self._flatten_topics(self.config.get("protected_topics", {}))
-        negative_examples = self.config.get("negative_examples", [])
+        semantic_cfg = self.config.get('layers', {}).get('semantic', {})
+        protected_topics = self._flatten_topics(
+            self.config.get('protected_topics', {}))
+        negative_examples = self.config.get('negative_examples', [])
 
         if self.sentence_model:
             self.semantic = SemanticLayer(
                 model=self.sentence_model,
                 protected_topics=protected_topics,
                 negative_examples=negative_examples,
-                threshold=semantic_cfg.get("threshold", 0.85),
+                threshold=semantic_cfg.get('threshold', 0.85)
             )
         else:
             self.semantic = None
-            logger.warning("No sentence model provided, semantic layer disabled")
+            logger.warning(
+                "No sentence model provided, semantic layer disabled")
 
         # Layer 4: Context
-        context_cfg = self.config.get("layers", {}).get("context", {})
+        context_cfg = self.config.get('layers', {}).get('context', {})
         self.context = ContextLayer(
-            session_window=context_cfg.get("session_window_seconds", 300),
-            cumulative_threshold=context_cfg.get("cumulative_threshold", 2.0),
+            session_window=context_cfg.get('session_window_seconds', 300),
+            cumulative_threshold=context_cfg.get('cumulative_threshold', 2.0)
         )
 
         # Layer 5: Verdict
-        verdict_cfg = self.config.get("layers", {}).get("verdict", {})
-        zones = verdict_cfg.get(
-            "zones",
-            {
-                "allow": [0.0, 0.5],
-                "warn": [0.5, 0.7],
-                "review": [0.7, 0.85],
-                "block": [0.85, 1.0],
-            },
-        )
+        verdict_cfg = self.config.get('layers', {}).get('verdict', {})
+        zones = verdict_cfg.get('zones', {
+            'allow': [0.0, 0.5],
+            'warn': [0.5, 0.7],
+            'review': [0.7, 0.85],
+            'block': [0.85, 1.0]
+        })
         self.verdict = VerdictEngine(zones)
 
         logger.info("Knowledge Guard initialized with all layers.")
 
     def _load_config(self) -> dict:
         config_path = os.path.join(
-            os.path.dirname(os.path.dirname(__file__)), "config", "knowledge_guard.yaml"
+            os.path.dirname(os.path.dirname(__file__)),
+            'config', 'knowledge_guard.yaml'
         )
 
         if os.path.exists(config_path):
-            with open(config_path, "r", encoding="utf-8") as f:
+            with open(config_path, 'r', encoding='utf-8') as f:
                 return yaml.safe_load(f)
 
         logger.warning(f"Config not found at {config_path}, using defaults")
@@ -522,16 +485,14 @@ class KnowledgeGuard:
 
         # Layer 4: Context
         cumulative, is_suspicious = self.context.add_and_check(
-            session_id, semantic_score
-        )
+            session_id, semantic_score)
 
         # Boost score if session is suspicious
         final_score = semantic_score
         if is_suspicious:
             final_score = min(1.0, semantic_score + 0.2)
             logger.warning(
-                f"Session suspicious, boosting score: {semantic_score:.2f} -> {final_score:.2f}"
-            )
+                f"Session suspicious, boosting score: {semantic_score:.2f} -> {final_score:.2f}")
 
         # Layer 5: Verdict
         action = self.verdict.decide(final_score)
@@ -542,7 +503,7 @@ class KnowledgeGuard:
             layer="SEMANTIC" if not is_suspicious else "CONTEXT",
             matched_topic=matched_topic,
             explanation=f"Semantic similarity: {semantic_score:.2f}, Session cumulative: {cumulative:.2f}",
-            audit_id=f"kg-{datetime.now().strftime('%Y%m%d%H%M%S%f')}",
+            audit_id=f"kg-{datetime.now().strftime('%Y%m%d%H%M%S%f')}"
         )
 
         # Cache non-block decisions
@@ -572,7 +533,6 @@ class KnowledgeGuard:
 
         if decision.action != "ALLOW":
             logger.info(
-                f"Knowledge Guard: {decision.action} (score={decision.score:.2f}, topic={decision.matched_topic})"
-            )
+                f"Knowledge Guard: {decision.action} (score={decision.score:.2f}, topic={decision.matched_topic})")
 
         return risk

@@ -1,0 +1,93 @@
+# SENTINEL Shield v2.0 — Configuration
+# All values can be overridden by environment variables
+# prefixed with SHIELD_ (e.g., SHIELD_PORT=8080)
+
+server:
+  host: "0.0.0.0"
+  port: 8080
+  workers: 1
+  log_level: "info"
+
+# Detection engine weights and thresholds
+pipeline:
+  block_threshold: 0.85
+  warn_threshold: 0.50
+  engines:
+    regex:
+      enabled: true
+      weight: 1.0
+      max_matches_per_category: 3
+    entropy:
+      enabled: true
+      weight: 0.7
+    encoding:
+      enabled: true
+      weight: 0.8
+    structural:
+      enabled: true
+      weight: 0.9
+    redaction:
+      enabled: true
+      weight: 0.9
+
+# Guards
+guards:
+  llm:
+    enabled: true
+    threshold: 0.70
+  rag:
+    enabled: true
+    threshold: 0.70
+  agent:
+    enabled: true
+    threshold: 0.70
+  tool:
+    enabled: true
+    threshold: 0.70
+  mcp:
+    enabled: true
+    threshold: 0.70
+  api:
+    enabled: true
+    threshold: 0.70
+
+# Trust zones
+zones:
+  - name: external
+    trust_level: 1
+    rate_limit: 100
+  - name: internal
+    trust_level: 10
+    rate_limit: 1000
+  - name: dmz
+    trust_level: 5
+    rate_limit: 500
+
+# CDN signature updates
+cdn:
+  url: ""
+  check_interval_hours: 24
+  max_retries: 3
+  timeout_seconds: 30
+  max_cached_versions: 5
+
+# Rate limiting
+rate_limit:
+  enabled: false
+  requests_per_minute: 100
+  burst: 20
+  # backend: memory  # 'memory' or 'redis'
+  # redis_url: "redis://localhost:6379/0"
+
+# Brain API integration
+brain:
+  url: "http://sentinel-community:8000"
+  mode: "proxy"
+  max_tokens: 4096
+
+# Plugins — load custom engines from directory
+plugins:
+  enabled: false
+  directory: "./plugins"
+  # Each plugin is a .py file with a class extending
+  # BaseEngine. The class must be named *Engine.

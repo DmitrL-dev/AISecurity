@@ -208,15 +208,15 @@ OTEL_TRACES_SAMPLER_ARG=0.1  # 10% sampling
 ```yaml
 # prometheus.yml
 scrape_configs:
-  - job_name: "sentinel-shield"
+  - job_name: "sentinel-gateway"
     static_configs:
-      - targets: ["shield:9090"]
+      - targets: ["gateway:8080"]
     metrics_path: /metrics
     scrape_interval: 15s
 
   - job_name: "sentinel-brain"
     static_configs:
-      - targets: ["brain:8000"]
+      - targets: ["brain:50051"]
     metrics_path: /metrics
     scrape_interval: 15s
 ```

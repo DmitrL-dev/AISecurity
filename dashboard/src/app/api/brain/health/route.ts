@@ -16,7 +16,7 @@ export async function GET() {
     
     const data = await res.json();
     return NextResponse.json(data);
-  } catch (_error) {
+  } catch (error) {
     return NextResponse.json(
       { error: 'Failed to connect to BRAIN API', status: 'unhealthy' },
       { status: 503 }

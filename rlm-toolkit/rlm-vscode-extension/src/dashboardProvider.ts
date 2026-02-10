@@ -97,10 +97,9 @@ export class RLMDashboardProvider implements vscode.WebviewViewProvider {
         healthCheck: any = {},
         hierarchyStats: any = {}
     ): string {
-        // Quick Fix: Use hierarchyStats instead of broken rlm_status
-        // crystals/tokens now calculated from totalFacts (which comes from rlm_get_hierarchy_stats)
-        const version = '3.0.0';
-        const isGoMcp = (this.mcpClient as any).isUsingGoMcp?.() || false;
+        const crystals = status.success ? status.index?.crystals || 0 : 0;
+        const tokens = status.success ? status.index?.tokens || 0 : 0;
+        const version = '2.1.0';
         const symbols = validation.success ? validation.symbols?.total_symbols || 0 : 0;
         const relations = validation.success ? validation.symbols?.defined_functions || 0 : 0;
         const health = validation.success ? validation.health : 'unknown';
@@ -109,8 +108,10 @@ export class RLMDashboardProvider implements vscode.WebviewViewProvider {
         // v2.1 data extraction - healthCheck uses 'status' not 'success'
         const hcOk = healthCheck.status === 'healthy' || healthCheck.success;
         const hcComponents = hcOk ? healthCheck.components || {} : {};
-        // Router is healthy if embeddings are enabled or store has facts
-        let routerHealth = hcComponents.router?.status || (hcComponents.router?.embeddings_enabled ? 'healthy' : 'checking');
+        const storeHealth = hcComponents.store?.status || 'unknown';
+        const routerHealth = hcComponents.router?.status || 'unknown';
+        const factsCount = hcComponents.store?.facts_count || 0;
+        const domainsCount = hcComponents.store?.domains || 0;
         
         // hierarchyStats uses 'status' not 'success'
         const hsOk = hierarchyStats.status === 'success' || hierarchyStats.success;
@@ -119,24 +120,12 @@ export class RLMDashboardProvider implements vscode.WebviewViewProvider {
         const l1Facts = hierarchy.by_level?.L1_DOMAIN || 0;
         const l2Facts = hierarchy.by_level?.L2_MODULE || 0;
         const l3Facts = hierarchy.by_level?.L3_CODE || 0;
-        const totalFacts = hierarchy.total_facts || (l0Facts + l1Facts + l2Facts + l3Facts);
-        
-        // Use hierarchy for store health (more accurate than GoMCP health check)
-        const storeHealth = totalFacts > 0 ? 'healthy' : 'unknown';
-        const factsCount = totalFacts;
-        const domainsCount = hcComponents.store?.domains || hierarchy.domains_count || 0;
-        
-        // Router is healthy if store has facts
-        if (totalFacts > 0) routerHealth = 'healthy';
-        
-        // Calculate files/tokens from totalFacts (Quick Fix)
-        const crystals = totalFacts * 5;  // Estimated files based on facts
-        const tokens = totalFacts * 150;  // Estimated tokens based on facts
+        const totalFacts = hierarchy.total_facts || 0;
         
         // Calculate compression (estimated)
-        const rawTokens = totalFacts * 500; // Raw context estimate
-        const compressionRatio = rawTokens > 0 && tokens > 0 ? Math.round(rawTokens / tokens) : 33;
-        const savingsPercent = compressionRatio > 0 ? ((1 - 1/compressionRatio) * 100).toFixed(1) : '0';
+        const rawTokens = tokens * 56; // Assuming 56x compression
+        const compressionRatio = 56;
+        const savingsPercent = ((1 - 1/compressionRatio) * 100).toFixed(1);
         
         return `<!DOCTYPE html>
 <html>
@@ -273,15 +262,6 @@ export class RLMDashboardProvider implements vscode.WebviewViewProvider {
             font-size: 11px;
             background: var(--vscode-button-background);
         }
-        .gomcp-badge {
-            background: linear-gradient(135deg, #22c55e, #16a34a);
-            color: white;
-            padding: 2px 6px;
-            border-radius: 4px;
-            font-size: 10px;
-            font-weight: 600;
-            margin-left: 8px;
-        }
     </style>
 </head>
 <body>
@@ -289,7 +269,6 @@ export class RLMDashboardProvider implements vscode.WebviewViewProvider {
         <span class="icon">🔮</span>
         <h2>RLM-Toolkit</h2>
         <span class="version">v${version}</span>
-        ${isGoMcp ? '<span class="gomcp-badge">⚡ GoMCP</span>' : ''}
     </div>
     
     <!-- TODO: Multi-project support - deferred to backlog

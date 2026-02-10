@@ -19,7 +19,6 @@ logger = logging.getLogger("Watchdog")
 @dataclass
 class EngineHealth:
     """Health status of an engine."""
-
     name: str
     status: str  # healthy, degraded, failed
     last_check: datetime = None
@@ -32,7 +31,6 @@ class EngineHealth:
 @dataclass
 class WatchdogConfig:
     """Watchdog configuration."""
-
     check_interval_seconds: int = 30
     failure_threshold: int = 3
     recovery_timeout_seconds: int = 60
@@ -99,7 +97,8 @@ class Watchdog:
                 health.status = "healthy"
                 health.failure_count = 0
                 health.last_success = datetime.now()
-                health.avg_latency_ms = (health.avg_latency_ms + latency_ms) / 2
+                health.avg_latency_ms = (
+                    health.avg_latency_ms + latency_ms) / 2
                 health.error_message = ""
             else:
                 health.failure_count += 1
@@ -142,26 +141,23 @@ class Watchdog:
 
         try:
             key = f"watchdog:engine:{health.name}"
-            self._redis.hset(
-                key,
-                mapping={
-                    "status": health.status,
-                    "failure_count": health.failure_count,
-                    "avg_latency_ms": health.avg_latency_ms,
-                    "last_check": (
-                        health.last_check.isoformat() if health.last_check else ""
-                    ),
-                    "error": health.error_message or "",
-                },
-            )
+            self._redis.hset(key, mapping={
+                "status": health.status,
+                "failure_count": health.failure_count,
+                "avg_latency_ms": health.avg_latency_ms,
+                "last_check": health.last_check.isoformat() if health.last_check else "",
+                "error": health.error_message or "",
+            })
             self._redis.expire(key, 300)  # 5 min TTL
         except Exception as e:
             logger.warning(f"Failed to store metrics: {e}")
 
     def get_status_report(self) -> dict:
         """Get status report for all engines."""
-        healthy = sum(1 for e in self.engines.values() if e.status == "healthy")
-        degraded = sum(1 for e in self.engines.values() if e.status == "degraded")
+        healthy = sum(1 for e in self.engines.values()
+                      if e.status == "healthy")
+        degraded = sum(1 for e in self.engines.values()
+                       if e.status == "degraded")
         failed = sum(1 for e in self.engines.values() if e.status == "failed")
 
         return {
@@ -177,20 +173,17 @@ class Watchdog:
                     "status": h.status,
                     "failure_count": h.failure_count,
                     "latency_ms": round(h.avg_latency_ms, 2),
-                    "last_success": (
-                        h.last_success.isoformat() if h.last_success else None
-                    ),
+                    "last_success": h.last_success.isoformat() if h.last_success else None,
                 }
                 for name, h in self.engines.items()
-            },
+            }
         }
 
     async def run(self):
         """Start watchdog monitoring loop."""
         self.running = True
         logger.info(
-            f"Watchdog started (interval={self.config.check_interval_seconds}s)"
-        )
+            f"Watchdog started (interval={self.config.check_interval_seconds}s)")
 
         while self.running:
             try:
@@ -220,15 +213,15 @@ def create_default_health_checks():
 
     def check_redis():
         try:
-            r = redis.from_url(os.getenv("REDIS_URL", "redis://localhost:6379"))
+            r = redis.from_url(
+                os.getenv("REDIS_URL", "redis://localhost:6379"))
             return r.ping()
         except:
             return False
 
     def check_language_engine():
         try:
-            from brain.engines.language import LanguageEngine
-
+            from engines.language import LanguageEngine
             engine = LanguageEngine()
             result = engine.detect("Hello world")
             return result.get("language") == "en"
@@ -236,17 +229,12 @@ def create_default_health_checks():
             return False
 
     def check_pii_engine():
-        # PIIEngine moved to Rust Core - skip or use archive
         try:
-            from brain.engines.archive.deprecated_pattern_engines.pii import PIIEngine
-
+            from engines.pii import PIIEngine
             engine = PIIEngine()
             result = engine.scan("Test text without PII")
             return "entities" in result
-        except ImportError:
-            # PIIEngine in Rust Core - assumed healthy
-            return True
-        except Exception:
+        except:
             return False
 
     return {
