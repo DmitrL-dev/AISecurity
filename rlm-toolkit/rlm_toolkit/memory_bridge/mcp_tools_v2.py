@@ -1,19 +1,20 @@
-# Memory Bridge v2.0/v2.1 — MCP Tools
+# Memory Bridge — Unified MCP Tools
 """
-MCP tools for Memory Bridge v2.x Enterprise features.
+Unified MCP tools for Memory Bridge.
+Consolidates v1 (session/state management) and v2 (enterprise features) into
+a single registration point.
 
-v2.0 Tools:
-- rlm_discover_project: Smart cold start discovery
-- rlm_route_context: Semantic context routing
-- rlm_extract_facts: Auto-extract facts from changes
-- rlm_get_causal_chain: Query decision reasoning
-- rlm_set_ttl: Configure fact TTL
-- rlm_get_stale_facts: List expired facts
-- rlm_index_embeddings: Generate embeddings for semantic search
+v1 Tools (session/cognitive state via MemoryBridgeManager):
+- rlm_start_session, rlm_sync_state, rlm_restore_state, rlm_auto_context
+- rlm_get_state, rlm_update_goals, rlm_record_decision, rlm_add_hypothesis
+- rlm_add_fact, rlm_search_facts, rlm_build_communities
+- rlm_list_sessions, rlm_delete_session, rlm_get_audit_log
 
-v2.1 Auto-Mode:
-- rlm_enterprise_context: One-call zero-friction context (recommended)
-- rlm_install_git_hooks: Install git hooks for auto-extraction
+v2 Tools (enterprise features via HierarchicalMemoryStore):
+- rlm_discover_project, rlm_route_context, rlm_extract_facts
+- rlm_get_causal_chain, rlm_set_ttl, rlm_get_stale_facts
+- rlm_index_embeddings, rlm_enterprise_context, rlm_install_git_hooks
+- rlm_reindex, rlm_status, rlm_validate, rlm_session_stats
 """
 
 from __future__ import annotations
@@ -167,6 +168,7 @@ def register_memory_bridge_v2_tools(
     server: Union["Server", "FastMCP", Any],
     store: HierarchicalMemoryStore,
     project_root: Optional[Path] = None,
+    manager: Optional[Any] = None,
 ) -> Dict[str, Any]:
     """
     Register Memory Bridge v2.0 MCP tools on the server.
@@ -1469,5 +1471,329 @@ def register_memory_bridge_v2_tools(
             }
         except Exception as e:
             return {"status": "error", "message": str(e)}
+
+    # ========== V1 Bridge Tools (session/cognitive state) ==========
+    # Registered only when manager (MemoryBridgeManager) is provided.
+    # These delegate to the v1 bi-temporal cognitive state system.
+
+    if manager is not None:
+        from .models import EntityType
+
+        DEFAULT_SESSION = "default"
+
+        def _ensure_session() -> None:
+            """Auto-restore default session if no active session."""
+            if manager._current_state is None:
+                try:
+                    manager.start_session(session_id=DEFAULT_SESSION, restore=True)
+                except Exception:
+                    manager.start_session(session_id=DEFAULT_SESSION, restore=False)
+
+        @server.tool(
+            name="rlm_start_session",
+            description="Start a new session or restore existing one. Required before adding facts.",
+        )
+        async def rlm_start_session(
+            session_id: Optional[str] = None,
+            restore: bool = True,
+        ) -> Dict[str, Any]:
+            try:
+                state = manager.start_session(session_id=session_id, restore=restore)
+                return {
+                    "status": "success",
+                    "session_id": state.session_id,
+                    "version": state.version,
+                    "restored": restore and state.version > 1,
+                    "message": f"Session started: {state.session_id}",
+                }
+            except Exception as e:
+                return {"status": "error", "message": str(e)}
+
+        @server.tool(
+            name="rlm_sync_state",
+            description="Save current cognitive state to persistent storage",
+        )
+        async def rlm_sync_state() -> Dict[str, Any]:
+            try:
+                version = manager.sync_state()
+                db_path = str(manager.storage.db_path) if manager.storage else "unknown"
+                return {
+                    "status": "success",
+                    "version": version,
+                    "message": f"State synced (version {version})",
+                    "db_path": db_path,
+                }
+            except Exception as e:
+                return {"status": "error", "message": str(e)}
+
+        @server.tool(
+            name="rlm_restore_state",
+            description="Restore cognitive state for a session",
+        )
+        async def rlm_restore_state(
+            session_id: str,
+            version: Optional[int] = None,
+        ) -> Dict[str, Any]:
+            try:
+                state = manager.start_session(session_id=session_id, restore=True)
+                return {
+                    "status": "success",
+                    "session_id": state.session_id,
+                    "version": state.version,
+                    "has_goal": state.primary_goal is not None,
+                    "facts_count": len(state.facts),
+                }
+            except Exception as e:
+                return {"status": "error", "message": str(e)}
+
+        @server.tool(
+            name="rlm_auto_context",
+            description="Auto-restore session and return context for prompt injection. "
+            "One-call solution for always having project knowledge.",
+        )
+        async def rlm_auto_context(
+            session_id: str = "default",
+            max_tokens: int = 500,
+        ) -> Dict[str, Any]:
+            try:
+                state = manager.start_session(session_id=session_id, restore=True)
+                compact = manager.get_state_for_injection(max_tokens=max_tokens)
+                return {
+                    "status": "success",
+                    "session_id": state.session_id,
+                    "version": state.version,
+                    "facts_count": len(state.facts),
+                    "decisions_count": len(state.decisions),
+                    "has_goal": state.primary_goal is not None,
+                    "context": compact,
+                }
+            except Exception as e:
+                return {"status": "error", "message": str(e)}
+
+        @server.tool(
+            name="rlm_get_state",
+            description="Get current cognitive state as compact string",
+        )
+        async def rlm_get_state(
+            max_tokens: int = 500,
+        ) -> Dict[str, Any]:
+            try:
+                _ensure_session()
+                compact = manager.get_state_for_injection(max_tokens)
+                state = manager.get_state()
+                return {
+                    "status": "success",
+                    "compact_state": compact,
+                    "session_id": state.session_id if state else None,
+                    "version": state.version if state else 0,
+                }
+            except Exception as e:
+                return {"status": "error", "message": str(e)}
+
+        @server.tool(
+            name="rlm_update_goals",
+            description="Set or update the primary goal",
+        )
+        async def rlm_update_goals(
+            description: str,
+            progress: Optional[float] = None,
+        ) -> Dict[str, Any]:
+            try:
+                _ensure_session()
+                goal = manager.set_goal(description)
+                if progress is not None:
+                    manager.update_goal_progress(progress)
+                return {
+                    "status": "success",
+                    "goal_id": goal.id,
+                    "description": goal.description,
+                    "progress": goal.progress,
+                }
+            except Exception as e:
+                return {"status": "error", "message": str(e)}
+
+        @server.tool(
+            name="rlm_record_decision",
+            description="Record a decision with rationale",
+        )
+        async def rlm_record_decision(
+            description: str,
+            rationale: str,
+            alternatives: Optional[List[str]] = None,
+        ) -> Dict[str, Any]:
+            try:
+                _ensure_session()
+                decision = manager.record_decision(
+                    description=description,
+                    rationale=rationale,
+                    alternatives=alternatives or [],
+                )
+                return {
+                    "status": "success",
+                    "decision_id": decision.id,
+                    "description": decision.description,
+                }
+            except Exception as e:
+                return {"status": "error", "message": str(e)}
+
+        @server.tool(
+            name="rlm_add_hypothesis",
+            description="Add a hypothesis to test",
+        )
+        async def rlm_add_hypothesis(
+            statement: str,
+        ) -> Dict[str, Any]:
+            try:
+                _ensure_session()
+                h = manager.add_hypothesis(statement)
+                return {
+                    "status": "success",
+                    "hypothesis_id": h.id,
+                    "statement": h.statement,
+                    "hypothesis_status": h.status.value,
+                }
+            except Exception as e:
+                return {"status": "error", "message": str(e)}
+
+        @server.tool(
+            name="rlm_add_fact",
+            description="Add a fact with bi-temporal tracking",
+        )
+        async def rlm_add_fact(
+            content: str,
+            entity_type: str = "fact",
+            confidence: float = 1.0,
+            custom_type_name: Optional[str] = None,
+            auto_start: bool = False,
+        ) -> Dict[str, Any]:
+            try:
+                _ensure_session()
+                try:
+                    etype = EntityType(entity_type.lower())
+                except ValueError:
+                    etype = EntityType.OTHER
+                fact = manager.add_fact(
+                    content=content,
+                    entity_type=etype,
+                    confidence=confidence,
+                    custom_type_name=custom_type_name,
+                )
+                return {
+                    "status": "success",
+                    "fact_id": fact.id,
+                    "entity_type": fact.entity_type.value,
+                    "content": fact.content,
+                    "valid_at": fact.valid_at.isoformat() if fact.valid_at else None,
+                }
+            except Exception as e:
+                return {"status": "error", "message": str(e)}
+
+        @server.tool(
+            name="rlm_search_facts",
+            description="Hybrid search across facts (semantic + keyword + recency)",
+        )
+        async def rlm_search_facts(
+            query: str,
+            top_k: int = 10,
+            semantic_weight: float = 0.5,
+            keyword_weight: float = 0.3,
+            recency_weight: float = 0.2,
+        ) -> Dict[str, Any]:
+            try:
+                results = manager.hybrid_search(
+                    query=query,
+                    top_k=top_k,
+                    semantic_weight=semantic_weight,
+                    keyword_weight=keyword_weight,
+                    recency_weight=recency_weight,
+                )
+                return {
+                    "status": "success",
+                    "query": query,
+                    "results": [
+                        {
+                            "fact_id": fact.id,
+                            "content": fact.content,
+                            "entity_type": fact.entity_type.value,
+                            "score": round(score, 4),
+                        }
+                        for fact, score in results
+                    ],
+                }
+            except Exception as e:
+                return {"status": "error", "message": str(e)}
+
+        @server.tool(
+            name="rlm_build_communities",
+            description="Cluster facts into communities using DBSCAN",
+        )
+        async def rlm_build_communities(
+            min_cluster_size: int = 3,
+        ) -> Dict[str, Any]:
+            try:
+                communities = manager.build_communities(min_cluster_size)
+                return {
+                    "status": "success",
+                    "communities_count": len(communities),
+                    "communities": [
+                        {
+                            "id": c.id,
+                            "name": c.name,
+                            "fact_count": len(c.fact_ids),
+                        }
+                        for c in communities
+                    ],
+                }
+            except Exception as e:
+                return {"status": "error", "message": str(e)}
+
+        @server.tool(
+            name="rlm_list_sessions",
+            description="List all saved sessions",
+        )
+        async def rlm_list_sessions() -> Dict[str, Any]:
+            try:
+                sessions = manager.storage.list_sessions()
+                return {"status": "success", "sessions": sessions}
+            except Exception as e:
+                return {"status": "error", "message": str(e)}
+
+        @server.tool(
+            name="rlm_delete_session",
+            description="Delete a session and all its versions (AC-06.4)",
+        )
+        async def rlm_delete_session(session_id: str) -> Dict[str, Any]:
+            try:
+                deleted_count = manager.storage.delete_session(session_id)
+                return {
+                    "status": "success",
+                    "session_id": session_id,
+                    "deleted_versions": deleted_count,
+                    "message": (
+                        f"Deleted {deleted_count} version(s)"
+                        if deleted_count > 0
+                        else "Session not found"
+                    ),
+                }
+            except Exception as e:
+                return {"status": "error", "message": str(e)}
+
+        @server.tool(
+            name="rlm_get_audit_log",
+            description="Get audit log entries for state changes (AC-04.4)",
+        )
+        async def rlm_get_audit_log(
+            session_id: Optional[str] = None,
+            limit: int = 100,
+        ) -> Dict[str, Any]:
+            try:
+                entries = manager.storage.get_audit_log(session_id, limit)
+                return {
+                    "status": "success",
+                    "entries_count": len(entries),
+                    "entries": entries,
+                }
+            except Exception as e:
+                return {"status": "error", "message": str(e)}
 
     return components
