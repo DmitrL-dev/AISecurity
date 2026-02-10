@@ -33,11 +33,33 @@ jobs:
 
       - name: Install dependencies
         run: |
-          pip install requests pyyaml pyarrow
+          pip install requests pyyaml pyarrow argostranslate
+
+      - name: Pre-download Argos EN→RU model
+        run: |
+          python -c "
+          import argostranslate.package
+          argostranslate.package.update_package_index()
+          pkgs = argostranslate.package.get_available_packages()
+          en_ru = [p for p in pkgs if p.from_code == 'en' and p.to_code == 'ru']
+          if en_ru:
+              en_ru[0].install()
+              print('EN->RU model installed')
+          else:
+              print('WARN: EN->RU model not found')
+          "
 
       - name: Fetch external sources
         run: |
           python scripts/fetch_signatures.py
+
+      - name: Translate EN → RU (multi-variant)
+        run: |
+          python scripts/translate_signatures.py
+
+      - name: Generate RU-native patterns
+        run: |
+          cd signatures && python generate_ru_patterns.py
 
       - name: Validate signatures
         run: |
@@ -59,20 +81,29 @@ jobs:
       - name: Commit and push
         if: steps.check_changes.outputs.changed == 'true' || github.event.inputs.force_update == 'true'
         run: |
-          # Count actual patterns in jailbreaks.json
-          JAILBREAK_COUNT=$(python -c "import json; f=open('signatures/jailbreaks.json'); d=json.load(f); print(len(d))")
-          echo "Found $JAILBREAK_COUNT jailbreak patterns"
+          # Count patterns
+          STATS=$(python -c "
+          import json
+          with open('signatures/jailbreaks.json') as f:
+              d = json.load(f)
+          p = d.get('patterns', d) if isinstance(d, dict) else d
+          total = len(p)
+          ru = sum(1 for x in p if x.get('language') == 'ru')
+          en = total - ru
+          pct = 100 * ru / max(total, 1)
+          print(f'{total} {en} {ru} {pct:.0f}')
+          ")
+          read TOTAL EN RU PCT <<< "$STATS"
+          echo "Total: $TOTAL (EN: $EN, RU: $RU, ${PCT}%)"
 
-          # Update README badge with actual count
-          sed -i "s/Dataset-[0-9,]*-orange/Dataset-${JAILBREAK_COUNT}-orange/g" README.md
-
-          # Update jailbreaks count in CDN table
-          sed -i "s/\*\*[0-9,]*\*\* jailbreak patterns/**${JAILBREAK_COUNT}** jailbreak patterns/g" README.md
+          # Update README badge
+          sed -i "s/Dataset-[0-9,]*-orange/Dataset-${TOTAL}-orange/g" README.md
+          sed -i "s/\*\*[0-9,]*\*\* jailbreak patterns/**${TOTAL}** jailbreak patterns/g" README.md
 
           git config user.name "SENTINEL Bot"
           git config user.email "sentinel-bot@users.noreply.github.com"
           git add signatures/ README.md
-          git commit -m "chore(signatures): auto-update $(date +%Y.%m.%d) - ${JAILBREAK_COUNT} patterns"
+          git commit -m "chore(signatures): auto-update $(date +%Y.%m.%d) - ${TOTAL} patterns (EN:${EN} RU:${RU} ${PCT}%)"
           git pull --rebase origin main
           git push
 

@@ -79,6 +79,31 @@ SOURCES = [
         ),
         "enabled": True,
     },
+    # Multilingual sources (include Russian)
+    {
+        "name": "xsafety",
+        "type": "huggingface_parquet",
+        "url": (
+            "https://huggingface.co/datasets/"
+            "Saltlux/XSafety/resolve/main/"
+            "data/train-00000-of-00001.parquet"
+        ),
+        "text_field": "prompt",
+        "language_field": "language",
+        "enabled": True,
+    },
+    {
+        "name": "lakera_pint",
+        "type": "huggingface_parquet",
+        "url": (
+            "https://huggingface.co/datasets/"
+            "Lakera/pint-benchmark/resolve/main/"
+            "data/train-00000-of-00001.parquet"
+        ),
+        "text_field": "text",
+        "language_field": "language",
+        "enabled": True,
+    },
 ]
 
 
@@ -129,17 +154,25 @@ def fetch_huggingface_parquet(source: dict) -> list[dict]:
                     f"ext_{name}_{hashlib.md5(text[:100].encode()).hexdigest()[:8]}"
                 )
 
+                lang_field = source.get("language_field")
+                lang = None
+                if lang_field:
+                    langs = df_dict.get(lang_field, [])
+                    if i < len(langs):
+                        lang = str(langs[i]).lower()
+
                 patterns.append(
                     {
                         "id": pattern_id,
                         "source": name,
-                        "pattern": keywords[0] if keywords else text[:50],
+                        "pattern": (keywords[0] if keywords else text[:50]),
                         "regex": generate_regex(keywords),
                         "attack_class": "LLM01",
                         "severity": "high",
                         "complexity": "moderate",
                         "bypass_technique": "external",
-                        "fetched_at": datetime.utcnow().isoformat(),
+                        **({"language": lang} if lang else {}),
+                        "fetched_at": (datetime.utcnow().isoformat()),
                     }
                 )
 
