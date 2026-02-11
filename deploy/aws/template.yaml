@@ -1,0 +1,191 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+Description: >
+  SENTINEL Shield API — Serverless deployment on AWS Lambda.
+  Rust-powered AI security firewall with sub-1ms latency.
+
+Globals:
+  Function:
+    Timeout: 30
+    MemorySize: 512
+    Runtime: provided.al2023
+    Architectures:
+      - arm64
+    Environment:
+      Variables:
+        SENTINEL_MODE: production
+        SENTINEL_LOG_LEVEL: info
+        RUST_LOG: info
+
+Parameters:
+  Stage:
+    Type: String
+    Default: prod
+    AllowedValues: [dev, staging, prod]
+  DomainName:
+    Type: String
+    Default: api.sentinel.dev
+
+Resources:
+  # ============================================================
+  # API Gateway
+  # ============================================================
+  ShieldApi:
+    Type: AWS::Serverless::Api
+    Properties:
+      StageName: !Ref Stage
+      Description: SENTINEL Shield API Gateway
+      EndpointConfiguration:
+        Type: REGIONAL
+      Cors:
+        AllowOrigin: "'*'"
+        AllowMethods: "'POST,GET,OPTIONS'"
+        AllowHeaders: "'Content-Type,X-API-Key,X-Correlation-ID'"
+      Auth:
+        ApiKeyRequired: false
+        UsagePlan:
+          CreateUsagePlan: PER_API
+          UsagePlanName: !Sub sentinel-${Stage}-plan
+          Throttle:
+            BurstLimit: 100
+            RateLimit: 50
+          Quota:
+            Limit: 100000
+            Period: MONTH
+      # Rate limiting per API key
+      MethodSettings:
+        - HttpMethod: '*'
+          ResourcePath: '/*'
+          ThrottlingBurstLimit: 50
+          ThrottlingRateLimit: 25
+
+  # ============================================================
+  # Lambda Functions
+  # ============================================================
+  AnalyzeFunction:
+    Type: AWS::Serverless::Function
+    Metadata:
+      BuildMethod: rust-cargolambda
+    Properties:
+      FunctionName: !Sub sentinel-analyze-${Stage}
+      Handler: bootstrap
+      CodeUri: ./sentinel-core/
+      Description: Analyze text for threats (36 Rust engines)
+      MemorySize: 1024
+      Timeout: 10
+      Events:
+        AnalyzePost:
+          Type: Api
+          Properties:
+            RestApiId: !Ref ShieldApi
+            Path: /analyze
+            Method: POST
+      Environment:
+        Variables:
+          SENTINEL_PATTERNS_PATH: /opt/patterns
+          SENTINEL_MAX_TEXT_LENGTH: '50000'
+      Layers:
+        - !Ref PatternsLayer
+
+  RedactFunction:
+    Type: AWS::Serverless::Function
+    Metadata:
+      BuildMethod: rust-cargolambda
+    Properties:
+      FunctionName: !Sub sentinel-redact-${Stage}
+      Handler: bootstrap
+      CodeUri: ./sentinel-core/
+      Description: Redact PII from text
+      MemorySize: 512
+      Events:
+        RedactPost:
+          Type: Api
+          Properties:
+            RestApiId: !Ref ShieldApi
+            Path: /redact
+            Method: POST
+      Environment:
+        Variables:
+          SENTINEL_REDACT_MODE: standard
+
+  HealthFunction:
+    Type: AWS::Serverless::Function
+    Metadata:
+      BuildMethod: rust-cargolambda
+    Properties:
+      FunctionName: !Sub sentinel-health-${Stage}
+      Handler: bootstrap
+      CodeUri: ./sentinel-core/
+      Description: Health check endpoint
+      MemorySize: 256
+      Timeout: 5
+      Events:
+        HealthGet:
+          Type: Api
+          Properties:
+            RestApiId: !Ref ShieldApi
+            Path: /health
+            Method: GET
+
+  # ============================================================
+  # Layers
+  # ============================================================
+  PatternsLayer:
+    Type: AWS::Serverless::LayerVersion
+    Properties:
+      LayerName: !Sub sentinel-patterns-${Stage}
+      Description: Threat detection patterns and signatures
+      ContentUri: ./patterns/
+      CompatibleRuntimes:
+        - provided.al2023
+      RetentionPolicy: Retain
+
+  # ============================================================
+  # DynamoDB (usage tracking)
+  # ============================================================
+  UsageTable:
+    Type: AWS::DynamoDB::Table
+    Properties:
+      TableName: !Sub sentinel-usage-${Stage}
+      BillingMode: PAY_PER_REQUEST
+      AttributeDefinitions:
+        - AttributeName: api_key
+          AttributeType: S
+        - AttributeName: month
+          AttributeType: S
+      KeySchema:
+        - AttributeName: api_key
+          KeyType: HASH
+        - AttributeName: month
+          KeyType: RANGE
+      TimeToLiveSpecification:
+        AttributeName: ttl
+        Enabled: true
+
+  # ============================================================
+  # CloudWatch Alarms
+  # ============================================================
+  HighErrorRateAlarm:
+    Type: AWS::CloudWatch::Alarm
+    Properties:
+      AlarmName: !Sub sentinel-high-error-rate-${Stage}
+      AlarmDescription: Shield API error rate exceeds 5%
+      MetricName: 5XXError
+      Namespace: AWS/ApiGateway
+      Dimensions:
+        - Name: ApiName
+          Value: !Ref ShieldApi
+      Statistic: Sum
+      Period: 300
+      EvaluationPeriods: 2
+      Threshold: 10
+      ComparisonOperator: GreaterThanThreshold
+
+Outputs:
+  ApiUrl:
+    Description: Shield API endpoint URL
+    Value: !Sub https://${ShieldApi}.execute-api.${AWS::Region}.amazonaws.com/${Stage}
+  AnalyzeFunction:
+    Value: !GetAtt AnalyzeFunction.Arn
+  RedactFunction:
+    Value: !GetAtt RedactFunction.Arn
