@@ -59,13 +59,12 @@ export class RLMDashboardProvider implements vscode.WebviewViewProvider {
                     await vscode.commands.executeCommand('rlm.indexEmbeddings');
                     this.refresh();
                     break;
-                // TODO: Multi-project support - deferred to backlog
-                // case 'switchProject':
-                //     if (message.path) {
-                //         this.mcpClient.setProjectRoot(message.path);
-                //         this.refresh();
-                //     }
-                //     break;
+                case 'switchProject':
+                    if (message.path) {
+                        this.mcpClient.setProjectRoot(message.path);
+                        this.refresh();
+                    }
+                    break;
             }
         });
     }
@@ -105,6 +104,7 @@ export class RLMDashboardProvider implements vscode.WebviewViewProvider {
         const data = extractDashboardData(
             status, validation, sessionStats,
             healthCheck, hierarchyStats,
+            workspaceFolders, currentProject,
         );
         return renderDashboardHtml(data);
     }
