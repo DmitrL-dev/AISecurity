@@ -1,0 +1,46 @@
+name: SDK Tests
+
+on:
+  push:
+    paths:
+      - "sentinel-sdk/**"
+  pull_request:
+    paths:
+      - "sentinel-sdk/**"
+  workflow_dispatch:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version: ["3.9", "3.10", "3.11", "3.12", "3.13"]
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+
+      - name: Install SDK + dev deps
+        working-directory: sentinel-sdk
+        run: |
+          pip install -e ".[dev]"
+
+      - name: Run tests
+        working-directory: sentinel-sdk
+        run: |
+          python -m pytest tests/ -v --tb=short
+
+      - name: Type check (mypy)
+        working-directory: sentinel-sdk
+        run: |
+          mypy sentinel_shield/ --ignore-missing-imports || true
+
+      - name: Lint (ruff)
+        working-directory: sentinel-sdk
+        run: |
+          ruff check sentinel_shield/ || true
