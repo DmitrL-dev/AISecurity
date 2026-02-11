@@ -1,0 +1,74 @@
+[package]
+name = "sentinel-core"
+version = "2.0.0"
+edition = "2021"
+authors = ["SENTINEL Team"]
+description = "High-performance AI security detection engine"
+license = "Apache-2.0"
+repository = "https://github.com/DmitrL-dev/AISecurity"
+
+[lib]
+name = "sentinel_core"
+crate-type = ["cdylib", "rlib"]
+
+[dependencies]
+# PyO3 for Python bindings (MAJOR UPDATE: 0.22 -> 0.27.2)
+pyo3 = { version = "0.27", features = ["extension-module", "abi3-py310"] }
+
+# Pattern matching (updated to latest)
+regex = "1.12"
+aho-corasick = "1.1"
+
+# Unicode normalization
+unicode-normalization = "0.1"
+
+# Serialization
+serde = { version = "1.0", features = ["derive"] }
+serde_json = "1.0"
+
+# Performance
+rayon = "1.11"     # Parallel processing (updated)
+once_cell = "1.21" # Lazy statics (updated)
+
+# Logging
+log = "0.4"
+env_logger = "0.11"
+
+# Error handling
+thiserror = "2.0"
+
+# CDN signature loading (optional feature)
+reqwest = { version = "0.12", features = [
+    "json",
+    "rustls-tls",
+], optional = true }
+tokio = { version = "1.49", features = ["rt", "macros"], optional = true }
+sha2 = { version = "0.10", optional = true }
+directories = { version = "5.0", optional = true }
+
+# ML inference (optional feature)
+ort = { version = "2.0.0-rc.11", optional = true }
+ndarray = { version = "0.17", optional = true } # Updated 0.15 -> 0.17
+tokenizers = { version = "0.22.2", default-features = false, features = [
+    "fancy-regex",
+    "progressbar",
+], optional = true }
+
+[features]
+default = []
+cdn = ["reqwest", "tokio", "sha2", "directories"]
+ml = ["ort", "ndarray", "tokenizers"]
+
+[dev-dependencies]
+criterion = { version = "0.8", features = ["html_reports"] }
+proptest = "1.6"                                             # Property-based testing
+arbitrary = "1.4"                                            # Fuzz testing support
+
+[[bench]]
+name = "engine_benchmark"
+harness = false
+
+[profile.release]
+lto = true
+codegen-units = 1
+opt-level = 3
