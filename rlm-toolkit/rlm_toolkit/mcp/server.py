@@ -124,7 +124,7 @@ class RLMServer:
 
         # Initialize Memory Bridge v2.0 (enterprise hierarchical memory)
         from ..memory_bridge.v2.hierarchical import HierarchicalMemoryStore
-        from ..memory_bridge.mcp_tools_v2 import register_memory_bridge_v2_tools
+        from ..memory_bridge.tools import register_memory_bridge_v2_tools
 
         memory_bridge_v2_db = (
             self.context_manager.storage_dir / "memory" / "memory_bridge_v2.db"
