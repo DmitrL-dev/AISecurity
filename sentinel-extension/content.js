@@ -1,7 +1,8 @@
 /**
  * SENTINEL Guard — Content Script.
  * 
- * Injected into ChatGPT, Claude, Gemini, Perplexity pages.
+ * Injected into ChatGPT, Claude, Gemini, Perplexity,
+ * DeepSeek, Tongyi Qianwen, Kimi, Doubao, MiniMax, ChatGLM.
  * Intercepts user prompts before submission and scans them via Shield API.
  */
 
@@ -9,6 +10,7 @@
   'use strict';
 
   const SELECTORS = {
+    // ---- Western Platforms ----
     // ChatGPT
     'chatgpt.com': {
       input: '#prompt-textarea, textarea[data-id="root"]',
@@ -36,6 +38,44 @@
     'www.perplexity.ai': {
       input: 'textarea',
       sendButton: 'button[aria-label="Submit"]',
+      form: 'form',
+    },
+
+    // ---- Chinese Platforms ----
+    // DeepSeek Chat
+    'chat.deepseek.com': {
+      input: 'textarea, div[contenteditable="true"]',
+      sendButton: 'button[aria-label="Send"], button.ds-icon-button',
+      form: 'form',
+    },
+    // Tongyi Qianwen (Alibaba / Qwen)
+    'tongyi.aliyun.com': {
+      input: 'textarea, div[contenteditable="true"]',
+      sendButton: 'button[class*="send"], button[type="submit"]',
+      form: 'form',
+    },
+    // Kimi (Moonshot AI)
+    'kimi.moonshot.cn': {
+      input: 'textarea, div[contenteditable="true"]',
+      sendButton: 'button[class*="send"], button[type="submit"]',
+      form: 'form',
+    },
+    // Doubao (ByteDance)
+    'www.doubao.com': {
+      input: 'textarea, div[contenteditable="true"]',
+      sendButton: 'button[class*="send"], button[type="submit"]',
+      form: 'form',
+    },
+    // MiniMax
+    'www.minimaxi.com': {
+      input: 'textarea, div[contenteditable="true"]',
+      sendButton: 'button[class*="send"], button[type="submit"]',
+      form: 'form',
+    },
+    // ChatGLM (Zhipu AI)
+    'chatglm.cn': {
+      input: 'textarea, div[contenteditable="true"]',
+      sendButton: 'button[class*="send"], button[type="submit"]',
       form: 'form',
     },
   };

@@ -3,7 +3,7 @@
   "name": "SENTINEL Guard — AI Firewall",
   "short_name": "SENTINEL Guard",
   "version": "0.1.0",
-  "description": "Protect your AI conversations. Scans prompts for injection, jailbreak, PII leaks before they reach ChatGPT, Claude, Gemini.",
+  "description": "Protect your AI conversations. Scans prompts for injection, jailbreak, PII leaks before they reach ChatGPT, Claude, Gemini, DeepSeek, Qwen.",
   "permissions": [
     "storage",
     "activeTab"
@@ -14,6 +14,12 @@
     "https://claude.ai/*",
     "https://gemini.google.com/*",
     "https://www.perplexity.ai/*",
+    "https://chat.deepseek.com/*",
+    "https://tongyi.aliyun.com/*",
+    "https://kimi.moonshot.cn/*",
+    "https://www.doubao.com/*",
+    "https://www.minimaxi.com/*",
+    "https://chatglm.cn/*",
     "https://api.sentinel.dev/*"
   ],
   "background": {
@@ -27,7 +33,13 @@
         "https://chat.openai.com/*",
         "https://claude.ai/*",
         "https://gemini.google.com/*",
-        "https://www.perplexity.ai/*"
+        "https://www.perplexity.ai/*",
+        "https://chat.deepseek.com/*",
+        "https://tongyi.aliyun.com/*",
+        "https://kimi.moonshot.cn/*",
+        "https://www.doubao.com/*",
+        "https://www.minimaxi.com/*",
+        "https://chatglm.cn/*"
       ],
       "js": ["content.js"],
       "css": ["content.css"],
