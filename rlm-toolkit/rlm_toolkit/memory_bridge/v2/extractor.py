@@ -12,6 +12,7 @@ from dataclasses import dataclass, field
 from datetime import datetime
 from pathlib import Path
 from typing import Any, Dict, List, Optional, Tuple
+import math
 import logging
 import re
 import subprocess
@@ -119,10 +120,12 @@ class AutoExtractionEngine:
         project_root: Optional[Path] = None,
         confidence_threshold: float = 0.8,
         min_change_lines: int = 5,
+        embedding_service: Optional[Any] = None,
     ):
         self.project_root = project_root or Path.cwd()
         self.confidence_threshold = confidence_threshold
         self.min_change_lines = min_change_lines
+        self._embedding_service = embedding_service
 
     def extract_from_git_diff(
         self,
@@ -249,10 +252,10 @@ class AutoExtractionEngine:
         similarity_threshold: float = 0.85,
     ) -> List[CandidateFact]:
         """
-        Remove duplicate candidates.
+        Remove duplicate candidates using semantic or text similarity.
 
-        Uses simple text similarity (for now).
-        TODO: Use semantic similarity when embeddings available.
+        Uses cosine similarity via EmbeddingService when available,
+        falls back to Jaccard text similarity otherwise.
 
         Args:
             candidates: New candidate facts
@@ -262,25 +265,69 @@ class AutoExtractionEngine:
         Returns:
             Deduplicated candidates
         """
+        if not candidates:
+            return []
+
         deduplicated: List[CandidateFact] = []
         existing_contents = {f.content.lower() for f in existing_facts}
+
+        # Try semantic deduplication via embeddings
+        use_semantic = self._embedding_service is not None and len(existing_facts) > 0
+        existing_embeddings: List[List[float]] = []
+
+        if use_semantic:
+            try:
+                existing_texts = [f.content for f in existing_facts]
+                existing_embeddings = self._embedding_service.embed_batch(
+                    existing_texts
+                )
+            except Exception as e:
+                logger.warning(
+                    f"Semantic dedupe unavailable, " f"falling back to text: {e}"
+                )
+                use_semantic = False
 
         for candidate in candidates:
             content_lower = candidate.content.lower()
 
-            # Check exact match
+            # Check exact match first (fast path)
             if content_lower in existing_contents:
                 logger.debug(f"Skipping duplicate: {candidate.content[:50]}...")
                 continue
 
-            # Check similarity with existing
             is_duplicate = False
-            for existing in existing_contents:
-                similarity = self._text_similarity(content_lower, existing)
-                if similarity >= similarity_threshold:
-                    logger.debug(f"Skipping similar fact: {candidate.content[:50]}...")
-                    is_duplicate = True
-                    break
+
+            if use_semantic and existing_embeddings:
+                # Semantic similarity via cosine
+                try:
+                    cand_emb = self._embedding_service.embed(candidate.content)
+                    for ex_emb in existing_embeddings:
+                        sim = self._cosine_similarity(cand_emb, ex_emb)
+                        if sim >= similarity_threshold:
+                            logger.debug(
+                                f"Skipping semantically similar "
+                                f"fact (cos={sim:.2f}): "
+                                f"{candidate.content[:50]}..."
+                            )
+                            is_duplicate = True
+                            break
+                except Exception:
+                    # Fallback to text similarity for this candidate
+                    for existing in existing_contents:
+                        sim = self._text_similarity(content_lower, existing)
+                        if sim >= similarity_threshold:
+                            is_duplicate = True
+                            break
+            else:
+                # Jaccard text similarity fallback
+                for existing in existing_contents:
+                    sim = self._text_similarity(content_lower, existing)
+                    if sim >= similarity_threshold:
+                        logger.debug(
+                            f"Skipping similar fact: " f"{candidate.content[:50]}..."
+                        )
+                        is_duplicate = True
+                        break
 
             if not is_duplicate:
                 deduplicated.append(candidate)
@@ -486,7 +533,7 @@ class AutoExtractionEngine:
         return "functionality"
 
     def _text_similarity(self, a: str, b: str) -> float:
-        """Simple text similarity based on word overlap."""
+        """Simple text similarity based on word overlap (Jaccard)."""
         words_a = set(a.split())
         words_b = set(b.split())
 
@@ -497,6 +544,16 @@ class AutoExtractionEngine:
         union = len(words_a | words_b)
 
         return intersection / union if union > 0 else 0.0
+
+    @staticmethod
+    def _cosine_similarity(a: List[float], b: List[float]) -> float:
+        """Cosine similarity between two embedding vectors."""
+        dot = sum(x * y for x, y in zip(a, b))
+        norm_a = math.sqrt(sum(x * x for x in a))
+        norm_b = math.sqrt(sum(x * x for x in b))
+        if norm_a == 0 or norm_b == 0:
+            return 0.0
+        return dot / (norm_a * norm_b)
 
 
 class ConversationExtractor:

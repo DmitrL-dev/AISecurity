@@ -36,6 +36,9 @@ export interface DashboardData {
     tokensServed: number;
     tokensSaved: number;
     savingsSessionPercent: number;
+    // Multi-project
+    workspaceFolders: {name: string; path: string}[];
+    currentProject: string;
 }
 
 // ─── Data Extraction ─────────────────────────────────
@@ -46,6 +49,8 @@ export function extractDashboardData(
     sessionStats: any,
     healthCheck: any,
     hierarchyStats: any,
+    workspaceFolders: {name: string; path: string}[] = [],
+    currentProject: string = '',
 ): DashboardData {
     const crystals = status.success
         ? status.index?.crystals || 0 : 0;
@@ -115,6 +120,8 @@ export function extractDashboardData(
             sessionStats.session?.tokens_saved || 0,
         savingsSessionPercent:
             sessionStats.session?.savings_percent || 0,
+        workspaceFolders,
+        currentProject,
     };
 }
 
@@ -190,6 +197,20 @@ export function renderDashboardHtml(d: DashboardData): string {
     + '</div>'
 
     + warningBanner
+
+    // Multi-project selector (shown only if >1 workspace folder)
+    + (d.workspaceFolders.length > 1
+        ? '<div class="section">'
+        + '<div class="section-title"><span class="icon">📁</span> Project</div>'
+        + '<select onchange="switchProject(this.value)">'
+        + d.workspaceFolders.map(function(f) {
+            var selected = f.path === d.currentProject ? ' selected' : '';
+            return '<option value="' + f.path.replace(/"/g, '&quot;') + '"' + selected + '>'
+                + f.name + '</option>';
+        }).join('')
+        + '</select>'
+        + '</div>'
+        : '')
 
     // Enterprise v2.1
     + '<div class="section">'
@@ -287,6 +308,7 @@ export function renderDashboardHtml(d: DashboardData): string {
     + 'function discover() { vscode.postMessage({ command: "discover" }); }'
     + 'function gitHook() { vscode.postMessage({ command: "gitHook" }); }'
     + 'function indexEmbeddings() { vscode.postMessage({ command: "indexEmbeddings" }); }'
+    + 'function switchProject(path) { vscode.postMessage({ command: "switchProject", path: path }); }'
     + 'function refresh() { vscode.postMessage({ command: "refresh" }); }'
     + 'setInterval(refresh, 30000);'
     + '</script>'
