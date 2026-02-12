@@ -1,0 +1,17 @@
+{
+  "name": "safeclaw-bot",
+  "version": "1.0.0",
+  "description": "SafeClaw Telegram Bot — управление подписками и API ключами через Telegram",
+  "language": "ru",
+  "phases": ["requirements", "design", "tasks"],
+  "status": "implemented",
+  "created": "2026-02-12",
+  "dependencies": ["safeclaw"],
+  "decisions": {
+    "framework": "python-telegram-bot (PTB)",
+    "plans": ["Free (1K tokens)", "Personal (100K tokens, ₽499)", "Developer (1M tokens, ₽2999)", "Team (10M tokens, ₽9999)"],
+    "payment": "YooKassa (Telegram Payments API)",
+    "api_key_format": "sc_<uuid>",
+    "storage": "SQLite via models.py"
+  }
+}

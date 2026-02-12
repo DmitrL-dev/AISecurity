@@ -1,0 +1,17 @@
+{
+  "name": "safeclaw-tunnel",
+  "version": "0.3.0",
+  "description": "SafeClaw Tunnel — stealth прокси для AI-инфраструктуры",
+  "language": "ru",
+  "phases": ["requirements", "design", "tasks"],
+  "status": "implemented",
+  "created": "2026-02-12",
+  "dependencies": [],
+  "decisions": {
+    "language": "Go 1.22+",
+    "protocols": ["SOCKS5", "HTTP CONNECT", "WSS Relay"],
+    "stealth": ["uTLS", "DNS-over-HTTPS", "Gaussian Jitter"],
+    "proxy_rotation": "Round-robin с geo-тегами",
+    "architecture": "Dual listener (SOCKS5 + HTTP)"
+  }
+}

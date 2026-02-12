@@ -1,0 +1,19 @@
+{
+  "name": "sentinel-extension",
+  "version": "0.1.0",
+  "description": "SENTINEL Guard Chrome Extension — AI Firewall для браузера",
+  "language": "ru",
+  "phases": ["requirements", "design", "tasks"],
+  "status": "implemented",
+  "created": "2026-02-12",
+  "dependencies": ["brain-api"],
+  "decisions": {
+    "manifest": "Manifest V3 (Chrome)",
+    "architecture": "Service Worker + Content Script + Popup",
+    "api_endpoint": "POST /analyze",
+    "supported_sites": ["chatgpt.com", "claude.ai", "gemini.google.com", "perplexity.ai", "chat.deepseek.com", "tongyi.aliyun.com", "kimi.moonshot.cn", "doubao.com", "minimaxi.com", "chatglm.cn"],
+    "storage": "chrome.storage.sync (config) + chrome.storage.local (stats)",
+    "sensitivity_levels": ["low", "medium", "high"],
+    "cache_ttl": "5 minutes"
+  }
+}

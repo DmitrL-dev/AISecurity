@@ -1,0 +1,19 @@
+{
+  "name": "saas-dashboard",
+  "version": "3.0.0",
+  "description": "SENTINEL SOC Dashboard — Next.js 15 + React 19 Security Operations Center",
+  "language": "ru",
+  "phases": ["requirements", "design", "tasks"],
+  "status": "implemented",
+  "created": "2026-02-12",
+  "dependencies": ["brain-api", "dashboard-auth"],
+  "decisions": {
+    "framework": "Next.js 15 + React 19",
+    "css": "TailwindCSS",
+    "charts": "Recharts / D3-based SunburstChart",
+    "ai_assistant": "Built-in AI chat (useAnalyze hook)",
+    "deploy": "Docker (standalone output) / Vercel",
+    "auth": "Keycloak OIDC (planned, see dashboard-auth spec)",
+    "api_proxy": "/api/brain/* → SENTINEL Brain API"
+  }
+}

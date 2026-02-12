@@ -1,0 +1,18 @@
+{
+  "name": "saas-landing",
+  "version": "1.0.0",
+  "description": "SENTINEL SaaS Landing Pages — маркетинговые лендинги для Western и RU рынков",
+  "language": "ru",
+  "phases": ["requirements", "design", "tasks"],
+  "status": "implemented",
+  "created": "2026-02-12",
+  "dependencies": [],
+  "decisions": {
+    "tech": "Static HTML + CSS + JS (no framework)",
+    "pages": 3,
+    "deploy": "Vercel / Cloudflare Pages",
+    "theme_western": "Matrix-style dark, green accents (#00ff41)",
+    "theme_ru": "Community open-source focused",
+    "pricing_model": "4-tier (Free/$4.99 Personal/$49 Developer/$149 Team/Custom Enterprise)"
+  }
+}

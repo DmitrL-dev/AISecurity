@@ -1,0 +1,18 @@
+{
+  "name": "safeclaw-billing",
+  "version": "1.0.0",
+  "description": "SafeClaw Django Backend — биллинг, подписки, API-роутинг для LLM-провайдеров",
+  "language": "ru",
+  "phases": ["requirements", "design", "tasks"],
+  "status": "implemented",
+  "created": "2026-02-12",
+  "dependencies": ["brain-api"],
+  "decisions": {
+    "framework": "Django 5.x + DRF",
+    "database": "SQLite (dev) / PostgreSQL (prod)",
+    "payment": "YooKassa (yokassa SDK)",
+    "llm_providers": ["GigaChat", "DeepSeek", "YandexGPT", "OpenAI-compatible"],
+    "security": "SENTINEL Shield middleware (dogfood)",
+    "architecture": "2 Django apps: billing + router"
+  }
+}
