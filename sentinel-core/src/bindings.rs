@@ -205,7 +205,7 @@ mod tests {
         pyo3::prepare_freethreaded_python();
         Python::with_gil(|_py| {
             let registry = EngineRegistry::new().unwrap();
-            assert_eq!(registry.list_pattern_engines().len(), 8);
+            assert_eq!(registry.list_pattern_engines().len(), 11);
             assert_eq!(registry.list_engines().len(), 36);
         });
     }

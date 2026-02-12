@@ -1,6 +1,11 @@
 //! Engine implementations
 //!
-//! 8 Super-Engines consolidating 220 Python engines
+//! 44 Super-Engines consolidating 220 Python engines
+//! 
+//! Architecture:
+//! - Core engines (PatternMatcher trait): text scan -> Vec<MatchResult>
+//! - Domain engines (analyze -> CustomResult): adapted via run_domain_engine!
+//! - Structured engines (ToolCall/Document input): separate API, not in text pipeline
 
 use pyo3::prelude::*;
 use serde::{Deserialize, Serialize};
@@ -141,7 +146,9 @@ pub struct MatchResult {
 
 /// High-performance AI security detection engine.
 ///
-/// Consolidates 8 super-engines for comprehensive threat detection:
+/// Consolidates 44 super-engines for comprehensive threat detection:
+///
+/// **Core Engines** (text scan pipeline):
 /// - **Injection**: SQL, NoSQL, Command, LDAP, XPath
 /// - **Jailbreak**: Prompt injection, role override
 /// - **PII**: Personal data detection (SSN, credit cards, etc.)
@@ -150,6 +157,22 @@ pub struct MatchResult {
 /// - **Evasion**: Obfuscation techniques
 /// - **Tool Abuse**: Agent tool misuse
 /// - **Social**: Social engineering tactics
+/// - **OCI**: Operational context injection
+/// - **Lethal Trifecta**: Data access + untrusted input + exfil combo
+/// - **Workspace Guard**: Workspace-level protection
+/// - **Cross-Tool Guard**: Cross-tool attack chains
+///
+/// **Domain Engines** (text analyze pipeline):
+/// - Behavioral, Obfuscation, Attack, Compliance, Threat Intel
+/// - Supply Chain, Privacy, Orchestration, Multimodal, Knowledge
+/// - Proactive, Synthesis, Runtime, Formal, Category
+/// - Semantic, Anomaly, Attention, Drift
+///
+/// **Structured Engines** (separate API, not in text pipeline):
+/// - Agentic (ToolCall), RAG (RetrievedDocument), Sheaf (conversation turns)
+///
+/// **Math Engines** (feature-level analysis):
+/// - Hyperbolic, Info Geometry, Spectral, Chaos, TDA
 ///
 /// # Example
 /// ```python
@@ -162,7 +185,7 @@ pub struct MatchResult {
 /// ```
 #[pyclass]
 pub struct SentinelEngine {
-    // 8 Super-Engines
+    // === Core Engines (PatternMatcher trait) ===
     injection: Option<injection::InjectionEngine>,
     jailbreak: Option<jailbreak::JailbreakEngine>,
     pii: Option<pii::PIIEngine>,
@@ -171,8 +194,30 @@ pub struct SentinelEngine {
     evasion: Option<evasion::EvasionEngine>,
     tool_abuse: Option<tool_abuse::ToolAbuseEngine>,
     social: Option<social::SocialEngine>,
-    // Phase 10: OCI (Feb 2026)
     oci: Option<operational_context_injection::OperationalContextInjectionEngine>,
+    lethal_trifecta: Option<lethal_trifecta::LethalTrifectaEngine>,
+    workspace_guard: Option<workspace_guard::WorkspaceGuard>,
+    cross_tool_guard: Option<cross_tool_guard::CrossToolGuard>,
+
+    // === Domain Engines (analyze -> CustomResult, adapted to MatchResult) ===
+    behavioral_guard: Option<behavioral::BehavioralGuard>,
+    obfuscation_guard: Option<obfuscation::ObfuscationGuard>,
+    attack_guard: Option<attack::AttackGuard>,
+    compliance_guard: Option<compliance::ComplianceGuard>,
+    threat_intel_guard: Option<threat_intel::ThreatIntelGuard>,
+    supply_chain_guard: Option<supply_chain::SupplyChainGuard>,
+    privacy_guard: Option<privacy::PrivacyGuard>,
+    orchestration_guard: Option<orchestration::OrchestrationGuard>,
+    multimodal_guard: Option<multimodal::MultimodalGuard>,
+    knowledge_guard: Option<knowledge::KnowledgeGuard>,
+    proactive_guard: Option<proactive::ProactiveGuard>,
+    synthesis_guard: Option<synthesis::SynthesisGuard>,
+    runtime_guard: Option<runtime::RuntimeGuard>,
+    formal_guard: Option<formal::FormalGuard>,
+    category_guard: Option<category::CategoryGuard>,
+    semantic_detector: Option<semantic::SemanticDetector>,
+    anomaly_guard: Option<anomaly::AnomalyGuard>,
+    attention_guard: Option<attention::AttentionGuard>,
 }
 
 #[pymethods]
@@ -181,6 +226,7 @@ impl SentinelEngine {
     #[new]
     pub fn new() -> PyResult<Self> {
         Ok(Self {
+            // Core engines
             injection: Some(injection::InjectionEngine::new()),
             jailbreak: Some(jailbreak::JailbreakEngine::new()),
             pii: Some(pii::PIIEngine::new()),
@@ -190,10 +236,33 @@ impl SentinelEngine {
             tool_abuse: Some(tool_abuse::ToolAbuseEngine::new()),
             social: Some(social::SocialEngine::new()),
             oci: Some(operational_context_injection::OperationalContextInjectionEngine::new()),
+            lethal_trifecta: Some(lethal_trifecta::LethalTrifectaEngine::new()),
+            workspace_guard: Some(workspace_guard::WorkspaceGuard::new()),
+            cross_tool_guard: Some(cross_tool_guard::CrossToolGuard::new()),
+
+            // Domain engines
+            behavioral_guard: Some(behavioral::BehavioralGuard::new()),
+            obfuscation_guard: Some(obfuscation::ObfuscationGuard::new()),
+            attack_guard: Some(attack::AttackGuard::default()),
+            compliance_guard: Some(compliance::ComplianceGuard::default()),
+            threat_intel_guard: Some(threat_intel::ThreatIntelGuard::new()),
+            supply_chain_guard: Some(supply_chain::SupplyChainGuard::new()),
+            privacy_guard: Some(privacy::PrivacyGuard::new()),
+            orchestration_guard: Some(orchestration::OrchestrationGuard::new()),
+            multimodal_guard: Some(multimodal::MultimodalGuard::new()),
+            knowledge_guard: Some(knowledge::KnowledgeGuard::new()),
+            proactive_guard: Some(proactive::ProactiveGuard::new()),
+            synthesis_guard: Some(synthesis::SynthesisGuard::new()),
+            runtime_guard: Some(runtime::RuntimeGuard::new()),
+            formal_guard: Some(formal::FormalGuard::new()),
+            category_guard: Some(category::CategoryGuard::new()),
+            semantic_detector: Some(semantic::SemanticDetector::default()),
+            anomaly_guard: Some(anomaly::AnomalyGuard::new()),
+            attention_guard: Some(attention::AttentionGuard::new()),
         })
     }
 
-    /// Analyze text with all engines
+    /// Analyze text with all 31 text-compatible engines
     pub fn analyze(&self, text: &str) -> PyResult<AnalysisResult> {
         let start = std::time::Instant::now();
         let mut matches = Vec::new();
@@ -202,7 +271,7 @@ impl SentinelEngine {
         // Normalize text for detection
         let normalized = crate::unicode_norm::normalize(text);
 
-        // Helper macro to reduce boilerplate
+        // Macro for engines implementing PatternMatcher trait
         macro_rules! run_engine {
             ($engine:expr) => {
                 if let Some(ref e) = $engine {
@@ -215,7 +284,26 @@ impl SentinelEngine {
             };
         }
 
-        // Run all 8 super-engines
+        // Macro for domain engines: analyze(text) -> CustomResult { risk_score, threats/anomalies }
+        macro_rules! run_domain_engine {
+            ($engine:expr, $name:expr) => {
+                if let Some(ref e) = $engine {
+                    let result = e.analyze(&normalized);
+                    if result.risk_score > 0.0 {
+                        categories.push($name.to_string());
+                        matches.push(MatchResult {
+                            engine: $name.to_string(),
+                            pattern: "domain_detect".to_string(),
+                            confidence: (result.risk_score / 100.0).min(1.0),
+                            start: 0,
+                            end: normalized.len(),
+                        });
+                    }
+                }
+            };
+        }
+
+        // === Core Engines (PatternMatcher) ===
         run_engine!(self.injection);
         run_engine!(self.jailbreak);
         run_engine!(self.pii);
@@ -225,6 +313,43 @@ impl SentinelEngine {
         run_engine!(self.tool_abuse);
         run_engine!(self.social);
         run_engine!(self.oci);
+        run_engine!(self.lethal_trifecta);
+        run_engine!(self.workspace_guard);
+        run_engine!(self.cross_tool_guard);
+
+        // === Domain Engines (analyze -> CustomResult) ===
+        run_domain_engine!(self.behavioral_guard, "behavioral");
+        run_domain_engine!(self.obfuscation_guard, "obfuscation");
+        run_domain_engine!(self.attack_guard, "attack");
+        run_domain_engine!(self.compliance_guard, "compliance");
+        run_domain_engine!(self.threat_intel_guard, "threat_intel");
+        run_domain_engine!(self.supply_chain_guard, "supply_chain");
+        run_domain_engine!(self.privacy_guard, "privacy");
+        run_domain_engine!(self.orchestration_guard, "orchestration");
+        run_domain_engine!(self.multimodal_guard, "multimodal");
+        run_domain_engine!(self.knowledge_guard, "knowledge");
+        run_domain_engine!(self.proactive_guard, "proactive");
+        run_domain_engine!(self.synthesis_guard, "synthesis");
+        run_domain_engine!(self.runtime_guard, "runtime");
+        run_domain_engine!(self.formal_guard, "formal");
+        run_domain_engine!(self.category_guard, "category");
+        run_domain_engine!(self.semantic_detector, "semantic");
+        run_domain_engine!(self.attention_guard, "attention");
+
+        // Anomaly engine: uses anomaly_score instead of risk_score
+        if let Some(ref e) = self.anomaly_guard {
+            let result = e.analyze(&normalized);
+            if result.anomaly_score > 0.0 {
+                categories.push("anomaly".to_string());
+                matches.push(MatchResult {
+                    engine: "anomaly".to_string(),
+                    pattern: "domain_detect".to_string(),
+                    confidence: result.anomaly_score.min(1.0),
+                    start: 0,
+                    end: normalized.len(),
+                });
+            }
+        }
 
         let detected = !matches.is_empty();
         let risk_score = if detected {

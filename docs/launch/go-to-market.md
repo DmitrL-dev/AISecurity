@@ -105,7 +105,7 @@ User prompt → SENTINEL (36 engines, <1ms) → Safe? → Forward to AI
 
 Tech stack: Rust core + Python Shield API + Chrome Extension (Manifest V3)
 
-GitHub: https://github.com/anthropic-security/sentinel-community
+GitHub: https://github.com/DmitrL-dev/AISecurity
 Chrome: [Chrome Web Store link]
 SDK: `pip install sentinel-shield`
 

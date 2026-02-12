@@ -1,0 +1,121 @@
+# ============================================================================
+# SENTINEL — MVP Docker Compose for AWS EC2
+# ============================================================================
+# Quick Start:
+#   1. cp .env.example .env && edit .env
+#   2. docker-compose -f docker-compose-deploy.yml up -d
+#   3. curl http://localhost:8080/health
+#
+# Services:
+#   - shield:    API Gateway + Detection (FastAPI)  → :8080
+#   - dashboard: Web UI (Next.js)                   → :3000
+#   - redis:     Cache & Rate Limiting              → :6379
+#   - postgres:  Audit Logs & Metrics               → :5432
+# ============================================================================
+
+version: '3.8'
+
+services:
+  # ==========================================================================
+  # SHIELD v2 — API Gateway + Fast Detection Pipeline
+  # ==========================================================================
+  shield:
+    build:
+      context: ./shield
+      dockerfile: Dockerfile.v2
+    container_name: sentinel-shield
+    ports:
+      - "${SHIELD_PORT:-8080}:8080"
+    environment:
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+      - LOG_LEVEL=${LOG_LEVEL:-INFO}
+      - SENTINEL_API_KEY=${GATEWAY_API_KEY:-}
+      - CDN_URL=${CDN_URL:-https://cdn.jsdelivr.net/gh/DmitrL-dev/AISecurity@latest/signatures}
+    depends_on:
+      redis:
+        condition: service_started
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8080/healthz')"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 15s
+    networks:
+      - sentinel-network
+
+  # ==========================================================================
+  # DASHBOARD — Web UI (Next.js 15)
+  # ==========================================================================
+  dashboard:
+    build:
+      context: ./dashboard
+      dockerfile: Dockerfile
+    container_name: sentinel-dashboard
+    ports:
+      - "${DASHBOARD_PORT:-3000}:3000"
+    environment:
+      - NEXT_PUBLIC_API_URL=http://shield:8080
+      - NODE_ENV=production
+    depends_on:
+      shield:
+        condition: service_healthy
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "wget", "-q", "--spider", "http://localhost:3000"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    networks:
+      - sentinel-network
+
+  # ==========================================================================
+  # REDIS — Cache & Rate Limiting
+  # ==========================================================================
+  redis:
+    image: redis:7-alpine
+    container_name: sentinel-redis
+    command: redis-server --appendonly yes --maxmemory 256mb --maxmemory-policy allkeys-lru
+    volumes:
+      - redis-data:/data
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+    networks:
+      - sentinel-network
+
+  # ==========================================================================
+  # POSTGRESQL — Audit Logs (optional, uncomment if needed)
+  # ==========================================================================
+  # postgres:
+  #   image: postgres:16-alpine
+  #   container_name: sentinel-postgres
+  #   environment:
+  #     - POSTGRES_USER=${POSTGRES_USER:-sentinel}
+  #     - POSTGRES_PASSWORD=${POSTGRES_PASSWORD:-sentinel}
+  #     - POSTGRES_DB=${POSTGRES_DB:-sentinel}
+  #   volumes:
+  #     - postgres-data:/var/lib/postgresql/data
+  #   restart: unless-stopped
+  #   healthcheck:
+  #     test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-sentinel}"]
+  #     interval: 10s
+  #     timeout: 5s
+  #     retries: 5
+  #   networks:
+  #     - sentinel-network
+
+volumes:
+  redis-data:
+    driver: local
+  # postgres-data:
+  #   driver: local
+
+networks:
+  sentinel-network:
+    name: sentinel-network
+    driver: bridge
