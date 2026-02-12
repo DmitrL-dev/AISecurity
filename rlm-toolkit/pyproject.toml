@@ -8,7 +8,7 @@ version = "2.3.1"
 description = "Recursive Language Models Toolkit for processing unlimited context"
 readme = "README.md"
 license = { text = "Apache-2.0" }
-authors = [{ name = "SENTINEL Community", email = "rlm@sentinel.dev" }]
+authors = [{ name = "SENTINEL Community", email = "d.labintcev@gmail.com" }]
 keywords = ["llm", "recursive", "language-models", "long-context", "rlm"]
 classifiers = [
     "Development Status :: 5 - Production/Stable",
