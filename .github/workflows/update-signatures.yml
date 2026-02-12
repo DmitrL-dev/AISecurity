@@ -93,12 +93,14 @@ jobs:
           p = d.get('patterns', d) if isinstance(d, dict) else d
           total = len(p)
           ru = sum(1 for x in p if x.get('language') == 'ru')
-          en = total - ru
-          pct = 100 * ru / max(total, 1)
-          print(f'{total} {en} {ru} {pct:.0f}')
+          cjk_langs = {'zh', 'ja', 'ko'}
+          cjk = sum(1 for x in p if x.get('language') in cjk_langs)
+          en = total - ru - cjk
+          pct_ru = 100 * ru / max(total, 1)
+          print(f'{total} {en} {ru} {cjk} {pct_ru:.0f}')
           ")
-          read TOTAL EN RU PCT <<< "$STATS"
-          echo "Total: $TOTAL (EN: $EN, RU: $RU, ${PCT}%)"
+          read TOTAL EN RU CJK PCT <<< "$STATS"
+          echo "Total: $TOTAL (EN:$EN RU:$RU CJK:$CJK ${PCT}%)"
 
           # Update README badge
           sed -i "s/Dataset-[0-9,]*-orange/Dataset-${TOTAL}-orange/g" README.md
