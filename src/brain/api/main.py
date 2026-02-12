@@ -7,8 +7,11 @@ Generated: 2026-01-08
 Updated: 2026-01-09 (added metrics, v1 router)
 """
 
-from fastapi import FastAPI, Response
+import os
+
+from fastapi import FastAPI, Response, Request
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import JSONResponse
 
 # Import API routers
 from .requirements_api import router as requirements_router
@@ -18,6 +21,7 @@ from .design_review_api import router as design_review_router
 # Import v1 router
 try:
     from .v1 import router as v1_router
+
     HAS_V1 = True
 except ImportError:
     HAS_V1 = False
@@ -26,6 +30,7 @@ except ImportError:
 try:
     from ..observability.metrics import get_metrics
     from ..observability.health import get_health
+
     HAS_OBSERVABILITY = True
 except ImportError:
     HAS_OBSERVABILITY = False
@@ -48,6 +53,46 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+# API Key configuration
+SENTINEL_API_KEY = os.environ.get("SENTINEL_API_KEY")
+
+# Paths that don't require authentication
+PUBLIC_PATHS = {
+    "/",
+    "/health",
+    "/ready",
+    "/metrics",
+    "/docs",
+    "/redoc",
+    "/openapi.json",
+}
+
+
+@app.middleware("http")
+async def api_key_middleware(request: Request, call_next):
+    """API key authentication middleware."""
+    # Skip auth if no key configured (open/test mode)
+    if not SENTINEL_API_KEY:
+        return await call_next(request)
+
+    # Skip auth for public paths
+    if request.url.path in PUBLIC_PATHS:
+        return await call_next(request)
+
+    # Check API key
+    api_key = request.headers.get("X-API-Key")
+    if api_key != SENTINEL_API_KEY:
+        return JSONResponse(
+            status_code=401,
+            content={
+                "error": "Unauthorized",
+                "message": "Invalid or missing API key",
+                "hint": "Set X-API-Key header",
+            },
+        )
+
+    return await call_next(request)
+
 
 @app.get("/")
 async def root():
@@ -59,24 +104,24 @@ async def root():
             {
                 "name": "Requirements",
                 "description": "Custom security requirements management",
-                "prefix": "/requirements"
+                "prefix": "/requirements",
             },
             {
                 "name": "Compliance",
                 "description": "Unified compliance reporting",
-                "prefix": "/compliance"
+                "prefix": "/compliance",
             },
             {
                 "name": "Design Review",
                 "description": "AI architecture security review",
-                "prefix": "/design-review"
+                "prefix": "/design-review",
             },
             {
                 "name": "API v1",
                 "description": "Versioned API endpoints",
-                "prefix": "/v1"
-            }
-        ]
+                "prefix": "/v1",
+            },
+        ],
     }
 
 
@@ -90,9 +135,8 @@ async def health_check():
             "status": result.status.value,
             "version": "1.7.0",
             "components": [
-                {"name": c.name, "status": c.status.value}
-                for c in result.components
-            ]
+                {"name": c.name, "status": c.status.value} for c in result.components
+            ],
         }
     return {"status": "healthy", "version": "1.7.0"}
 
@@ -103,13 +147,12 @@ async def metrics():
     if HAS_OBSERVABILITY:
         registry = get_metrics()
         return Response(
-            content=registry.collect(),
-            media_type="text/plain; charset=utf-8"
+            content=registry.collect(), media_type="text/plain; charset=utf-8"
         )
     # Return minimal metrics if observability not available
     return Response(
         content="# SENTINEL Brain API metrics\nsentinel_up 1\n",
-        media_type="text/plain; charset=utf-8"
+        media_type="text/plain; charset=utf-8",
     )
 
 
