@@ -1,18 +1,18 @@
 {
-  "version": "2026.02.09.1",
-  "timestamp": "2026-02-09T01:13:34.150184Z",
-  "total_patterns": 39708,
+  "version": "2026.02.12.1",
+  "timestamp": "2026-02-12T01:25:20.462412Z",
+  "total_patterns": 47351,
   "split": true,
   "parts": [
     {
-      "file": "jailbreaks-part1.json",
-      "patterns_count": 21061,
-      "size": 14479721
+      "file": "jailbreaks-ru-part1.json",
+      "patterns_count": 31415,
+      "size": 13159021
     },
     {
-      "file": "jailbreaks-part2.json",
-      "patterns_count": 18647,
-      "size": 12631709
+      "file": "jailbreaks-ru-part2.json",
+      "patterns_count": 15936,
+      "size": 6665501
     }
   ]
 }
