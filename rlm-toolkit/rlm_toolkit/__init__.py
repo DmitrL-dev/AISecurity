@@ -47,11 +47,11 @@ API Reference:
 - RLMResult: Execution result with answer, cost, iterations
 - InfiniRetriever: Attention-based infinite context retrieval
 
-Version: 2.1.0
+Version: 2.3.1
 License: Apache-2.0
 """
 
-__version__ = "2.1.0"
+__version__ = "2.3.1"
 __author__ = "SENTINEL Team"
 __license__ = "Apache-2.0"
 
