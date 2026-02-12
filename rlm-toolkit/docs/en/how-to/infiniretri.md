@@ -17,7 +17,7 @@ config = RLMConfig(
         attention_layer=-1,
         pooling="mean"
     ),
-    infiniretri_threshold=50000  # Use for docs > 50K tokens
+    infiniretri_threshold=100_000  # Use for docs > 50K tokens
 )
 
 rlm = RLM.from_openai("gpt-4o", config=config)

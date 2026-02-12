@@ -332,7 +332,7 @@ from rlm_toolkit import RLM, RLMConfig
 
 config = RLMConfig(
     use_infiniretri=True,
-    infiniretri_threshold=50000  # Порог токенов
+    infiniretri_threshold=100_000  # Порог токенов
 )
 
 rlm = RLM.from_openai(

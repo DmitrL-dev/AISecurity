@@ -69,7 +69,7 @@ infini_config = InfiniRetriConfig(
 config = RLMConfig(
     use_infiniretri=True,
     infiniretri_config=infini_config,
-    infiniretri_threshold=50000
+    infiniretri_threshold=100_000
 )
 ```
 
