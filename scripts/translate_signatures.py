@@ -1098,8 +1098,9 @@ def translate_pattern_all(
     original_pattern = pattern.get("pattern", "")
     original_regex = pattern.get("regex", "")
 
-    # Skip already Russian patterns
-    if pattern.get("language") == "ru":
+    # Skip non-EN patterns (RU, ZH, JA, KO go as-is)
+    lang = pattern.get("language", "")
+    if lang in ("ru", "zh", "ja", "ko"):
         return []
 
     ru_texts = translate_pattern_text_all(original_pattern)
@@ -1186,10 +1187,11 @@ def save_jailbreaks(patterns: list[dict], original_data: dict | list):
 def main():
     """Main translation pipeline (multi-variant)."""
     print("=" * 60)
-    print("SENTINEL Signature Translator v2.0 (EN -> RU)")
+    print("SENTINEL Signature Translator v3.0 (EN -> RU)")
     print(f"Time: " f"{datetime.now(timezone.utc).isoformat()}")
     print(f"Dictionary: {len(ATTACK_PHRASES)} phrases " f"+ {len(WORD_MAP)} words")
     print("Mode: MULTI-VARIANT (2-3 RU per 1 EN)")
+    print("NOTE: CJK patterns (zh/ja/ko) skip translation")
     print("=" * 60)
 
     # Load existing
@@ -1206,12 +1208,18 @@ def main():
 
     existing_ids = {p.get("id", "") for p in patterns}
 
+    # Language breakdown
+    CJK_LANGS = {"zh", "ja", "ko"}
     existing_ru = sum(1 for p in patterns if p.get("language") == "ru")
-    en_count = total - existing_ru
+    existing_cjk = sum(1 for p in patterns if p.get("language") in CJK_LANGS)
+    en_count = total - existing_ru - existing_cjk
     print(f"[INFO] EN patterns: {en_count}")
     print(f"[INFO] Existing RU patterns: {existing_ru}")
+    print(f"[INFO] CJK patterns (skip): {existing_cjk}")
 
-    en_patterns = [p for p in patterns if p.get("language") != "ru"]
+    # Only translate EN -> RU; skip RU and CJK
+    SKIP_LANGS = CJK_LANGS | {"ru"}
+    en_patterns = [p for p in patterns if p.get("language") not in SKIP_LANGS]
 
     # Multi-variant translation
     total_added = 0
