@@ -53,7 +53,7 @@ rlm = RLM.from_openai(
 
 # Agent will choose appropriate tool
 result = rlm.run("What's 15% of 340 plus the current temperature in Tokyo?")
-print(result.final_answer)
+print(result.answer)
 ```
 
 ## Step 2: Built-in Tools
@@ -315,7 +315,7 @@ def main():
             continue
         
         result = agent.run(user_input)
-        print(f"\n🤖 Assistant: {result.final_answer}")
+        print(f"\n🤖 Assistant: {result.answer}")
         
         if result.tool_calls:
             print(f"\n📎 Tools used: {[t.name for t in result.tool_calls]}")

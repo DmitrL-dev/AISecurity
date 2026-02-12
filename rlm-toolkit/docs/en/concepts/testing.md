@@ -16,8 +16,8 @@ mock = MockLLM(responses=[
 ])
 
 rlm = RLM(provider=mock)
-assert rlm.run("any").final_answer == "First response"
-assert rlm.run("any").final_answer == "Second response"
+assert rlm.run("any").answer == "First response"
+assert rlm.run("any").answer == "Second response"
 ```
 
 ## MockEmbeddings

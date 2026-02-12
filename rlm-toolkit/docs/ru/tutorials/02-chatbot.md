@@ -28,11 +28,11 @@ rlm = RLM.from_openai("gpt-4o")
 
 # Первое сообщение
 result = rlm.run("Привет, меня зовут Алиса")
-print(result.final_answer)
+print(result.answer)
 
 # Второе сообщение - он не запомнит!
 result = rlm.run("Как меня зовут?")
-print(result.final_answer)  # "Я не знаю вашего имени"
+print(result.answer)  # "Я не знаю вашего имени"
 ```
 
 Проблема: чат-бот ничего не помнит между сообщениями.
@@ -54,7 +54,7 @@ rlm = RLM.from_openai("gpt-4o", memory=memory)
 # Теперь он запоминает!
 rlm.run("Привет, меня зовут Алиса")
 result = rlm.run("Как меня зовут?")
-print(result.final_answer)  # "Вас зовут Алиса"
+print(result.answer)  # "Вас зовут Алиса"
 ```
 
 ## Шаг 3: Добавляем иерархическую память (H-MEM)
@@ -82,7 +82,7 @@ rlm.run("Создаю чат-бота для своей компании.")
 
 # Позже он помнит ключевые концепции
 result = rlm.run("Что ты знаешь обо мне?")
-print(result.final_answer)
+print(result.answer)
 # "Вы Борис, программист, специализирующийся на Python и ML..."
 ```
 
@@ -106,10 +106,10 @@ rlm.run("Мария — сестра Ивана, она врач")
 
 # Запрашиваем информацию о конкретных сущностях
 result = rlm.run("Сколько лет Ивану?")
-print(result.final_answer)  # "Ивану 30 лет"
+print(result.answer)  # "Ивану 30 лет"
 
 result = rlm.run("Кем работает Мария?")
-print(result.final_answer)  # "Мария — врач"
+print(result.answer)  # "Мария — врач"
 ```
 
 ## Шаг 5: Персистентная память
@@ -138,7 +138,7 @@ hmem2 = HierarchicalMemory(persist_directory="./memory_store")
 rlm2 = RLM.from_openai("gpt-4o", memory=hmem2)
 
 result = rlm2.run("Когда мой день рождения?")
-print(result.final_answer)  # "Ваш день рождения 15 марта"
+print(result.answer)  # "Ваш день рождения 15 марта"
 ```
 
 ## Полное приложение чат-бота
@@ -208,7 +208,7 @@ def main():
         
         # Получаем ответ
         result = rlm.run(user_input)
-        print(f"\n🤖 Ариа: {result.final_answer}")
+        print(f"\n🤖 Ариа: {result.answer}")
 
 if __name__ == "__main__":
     main()

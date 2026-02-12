@@ -47,7 +47,7 @@ from rlm_toolkit import RLM, RLMConfig
 
 # Enable InfiniRetri
 config = RLMConfig(
-    enable_infiniretri=True,
+    use_infiniretri=True,
     infiniretri_threshold=50000  # Activate above 50K tokens
 )
 
@@ -63,7 +63,7 @@ result = rlm.run(
     context=massive_context
 )
 
-print(result.final_answer)
+print(result.answer)
 print(f"Processed {result.total_tokens} tokens")
 ```
 
@@ -83,7 +83,7 @@ infiniretri_config = InfiniRetriConfig(
 )
 
 config = RLMConfig(
-    enable_infiniretri=True,
+    use_infiniretri=True,
     infiniretri_config=infiniretri_config,
     infiniretri_threshold=50000
 )
@@ -106,7 +106,7 @@ retriever = vectorstore.as_retriever(search_kwargs={"k": 20})
 
 # Enable InfiniRetri for re-ranking
 config = RLMConfig(
-    enable_infiniretri=True,
+    use_infiniretri=True,
     infiniretri_threshold=10000,
     use_retriever_with_infiniretri=True  # Combine both
 )
@@ -127,7 +127,7 @@ result = rlm.run("What are the financial projections for Q4?")
 from rlm_toolkit import RLM, RLMConfig
 
 config = RLMConfig(
-    enable_infiniretri=True,
+    use_infiniretri=True,
     stream=True  # Enable streaming
 )
 
@@ -170,7 +170,7 @@ InfiniRetri works with any text format:
 from rlm_toolkit import RLM, RLMConfig
 from rlm_toolkit.loaders import PDFLoader, DOCXLoader
 
-config = RLMConfig(enable_infiniretri=True)
+config = RLMConfig(use_infiniretri=True)
 rlm = RLM.from_openai("gpt-4o", config=config)
 
 # PDFs
@@ -202,7 +202,7 @@ benchmark = NeedleInHaystackBenchmark(
 )
 
 # Test with InfiniRetri
-config = RLMConfig(enable_infiniretri=True)
+config = RLMConfig(use_infiniretri=True)
 rlm = RLM.from_openai("gpt-4o", config=config)
 
 results = benchmark.run(rlm)
@@ -240,7 +240,7 @@ def create_infinite_qa(pdf_path: str):
     )
     
     config = RLMConfig(
-        enable_infiniretri=True,
+        use_infiniretri=True,
         infiniretri_config=infini_config
     )
     
@@ -268,7 +268,7 @@ def main():
             break
         
         result = rlm.run(question, context=context)
-        print(f"\n✅ Answer: {result.final_answer}")
+        print(f"\n✅ Answer: {result.answer}")
         
         if hasattr(result, 'chunks_used'):
             print(f"📊 Chunks analyzed: {result.chunks_used}")

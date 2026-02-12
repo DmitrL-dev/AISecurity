@@ -121,7 +121,7 @@ questions = [
 for question in questions:
     print(f"\n❓ {question}")
     result = rlm.run(question)
-    print(f"✅ {result.final_answer}")
+    print(f"✅ {result.answer}")
 ```
 
 ## Полный код
@@ -175,7 +175,7 @@ def main():
             break
         
         result = rlm.run(question)
-        print(f"AI: {result.final_answer}\n")
+        print(f"AI: {result.answer}\n")
 
 if __name__ == "__main__":
     main()

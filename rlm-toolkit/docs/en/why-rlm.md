@@ -85,7 +85,7 @@ print(response.choices[0].message.content)
 ```python
 from rlm_toolkit import RLM, RLMConfig
 
-config = RLMConfig(enable_infiniretri=True)
+config = RLMConfig(use_infiniretri=True)
 rlm = RLM.from_openai("gpt-4o", config=config)
 rlm.add_documents("docs/")
 response = rlm.run("What does the document say about X?")
@@ -144,7 +144,7 @@ Things you **can't easily do** with other frameworks:
 ### 1. InfiniRetri — Infinite Context
 Process documents of **any size** without hitting context limits:
 ```python
-config = RLMConfig(enable_infiniretri=True)
+config = RLMConfig(use_infiniretri=True)
 rlm.add_documents("1000_page_manual.pdf")  # Just works
 ```
 
@@ -177,7 +177,7 @@ Already using LangChain? Migration is straightforward:
 | `ChatOpenAI()` | `RLM.from_openai()` |
 | `llm.invoke(messages)` | `rlm.run(prompt)` |
 | `ConversationBufferMemory` | `BufferMemory` |
-| `RetrievalQA` | `RLMConfig(enable_infiniretri=True)` |
+| `RetrievalQA` | `RLMConfig(use_infiniretri=True)` |
 | `AgentExecutor` | `ReActAgent` |
 
 See the full [Migration Guide](./migration.md) →

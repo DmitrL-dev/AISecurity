@@ -56,7 +56,7 @@ evolving = SelfEvolvingRLM.from_openai(
 
 # Первая попытка - учится из процесса
 result = evolving.run("Объясни квантовую запутанность простыми словами")
-print(result.final_answer)
+print(result.answer)
 
 # Смотрим эволюцию
 print(f"Итерации: {result.iterations}")
@@ -281,7 +281,7 @@ class EvolvingCodeAssistant:
         result = self.rlm.run(f"Напиши Python-код для: {task}")
         
         return {
-            "code": result.final_answer,
+            "code": result.answer,
             "iterations": result.iterations,
             "improvements": result.improvements,
             "quality_score": result.final_quality_score

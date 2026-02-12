@@ -31,7 +31,7 @@ rlm = RLM.from_openai("gpt-4o")
 
 # Simple query
 result = rlm.run("Explain quantum computing in simple terms")
-print(result.final_answer)
+print(result.answer)
 ```
 
 !!! tip "API Key"
@@ -52,7 +52,7 @@ rlm.run("My name is Alex")
 
 # Memory persists
 result = rlm.run("What's my name?")
-print(result.final_answer)  # "Your name is Alex"
+print(result.answer)  # "Your name is Alex"
 ```
 
 ## RAG Pipeline
@@ -66,14 +66,15 @@ from rlm_toolkit.embeddings import OpenAIEmbeddings
 # Load documents
 docs = PDFLoader("report.pdf").load()
 
-# Create vector store
-vectorstore = ChromaVectorStore.from_documents(
-    docs, 
-    OpenAIEmbeddings()
+# Create vector store and add documents
+vectorstore = ChromaVectorStore(
+    collection_name="reports",
+    embedding_function=OpenAIEmbeddings()
 )
+vectorstore.add_documents(docs)
 
 # Query with RAG
-rlm = RLM.from_openai("gpt-4o", retriever=vectorstore.as_retriever())
+rlm = RLM.from_openai("gpt-4o", retriever=vectorstore)
 result = rlm.run("What are the key findings?")
 ```
 
@@ -85,15 +86,15 @@ For documents with 100K+ tokens:
 from rlm_toolkit import RLM, RLMConfig
 
 config = RLMConfig(
-    enable_infiniretri=True,
-    infiniretri_threshold=50000
+    use_infiniretri=True,
+    infiniretri_threshold=100_000
 )
 
 rlm = RLM.from_openai("gpt-4o", config=config)
 result = rlm.run("Find the budget for Q3", context=massive_document)
 ```
 
-## VS Code Extension (v1.2.1)
+## VS Code Extension (v2.1.0)
 
 Install the RLM-Toolkit extension for real-time token savings:
 

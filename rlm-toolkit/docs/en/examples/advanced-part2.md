@@ -1286,7 +1286,7 @@ class RecursiveDocumentSummarizer:
     def __init__(self):
         # InfiniRetri-enabled RLM for large context
         self.config = RLMConfig(
-            enable_infiniretri=True,
+            use_infiniretri=True,
             infiniretri_config=InfiniRetriConfig(
                 chunk_size=8000,
                 top_k=10,

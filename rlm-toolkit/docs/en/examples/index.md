@@ -591,7 +591,7 @@ from rlm_toolkit.loaders import PDFLoader
 
 # Configure InfiniRetri
 config = RLMConfig(
-    enable_infiniretri=True,
+    use_infiniretri=True,
     infiniretri_config=InfiniRetriConfig(
         chunk_size=4000,
         top_k=5

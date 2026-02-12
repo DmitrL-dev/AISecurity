@@ -22,7 +22,7 @@ This guide helps you migrate existing LangChain code to RLM-Toolkit.
 | `Chroma.from_documents()` | `ChromaVectorStore.from_documents()` | Same interface |
 | `FAISS.from_documents()` | `FAISSVectorStore.from_documents()` | Same interface |
 | `vectorstore.as_retriever()` | `vectorstore.as_retriever()` | Identical |
-| `RetrievalQA.from_chain_type()` | `RLMConfig(enable_infiniretri=True)` | Simpler |
+| `RetrievalQA.from_chain_type()` | `RLMConfig(use_infiniretri=True)` | Simpler |
 | `AgentExecutor` | `ReActAgent` | Similar |
 | `Tool(func=...)` | `@Tool(...)` decorator | Cleaner syntax |
 | `create_react_agent()` | `ReActAgent.from_openai()` | One line |
@@ -153,7 +153,7 @@ from rlm_toolkit.vectorstores import ChromaVectorStore
 from rlm_toolkit.embeddings import OpenAIEmbeddings
 
 # Setup with InfiniRetri for automatic context management
-config = RLMConfig(enable_infiniretri=True)
+config = RLMConfig(use_infiniretri=True)
 rlm = RLM.from_openai("gpt-4o", config=config)
 
 # Load and index
