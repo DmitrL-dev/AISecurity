@@ -1,4 +1,0 @@
-python-telegram-bot>=21.0
-sqlalchemy>=2.0
-aiosqlite>=0.19.0
-# yookassa>=3.0  # uncomment when ЮKassa is configured

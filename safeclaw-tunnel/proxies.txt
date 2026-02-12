@@ -1,6 +1,0 @@
-# SafeClaw upstream proxies — EU only (lower latency)
-# Format: user:pass@host:port#country
-mipehewg:z113tiv0bbge@31.59.20.176:6754#GB-London
-mipehewg:z113tiv0bbge@45.38.107.97:6014#GB-London
-mipehewg:z113tiv0bbge@198.105.121.200:6462#GB-London
-mipehewg:z113tiv0bbge@64.137.96.74:6641#ES-Madrid
