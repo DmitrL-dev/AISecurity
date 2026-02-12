@@ -47,7 +47,7 @@ API Reference:
 - RLMResult: Execution result with answer, cost, iterations
 - InfiniRetriever: Attention-based infinite context retrieval
 
-Version: 2.0.0a1
+Version: 2.1.0
 License: Apache-2.0
 """
 

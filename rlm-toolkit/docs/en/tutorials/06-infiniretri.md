@@ -48,7 +48,7 @@ from rlm_toolkit import RLM, RLMConfig
 # Enable InfiniRetri
 config = RLMConfig(
     use_infiniretri=True,
-    infiniretri_threshold=50000  # Activate above 50K tokens
+    infiniretri_threshold=100_000  # Activate above 50K tokens
 )
 
 rlm = RLM.from_openai("gpt-4o", config=config)
@@ -85,7 +85,7 @@ infiniretri_config = InfiniRetriConfig(
 config = RLMConfig(
     use_infiniretri=True,
     infiniretri_config=infiniretri_config,
-    infiniretri_threshold=50000
+    infiniretri_threshold=100_000
 )
 
 rlm = RLM.from_openai("gpt-4o", config=config)
