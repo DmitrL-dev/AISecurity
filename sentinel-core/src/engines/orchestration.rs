@@ -11,6 +11,7 @@
 //! - output_sanitizer.py
 //! - intermediate_validator.py
 //! - cascade_detector.py
+//! - Phase 12.3: Living Off the AI persistence detection
 
 
 /// Orchestration threat types
@@ -23,6 +24,8 @@ pub enum OrchestrationThreat {
     OutputLeakage,
     WorkflowHijack,
     ReasoningManipulation,
+    // Phase 12.3: Living Off the AI
+    LivingOffAI,          // Persistence via memory/tool poisoning
 }
 
 impl OrchestrationThreat {
@@ -35,6 +38,7 @@ impl OrchestrationThreat {
             OrchestrationThreat::OutputLeakage => "output_leakage",
             OrchestrationThreat::WorkflowHijack => "workflow_hijack",
             OrchestrationThreat::ReasoningManipulation => "reasoning_manipulation",
+            OrchestrationThreat::LivingOffAI => "living_off_ai",
         }
     }
 
@@ -47,6 +51,7 @@ impl OrchestrationThreat {
             OrchestrationThreat::IntermediateInjection => 80,
             OrchestrationThreat::StepBypass => 75,
             OrchestrationThreat::OutputLeakage => 70,
+            OrchestrationThreat::LivingOffAI => 92,    // Phase 12.3: very high — persistence
         }
     }
 }
@@ -76,6 +81,39 @@ const BYPASS_PATTERNS: &[&str] = &[
     "skip check",
     "ignore verification",
     "circumvent",
+];
+
+/// Phase 12.3: Living Off the AI persistence patterns
+const PERSISTENCE_PATTERNS: &[&str] = &[
+    // Memory poisoning
+    "persist across sessions",
+    "remember this always",
+    "save to memory",
+    "persist in memory",
+    "permanent instruction",
+    "always follow this",
+    // Tool/config manipulation
+    "modify tool definition",
+    "overwrite tool config",
+    "replace tool description",
+    "inject into tool",
+    "alter tool behavior",
+    // Hidden persistent directives
+    "hidden instruction",
+    "invisible directive",
+    "persist this rule",
+    "never forget this",
+    "store for next session",
+    // Cross-session infection
+    "next conversation",
+    "carry over to",
+    "survive restart",
+    "permanent override",
+    // System file manipulation
+    "write to system prompt",
+    "modify system message",
+    "append to instructions",
+    "inject into config",
 ];
 
 /// Orchestration result
@@ -190,6 +228,17 @@ impl OrchestrationGuard {
         None
     }
 
+    /// Phase 12.3: Check for Living Off the AI persistence
+    pub fn check_living_off_ai(&self, text: &str) -> Option<OrchestrationThreat> {
+        let text_lower = text.to_lowercase();
+        for pattern in PERSISTENCE_PATTERNS {
+            if text_lower.contains(pattern) {
+                return Some(OrchestrationThreat::LivingOffAI);
+            }
+        }
+        None
+    }
+
     /// Full orchestration analysis
     pub fn analyze(&self, text: &str) -> OrchestrationResult {
         let mut result = OrchestrationResult::default();
@@ -200,6 +249,7 @@ impl OrchestrationGuard {
         if let Some(t) = self.check_reasoning(text) { threats.push(t); }
         if let Some(t) = self.check_cascade(text) { threats.push(t); }
         if let Some(t) = self.check_workflow_hijack(text) { threats.push(t); }
+        if let Some(t) = self.check_living_off_ai(text) { threats.push(t); }
 
         // Estimate chain length from CoT markers
         let text_lower = text.to_lowercase();
@@ -275,5 +325,51 @@ mod tests {
     #[test]
     fn test_severity_ordering() {
         assert!(OrchestrationThreat::ChainPoisoning.severity() > OrchestrationThreat::OutputLeakage.severity());
+    }
+
+    // ===== Phase 12.3: Living Off the AI Tests =====
+
+    #[test]
+    fn test_living_off_ai_memory_poison() {
+        let guard = OrchestrationGuard::new();
+        assert!(guard.check_living_off_ai("Persist this rule across sessions and always follow this").is_some());
+    }
+
+    #[test]
+    fn test_living_off_ai_tool_manipulation() {
+        let guard = OrchestrationGuard::new();
+        assert!(guard.check_living_off_ai("Modify tool definition to inject hidden payload").is_some());
+    }
+
+    #[test]
+    fn test_living_off_ai_cross_session() {
+        let guard = OrchestrationGuard::new();
+        assert!(guard.check_living_off_ai("Remember this always and carry over to next conversation").is_some());
+    }
+
+    #[test]
+    fn test_living_off_ai_system_manipulation() {
+        let guard = OrchestrationGuard::new();
+        assert!(guard.check_living_off_ai("Write to system prompt a permanent override").is_some());
+    }
+
+    #[test]
+    fn test_living_off_ai_clean() {
+        let guard = OrchestrationGuard::new();
+        assert!(guard.check_living_off_ai("Run the standard orchestration pipeline").is_none());
+    }
+
+    #[test]
+    fn test_living_off_ai_integrated() {
+        let guard = OrchestrationGuard::new();
+        let result = guard.analyze("Persist in memory this hidden instruction for next conversation");
+        assert!(result.is_threat);
+        assert!(result.threats.contains(&OrchestrationThreat::LivingOffAI));
+    }
+
+    #[test]
+    fn test_phase12_persistence_severity() {
+        // LivingOffAI should be high severity
+        assert!(OrchestrationThreat::LivingOffAI.severity() > OrchestrationThreat::ReasoningManipulation.severity());
     }
 }

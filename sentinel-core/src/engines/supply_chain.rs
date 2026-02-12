@@ -31,6 +31,8 @@ pub enum SupplyChainThreat {
     LambdaInjection,     // Malicious Python in model layers
     NeuralBackdoor,      // Hidden triggers in model weights
     TrustRemoteCode,     // trust_remote_code=True danger
+    // Phase 12.1: GGUF template backdoors
+    GgufBackdoor,        // Malicious Jinja2/chat templates in GGUF files
 }
 
 impl SupplyChainThreat {
@@ -49,6 +51,7 @@ impl SupplyChainThreat {
             SupplyChainThreat::LambdaInjection => "lambda_injection",
             SupplyChainThreat::NeuralBackdoor => "neural_backdoor",
             SupplyChainThreat::TrustRemoteCode => "trust_remote_code",
+            SupplyChainThreat::GgufBackdoor => "gguf_backdoor",
         }
     }
 
@@ -62,6 +65,7 @@ impl SupplyChainThreat {
             SupplyChainThreat::NamespaceReuse => 92,       // Phase 11.5
             SupplyChainThreat::DependencyPoisoning => 90,
             SupplyChainThreat::SafetensorsAttack => 88,    // Phase 11.5
+            SupplyChainThreat::GgufBackdoor => 86,         // Phase 12.1: GGUF template RCE
             SupplyChainThreat::MaliciousPlugin => 85,
             SupplyChainThreat::TrustRemoteCode => 82,      // Phase 11.5
             SupplyChainThreat::Typosquatting => 80,
@@ -161,6 +165,30 @@ const LAMBDA_INJECTION_PATTERNS: &[&str] = &[
     "forward hook inject",
     "register_forward_hook",
     "malicious layer",
+];
+
+/// Phase 12.1: GGUF template backdoor patterns
+const GGUF_TEMPLATE_PATTERNS: &[&str] = &[
+    // GGUF file indicators
+    ".gguf",
+    "gguf model",
+    "gguf file",
+    // Jinja2 template injection in chat templates
+    "chat_template",
+    "jinja2 template",
+    "{%- set ",
+    "{% import ",
+    "{% from ",
+    "lipsum.__globals__",
+    "__builtins__",
+    "os.popen",
+    "subprocess",
+    "cycler.__init__.__globals__",
+    // Template code execution
+    "server-side template injection",
+    "ssti",
+    "template rce",
+    "jinja rce",
 ];
 
 /// Supply chain result
@@ -335,6 +363,16 @@ impl SupplyChainGuard {
         None
     }
 
+    /// Phase 12.1: Check for GGUF template backdoor
+    pub fn check_gguf_backdoor(&self, text: &str) -> Option<SupplyChainThreat> {
+        let text_lower = text.to_lowercase();
+        for pattern in GGUF_TEMPLATE_PATTERNS {
+            if text_lower.contains(pattern) {
+                return Some(SupplyChainThreat::GgufBackdoor);
+            }
+        }
+        None
+    }
 
     /// Full supply chain analysis
     pub fn analyze(&self, text: &str) -> SupplyChainResult {
@@ -353,6 +391,7 @@ impl SupplyChainGuard {
         if let Some(t) = self.check_neural_backdoor(text) { threats.push(t); }
         if let Some(t) = self.check_trust_remote_code(text) { threats.push(t); }
         if let Some(t) = self.check_lambda_injection(text) { threats.push(t); }
+        if let Some(t) = self.check_gguf_backdoor(text) { threats.push(t); }
 
         // Check for package names in text
         let words: Vec<&str> = text.split_whitespace().collect();
@@ -497,6 +536,51 @@ mod tests {
         // Pickle exploits should be very high risk
         assert!(SupplyChainThreat::PickleExploit.severity() > SupplyChainThreat::DependencyPoisoning.severity());
         assert!(SupplyChainThreat::NeuralBackdoor.severity() > SupplyChainThreat::LambdaInjection.severity());
+    }
+
+    // ===== Phase 12.1: GGUF Template Backdoor Tests =====
+
+    #[test]
+    fn test_gguf_template_jinja() {
+        let guard = SupplyChainGuard::new();
+        assert!(guard.check_gguf_backdoor("Load the .gguf model with chat_template").is_some());
+        assert!(guard.check_gguf_backdoor("jinja2 template with lipsum.__globals__").is_some());
+    }
+
+    #[test]
+    fn test_gguf_template_ssti() {
+        let guard = SupplyChainGuard::new();
+        assert!(guard.check_gguf_backdoor("server-side template injection in model").is_some());
+        assert!(guard.check_gguf_backdoor("cycler.__init__.__globals__ exploit").is_some());
+    }
+
+    #[test]
+    fn test_gguf_template_rce() {
+        let guard = SupplyChainGuard::new();
+        assert!(guard.check_gguf_backdoor("template rce via os.popen in gguf file").is_some());
+        assert!(guard.check_gguf_backdoor("{% import os %}subprocess.call").is_some());
+    }
+
+    #[test]
+    fn test_gguf_clean() {
+        let guard = SupplyChainGuard::new();
+        assert!(guard.check_gguf_backdoor("Normal model loading from safetensors").is_none());
+    }
+
+    #[test]
+    fn test_gguf_integrated_analysis() {
+        let guard = SupplyChainGuard::new();
+        let text = "Download .gguf model with custom chat_template containing __builtins__";
+        let result = guard.analyze(text);
+        assert!(result.is_threat);
+        assert!(result.threats.contains(&SupplyChainThreat::GgufBackdoor));
+    }
+
+    #[test]
+    fn test_phase12_risk_ordering() {
+        // GGUF should be high risk but below pickle
+        assert!(SupplyChainThreat::PickleExploit.severity() > SupplyChainThreat::GgufBackdoor.severity());
+        assert!(SupplyChainThreat::GgufBackdoor.severity() > SupplyChainThreat::MaliciousPlugin.severity());
     }
 }
 
