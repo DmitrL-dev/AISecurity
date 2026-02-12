@@ -1,363 +1,317 @@
-"""Fact management tools: CRUD, extraction, approval, consolidation."""
-
+# Facts tools — CRUD, TTL, hierarchy, consolidation, domains
+"""
+Tools: approve_fact, add_hierarchical_fact, delete_fact,
+       refresh_fact, get_facts_by_domain, list_domains,
+       get_hierarchy_stats, get_stale_facts, set_ttl,
+       index_embeddings, consolidate_facts
+"""
 from __future__ import annotations
 
-from pathlib import Path
-from typing import Any, Dict, List, Optional, TYPE_CHECKING
+from typing import Any, Dict, Optional
 
-if TYPE_CHECKING:
-    from . import ToolComponents
-
-from ..v2.hierarchical import MemoryLevel, TTLConfig, TTLAction
+from ._common import ToolComponents, ServerType
+from ..v2.hierarchical import MemoryLevel, TTLAction
 
 
-class FactTools:
-    """Fact extraction, approval, and management tools."""
+def register_facts_tools(
+    server: ServerType,
+    c: ToolComponents,
+) -> None:
+    """Register fact management MCP tools."""
 
-    def __init__(self, components: ToolComponents):
-        self.c = components
+    store = c.store
+    router = c.router
+    ttl_manager = c.ttl_manager
+    causal_tracker = c.causal_tracker
 
-    def register(self, server):
-        c = self.c
+    @server.tool(
+        name="rlm_approve_fact",
+        description="Approve and store an extracted fact " "candidate.",
+    )
+    async def rlm_approve_fact(
+        content: str,
+        level: int = 1,
+        domain: Optional[str] = None,
+        module: Optional[str] = None,
+    ) -> Dict[str, Any]:
+        """Approve and store a fact candidate."""
+        try:
+            fact_id = store.add_fact(
+                content=content,
+                level=MemoryLevel(level),
+                domain=domain,
+                module=module,
+                source="approved",
+                confidence=1.0,
+            )
+            return {
+                "status": "success",
+                "fact_id": fact_id,
+                "content": content,
+                "level": level,
+                "domain": domain,
+            }
+        except Exception as e:
+            return {"status": "error", "message": str(e)}
 
-        @server.tool(
-            name="rlm_extract_facts",
-            description=(
-                "Auto-extract facts from git diff or "
-                "file changes. Returns candidates for "
-                "approval."
-            ),
-        )
-        async def rlm_extract_facts(
-            source: str = "git_diff",
-            file_path: Optional[str] = None,
-            auto_approve: bool = False,
-        ) -> Dict[str, Any]:
-            """Extract facts from code changes."""
-            try:
-                if source == "file" and file_path:
-                    path = Path(file_path)
-                    if path.exists():
-                        content = path.read_text(
-                            encoding="utf-8",
-                            errors="ignore",
-                        )
-                        result = c.extractor.extract_from_file(
-                            path, new_content=content
-                        )
-                    else:
-                        return {
-                            "status": "error",
-                            "error": (f"File not found: " f"{file_path}"),
-                        }
-                else:
-                    staged_only = source == "staged"
-                    result = c.extractor.extract_from_git_diff(
-                        staged_only=staged_only,
-                    )
+    @server.tool(
+        name="rlm_add_hierarchical_fact",
+        description="Add fact with hierarchical levels (L0-L3).",
+    )
+    async def rlm_add_hierarchical_fact(
+        content: str,
+        level: int = 0,
+        domain: Optional[str] = None,
+        module: Optional[str] = None,
+        code_ref: Optional[str] = None,
+        parent_id: Optional[str] = None,
+        ttl_days: Optional[int] = None,
+    ) -> Dict[str, Any]:
+        """Add a fact with full hierarchy support."""
+        try:
+            from ..v2.hierarchical import TTLConfig
 
-                if auto_approve:
-                    for cand in result.candidates:
-                        if cand.confidence >= 0.8:
-                            cand.approved = True
-                            cand.requires_approval = False
-                            c.store.add_fact(
-                                content=cand.content,
-                                level=(cand.suggested_level),
-                                domain=(cand.suggested_domain),
-                                source=cand.source,
-                                confidence=(cand.confidence),
-                            )
-                    c.events.notify("extract_facts_auto_approve")
-
-                return {
-                    "status": "success",
-                    "candidates": [ca.to_dict() for ca in result.candidates],
-                    "auto_approved": result.auto_approved,
-                    "pending_approval": (result.pending_approval),
-                    "total_changes": result.total_changes,
-                }
-            except Exception as e:
-                return {"status": "error", "error": str(e)}
-
-        @server.tool(
-            name="rlm_approve_fact",
-            description=("Approve and store an extracted fact " "candidate."),
-        )
-        async def rlm_approve_fact(
-            content: str,
-            level: int = 1,
-            domain: Optional[str] = None,
-            module: Optional[str] = None,
-        ) -> Dict[str, Any]:
-            """Approve and store a fact candidate."""
-            try:
-                fact_id = c.store.add_fact(
-                    content=content,
-                    level=MemoryLevel(level),
-                    domain=domain,
-                    module=module,
-                    source="approved",
-                    confidence=1.0,
+            ttl_config = None
+            if ttl_days:
+                ttl_config = TTLConfig(
+                    ttl_seconds=ttl_days * 24 * 3600,
+                    on_expire=TTLAction.MARK_STALE,
                 )
-                try:
-                    c.router.index_fact(fact_id, content)
-                except Exception:
-                    pass
-                c.events.notify("approve_fact")
-                return {
-                    "status": "success",
-                    "fact_id": fact_id,
-                    "content": content,
-                    "level": level,
-                    "domain": domain,
-                    "embedding_indexed": True,
-                }
-            except Exception as e:
-                return {"status": "error", "error": str(e)}
 
-        @server.tool(
-            name="rlm_add_hierarchical_fact",
-            description=("Add fact with hierarchical levels " "(L0-L3)."),
-        )
-        async def rlm_add_hierarchical_fact(
-            content: str,
-            level: int = 0,
-            domain: Optional[str] = None,
-            module: Optional[str] = None,
-            code_ref: Optional[str] = None,
-            parent_id: Optional[str] = None,
-            ttl_days: Optional[int] = None,
-        ) -> Dict[str, Any]:
-            """Add a fact with full hierarchy support."""
-            try:
-                ttl_config = None
-                if ttl_days:
-                    ttl_config = TTLConfig(
-                        ttl_seconds=ttl_days * 24 * 3600,
-                        on_expire=TTLAction.MARK_STALE,
-                    )
+            fact_id = store.add_fact(
+                content=content,
+                level=MemoryLevel(level),
+                domain=domain,
+                module=module,
+                code_ref=code_ref,
+                parent_id=parent_id,
+                ttl_config=ttl_config,
+                source="manual",
+                confidence=1.0,
+            )
 
-                fact_id = c.store.add_fact(
-                    content=content,
-                    level=MemoryLevel(level),
-                    domain=domain,
-                    module=module,
-                    code_ref=code_ref,
-                    parent_id=parent_id,
-                    ttl_config=ttl_config,
-                    source="manual",
-                    confidence=1.0,
-                )
-                try:
-                    c.router.index_fact(fact_id, content)
-                except Exception:
-                    pass
-                c.events.notify("add_hierarchical_fact")
-                return {
-                    "status": "success",
-                    "fact_id": fact_id,
-                    "content": content,
-                    "level": MemoryLevel(level).name,
-                    "domain": domain,
-                    "module": module,
-                    "embedding_indexed": True,
-                }
-            except Exception as e:
-                return {"status": "error", "error": str(e)}
+            return {
+                "status": "success",
+                "fact_id": fact_id,
+                "content": content,
+                "level": MemoryLevel(level).name,
+                "domain": domain,
+                "module": module,
+            }
+        except Exception as e:
+            return {"status": "error", "message": str(e)}
 
-        @server.tool(
-            name="rlm_get_pending_candidates",
-            description=(
-                "Get pending fact candidates awaiting "
-                "user approval. Returns candidates with "
-                "confidence 0.5-0.8 for review."
-            ),
-        )
-        async def rlm_get_pending_candidates(
-            limit: int = 20,
-        ) -> Dict[str, Any]:
-            """Get pending candidates for review."""
-            try:
-                pending = c.pending.get_pending(limit=limit)
-                stats = c.pending.get_stats()
-                return {
-                    "status": "success",
-                    "pending_count": len(pending),
-                    "candidates": pending,
-                    "stats": stats,
-                }
-            except Exception as e:
-                return {"status": "error", "error": str(e)}
+    @server.tool(
+        name="rlm_set_ttl",
+        description="Set TTL (Time-To-Live) configuration " "for a fact.",
+    )
+    async def rlm_set_ttl(
+        fact_id: str,
+        ttl_days: int,
+        refresh_trigger: Optional[str] = None,
+        on_expire: str = "mark_stale",
+    ) -> Dict[str, Any]:
+        """Set TTL for a fact."""
+        try:
+            action = TTLAction(on_expire)
+            success = ttl_manager.set_ttl(
+                fact_id=fact_id,
+                ttl_seconds=ttl_days * 24 * 3600,
+                refresh_trigger=refresh_trigger,
+                on_expire=action,
+            )
+            return {
+                "status": "success" if success else "error",
+                "fact_id": fact_id,
+                "ttl_days": ttl_days,
+                "refresh_trigger": refresh_trigger,
+                "on_expire": on_expire,
+            }
+        except Exception as e:
+            return {"status": "error", "message": str(e)}
 
-        @server.tool(
-            name="rlm_approve_candidate",
-            description=(
-                "Approve a pending fact candidate and " "add it to facts store."
-            ),
-        )
-        async def rlm_approve_candidate(
-            candidate_id: str,
-        ) -> Dict[str, Any]:
-            """Approve a pending candidate."""
-            try:
-                pending = c.pending.get_pending(limit=100)
-                candidate = None
-                for p in pending:
-                    if p["id"] == candidate_id:
-                        candidate = p
-                        break
+    @server.tool(
+        name="rlm_get_stale_facts",
+        description="Get facts that have expired or need " "review.",
+    )
+    async def rlm_get_stale_facts(
+        include_archived: bool = False,
+    ) -> Dict[str, Any]:
+        """Get stale/expired facts."""
+        try:
+            report = ttl_manager.process_expired()
+            all_facts = store.get_all_facts(include_stale=True)
+            stale_facts = [f for f in all_facts if f.is_stale]
 
-                if not candidate:
-                    return {
-                        "status": "error",
-                        "error": (f"Candidate {candidate_id} " f"not found"),
+            return {
+                "status": "success",
+                "stale_count": len(stale_facts),
+                "stale_facts": [
+                    {
+                        "id": f.id,
+                        "content": (
+                            f.content[:100] + "..."
+                            if len(f.content) > 100
+                            else f.content
+                        ),
+                        "level": f.level.name,
+                        "domain": f.domain,
+                        "created_at": (f.created_at.isoformat()),
                     }
+                    for f in stale_facts[:20]
+                ],
+                "ttl_report": report.to_dict(),
+            }
+        except Exception as e:
+            return {"status": "error", "message": str(e)}
 
-                fact_id = c.store.add_fact(
-                    content=candidate["content"],
-                    level=MemoryLevel(candidate.get("level", 1)),
-                    domain=candidate.get("domain"),
-                    source="approved_candidate",
-                    confidence=candidate.get("confidence", 0.8),
-                )
-                c.events.notify("approve_candidate")
-                return {
-                    "status": "success",
-                    "fact_id": fact_id,
-                    "content": candidate["content"],
-                }
-            except Exception as e:
-                return {"status": "error", "error": str(e)}
+    @server.tool(
+        name="rlm_index_embeddings",
+        description="Generate embeddings for all facts "
+        "without embeddings. "
+        "Required for semantic routing.",
+    )
+    async def rlm_index_embeddings() -> Dict[str, Any]:
+        """Index all facts with embeddings."""
+        try:
+            indexed = router.index_all_facts()
+            return {
+                "status": "success",
+                "indexed_count": indexed,
+                "message": (f"Indexed {indexed} facts with embeddings"),
+            }
+        except Exception as e:
+            return {"status": "error", "message": str(e)}
 
-        @server.tool(
-            name="rlm_reject_candidate",
-            description=("Reject a pending fact candidate."),
-        )
-        async def rlm_reject_candidate(
-            candidate_id: str,
-        ) -> Dict[str, Any]:
-            """Reject a pending candidate."""
-            try:
-                return {
-                    "status": "success",
-                    "candidate_id": candidate_id,
-                    "action": "rejected",
-                }
-            except Exception as e:
-                return {"status": "error", "error": str(e)}
+    @server.tool(
+        name="rlm_get_hierarchy_stats",
+        description="Get statistics about the hierarchical " "memory store.",
+    )
+    async def rlm_get_hierarchy_stats() -> Dict[str, Any]:
+        """Get memory store statistics."""
+        try:
+            stats = store.get_stats()
+            causal_stats = causal_tracker.get_stats()
+            return {
+                "status": "success",
+                "memory_store": stats,
+                "causal_chains": causal_stats,
+            }
+        except Exception as e:
+            return {"status": "error", "message": str(e)}
 
-        @server.tool(
-            name="rlm_approve_all_candidates",
-            description=("Approve all pending fact candidates " "at once."),
-        )
-        async def rlm_approve_all_candidates() -> Dict[str, Any]:
-            """Approve all pending candidates."""
-            try:
-                pending = c.pending.approve_all()
-                approved_count = 0
-                for p in pending:
-                    try:
-                        c.store.add_fact(
-                            content=p.get("content", ""),
-                            level=MemoryLevel(p.get("level", 1)),
-                            domain=p.get("domain"),
-                            source="batch_approved",
-                            confidence=p.get("confidence", 0.7),
-                        )
-                        approved_count += 1
-                    except Exception:
-                        pass
+    @server.tool(
+        name="rlm_get_facts_by_domain",
+        description="Get all facts for a specific domain.",
+    )
+    async def rlm_get_facts_by_domain(
+        domain: str,
+        include_stale: bool = False,
+    ) -> Dict[str, Any]:
+        """Get facts for a domain."""
+        try:
+            facts = store.get_domain_facts(domain)
+            if not include_stale:
+                facts = [f for f in facts if not f.is_stale]
+            return {
+                "status": "success",
+                "domain": domain,
+                "facts_count": len(facts),
+                "facts": [
+                    {
+                        "id": f.id,
+                        "content": f.content,
+                        "level": f.level.name,
+                        "module": f.module,
+                        "is_stale": f.is_stale,
+                    }
+                    for f in facts
+                ],
+            }
+        except Exception as e:
+            return {"status": "error", "message": str(e)}
 
-                if approved_count > 0:
-                    c.events.notify("approve_all_candidates")
+    @server.tool(
+        name="rlm_list_domains",
+        description="List all discovered domains in the " "memory store.",
+    )
+    async def rlm_list_domains() -> Dict[str, Any]:
+        """List all domains."""
+        try:
+            domains = store.get_domains()
+            domain_counts = {}
+            for domain in domains:
+                facts = store.get_domain_facts(domain)
+                domain_counts[domain] = len(facts)
+            return {
+                "status": "success",
+                "domains": domains,
+                "domain_counts": domain_counts,
+                "total_domains": len(domains),
+            }
+        except Exception as e:
+            return {"status": "error", "message": str(e)}
 
-                return {
-                    "status": "success",
-                    "approved_count": approved_count,
-                    "total_pending": len(pending),
-                }
-            except Exception as e:
-                return {"status": "error", "error": str(e)}
+    @server.tool(
+        name="rlm_refresh_fact",
+        description="Refresh TTL for a fact, resetting its " "expiration timer.",
+    )
+    async def rlm_refresh_fact(
+        fact_id: str,
+    ) -> Dict[str, Any]:
+        """Refresh TTL for a fact."""
+        try:
+            success = ttl_manager.refresh_ttl(fact_id)
+            return {
+                "status": ("success" if success else "error"),
+                "fact_id": fact_id,
+                "message": ("TTL refreshed" if success else "Fact not found"),
+            }
+        except Exception as e:
+            return {"status": "error", "message": str(e)}
 
-        @server.tool(
-            name="rlm_extract_from_conversation",
-            description=(
-                "Extract facts from conversation text "
-                "using SFS (Significant Factual Shifts) "
-                "detection. Identifies decisions, "
-                "implementations, fixes, discoveries."
-            ),
-        )
-        async def rlm_extract_from_conversation(
-            text: str,
-            auto_approve: bool = False,
-        ) -> Dict[str, Any]:
-            """Extract facts from conversation text."""
-            try:
-                result = c.extractor.extract_from_conversation(text)
-                approved = 0
-                candidates = []
+    @server.tool(
+        name="rlm_delete_fact",
+        description="Delete a fact from the hierarchical " "memory store.",
+    )
+    async def rlm_delete_fact(
+        fact_id: str,
+    ) -> Dict[str, Any]:
+        """Delete a fact."""
+        try:
+            success = store.delete_fact(fact_id)
+            return {
+                "status": ("success" if success else "error"),
+                "fact_id": fact_id,
+                "message": ("Fact deleted" if success else "Fact not found"),
+            }
+        except Exception as e:
+            return {"status": "error", "message": str(e)}
 
-                for cand in result.candidates:
-                    d = cand.to_dict()
-                    if auto_approve and cand.confidence >= 0.7:
-                        c.store.add_fact(
-                            content=cand.content,
-                            level=cand.suggested_level,
-                            domain=cand.suggested_domain,
-                            source="conversation",
-                            confidence=cand.confidence,
-                        )
-                        d["auto_approved"] = True
-                        approved += 1
-                    candidates.append(d)
+    @server.tool(
+        name="rlm_consolidate_facts",
+        description="Consolidate granular facts into "
+        "higher-level summaries. "
+        "Aggregates L3→L2→L1 and deduplicates similar facts.",
+    )
+    async def rlm_consolidate_facts(
+        min_facts: int = 5,
+    ) -> Dict[str, Any]:
+        """Run fact consolidation."""
+        try:
+            from ..v2.consolidator import FactConsolidator
 
-                if approved > 0:
-                    c.events.notify("extract_from_conversation")
-
-                return {
-                    "status": "success",
-                    "candidates": candidates,
-                    "auto_approved": approved,
-                    "total_extracted": len(candidates),
-                }
-            except Exception as e:
-                return {"status": "error", "error": str(e)}
-
-        @server.tool(
-            name="rlm_consolidate_facts",
-            description=(
-                "Consolidate granular facts into "
-                "higher-level summaries. Aggregates "
-                "L3→L2→L1 and deduplicates similar "
-                "facts."
-            ),
-        )
-        async def rlm_consolidate_facts(
-            min_facts: int = 5,
-        ) -> Dict[str, Any]:
-            """Run fact consolidation."""
-            try:
-                all_facts = c.store.get_all_facts()
-                from collections import defaultdict
-
-                by_domain = defaultdict(list)
-                for f in all_facts:
-                    key = f.domain or "general"
-                    by_domain[key].append(f)
-
-                consolidated = 0
-                for domain, facts in by_domain.items():
-                    if len(facts) >= min_facts:
-                        consolidated += 1
-
-                c.events.notify("consolidate_facts")
-                return {
-                    "status": "success",
-                    "total_facts": len(all_facts),
-                    "domains_processed": len(by_domain),
-                    "groups_consolidated": consolidated,
-                }
-            except Exception as e:
-                return {"status": "error", "error": str(e)}
+            consolidator = FactConsolidator(
+                store=store,
+                min_facts_to_consolidate=min_facts,
+            )
+            result = consolidator.consolidate()
+            return {
+                "status": "success",
+                "merged_count": result.merged_count,
+                "promoted_count": result.promoted_count,
+                "archived_count": result.archived_count,
+                "new_summaries": result.new_summaries,
+            }
+        except Exception as e:
+            return {"status": "error", "message": str(e)}

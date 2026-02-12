@@ -3,28 +3,6 @@
 from rlm_toolkit.providers.base import LLMProvider, LLMResponse
 from rlm_toolkit.providers.retry import RetryConfig, Retrier
 from rlm_toolkit.providers.rate_limit import RateLimiter, RateLimitConfig, get_rate_limiter
-from rlm_toolkit.providers.resilience import (
-    CircuitBreaker,
-    CircuitBreakerRegistry,
-    CircuitOpenError,
-    CircuitState,
-    get_circuit_breaker,
-    get_all_circuit_breakers,
-    reset_all_circuit_breakers,
-)
-from rlm_toolkit.providers.pool import (
-    ConnectionPool,
-    PoolConfig,
-    PooledConnection,
-    get_connection_pool,
-    close_connection_pool,
-)
-from rlm_toolkit.providers.rotation import (
-    ModelRotator,
-    ModelConfig,
-    RotationStrategy,
-    FailoverRotator,
-)
 
 __all__ = [
     "LLMProvider",
@@ -34,25 +12,6 @@ __all__ = [
     "RateLimiter",
     "RateLimitConfig",
     "get_rate_limiter",
-    # Circuit Breaker (v2.4)
-    "CircuitBreaker",
-    "CircuitBreakerRegistry",
-    "CircuitOpenError",
-    "CircuitState",
-    "get_circuit_breaker",
-    "get_all_circuit_breakers",
-    "reset_all_circuit_breakers",
-    # Connection Pool (v2.4)
-    "ConnectionPool",
-    "PoolConfig",
-    "PooledConnection",
-    "get_connection_pool",
-    "close_connection_pool",
-    # Model Rotation (v2.4)
-    "ModelRotator",
-    "ModelConfig",
-    "RotationStrategy",
-    "FailoverRotator",
     # Core Providers (4)
     "OllamaProvider",
     "OpenAIProvider",
@@ -126,8 +85,6 @@ _EXTENDED_PROVIDERS = {
 }
 
 # Lazy imports
-
-
 def __getattr__(name):
     # Core providers
     if name == "OllamaProvider":
@@ -142,15 +99,15 @@ def __getattr__(name):
     elif name == "GeminiProvider":
         from rlm_toolkit.providers.google import GeminiProvider
         return GeminiProvider
-
+    
     # Compatible providers
     elif name in _COMPATIBLE_PROVIDERS:
         from rlm_toolkit.providers import compatible
         return getattr(compatible, name)
-
+    
     # Extended providers
     elif name in _EXTENDED_PROVIDERS:
         from rlm_toolkit.providers import extended
         return getattr(extended, name)
-
+    
     raise AttributeError(f"module {__name__!r} has no attribute {name!r}")

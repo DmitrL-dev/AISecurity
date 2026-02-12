@@ -31,7 +31,7 @@ rlm = RLM.from_openai("gpt-4o")
 
 # Простой запрос
 result = rlm.run("Объясни квантовые вычисления простыми словами")
-print(result.final_answer)
+print(result.answer)
 ```
 
 !!! tip "API ключ"
@@ -52,7 +52,7 @@ rlm.run("Меня зовут Алексей")
 
 # Память сохраняется
 result = rlm.run("Как меня зовут?")
-print(result.final_answer)  # "Вас зовут Алексей"
+print(result.answer)  # "Вас зовут Алексей"
 ```
 
 ## RAG Pipeline
@@ -66,14 +66,15 @@ from rlm_toolkit.embeddings import OpenAIEmbeddings
 # Загружаем документы
 docs = PDFLoader("отчёт.pdf").load()
 
-# Создаём векторное хранилище
-vectorstore = ChromaVectorStore.from_documents(
-    docs, 
-    OpenAIEmbeddings()
+# Создаём векторное хранилище и добавляем документы
+vectorstore = ChromaVectorStore(
+    collection_name="reports",
+    embedding_function=OpenAIEmbeddings()
 )
+vectorstore.add_documents(docs)
 
 # Запрос с RAG
-rlm = RLM.from_openai("gpt-4o", retriever=vectorstore.as_retriever())
+rlm = RLM.from_openai("gpt-4o", retriever=vectorstore)
 result = rlm.run("Какие ключевые выводы?")
 ```
 
@@ -85,15 +86,15 @@ result = rlm.run("Какие ключевые выводы?")
 from rlm_toolkit import RLM, RLMConfig
 
 config = RLMConfig(
-    enable_infiniretri=True,
-    infiniretri_threshold=50000
+    use_infiniretri=True,
+    infiniretri_threshold=100_000
 )
 
 rlm = RLM.from_openai("gpt-4o", config=config)
 result = rlm.run("Найди бюджет за Q3", context=massive_document)
 ```
 
-## VS Code Extension (v1.2.1)
+## VS Code Extension (v2.1.0)
 
 Установите расширение RLM-Toolkit для отслеживания экономии токенов:
 

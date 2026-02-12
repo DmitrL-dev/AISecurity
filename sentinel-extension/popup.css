@@ -1,0 +1,291 @@
+/* SENTINEL Guard — Popup Styles */
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  width: 380px;
+  background: #0f172a;
+  color: #e2e8f0;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  font-size: 13px;
+  overflow-x: hidden;
+}
+
+/* ============================================================
+   Header
+   ============================================================ */
+
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px;
+  background: linear-gradient(135deg, #0f172a, #1e293b);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.header-brand {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.header-icon {
+  color: #10B981;
+  filter: drop-shadow(0 0 8px rgba(16, 185, 129, 0.4));
+}
+
+.header-title {
+  font-size: 16px;
+  font-weight: 700;
+  color: #f8fafc;
+  letter-spacing: -0.02em;
+}
+
+.header-subtitle {
+  font-size: 11px;
+  color: #64748b;
+  font-weight: 400;
+  margin-top: 1px;
+}
+
+/* ============================================================
+   Toggle Switch
+   ============================================================ */
+
+.toggle {
+  position: relative;
+  display: inline-block;
+  width: 44px;
+  height: 24px;
+}
+
+.toggle-sm {
+  width: 36px;
+  height: 20px;
+}
+
+.toggle input {
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+.toggle-slider {
+  position: absolute;
+  cursor: pointer;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: #334155;
+  border-radius: 24px;
+  transition: 0.3s;
+}
+
+.toggle-slider::before {
+  content: '';
+  position: absolute;
+  width: 18px;
+  height: 18px;
+  left: 3px;
+  bottom: 3px;
+  background: white;
+  border-radius: 50%;
+  transition: 0.3s;
+}
+
+.toggle-sm .toggle-slider::before {
+  width: 14px;
+  height: 14px;
+}
+
+.toggle input:checked + .toggle-slider {
+  background: #10B981;
+}
+
+.toggle input:checked + .toggle-slider::before {
+  transform: translateX(20px);
+}
+
+.toggle-sm input:checked + .toggle-slider::before {
+  transform: translateX(16px);
+}
+
+/* ============================================================
+   Status Card
+   ============================================================ */
+
+.status-card {
+  text-align: center;
+  padding: 20px 16px;
+  background: linear-gradient(135deg, rgba(16, 185, 129, 0.1), rgba(16, 185, 129, 0.02));
+  border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+}
+
+.status-card.status-block {
+  background: linear-gradient(135deg, rgba(239, 68, 68, 0.15), rgba(239, 68, 68, 0.02));
+}
+
+.status-card.status-warn {
+  background: linear-gradient(135deg, rgba(245, 158, 11, 0.15), rgba(245, 158, 11, 0.02));
+}
+
+.status-card.status-disabled {
+  background: linear-gradient(135deg, rgba(100, 116, 139, 0.1), rgba(100, 116, 139, 0.02));
+}
+
+.status-icon {
+  font-size: 32px;
+  margin-bottom: 8px;
+}
+
+.status-text {
+  font-size: 16px;
+  font-weight: 600;
+  color: #f8fafc;
+  margin-bottom: 4px;
+}
+
+.status-detail {
+  font-size: 12px;
+  color: #94a3b8;
+}
+
+/* ============================================================
+   Stats Grid
+   ============================================================ */
+
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 8px;
+  padding: 12px 16px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+}
+
+.stat-card {
+  text-align: center;
+  padding: 10px 4px;
+  background: rgba(255, 255, 255, 0.03);
+  border-radius: 8px;
+  border: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.stat-value {
+  font-size: 20px;
+  font-weight: 700;
+  color: #f8fafc;
+  font-variant-numeric: tabular-nums;
+}
+
+.stat-blocked .stat-value { color: #EF4444; }
+.stat-warned .stat-value { color: #F59E0B; }
+.stat-safe .stat-value { color: #10B981; }
+
+.stat-label {
+  font-size: 10px;
+  color: #64748b;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin-top: 2px;
+}
+
+/* ============================================================
+   Last Scan
+   ============================================================ */
+
+.last-scan {
+  padding: 12px 16px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+}
+
+.last-scan-header {
+  font-size: 10px;
+  color: #64748b;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin-bottom: 6px;
+}
+
+.last-scan-result {
+  font-size: 12px;
+  color: #94a3b8;
+  line-height: 1.4;
+}
+
+/* ============================================================
+   Settings
+   ============================================================ */
+
+.settings {
+  padding: 12px 16px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+}
+
+.setting-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 0;
+}
+
+.setting-row label {
+  font-size: 12px;
+  color: #94a3b8;
+}
+
+.setting-row select {
+  background: #1e293b;
+  color: #e2e8f0;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 6px;
+  padding: 4px 8px;
+  font-size: 12px;
+  outline: none;
+}
+
+.setting-row select:focus {
+  border-color: #10B981;
+}
+
+.input-api {
+  background: #1e293b;
+  color: #e2e8f0;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 6px;
+  padding: 4px 8px;
+  font-size: 12px;
+  width: 180px;
+  outline: none;
+}
+
+.input-api:focus {
+  border-color: #10B981;
+}
+
+.input-api::placeholder {
+  color: #475569;
+}
+
+/* ============================================================
+   Footer
+   ============================================================ */
+
+.footer {
+  display: flex;
+  justify-content: space-between;
+  padding: 10px 16px;
+  font-size: 11px;
+  color: #475569;
+}
+
+.footer a {
+  color: #10B981;
+  text-decoration: none;
+}
+
+.footer a:hover {
+  text-decoration: underline;
+}

@@ -200,7 +200,7 @@ rlm = RLM.from_openai(
 
 # Ask questions
 result = rlm.run("What are the key findings in the report?")
-print(result.final_answer)
+print(result.answer)
 
 # Access retrieved documents
 for doc in result.context_documents:
@@ -293,7 +293,7 @@ class RAGApplication:
     def query(self, question: str) -> str:
         """Query the RAG system."""
         result = self.rlm.run(question)
-        return result.final_answer
+        return result.answer
     
     def interactive(self):
         """Run interactive Q&A session."""
@@ -331,8 +331,8 @@ For very large documents (100K+ tokens), use InfiniRetri:
 from rlm_toolkit import RLM, RLMConfig
 
 config = RLMConfig(
-    enable_infiniretri=True,
-    infiniretri_threshold=50000  # Token threshold
+    use_infiniretri=True,
+    infiniretri_threshold=100_000  # Token threshold
 )
 
 rlm = RLM.from_openai(

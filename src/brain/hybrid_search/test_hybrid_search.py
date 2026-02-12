@@ -7,9 +7,12 @@ Tests Node, Journal, Config, SearchPolicy, and HybridAgent.
 import pytest
 from pathlib import Path
 import tempfile
+import sys
 
-# Use relative imports for Docker compatibility
-from brain.hybrid_search import (
+# Add src to path for testing
+sys.path.insert(0, str(Path(__file__).parent.parent.parent.parent))
+
+from src.brain.hybrid_search import (
     SearchNode,
     SearchJournal,
     HybridConfig,

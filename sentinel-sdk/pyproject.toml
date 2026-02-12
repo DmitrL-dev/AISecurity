@@ -1,0 +1,75 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "sentinel-shield"
+version = "0.1.0"
+description = "Python SDK for SENTINEL AI Firewall — sub-millisecond prompt injection detection"
+readme = "README.md"
+license = "Apache-2.0"
+requires-python = ">=3.9"
+authors = [{ name = "SENTINEL Team", email = "security@sentinel.dev" }]
+keywords = [
+    "ai-security",
+    "llm-security",
+    "prompt-injection",
+    "firewall",
+    "sentinel",
+    "guardrails",
+]
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: Apache Software License",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Topic :: Security",
+    "Topic :: Scientific/Engineering :: Artificial Intelligence",
+    "Typing :: Typed",
+]
+
+dependencies = [
+    "httpx>=0.24.0",
+    "pydantic>=2.0",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=7.0",
+    "pytest-asyncio>=0.21",
+    "respx>=0.21",
+    "mypy>=1.0",
+    "ruff>=0.1",
+]
+
+[project.urls]
+Homepage = "https://github.com/DmitrL-dev/AISecurity"
+Documentation = "https://sentinel.dev/docs/sdk/python"
+Repository = "https://github.com/DmitrL-dev/AISecurity"
+Issues = "https://github.com/DmitrL-dev/AISecurity/issues"
+
+[tool.hatch.build.targets.wheel]
+packages = ["sentinel_shield"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+asyncio_mode = "auto"
+
+[tool.mypy]
+python_version = "3.9"
+strict = true
+warn_return_any = true
+warn_unused_configs = true
+
+[tool.ruff]
+line-length = 88
+target-version = "py39"
+
+[tool.ruff.lint]
+select = ["E", "F", "W", "I", "N", "UP", "S", "B", "A", "C4", "SIM"]

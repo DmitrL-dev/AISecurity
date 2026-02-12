@@ -200,7 +200,7 @@ rlm = RLM.from_openai(
 
 # Задаём вопросы
 result = rlm.run("Каковы ключевые выводы отчёта?")
-print(result.final_answer)
+print(result.answer)
 
 # Доступ к извлечённым документам
 for doc in result.context_documents:
@@ -293,7 +293,7 @@ class RAGApplication:
     def query(self, question: str) -> str:
         """Запрос к RAG-системе."""
         result = self.rlm.run(question)
-        return result.final_answer
+        return result.answer
     
     def interactive(self):
         """Запуск интерактивной сессии вопросов и ответов."""
@@ -331,8 +331,8 @@ if __name__ == "__main__":
 from rlm_toolkit import RLM, RLMConfig
 
 config = RLMConfig(
-    enable_infiniretri=True,
-    infiniretri_threshold=50000  # Порог токенов
+    use_infiniretri=True,
+    infiniretri_threshold=100_000  # Порог токенов
 )
 
 rlm = RLM.from_openai(

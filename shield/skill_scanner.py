@@ -284,6 +284,82 @@ THREAT_DB: list[ThreatPattern] = [
             r"navigator\.clipboard",
         ],
     ),
+    # === SANDBOX ESCAPE: Monty/Pyodide/E2B ===
+    ThreatPattern(
+        id="SANDBOX-001",
+        category="sandbox_escape",
+        severity="critical",
+        name="Unsafe Host Function Exposure",
+        description=(
+            "Exposes dangerous host functions to sandbox "
+            "(Monty/Pyodide) — agent can call os/fs/net"
+        ),
+        patterns=[
+            r"add_function.*os\.",
+            r"add_function.*subprocess",
+            r"add_function.*open\b",
+            r"add_function.*exec\b",
+            r"register_tool.*os\.",
+            r"register_tool.*subprocess",
+            r"host_functions.*\bopen\b",
+            r"host_functions.*\bexec\b",
+            r"external_call.*shell",
+            r"pydantic.monty.*os\.",
+            r"CodeModeToolset.*os\.",
+        ],
+    ),
+    ThreatPattern(
+        id="SANDBOX-002",
+        category="sandbox_escape",
+        severity="critical",
+        name="Code Generation for Sandbox",
+        description=(
+            "Generates Python code for LLM sandbox "
+            "execution — potential injection vector"
+        ),
+        patterns=[
+            r"monty\.run\(",
+            r"monty\.execute\(",
+            r"pyodide\.runPython",
+            r"e2b.*sandbox.*exec",
+            r"CodeModeToolset\(",
+            r"code_interpreter.*exec",
+            r"run_code_in_sandbox",
+        ],
+    ),
+    ThreatPattern(
+        id="SANDBOX-003",
+        category="sandbox_escape",
+        severity="high",
+        name="Sandbox Snapshot Manipulation",
+        description=(
+            "Dumps/loads sandbox state — can persist "
+            "malicious code across executions"
+        ),
+        patterns=[
+            r"monty\.dump\(",
+            r"monty\.load\(",
+            r"snapshot.*interpreter",
+            r"serialize.*sandbox",
+            r"pickle\.loads.*sandbox",
+        ],
+    ),
+    ThreatPattern(
+        id="SANDBOX-004",
+        category="sandbox_escape",
+        severity="high",
+        name="Import Smuggling in Sandbox",
+        description=(
+            "Attempts to import dangerous modules " "inside sandboxed execution"
+        ),
+        patterns=[
+            r"__import__\(",
+            r"importlib\.import_module",
+            r"builtins\.__import__",
+            r"__builtins__\[",
+            r"globals\(\)\[.*import",
+        ],
+    ),
 ]
 
 
@@ -474,6 +550,7 @@ CATEGORY_NAMES = {
     "credential_theft": "🔑 Кража учётных данных",
     "cross_tool": "🔗 Межинструментная атака",
     "privacy": "👁️ Нарушение приватности",
+    "sandbox_escape": "🏗️ Побег из песочницы",
 }
 
 

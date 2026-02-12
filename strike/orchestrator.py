@@ -24,7 +24,6 @@ logger = logging.getLogger(__name__)
 
 class OrchestratorState(Enum):
     """State machine for orchestrator."""
-
     IDLE = "idle"
     RUNNING = "running"
     PAUSED = "paused"
@@ -61,7 +60,6 @@ class StrikeConfig:
 @dataclass
 class Message:
     """Conversation message."""
-
     role: str  # system, user, assistant
     content: str
     timestamp: datetime = field(default_factory=datetime.now)
@@ -71,7 +69,6 @@ class Message:
 @dataclass
 class StrikeResult:
     """Result from single attack iteration."""
-
     success: bool
     vector_name: str
     response: str
@@ -83,7 +80,6 @@ class StrikeResult:
 @dataclass
 class StrikeReport:
     """Final report from Strike operation."""
-
     target: str
     started_at: datetime
     completed_at: Optional[datetime] = None
@@ -132,11 +128,6 @@ class StrikeOrchestrator:
         self.results: List[StrikeResult] = []
         self.report: Optional[StrikeReport] = None
 
-        # Live progress tracking
-        self.current_vector: Optional[str] = None
-        self.current_category: Optional[str] = None
-        self.last_error: Optional[str] = None
-
         # Timing
         self.started_at: Optional[datetime] = None
         self.deadline: Optional[datetime] = None
@@ -149,7 +140,6 @@ class StrikeOrchestrator:
     def context_manager(self):
         if self._context_manager is None:
             from .context_manager import ContextManager
-
             self._context_manager = ContextManager(max_tokens=200_000)
         return self._context_manager
 
@@ -157,7 +147,6 @@ class StrikeOrchestrator:
     def session_manager(self):
         if self._session_manager is None:
             from .session import SessionManager
-
             self._session_manager = SessionManager(self.config.session_dir)
         return self._session_manager
 
@@ -165,7 +154,6 @@ class StrikeOrchestrator:
     def hydra(self):
         if self._hydra is None:
             from .hydra.core import HydraCore, OperationMode
-
             self._hydra = HydraCore(mode=OperationMode.SHADOW)
         return self._hydra
 
@@ -174,15 +162,13 @@ class StrikeOrchestrator:
         if self._stealth is None and self.config.stealth_enabled:
             try:
                 import sys
-
                 sys.path.insert(
-                    0, str(Path(__file__).parent.parent.parent.parent / "stealth")
-                )
+                    0, str(Path(__file__).parent.parent.parent.parent / "stealth"))
                 from stealth_layer import StealthLayer
-
                 self._stealth = StealthLayer.from_env()
             except ImportError:
-                logger.warning("Stealth Layer not available, running without VPN")
+                logger.warning(
+                    "Stealth Layer not available, running without VPN")
                 self._stealth = None
         return self._stealth
 
@@ -197,9 +183,8 @@ class StrikeOrchestrator:
         """
         self.state = OrchestratorState.RUNNING
         self.started_at = datetime.now()
-        self.deadline = self.started_at + timedelta(
-            minutes=self.config.duration_minutes
-        )
+        self.deadline = self.started_at + \
+            timedelta(minutes=self.config.duration_minutes)
 
         # Initialize report
         self.report = StrikeReport(
@@ -225,10 +210,6 @@ class StrikeOrchestrator:
                 action = await self._plan_next_action()
 
                 # Execute action
-                self.current_vector = action.get("vector", {}).get("name", "unknown")
-                self.current_category = action.get("vector", {}).get(
-                    "category", "attack"
-                )
                 result = await self._execute_action(action)
 
                 # Process result
@@ -278,11 +259,11 @@ class StrikeOrchestrator:
     def _add_system_prompt(self):
         """Add ARTEMIS-style system prompt."""
         prompt = self._get_system_prompt()
-        self.conversation.append(
-            Message(
-                role="system", content=prompt, tokens=len(prompt) // 4  # rough estimate
-            )
-        )
+        self.conversation.append(Message(
+            role="system",
+            content=prompt,
+            tokens=len(prompt) // 4  # rough estimate
+        ))
 
     def _get_system_prompt(self) -> str:
         """Generate supervisor system prompt."""
@@ -392,13 +373,12 @@ Respond with JSON: {{"vector": "...", "reasoning": "..."}}"""
 
         # Fallback: simple rotation through vectors
         from .attacks import get_next_vector
-
         vector = await get_next_vector(self.results)
 
         return {
             "type": "attack",
             "vector": vector,
-            "reasoning": f"Trying vector: {vector.get('name', 'unknown')}",
+            "reasoning": f"Trying vector: {vector.get('name', 'unknown')}"
         }
 
     async def _execute_action(self, action: Dict[str, Any]) -> StrikeResult:
@@ -412,24 +392,20 @@ Respond with JSON: {{"vector": "...", "reasoning": "..."}}"""
                 session = await self.stealth.session()
             else:
                 import aiohttp
-
                 session = aiohttp.ClientSession()
 
             async with session:
                 # Execute attack
                 payload = {
                     "model": self.config.target_model or "gpt-4",
-                    "messages": [{"role": "user", "content": vector.get("prompt", "")}],
+                    "messages": [{"role": "user", "content": vector.get("prompt", "")}]
                 }
 
                 async with session.post(
                     self.config.target_url,
                     json=payload,
-                    headers=(
-                        {"Authorization": f"Bearer {self.config.target_api_key}"}
-                        if self.config.target_api_key
-                        else {}
-                    ),
+                    headers={
+                        "Authorization": f"Bearer {self.config.target_api_key}"} if self.config.target_api_key else {}
                 ) as response:
                     data = await response.json()
 
@@ -455,13 +431,9 @@ Respond with JSON: {{"vector": "...", "reasoning": "..."}}"""
         content = str(response).lower()
 
         refusal_patterns = [
-            "i can't",
-            "i cannot",
-            "i'm not able",
-            "i apologize",
-            "against my guidelines",
-            "i'm sorry",
-            "as an ai",
+            "i can't", "i cannot", "i'm not able",
+            "i apologize", "against my guidelines",
+            "i'm sorry", "as an ai"
         ]
 
         for pattern in refusal_patterns:
@@ -483,43 +455,38 @@ Respond with JSON: {{"vector": "...", "reasoning": "..."}}"""
 
         if result.success:
             self.report.successful_attacks += 1
-            self.report.vulnerabilities.append(
-                {
-                    "vector": result.vector_name,
-                    "response": result.response[:500],
-                    "severity": result.severity or "medium",
-                    "timestamp": datetime.now().isoformat(),
-                }
-            )
+            self.report.vulnerabilities.append({
+                "vector": result.vector_name,
+                "response": result.response[:500],
+                "severity": result.severity or "medium",
+                "timestamp": datetime.now().isoformat(),
+            })
             logger.info(f"✅ SUCCESS: {result.vector_name}")
         else:
             logger.debug(f"❌ Failed: {result.vector_name}")
 
         # Add to conversation context
-        self.conversation.append(
-            Message(
-                role="assistant",
-                content=f"Tried {result.vector_name}: {'SUCCESS' if result.success else 'FAILED'}",
-            )
-        )
+        self.conversation.append(Message(
+            role="assistant",
+            content=f"Tried {result.vector_name}: {'SUCCESS' if result.success else 'FAILED'}",
+        ))
 
     async def _summarize_context(self):
         """Summarize old context to stay within limits."""
         logger.info("📝 Summarizing context...")
         self.conversation = await self.context_manager.summarize(
-            self.conversation, preserve_recent=20
+            self.conversation,
+            preserve_recent=20
         )
 
     def _checkpoint(self):
         """Save session checkpoint."""
         if self.session_manager:
-            self.session_manager.save(
-                {
-                    "iteration": self.iteration,
-                    "results": [r.__dict__ for r in self.results],
-                    "conversation": [m.__dict__ for m in self.conversation],
-                }
-            )
+            self.session_manager.save({
+                "iteration": self.iteration,
+                "results": [r.__dict__ for r in self.results],
+                "conversation": [m.__dict__ for m in self.conversation],
+            })
 
     def _save_report(self):
         """Save final report."""
@@ -529,25 +496,16 @@ Respond with JSON: {{"vector": "...", "reasoning": "..."}}"""
         filename = f"strike_report_{datetime.now().strftime('%Y%m%d_%H%M%S')}.json"
 
         import json
-
-        with open(report_path / filename, "w") as f:
-            json.dump(
-                {
-                    "target": self.report.target,
-                    "started_at": self.report.started_at.isoformat(),
-                    "completed_at": (
-                        self.report.completed_at.isoformat()
-                        if self.report.completed_at
-                        else None
-                    ),
-                    "iterations": self.report.iterations,
-                    "successful_attacks": self.report.successful_attacks,
-                    "success_rate": self.report.success_rate,
-                    "vulnerabilities": self.report.vulnerabilities,
-                },
-                f,
-                indent=2,
-            )
+        with open(report_path / filename, 'w') as f:
+            json.dump({
+                "target": self.report.target,
+                "started_at": self.report.started_at.isoformat(),
+                "completed_at": self.report.completed_at.isoformat() if self.report.completed_at else None,
+                "iterations": self.report.iterations,
+                "successful_attacks": self.report.successful_attacks,
+                "success_rate": self.report.success_rate,
+                "vulnerabilities": self.report.vulnerabilities,
+            }, f, indent=2)
 
         logger.info(f"📄 Report saved: {report_path / filename}")
 
@@ -574,7 +532,4 @@ Respond with JSON: {{"vector": "...", "reasoning": "..."}}"""
             "time_remaining": self._time_remaining(),
             "successful_attacks": len([r for r in self.results if r.success]),
             "total_attempts": len(self.results),
-            "current_payload": self.current_vector,
-            "current_category": self.current_category,
-            "last_error": self.last_error,
         }

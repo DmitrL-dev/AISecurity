@@ -61,7 +61,7 @@ rlm.run("I prefer Python and TensorFlow.")
 
 # Query accumulated knowledge
 result = rlm.run("What do you know about me?")
-print(result.final_answer)
+print(result.answer)
 # "You're Sarah, a data scientist at Netflix specializing in 
 #  recommendation systems. You prefer Python and TensorFlow."
 ```
@@ -279,7 +279,7 @@ Use your knowledge of the user to personalize responses."""
     def chat(self, message: str) -> str:
         """Process a chat message."""
         result = self.rlm.run(message)
-        return result.final_answer
+        return result.answer
     
     def get_memory_stats(self) -> dict:
         """Get current memory statistics."""

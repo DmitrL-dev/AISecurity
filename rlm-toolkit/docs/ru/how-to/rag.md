@@ -68,12 +68,12 @@ from rlm_toolkit import RLMConfig
 from rlm_toolkit.retrieval import InfiniRetriConfig
 
 config = RLMConfig(
-    enable_infiniretri=True,
+    use_infiniretri=True,
     infiniretri_config=InfiniRetriConfig(
         chunk_size=4000,
         top_k=5
     ),
-    infiniretri_threshold=50000
+    infiniretri_threshold=100_000
 )
 
 rlm = RLM.from_openai("gpt-4o", config=config)

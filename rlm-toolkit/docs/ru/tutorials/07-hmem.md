@@ -61,7 +61,7 @@ rlm.run("Предпочитаю Python и TensorFlow.")
 
 # Запрашиваем накопленные знания
 result = rlm.run("Что ты знаешь обо мне?")
-print(result.final_answer)
+print(result.answer)
 # "Вы Сара, дата-сайентист в Netflix, специализируетесь на
 #  рекомендательных системах. Предпочитаете Python и TensorFlow."
 ```
@@ -279,7 +279,7 @@ class PersonalAssistant:
     def chat(self, message: str) -> str:
         """Обработка сообщения чата."""
         result = self.rlm.run(message)
-        return result.final_answer
+        return result.answer
     
     def get_memory_stats(self) -> dict:
         """Получение статистики памяти."""

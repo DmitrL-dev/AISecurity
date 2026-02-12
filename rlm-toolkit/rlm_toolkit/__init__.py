@@ -47,16 +47,17 @@ API Reference:
 - RLMResult: Execution result with answer, cost, iterations
 - InfiniRetriever: Attention-based infinite context retrieval
 
-Version: 2.0.0a1
+Version: 2.3.1
 License: Apache-2.0
 """
 
-__version__ = "2.0.0a1"
+__version__ = "2.3.1"
 __author__ = "SENTINEL Team"
 __license__ = "Apache-2.0"
 
 # Public API - lazy imports for optional dependencies
 from rlm_toolkit.core.engine import RLM, RLMConfig, RLMResult
+from rlm_toolkit.core.config import SecurityConfig
 from rlm_toolkit.core.state import RLMState
 from rlm_toolkit.core.repl import SecureREPL, SecurityViolation
 from rlm_toolkit.core.callbacks import RLMCallback, CallbackManager
@@ -71,6 +72,7 @@ except ImportError:
 
 # Type hints
 from typing import TYPE_CHECKING
+
 if TYPE_CHECKING:
     from rlm_toolkit.providers import (
         LLMProvider,
@@ -90,6 +92,7 @@ __all__ = [
     "RLMResult",
     "RLMState",
     # Security
+    "SecurityConfig",
     "SecureREPL",
     "SecurityViolation",
     # Callbacks
@@ -101,4 +104,3 @@ __all__ = [
     "InfiniRetriever",
     "INFINIRETRI_AVAILABLE",
 ]
-

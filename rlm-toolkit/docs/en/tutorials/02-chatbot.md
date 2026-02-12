@@ -28,11 +28,11 @@ rlm = RLM.from_openai("gpt-4o")
 
 # First message
 result = rlm.run("Hi, my name is Alice")
-print(result.final_answer)
+print(result.answer)
 
 # Second message - it won't remember!
 result = rlm.run("What's my name?")
-print(result.final_answer)  # "I don't know your name"
+print(result.answer)  # "I don't know your name"
 ```
 
 The problem: the chatbot doesn't remember anything between messages.
@@ -54,7 +54,7 @@ rlm = RLM.from_openai("gpt-4o", memory=memory)
 # Now it remembers!
 rlm.run("Hi, my name is Alice")
 result = rlm.run("What's my name?")
-print(result.final_answer)  # "Your name is Alice"
+print(result.answer)  # "Your name is Alice"
 ```
 
 ## Step 3: Add Hierarchical Memory (H-MEM)
@@ -82,7 +82,7 @@ rlm.run("I'm building a chatbot for my company.")
 
 # Later, it remembers high-level concepts
 result = rlm.run("What do you know about me?")
-print(result.final_answer)
+print(result.answer)
 # "You're Bob, a software engineer specializing in Python and ML..."
 ```
 
@@ -106,10 +106,10 @@ rlm.run("Mary is John's sister and she's a doctor")
 
 # Query specific entities
 result = rlm.run("How old is John?")
-print(result.final_answer)  # "John is 30 years old"
+print(result.answer)  # "John is 30 years old"
 
 result = rlm.run("What does Mary do?")
-print(result.final_answer)  # "Mary is a doctor"
+print(result.answer)  # "Mary is a doctor"
 ```
 
 ## Step 5: Persistent Memory
@@ -138,7 +138,7 @@ hmem2 = HierarchicalMemory(persist_directory="./memory_store")
 rlm2 = RLM.from_openai("gpt-4o", memory=hmem2)
 
 result = rlm2.run("When is my birthday?")
-print(result.final_answer)  # "Your birthday is March 15th"
+print(result.answer)  # "Your birthday is March 15th"
 ```
 
 ## Complete Chatbot Application
@@ -208,7 +208,7 @@ def main():
         
         # Get response
         result = rlm.run(user_input)
-        print(f"\n🤖 Aria: {result.final_answer}")
+        print(f"\n🤖 Aria: {result.answer}")
 
 if __name__ == "__main__":
     main()

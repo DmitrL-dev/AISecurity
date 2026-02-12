@@ -17,7 +17,7 @@ from .models import (
 )
 from .storage import StateStorage, AuditAction, AuditLogEntry
 from .manager import MemoryBridgeManager
-from .mcp_tools import register_memory_bridge_tools
+from .tools import register_memory_bridge_v2_tools
 
 __all__ = [
     # Enums
@@ -35,8 +35,8 @@ __all__ = [
     # Core Classes
     "StateStorage",
     "MemoryBridgeManager",
-    # MCP Integration
-    "register_memory_bridge_tools",
+    # MCP Integration (unified v1+v2)
+    "register_memory_bridge_v2_tools",
 ]
 
-__version__ = "1.1.0"
+__version__ = "2.1.0"

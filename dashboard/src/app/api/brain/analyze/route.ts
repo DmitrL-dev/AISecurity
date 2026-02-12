@@ -1,54 +1,34 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { BRAIN_API_URL } from '@/lib/brain-api';
 
-// Track if BRAIN has been successfully contacted (models loaded)
-let isWarmedUp = false;
-
-// Adaptive timeout: 60s for cold start, 5s after warmup
-function getTimeout(): number {
-  return isWarmedUp ? 5000 : 60000;
-}
-
 // Mock response when BRAIN is unavailable
 function generateMockResponse(text: string) {
+  const lowerText = text.toLowerCase();
   
-  // Pattern detection with scoring
-  const patterns = [
-    { regex: /ignore.*(?:previous|prior|above).*instructions?/i, engine: 'injection', type: 'instruction_override', score: 40 },
-    { regex: /system\s*prompt/i, engine: 'prompt_leak', type: 'extraction_attempt', score: 35 },
-    { regex: /(?:dan|jailbreak|bypass|pretend)/i, engine: 'jailbreak', type: 'role_manipulation', score: 45 },
-    { regex: /(?:you are now|act as|roleplay)/i, engine: 'behavioral', type: 'persona_injection', score: 25 },
-    { regex: /(?:api[_\s]?key|password|secret|ssn|credit.?card)/i, engine: 'pii', type: 'credential_exposure', score: 30 },
-  ];
-
-  const details: any[] = [];
-  let score = 0;
-
-  for (const pattern of patterns) {
-    if (pattern.regex.test(text)) {
-      score += pattern.score;
-      details.push({
-        engine: pattern.engine,
-        threat_type: pattern.type,
-        confidence: 0.75 + Math.random() * 0.2,
-        description: `Detected ${pattern.type.replace(/_/g, ' ')} pattern`,
-      });
-    }
+  // Check for common attack patterns
+  const injectionPatterns = ['ignore', 'forget', 'previous instructions', 'system prompt', 'dan', 'jailbreak'];
+  const piiPatterns = ['ssn', 'social security', 'credit card', 'password', 'api key'];
+  
+  const hasInjection = injectionPatterns.some(p => lowerText.includes(p));
+  const hasPII = piiPatterns.some(p => lowerText.includes(p));
+  
+  if (hasInjection || hasPII) {
+    return {
+      is_safe: false,
+      risk_score: hasInjection ? 0.85 : 0.65,
+      processing_time_ms: Math.floor(50 + Math.random() * 100),
+      detections: [
+        ...(hasInjection ? [{ engine: 'injection', threat_type: 'Prompt Injection', confidence: 0.9, details: 'Detected instruction override attempt' }] : []),
+        ...(hasPII ? [{ engine: 'pii', threat_type: 'PII Request', confidence: 0.8, details: 'Detected sensitive data request' }] : []),
+      ],
+    };
   }
-
-  score = Math.min(100, score);
-  const riskLevel = score >= 80 ? 'critical' : score >= 60 ? 'high' : score >= 30 ? 'medium' : 'low';
-
+  
   return {
-    is_safe: score < 50,
-    risk_score: score,
-    risk_level: riskLevel,
-    verdict: score >= 50 ? 'BLOCKED' : 'ALLOWED',
-    engines_triggered: details.map(d => d.engine),
-    processing_time_ms: Math.floor(50 + Math.random() * 100),
-    latency_ms: Math.floor(50 + Math.random() * 100),
-    details,
-    detections: details, // backward compat
+    is_safe: true,
+    risk_score: Math.random() * 0.2,
+    processing_time_ms: Math.floor(30 + Math.random() * 50),
+    detections: [],
   };
 }
 
@@ -66,22 +46,20 @@ export async function POST(request: NextRequest) {
       };
       
       const url = `${BRAIN_API_URL}/v1/analyze`;
-      const timeout = getTimeout();
-      console.log(`[BRAIN] Calling: ${url} (timeout: ${timeout}ms, warmed: ${isWarmedUp})`);
+      console.log(`[BRAIN] Calling: ${url}`);
       
       const res = await fetch(url, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(brainPayload),
-        signal: AbortSignal.timeout(timeout),
+        signal: AbortSignal.timeout(30000), // 30s timeout for first request (model loading)
       });
       
       console.log(`[BRAIN] Response status: ${res.status}`);
       
       if (res.ok) {
         const data = await res.json();
-        isWarmedUp = true; // Mark as warmed up after first success
-        console.log(`[BRAIN] Success, risk_score: ${data.risk_score}, now warmed up`);
+        console.log(`[BRAIN] Success, risk_score: ${data.risk_score}`);
         return NextResponse.json({
           ...data,
           is_safe: data.verdict === 'ALLOW' || data.is_safe,
@@ -102,8 +80,8 @@ export async function POST(request: NextRequest) {
       ...mockData,
       _mock: true,
     });
-  } catch (_error) {
-    console.error('[BRAIN] Fatal error:', _error);
+  } catch (error) {
+    console.error('[BRAIN] Fatal error:', error);
     return NextResponse.json(
       { error: 'Failed to analyze' },
       { status: 500 }

@@ -1,0 +1,89 @@
+# SENTINEL Shield — Full Development Stack
+# Usage: docker compose -f deploy/docker/docker-compose.full.yml up -d
+# API: http://localhost:8080  |  Dashboard: http://localhost:3000
+
+version: '3.9'
+
+services:
+  shield-api:
+    build:
+      context: ../..
+      dockerfile: deploy/docker/Dockerfile.shield
+    container_name: sentinel-shield-full
+    ports:
+      - "8080:8080"
+    environment:
+      - SENTINEL_MODE=development
+      - SENTINEL_LOG_LEVEL=debug
+      - SENTINEL_PATTERNS_PATH=/app/patterns
+      - SENTINEL_AUTH_ENABLED=false
+      - SENTINEL_CORS_ORIGINS=*
+      - SENTINEL_REDIS_URL=redis://redis:6379
+    volumes:
+      - ../../shield:/app/shield:ro
+      - ../../patterns:/app/patterns:ro
+    depends_on:
+      redis:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+    restart: unless-stopped
+
+  sentinel-core:
+    build:
+      context: ../../sentinel-core
+      dockerfile: Dockerfile
+    container_name: sentinel-core
+    ports:
+      - "50051:50051"
+    environment:
+      - RUST_LOG=info
+      - SENTINEL_GRPC_PORT=50051
+    restart: unless-stopped
+
+  dashboard:
+    image: nginx:alpine
+    container_name: sentinel-dashboard
+    ports:
+      - "3000:80"
+    volumes:
+      - ../../sentinel-dashboard/dist:/usr/share/nginx/html:ro
+    depends_on:
+      - shield-api
+    restart: unless-stopped
+
+  redis:
+    image: redis:7-alpine
+    container_name: sentinel-redis-full
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis-data:/data
+    command: >
+      redis-server --maxmemory 128mb 
+      --maxmemory-policy allkeys-lru
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 3
+    restart: unless-stopped
+
+  prometheus:
+    image: prom/prometheus:latest
+    container_name: sentinel-prometheus
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - prometheus-data:/prometheus
+    depends_on:
+      - shield-api
+    restart: unless-stopped
+
+volumes:
+  redis-data:
+  prometheus-data:

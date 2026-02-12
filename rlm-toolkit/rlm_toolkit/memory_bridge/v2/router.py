@@ -1,14 +1,13 @@
 """
 Semantic Router for Memory Bridge v2.0
 
-Provides intelligent context routing based on semantic similarity,
-loading only the most relevant facts for a given query.
+Provides intelligent context routing based on semantic similarity.
+Embedding logic lives in embeddings.py.
 """
 
 from dataclasses import dataclass, field
 from typing import Any, Dict, List, Optional, Tuple
 import logging
-import json
 import numpy as np
 
 from .hierarchical import (
@@ -16,19 +15,12 @@ from .hierarchical import (
     HierarchicalFact,
     MemoryLevel,
 )
+from .embeddings import (
+    EmbeddingService,
+    SENTENCE_TRANSFORMERS_AVAILABLE,
+)
 
 logger = logging.getLogger(__name__)
-
-# Try to import sentence-transformers, graceful fallback if not available
-try:
-    from sentence_transformers import SentenceTransformer
-
-    SENTENCE_TRANSFORMERS_AVAILABLE = True
-except ImportError:
-    SENTENCE_TRANSFORMERS_AVAILABLE = False
-    logger.warning(
-        "sentence-transformers not installed. Semantic routing will use keyword fallback."
-    )
 
 
 @dataclass
@@ -39,86 +31,24 @@ class RoutingResult:
     total_tokens: int
     routing_confidence: float
     routing_explanation: str
-    cross_references: List[Tuple[str, str]] = field(default_factory=list)
-    domains_loaded: List[str] = field(default_factory=list)
+    cross_references: List[Tuple[str, str]] = field(
+        default_factory=list,
+    )
+    domains_loaded: List[str] = field(
+        default_factory=list,
+    )
     fallback_used: bool = False
 
     def to_dict(self) -> Dict[str, Any]:
         return {
             "facts": [f.to_dict() for f in self.facts],
             "total_tokens": self.total_tokens,
-            "routing_confidence": self.routing_confidence,
-            "routing_explanation": self.routing_explanation,
-            "cross_references": self.cross_references,
-            "domains_loaded": self.domains_loaded,
+            "routing_confidence": (self.routing_confidence),
+            "routing_explanation": (self.routing_explanation),
+            "cross_references": (self.cross_references),
+            "domains_loaded": (self.domains_loaded),
             "fallback_used": self.fallback_used,
         }
-
-
-class EmbeddingService:
-    """Service for generating and caching embeddings."""
-
-    DEFAULT_MODEL = "all-MiniLM-L6-v2"
-    FALLBACK_MODEL = "paraphrase-MiniLM-L3-v2"
-
-    def __init__(self, model_name: Optional[str] = None):
-        self.model_name = model_name or self.DEFAULT_MODEL
-        self._model = None
-        self._dimension = None
-
-    @property
-    def model(self):
-        """Lazy load the model."""
-        if self._model is None:
-            if not SENTENCE_TRANSFORMERS_AVAILABLE:
-                raise RuntimeError("sentence-transformers not installed")
-            try:
-                self._model = SentenceTransformer(self.model_name)
-                self._dimension = self._model.get_sentence_embedding_dimension()
-                logger.info(
-                    f"Loaded embedding model: {self.model_name} (dim={self._dimension})"
-                )
-            except Exception as e:
-                logger.warning(
-                    f"Failed to load {self.model_name}, trying fallback: {e}"
-                )
-                self._model = SentenceTransformer(self.FALLBACK_MODEL)
-                self._dimension = self._model.get_sentence_embedding_dimension()
-        return self._model
-
-    @property
-    def dimension(self) -> int:
-        """Get embedding dimension."""
-        if self._dimension is None:
-            _ = self.model  # Trigger lazy load
-        return self._dimension or 384
-
-    def embed(self, text: str) -> List[float]:
-        """Generate embedding for a single text."""
-        if not SENTENCE_TRANSFORMERS_AVAILABLE:
-            return self._keyword_embedding(text)
-        return self.model.encode(text, convert_to_numpy=True).tolist()
-
-    def embed_batch(self, texts: List[str]) -> List[List[float]]:
-        """Generate embeddings for multiple texts."""
-        if not SENTENCE_TRANSFORMERS_AVAILABLE:
-            return [self._keyword_embedding(t) for t in texts]
-        embeddings = self.model.encode(texts, convert_to_numpy=True)
-        return embeddings.tolist()
-
-    def _keyword_embedding(self, text: str) -> List[float]:
-        """Fallback keyword-based embedding when transformers unavailable."""
-        # Simple TF-based embedding (for fallback only)
-        words = text.lower().split()
-        # Use hash to create a pseudo-embedding
-        embedding = [0.0] * 128
-        for i, word in enumerate(words[:128]):
-            embedding[hash(word) % 128] += 1.0
-        # Normalize
-        norm = sum(x * x for x in embedding) ** 0.5
-        if norm > 0:
-            embedding = [x / norm for x in embedding]
-        return embedding
 
 
 class SemanticRouter:

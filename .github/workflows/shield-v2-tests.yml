@@ -1,0 +1,34 @@
+name: Shield v2 Tests
+
+on:
+  push:
+    paths:
+      - 'shield/**'
+  pull_request:
+    paths:
+      - 'shield/**'
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: 'pip'
+
+      - name: Install dependencies
+        working-directory: shield
+        run: pip install -r requirements_v2.txt
+
+      - name: Unit tests
+        working-directory: shield
+        run: python -m pytest tests/test_shield_v2.py -v --tb=short
+
+      - name: Integration tests
+        working-directory: shield
+        run: python -m pytest tests/test_integration.py -v --tb=short

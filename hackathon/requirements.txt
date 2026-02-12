@@ -1,0 +1,5 @@
+# SENTINEL AI Shield for Gemini
+# Hackathon Demo Requirements
+
+gradio>=4.0.0
+google-generativeai>=0.8.0

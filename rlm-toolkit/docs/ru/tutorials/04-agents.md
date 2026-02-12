@@ -53,7 +53,7 @@ rlm = RLM.from_openai(
 
 # Агент выберет подходящий инструмент
 result = rlm.run("Сколько будет 15% от 340 плюс текущая температура в Токио?")
-print(result.final_answer)
+print(result.answer)
 ```
 
 ## Шаг 2: Встроенные инструменты
@@ -315,7 +315,7 @@ def main():
             continue
         
         result = agent.run(user_input)
-        print(f"\n🤖 Ассистент: {result.final_answer}")
+        print(f"\n🤖 Ассистент: {result.answer}")
         
         if result.tool_calls:
             print(f"\n📎 Использованные инструменты: {[t.name for t in result.tool_calls]}")

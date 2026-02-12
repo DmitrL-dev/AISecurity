@@ -1,0 +1,45 @@
+global:
+  scrape_interval: 15s
+  evaluation_interval: 15s
+  external_labels:
+    monitor: "sentinel"
+
+alerting:
+  alertmanagers:
+    - static_configs:
+        - targets:
+            - alertmanager:9093
+
+rule_files:
+  - "/etc/prometheus/alerts.yml"
+
+scrape_configs:
+  # Prometheus self-monitoring
+  - job_name: "prometheus"
+    static_configs:
+      - targets: ["localhost:9090"]
+
+  # SENTINEL Brain API
+  - job_name: "brain"
+    metrics_path: "/metrics"
+    static_configs:
+      - targets: ["host.docker.internal:8000"]
+    relabel_configs:
+      - source_labels: [__address__]
+        target_label: instance
+        replacement: "brain"
+
+  # SENTINEL Shield Proxy
+  - job_name: "shield"
+    metrics_path: "/metrics"
+    static_configs:
+      - targets: ["host.docker.internal:8081"]
+    relabel_configs:
+      - source_labels: [__address__]
+        target_label: instance
+        replacement: "shield"
+
+  # Node Exporter (optional)
+  - job_name: "node"
+    static_configs:
+      - targets: ["host.docker.internal:9100"]

@@ -2,13 +2,13 @@
   "name": "rlm-toolkit",
   "displayName": "RLM-Toolkit",
   "description": "Recursive Language Models - Unlimited Context for Code Projects",
-  "version": "3.0.0",
+  "version": "2.1.0",
   "publisher": "sentinel-community",
   "engines": {
     "vscode": "^1.85.0"
   },
   "categories": ["Other", "Machine Learning"],
-  "keywords": ["rlm", "llm", "context", "memory", "ai", "mcp", "gomcp"],
+  "keywords": ["rlm", "llm", "context", "memory", "ai", "mcp"],
   "activationEvents": ["onStartupFinished"],
   "main": "./out/extension.js",
   "contributes": {
@@ -66,18 +66,6 @@
       {
         "command": "rlm.indexEmbeddings",
         "title": "RLM: Index Embeddings (Semantic Routing)"
-      },
-      {
-        "command": "rlm.copyContext",
-        "title": "RLM: Copy Context to Clipboard"
-      },
-      {
-        "command": "rlm.getContext",
-        "title": "RLM: View Current Context"
-      },
-      {
-        "command": "rlm.refreshContext",
-        "title": "RLM: Refresh Context Cache"
       }
     ],
     "configuration": {
@@ -102,26 +90,6 @@
           "type": "boolean",
           "default": true,
           "description": "Auto-discover project on first load (v2.1)"
-        },
-        "rlm.useGoMcp": {
-          "type": "boolean",
-          "default": true,
-          "description": "Use GoMCP high-performance backend (v3.0)"
-        },
-        "rlm.autoContext.enabled": {
-          "type": "boolean",
-          "default": true,
-          "description": "Enable auto-context injection (v2.5 Anti-Amnesia)"
-        },
-        "rlm.autoContext.maxTokens": {
-          "type": "number",
-          "default": 2000,
-          "description": "Maximum tokens for auto-context"
-        },
-        "rlm.autoContext.includeL0": {
-          "type": "boolean",
-          "default": true,
-          "description": "Always include L0 (project-level) facts"
         }
       }
     }

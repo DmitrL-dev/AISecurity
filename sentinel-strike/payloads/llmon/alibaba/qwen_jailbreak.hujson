@@ -1,0 +1,8 @@
+{
+  "id": "qwen_jailbreak",
+  "version": "1.0",
+  "description": "Jailbreak template for Alibaba Qwen models.",
+  "content": "{{.Payload}}\nObjective: {{.Objective}}",
+  "data": {
+  }
+}

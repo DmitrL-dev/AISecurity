@@ -1,0 +1,70 @@
+{
+  "manifest_version": 3,
+  "name": "SENTINEL Guard — AI Firewall",
+  "short_name": "SENTINEL Guard",
+  "version": "0.1.0",
+  "description": "Protect your AI conversations. Scans prompts for injection, jailbreak, PII leaks before they reach ChatGPT, Claude, Gemini, DeepSeek, Qwen.",
+  "permissions": [
+    "storage",
+    "activeTab"
+  ],
+  "host_permissions": [
+    "https://chatgpt.com/*",
+    "https://chat.openai.com/*",
+    "https://claude.ai/*",
+    "https://gemini.google.com/*",
+    "https://www.perplexity.ai/*",
+    "https://chat.deepseek.com/*",
+    "https://tongyi.aliyun.com/*",
+    "https://kimi.moonshot.cn/*",
+    "https://www.doubao.com/*",
+    "https://www.minimaxi.com/*",
+    "https://chatglm.cn/*",
+    "https://api.sentinel.dev/*"
+  ],
+  "background": {
+    "service_worker": "background.js",
+    "type": "module"
+  },
+  "content_scripts": [
+    {
+      "matches": [
+        "https://chatgpt.com/*",
+        "https://chat.openai.com/*",
+        "https://claude.ai/*",
+        "https://gemini.google.com/*",
+        "https://www.perplexity.ai/*",
+        "https://chat.deepseek.com/*",
+        "https://tongyi.aliyun.com/*",
+        "https://kimi.moonshot.cn/*",
+        "https://www.doubao.com/*",
+        "https://www.minimaxi.com/*",
+        "https://chatglm.cn/*"
+      ],
+      "js": ["content.js"],
+      "css": ["content.css"],
+      "run_at": "document_idle"
+    }
+  ],
+  "action": {
+    "default_popup": "popup.html",
+    "default_icon": {
+      "16": "icons/icon16.png",
+      "32": "icons/icon32.png",
+      "48": "icons/icon48.png",
+      "128": "icons/icon128.png"
+    }
+  },
+  "icons": {
+    "16": "icons/icon16.png",
+    "32": "icons/icon32.png",
+    "48": "icons/icon48.png",
+    "128": "icons/icon128.png"
+  },
+  "web_accessible_resources": [
+    {
+      "resources": ["icons/*"],
+      "matches": ["<all_urls>"]
+    }
+  ]
+}

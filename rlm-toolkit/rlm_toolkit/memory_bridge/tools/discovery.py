@@ -1,291 +1,311 @@
-"""Discovery tools: discover_project, discover_deep, reindex."""
-
+# Discovery tools — project discovery, deep discover, extractors
+"""
+Tools: discover_project, discover_deep, extract_facts,
+       extract_from_conversation, install_git_hooks
+"""
 from __future__ import annotations
 
 from pathlib import Path
-from typing import Any, Dict, List, Optional, TYPE_CHECKING
+from typing import Any, Dict, List, Optional
 
-if TYPE_CHECKING:
-    from . import ToolComponents
-
-
-class DiscoveryTools:
-    """Project discovery and indexing tools."""
-
-    def __init__(self, components: ToolComponents):
-        self.c = components
-
-    def register(self, server):
-        c = self.c
-
-        @server.tool(
-            name="rlm_discover_project",
-            description=(
-                "Smart cold start discovery for new projects. "
-                "Detects project type, seeds template facts, "
-                "discovers domains."
-            ),
-        )
-        async def rlm_discover_project(
-            project_root: Optional[str] = None,
-            task_hint: Optional[str] = None,
-        ) -> Dict[str, Any]:
-            """Perform smart project discovery."""
-            try:
-                if project_root:
-                    root = Path(project_root)
-                else:
-                    root = c.cold_start.project_root
-                result = c.cold_start.discover_project(
-                    root=root,
-                    task_hint=task_hint,
-                )
-                c.events.notify("discover_project")
-                return {
-                    "status": "success",
-                    "project_type": (result.project_info.project_type.value),
-                    "project_name": result.project_info.name,
-                    "framework": result.project_info.framework,
-                    "facts_created": result.facts_created,
-                    "discovery_tokens": (result.discovery_tokens),
-                    "suggested_domains": (result.suggested_domains),
-                    "loc_estimate": (result.project_info.loc_estimate),
-                    "file_count": (result.project_info.file_count),
-                    "warnings": result.warnings,
-                }
-            except Exception as e:
-                return {"status": "error", "error": str(e)}
-
-        @server.tool(
-            name="rlm_discover_deep",
-            description=(
-                "Deep discovery using multiple extractors: "
-                "code (README, docstrings), config "
-                "(package.json, pyproject), git "
-                "(conventional commits), conversation. "
-                "Extracts 10x more facts than basic discover."
-            ),
-        )
-        async def rlm_discover_deep(
-            extractors_list: Optional[List[str]] = None,
-            auto_approve: bool = False,
-            max_facts: int = 100,
-        ) -> Dict[str, Any]:
-            """Deep discovery with multiple extractors."""
-            try:
-                extractors = extractors_list or [
-                    "code",
-                    "config",
-                    "git",
-                ]
-                all_candidates = []
-                auto_approved = 0
-                total_extracted = 0
-                extractor_results = {}
-
-                for ext_name in extractors:
-                    try:
-                        candidates = _run_extractor(c, ext_name, max_facts)
-                        extractor_results[ext_name] = len(candidates)
-                        total_extracted += len(candidates)
-
-                        for cand in candidates:
-                            if auto_approve or (cand.get("confidence", 0) >= 0.8):
-                                c.store.add_fact(
-                                    content=cand["content"],
-                                    level=cand.get(
-                                        "level",
-                                        (
-                                            c.store.MemoryLevel
-                                            if hasattr(
-                                                c.store,
-                                                "MemoryLevel",
-                                            )
-                                            else 1
-                                        ),
-                                    ),
-                                    domain=cand.get("domain"),
-                                    source=ext_name,
-                                    confidence=cand.get("confidence", 0.7),
-                                )
-                                auto_approved += 1
-                            else:
-                                all_candidates.append(cand)
-                    except Exception as ext_err:
-                        extractor_results[ext_name] = f"error: {ext_err}"
-
-                if auto_approved > 0:
-                    c.events.notify("discover_deep")
-
-                return {
-                    "status": "success",
-                    "total_extracted": total_extracted,
-                    "auto_approved": auto_approved,
-                    "pending_review": len(all_candidates),
-                    "extractor_results": extractor_results,
-                    "candidates": all_candidates[:20],
-                }
-            except Exception as e:
-                return {"status": "error", "error": str(e)}
-
-        @server.tool(
-            name="rlm_reindex",
-            description=("Reindex project or specific path."),
-        )
-        async def rlm_reindex(
-            path: Optional[str] = None,
-            force: bool = False,
-        ) -> Dict[str, Any]:
-            """Reindex project files."""
-            try:
-                target = Path(path) if path else c.project_root
-                if not target.exists():
-                    return {
-                        "status": "error",
-                        "error": f"Path not found: {path}",
-                    }
-
-                indexed = 0
-                errors = []
-                files_found = 0
-
-                code_exts = {
-                    ".py",
-                    ".js",
-                    ".ts",
-                    ".go",
-                    ".rs",
-                    ".java",
-                    ".cpp",
-                    ".c",
-                    ".h",
-                    ".rb",
-                    ".php",
-                    ".swift",
-                    ".kt",
-                    ".scala",
-                    ".md",
-                    ".yaml",
-                    ".yml",
-                    ".json",
-                    ".toml",
-                    ".cfg",
-                    ".ini",
-                }
-
-                for f in target.rglob("*"):
-                    if not f.is_file():
-                        continue
-                    if f.suffix not in code_exts:
-                        continue
-                    if any(
-                        p in str(f)
-                        for p in [
-                            "node_modules",
-                            ".git",
-                            "__pycache__",
-                            ".venv",
-                            "venv",
-                            "dist",
-                            "build",
-                        ]
-                    ):
-                        continue
-                    files_found += 1
-
-                    try:
-                        content = f.read_text(
-                            encoding="utf-8",
-                            errors="ignore",
-                        )
-                        if len(content) > 100:
-                            from ..v2.extractor import (
-                                AutoExtractionEngine,
-                            )
-
-                            result = c.extractor.extract_from_file(
-                                f, new_content=content
-                            )
-                            for cand in result.candidates:
-                                if cand.confidence >= 0.7:
-                                    c.store.add_fact(
-                                        content=(cand.content),
-                                        level=(cand.suggested_level),
-                                        domain=(cand.suggested_domain),
-                                        source="reindex",
-                                        confidence=(cand.confidence),
-                                    )
-                                    indexed += 1
-                    except Exception as fe:
-                        errors.append(f"{f.name}: {fe}")
-
-                if indexed > 0:
-                    c.events.notify("reindex")
-
-                return {
-                    "status": "success",
-                    "files_scanned": files_found,
-                    "facts_indexed": indexed,
-                    "errors": errors[:10],
-                    "path": str(target),
-                }
-            except Exception as e:
-                return {"status": "error", "error": str(e)}
+from ._common import ToolComponents, ServerType
+from ..v2.hierarchical import MemoryLevel
 
 
-def _run_extractor(c, name: str, max_facts: int):
-    """Run a single extractor by name."""
-    candidates = []
+def register_discovery_tools(
+    server: ServerType,
+    c: ToolComponents,
+) -> None:
+    """Register all discovery-related MCP tools."""
 
-    if name == "code":
-        for ext in [".md", ".py", ".js", ".ts"]:
-            for f in c.project_root.rglob(f"*{ext}"):
-                if any(
-                    p in str(f)
-                    for p in [
-                        "node_modules",
-                        ".git",
-                        "__pycache__",
-                    ]
-                ):
-                    continue
-                if len(candidates) >= max_facts:
-                    break
-                try:
-                    content = f.read_text(
+    store = c.store
+    extractor = c.extractor
+    cold_start = c.cold_start
+    project_root = c.project_root
+
+    @server.tool(
+        name="rlm_discover_project",
+        description="Smart cold start discovery for new projects. "
+        "Detects project type, seeds template facts, discovers domains.",
+    )
+    async def rlm_discover_project(
+        project_root: Optional[str] = None,
+        task_hint: Optional[str] = None,
+    ) -> Dict[str, Any]:
+        """Perform smart project discovery."""
+        try:
+            if project_root:
+                root = Path(project_root)
+            else:
+                root = cold_start.project_root
+            result = cold_start.discover_project(
+                root=root,
+                task_hint=task_hint,
+            )
+            return {
+                "status": "success",
+                "project_type": result.project_info.project_type.value,
+                "project_name": result.project_info.name,
+                "framework": result.project_info.framework,
+                "facts_created": result.facts_created,
+                "discovery_tokens": result.discovery_tokens,
+                "suggested_domains": result.suggested_domains,
+                "loc_estimate": result.project_info.loc_estimate,
+                "file_count": result.project_info.file_count,
+                "warnings": result.warnings,
+            }
+        except Exception as e:
+            return {"status": "error", "message": str(e)}
+
+    @server.tool(
+        name="rlm_extract_facts",
+        description="Auto-extract facts from git diff or file changes. "
+        "Returns candidates for approval.",
+    )
+    async def rlm_extract_facts(
+        source: str = "git_diff",
+        file_path: Optional[str] = None,
+        auto_approve: bool = False,
+    ) -> Dict[str, Any]:
+        """Extract facts from code changes."""
+        try:
+            if source == "file" and file_path:
+                path = Path(file_path)
+                if path.exists():
+                    content = path.read_text(
                         encoding="utf-8",
                         errors="ignore",
                     )
-                    result = c.extractor.extract_from_file(f, new_content=content)
-                    for cand in result.candidates:
-                        candidates.append(cand.to_dict())
-                except Exception:
-                    pass
+                    result = extractor.extract_from_file(
+                        path,
+                        new_content=content,
+                    )
+                else:
+                    return {
+                        "status": "error",
+                        "message": f"File not found: {file_path}",
+                    }
+            else:
+                staged_only = source == "staged"
+                result = extractor.extract_from_git_diff(
+                    staged_only=staged_only,
+                )
 
-    elif name == "config":
-        config_files = [
-            "package.json",
-            "pyproject.toml",
-            "Cargo.toml",
-            "go.mod",
-        ]
-        for cf in config_files:
-            fp = c.project_root / cf
-            if fp.exists():
-                try:
-                    content = fp.read_text(encoding="utf-8")
-                    result = c.extractor.extract_from_file(fp, new_content=content)
-                    for cand in result.candidates:
-                        candidates.append(cand.to_dict())
-                except Exception:
-                    pass
+            if auto_approve:
+                for candidate in result.candidates:
+                    if candidate.confidence >= 0.8:
+                        candidate.approved = True
+                        candidate.requires_approval = False
+                        store.add_fact(
+                            content=candidate.content,
+                            level=candidate.suggested_level,
+                            domain=candidate.suggested_domain,
+                            source=candidate.source,
+                            confidence=candidate.confidence,
+                        )
 
-    elif name == "git":
+            return {
+                "status": "success",
+                "candidates": [c.to_dict() for c in result.candidates],
+                "auto_approved": result.auto_approved,
+                "pending_approval": result.pending_approval,
+                "total_changes": result.total_changes,
+            }
+        except Exception as e:
+            return {"status": "error", "message": str(e)}
+
+    @server.tool(
+        name="rlm_discover_deep",
+        description="Deep discovery using multiple extractors: "
+        "code (README, docstrings), config (package.json, pyproject), "
+        "git (conventional commits), conversation. "
+        "Extracts 10x more facts than basic discover.",
+    )
+    async def rlm_discover_deep(
+        extractors_list: Optional[List[str]] = None,
+        auto_approve: bool = False,
+        max_facts: int = 100,
+    ) -> Dict[str, Any]:
+        """Deep discovery with multiple extractors."""
         try:
-            result = c.extractor.extract_from_git_diff(staged_only=False)
-            for cand in result.candidates:
-                candidates.append(cand.to_dict())
-        except Exception:
-            pass
+            import sys
+            from pathlib import Path as PathLib
 
-    return candidates[:max_facts]
+            rlm_toolkit_root = PathLib(__file__).parent.parent.parent
+            extractors_src = rlm_toolkit_root / "src"
+            if extractors_src.exists():
+                if str(extractors_src) not in sys.path:
+                    sys.path.insert(0, str(extractors_src))
+
+            try:
+                from rlm_mcp_server.extractors import (
+                    ExtractionOrchestrator,
+                )
+            except ImportError as import_err:
+                return {
+                    "status": "error",
+                    "message": (
+                        f"Extractors import failed: {import_err}. "
+                        f"Path checked: {extractors_src}"
+                    ),
+                }
+
+            orchestrator_ext = ExtractionOrchestrator(project_root)
+            result = await orchestrator_ext.discover_deep(
+                extractors=extractors_list,
+                auto_approve=auto_approve,
+                max_facts=max_facts,
+            )
+
+            pending_db = Path(project_root) / ".rlm" / "pending_candidates.db"
+            pending_db.parent.mkdir(parents=True, exist_ok=True)
+
+            pending_store = None
+            try:
+                from rlm_mcp_server.pending_store import (
+                    PendingCandidatesStore,
+                    PendingCandidate,
+                )
+
+                pending_store = PendingCandidatesStore(pending_db)
+            except ImportError:
+                pass
+
+            auto_approved_count = 0
+            pending_count = 0
+
+            for candidate in result.get("candidates", []):
+                confidence = candidate.get("confidence", 0)
+                if confidence > 0.9 or auto_approve:
+                    store.add_fact(
+                        content=candidate["content"],
+                        level=MemoryLevel(candidate.get("level", 1)),
+                        domain=candidate.get("domain"),
+                        source=(f"discover_deep:" f"{candidate.get('source')}"),
+                        confidence=confidence,
+                    )
+                    auto_approved_count += 1
+                elif confidence >= 0.5 and pending_store:
+                    import uuid
+
+                    pending_store.add(
+                        PendingCandidate(
+                            id=str(uuid.uuid4()),
+                            content=candidate["content"],
+                            source=candidate.get("source", "unknown"),
+                            confidence=confidence,
+                            domain=candidate.get("domain"),
+                            level=candidate.get("level", 1),
+                            file_path=candidate.get("file_path"),
+                            line_number=candidate.get("line_number"),
+                        )
+                    )
+                    pending_count += 1
+
+            result["auto_approved"] = auto_approved_count
+            result["pending_review"] = pending_count
+            return result
+        except Exception as e:
+            return {"status": "error", "message": str(e)}
+
+    @server.tool(
+        name="rlm_extract_from_conversation",
+        description="Extract facts from conversation text using SFS "
+        "(Significant Factual Shifts) detection. "
+        "Identifies decisions, implementations, fixes, discoveries.",
+    )
+    async def rlm_extract_from_conversation(
+        text: str,
+        auto_approve: bool = False,
+    ) -> Dict[str, Any]:
+        """Extract facts from conversation text."""
+        try:
+            from ..v2.extractor import ConversationExtractor
+
+            conv_extractor = ConversationExtractor()
+            result = conv_extractor.extract_from_text(text)
+
+            if auto_approve:
+                for candidate in result.candidates:
+                    if not candidate.requires_approval:
+                        store.add_fact(
+                            content=candidate.content,
+                            level=candidate.suggested_level,
+                            domain=candidate.suggested_domain,
+                            source="conversation_sfs",
+                            confidence=candidate.confidence,
+                        )
+
+            return {
+                "status": "success",
+                "candidates": [c.to_dict() for c in result.candidates],
+                "auto_approved": result.auto_approved,
+                "pending_approval": result.pending_approval,
+            }
+        except Exception as e:
+            return {"status": "error", "message": str(e)}
+
+    @server.tool(
+        name="rlm_install_git_hooks",
+        description="Install git hooks for automatic fact extraction. "
+        "Extracts facts from commits automatically.",
+    )
+    async def rlm_install_git_hooks(
+        hook_type: str = "post-commit",
+    ) -> Dict[str, Any]:
+        """Install git hooks for auto-extraction."""
+        try:
+            git_dir = project_root / ".git"
+            if not git_dir.exists():
+                return {
+                    "status": "error",
+                    "message": "Not a git repository",
+                }
+
+            hooks_dir = git_dir / "hooks"
+            hooks_dir.mkdir(exist_ok=True)
+            hook_path = hooks_dir / hook_type
+
+            if hook_path.exists():
+                content = hook_path.read_text()
+                if "rlm_toolkit" in content:
+                    return {
+                        "status": "success",
+                        "message": "Hook already installed",
+                        "hook_path": str(hook_path),
+                    }
+                hook_script = "\n# Memory Bridge Auto-Extract\n"
+            else:
+                hook_script = "#!/bin/sh\n# Memory Bridge Auto-Extract\n"
+
+            hook_script += (
+                'python -c "'
+                "from rlm_toolkit.memory_bridge.v2.extractor "
+                "import AutoExtractionEngine; "
+                "e = AutoExtractionEngine(); "
+                "r = e.extract_from_git_diff(); "
+                f"print(f'Extracted {{len(r.candidates)}} facts')"
+                '" 2>/dev/null || true\n'
+            )
+
+            if hook_path.exists():
+                with open(hook_path, "a") as f:
+                    f.write(hook_script)
+            else:
+                hook_path.write_text(hook_script)
+
+            try:
+                import stat
+
+                mode = hook_path.stat().st_mode
+                hook_path.chmod(mode | stat.S_IXUSR | stat.S_IXGRP)
+            except Exception:
+                pass
+
+            return {
+                "status": "success",
+                "message": f"Installed {hook_type} hook",
+                "hook_path": str(hook_path),
+            }
+        except Exception as e:
+            return {"status": "error", "message": str(e)}

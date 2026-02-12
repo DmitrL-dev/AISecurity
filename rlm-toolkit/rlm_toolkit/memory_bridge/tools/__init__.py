@@ -1,78 +1,64 @@
+# tools/__init__.py — Orchestrator: register all domain tools
 """
-Memory Bridge v2.x MCP Tools — Domain Modules.
-
-Decomposed from mcp_tools_v2.py monolith into focused modules:
-- pending_store: Pending candidates SQLite store
-- context_events: Anti-Amnesia context change tracking
-- discovery: Project discovery + deep discovery + reindex
-- routing: Semantic routing + auto-inject + enterprise context
-- facts: Fact CRUD, extraction, approval, consolidation
-- lifecycle: TTL management, stale facts, refresh, delete
-- infra: Stats, domains, health, enforcement, git hooks, embeddings
+Unified registration entrypoint for all Memory Bridge MCP tools.
+Re-exports `register_memory_bridge_v2_tools` for backward compat.
 """
+from __future__ import annotations
 
-from dataclasses import dataclass, field
+import logging
+import os
 from pathlib import Path
-from typing import Any, Optional
+from typing import Any, Dict, Optional, Union
 
 from ..v2.hierarchical import HierarchicalMemoryStore
-from ..v2.router import SemanticRouter, EmbeddingService
-from ..v2.extractor import AutoExtractionEngine
-from ..v2.ttl import TTLManager
-from ..v2.causal import CausalChainTracker
-from ..v2.coldstart import ColdStartOptimizer
-from ..v2.automode import DiscoveryOrchestrator, EnterpriseContextBuilder
+from ._common import ToolComponents
 
-from .pending_store import InlinePendingStore
-from .context_events import ContextEventTracker
+logger = logging.getLogger(__name__)
 
 
-@dataclass
-class ToolComponents:
-    """Shared components injected into all ToolGroup classes."""
-
-    store: HierarchicalMemoryStore
-    router: SemanticRouter
-    extractor: AutoExtractionEngine
-    ttl_manager: TTLManager
-    causal_tracker: CausalChainTracker
-    cold_start: ColdStartOptimizer
-    orchestrator: DiscoveryOrchestrator
-    context_builder: EnterpriseContextBuilder
-    events: ContextEventTracker
-    pending: InlinePendingStore
-    project_root: Path = field(default_factory=Path.cwd)
-
-    def to_dict(self):
-        """Legacy compat — returns dict for register_memory_bridge_v2_tools."""
-        return {
-            "store": self.store,
-            "router": self.router,
-            "extractor": self.extractor,
-            "ttl_manager": self.ttl_manager,
-            "causal_tracker": self.causal_tracker,
-            "cold_start": self.cold_start,
-            "orchestrator": self.orchestrator,
-            "context_builder": self.context_builder,
-        }
-
-
-def init_components(
+def register_memory_bridge_v2_tools(
+    server: Union[Any, Any, Any],
     store: HierarchicalMemoryStore,
     project_root: Optional[Path] = None,
-    on_context_change: Optional[callable] = None,
-) -> ToolComponents:
-    """Initialize all components for MCP tool registration."""
-    project_root = project_root or Path.cwd()
+    manager: Optional[Any] = None,
+) -> Dict[str, Any]:
+    """
+    Unified registration for all Memory Bridge v2+v1 tools.
 
-    embedding_service = EmbeddingService()
-    router = SemanticRouter(store=store, embedding_service=embedding_service)
-    extractor = AutoExtractionEngine(project_root=project_root)
-    ttl_manager = TTLManager(store=store, project_root=project_root)
-    causal_tracker = CausalChainTracker(
-        db_path=store.db_path.parent / "causal_chains.db"
+    Args:
+        server: MCP server (FastMCP or Server)
+        store: HierarchicalMemoryStore instance
+        project_root: Project root path
+        manager: Optional v1 MemoryBridgeManager
+
+    Returns:
+        Dict of component instances
+    """
+    from ..v2.router import SemanticRouter
+    from ..v2.extractor import AutoExtractionEngine
+    from ..v2.ttl import TTLManager
+    from ..v2.causal import CausalChainTracker
+    from ..v2.coldstart import ColdStartOptimizer
+    from ..v2.automode import (
+        DiscoveryOrchestrator,
+        EnterpriseContextBuilder,
     )
-    cold_start = ColdStartOptimizer(store=store, project_root=project_root)
+
+    if project_root is None:
+        project_root = Path(os.getenv("RLM_PROJECT_ROOT", os.getcwd()))
+
+    router = SemanticRouter(store=store)
+    extractor = AutoExtractionEngine(
+        project_root=project_root,
+    )
+    ttl_manager = TTLManager(store=store)
+    causal_tracker = CausalChainTracker(
+        db_path=store.db_path.parent / "causal_chains.db",
+    )
+    cold_start = ColdStartOptimizer(
+        store=store,
+        project_root=project_root,
+    )
     orchestrator = DiscoveryOrchestrator(
         store=store,
         cold_start=cold_start,
@@ -84,13 +70,20 @@ def init_components(
         causal_tracker=causal_tracker,
         orchestrator=orchestrator,
     )
-    events = ContextEventTracker(
-        db_path=store.db_path.parent / "context_events.db",
-        on_context_change=on_context_change,
-    )
-    pending = InlinePendingStore(db_path=store.db_path.parent / "pending_candidates.db")
 
-    return ToolComponents(
+    components: Dict[str, Any] = {
+        "store": store,
+        "router": router,
+        "extractor": extractor,
+        "ttl_manager": ttl_manager,
+        "causal_tracker": causal_tracker,
+        "cold_start": cold_start,
+        "orchestrator": orchestrator,
+        "context_builder": context_builder,
+    }
+
+    # Build shared ToolComponents
+    tc = ToolComponents(
         store=store,
         router=router,
         extractor=extractor,
@@ -99,15 +92,29 @@ def init_components(
         cold_start=cold_start,
         orchestrator=orchestrator,
         context_builder=context_builder,
-        events=events,
-        pending=pending,
         project_root=project_root,
     )
 
+    # Register all domain tool groups
+    from .discovery import register_discovery_tools
+    from .context import register_context_tools
+    from .facts import register_facts_tools
+    from .causal import register_causal_tools
+    from .candidates import register_candidates_tools
+    from .system import register_system_tools
+    from .session import register_session_tools
 
-__all__ = [
-    "ToolComponents",
-    "init_components",
-    "InlinePendingStore",
-    "ContextEventTracker",
-]
+    register_discovery_tools(server, tc)
+    register_context_tools(server, tc)
+    register_facts_tools(server, tc)
+    register_causal_tools(server, tc)
+    register_candidates_tools(server, tc)
+    register_system_tools(server, tc)
+
+    # V1 session tools (only if manager provided)
+    if manager is not None:
+        register_session_tools(server, manager)
+
+    logger.info("Memory Bridge tools registered " "(modular v2+v1, 7 domains)")
+
+    return components

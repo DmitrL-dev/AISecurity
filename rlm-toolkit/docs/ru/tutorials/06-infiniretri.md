@@ -47,8 +47,8 @@ from rlm_toolkit import RLM, RLMConfig
 
 # Включаем InfiniRetri
 config = RLMConfig(
-    enable_infiniretri=True,
-    infiniretri_threshold=50000  # Активировать выше 50K токенов
+    use_infiniretri=True,
+    infiniretri_threshold=100_000  # Активировать выше 50K токенов
 )
 
 rlm = RLM.from_openai("gpt-4o", config=config)
@@ -63,7 +63,7 @@ result = rlm.run(
     context=massive_context
 )
 
-print(result.final_answer)
+print(result.answer)
 print(f"Обработано {result.total_tokens} токенов")
 ```
 
@@ -83,9 +83,9 @@ infiniretri_config = InfiniRetriConfig(
 )
 
 config = RLMConfig(
-    enable_infiniretri=True,
+    use_infiniretri=True,
     infiniretri_config=infiniretri_config,
-    infiniretri_threshold=50000
+    infiniretri_threshold=100_000
 )
 
 rlm = RLM.from_openai("gpt-4o", config=config)
@@ -106,7 +106,7 @@ retriever = vectorstore.as_retriever(search_kwargs={"k": 20})
 
 # Включаем InfiniRetri для ре-ранжирования
 config = RLMConfig(
-    enable_infiniretri=True,
+    use_infiniretri=True,
     infiniretri_threshold=10000,
     use_retriever_with_infiniretri=True  # Комбинировать оба
 )
@@ -127,7 +127,7 @@ result = rlm.run("Каковы финансовые прогнозы на Q4?")
 from rlm_toolkit import RLM, RLMConfig
 
 config = RLMConfig(
-    enable_infiniretri=True,
+    use_infiniretri=True,
     stream=True  # Включить стриминг
 )
 
@@ -170,7 +170,7 @@ InfiniRetri работает с любым текстовым форматом:
 from rlm_toolkit import RLM, RLMConfig
 from rlm_toolkit.loaders import PDFLoader, DOCXLoader
 
-config = RLMConfig(enable_infiniretri=True)
+config = RLMConfig(use_infiniretri=True)
 rlm = RLM.from_openai("gpt-4o", config=config)
 
 # PDF
@@ -202,7 +202,7 @@ benchmark = NeedleInHaystackBenchmark(
 )
 
 # Тестируем с InfiniRetri
-config = RLMConfig(enable_infiniretri=True)
+config = RLMConfig(use_infiniretri=True)
 rlm = RLM.from_openai("gpt-4o", config=config)
 
 results = benchmark.run(rlm)
@@ -240,7 +240,7 @@ def create_infinite_qa(pdf_path: str):
     )
     
     config = RLMConfig(
-        enable_infiniretri=True,
+        use_infiniretri=True,
         infiniretri_config=infini_config
     )
     
@@ -268,7 +268,7 @@ def main():
             break
         
         result = rlm.run(question, context=context)
-        print(f"\n✅ Ответ: {result.final_answer}")
+        print(f"\n✅ Ответ: {result.answer}")
         
         if hasattr(result, 'chunks_used'):
             print(f"📊 Проанализировано чанков: {result.chunks_used}")

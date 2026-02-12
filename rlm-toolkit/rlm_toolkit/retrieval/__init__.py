@@ -1,23 +1,26 @@
 """
 RLM-Toolkit Retrieval Module.
 
-Provides embedding-based, BM25, and hybrid retrieval.
+Provides embedding-based, hybrid, and attention-based retrieval.
 """
 
 from .embeddings import EmbeddingRetriever, RetrievalResult, create_retriever
-from .bm25 import BM25Index, BM25Config
-from .hybrid import HybridRetriever, HybridResult
+
+# InfiniRetri (optional, requires infini-retri package)
+try:
+    from .infiniretri import InfiniRetriever
+
+    INFINIRETRI_AVAILABLE = True
+except ImportError:
+    InfiniRetriever = None
+    INFINIRETRI_AVAILABLE = False
 
 __all__ = [
     "EmbeddingRetriever",
     "RetrievalResult",
     "create_retriever",
-    # BM25 (v2.5)
-    "BM25Index",
-    "BM25Config",
-    # Hybrid (v2.5)
-    "HybridRetriever",
-    "HybridResult",
+    "InfiniRetriever",
+    "INFINIRETRI_AVAILABLE",
 ]
 
-__version__ = "2.5.0"
+__version__ = "2.3.1"
