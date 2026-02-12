@@ -31,8 +31,8 @@ AI, Security, Chrome Extensions, Developer Tools, Open Source
 
 ### Pricing
 - Personal: Free (10K scans/mo)
-- Developer: $29/mo (100K scans, API access)
-- Team: $99/mo (1M scans, SSO, dashboard)
+- Developer: $49/mo (100K scans, API access)
+- Team: $149/mo (1M scans, SSO, dashboard)
 - Enterprise: Custom (on-prem, SLA)
 
 ---
