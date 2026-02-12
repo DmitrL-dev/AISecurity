@@ -150,7 +150,7 @@ Common issues and how to solve them.
 
 2. **Enable InfiniRetri:**
    ```python
-   config = RLMConfig(enable_infiniretri=True)
+   config = RLMConfig(use_infiniretri=True)
    rlm = RLM.from_openai("gpt-4o", config=config)
    ```
 

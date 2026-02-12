@@ -56,7 +56,7 @@ evolving = SelfEvolvingRLM.from_openai(
 
 # First attempt - learns from the process
 result = evolving.run("Explain quantum entanglement simply")
-print(result.final_answer)
+print(result.answer)
 
 # See the evolution
 print(f"Iterations: {result.iterations}")
@@ -281,7 +281,7 @@ class EvolvingCodeAssistant:
         result = self.rlm.run(f"Write Python code to: {task}")
         
         return {
-            "code": result.final_answer,
+            "code": result.answer,
             "iterations": result.iterations,
             "improvements": result.improvements,
             "quality_score": result.final_quality_score

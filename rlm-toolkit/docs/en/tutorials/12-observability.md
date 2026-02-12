@@ -161,7 +161,7 @@ async def analyze(text: str):
     with tracer.span("api.analyze") as span:
         span.set_attribute("input_length", len(text))
         result = rlm.run(text, "Analyze")
-        return {"result": result.final_answer}
+        return {"result": result.answer}
 
 @app.get("/metrics")
 async def get_metrics():

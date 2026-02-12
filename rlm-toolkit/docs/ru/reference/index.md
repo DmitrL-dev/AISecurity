@@ -136,7 +136,7 @@ class RLMConfig:
     seed: int = None
     
     # InfiniRetri
-    enable_infiniretri: bool = False
+    use_infiniretri: bool = False
     infiniretri_config: InfiniRetriConfig = None
     infiniretri_threshold: int = 50000
     

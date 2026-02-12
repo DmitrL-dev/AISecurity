@@ -72,7 +72,7 @@ print(response.content)
 ```python
 from rlm_toolkit import RLM, RLMConfig
 
-config = RLMConfig(enable_infiniretri=True)
+config = RLMConfig(use_infiniretri=True)
 rlm = RLM.from_openai("gpt-4o", config=config)
 rlm.add_documents("docs/")
 response = rlm.run("Что говорится в документе о X?")

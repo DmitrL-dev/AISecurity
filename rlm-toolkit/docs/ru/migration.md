@@ -15,7 +15,7 @@
 | `RecursiveCharacterTextSplitter` | `RecursiveTextSplitter` | Те же параметры |
 | `PyPDFLoader` | `PDFLoader` | Тот же интерфейс |
 | `Chroma.from_documents()` | `ChromaVectorStore.from_documents()` | Тот же интерфейс |
-| `RetrievalQA.from_chain_type()` | `RLMConfig(enable_infiniretri=True)` | Проще |
+| `RetrievalQA.from_chain_type()` | `RLMConfig(use_infiniretri=True)` | Проще |
 | `AgentExecutor` | `ReActAgent` | Похожий |
 | `@tool` decorator | `@Tool(...)` decorator | Чище синтаксис |
 
@@ -92,7 +92,7 @@ from rlm_toolkit.loaders import PDFLoader
 from rlm_toolkit.vectorstores import ChromaVectorStore
 from rlm_toolkit.embeddings import OpenAIEmbeddings
 
-config = RLMConfig(enable_infiniretri=True)
+config = RLMConfig(use_infiniretri=True)
 rlm = RLM.from_openai("gpt-4o", config=config)
 
 docs = PDFLoader("document.pdf").load()

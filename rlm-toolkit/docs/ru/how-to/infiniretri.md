@@ -9,7 +9,7 @@ from rlm_toolkit import RLM, RLMConfig
 from rlm_toolkit.retrieval import InfiniRetriConfig
 
 config = RLMConfig(
-    enable_infiniretri=True,
+    use_infiniretri=True,
     infiniretri_config=InfiniRetriConfig(
         chunk_size=4000,
         chunk_overlap=200,
