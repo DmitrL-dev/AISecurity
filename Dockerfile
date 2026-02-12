@@ -10,11 +10,11 @@ RUN apt-get update && apt-get install -y \
     curl \
     && rm -rf /var/lib/apt/lists/*
 
-# Copy requirements first for caching
-COPY requirements.txt .
+# Copy production requirements (slim, CPU-only)
+COPY requirements-pro.txt .
 
 # Install Python dependencies
-RUN pip install --no-cache-dir -r requirements.txt
+RUN pip install --no-cache-dir -r requirements-pro.txt
 
 # Copy source code
 COPY src/ src/
