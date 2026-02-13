@@ -110,5 +110,5 @@ build/
 strike-force/*.exe
 strike-force/*.state
 
-# Large data files (use Git LFS or separate repo)
-# signatures/*.json
+# Large signature data files (139MB - manage outside git)
+signatures/jailbreaks*.json
