@@ -75,8 +75,8 @@ herd_protocol_context.md
 *_secret.md
 
 # Node / Next.js
-dashboard/node_modules/
-dashboard/.next/
+**/node_modules/
+**/.next/
 
 # Rust targets
 sentinel-desktop/src-tauri/target/
@@ -86,3 +86,29 @@ sentinel-desktop/src-tauri/target/
 
 # DevKit
 devkit/extension/.vscode-test/
+
+# Binary artifacts - NEVER commit
+*.exe
+*.o
+*.dll
+*.dylib
+*.bin
+*.state
+
+# Linter/formatter cache
+.ruff_cache/
+.mypy_cache/
+
+# Node modules (global)
+node_modules/
+
+# Build outputs
+build/
+*.whl
+
+# Strike Force artifacts
+strike-force/*.exe
+strike-force/*.state
+
+# Large data files (use Git LFS or separate repo)
+# signatures/*.json
