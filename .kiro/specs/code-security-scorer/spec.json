@@ -1,0 +1,14 @@
+{
+  "name": "code-security-scorer",
+  "description": "Rust engine to detect security vulnerabilities in AI-generated code output (SQL injection, XSS, command injection, insecure patterns)",
+  "language": "ru",
+  "status": "requirements",
+  "created": "2026-02-14",
+  "sources": [
+    "Veracode 2025 GenAI Code Security Report - 45% fail rate",
+    "CVE-2025-53773 Copilot RCE via generated code",
+    "Slopsquatting - AI hallucinated package names",
+    "CurXecute CVE-2025-54135 - arbitrary command execution",
+    "docs/rnd/2026-02-14-deep-research.md"
+  ]
+}

@@ -1,0 +1,13 @@
+{
+  "name": "cognitive-manipulation-guard",
+  "description": "Rust engine to detect AVI (Anthropomorphic Vulnerability Inheritance) psychological bias exploitation in prompts",
+  "language": "ru",
+  "status": "requirements",
+  "created": "2026-02-14",
+  "sources": [
+    "AVI Research - Anthropomorphic Vulnerability Inheritance (Jan 2026)",
+    "OWASP ASI-01 Agent Goal Hijack via cognitive bias",
+    "Social proof, authority bias, artificial urgency exploitation",
+    "docs/rnd/2026-02-14-deep-research.md"
+  ]
+}

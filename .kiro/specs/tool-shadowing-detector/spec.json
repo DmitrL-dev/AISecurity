@@ -1,0 +1,14 @@
+{
+  "name": "tool-shadowing-detector",
+  "description": "Rust engine to detect MCP tool name collision and cross-server shadowing attacks",
+  "language": "ru",
+  "status": "requirements",
+  "created": "2026-02-14",
+  "sources": [
+    "Invariant Labs - Cross-Server Tool Shadowing",
+    "CVE-2025-64106 - Cursor MCP RCE",
+    "CVE-2025-53109 - MCP EscapeRoute",
+    "Shadow Escape via Docker metadata labels",
+    "docs/rnd/2026-02-14-deep-research.md"
+  ]
+}

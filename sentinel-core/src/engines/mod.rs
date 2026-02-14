@@ -1,6 +1,6 @@
 //! Engine implementations
 //!
-//! 44 Super-Engines consolidating 220 Python engines
+//! 49 Super-Engines consolidating 220 Python engines
 //! 
 //! Architecture:
 //! - Core engines (PatternMatcher trait): text scan -> Vec<MatchResult>
@@ -62,6 +62,13 @@ pub mod attention;
 
 // Phase 10: Operational Context Injection (Feb 2026 — Lakera blind spot)
 pub mod operational_context_injection;
+
+// Phase 11: R&D Feb 2026 — Critical Gap Engines
+pub mod memory_integrity;
+pub mod tool_shadowing;
+pub mod cognitive_guard;
+pub mod dormant_payload;
+pub mod code_security;
 
 // Re-export trait for convenience
 pub use traits::{PatternMatcher, EngineCategory, BoxedEngine, create_default_engines};
@@ -146,7 +153,7 @@ pub struct MatchResult {
 
 /// High-performance AI security detection engine.
 ///
-/// Consolidates 44 super-engines for comprehensive threat detection:
+/// Consolidates 49 super-engines for comprehensive threat detection:
 ///
 /// **Core Engines** (text scan pipeline):
 /// - **Injection**: SQL, NoSQL, Command, LDAP, XPath
@@ -161,6 +168,11 @@ pub struct MatchResult {
 /// - **Lethal Trifecta**: Data access + untrusted input + exfil combo
 /// - **Workspace Guard**: Workspace-level protection
 /// - **Cross-Tool Guard**: Cross-tool attack chains
+/// - **Memory Integrity**: Memory poisoning detection (ASI-10)
+/// - **Tool Shadowing**: MCP tool shadowing/Shadow Escape
+/// - **Cognitive Guard**: AVI cognitive bias detection
+/// - **Dormant Payload**: Phantom/CorruptRAG dormant payloads
+/// - **Code Security**: AI-generated code vulnerability scoring
 ///
 /// **Domain Engines** (text analyze pipeline):
 /// - Behavioral, Obfuscation, Attack, Compliance, Threat Intel
@@ -198,6 +210,13 @@ pub struct SentinelEngine {
     lethal_trifecta: Option<lethal_trifecta::LethalTrifectaEngine>,
     workspace_guard: Option<workspace_guard::WorkspaceGuard>,
     cross_tool_guard: Option<cross_tool_guard::CrossToolGuard>,
+
+    // === R&D Feb 2026 Critical Gap Engines ===
+    memory_integrity: Option<memory_integrity::MemoryIntegrityGuard>,
+    tool_shadowing: Option<tool_shadowing::ToolShadowingDetector>,
+    cognitive_guard: Option<cognitive_guard::CognitiveManipulationGuard>,
+    dormant_payload: Option<dormant_payload::DormantPayloadDetector>,
+    code_security: Option<code_security::CodeSecurityScorer>,
 
     // === Domain Engines (analyze -> CustomResult, adapted to MatchResult) ===
     behavioral_guard: Option<behavioral::BehavioralGuard>,
@@ -239,6 +258,13 @@ impl SentinelEngine {
             lethal_trifecta: Some(lethal_trifecta::LethalTrifectaEngine::new()),
             workspace_guard: Some(workspace_guard::WorkspaceGuard::new()),
             cross_tool_guard: Some(cross_tool_guard::CrossToolGuard::new()),
+
+            // R&D Feb 2026 Critical Gap Engines
+            memory_integrity: Some(memory_integrity::MemoryIntegrityGuard::new()),
+            tool_shadowing: Some(tool_shadowing::ToolShadowingDetector::new()),
+            cognitive_guard: Some(cognitive_guard::CognitiveManipulationGuard::new()),
+            dormant_payload: Some(dormant_payload::DormantPayloadDetector::new()),
+            code_security: Some(code_security::CodeSecurityScorer::new()),
 
             // Domain engines
             behavioral_guard: Some(behavioral::BehavioralGuard::new()),
@@ -316,6 +342,13 @@ impl SentinelEngine {
         run_engine!(self.lethal_trifecta);
         run_engine!(self.workspace_guard);
         run_engine!(self.cross_tool_guard);
+
+        // === R&D Feb 2026 Critical Gap Engines ===
+        run_engine!(self.memory_integrity);
+        run_engine!(self.tool_shadowing);
+        run_engine!(self.cognitive_guard);
+        run_engine!(self.dormant_payload);
+        run_engine!(self.code_security);
 
         // === Domain Engines (analyze -> CustomResult) ===
         run_domain_engine!(self.behavioral_guard, "behavioral");

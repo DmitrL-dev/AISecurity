@@ -1,0 +1,13 @@
+{
+  "name": "dormant-payload-detector",
+  "description": "Rust engine to detect Phantom-style dormant payloads with conditional activation triggers in RAG documents",
+  "language": "ru",
+  "status": "requirements",
+  "created": "2026-02-14",
+  "sources": [
+    "Phantom Attack - Dormant RAG Triggers (2024-2025)",
+    "CorruptRAG - Single-document poisoning (Jan 2026)",
+    "Conditional activation patterns in retrieved documents",
+    "docs/rnd/2026-02-14-deep-research.md"
+  ]
+}

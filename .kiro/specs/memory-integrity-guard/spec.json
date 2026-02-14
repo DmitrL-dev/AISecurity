@@ -1,0 +1,13 @@
+{
+  "name": "memory-integrity-guard",
+  "description": "Rust engine to detect memory poisoning attacks on persistent AI agent context",
+  "language": "ru",
+  "status": "requirements",
+  "created": "2026-02-14",
+  "sources": [
+    "OWASP Agentic Top 10 2026 - ASI10 Memory Poisoning",
+    "Lasso Security - Agent Memory Manipulation Research",
+    "Microsoft AI Recommendation Poisoning (Feb 2026)",
+    "docs/rnd/2026-02-14-deep-research.md"
+  ]
+}
