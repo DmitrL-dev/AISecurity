@@ -110,5 +110,8 @@ build/
 strike-force/*.exe
 strike-force/*.state
 
+# Rust build artifacts
+**/target/
+
 # Large signature data files (139MB - manage outside git)
 signatures/jailbreaks*.json
