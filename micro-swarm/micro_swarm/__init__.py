@@ -25,9 +25,13 @@ from micro_swarm.trainer import (
 )
 from micro_swarm.shadow import ShadowAdapter, DisagreementReport
 from micro_swarm.strike_feedback import StrikeFeedbackLoop, ProbeResult, StealthProfile
+from micro_swarm.kolmogorov import KolmogorovDetector, CompressionAnalysis
+from micro_swarm.ncd import (
+    NormalizedCompressionDistance, AdversarialDetector, AdversarialAnalysis,
+)
 from micro_swarm.presets import load_preset, list_presets
 
-__version__ = "0.2.0"
+__version__ = "0.3.0"
 __all__ = [
     # Autograd
     "Value",
@@ -45,6 +49,10 @@ __all__ = [
     "ShadowAdapter", "DisagreementReport",
     # Strike
     "StrikeFeedbackLoop", "ProbeResult", "StealthProfile",
+    # Kolmogorov
+    "KolmogorovDetector", "CompressionAnalysis",
+    # NCD
+    "NormalizedCompressionDistance", "AdversarialDetector", "AdversarialAnalysis",
     # Presets
     "load_preset", "list_presets",
 ]

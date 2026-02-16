@@ -1,6 +1,6 @@
 [project]
 name = "micro-swarm"
-version = "0.2.0"
+version = "0.3.0"
 description = "Micro-Model Swarm: lightweight ML ensemble framework. Pure Python, 0 deps, <1ms inference."
 readme = "README.md"
 requires-python = ">=3.11"
