@@ -29,9 +29,10 @@ from micro_swarm.kolmogorov import KolmogorovDetector, CompressionAnalysis
 from micro_swarm.ncd import (
     NormalizedCompressionDistance, AdversarialDetector, AdversarialAnalysis,
 )
+from micro_swarm.text_features import TextFeatureExtractor, TextFeatures
 from micro_swarm.presets import load_preset, list_presets
 
-__version__ = "0.3.0"
+__version__ = "0.4.0"
 __all__ = [
     # Autograd
     "Value",
@@ -53,6 +54,8 @@ __all__ = [
     "KolmogorovDetector", "CompressionAnalysis",
     # NCD
     "NormalizedCompressionDistance", "AdversarialDetector", "AdversarialAnalysis",
+    # Text Features
+    "TextFeatureExtractor", "TextFeatures",
     # Presets
     "load_preset", "list_presets",
 ]

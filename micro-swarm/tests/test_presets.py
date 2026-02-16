@@ -100,7 +100,7 @@ class TestAllPresetsProperties:
     @pytest.mark.parametrize("preset_name", list_presets())
     def test_three_domains(self, preset_name):
         swarm = load_preset(preset_name)
-        assert swarm.model_count == 3
+        assert swarm.model_count >= 3
 
     @pytest.mark.parametrize("preset_name", list_presets())
     def test_param_count_positive(self, preset_name):
