@@ -6,11 +6,11 @@
 
 <p align="center">
   <strong> Defense +  Offense +  Framework - Complete AI Security Suite</strong><br>
-  <strong>Dragon v4.1 * January 2026</strong>
+  <strong>Dragon v5.0 * February 2026</strong>
 </p>
 
 <p align="center">
-  <img src="https://img.shields.io/badge/_BRAIN-217_Engines-brightgreen?style=for-the-badge" alt="Brain">
+  <img src="https://img.shields.io/badge/_BRAIN-49_Rust_Engines-brightgreen?style=for-the-badge" alt="Brain">
   <img src="https://img.shields.io/badge/_SHIELD-113_Tests_-00ADD8?style=for-the-badge" alt="Shield">
   <img src="https://img.shields.io/badge/_STRIKE-39K+_Payloads-red?style=for-the-badge" alt="Strike">
   <img src="https://img.shields.io/badge/_LOC-116K-blue?style=for-the-badge" alt="LOC">
@@ -28,7 +28,7 @@
 
 > [!IMPORTANT]
 > ### Open to Work - AI Security Engineer
-> **Solo author of this 116K LOC platform with 217 Engines. Available remote.**
+> **Solo author of this 116K LOC platform with 49 Rust Super-Engines + Micro-Model Swarm. Available remote.**
 >  [chg@live.ru](mailto:chg@live.ru) *  [@DmLabincev](https://t.me/DmLabincev)
 
 ---
@@ -98,13 +98,14 @@ Prompt injection, jailbreaks, извлечение данных — не тео�
 ```mermaid
 graph TB
     subgraph DEFENSE["🛡️ DEFENSE"]
-        BRAIN["🧠 BRAIN<br/>217 Engines"]
+        BRAIN["🧠 BRAIN<br/>49 Rust Engines via PyO3"]
+        SWARM["🐝 MICRO-SWARM<br/>ML Presets · F1=0.997"]
         SHIELD["🛡️ SHIELD<br/>< 1ms latency"]
         IMMUNE["🔬 IMMUNE<br/>EDR/XDR/MDR"]
     end
     
     subgraph OFFENSE["⚔️ OFFENSE"]
-        STRIKE["💥 STRIKE<br/>39K+ payloads"]
+        STRIKE["💥 STRIKE<br/>39K+ payloads (Go)"]
     end
     
     subgraph DEV["🛠️ DEVELOPMENT"]
@@ -113,7 +114,9 @@ graph TB
     end
     
     INPUT(["📥 User Input"]) --> BRAIN
+    INPUT --> SWARM
     BRAIN --> SHIELD
+    SWARM --> SHIELD
     SHIELD --> LLM(["🤖 LLM"])
     LLM --> BRAIN
     STRIKE -.->|tests| BRAIN
@@ -121,6 +124,7 @@ graph TB
     RLM --> FRAMEWORK
     
     style BRAIN fill:#4CAF50,color:#fff
+    style SWARM fill:#8BC34A,color:#fff
     style SHIELD fill:#00ADD8,color:#fff
     style STRIKE fill:#f44336,color:#fff
     style RLM fill:#9C27B0,color:#fff
@@ -198,6 +202,11 @@ pip install rlm-toolkit
 ```bash
 git clone https://github.com/DmitrL-dev/AISecurity.git
 cd AISecurity/sentinel-community
+
+# Build Rust engines
+cd sentinel-core && pip install maturin
+maturin develop --release && cd ..
+
 pip install -e ".[dev]"
 ```
 
@@ -301,15 +310,16 @@ result = shield.validate_command("/research", {"query": "AI news"})
 
 | Metric | Value |
 |--------|-------|
-| **Brain Engines** | 217 |
+| **Brain Engines** | 49 Rust Super-Engines (<1ms each) |
+| **Micro-Model Swarm** | 5 presets · F1=0.997 |
 | **Shield LOC** | 36,000+ |
 | **Shield Tests** | 103/103  |
-| **Strike Payloads** | 39,000+ |
+| **Strike Payloads** | 39,000+ (Go) |
 | **Total LOC** | 116,000+ |
 | **OWASP LLM Top 10** | 10/10  |
 | **OWASP Agentic AI** | 10/10  |
 
-📋 **[Full Changelog](./docs/CHANGELOG.md)** | 📖 **[Engine Reference](./docs/reference/engines-en.md)**
+📋 **[Full Changelog](./docs/CHANGELOG.md)** | 📖 **[Engine Reference](./docs/reference/engines-en.md)** | 🐝 **[Micro-Swarm](./docs/reference/micro-swarm.md)**
 
 ---
 
