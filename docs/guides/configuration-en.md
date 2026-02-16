@@ -226,7 +226,7 @@ LLM_DEFAULT_MODEL=llama2
 ### Thorough Mode
 
 - ~200ms latency
-- All 217 engines
+- All 49 Rust engines
 - Use: Critical systems
 
 ---

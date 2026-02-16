@@ -19,25 +19,31 @@
 │                                    │                                         │
 │                                    ▼                                         │
 │  ┌──────────────────────────────────────────────────────────────────────┐   │
-│  │                          BRAIN (Python)                               │   │
+│  │                     BRAIN (Rust via PyO3)                             │   │
 │  │                     AI Security Detection                             │   │
 │  │  ┌────────────┐  ┌────────────┐  ┌────────────┐  ┌────────────┐     │   │
 │  │  │ Injection  │  │ Jailbreak  │  │    PII     │  │  Agentic   │     │   │
 │  │  │  Engines   │  │  Engines   │  │  Engines   │  │  Engines   │     │   │
 │  │  └────────────┘  └────────────┘  └────────────┘  └────────────┘     │   │
-│  │                      217 Detection Engines                           │   │
+│  │                    49 Rust Super-Engines (<1ms each)                  │   │
 │  └──────────────────────────────────────────────────────────────────────┘   │
 │                                    │                                         │
 │         ┌──────────────────────────┼──────────────────────────┐             │
 │         ▼                          ▼                          ▼             │
 │  ┌────────────────┐    ┌────────────────┐    ┌────────────────────────┐    │
 │  │   FRAMEWORK    │    │     STRIKE     │    │        IMMUNE          │    │
-│  │    (Python)    │    │    (Python)    │    │          (C)           │    │
+│  │    (Python)    │    │      (Go)      │    │          (C)           │    │
 │  │                │    │                │    │                        │    │
 │  │  • SDK         │    │  • Red Team    │    │  • EDR                 │    │
 │  │  • FastAPI     │    │  • HYDRA       │    │  • Agent Protection    │    │
 │  │  • Middleware  │    │  • 39K Payloads│    │  • Real-time Defense   │    │
 │  └────────────────┘    └────────────────┘    └────────────────────────┘    │
+│                                                                              │
+│  ┌──────────────────────────────────────────────────────────────────────┐   │
+│  │                    MICRO-MODEL SWARM (Python)                        │   │
+│  │         Lightweight ML Detection (F1=0.997 jailbreak)                │   │
+│  │     • TextFeatureExtractor  • 4-Domain Presets  • Online SGD        │   │
+│  └──────────────────────────────────────────────────────────────────────┘   │
 │                                                                              │
 ├─────────────────────────────────────────────────────────────────────────────┤
 │                                                                              │
@@ -102,7 +108,8 @@ Input Prompt
 ScanResult {is_threat, confidence, details}
 ```
 
-**Engines:** 217  
+**Engines:** 49 Rust Super-Engines (via PyO3, <1ms each)  
+**Legacy:** 243 Python engines archived in `_archive/brain-engines-python/`  
 **OWASP Coverage:** 100% LLM Top 10 + 100% Agentic AI Top 10  
 
 ---

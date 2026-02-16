@@ -4,6 +4,31 @@ All notable changes to the SENTINEL AI Security Platform.
 
 ---
 
+## [2.0.0] - 2026-02-16 (Rust Migration + Micro-Model Swarm)
+
+### 🦀 Engine Migration
+
+- **49 Rust Super-Engines** consolidating 220+ legacy Python engines
+- PyO3 bindings: <1ms per engine inference
+- Legacy engines archived in `_archive/brain-engines-python/`
+- STRIKE rewritten in Go
+
+### 🐝 Micro-Model Swarm v0.4.0
+
+- TextFeatureExtractor: 22 features from raw text
+- JailbreakPreset: 4-domain detection (F1=0.997, Accuracy=99.7%)
+- Trained on 87,056 real jailbreak patterns
+- Additional presets: adtech, security, fraud, strike
+
+### 📚 Documentation Overhaul
+
+- Removed outdated expert-deep-dive files (~1MB dead weight)
+- Updated all references: 217 Python engines → 49 Rust Super-Engines
+- New: `docs/reference/micro-swarm.md`
+- Updated: ARCHITECTURE, README, COMPARISON, engines reference
+
+---
+
 ## [1.7.0] - 2026-01-18 (CVE-2026-22812 + RLM v1.0.1 Security Fix)
 
 ### 🎯 New STRIKE Payloads (24)

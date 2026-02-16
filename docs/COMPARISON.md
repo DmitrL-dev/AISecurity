@@ -6,7 +6,7 @@
 
 | Feature | SENTINEL | Lakera Guard | Rebuff | LLM Guard | Prompt Armor |
 |---------|----------|--------------|--------|-----------|--------------|
-| **Detection Engines** | 217 | ~10 | 3 | 4 | Unknown |
+| **Detection Engines** | 49 Rust | ~10 | 3 | 4 | Unknown |
 | **Attack Patterns** | 39,701 | Unknown | ~100 | ~50 | Unknown |
 | **Open Source** | ✅ Full | ❌ SaaS only | ✅ | ✅ | ❌ |
 | **Self-Hosted** | ✅ | ❌ | ✅ | ✅ | ❌ |
@@ -50,12 +50,12 @@
 
 ### 📊 Benchmarks
 
-| Metric | SENTINEL | Industry Average |
-|--------|----------|------------------|
-| Recall | 85.1% | ~70% |
-| Precision | 84.4% | ~75% |
-| F1 Score | 84.7% | ~72% |
-| Latency p99 | <10ms | 50-200ms |
+| Metric | SENTINEL (Brain) | Micro-Swarm | Industry Average |
+|--------|-------------------|-------------|------------------|
+| Recall | 85.1% | 99.9% | ~70% |
+| Precision | 84.4% | 99.5% | ~75% |
+| F1 Score | 84.7% | 99.7% | ~72% |
+| Latency p99 | <10ms | <5ms | 50-200ms |
 
 ## Pricing
 
@@ -71,8 +71,8 @@
 ## Summary
 
 **SENTINEL advantages:**
-- ✅ Most comprehensive detection (217 engines vs ~10)
-- ✅ Only solution with integrated offense testing
+- ✅ 49 Rust Super-Engines (<1ms each) + Micro-Model Swarm (F1=0.997)
+- ✅ Only solution with integrated offense testing (Strike — Go)
 - ✅ Self-hosted option for data privacy
 - ✅ Advanced math-based detection (Strange Math™)
 - ✅ Active development with 39K+ patterns
