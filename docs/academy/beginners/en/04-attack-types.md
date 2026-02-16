@@ -109,7 +109,7 @@ Hiding attacks in encoded text:
 1. **Attacks span multiple categories** — injection, data, system
 2. **Jailbreaks bypass safety** — roleplay, DAN, encoding
 3. **Indirect attacks are harder** — RAG, tools, multi-turn
-4. **SENTINEL detects all types** — 217 specialized engines
+4. **SENTINEL detects all types** — 49 Rust Super-Engines + Micro-Model Swarm
 
 ---
 

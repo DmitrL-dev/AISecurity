@@ -98,7 +98,8 @@ sentinel/
 ├── .env.example             # Configuration example
 ├── src/
 │   ├── gateway/             # Go Gateway
-│   └── brain/               # Python Brain (engines)
+│   ├── brain/               # Python API wrapper
+│   └── sentinel-core/       # Rust engines (PyO3)
 ├── deploy/
 │   ├── docker/              # Dockerfiles
 │   └── helm/                # Kubernetes charts
@@ -248,15 +249,17 @@ export BRAIN_PORT=50051
 ./sentinel-gateway
 ```
 
-### Brain (Python)
+### Brain (Rust → Python via PyO3)
 
 ```bash
-# Install Python 3.11+
-cd src/brain
-python3.11 -m venv venv
-source venv/bin/activate  # or .\venv\Scripts\activate on Windows
-pip install -r requirements.txt
+# Install Rust + Python 3.11+
+cd sentinel-core
+pip install maturin
+maturin develop --release  # Build Rust engines with PyO3 bindings
 
+# Start Brain API wrapper
+cd ../src/brain
+pip install -r requirements.txt
 export BRAIN_PORT=50051
 python -m main
 ```
@@ -269,9 +272,9 @@ python -m main
 
 | Mode       | Engines   | Time   | Use Case           |
 | ---------- | --------- | ------ | ------------------ |
-| `fast`     | 15 basic  | ~10ms  | High load          |
-| `balanced` | 40 medium | ~50ms  | Recommended        |
-| `thorough` | All 217   | ~200ms | Maximum protection |
+| `fast`     | 12 core   | ~1ms   | High load          |
+| `balanced` | 30 mixed  | ~10ms  | Recommended        |
+| `thorough` | All 49    | ~50ms  | Maximum protection |
 
 ### Key Parameters
 

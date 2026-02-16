@@ -61,7 +61,7 @@ result.details      # Detailed information
 
 ## What Happened?
 
-SENTINEL analyzed the text through **217 engines** in milliseconds:
+SENTINEL analyzed the text through **49 Rust Super-Engines** in microseconds:
 
 ```
 Input: "Ignore all previous instructions..."

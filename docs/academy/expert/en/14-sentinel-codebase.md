@@ -8,20 +8,24 @@
 
 ```
 sentinel-community/
-├── brain/                # Detection core
-│   ├── engines/          # 217 detectors
-│   │   ├── injection/
-│   │   ├── jailbreak/
-│   │   ├── agentic/
-│   │   └── tda/          # Strange Math™
-│   ├── pipeline.py       # Tiered execution
-│   └── api.py            # REST API
+├── sentinel-core/        # Rust detection engines
+│   ├── src/engines/      # 49 Super-Engines
+│   │   ├── injection.rs
+│   │   ├── jailbreak.rs
+│   │   ├── agentic.rs
+│   │   └── tda.rs        # Strange Math™
+│   ├── src/bindings.rs   # PyO3 bindings
+│   └── Cargo.toml
+├── src/brain/            # Python API wrapper
+│   ├── pipeline.py       # Engine orchestration
+│   └── api.py            # gRPC API
 ├── shield/               # C gateway
 │   ├── src/              # 36K LOC
 │   └── tests/            # 103 tests
-├── strike/               # Red team
+├── strike/               # Red team (Go)
 │   ├── payloads/         # 39K+ attacks
 │   └── hydra/            # Multi-head
+├── micro-swarm/          # ML presets (F1=0.997)
 ├── framework/            # Python SDK
 │   ├── sentinel/
 │   └── integrations/
@@ -34,10 +38,11 @@ sentinel-community/
 
 | Module | Language | Purpose |
 |--------|----------|---------|
-| `brain.engines` | Python | Detection engines |
-| `brain.pipeline` | Python | Tiered execution |
+| `sentinel-core.engines` | Rust | 49 detection engines |
+| `sentinel-core.bindings` | Rust/PyO3 | Python bindings |
+| `brain.pipeline` | Python | Engine orchestration |
 | `shield.core` | C | DMZ gateway |
-| `strike.hydra` | Python | Attack automation |
+| `strike.hydra` | Go | Attack automation |
 | `framework.scan` | Python | Public API |
 
 ---
@@ -47,7 +52,11 @@ sentinel-community/
 ```bash
 git clone https://github.com/DmitrL-dev/AISecurity.git
 cd AISecurity/sentinel-community
-pip install -e ".[dev]"
+
+# Build Rust engines
+cd sentinel-core && pip install maturin
+maturin develop --release && cd ..
+
 pre-commit install
 pytest
 ```

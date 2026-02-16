@@ -8,67 +8,73 @@
 
 ```
 sentinel-community/
+├── sentinel-core/         # Rust detection engines
+│   ├── src/engines/       # 49 Rust Super-Engines
+│   │   ├── injection.rs
+│   │   ├── jailbreak.rs
+│   │   ├── pii.rs
+│   │   └── mod.rs         # Engine registry
+│   ├── src/bindings.rs    # PyO3 Python bindings
+│   └── Cargo.toml
 ├── src/
-│   ├── brain/              # Detection engines
-│   │   ├── engines/        # 217 detection engines
-│   │   ├── security/       # Trust, crypto, scoring
-│   │   └── integrations/   # MCP, external services
-│   ├── framework/          # Python SDK
-│   │   ├── scan.py         # Core scan API
-│   │   ├── guard.py        # Decorators
-│   │   └── middleware/     # FastAPI, Flask
-│   └── strike/             # Red team platform
-│       ├── payloads/       # 39K+ attack payloads
-│       ├── hydra/          # Attack engine
-│       └── report/         # Reporting
-├── shield/                 # Pure C DMZ (separate)
-├── immune/                 # EDR in C (separate)
-├── tests/                  # All tests
-├── docs/                   # Documentation
-└── .kiro/                  # SDD specifications
+│   ├── brain/             # Python API wrapper (gRPC)
+│   │   ├── security/      # Trust, crypto, scoring
+│   │   └── integrations/  # MCP, external services
+│   ├── framework/         # Python SDK
+│   │   ├── scan.py        # Core scan API
+│   │   ├── guard.py       # Decorators
+│   │   └── middleware/    # FastAPI, Flask
+│   └── strike/            # Red team platform (Go)
+│       ├── payloads/      # 39K+ attack payloads
+│       ├── hydra/         # Attack engine
+│       └── report/        # Reporting
+├── shield/                # Pure C DMZ (separate)
+├── immune/                # EDR in C (separate)
+├── micro-swarm/           # ML detection (F1=0.997)
+├── tests/                 # All tests
+├── docs/                  # Documentation
+└── .kiro/                 # SDD specifications
 ```
 
 ---
 
 ## Key Modules
 
-### BaseEngine
+### PatternMatcher Trait (Rust)
 
-```python
-# src/brain/engine/base.py
-class BaseEngine(ABC):
-    name: str
-    category: str
-    tier: int  # 1, 2, 3
-    owasp: List[str]
-    
-    @abstractmethod
-    def scan(self, text: str) -> ScanResult: ...
+```rust
+// sentinel-core/src/engines/traits.rs
+pub trait PatternMatcher {
+    fn name(&self) -> &'static str;
+    fn scan(&self, text: &str) -> Vec<MatchResult>;
+}
 ```
 
-### ScanResult
+### AnalysisResult
 
-```python
-@dataclass
-class ScanResult:
-    is_threat: bool
-    confidence: float  # 0.0 - 1.0
-    threat_type: str
-    engine: str
-    details: Dict = field(default_factory=dict)
+```rust
+#[pyclass]
+pub struct AnalysisResult {
+    pub detected: bool,
+    pub risk_score: f64,      // 0.0 - 1.0
+    pub processing_time_us: u64,
+    pub matches: Vec<MatchResult>,
+    pub categories: Vec<String>,
+}
 ```
 
 ### Pipeline
 
-```python
-# Tiered execution
-class TieredPipeline:
-    def scan(self, text: str) -> ScanResult:
-        for tier in self.tiers:
-            results = tier.run(text)
-            if any(r.is_threat for r in results):
-                return merge(results)
-        return ScanResult(is_threat=False)
+```rust
+// All engines run in analyze()
+impl SentinelEngine {
+    pub fn analyze(&self, text: &str) -> PyResult<AnalysisResult> {
+        // Core engines (PatternMatcher trait)
+        run_engine!(self.injection);
+        run_engine!(self.jailbreak);
+        // ... 49 engines total
+    }
+}
 ```
 
 ---
@@ -80,15 +86,18 @@ class TieredPipeline:
 git clone https://github.com/DmitrL-dev/AISecurity.git
 cd AISecurity/sentinel-community
 
-# Setup
-pip install -e ".[dev]"
+# Build Rust engines
+cd sentinel-core
+pip install maturin
+maturin develop --release
 
 # Run tests
+cd ..
 pytest tests/ -v
 
 # Lint
+cargo clippy --manifest-path sentinel-core/Cargo.toml
 ruff check src/
-black src/ --check
 ```
 
 ---

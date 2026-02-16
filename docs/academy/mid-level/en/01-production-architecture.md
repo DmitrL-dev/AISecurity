@@ -65,9 +65,9 @@ from sentinel import scan
 
 ### BRAIN (Detection)
 
-- 217 detection engines
+- 49 Rust Super-Engines (<1ms each)
 - Tiered execution (fast → slow)
-- Python-based, REST API
+- Rust via PyO3, gRPC API
 
 ### SHIELD (Gateway)
 

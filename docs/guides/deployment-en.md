@@ -55,8 +55,8 @@
                         ▼                           ▼                           ▼
                 ┌───────────────┐           ┌───────────────┐           ┌───────────────┐
                 │    BRAIN 1    │           │    BRAIN 2    │           │    BRAIN 3    │
-                │   (Python)    │           │   (Python)    │           │   (Python)    │
-                │  217 engines  │           │  217 engines  │           │  217 engines  │
+                │  (Rust/PyO3)  │           │  (Rust/PyO3)  │           │  (Rust/PyO3)  │
+                │  49 engines   │           │  49 engines   │           │  49 engines   │
                 └───────────────┘           └───────────────┘           └───────────────┘
 ```
 
@@ -66,7 +66,7 @@
 | ----------------- | -------------------------------- | ------------------ |
 | **Load Balancer** | TLS termination, routing         | 1 (HA pair)        |
 | **Gateway**       | HTTP → gRPC, auth, rate limiting | 2-10 replicas      |
-| **Brain**         | ML engines, analysis             | 3-20 replicas      |
+| **Brain**         | 49 Rust engines via PyO3         | 3-20 replicas      |
 | **Redis**         | Cache, sessions, rate limits     | Cluster (3+ nodes) |
 | **Prometheus**    | Metrics                          | 1-2 replicas       |
 
