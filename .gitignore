@@ -74,6 +74,40 @@ herd_protocol_context.md
 *_classified.md
 *_secret.md
 
+# ============================================================
+# SENSITIVE / NON-PUBLIC — NEVER commit to open-source repo
+# ============================================================
+
+# RLM state & encryption keys — CRITICAL
+.rlm/
+
+# Commercial / promotional projects
+ad-shield/
+saas/
+
+# Internal development tooling & methodology
+ralph-sdd/
+
+# External repositories (forks, submodules vendored in)
+openclaw/
+
+# R&D / competitive research
+rlm-research/
+docs/rnd/
+
+# Pentest results, attack logs, recon data
+strike/dashboard/logs/
+strike/dashboard/recon_cache/
+strike/dashboard/reports/
+strike/bugbounty/
+_archive/attack_report.html
+benchmarks/benchmark_results.json
+
+# Standalone engine projects (not part of core)
+virtualconv-engine/
+
+# ============================================================
+
 # Node / Next.js
 **/node_modules/
 **/.next/
