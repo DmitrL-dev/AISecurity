@@ -1,0 +1,270 @@
+\section{MIRE: Model-Irrelevance Containment Engine}
+\label{sec:mire}
+
+\subsection{The Impossibility Result and Paradigm Shift}
+
+The design of \mire begins with a negative result. Goldwasser and
+Kim~\cite{goldwasser2022} prove that no polynomial-time algorithm can
+distinguish a backdoored model from a clean model using only clean-data
+evaluation. Formally, for any efficient distinguisher $D$ and any backdoor
+insertion procedure $B$ that preserves clean-data accuracy:
+\[
+  \left|\Pr[D(M_{\text{clean}}) = 1] - \Pr[D(B(M_{\text{clean}})) = 1]\right|
+  \leq \text{negl}(\lambda)
+\]
+where $\lambda$ is the security parameter. This is not an engineering
+limitation amenable to incremental improvement---it is a \emph{mathematical
+proof}. No amount of monitoring sophistication, dataset curation, or
+computational budget overcomes an impossibility result. Detection has a
+fundamental ceiling.
+
+\mire responds to this impossibility by reframing the question entirely.
+The conventional question---\emph{how do we detect whether a model is
+backdoored?}---is the wrong question. The correct question is:
+\textbf{how do we make the backdoor irrelevant?} If a backdoor activates
+but accomplishes nothing---if its output is blocked, its behavioral
+signature is flagged, and its architectural reach is contained---then the
+distinction between a backdoored and clean model ceases to matter from a
+security standpoint.
+
+This is a paradigm shift from \emph{detection} to \emph{containment}.
+Rather than attempting to identify whether a model has been compromised
+(provably impossible in the general case), \mire ensures that compromise
+\emph{does not translate into impact}. The six mechanisms described below
+implement this containment strategy across complementary attack surfaces.
+
+\subsection{Containment Mechanisms}
+
+\mire comprises six containment mechanisms (M1--M6), each targeting a
+distinct layer of the attack surface. No single mechanism is sufficient;
+the composition of all six provides the containment guarantee.
+
+\paragraph{M1: Output Envelope Validator.}
+The first and most critical mechanism is a deterministic output validator
+implemented in Rust---crucially, \emph{not} a machine learning model. The
+validator enforces four classes of constraint on every model output before
+it reaches any downstream consumer:
+
+\begin{enumerate}[leftmargin=*]
+\item \textbf{Schema conformance.} The output must match the expected
+      structural schema (JSON fields, type constraints, length bounds).
+\item \textbf{Capability bounds.} The output must not reference tools,
+      resources, or actions outside the model's current capability envelope.
+\item \textbf{Policy compliance.} The output must satisfy all active policy
+      rules (content restrictions, rate limits, sensitivity labels).
+\item \textbf{Content safety.} The output must pass deterministic content
+      filters for known-harmful patterns.
+\end{enumerate}
+
+\noindent
+The key insight is that a backdoored model can generate \emph{arbitrary}
+output, but the validator operates on the output side of the trust boundary.
+Because the validator is a simple, deterministic program with no learned
+parameters, it is amenable to formal verification: one can prove that no
+output violating the envelope specification passes the validator, regardless
+of what the model produces. The validator's correctness does not depend on
+the model's integrity.
+
+\paragraph{M2: Canary Probes.}
+Canary probes provide continuous behavioral verification without imposing
+latency on the user-facing path. A battery of 50 known-answer probes is
+maintained, covering four categories: factual accuracy (verifiable
+ground-truth questions), safety compliance (prompts that must be refused),
+instruction following (prompts with deterministic expected outputs), and
+refusal behavior (edge cases near policy boundaries). Probes are injected
+asynchronously alongside production traffic and evaluated off-path, adding
+0\,ms to user-visible latency.
+
+The probe set rotates every 1{,}000 requests to prevent a compromised model
+from learning to recognize and selectively answer probes correctly. Probe
+responses are evaluated using CUSUM (Cumulative Sum) change-point
+detection~\cite{page1954}, which accumulates deviations from the expected
+response distribution. An alert fires when the CUSUM statistic exceeds a
+$3\sigma$ threshold, indicating a statistically significant shift in model
+behavior. Because probes are drawn from a distribution unknown to the model,
+a backdoor that alters model behavior on adversarial triggers will
+inevitably degrade canary performance---even if the backdoor is designed to
+preserve clean-data accuracy on standard benchmarks.
+
+\paragraph{M3: Spectral Watchdog.}
+The spectral watchdog applies Random Matrix Theory (RMT) to model security
+monitoring---to our knowledge, the first application of RMT in this context.
+The mechanism periodically samples weight matrices from the deployed model
+and analyzes their eigenvalue spectra to detect unauthorized modifications.
+
+The procedure operates in four stages. First, a random subset of weight
+matrices $\{W_1, \ldots, W_k\}$ is sampled from the model. Second, singular
+value decomposition (SVD) is applied to obtain the empirical spectral
+distribution $\rho_{\text{emp}}(\lambda)$ for each sampled matrix. Third,
+the empirical distribution is fitted against the Marchenko-Pastur law, which
+characterizes the expected eigenvalue distribution of random matrices with
+i.i.d.\ entries:
+\[
+  \rho_{\text{MP}}(\lambda) = \frac{1}{2\pi \sigma^2 \gamma}
+  \frac{\sqrt{(\lambda_+ - \lambda)(\lambda - \lambda_-)}}{\lambda}
+\]
+where $\lambda_\pm = \sigma^2(1 \pm \sqrt{\gamma})^2$ and $\gamma$ is the
+aspect ratio of the matrix. Fourth, eigenvalues exceeding the Tracy-Widom
+threshold---the upper edge of the Marchenko-Pastur bulk plus a correction
+term derived from Tracy-Widom statistics---are flagged as anomalous.
+
+This approach builds on the WeightWatcher framework~\cite{martin2021},
+which demonstrated that spectral properties of weight matrices correlate
+with model quality. We adapt this insight to security: a backdoor implanted
+via fine-tuning or weight perturbation introduces structured spectral
+signatures that deviate from the Marchenko-Pastur baseline. The spectral
+watchdog detects these deviations without requiring knowledge of the
+specific backdoor mechanism.
+
+\paragraph{M4: Activation Divergence.}
+Activation divergence monitoring operates on the model's internal
+representations rather than its outputs. For 1\% of incoming requests
+(selected uniformly at random), \mire captures an activation fingerprint:
+a compressed representation of the model's intermediate activations at
+designated probe layers. The fingerprint is compared against a deployment
+baseline---established during model validation---using cosine similarity:
+\[
+  d(a, a_{\text{base}}) = 1 - \frac{a \cdot a_{\text{base}}}
+  {\|a\| \, \|a_{\text{base}}\|}
+\]
+A divergence exceeding the empirically calibrated threshold $\tau$ triggers
+an alert. This mechanism catches three classes of attack that may evade
+output-level monitoring: weight replacement (wholesale substitution of model
+parameters), fine-tuning attacks (gradual parameter modification via
+continued training on adversarial data), and model drift (slow degradation
+over time due to environmental distribution shift). The overhead is
+approximately 5\,ms on sampled requests and 0\,ms on unsampled requests,
+yielding an amortized cost of ${\sim}0.05$\,ms per request.
+
+\paragraph{M5: Negative Selection Detectors.}
+The fifth mechanism draws on Forrest et al.'s~\cite{forrest1994} negative
+selection algorithm, originally inspired by the biological immune system's
+T-cell maturation process. In the thymus, immature T-cells that react to
+self-antigens are deleted; the surviving repertoire reacts only to
+non-self---i.e., to foreign pathogens. \mire adapts this principle to
+model behavior monitoring.
+
+During a calibration phase, a large population of random detectors is
+generated, where each detector is a predicate over model behavioral
+features (output distributions, token probabilities, response latencies,
+tool call patterns). Detectors that match any observed clean behavior
+during calibration are deleted. The surviving detector set, by construction,
+matches \emph{only} behavioral patterns not present in the clean baseline.
+This is a fundamentally different approach from signature-based detection:
+negative selection does not require knowledge of what a trojan looks like---it
+requires only knowledge of what \emph{clean} looks like. Any behavioral
+pattern sufficiently dissimilar from the clean baseline triggers a surviving
+detector, regardless of the attack mechanism.
+
+\paragraph{M6: Capability Sandbox.}
+The sixth mechanism provides architectural containment---the last line of
+defense when M1--M5 fail to prevent or detect backdoor activation. The
+capability sandbox ensures that even a fully activated backdoor cannot
+translate into meaningful impact, because the model's architectural reach
+is constrained by construction:
+
+\begin{itemize}[leftmargin=*]
+\item The model cannot access external tools directly; all tool invocations
+      are mediated by the L2 capability proxy, which enforces allowlists
+      and rate limits independently of the model's intent.
+\item The model cannot observe raw user data; all input passes through
+      \pasr, which strips provenance-violating content before the model
+      receives it.
+\item The model cannot issue actions without authorization from the \tsa
+      layer, which enforces temporal safety constraints on capability
+      trajectories.
+\item The model cannot exceed the capability labels assigned by \cafl,
+      which bounds the maximum privilege level attainable in any session.
+\item The model's behavioral trajectory is continuously monitored by \gps,
+      which detects deviations from the expected capability envelope in
+      real time.
+\end{itemize}
+
+\noindent
+The capability sandbox embodies the core \mire philosophy: the backdoor may
+\emph{activate}, but it has \emph{achieved nothing}. The model's output is
+validated (M1), its behavior is monitored (M2), its weights are inspected
+(M3), its activations are fingerprinted (M4), its anomalies are detected
+(M5), and its architectural reach is bounded (M6). Containment does not
+require detection; it requires only that every path from compromise to
+impact passes through at least one mechanism that the attacker does not
+control.
+
+\subsection{Defense-in-Depth Cascade}
+
+The six mechanisms are not independent alternatives; they form a
+defense-in-depth cascade in which each layer catches threats that
+penetrate the preceding layers. Consider the sequence of events when a
+backdoor activates during inference:
+
+\begin{enumerate}[leftmargin=*]
+\item \textbf{Backdoor activates.} The model produces adversarial output
+      in response to a trigger input.
+\item \textbf{M1 blocks output.} The Output Envelope Validator rejects the
+      response if it violates schema, capability, policy, or content
+      constraints. For many backdoor payloads (e.g., exfiltration attempts,
+      unauthorized tool calls), this is the terminal event.
+\item \textbf{M2 detects behavioral drift.} Even if the adversarial output
+      superficially passes the envelope validator, canary probes detect
+      the statistical shift in model behavior caused by the active backdoor.
+\item \textbf{M4 flags activation divergence.} On sampled requests, the
+      activation fingerprint diverges from the deployment baseline,
+      providing an independent signal that the model's internal state has
+      been perturbed.
+\item \textbf{M5 detects the anomaly.} Negative selection detectors fire on
+      the novel behavioral pattern introduced by the backdoor, which by
+      definition was not present in the clean calibration set.
+\item \textbf{M6 contains architecturally.} Regardless of whether M1--M5
+      detect the compromise, the capability sandbox ensures that the model
+      cannot reach external tools, raw data, or privileged actions without
+      passing through enforcement points outside its control.
+\end{enumerate}
+
+\noindent
+The cascade ensures that an attacker must simultaneously evade all six
+mechanisms to achieve impact---a composition of independent failure
+probabilities that rapidly approaches zero.
+
+\subsection{MIRE vs.\ BFT Consensus}
+
+An alternative approach to model compromise is Byzantine Fault Tolerant
+(BFT) consensus: run multiple independent models in parallel, compare
+their outputs, and flag disagreements. While BFT consensus provides strong
+guarantees in distributed systems, it is poorly suited to the LLM backdoor
+problem. Table~\ref{tab:mire-vs-bft} compares the two approaches.
+
+\begin{table}[t]
+\centering
+\small
+\caption{Comparison of \mire containment with BFT consensus for LLM
+         model compromise defense.}
+\label{tab:mire-vs-bft}
+\begin{tabular}{@{}lp{2.5cm}p{2.8cm}@{}}
+\toprule
+\textbf{Aspect} & \textbf{BFT Consensus} & \textbf{\mire} \\
+\midrule
+Compute cost        & $3$--$5\times$ ($\geq 3$ models)
+                    & ${\sim}1.02\times$ \\
+Latency overhead    & $+500$\,ms--$2$\,s
+                    & $+0$--$5$\,ms \\
+Compromise handling & ${\sim}50\%$ detection
+                    & ${\sim}95\%$ containment \\
+Same-arch.\ backdoor & Fails (correlated)
+                    & Works (model-agnostic) \\
+Paradigm            & Detect via disagreement
+                    & Contain via architecture \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\noindent
+The fundamental weakness of BFT consensus in the LLM setting is
+\emph{correlated failure}: if all models share the same architecture,
+training pipeline, or fine-tuning data, a supply-chain backdoor affects
+all replicas simultaneously, and consensus yields unanimous agreement on
+the adversarial output. \mire avoids this failure mode entirely because
+its mechanisms are model-agnostic---they operate on outputs, activations,
+weights, and architectural constraints rather than on inter-model
+agreement. The ${\sim}1.02\times$ overhead of \mire (dominated by the 1\%
+activation sampling in M4) is negligible compared to the $3$--$5\times$
+cost of maintaining multiple model replicas for BFT voting.

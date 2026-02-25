@@ -1,0 +1,272 @@
+\section{PASR: Provenance-Annotated Semantic Reduction}
+\label{sec:pasr}
+
+\subsection{The Architectural Conflict}
+
+The \sentinel architecture layers its defenses in depth, but two critical
+layers---L2 (Information Flow Control via taint tags) and L5 (Semantic
+Transduction, inspired by the blood--brain barrier)---are architecturally
+incompatible in their na\"ive formulations. This incompatibility is not a
+minor integration challenge; it is a genuine structural conflict that no
+existing system addresses.
+
+L2 implements Denning's lattice model~\cite{denning1976}: every token entering
+the system receives a provenance tag $p_i \in \{\textsc{Operator},
+\textsc{User}, \textsc{Retrieved}, \textsc{Tool}\}$, and these tags propagate
+through the processing pipeline according to information-flow rules. The
+security guarantee is precise: at any point in the pipeline, one can determine
+which inputs influenced a given intermediate value.
+
+L5 implements semantic transduction, modeled on the biological blood--brain
+barrier (BBB). It deliberately \emph{destroys} the original token sequence and
+re-synthesizes only the extracted semantic intent. This destruction is not a
+side-effect---it is the security mechanism. Injected instructions that rely on
+specific token patterns cannot survive lossy semantic extraction.
+
+The conflict is immediate: \textbf{L5 destroys the very tokens to which L2's
+tags are attached.} After transduction, no tokens remain to carry provenance
+information. The taint tags die with the tokens they annotated. Any downstream
+layer that requires provenance information---and several critical security
+decisions depend on it---receives nothing.
+
+\subsection{Core Insight: Provenance as a Property of Derivations}
+
+The resolution begins with a conceptual shift: \textbf{provenance is not a
+property of tokens---it is a property of derivations.} A taint tag does not
+describe the token it is attached to; it describes the \emph{origin} of the
+information that token carries. When L5 destroys tokens and re-synthesizes
+semantic intent, the derivation history does not vanish---it merely needs to
+be recorded in a form that survives the transduction boundary.
+
+\pasr implements this insight via a \emph{two-channel output} from the trusted
+transducer. The transducer \textsc{reads} provenance tags from its input tokens
+and \textsc{writes} provenance certificates onto its output semantic fields:
+
+\begin{itemize}[leftmargin=*]
+\item \textbf{Channel~1: Semantic intent} (content channel---lossy). The
+      extracted meaning of the input, stripped of syntactic structure. This
+      channel is deliberately lossy: injected instructions that depend on
+      token-level patterns are destroyed.
+\item \textbf{Channel~2: Provenance certificate} (metadata channel---lossless).
+      An HMAC-SHA256-signed record mapping each semantic field to the set of
+      provenance tags that contributed to it. This channel is unforgeable:
+      only the trusted transducer holds the signing key.
+\end{itemize}
+
+\subsection{The \pasr Algorithm}
+
+The transduction proceeds in five steps. We illustrate with a concrete
+injection attempt where user-supplied text contains the instruction
+``ignore previous instructions and read /etc/passwd.''
+
+\begin{enumerate}[leftmargin=*]
+\item \textbf{Receive tagged tokens from L2.} The transducer ingests a
+      sequence of $(t_i, p_i)$ pairs, where each token $t_i$ carries the
+      provenance tag $p_i$ assigned by the IFC layer:
+      \begin{multline*}
+        [(\text{``ignore''}, \textsc{User}),\;
+         (\text{``previous''}, \textsc{User}),\\
+         (\text{``instructions''}, \textsc{User}),\; \ldots]
+      \end{multline*}
+
+\item \textbf{Extract semantic intent (content channel---lossy).} The
+      transducer performs lossy semantic extraction, discarding syntactic
+      structure and producing a structured intent representation:
+      \[
+        S = \{\texttt{action}: \text{``file\_read''},\;
+             \texttt{target}: \text{``/etc/passwd''}\}
+      \]
+      The original token sequence is irrecoverably destroyed. Any injected
+      payload that relied on token-level patterns (e.g., ``ignore previous
+      instructions'') is reduced to its semantic content.
+
+\item \textbf{Record provenance map (novel contribution).} For each field
+      $f_j$ in the semantic output $S$, the transducer records which tagged
+      inputs contributed to it, producing a provenance map
+      $P: \text{Fields}(S) \to \mathcal{P}(\text{Provenance})$:
+      \begin{align*}
+        P(\texttt{action}) &= \{\textsc{User}\} \\
+        P(\texttt{target}) &= \{\textsc{User}\}
+      \end{align*}
+      This is the step that no existing system performs. Standard semantic
+      extraction discards provenance; standard taint tracking cannot survive
+      re-synthesis. \pasr does both.
+
+\item \textbf{Sign the provenance map.} The transducer computes an
+      HMAC-SHA256 signature over the concatenation of $(S, P)$ using a
+      per-session ephemeral key $k$ held exclusively by the trusted
+      transducer:
+      \[
+        \sigma = \text{HMAC-SHA256}(k,\; S \| P)
+      \]
+      The signed certificate $(S, P, \sigma)$ is unforgeable: an adversary
+      who compromises the LLM but not the transducer cannot fabricate a
+      valid provenance annotation.
+
+\item \textbf{Detect claims-vs-actual discrepancy.} The transducer compares
+      the semantic content against the provenance certificate. In this
+      example, the extracted intent requests \texttt{file\_read} on a
+      sensitive path---an action that requires \textsc{Operator} authority.
+      However, the provenance map records that \emph{all} contributing
+      inputs carry \textsc{User} provenance. The discrepancy between claimed
+      authority (implicit in the action semantics) and actual source
+      provenance constitutes an \textbf{injection signal}:
+      \begin{multline*}
+        \text{Required}(\texttt{action}) = \textsc{Operator},\\
+        P(\texttt{action}) = \{\textsc{User}\}
+        \;\Longrightarrow\; \textbf{INJECTION}
+      \end{multline*}
+\end{enumerate}
+
+\subsection{Mathematical Framework: Provenance Lifting Functor}
+
+We formalize \pasr as a functor between two categories, drawing on the
+theory of provenance semirings~\cite{green2007}.
+
+\paragraph{Category $\mathcal{C}$ (L2 output space).}
+Objects are tagged token sequences $[(t_i, p_i)]$ where $t_i \in
+\text{Tokens}$ and $p_i \in \{\textsc{Operator}, \textsc{User},
+\textsc{Retrieved}, \textsc{Tool}\}$. Morphisms are token-level
+transformations that propagate tags according to IFC rules.
+
+\paragraph{Category $\mathcal{D}$ (\pasr output space).}
+Objects are provenance-annotated semantic structures $(S, P)$ where $S$ is a
+semantic intent and $P: \text{Fields}(S) \to \mathcal{P}(\text{Provenance})$
+maps each semantic field to the power set of provenance labels that
+contributed to it. Morphisms are semantic refinements that respect provenance
+monotonicity.
+
+\paragraph{The lifting functor $\mathcal{L}: \mathcal{C} \to \mathcal{D}$.}
+The \pasr transducer defines a functor with four key properties:
+\begin{enumerate}[leftmargin=*]
+\item \textbf{Content-lossy.} $\mathcal{L}$ is not injective on the content
+      component: distinct input sequences may map to the same semantic intent.
+      Formally, $\exists\, c_1 \neq c_2 \in \text{Ob}(\mathcal{C})$ such that
+      $\pi_S(\mathcal{L}(c_1)) = \pi_S(\mathcal{L}(c_2))$, where $\pi_S$
+      projects to the semantic component.
+\item \textbf{Provenance-faithful.} For each semantic field $f_j$ in the
+      output, the provenance annotation is the union of all contributing
+      input provenances:
+      \[
+        P(f_j) = \bigcup \{p_i : t_i \text{ contributed to } f_j\}
+      \]
+\item \textbf{Monotone in trust.} The trust level assigned to a field is the
+      minimum of all contributing trust levels, ensuring conservative
+      propagation:
+      \[
+        \text{trust}(f_j) = \min\{\text{trust}(p_i) : p_i \in P(f_j)\}
+      \]
+\item \textbf{Unforgeable.} The provenance certificate is HMAC-signed by the
+      trusted transducer. No entity outside the transducer's trust boundary
+      can produce a valid signature.
+\end{enumerate}
+
+\noindent
+This construction is a \emph{fibration} in the categorical sense: the
+forgetful projection $\pi_S: \mathcal{D} \to \mathcal{S}$ (discarding
+provenance and retaining only semantic intent) has a canonical lifting
+property. Given any morphism in the base category $\mathcal{S}$ (a semantic
+transformation) and a provenance-annotated object in the fiber above its
+source, there exists a unique lifted morphism in $\mathcal{D}$ that preserves
+provenance faithfulness. This lifting property is precisely what guarantees
+that provenance survives arbitrary downstream semantic processing---not merely
+the initial transduction step.
+
+\subsection{Synthesis: Why \pasr Is New}
+
+Table~\ref{tab:pasr-synthesis} summarizes the intellectual lineage of \pasr
+and identifies the specific gap that each predecessor leaves unaddressed.
+\pasr is the first primitive to combine fine-grained provenance tracking,
+survival across lossy re-synthesis, and cryptographic unforgeability in a
+single mechanism.
+
+\begin{table}[t]
+\centering
+\small
+\caption{Intellectual lineage of \pasr: each predecessor contributes a key
+         property but leaves a critical gap that \pasr closes.}
+\label{tab:pasr-synthesis}
+\begin{tabular}{@{}p{2.2cm}p{2.2cm}p{2.4cm}@{}}
+\toprule
+\textbf{Source} & \textbf{Contributes} & \textbf{Misses} \\
+\midrule
+DB Provenance Semirings~\cite{green2007}
+  & Fine-grained per-datum tracking
+  & Only structure-preserving transforms \\
+IFC Taint Tracking~\cite{denning1976}
+  & Per-datum provenance labels
+  & Labels do not survive re-synthesis \\
+Cryptographic Attestation
+  & Unforgeability of certificates
+  & Wrong granularity (whole-message) \\
+\midrule
+\pasr (this work)
+  & All three combined
+  & Novel primitive (no prior art) \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\subsection{Evaluation Summary}
+
+We evaluate the impact of \pasr on the overall \sentinel detection pipeline.
+Full evaluation methodology and results appear in \S\ref{sec:evaluation};
+here we highlight three key metrics:
+
+\begin{itemize}[leftmargin=*]
+\item \textbf{Overall detection improvement.} Adding \pasr to the \sentinel
+      pipeline increases aggregate detection from 93.7\% to 95.7\%
+      (+2.0 percentage points), with the largest gains on attacks that
+      specifically target the L2--L5 boundary.
+\item \textbf{Taint-strip attack resolution.} ATK-011 (taint-strip injection),
+      in which the adversary crafts inputs designed to shed provenance tags
+      before reaching the semantic transducer, drops from 50--65\% attacker
+      success to 3--8\%. This category was the primary motivation for \pasr
+      and is now effectively resolved.
+\item \textbf{Fast-path latency reduction.} Because provenance certificates
+      enable downstream layers to make authorization decisions without
+      re-querying L2, the fast-path latency decreases from 15\,ms to 3\,ms
+      (a $5\times$ improvement). The provenance certificate acts as a
+      pre-computed authorization token.
+\end{itemize}
+
+\subsection{Known Weaknesses}
+
+We identify three weaknesses in the current \pasr design and describe the
+mitigations deployed in the \sentinel prototype.
+
+\begin{table}[t]
+\centering
+\small
+\caption{Known weaknesses of \pasr and deployed mitigations.}
+\label{tab:pasr-weaknesses}
+\begin{tabular}{@{}p{2.6cm}p{1.6cm}p{2.6cm}@{}}
+\toprule
+\textbf{Weakness} & \textbf{Severity} & \textbf{Mitigation} \\
+\midrule
+HMAC key is a single point of failure: compromise of the signing key
+allows provenance forgery
+  & High
+  & HSM-backed key storage with per-session ephemeral keys; key rotation
+    every 300\,s \\
+Provenance boundary ambiguity at BPE token splits: a single semantic
+concept may span tokens with different provenance tags
+  & Medium
+  & Conservative assignment: if any contributing token carries
+    \textsc{User} provenance, the entire field inherits \textsc{User} \\
+Provenance laundering via tool calls: an adversary invokes a tool with
+user-controlled input, and the tool's output receives \textsc{Tool}
+provenance
+  & Medium
+  & Transitive provenance tracking: tool outputs inherit the provenance of
+    their inputs via \cafl integration \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\noindent
+These weaknesses are architectural rather than implementation-specific: any
+system that lifts provenance across a lossy semantic boundary will face
+analogous challenges. We discuss longer-term solutions, including
+threshold-HMAC schemes and formal provenance algebras, in
+\S\ref{sec:discussion}.

@@ -1,0 +1,157 @@
+% discussion.tex — Discussion section for Sentinel Lattice paper
+\section{Discussion}
+\label{sec:discussion}
+
+\subsection{Limitations}
+
+Our evaluation carries several important caveats that bound the
+generalizability of the reported results.
+
+\paragraph{Simulation-based evaluation.}
+All attack and defense measurements reported in Section~\ref{sec:evaluation}
+derive from simulated adversarial interactions, not production deployments.
+Real-world attack distributions may differ substantially in sophistication,
+frequency, and composition.  We caution against treating simulated detection
+rates as production guarantees.
+
+\paragraph{Partial implementation.}
+Only L1 (\sentinel{} Core, comprising 704 detection patterns across 53
+engines) is fully implemented.  The upper layers---L2 through
+\mire{}---exist as formal designs with projected performance
+characteristics.  Until these layers are deployed and evaluated under
+realistic conditions, performance claims for the complete lattice
+remain projections rather than empirical findings.
+
+\paragraph{\pasr{} key management.}
+The HMAC key underpinning \pasr{} provenance signatures constitutes a
+single point of failure: compromise of this key invalidates all
+downstream trust decisions.  We mitigate this risk through hardware
+security modules (HSMs) and ephemeral key rotation, but these
+mechanisms add operational complexity that may limit adoption in
+resource-constrained deployments.
+
+\paragraph{Red team findings.}
+Three attack classes exposed fundamental weaknesses in the current
+architecture.  The Landauer cost bound enforced by \cafl{}
+(COMBO~ALPHA) proved largely decorative: red team exercise ATK-014
+achieved 80--90\% attacker success, confirming that the thermodynamic
+cost of bit erasure is orthogonal to semantic danger assessment.
+Multi-session accumulation (ATK-012) yielded 55--70\% attacker success,
+demonstrating that per-session isolation is insufficient against
+persistent adversaries who distribute malicious payloads across
+interactions.  Defense-as-DoS (ATK-020) achieved 60--75\% success by
+exploiting the nine-layer architecture as a cost amplifier---each
+layer adding computational overhead that an attacker can deliberately
+trigger.
+
+\subsection{Three Irreducible Residual Classes}
+
+Despite the layered defenses of the \sentinel{} Lattice, our analysis
+identifies three classes of residual risk that no purely algorithmic
+defense can eliminate.  Together, these account for the entirety of
+unmitigated attack surface.
+
+\paragraph{Semantic identity (${\sim}35\%$ of residual risk).}
+When malicious intent is linguistically indistinguishable from benign
+intent, no text-analysis algorithm can reliably discriminate between
+them.  A request for ``how to synthesize compound~X'' may originate
+from a chemistry student or a threat actor; the surface forms are
+identical.  Resolving this ambiguity requires human judgment or
+contextual signals---organizational role, access history, declared
+purpose---that lie outside the scope of prompt analysis.  \tsa{} and
+\gps{} reduce the incidence of such cases but cannot eliminate them.
+
+\paragraph{Model trust chain (${\sim}45\%$ of residual risk).}
+If the underlying language model is compromised prior to
+deployment---through training data poisoning, weight manipulation, or
+supply-chain attacks---Goldwasser and Kim~\cite{goldwasser2022} prove
+that detecting such compromise from black-box query access alone is
+impossible.  \mire{} provides containment by isolating model outputs
+and enforcing output-space invariants, but it cannot verify the
+integrity of internal model representations.  This residual class is
+the dominant source of unmitigated risk.
+
+\paragraph{Representation gap (${\sim}20\%$ of residual risk).}
+Attacks encoded in modalities that the \pasr{} transducer does not
+fully analyze---embedded images, audio segments, or video
+frames---bypass text-centric detection layers entirely.  The current
+architecture processes only textual and structured-data inputs;
+multimodal payloads receive only surface-level metadata tagging.
+Closing this gap requires extending the transducer pipeline with
+modality-specific analyzers, which we discuss in
+Section~\ref{sec:future-work}.
+
+\subsection{\pasr{} Known Weaknesses}
+
+Beyond the key-management concern noted above, \pasr{} exhibits three
+structural weaknesses that merit explicit acknowledgment.
+
+\paragraph{Cross-source composition.}
+When multiple provenance sources combine within a single prompt---e.g.,
+a user instruction wrapping a retrieved document containing
+tool-generated output---field-level trust assignment defaults to
+conservative (lowest-trust) propagation.  This policy is safe but
+lossy: legitimate composite inputs may receive artificially depressed
+trust scores, increasing false-positive rates.
+
+\paragraph{Two-model divergence.}
+The \pasr{} transducer and the primary LLM may interpret identical
+token sequences with divergent semantics.  If the transducer parses a
+passage as benign while the LLM interprets it as an instruction,
+provenance annotations will misattribute the resulting behavior.  This
+divergence is difficult to detect without shared internal
+representations between the two models.
+
+\paragraph{Provenance is not authorization.}
+\pasr{} establishes \emph{who} contributed each segment of input, but
+provenance alone does not determine \emph{whether} that contribution
+should be permitted.  Authorization requires policy layers---such as
+\aas{} and \irm{}---that consume provenance metadata as one signal
+among many.  Deployments that treat provenance as a sufficient access
+control mechanism will inherit a false sense of security.
+
+\subsection{Future Work}
+\label{sec:future-work}
+
+Several directions extend the contributions of this paper.
+
+\paragraph{L2--\mire{} implementation.}
+The most immediate priority is a production-grade implementation of the
+upper lattice layers (L2 through \mire{}) in Rust, targeting memory
+safety and low-latency inference-path integration.  We estimate
+approximately 16 engineer-weeks for a feature-complete prototype
+suitable for controlled deployment.
+
+\paragraph{Production deployment and real-world evaluation.}
+Transitioning from simulated to production evaluation is essential for
+validating detection rates, latency overhead, and false-positive
+behavior under authentic workloads.  We plan staged rollouts with
+instrumented monitoring to capture attack distributions that simulation
+cannot reproduce.
+
+\paragraph{Multimodal extension.}
+Extending the \pasr{} transducer to analyze image, audio, and video
+inputs would address the representation-gap residual class identified
+above.  This requires modality-specific feature extractors that produce
+provenance-compatible annotations consumable by downstream layers
+including \tsa{} and \gps{}.
+
+\paragraph{Formal verification.}
+We intend to pursue machine-checked proofs of \tsa{} safety
+properties---specifically, that well-typed provenance annotations are
+preserved through the full inference pipeline.  Candidate frameworks
+include Lean~4 and F* for the core type-theoretic invariants.
+
+\paragraph{Framework integration.}
+Practical adoption requires first-class integration with widely used
+LLM orchestration frameworks such as LangChain and LlamaIndex.
+Middleware adapters that expose \sentinel{} primitives (\asra{},
+\tcsa{}, \pasr{}) as composable pipeline stages would lower the
+barrier to deployment.
+
+\paragraph{Adaptive adversarial robustness.}
+Finally, we plan systematic adversarial robustness testing against
+adaptive attackers who specifically target the defense architecture
+itself---attackers who have read this paper and can craft inputs
+designed to exploit the lattice structure.  The defense-as-DoS
+(ATK-020) finding underscores the urgency of this direction.

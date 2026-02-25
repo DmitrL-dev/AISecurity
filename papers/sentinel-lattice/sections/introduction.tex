@@ -1,0 +1,47 @@
+\section{Introduction}
+\label{sec:introduction}
+
+Large Language Models (LLMs) deployed as autonomous agents---with tool access, persistent memory, and multi-turn interaction---create an attack surface that no existing defense adequately addresses. The fundamental challenges span five categories:
+
+\begin{enumerate}[leftmargin=*]
+\item \textbf{Prompt injection remains unsolved.} No production system reliably prevents instruction override via adversarial input~\cite{greshake2023}.
+\item \textbf{Agentic attacks compound.} Tool chains create exponential attack surface: $N$ tools yield $O(N!)$ possible action chains.
+\item \textbf{Model integrity is unverifiable.} Goldwasser and Kim~\cite{goldwasser2022} prove that backdoor detection is mathematically impossible under standard cryptographic assumptions.
+\item \textbf{Semantic identity defeats classification.} Malicious and benign intent can produce identical text (``How do I mix bleach and ammonia?'').
+\item \textbf{Defense layers conflict.} Provenance tracking and semantic transduction are architecturally incompatible without novel primitives.
+\end{enumerate}
+
+Existing commercial solutions---Lakera Guard, Meta Prompt Guard~\cite{promptguard2024}, NVIDIA NeMo Guardrails~\cite{nemo2023}, and LLM Guard---are all variants of content-level filtering: classify input as safe or dangerous, then block or allow. This approach has a fundamental ceiling, bounded by the impossibility results above.
+
+\paragraph{Our approach.} Rather than incrementally improving content classification, we apply a methodology inspired by recent breakthroughs in AI-driven scientific discovery. AlphaFold~\cite{alphafold2021} did not invent new physics---it systematically explored 170,000 known protein structures and found patterns that 500,000 biologists missed due to cognitive limitations. Similarly, we systematically analyze \textbf{58 security paradigms from 19 scientific domains} and identify cross-domain combinations that have never been applied to LLM security.
+
+This cross-domain synthesis yields seven novel security primitives (Table~\ref{tab:primitives}), five of which are genuinely new inventions with zero prior art, confirmed via 51 independent searches across GitHub and academic databases.
+
+\begin{table}[t]
+\centering
+\small
+\caption{The seven security primitives introduced in this work.}
+\label{tab:primitives}
+\begin{tabular}{@{}cp{3.0cm}cc@{}}
+\toprule
+\# & Primitive & Acr. & Nov. \\
+\midrule
+1 & Provenance-Annotated Sem.\ Reduction & \pasr & New \\
+2 & Capability-Attenuating Flow Labels & \cafl & New \\
+3 & Goal Predictability Score & \gps & New \\
+4 & Adversarial Argumentation Safety & \aas & New \\
+5 & Intent Revelation Mechanisms & \irm & New \\
+6 & Model-Irrelevance Containment & \mire & New \\
+7 & Temporal Safety Automata & \tsa & Adapted \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\paragraph{Contributions.} This paper makes the following contributions:
+\begin{itemize}[leftmargin=*]
+\item A systematic methodology for cross-domain paradigm synthesis applied to LLM security, analyzing 58 paradigms from 19 domains (\S\ref{sec:background}).
+\item Seven novel security primitives, with formal definitions and architectural integration (\S\ref{sec:pasr}--\S\ref{sec:mire}).
+\item A paradigm shift from backdoor \emph{detection} (proven impossible) to backdoor \emph{containment} via \mire (\S\ref{sec:mire}).
+\item Evaluation against 250,000 simulated attacks across 15 categories, achieving approximately 98.5\% containment (\S\ref{sec:evaluation}).
+\item Confirmation of zero prior art via exhaustive search across 51 cross-domain intersections (\S\ref{sec:related}).
+\end{itemize}

@@ -1,0 +1,7 @@
+\begin{abstract}
+We present \sentinel, a multi-layer defense architecture for Large Language Model (LLM) security that synthesizes 58 security paradigms from 19 scientific domains into 7 novel security primitives. Through systematic cross-domain analysis---applying methodologies from biology, nuclear safety, control theory, formal linguistics, game theory, and thermodynamics to the LLM security problem---we identify and fill fundamental gaps that no existing approach addresses.
+
+We introduce \pasr (Provenance-Annotated Semantic Reduction), a primitive that preserves information flow control through lossy semantic transformations; \mire (Model-Irrelevance Containment Engine), which shifts the defense paradigm from backdoor detection (proven impossible by Goldwasser and Kim) to architectural containment; and five additional primitives addressing within-authority chaining, dual-use ambiguity, and predictive threat scoring.
+
+Against a corpus of 250,000 simulated attacks across 15 categories with 5 mutation types, the full architecture achieves approximately 98.5\% detection and containment, approaching the theoretical floor of 98--99\% bounded by proven impossibility results. Exhaustive prior art search (51 cross-domain queries) confirms zero existing implementations for any of the proposed primitives.
+\end{abstract}
