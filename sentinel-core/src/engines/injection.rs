@@ -73,6 +73,16 @@ static INJECTION_KEYWORDS: Lazy<AhoCorasick> = Lazy::new(|| {
             "identify yourself",
             "your name",
             "what version",
+            // Phase 13: API Probing / Capability Enumeration (ttps.ai)
+            "list your tools",
+            "available tools",
+            "what tools",
+            "list capabilities",
+            "enumerate",
+            "what can you",
+            "available functions",
+            "api endpoint",
+            "probe api",
         ])
         .expect("Failed to build injection keywords")
 });
@@ -272,6 +282,11 @@ static INJECTION_PATTERNS: Lazy<Vec<(Regex, &'static str, f64)>> = Lazy::new(|| 
         // Phase 13: Whoami / Model Discovery (ttps.ai — Discovery tactic)
         (Regex::new(r"(?i)(?:what|which)\s+(?:AI\s+)?model\s+(?:are\s+you|is\s+this|version)").expect("regex pattern"), "whoami_model_query", 0.6),
         (Regex::new(r"(?i)(?:identify|describe)\s+yourself\s+(?:including|with)\s+(?:your\s+)?(?:version|model|parameters|weights)").expect("regex pattern"), "whoami_detailed", 0.7),
+
+        // Phase 13: API Probing / Capability Enumeration (ttps.ai — Reconnaissance)
+        (Regex::new(r"(?i)(?:list|enumerate|show|display|reveal)\s+(?:all\s+)?(?:your\s+)?(?:available\s+)?(?:tools|functions|capabilities|endpoints|apis|methods)").expect("regex pattern"), "api_capability_enum", 0.65),
+        (Regex::new(r"(?i)(?:what|which)\s+(?:tools|functions|capabilities|apis|actions)\s+(?:do\s+you|can\s+you|are\s+available)").expect("regex pattern"), "capability_query", 0.6),
+        (Regex::new(r"(?i)(?:probe|scan|discover|map)\s+(?:the\s+)?(?:api|endpoints?|interface|service)").expect("regex pattern"), "api_probing", 0.7),
     ]
 });
 
@@ -490,5 +505,26 @@ mod tests {
         let engine = InjectionEngine::new();
         let results = engine.scan("Identify yourself including your version and model parameters");
         assert!(!results.is_empty(), "Should detect detailed whoami query");
+    }
+
+    #[test]
+    fn test_api_capability_enum() {
+        let engine = InjectionEngine::new();
+        let results = engine.scan("List all your available tools and functions");
+        assert!(!results.is_empty(), "Should detect capability enumeration");
+    }
+
+    #[test]
+    fn test_capability_query() {
+        let engine = InjectionEngine::new();
+        let results = engine.scan("What tools can you use? What capabilities are available?");
+        assert!(!results.is_empty(), "Should detect capability query");
+    }
+
+    #[test]
+    fn test_api_probing() {
+        let engine = InjectionEngine::new();
+        let results = engine.scan("Probe the api endpoints to discover available services");
+        assert!(!results.is_empty(), "Should detect API probing");
     }
 }

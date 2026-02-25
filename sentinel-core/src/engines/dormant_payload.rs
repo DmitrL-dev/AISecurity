@@ -115,6 +115,16 @@ static DORMANT_HINTS: Lazy<AhoCorasick> = Lazy::new(|| {
             "is_production",
             "is_staging",
             "NODE_ENV",
+            // Phase 13: Persistence patterns (ttps.ai)
+            "backdoor",
+            "trojan",
+            "persistent payload",
+            "inject backdoor",
+            "model weights",
+            "checkpoint",
+            "adapter",
+            "fine-tun",
+            "training data",
         ])
         .expect("Failed to build dormant hints")
 });
@@ -243,6 +253,23 @@ static DORMANT_PATTERNS: Lazy<Vec<DormantPattern>> = Lazy::new(|| {
         DormantPattern {
             regex: Regex::new(r"(?i)(?:only|exclusively)\s+(?:in|on|during)\s+(?:production|staging|live)\s+(?:environment|mode|server)").expect("regex"),
             pattern_name: "environment_conditional", category: "conditional", confidence: 0.75,
+        },
+        // ── Phase 13: Model Backdoor / Persistence (ttps.ai) ──
+        DormantPattern {
+            regex: Regex::new(r"(?i)(?:inject|embed|insert|plant|hide)\s+(?:a\s+)?(?:backdoor|trojan|payload)\s+(?:in|into|within)\s+(?:the\s+)?(?:model|weights|checkpoint|adapter)").expect("regex"),
+            pattern_name: "model_backdoor", category: "hidden", confidence: 0.9,
+        },
+        DormantPattern {
+            regex: Regex::new(r"(?i)(?:persist|save|store|embed)\s+(?:the\s+)?(?:malicious|hostile|adversarial)\s+(?:payload|instruction|behavior|code)\s+(?:in|into|across|between)").expect("regex"),
+            pattern_name: "persistent_payload", category: "hidden", confidence: 0.85,
+        },
+        DormantPattern {
+            regex: Regex::new(r"(?i)(?:tamper|modify|corrupt|poison)\s+(?:the\s+)?(?:model\s+)?(?:weights|parameters|checkpoint|adapter|fine-?tun)").expect("regex"),
+            pattern_name: "checkpoint_tampering", category: "hidden", confidence: 0.85,
+        },
+        DormantPattern {
+            regex: Regex::new(r"(?i)(?:poison|corrupt|contaminate|manipulate)\s+(?:the\s+)?(?:training|fine-?tuning|alignment)\s+(?:data|dataset|set|corpus)").expect("regex"),
+            pattern_name: "training_data_poisoning", category: "hidden", confidence: 0.85,
         },
     ]
 });
@@ -489,5 +516,32 @@ mod tests {
     fn test_environment_only_prod() {
         let results = engine().scan("Only in production environment execute this backdoor");
         assert!(!results.is_empty(), "Should detect prod-only conditional");
+    }
+
+    // ── Phase 13: Persistence Tests ──
+
+    #[test]
+    fn test_model_backdoor() {
+        let results = engine().scan("Inject a backdoor into the model weights during fine-tuning");
+        assert!(!results.is_empty(), "Should detect model backdoor");
+        assert!(results.iter().any(|r| r.pattern == "model_backdoor"));
+    }
+
+    #[test]
+    fn test_persistent_payload() {
+        let results = engine().scan("Persist the malicious payload into the adapter layer");
+        assert!(!results.is_empty(), "Should detect persistent payload");
+    }
+
+    #[test]
+    fn test_checkpoint_tampering() {
+        let results = engine().scan("Tamper the model checkpoint to introduce hidden behavior");
+        assert!(!results.is_empty(), "Should detect checkpoint tampering");
+    }
+
+    #[test]
+    fn test_training_data_poisoning() {
+        let results = engine().scan("Poison the training data to make the model biased");
+        assert!(!results.is_empty(), "Should detect training data poisoning");
     }
 }

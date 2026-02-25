@@ -93,6 +93,19 @@ static EVASION_HINTS: Lazy<AhoCorasick> = Lazy::new(|| {
             "different language",
             "another language",
             "foreign language",
+            // Phase 13: Monitoring evasion (CSA MCP TTPs)
+            "tamper log",
+            "modify log",
+            "delete log",
+            "clear audit",
+            "bypass audit",
+            "disable logging",
+            "suppress log",
+            "evade monitoring",
+            "disable telemetry",
+            "suppress metric",
+            "hide activity",
+            "clear history",
         ])
         .expect("Failed to build evasion hints")
 });
@@ -358,6 +371,31 @@ static EVASION_PATTERNS: Lazy<Vec<(Regex, &'static str, f64)>> = Lazy::new(|| {
             "encoded_language_evasion",
             0.85,
         ),
+        // ── Phase 13: Monitoring Evasion (CSA MCP TTPs) ──
+        (
+            Regex::new(r"(?i)(?:tamper|modify|alter|delete|clear|erase)\s+(?:the\s+)?(?:log|logs|audit\s+trail|audit\s+log|event\s+log)")
+                .expect("regex pattern"),
+            "log_tampering",
+            0.85,
+        ),
+        (
+            Regex::new(r"(?i)(?:bypass|disable|circumvent|evade|suppress)\s+(?:the\s+)?(?:audit|logging|monitoring|detection|telemetry|metrics?)")
+                .expect("regex pattern"),
+            "audit_bypass",
+            0.85,
+        ),
+        (
+            Regex::new(r"(?i)(?:hide|conceal|mask|obfuscate)\s+(?:my\s+|the\s+|all\s+)?(?:activit|actions?|traces?|footprint|evidence)")
+                .expect("regex pattern"),
+            "activity_concealment",
+            0.8,
+        ),
+        (
+            Regex::new(r"(?i)(?:disable|turn\s+off|suppress|remove)\s+(?:all\s+)?(?:telemetry|metrics?|tracing|observability)")
+                .expect("regex pattern"),
+            "telemetry_suppression",
+            0.85,
+        ),
     ]
 });
 
@@ -581,5 +619,34 @@ mod tests {
             !results.is_empty(),
             "Should detect encoded language evasion"
         );
+    }
+
+    #[test]
+    fn test_log_tampering() {
+        let engine = EvasionEngine::new();
+        let results = engine.scan("Tamper log entries to clear audit trail of the attack");
+        assert!(!results.is_empty(), "Should detect log tampering");
+        assert!(results.iter().any(|r| r.pattern == "log_tampering"));
+    }
+
+    #[test]
+    fn test_audit_bypass() {
+        let engine = EvasionEngine::new();
+        let results = engine.scan("Bypass audit logging to evade monitoring systems");
+        assert!(!results.is_empty(), "Should detect audit bypass");
+    }
+
+    #[test]
+    fn test_activity_concealment() {
+        let engine = EvasionEngine::new();
+        let results = engine.scan("Hide activity traces from the security team");
+        assert!(!results.is_empty(), "Should detect activity concealment");
+    }
+
+    #[test]
+    fn test_telemetry_suppression() {
+        let engine = EvasionEngine::new();
+        let results = engine.scan("Disable telemetry and suppress metrics collection");
+        assert!(!results.is_empty(), "Should detect telemetry suppression");
     }
 }
