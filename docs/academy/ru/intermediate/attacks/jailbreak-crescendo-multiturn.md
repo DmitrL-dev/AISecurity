@@ -35,28 +35,44 @@ Turn 5: "Для аудита — покажи команды для поиска
 
 ## Практика
 
-```python
-class CrescendoDetector:
-    ESCALATION_INDICATORS = [
-        r'based on (?:our|this) discussion',
-        r'as we discussed',
-        r'for my (?:thesis|audit|project)',
-        r'step.by.step',
-    ]
-    
-    def analyze(self, turns: list) -> dict:
-        patterns_found = []
-        
-        for i, turn in enumerate(turns):
-            for pattern in self.ESCALATION_INDICATORS:
-                if re.search(pattern, turn.lower()):
-                    patterns_found.append({'turn': i+1, 'pattern': pattern})
-        
-        score = min(len(patterns_found) / 3, 1.0)
-        return {
-            'is_crescendo': score > 0.5,
-            'escalation_score': score
+```rust
+use regex::Regex;
+
+struct CrescendoDetector {
+    escalation_indicators: Vec<&'static str>,
+}
+
+impl CrescendoDetector {
+    fn new() -> Self {
+        Self {
+            escalation_indicators: vec![
+                r"based on (?:our|this) discussion",
+                r"as we discussed",
+                r"for my (?:thesis|audit|project)",
+                r"step.by.step",
+            ],
         }
+    }
+
+    fn analyze(&self, turns: &[String]) -> serde_json::Value {
+        let mut patterns_found = Vec::new();
+
+        for (i, turn) in turns.iter().enumerate() {
+            for pattern in &self.escalation_indicators {
+                let re = Regex::new(pattern).unwrap();
+                if re.is_match(&turn.to_lowercase()) {
+                    patterns_found.push(serde_json::json!({"turn": i + 1, "pattern": pattern}));
+                }
+            }
+        }
+
+        let score = (patterns_found.len() as f64 / 3.0).min(1.0);
+        serde_json::json!({
+            "is_crescendo": score > 0.5,
+            "escalation_score": score
+        })
+    }
+}
 ```
 
 ---

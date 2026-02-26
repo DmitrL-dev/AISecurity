@@ -45,222 +45,282 @@
 
 ### Реализация атаки
 
-```python
-import numpy as np
-from typing import Tuple
+```rust
+use ndarray::Array1;
 
-class MembershipInferenceAttack:
-    """Выполнение атаки на членство для LLM."""
-    
-    def __init__(self, target_model, shadow_models: list = None):
-        self.target = target_model
-        self.shadows = shadow_models or []
-    
-    def get_confidence_features(self, text: str) -> dict:
-        """Извлечение признаков для атаки членства."""
-        
-        # Получаем характеристики ответа модели
-        response = self.target.generate(
-            text, 
-            return_logits=True,
-            return_perplexity=True
-        )
-        
-        return {
+struct MembershipInferenceAttack {
+    /// Выполнение атаки на членство для LLM.
+    target: Box<dyn LLMModel>,
+    shadows: Vec<Box<dyn LLMModel>>,
+    perplexity_threshold: f64,
+}
+
+impl MembershipInferenceAttack {
+    fn new(target: Box<dyn LLMModel>, shadows: Vec<Box<dyn LLMModel>>) -> Self {
+        Self { target, shadows, perplexity_threshold: 10.0 }
+    }
+
+    fn get_confidence_features(&self, text: &str) -> serde_json::Value {
+        /// Извлечение признаков для атаки членства.
+
+        // Получаем характеристики ответа модели
+        let response = self.target.generate_with_logits(text);
+
+        serde_json::json!({
             "perplexity": response.perplexity,
-            "avg_token_logprob": np.mean(response.logprobs),
-            "min_token_logprob": np.min(response.logprobs),
-            "entropy": self._calculate_entropy(response.logits),
+            "avg_token_logprob": response.logprobs.iter().sum::<f64>() / response.logprobs.len() as f64,
+            "min_token_logprob": response.logprobs.iter().cloned().fold(f64::MAX, f64::min),
+            "entropy": self.calculate_entropy(&response.logits),
             "completion_confidence": response.top_token_probs[0]
+        })
+    }
+
+    fn calculate_entropy(&self, logits: &Array1<f64>) -> f64 {
+        /// Расчёт энтропии распределения вывода.
+        let max_logit = logits.iter().cloned().fold(f64::NEG_INFINITY, f64::max);
+        let exp_logits: Vec<f64> = logits.iter().map(|&x| (x - max_logit).exp()).collect();
+        let sum_exp: f64 = exp_logits.iter().sum();
+        let probs: Vec<f64> = exp_logits.iter().map(|&x| x / sum_exp).collect();
+        -probs.iter().map(|&p| if p > 1e-10 { p * p.ln() } else { 0.0 }).sum::<f64>()
+    }
+
+    fn infer_membership(&self, sample: &str, method: &str) -> (bool, f64) {
+        /// Определить, был ли образец в обучающих данных.
+        let features = self.get_confidence_features(sample);
+
+        match method {
+            "threshold" => {
+                // Простой порог на перплексию
+                let ppl = features["perplexity"].as_f64().unwrap();
+                let is_member = ppl < self.perplexity_threshold;
+                let confidence = (1.0 - (ppl / 1000.0)).max(0.0).min(1.0);
+                (is_member, confidence)
+            }
+            "shadow" => {
+                // Использование классификатора теневых моделей
+                let feature_vector = self.to_vector(&features);
+                self.shadow_classifier_predict(&feature_vector)
+            }
+            "likelihood_ratio" => {
+                // Сравнение с эталонным распределением
+                let ratio = self.likelihood_ratio(&features);
+                let is_member = ratio > 1.0;
+                let confidence = (ratio / 2.0).min(1.0);
+                (is_member, confidence)
+            }
+            _ => (false, 0.0),
         }
-    
-    def _calculate_entropy(self, logits: np.ndarray) -> float:
-        """Расчёт энтропии распределения вывода."""
-        probs = np.exp(logits) / np.sum(np.exp(logits), axis=-1, keepdims=True)
-        return -np.sum(probs * np.log(probs + 1e-10), axis=-1).mean()
-    
-    def infer_membership(
-        self, 
-        sample: str, 
-        method: str = "threshold"
-    ) -> Tuple[bool, float]:
-        """Определить, был ли образец в обучающих данных."""
-        
-        features = self.get_confidence_features(sample)
-        
-        if method == "threshold":
-            # Простой порог на перплексию
-            is_member = features["perplexity"] < self.perplexity_threshold
-            confidence = 1.0 - (features["perplexity"] / 1000)
-            
-        elif method == "shadow":
-            # Использование классификатора теневых моделей
-            feature_vector = self._to_vector(features)
-            is_member, confidence = self.shadow_classifier.predict(feature_vector)
-            
-        elif method == "likelihood_ratio":
-            # Сравнение с эталонным распределением
-            ratio = self._likelihood_ratio(features)
-            is_member = ratio > 1.0
-            confidence = min(ratio / 2, 1.0)
-        
-        return is_member, max(0, min(confidence, 1))
-    
-    def _likelihood_ratio(self, features: dict) -> float:
-        """Расчёт отношения правдоподобия для членства."""
-        # P(features | member) / P(features | non-member)
-        # Оценивается по теневым моделям
-        
-        member_likelihood = self._fit_member_distribution(features)
-        nonmember_likelihood = self._fit_nonmember_distribution(features)
-        
-        return member_likelihood / (nonmember_likelihood + 1e-10)
+    }
+
+    fn likelihood_ratio(&self, features: &serde_json::Value) -> f64 {
+        /// Расчёт отношения правдоподобия для членства.
+        // P(features | member) / P(features | non-member)
+        // Оценивается по теневым моделям
+        let member_likelihood = self.fit_member_distribution(features);
+        let nonmember_likelihood = self.fit_nonmember_distribution(features);
+        member_likelihood / (nonmember_likelihood + 1e-10)
+    }
+}
 ```
 
 ---
 
 ## Обучение теневых моделей
 
-```python
-class ShadowModelTrainer:
-    """Обучение теневых моделей для калибровки атаки членства."""
-    
-    def __init__(self, model_architecture, num_shadows: int = 5):
-        self.architecture = model_architecture
-        self.num_shadows = num_shadows
-        self.shadows = []
-        self.membership_classifier = None
-    
-    def create_training_sets(
-        self, 
-        available_data: list, 
-        samples_per_shadow: int
-    ) -> list:
-        """Создание непересекающихся обучающих наборов для теневых моделей."""
-        import random
-        
-        training_sets = []
-        for i in range(self.num_shadows):
-            # Случайная выборка (часть данных "внутри", часть "снаружи")
-            shadow_train = random.sample(available_data, samples_per_shadow)
-            shadow_out = [d for d in available_data if d not in shadow_train]
-            
-            training_sets.append({
+```rust
+use rand::seq::SliceRandom;
+use ndarray::Array1;
+
+struct ShadowModelTrainer {
+    /// Обучение теневых моделей для калибровки атаки членства.
+    architecture: String,
+    num_shadows: usize,
+    shadows: Vec<ShadowData>,
+    membership_classifier: Option<Box<dyn Classifier>>,
+}
+
+struct ShadowData {
+    model: Box<dyn LLMModel>,
+    train_set: std::collections::HashSet<String>,
+    out_set: std::collections::HashSet<String>,
+}
+
+impl ShadowModelTrainer {
+    fn new(model_architecture: &str, num_shadows: usize) -> Self {
+        Self {
+            architecture: model_architecture.to_string(),
+            num_shadows,
+            shadows: Vec::new(),
+            membership_classifier: None,
+        }
+    }
+
+    fn create_training_sets(
+        &self,
+        available_data: &[String],
+        samples_per_shadow: usize,
+    ) -> Vec<serde_json::Value> {
+        /// Создание непересекающихся обучающих наборов для теневых моделей.
+        let mut rng = rand::thread_rng();
+        let mut training_sets = Vec::new();
+
+        for _i in 0..self.num_shadows {
+            // Случайная выборка (часть данных "внутри", часть "снаружи")
+            let mut shuffled = available_data.to_vec();
+            shuffled.shuffle(&mut rng);
+            let shadow_train: Vec<String> = shuffled[..samples_per_shadow].to_vec();
+            let shadow_out: Vec<String> = shuffled[samples_per_shadow..]
+                .iter()
+                .take(samples_per_shadow) // Равный размер
+                .cloned()
+                .collect();
+
+            training_sets.push(serde_json::json!({
                 "train": shadow_train,
-                "out": shadow_out[:samples_per_shadow]  # Равный размер
-            })
-        
-        return training_sets
-    
-    def train_shadows(self, training_sets: list):
-        """Обучение теневых моделей."""
-        for i, dataset in enumerate(training_sets):
-            shadow = self._create_model()
-            shadow.train(dataset["train"])
-            self.shadows.append({
-                "model": shadow,
-                "train_set": set(dataset["train"]),
-                "out_set": set(dataset["out"])
-            })
-    
-    def train_attack_classifier(self):
-        """Обучение классификатора для предсказания членства по признакам."""
-        from sklearn.ensemble import RandomForestClassifier
-        
-        X, y = [], []
-        
-        for shadow_data in self.shadows:
-            shadow = shadow_data["model"]
-            
-            # Признаки для образцов "внутри"
-            for sample in shadow_data["train_set"]:
-                features = self._extract_features(shadow, sample)
-                X.append(features)
-                y.append(1)  # Член
-            
-            # Признаки для образцов "снаружи"
-            for sample in shadow_data["out_set"]:
-                features = self._extract_features(shadow, sample)
-                X.append(features)
-                y.append(0)  # Не член
-        
-        self.membership_classifier = RandomForestClassifier(n_estimators=100)
-        self.membership_classifier.fit(X, y)
-    
-    def _extract_features(self, model, sample: str) -> list:
-        """Извлечение признаков предсказания для образца."""
-        response = model.generate(sample, return_logits=True)
-        
-        return [
+                "out": shadow_out
+            }));
+        }
+
+        training_sets
+    }
+
+    fn train_shadows(&mut self, training_sets: &[serde_json::Value]) {
+        /// Обучение теневых моделей.
+        for dataset in training_sets {
+            let mut shadow = self.create_model();
+            let train_data: Vec<String> = dataset["train"].as_array().unwrap()
+                .iter().filter_map(|v| v.as_str().map(String::from)).collect();
+            shadow.train(&train_data);
+
+            self.shadows.push(ShadowData {
+                model: shadow,
+                train_set: train_data.into_iter().collect(),
+                out_set: dataset["out"].as_array().unwrap()
+                    .iter().filter_map(|v| v.as_str().map(String::from)).collect(),
+            });
+        }
+    }
+
+    fn train_attack_classifier(&mut self) {
+        /// Обучение классификатора для предсказания членства по признакам.
+        let mut x: Vec<Vec<f64>> = Vec::new();
+        let mut y: Vec<u8> = Vec::new();
+
+        for shadow_data in &self.shadows {
+            // Признаки для образцов "внутри"
+            for sample in &shadow_data.train_set {
+                let features = self.extract_features(&shadow_data.model, sample);
+                x.push(features);
+                y.push(1); // Член
+            }
+
+            // Признаки для образцов "снаружи"
+            for sample in &shadow_data.out_set {
+                let features = self.extract_features(&shadow_data.model, sample);
+                x.push(features);
+                y.push(0); // Не член
+            }
+        }
+
+        let classifier = RandomForestClassifier::new(100);
+        classifier.fit(&x, &y);
+        self.membership_classifier = Some(Box::new(classifier));
+    }
+
+    fn extract_features(&self, model: &dyn LLMModel, sample: &str) -> Vec<f64> {
+        /// Извлечение признаков предсказания для образца.
+        let response = model.generate_with_logits(sample);
+
+        vec![
             response.perplexity,
-            np.mean(response.logprobs),
-            np.std(response.logprobs),
-            np.min(response.logprobs),
-            self._entropy(response.logits)
+            response.logprobs.iter().sum::<f64>() / response.logprobs.len() as f64,
+            std_dev(&response.logprobs),
+            response.logprobs.iter().cloned().fold(f64::MAX, f64::min),
+            self.entropy(&response.logits),
         ]
+    }
+}
 ```
 
 ---
 
 ## Обнаружение попыток атак на членство
 
-```python
-class MembershipInferenceDetector:
-    """Обнаружение потенциальных атак на членство."""
-    
-    def __init__(self):
-        self.query_history = []
-        self.suspicious_patterns = []
-    
-    def analyze_query(self, query: str, response_meta: dict) -> dict:
-        """Анализ запроса на паттерны атаки членства."""
-        
-        indicators = []
-        
-        # 1. Запросы точного текста (попытка получить перплексию)
-        if self._is_exact_text_query(query):
-            indicators.append("exact_text_query")
-        
-        # 2. Повторяющиеся похожие запросы
-        similar_past = self._find_similar_queries(query)
-        if len(similar_past) > 3:
-            indicators.append("repeated_similar_queries")
-        
-        # 3. Запросы уверенности/вероятности
-        if self._asks_for_confidence(query):
-            indicators.append("confidence_request")
-        
-        # 4. Систематический паттерн зондирования
-        if self._is_systematic_probe(query):
-            indicators.append("systematic_probing")
-        
-        risk_score = len(indicators) / 4.0
-        
-        self.query_history.append({
-            "query": query[:100],  # Усечение для хранения
-            "timestamp": datetime.now(),
+```rust
+use chrono::Utc;
+use regex::Regex;
+
+struct MembershipInferenceDetector {
+    /// Обнаружение потенциальных атак на членство.
+    query_history: Vec<serde_json::Value>,
+    suspicious_patterns: Vec<String>,
+}
+
+impl MembershipInferenceDetector {
+    fn new() -> Self {
+        Self {
+            query_history: Vec::new(),
+            suspicious_patterns: Vec::new(),
+        }
+    }
+
+    fn analyze_query(&mut self, query: &str, _response_meta: &serde_json::Value) -> serde_json::Value {
+        /// Анализ запроса на паттерны атаки членства.
+        let mut indicators = Vec::new();
+
+        // 1. Запросы точного текста (попытка получить перплексию)
+        if self.is_exact_text_query(query) {
+            indicators.push("exact_text_query");
+        }
+
+        // 2. Повторяющиеся похожие запросы
+        let similar_past = self.find_similar_queries(query);
+        if similar_past > 3 {
+            indicators.push("repeated_similar_queries");
+        }
+
+        // 3. Запросы уверенности/вероятности
+        if self.asks_for_confidence(query) {
+            indicators.push("confidence_request");
+        }
+
+        // 4. Систематический паттерн зондирования
+        if self.is_systematic_probe(query) {
+            indicators.push("systematic_probing");
+        }
+
+        let risk_score = indicators.len() as f64 / 4.0;
+
+        self.query_history.push(serde_json::json!({
+            "query": &query[..query.len().min(100)], // Усечение для хранения
+            "timestamp": Utc::now().to_rfc3339(),
             "indicators": indicators
-        })
-        
-        return {
+        }));
+
+        serde_json::json!({
             "is_suspicious": risk_score > 0.25,
             "risk_score": risk_score,
             "indicators": indicators
-        }
-    
-    def _is_exact_text_query(self, query: str) -> bool:
-        """Проверка, является ли запрос зондом точного обучающего образца."""
-        import re
-        return bool(re.search(r'^["\'"].*["\'"]$', query.strip()))
-    
-    def _asks_for_confidence(self, query: str) -> bool:
-        """Проверка, спрашивает ли запрос уверенность модели."""
-        confidence_keywords = [
+        })
+    }
+
+    fn is_exact_text_query(&self, query: &str) -> bool {
+        /// Проверка, является ли запрос зондом точного обучающего образца.
+        let re = Regex::new(r#"^["'"].*["'"]$"#).unwrap();
+        re.is_match(query.trim())
+    }
+
+    fn asks_for_confidence(&self, query: &str) -> bool {
+        /// Проверка, спрашивает ли запрос уверенность модели.
+        let confidence_keywords = vec![
             "уверенность", "вероятность", "правдоподобие", "уверен",
             "насколько точно", "перплексия", "logprob",
-            "confidence", "probability", "likelihood"
-        ]
-        return any(kw in query.lower() for kw in confidence_keywords)
+            "confidence", "probability", "likelihood",
+        ];
+        let query_lower = query.to_lowercase();
+        confidence_keywords.iter().any(|kw| query_lower.contains(kw))
+    }
+}
 ```
 
 ---
@@ -269,66 +329,92 @@ class MembershipInferenceDetector:
 
 ### 1. Дифференциальная приватность
 
-```python
-class DPModelWrapper:
-    """Обёртка, добавляющая дифференциальную приватность к выводам модели."""
-    
-    def __init__(self, model, epsilon: float = 1.0):
-        self.model = model
-        self.epsilon = epsilon
-    
-    def generate(self, prompt: str, **kwargs) -> str:
-        """Генерация с DP-шумом на вероятностях вывода."""
-        
-        # Получаем сырые логиты
-        logits = self.model.get_logits(prompt)
-        
-        # Добавляем лапласовский шум для DP
-        noise = np.random.laplace(0, 1/self.epsilon, logits.shape)
-        noised_logits = logits + noise
-        
-        # Сэмплируем из зашумлённого распределения
-        return self._sample_from_logits(noised_logits)
+```rust
+use ndarray::Array1;
+use rand::distributions::{Distribution, Standard};
+
+struct DPModelWrapper {
+    /// Обёртка, добавляющая дифференциальную приватность к выводам модели.
+    model: Box<dyn LLMModel>,
+    epsilon: f64,
+}
+
+impl DPModelWrapper {
+    fn new(model: Box<dyn LLMModel>, epsilon: f64) -> Self {
+        Self { model, epsilon }
+    }
+
+    fn generate(&self, prompt: &str) -> String {
+        /// Генерация с DP-шумом на вероятностях вывода.
+
+        // Получаем сырые логиты
+        let logits = self.model.get_logits(prompt);
+
+        // Добавляем лапласовский шум для DP
+        let mut rng = rand::thread_rng();
+        let scale = 1.0 / self.epsilon;
+        let noised_logits: Vec<f64> = logits
+            .iter()
+            .map(|&l| {
+                let u: f64 = rng.gen::<f64>() - 0.5;
+                l + -scale * u.signum() * (1.0 - 2.0 * u.abs()).ln()
+            })
+            .collect();
+
+        // Сэмплируем из зашумлённого распределения
+        self.sample_from_logits(&noised_logits)
+    }
+}
 ```
 
 ### 2. Маскирование уверенности
 
-```python
-def mask_confidence(response: dict, threshold: float = 0.9) -> dict:
-    """Маскирование сигналов высокой уверенности, утекающих членство."""
-    
-    masked = response.copy()
-    
-    # Не возвращаем точные вероятности
-    if "top_p" in masked:
-        masked["top_p"] = "high" if masked["top_p"] > threshold else "normal"
-    
-    # Добавляем шум к перплексии
-    if "perplexity" in masked:
-        noise = np.random.uniform(-0.1, 0.1) * masked["perplexity"]
-        masked["perplexity"] = round(masked["perplexity"] + noise, 1)
-    
-    return masked
+```rust
+use rand::Rng;
+
+fn mask_confidence(response: &serde_json::Value, threshold: f64) -> serde_json::Value {
+    /// Маскирование сигналов высокой уверенности, утекающих членство.
+    let mut masked = response.clone();
+
+    // Не возвращаем точные вероятности
+    if let Some(top_p) = masked.get("top_p").and_then(|v| v.as_f64()) {
+        masked["top_p"] = serde_json::json!(
+            if top_p > threshold { "high" } else { "normal" }
+        );
+    }
+
+    // Добавляем шум к перплексии
+    if let Some(ppl) = masked.get("perplexity").and_then(|v| v.as_f64()) {
+        let mut rng = rand::thread_rng();
+        let noise = rng.gen_range(-0.1..0.1) * ppl;
+        masked["perplexity"] = serde_json::json!(((ppl + noise) * 10.0).round() / 10.0);
+    }
+
+    masked
+}
 ```
 
 ### 3. Интеграция с SENTINEL
 
-```python
-from sentinel import configure, scan
+```rust
+use sentinel_core::engines::{configure, scan};
 
-configure(
-    membership_inference_protection=True,
-    confidence_masking=True,
-    query_pattern_detection=True
-)
+configure(serde_json::json!({
+    "membership_inference_protection": true,
+    "confidence_masking": true,
+    "query_pattern_detection": true,
+}));
 
-result = scan(
-    query,
-    detect_membership_inference=True
-)
+let result = scan(
+    &query,
+    serde_json::json!({
+        "detect_membership_inference": true,
+    }),
+);
 
-if result.membership_inference_detected:
-    return masked_response(response)
+if result.membership_inference_detected {
+    return masked_response(&response);
+}
 ```
 
 ---

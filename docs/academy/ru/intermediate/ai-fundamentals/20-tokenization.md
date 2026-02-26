@@ -39,31 +39,31 @@ Tokenization конвертирует текст в numerical tokens котор�
 
 ### 1. Token Boundaries Enable Attacks
 
-```python
-# Word-level detection fails на split tokens
-keyword = "bomb"  # Blocked as keyword
+```rust
+// Word-level detection fails на split tokens
+let keyword = "bomb"; // Blocked as keyword
 
-# Но tokenizer может split иначе:
-evasion = "b" + "omb"  # May tokenize as ["b", "omb"]
-evasion2 = "bo" + "mb"  # May tokenize as ["bo", "mb"]
+// Но tokenizer может split иначе:
+let evasion = format!("{}{}", "b", "omb"); // May tokenize as ["b", "omb"]
+let evasion2 = format!("{}{}", "bo", "mb"); // May tokenize as ["bo", "mb"]
 
-# Regex ищущий "bomb" пропускает split versions
+// Regex ищущий "bomb" пропускает split versions
 ```
 
 ### 2. Tokenization Inconsistency
 
-```python
-from transformers import AutoTokenizer
+```rust
+use tokenizers::Tokenizer;
 
-tokenizer = AutoTokenizer.from_pretrained("gpt2")
+let tokenizer = Tokenizer::from_pretrained("gpt2", None).unwrap();
 
-# Одно слово, разные tokenizations based on context
-print(tokenizer.encode("bomb"))      # [21901]
-print(tokenizer.encode(" bomb"))     # [6202]   (with space)
-print(tokenizer.encode("Bomb"))      # [33, 2381]  (capitalized)
-print(tokenizer.encode("BOMB"))      # [33, 2662, 33]  (all caps)
+// Одно слово, разные tokenizations based on context
+println!("{:?}", tokenizer.encode("bomb", false).unwrap().get_ids());      // [21901]
+println!("{:?}", tokenizer.encode(" bomb", false).unwrap().get_ids());     // [6202]   (with space)
+println!("{:?}", tokenizer.encode("Bomb", false).unwrap().get_ids());      // [33, 2381]  (capitalized)
+println!("{:?}", tokenizer.encode("BOMB", false).unwrap().get_ids());      // [33, 2662, 33]  (all caps)
 
-# Detection должен учитывать все variants!
+// Detection должен учитывать все variants!
 ```
 
 ---
@@ -72,155 +72,193 @@ print(tokenizer.encode("BOMB"))      # [33, 2662, 33]  (all caps)
 
 ### 1. Token Splitting Evasion
 
-```python
-class TokenSplitAttack:
-    """Evasion keyword detection через token splitting."""
-    
-    def __init__(self, tokenizer):
-        self.tokenizer = tokenizer
-    
-    def find_evasive_spellings(self, keyword: str) -> list:
-        """Найти spellings которые avoid keyword's token."""
-        
-        original_tokens = self.tokenizer.encode(keyword)
-        evasions = []
-        
-        # Try various splitting strategies
-        for i in range(1, len(keyword)):
-            # Split с spaces
-            split = keyword[:i] + " " + keyword[i:]
-            tokens = self.tokenizer.encode(split)
-            if tokens != original_tokens:
-                evasions.append({
+```rust
+use std::collections::HashMap;
+use tokenizers::Tokenizer;
+
+struct TokenSplitAttack {
+    /// Evasion keyword detection через token splitting.
+    tokenizer: Tokenizer,
+}
+
+impl TokenSplitAttack {
+    fn new(tokenizer: Tokenizer) -> Self {
+        Self { tokenizer }
+    }
+
+    fn find_evasive_spellings(&self, keyword: &str) -> Vec<serde_json::Value> {
+        /// Найти spellings которые avoid keyword's token.
+        let original_tokens = self.tokenizer.encode(keyword, false).unwrap().get_ids().to_vec();
+        let mut evasions = Vec::new();
+
+        // Try various splitting strategies
+        for i in 1..keyword.len() {
+            // Split с spaces
+            let split = format!("{} {}", &keyword[..i], &keyword[i..]);
+            let tokens = self.tokenizer.encode(split.as_str(), false).unwrap().get_ids().to_vec();
+            if tokens != original_tokens {
+                evasions.push(serde_json::json!({
                     "variant": split,
                     "tokens": tokens,
                     "strategy": "space_split"
-                })
-            
-            # Split с zero-width characters
-            zwsp = "\u200b"
-            split_zwsp = keyword[:i] + zwsp + keyword[i:]
-            tokens = self.tokenizer.encode(split_zwsp)
-            if tokens != original_tokens:
-                evasions.append({
+                }));
+            }
+
+            // Split с zero-width characters
+            let zwsp = "\u{200b}";
+            let split_zwsp = format!("{}{}{}", &keyword[..i], zwsp, &keyword[i..]);
+            let tokens = self.tokenizer.encode(split_zwsp.as_str(), false).unwrap().get_ids().to_vec();
+            if tokens != original_tokens {
+                evasions.push(serde_json::json!({
                     "variant": split_zwsp,
                     "tokens": tokens,
                     "strategy": "zero_width_split"
-                })
-        
-        return evasions
-    
-    def find_homoglyph_evasions(self, keyword: str) -> list:
-        """Найти homoglyph substitutions которые change tokens."""
-        
-        homoglyphs = {
-            'a': 'а', 'e': 'е', 'o': 'о', 'p': 'р',
-            'c': 'с', 'x': 'х', 'i': 'і'
+                }));
+            }
         }
-        
-        original_tokens = self.tokenizer.encode(keyword)
-        evasions = []
-        
-        for i, char in enumerate(keyword):
-            if char.lower() in homoglyphs:
-                variant = keyword[:i] + homoglyphs[char.lower()] + keyword[i+1:]
-                tokens = self.tokenizer.encode(variant)
-                
-                if tokens != original_tokens:
-                    evasions.append({
+
+        evasions
+    }
+
+    fn find_homoglyph_evasions(&self, keyword: &str) -> Vec<serde_json::Value> {
+        /// Найти homoglyph substitutions которые change tokens.
+        let homoglyphs: HashMap<char, char> = [
+            ('a', 'а'), ('e', 'е'), ('o', 'о'), ('p', 'р'),
+            ('c', 'с'), ('x', 'х'), ('i', 'і'),
+        ].into();
+
+        let original_tokens = self.tokenizer.encode(keyword, false).unwrap().get_ids().to_vec();
+        let mut evasions = Vec::new();
+
+        for (i, ch) in keyword.chars().enumerate() {
+            if let Some(&replacement) = homoglyphs.get(&ch.to_lowercase().next().unwrap()) {
+                let variant: String = keyword.chars().enumerate().map(|(j, c)| {
+                    if j == i { replacement } else { c }
+                }).collect();
+                let tokens = self.tokenizer.encode(variant.as_str(), false).unwrap().get_ids().to_vec();
+
+                if tokens != original_tokens {
+                    evasions.push(serde_json::json!({
                         "variant": variant,
                         "tokens": tokens,
                         "strategy": "homoglyph"
-                    })
-        
-        return evasions
+                    }));
+                }
+            }
+        }
+
+        evasions
+    }
+}
 ```
 
 ---
 
 ### 2. Token Boundary Manipulation
 
-```python
-class TokenBoundaryManipulator:
-    """Exploit token boundaries для attacks."""
-    
-    def __init__(self, tokenizer):
-        self.tokenizer = tokenizer
-    
-    def fragment_instruction(self, instruction: str) -> str:
-        """Fragment instruction across token boundaries."""
-        
-        # Find natural token breaks
-        tokens = self.tokenizer.encode(instruction)
-        decoded_tokens = [self.tokenizer.decode([t]) for t in tokens]
-        
-        # Insert characters которые change boundaries
-        fragmented = ""
-        for i, token_text in enumerate(decoded_tokens):
-            fragmented += token_text
-            if i < len(decoded_tokens) - 1:
-                # Insert boundary-breaking character
-                fragmented += "\u200b"  # Zero-width space
-        
-        return fragmented
-    
-    def embed_in_tokens(self, payload: str, carrier: str) -> str:
-        """Embed payload within carrier text tokens."""
-        
-        # Strategy: insert payload где не будет detected
-        # by token-level keyword matching
-        
-        carrier_tokens = self.tokenizer.encode(carrier)
-        payload_tokens = self.tokenizer.encode(payload)
-        
-        # Find position где payload integrates smoothly
-        # Это model-specific и requires experimentation
-        
-        return carrier + "\n\n" + payload
+```rust
+use tokenizers::Tokenizer;
+
+struct TokenBoundaryManipulator {
+    /// Exploit token boundaries для attacks.
+    tokenizer: Tokenizer,
+}
+
+impl TokenBoundaryManipulator {
+    fn new(tokenizer: Tokenizer) -> Self {
+        Self { tokenizer }
+    }
+
+    fn fragment_instruction(&self, instruction: &str) -> String {
+        /// Fragment instruction across token boundaries.
+
+        // Find natural token breaks
+        let encoding = self.tokenizer.encode(instruction, false).unwrap();
+        let tokens = encoding.get_ids();
+        let decoded_tokens: Vec<String> = tokens
+            .iter()
+            .map(|&t| self.tokenizer.decode(&[t], true).unwrap())
+            .collect();
+
+        // Insert characters которые change boundaries
+        let mut fragmented = String::new();
+        for (i, token_text) in decoded_tokens.iter().enumerate() {
+            fragmented.push_str(token_text);
+            if i < decoded_tokens.len() - 1 {
+                // Insert boundary-breaking character
+                fragmented.push('\u{200b}'); // Zero-width space
+            }
+        }
+
+        fragmented
+    }
+
+    fn embed_in_tokens(&self, payload: &str, carrier: &str) -> String {
+        /// Embed payload within carrier text tokens.
+
+        // Strategy: insert payload где не будет detected
+        // by token-level keyword matching
+
+        let _carrier_tokens = self.tokenizer.encode(carrier, false).unwrap();
+        let _payload_tokens = self.tokenizer.encode(payload, false).unwrap();
+
+        // Find position где payload integrates smoothly
+        // Это model-specific и requires experimentation
+
+        format!("{}\n\n{}", carrier, payload)
+    }
+}
 ```
 
 ---
 
 ### 3. Glitch Tokens
 
-```python
-# Некоторые tokenizers имеют "glitch tokens" - tokens которые cause unusual behavior
+```rust
+use candle_core::{Tensor, Device};
+use std::collections::HashMap;
 
-glitch_tokens = {
-    "gpt-2": [
-        " petertodd",  # Known glitch token
-        "SolidGoldMagikarp",  # Another example
-    ]
+// Некоторые tokenizers имеют "glitch tokens" - tokens которые cause unusual behavior
+
+let glitch_tokens: HashMap<&str, Vec<&str>> = [
+    ("gpt-2", vec![
+        " petertodd",          // Known glitch token
+        "SolidGoldMagikarp",   // Another example
+    ]),
+].into();
+
+struct GlitchTokenExplorer {
+    /// Explore glitch tokens в tokenizer.
+    tokenizer: tokenizers::Tokenizer,
+    model: Box<dyn EmbeddingModel>,
 }
 
-class GlitchTokenExplorer:
-    """Explore glitch tokens в tokenizer."""
-    
-    def __init__(self, tokenizer, model):
-        self.tokenizer = tokenizer
-        self.model = model
-    
-    def find_glitch_tokens(self, sample_size: int = 1000) -> list:
-        """Найти tokens с unusual embedding properties."""
-        
-        unusual = []
-        
-        for token_id in range(min(sample_size, len(self.tokenizer))):
-            token_text = self.tokenizer.decode([token_id])
-            embedding = self.model.get_input_embeddings()(
-                torch.tensor([token_id])
-            )
-            
-            # Check для unusual embedding properties
-            norm = torch.norm(embedding).item()
-            if norm > 100 or norm < 0.01:
-                unusual.append({
+impl GlitchTokenExplorer {
+    fn find_glitch_tokens(&self, sample_size: usize) -> Vec<serde_json::Value> {
+        /// Найти tokens с unusual embedding properties.
+        let vocab_size = self.tokenizer.get_vocab_size(false);
+        let mut unusual = Vec::new();
+
+        for token_id in 0..sample_size.min(vocab_size) {
+            let token_text = self.tokenizer.decode(&[token_id as u32], true).unwrap();
+            let token_tensor = Tensor::new(&[token_id as u32], &Device::Cpu).unwrap();
+            let embedding = self.model.get_input_embeddings(&token_tensor);
+
+            // Check для unusual embedding properties
+            let norm = embedding.sqr().unwrap().sum_all().unwrap().sqrt().unwrap()
+                .to_scalar::<f64>().unwrap();
+            if norm > 100.0 || norm < 0.01 {
+                unusual.push(serde_json::json!({
                     "token_id": token_id,
                     "text": token_text,
                     "embedding_norm": norm
-                })
-        
-        return unusual
+                }));
+            }
+        }
+
+        unusual
+    }
+}
 ```
 
 ---
@@ -229,163 +267,211 @@ class GlitchTokenExplorer:
 
 ### 1. Token-Aware Keyword Detection
 
-```python
-class TokenAwareDetector:
-    """Keyword detection который accounts for tokenization."""
-    
-    def __init__(self, tokenizer, keywords: list):
-        self.tokenizer = tokenizer
-        
-        # Pre-compute все token variants keywords
-        self.keyword_token_sets = {}
-        for keyword in keywords:
-            self.keyword_token_sets[keyword] = self._get_all_variants(keyword)
-    
-    def _get_all_variants(self, keyword: str) -> set:
-        """Get все token sequences для keyword variants."""
-        
-        variants = set()
-        
-        # Original
-        variants.add(tuple(self.tokenizer.encode(keyword)))
-        
-        # With leading space
-        variants.add(tuple(self.tokenizer.encode(" " + keyword)))
-        
-        # Capitalization variants
-        variants.add(tuple(self.tokenizer.encode(keyword.lower())))
-        variants.add(tuple(self.tokenizer.encode(keyword.upper())))
-        variants.add(tuple(self.tokenizer.encode(keyword.capitalize())))
-        
-        return variants
-    
-    def detect(self, text: str) -> dict:
-        """Detect keywords accounting for tokenization."""
-        
-        tokens = tuple(self.tokenizer.encode(text))
-        
-        found = []
-        for keyword, token_variants in self.keyword_token_sets.items():
-            for variant in token_variants:
-                if self._contains_subsequence(tokens, variant):
-                    found.append(keyword)
-                    break
-        
-        return {
-            "found_keywords": found,
-            "is_suspicious": len(found) > 0
+```rust
+use std::collections::HashMap;
+use tokenizers::Tokenizer;
+
+struct TokenAwareDetector {
+    /// Keyword detection который accounts for tokenization.
+    tokenizer: Tokenizer,
+    keyword_token_sets: HashMap<String, Vec<Vec<u32>>>,
+}
+
+impl TokenAwareDetector {
+    fn new(tokenizer: Tokenizer, keywords: &[&str]) -> Self {
+        // Pre-compute все token variants keywords
+        let mut keyword_token_sets = HashMap::new();
+        for &keyword in keywords {
+            let variants = Self::get_all_variants(&tokenizer, keyword);
+            keyword_token_sets.insert(keyword.to_string(), variants);
         }
-    
-    def _contains_subsequence(self, sequence: tuple, subseq: tuple) -> bool:
-        """Check содержит ли sequence subsequence."""
-        n, m = len(sequence), len(subseq)
-        for i in range(n - m + 1):
-            if sequence[i:i+m] == subseq:
-                return True
-        return False
+        Self { tokenizer, keyword_token_sets }
+    }
+
+    fn get_all_variants(tokenizer: &Tokenizer, keyword: &str) -> Vec<Vec<u32>> {
+        /// Get все token sequences для keyword variants.
+        let mut variants = Vec::new();
+
+        // Original
+        variants.push(tokenizer.encode(keyword, false).unwrap().get_ids().to_vec());
+
+        // With leading space
+        let spaced = format!(" {}", keyword);
+        variants.push(tokenizer.encode(spaced.as_str(), false).unwrap().get_ids().to_vec());
+
+        // Capitalization variants
+        variants.push(tokenizer.encode(&keyword.to_lowercase(), false).unwrap().get_ids().to_vec());
+        variants.push(tokenizer.encode(&keyword.to_uppercase(), false).unwrap().get_ids().to_vec());
+        let capitalized = format!("{}{}", &keyword[..1].to_uppercase(), &keyword[1..]);
+        variants.push(tokenizer.encode(capitalized.as_str(), false).unwrap().get_ids().to_vec());
+
+        // Deduplicate
+        variants.sort();
+        variants.dedup();
+        variants
+    }
+
+    fn detect(&self, text: &str) -> serde_json::Value {
+        /// Detect keywords accounting for tokenization.
+        let tokens = self.tokenizer.encode(text, false).unwrap().get_ids().to_vec();
+
+        let mut found = Vec::new();
+        for (keyword, token_variants) in &self.keyword_token_sets {
+            for variant in token_variants {
+                if self.contains_subsequence(&tokens, variant) {
+                    found.push(keyword.clone());
+                    break;
+                }
+            }
+        }
+
+        serde_json::json!({
+            "found_keywords": found,
+            "is_suspicious": !found.is_empty()
+        })
+    }
+
+    fn contains_subsequence(&self, sequence: &[u32], subseq: &[u32]) -> bool {
+        /// Check содержит ли sequence subsequence.
+        let (n, m) = (sequence.len(), subseq.len());
+        if m > n { return false; }
+        for i in 0..=(n - m) {
+            if &sequence[i..i + m] == subseq {
+                return true;
+            }
+        }
+        false
+    }
+}
 ```
 
 ---
 
 ### 2. Pre-Tokenization Normalization
 
-```python
-class TokenizationNormalizer:
-    """Normalize text до tokenization чтобы prevent evasion."""
-    
-    def __init__(self):
-        # Zero-width characters для removal
-        self.invisible_chars = [
-            '\u200b', '\u200c', '\u200d', '\u2060', '\ufeff'
-        ]
-        
-        # Homoglyph replacements
-        self.homoglyphs = {
-            'а': 'a', 'е': 'e', 'о': 'o', 'р': 'p',
-            'с': 'c', 'х': 'x', 'і': 'i', 'у': 'y'
+```rust
+use std::collections::HashMap;
+
+struct TokenizationNormalizer {
+    /// Normalize text до tokenization чтобы prevent evasion.
+    invisible_chars: Vec<char>,
+    homoglyphs: HashMap<char, char>,
+}
+
+impl TokenizationNormalizer {
+    fn new() -> Self {
+        // Zero-width characters для removal
+        let invisible_chars = vec![
+            '\u{200b}', '\u{200c}', '\u{200d}', '\u{2060}', '\u{feff}',
+        ];
+
+        // Homoglyph replacements
+        let homoglyphs: HashMap<char, char> = [
+            ('а', 'a'), ('е', 'e'), ('о', 'o'), ('р', 'p'),
+            ('с', 'c'), ('х', 'x'), ('і', 'i'), ('у', 'y'),
+        ].into();
+
+        Self { invisible_chars, homoglyphs }
+    }
+
+    fn normalize(&self, text: &str) -> String {
+        /// Normalize text к consistent form.
+        let mut result = text.to_string();
+
+        // Remove invisible characters
+        for &ch in &self.invisible_chars {
+            result = result.replace(ch, "");
         }
-    
-    def normalize(self, text: str) -> str:
-        """Normalize text к consistent form."""
-        
-        # Remove invisible characters
-        for char in self.invisible_chars:
-            text = text.replace(char, '')
-        
-        # Replace homoglyphs
-        for homoglyph, replacement in self.homoglyphs.items():
-            text = text.replace(homoglyph, replacement)
-        
-        # Normalize unicode
-        import unicodedata
-        text = unicodedata.normalize('NFKC', text)
-        
-        return text
+
+        // Replace homoglyphs
+        result = result
+            .chars()
+            .map(|c| *self.homoglyphs.get(&c).unwrap_or(&c))
+            .collect();
+
+        // Normalize unicode (NFKC)
+        unicode_normalization::UnicodeNormalization::nfkc(&*result).collect()
+    }
+}
 ```
 
 ---
 
 ### 3. Semantic Detection (Token-Agnostic)
 
-```python
-class SemanticDetector:
-    """Detect harmful content regardless of tokenization."""
-    
-    def __init__(self, embedding_model, harmful_examples: list):
-        self.embed = embedding_model
-        
-        # Pre-compute embeddings для known harmful patterns
-        self.harmful_embeddings = [
-            self.embed(ex) for ex in harmful_examples
-        ]
-    
-    def detect(self, text: str, threshold: float = 0.85) -> dict:
-        """Detect harmful content через semantic similarity."""
-        
-        text_emb = self.embed(text)
-        
-        max_similarity = 0
-        most_similar_idx = -1
-        
-        for i, harmful_emb in enumerate(self.harmful_embeddings):
-            sim = self._cosine_similarity(text_emb, harmful_emb)
-            if sim > max_similarity:
-                max_similarity = sim
-                most_similar_idx = i
-        
-        return {
+```rust
+use ndarray::Array1;
+
+struct SemanticDetector {
+    /// Detect harmful content regardless of tokenization.
+    embed: Box<dyn Fn(&str) -> Array1<f64>>,
+    harmful_embeddings: Vec<Array1<f64>>,
+}
+
+impl SemanticDetector {
+    fn new(
+        embed: Box<dyn Fn(&str) -> Array1<f64>>,
+        harmful_examples: &[&str],
+    ) -> Self {
+        // Pre-compute embeddings для known harmful patterns
+        let harmful_embeddings = harmful_examples.iter().map(|ex| embed(ex)).collect();
+        Self { embed, harmful_embeddings }
+    }
+
+    fn detect(&self, text: &str, threshold: f64) -> serde_json::Value {
+        /// Detect harmful content через semantic similarity.
+        let text_emb = (self.embed)(text);
+
+        let mut max_similarity: f64 = 0.0;
+        let mut most_similar_idx: Option<usize> = None;
+
+        for (i, harmful_emb) in self.harmful_embeddings.iter().enumerate() {
+            let sim = self.cosine_similarity(&text_emb, harmful_emb);
+            if sim > max_similarity {
+                max_similarity = sim;
+                most_similar_idx = Some(i);
+            }
+        }
+
+        serde_json::json!({
             "is_harmful": max_similarity > threshold,
             "confidence": max_similarity,
-            "matched_pattern": most_similar_idx if max_similarity > threshold else None
-        }
-    
-    def _cosine_similarity(self, a, b):
-        import numpy as np
-        return np.dot(a, b) / (np.linalg.norm(a) * np.linalg.norm(b))
+            "matched_pattern": if max_similarity > threshold { most_similar_idx } else { None }
+        })
+    }
+
+    fn cosine_similarity(&self, a: &Array1<f64>, b: &Array1<f64>) -> f64 {
+        let dot: f64 = a.iter().zip(b.iter()).map(|(x, y)| x * y).sum();
+        let norm_a: f64 = a.iter().map(|x| x * x).sum::<f64>().sqrt();
+        let norm_b: f64 = b.iter().map(|x| x * x).sum::<f64>().sqrt();
+        dot / (norm_a * norm_b)
+    }
+}
 ```
 
 ---
 
 ## Интеграция с SENTINEL
 
-```python
-from sentinel import configure, TokenGuard
+```rust
+use sentinel_core::engines::{configure, TokenGuard};
 
-configure(
-    tokenization_normalization=True,
-    token_aware_detection=True,
-    glitch_token_protection=True
-)
+configure(serde_json::json!({
+    "tokenization_normalization": true,
+    "token_aware_detection": true,
+    "glitch_token_protection": true,
+}));
 
-token_guard = TokenGuard(
-    normalize_before_detection=True,
-    block_glitch_tokens=True
-)
+let token_guard = TokenGuard::new(
+    true, // normalize_before_detection
+    true, // block_glitch_tokens
+);
 
-@token_guard.protect  
-def process_input(text: str):
-    # Автоматически normalized и checked
-    return llm.generate(text)
+#[token_guard::protect]
+fn process_input(text: &str) -> String {
+    // Автоматически normalized и checked
+    llm.generate(text)
+}
 ```
 
 ---
