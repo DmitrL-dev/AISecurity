@@ -45,7 +45,8 @@ papers/**/*.out
 papers/**/*.synctex.gz
 papers/**/*.fdb_latexmk
 papers/**/*.fls
-papers/**/*.pdf
+# Keep compiled PDFs for distribution
+!papers/**/main.pdf
 
 # === Node ===
 node_modules/
