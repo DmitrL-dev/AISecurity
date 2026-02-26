@@ -31,26 +31,32 @@ User Input → CaMeL Layer → LLM Core
 
 ## Практика
 
-```python
-from enum import Enum
-from dataclasses import dataclass
+```rust
+use std::collections::HashSet;
 
-class Capability(Enum):
-    READ_FILE = "read_file"
-    WRITE_FILE = "write_file"
-    EXECUTE = "execute_code"
+#[derive(Clone, PartialEq, Eq, Hash)]
+enum Capability {
+    ReadFile,
+    WriteFile,
+    Execute,
+}
 
-@dataclass
-class CaMeLContext:
-    allowed: set
-    scope: str
-    max_actions: int = 10
+struct CaMeLContext {
+    allowed: HashSet<Capability>,
+    scope: String,
+    max_actions: usize,
+}
 
-class CaMeLGuard:
-    def validate(self, ctx: CaMeLContext, action: Capability, target: str) -> bool:
-        if action not in ctx.allowed:
-            return False
-        return fnmatch.fnmatch(target, ctx.scope)
+struct CaMeLGuard;
+
+impl CaMeLGuard {
+    fn validate(&self, ctx: &CaMeLContext, action: &Capability, target: &str) -> bool {
+        if !ctx.allowed.contains(action) {
+            return false;
+        }
+        glob_match::glob_match(&ctx.scope, target)
+    }
+}
 ```
 
 ---

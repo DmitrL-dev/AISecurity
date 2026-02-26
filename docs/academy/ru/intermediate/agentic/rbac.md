@@ -73,254 +73,297 @@ RBAC иерархия для агентов:
 
 ### 2.1 Core Entities
 
-```python
-from dataclasses import dataclass, field
-from typing import List, Dict, Set, Optional, Any, Tuple
-from datetime import datetime, timedelta
-from enum import Enum
-import hashlib
-import fnmatch
+```rust
+use std::collections::HashMap;
+use chrono::{DateTime, Utc};
+use sha2::{Sha256, Digest};
 
-class PermissionType(Enum):
-    TOOL_EXECUTE = "tool:execute"
-    TOOL_READ = "tool:read"
-    DATA_READ = "data:read"
-    DATA_WRITE = "data:write"
-    DATA_DELETE = "data:delete"
-    NETWORK_EXTERNAL = "network:external"
-    SYSTEM_ADMIN = "system:admin"
+#[derive(Clone, PartialEq, Eq, Hash)]
+enum PermissionType {
+    ToolExecute,
+    ToolRead,
+    DataRead,
+    DataWrite,
+    DataDelete,
+    NetworkExternal,
+    SystemAdmin,
+}
 
-@dataclass
-class Permission:
-    """
-    Единичная permission grant.
-    Может включать resource pattern и constraints.
-    """
-    type: PermissionType
-    resource_pattern: str = "*"  # Glob pattern
-    constraints: Dict = field(default_factory=dict)
-    
-    def matches(self, resource: str) -> bool:
-        """Проверить применяется ли permission к resource"""
-        return fnmatch.fnmatch(resource, self.resource_pattern)
-    
-    def to_string(self) -> str:
-        return f"{self.type.value}:{self.resource_pattern}"
+impl PermissionType {
+    fn value(&self) -> &str {
+        match self {
+            Self::ToolExecute => "tool:execute",
+            Self::ToolRead => "tool:read",
+            Self::DataRead => "data:read",
+            Self::DataWrite => "data:write",
+            Self::DataDelete => "data:delete",
+            Self::NetworkExternal => "network:external",
+            Self::SystemAdmin => "system:admin",
+        }
+    }
+}
 
-@dataclass
-class Role:
-    """
-    Role группирует связанные permissions.
-    Поддерживает иерархию через parent roles.
-    """
-    name: str
-    display_name: str
-    permissions: List[Permission] = field(default_factory=list)
-    parent_roles: List[str] = field(default_factory=list)
-    description: str = ""
-    
-    # Constraints
-    max_actions_per_minute: int = 100
-    allowed_hours: List[int] = field(default_factory=lambda: list(range(24)))
-    requires_approval: bool = False
-    
-    def has_permission(self, perm_type: PermissionType, resource: str) -> bool:
-        """Проверить выдаёт ли role permission для resource"""
-        for perm in self.permissions:
-            if perm.type == perm_type and perm.matches(resource):
-                return True
-        return False
+/// Единичная permission grant.
+/// Может включать resource pattern и constraints.
+struct Permission {
+    perm_type: PermissionType,
+    resource_pattern: String, // Glob pattern
+    constraints: HashMap<String, String>,
+}
 
-@dataclass
-class Agent:
-    """
-    AI Agent сущность с identity и assigned roles.
-    """
-    agent_id: str
-    display_name: str
-    agent_type: str  # llm, tool, composite
-    roles: List[str] = field(default_factory=list)
-    
-    # Delegation
-    delegated_from: Optional[str] = None  # User ID
-    delegation_scope: List[str] = field(default_factory=list)
-    
-    # Trust
-    trust_level: float = 0.5  # 0-1
-    last_activity: datetime = field(default_factory=datetime.utcnow)
-    
-    # Metadata
-    created_at: datetime = field(default_factory=datetime.utcnow)
-    metadata: Dict = field(default_factory=dict)
-    
-    @property
-    def identity_hash(self) -> str:
-        data = f"{self.agent_id}:{self.agent_type}:{self.delegated_from}"
-        return hashlib.sha256(data.encode()).hexdigest()[:16]
+impl Permission {
+    fn new(perm_type: PermissionType, resource_pattern: &str) -> Self {
+        Self {
+            perm_type,
+            resource_pattern: resource_pattern.to_string(),
+            constraints: HashMap::new(),
+        }
+    }
 
-@dataclass
-class User:
-    """
-    Human user сущность.
-    """
-    user_id: str
-    username: str
-    roles: List[str] = field(default_factory=list)
-    
-    # Agent delegation limits
-    can_delegate_to_agents: bool = True
-    max_delegated_agents: int = 5
-    delegated_agents: List[str] = field(default_factory=list)
+    /// Проверить применяется ли permission к resource
+    fn matches(&self, resource: &str) -> bool {
+        glob_match(&self.resource_pattern, resource)
+    }
 
-@dataclass
-class AccessPolicy:
-    """
-    Access policy для конкретных resource patterns.
-    """
-    policy_id: str
-    resource_pattern: str
-    allowed_roles: List[str]
-    required_conditions: Dict = field(default_factory=dict)
-    deny_roles: List[str] = field(default_factory=list)
-    priority: int = 0
-    
-    def applies_to(self, resource: str) -> bool:
-        return fnmatch.fnmatch(resource, self.resource_pattern)
+    fn to_string(&self) -> String {
+        format!("{}:{}", self.perm_type.value(), self.resource_pattern)
+    }
+}
+
+/// Role группирует связанные permissions.
+/// Поддерживает иерархию через parent roles.
+struct Role {
+    name: String,
+    display_name: String,
+    permissions: Vec<Permission>,
+    parent_roles: Vec<String>,
+    description: String,
+    // Constraints
+    max_actions_per_minute: i32,
+    allowed_hours: Vec<u32>,
+    requires_approval: bool,
+}
+
+impl Role {
+    /// Проверить выдаёт ли role permission для resource
+    fn has_permission(&self, perm_type: &PermissionType, resource: &str) -> bool {
+        for perm in &self.permissions {
+            if perm.perm_type == *perm_type && perm.matches(resource) {
+                return true;
+            }
+        }
+        false
+    }
+}
+
+/// AI Agent сущность с identity и assigned roles.
+struct Agent {
+    agent_id: String,
+    display_name: String,
+    agent_type: String, // llm, tool, composite
+    roles: Vec<String>,
+    // Delegation
+    delegated_from: Option<String>, // User ID
+    delegation_scope: Vec<String>,
+    // Trust
+    trust_level: f64, // 0-1
+    last_activity: DateTime<Utc>,
+    // Metadata
+    created_at: DateTime<Utc>,
+    metadata: HashMap<String, String>,
+}
+
+impl Agent {
+    fn identity_hash(&self) -> String {
+        let data = format!("{}:{}:{:?}", self.agent_id, self.agent_type, self.delegated_from);
+        let mut hasher = Sha256::new();
+        hasher.update(data.as_bytes());
+        let result = hasher.finalize();
+        format!("{:x}", result)[..16].to_string()
+    }
+}
+
+/// Human user сущность.
+struct User {
+    user_id: String,
+    username: String,
+    roles: Vec<String>,
+    // Agent delegation limits
+    can_delegate_to_agents: bool,
+    max_delegated_agents: usize,
+    delegated_agents: Vec<String>,
+}
+
+/// Access policy для конкретных resource patterns.
+struct AccessPolicy {
+    policy_id: String,
+    resource_pattern: String,
+    allowed_roles: Vec<String>,
+    required_conditions: HashMap<String, String>,
+    deny_roles: Vec<String>,
+    priority: i32,
+}
+
+impl AccessPolicy {
+    fn applies_to(&self, resource: &str) -> bool {
+        glob_match(&self.resource_pattern, resource)
+    }
+}
 ```
 
 ### 2.2 Permission Store
 
-```python
-from abc import ABC, abstractmethod
-from collections import defaultdict
+```rust
+use std::collections::{HashMap, HashSet};
 
-class PermissionStore(ABC):
-    """Абстрактный permission store interface"""
-    
-    @abstractmethod
-    def get_role(self, role_name: str) -> Optional[Role]:
-        pass
-    
-    @abstractmethod
-    def get_agent(self, agent_id: str) -> Optional[Agent]:
-        pass
-    
-    @abstractmethod
-    def get_user(self, user_id: str) -> Optional[User]:
-        pass
-    
-    @abstractmethod
-    def get_policies_for_resource(self, resource: str) -> List[AccessPolicy]:
-        pass
+/// Абстрактный permission store interface
+trait PermissionStore {
+    fn get_role(&self, role_name: &str) -> Option<&Role>;
+    fn get_agent(&self, agent_id: &str) -> Option<&Agent>;
+    fn get_user(&self, user_id: &str) -> Option<&User>;
+    fn get_policies_for_resource(&self, resource: &str) -> Vec<&AccessPolicy>;
+}
 
-class InMemoryPermissionStore(PermissionStore):
-    """In-memory implementation для development/testing"""
-    
-    def __init__(self):
-        self.roles: Dict[str, Role] = {}
-        self.agents: Dict[str, Agent] = {}
-        self.users: Dict[str, User] = {}
-        self.policies: List[AccessPolicy] = []
-        
-        self._initialize_default_roles()
-    
-    def _initialize_default_roles(self):
-        """Создать default agent roles"""
-        
-        # Reader role
-        self.add_role(Role(
-            name="agent:reader",
-            display_name="Reader Agent",
-            permissions=[
-                Permission(PermissionType.DATA_READ, "*"),
-                Permission(PermissionType.TOOL_READ, "*")
+/// In-memory implementation для development/testing
+struct InMemoryPermissionStore {
+    roles: HashMap<String, Role>,
+    agents: HashMap<String, Agent>,
+    users: HashMap<String, User>,
+    policies: Vec<AccessPolicy>,
+}
+
+impl InMemoryPermissionStore {
+    fn new() -> Self {
+        let mut store = Self {
+            roles: HashMap::new(),
+            agents: HashMap::new(),
+            users: HashMap::new(),
+            policies: Vec::new(),
+        };
+        store.initialize_default_roles();
+        store
+    }
+
+    /// Создать default agent roles
+    fn initialize_default_roles(&mut self) {
+        // Reader role
+        self.add_role(Role {
+            name: "agent:reader".into(),
+            display_name: "Reader Agent".into(),
+            permissions: vec![
+                Permission::new(PermissionType::DataRead, "*"),
+                Permission::new(PermissionType::ToolRead, "*"),
             ],
-            max_actions_per_minute=50
-        ))
-        
-        # Writer role
-        self.add_role(Role(
-            name="agent:writer",
-            display_name="Writer Agent",
-            permissions=[
-                Permission(PermissionType.DATA_READ, "*"),
-                Permission(PermissionType.DATA_WRITE, "user/*"),
-                Permission(PermissionType.TOOL_EXECUTE, "safe/*")
+            parent_roles: vec![],
+            description: String::new(),
+            max_actions_per_minute: 50,
+            allowed_hours: (0..24).collect(),
+            requires_approval: false,
+        });
+
+        // Writer role
+        self.add_role(Role {
+            name: "agent:writer".into(),
+            display_name: "Writer Agent".into(),
+            permissions: vec![
+                Permission::new(PermissionType::DataRead, "*"),
+                Permission::new(PermissionType::DataWrite, "user/*"),
+                Permission::new(PermissionType::ToolExecute, "safe/*"),
             ],
-            parent_roles=["agent:reader"],
-            max_actions_per_minute=30
-        ))
-        
-        # Tool executor
-        self.add_role(Role(
-            name="agent:executor",
-            display_name="Tool Executor Agent",
-            permissions=[
-                Permission(PermissionType.TOOL_EXECUTE, "*"),
-                Permission(PermissionType.NETWORK_EXTERNAL, "approved/*")
+            parent_roles: vec!["agent:reader".into()],
+            description: String::new(),
+            max_actions_per_minute: 30,
+            allowed_hours: (0..24).collect(),
+            requires_approval: false,
+        });
+
+        // Tool executor
+        self.add_role(Role {
+            name: "agent:executor".into(),
+            display_name: "Tool Executor Agent".into(),
+            permissions: vec![
+                Permission::new(PermissionType::ToolExecute, "*"),
+                Permission::new(PermissionType::NetworkExternal, "approved/*"),
             ],
-            requires_approval=True,
-            max_actions_per_minute=20
-        ))
-        
-        # Admin role
-        self.add_role(Role(
-            name="agent:admin",
-            display_name="Admin Agent",
-            permissions=[
-                Permission(PermissionType.SYSTEM_ADMIN, "*"),
-                Permission(PermissionType.DATA_DELETE, "*"),
+            parent_roles: vec![],
+            description: String::new(),
+            max_actions_per_minute: 20,
+            allowed_hours: (0..24).collect(),
+            requires_approval: true,
+        });
+
+        // Admin role
+        self.add_role(Role {
+            name: "agent:admin".into(),
+            display_name: "Admin Agent".into(),
+            permissions: vec![
+                Permission::new(PermissionType::SystemAdmin, "*"),
+                Permission::new(PermissionType::DataDelete, "*"),
             ],
-            parent_roles=["agent:writer", "agent:executor"],
-            requires_approval=True,
-            max_actions_per_minute=10
-        ))
-    
-    def add_role(self, role: Role):
-        self.roles[role.name] = role
-    
-    def add_agent(self, agent: Agent):
-        self.agents[agent.agent_id] = agent
-    
-    def add_user(self, user: User):
-        self.users[user.user_id] = user
-    
-    def add_policy(self, policy: AccessPolicy):
-        self.policies.append(policy)
-        self.policies.sort(key=lambda p: -p.priority)
-    
-    def get_role(self, role_name: str) -> Optional[Role]:
-        return self.roles.get(role_name)
-    
-    def get_agent(self, agent_id: str) -> Optional[Agent]:
-        return self.agents.get(agent_id)
-    
-    def get_user(self, user_id: str) -> Optional[User]:
-        return self.users.get(user_id)
-    
-    def get_policies_for_resource(self, resource: str) -> List[AccessPolicy]:
-        return [p for p in self.policies if p.applies_to(resource)]
-    
-    def get_all_permissions_for_role(self, role_name: str, 
-                                      visited: Set[str] = None) -> List[Permission]:
-        """Получить все permissions включая inherited"""
-        if visited is None:
-            visited = set()
-        
-        if role_name in visited:
-            return []
-        visited.add(role_name)
-        
-        role = self.get_role(role_name)
-        if not role:
-            return []
-        
-        permissions = list(role.permissions)
-        
-        for parent in role.parent_roles:
-            permissions.extend(self.get_all_permissions_for_role(parent, visited))
-        
-        return permissions
+            parent_roles: vec!["agent:writer".into(), "agent:executor".into()],
+            description: String::new(),
+            max_actions_per_minute: 10,
+            allowed_hours: (0..24).collect(),
+            requires_approval: true,
+        });
+    }
+
+    fn add_role(&mut self, role: Role) {
+        self.roles.insert(role.name.clone(), role);
+    }
+
+    fn add_agent(&mut self, agent: Agent) {
+        self.agents.insert(agent.agent_id.clone(), agent);
+    }
+
+    fn add_user(&mut self, user: User) {
+        self.users.insert(user.user_id.clone(), user);
+    }
+
+    fn add_policy(&mut self, policy: AccessPolicy) {
+        self.policies.push(policy);
+        self.policies.sort_by(|a, b| b.priority.cmp(&a.priority));
+    }
+
+    /// Получить все permissions включая inherited
+    fn get_all_permissions_for_role(&self, role_name: &str, visited: &mut HashSet<String>) -> Vec<&Permission> {
+        if visited.contains(role_name) {
+            return vec![];
+        }
+        visited.insert(role_name.to_string());
+
+        let role = match self.roles.get(role_name) {
+            Some(r) => r,
+            None => return vec![],
+        };
+
+        let mut permissions: Vec<&Permission> = role.permissions.iter().collect();
+
+        for parent in &role.parent_roles {
+            permissions.extend(self.get_all_permissions_for_role(parent, visited));
+        }
+
+        permissions
+    }
+}
+
+impl PermissionStore for InMemoryPermissionStore {
+    fn get_role(&self, role_name: &str) -> Option<&Role> {
+        self.roles.get(role_name)
+    }
+
+    fn get_agent(&self, agent_id: &str) -> Option<&Agent> {
+        self.agents.get(agent_id)
+    }
+
+    fn get_user(&self, user_id: &str) -> Option<&User> {
+        self.users.get(user_id)
+    }
+
+    fn get_policies_for_resource(&self, resource: &str) -> Vec<&AccessPolicy> {
+        self.policies.iter().filter(|p| p.applies_to(resource)).collect()
+    }
+}
 ```
 
 ---
@@ -329,334 +372,385 @@ class InMemoryPermissionStore(PermissionStore):
 
 ### 3.1 Access Decision
 
-```python
-@dataclass
-class AccessRequest:
-    """Запрос на доступ для выполнения действия"""
-    agent_id: str
-    permission_type: PermissionType
-    resource: str
-    
-    # Context
-    session_id: str = ""
-    user_id: str = ""  # Delegating user
-    timestamp: datetime = field(default_factory=datetime.utcnow)
-    context: Dict = field(default_factory=dict)
+```rust
+use std::collections::HashMap;
+use chrono::{DateTime, Utc, Duration};
 
-@dataclass
-class AccessDecision:
-    """Результат проверки access control"""
-    allowed: bool
-    reason: str
-    matched_policy: Optional[str] = None
-    matched_role: Optional[str] = None
-    conditions: Dict = field(default_factory=dict)
-    
-    # Для auditing
-    request_id: str = ""
-    decision_time_ms: float = 0
+/// Запрос на доступ для выполнения действия
+struct AccessRequest {
+    agent_id: String,
+    permission_type: PermissionType,
+    resource: String,
+    // Context
+    session_id: String,
+    user_id: String, // Delegating user
+    timestamp: DateTime<Utc>,
+    context: HashMap<String, String>,
+}
 
-class RateLimiter:
-    """Простой rate limiter"""
-    
-    def __init__(self):
-        self.requests: Dict[str, List[datetime]] = defaultdict(list)
-    
-    def allow(self, agent_id: str, limit_per_minute: int) -> bool:
-        now = datetime.utcnow()
-        minute_ago = now - timedelta(minutes=1)
-        
-        # Очистить старые requests
-        self.requests[agent_id] = [
-            t for t in self.requests[agent_id] if t > minute_ago
-        ]
-        
-        if len(self.requests[agent_id]) >= limit_per_minute:
-            return False
-        
-        self.requests[agent_id].append(now)
-        return True
+/// Результат проверки access control
+struct AccessDecision {
+    allowed: bool,
+    reason: String,
+    matched_policy: Option<String>,
+    matched_role: Option<String>,
+    conditions: HashMap<String, bool>,
+    // Для auditing
+    request_id: String,
+    decision_time_ms: f64,
+}
 
-class AuthorizationEngine:
-    """
-    Core authorization engine для agent RBAC.
-    Реализует policy evaluation и decision logic.
-    """
-    
-    def __init__(self, store: PermissionStore):
-        self.store = store
-        self.decision_cache: Dict[str, AccessDecision] = {}
-        self.rate_limiter = RateLimiter()
-    
-    def check_access(self, request: AccessRequest) -> AccessDecision:
-        """
-        Главная authorization проверка.
-        
-        Returns:
-            AccessDecision с allow/deny и reason
-        """
-        import time
-        start = time.time()
-        
-        # Получить agent
-        agent = self.store.get_agent(request.agent_id)
-        if not agent:
-            return AccessDecision(
-                allowed=False,
-                reason=f"Unknown agent: {request.agent_id}"
-            )
-        
-        # Проверить валидность delegation
-        if agent.delegated_from:
-            delegation_check = self._check_delegation(agent, request)
-            if not delegation_check.allowed:
-                return delegation_check
-        
-        # Rate limiting
-        if not self.rate_limiter.allow(request.agent_id, self._get_rate_limit(agent)):
-            return AccessDecision(
-                allowed=False,
-                reason="Rate limit exceeded"
-            )
-        
-        # Проверить policies сначала (explicit allow/deny)
-        policy_decision = self._check_policies(request)
-        if policy_decision:
-            policy_decision.decision_time_ms = (time.time() - start) * 1000
-            return policy_decision
-        
-        # Проверить role-based permissions
-        role_decision = self._check_role_permissions(agent, request)
-        role_decision.decision_time_ms = (time.time() - start) * 1000
-        
-        return role_decision
-    
-    def _check_delegation(self, agent: Agent, request: AccessRequest) -> AccessDecision:
-        """Проверить валидность delegation"""
-        user = self.store.get_user(agent.delegated_from)
-        if not user:
-            return AccessDecision(
-                allowed=False,
-                reason=f"Delegating user {agent.delegated_from} not found"
-            )
-        
-        if not user.can_delegate_to_agents:
-            return AccessDecision(
-                allowed=False,
-                reason="User cannot delegate to agents"
-            )
-        
-        if agent.agent_id not in user.delegated_agents:
-            return AccessDecision(
-                allowed=False,
-                reason="Agent not in user's delegation list"
-            )
-        
-        # Проверить delegation scope
-        if agent.delegation_scope:
-            scope_match = any(
-                fnmatch.fnmatch(request.resource, scope)
-                for scope in agent.delegation_scope
-            )
-            if not scope_match:
-                return AccessDecision(
-                    allowed=False,
-                    reason="Request outside delegation scope"
-                )
-        
-        return AccessDecision(allowed=True, reason="Delegation valid")
-    
-    def _check_policies(self, request: AccessRequest) -> Optional[AccessDecision]:
-        """Проверить explicit policies"""
-        policies = self.store.get_policies_for_resource(request.resource)
-        agent = self.store.get_agent(request.agent_id)
-        
-        for policy in policies:
-            # Проверить deny сначала
-            for role in agent.roles:
-                if role in policy.deny_roles:
-                    return AccessDecision(
-                        allowed=False,
-                        reason=f"Denied by policy {policy.policy_id}",
-                        matched_policy=policy.policy_id
-                    )
-            
-            # Проверить allow
-            for role in agent.roles:
-                if role in policy.allowed_roles:
-                    # Проверить conditions
-                    if self._check_conditions(policy.required_conditions, request):
-                        return AccessDecision(
-                            allowed=True,
-                            reason=f"Allowed by policy {policy.policy_id}",
-                            matched_policy=policy.policy_id
-                        )
-        
-        return None  # Нет matching policy
-    
-    def _check_role_permissions(self, agent: Agent, 
-                                 request: AccessRequest) -> AccessDecision:
-        """Проверить role-based permissions"""
-        for role_name in agent.roles:
-            permissions = self.store.get_all_permissions_for_role(role_name)
-            
-            for perm in permissions:
-                if perm.type == request.permission_type and perm.matches(request.resource):
-                    role = self.store.get_role(role_name)
-                    
-                    # Проверить time constraints
-                    if role and request.timestamp.hour not in role.allowed_hours:
-                        continue
-                    
-                    # Проверить нужен ли approval
-                    if role and role.requires_approval:
-                        return AccessDecision(
-                            allowed=True,
-                            reason=f"Allowed by role {role_name} (pending approval)",
-                            matched_role=role_name,
-                            conditions={'requires_approval': True}
-                        )
-                    
-                    return AccessDecision(
-                        allowed=True,
-                        reason=f"Allowed by role {role_name}",
-                        matched_role=role_name
-                    )
-        
-        return AccessDecision(
-            allowed=False,
-            reason="No matching permission found"
-        )
-    
-    def _check_conditions(self, conditions: Dict, request: AccessRequest) -> bool:
-        """Evaluate policy conditions"""
-        for key, expected in conditions.items():
-            actual = request.context.get(key)
-            if actual != expected:
-                return False
-        return True
-    
-    def _get_rate_limit(self, agent: Agent) -> int:
-        """Получить rate limit для agent на основе roles"""
-        max_rate = 100
-        for role_name in agent.roles:
-            role = self.store.get_role(role_name)
-            if role:
-                max_rate = min(max_rate, role.max_actions_per_minute)
-        return max_rate
+/// Простой rate limiter
+struct RateLimiter {
+    requests: HashMap<String, Vec<DateTime<Utc>>>,
+}
+
+impl RateLimiter {
+    fn new() -> Self {
+        Self { requests: HashMap::new() }
+    }
+
+    fn allow(&mut self, agent_id: &str, limit_per_minute: i32) -> bool {
+        let now = Utc::now();
+        let minute_ago = now - Duration::minutes(1);
+
+        // Очистить старые requests
+        let entries = self.requests.entry(agent_id.to_string()).or_insert_with(Vec::new);
+        entries.retain(|t| *t > minute_ago);
+
+        if entries.len() as i32 >= limit_per_minute {
+            return false;
+        }
+
+        entries.push(now);
+        true
+    }
+}
+
+/// Core authorization engine для agent RBAC.
+/// Реализует policy evaluation и decision logic.
+struct AuthorizationEngine {
+    store: InMemoryPermissionStore,
+    decision_cache: HashMap<String, AccessDecision>,
+    rate_limiter: RateLimiter,
+}
+
+impl AuthorizationEngine {
+    fn new(store: InMemoryPermissionStore) -> Self {
+        Self {
+            store,
+            decision_cache: HashMap::new(),
+            rate_limiter: RateLimiter::new(),
+        }
+    }
+
+    /// Главная authorization проверка.
+    fn check_access(&mut self, request: &AccessRequest) -> AccessDecision {
+        let start = std::time::Instant::now();
+
+        // Получить agent
+        let agent = match self.store.get_agent(&request.agent_id) {
+            Some(a) => a,
+            None => return AccessDecision {
+                allowed: false,
+                reason: format!("Unknown agent: {}", request.agent_id),
+                matched_policy: None, matched_role: None,
+                conditions: HashMap::new(), request_id: String::new(),
+                decision_time_ms: 0.0,
+            },
+        };
+
+        // Проверить валидность delegation
+        if let Some(ref delegated_from) = agent.delegated_from {
+            let delegation_check = self.check_delegation(agent, request);
+            if !delegation_check.allowed {
+                return delegation_check;
+            }
+        }
+
+        // Rate limiting
+        let rate_limit = self.get_rate_limit(agent);
+        if !self.rate_limiter.allow(&request.agent_id, rate_limit) {
+            return AccessDecision {
+                allowed: false,
+                reason: "Rate limit exceeded".into(),
+                matched_policy: None, matched_role: None,
+                conditions: HashMap::new(), request_id: String::new(),
+                decision_time_ms: start.elapsed().as_secs_f64() * 1000.0,
+            };
+        }
+
+        // Проверить policies сначала (explicit allow/deny)
+        if let Some(mut policy_decision) = self.check_policies(request, agent) {
+            policy_decision.decision_time_ms = start.elapsed().as_secs_f64() * 1000.0;
+            return policy_decision;
+        }
+
+        // Проверить role-based permissions
+        let mut role_decision = self.check_role_permissions(agent, request);
+        role_decision.decision_time_ms = start.elapsed().as_secs_f64() * 1000.0;
+        role_decision
+    }
+
+    /// Проверить валидность delegation
+    fn check_delegation(&self, agent: &Agent, request: &AccessRequest) -> AccessDecision {
+        let delegated_from = agent.delegated_from.as_ref().unwrap();
+        let user = match self.store.get_user(delegated_from) {
+            Some(u) => u,
+            None => return AccessDecision {
+                allowed: false,
+                reason: format!("Delegating user {} not found", delegated_from),
+                matched_policy: None, matched_role: None,
+                conditions: HashMap::new(), request_id: String::new(),
+                decision_time_ms: 0.0,
+            },
+        };
+
+        if !user.can_delegate_to_agents {
+            return AccessDecision {
+                allowed: false, reason: "User cannot delegate to agents".into(),
+                matched_policy: None, matched_role: None,
+                conditions: HashMap::new(), request_id: String::new(),
+                decision_time_ms: 0.0,
+            };
+        }
+
+        if !user.delegated_agents.contains(&agent.agent_id) {
+            return AccessDecision {
+                allowed: false, reason: "Agent not in user's delegation list".into(),
+                matched_policy: None, matched_role: None,
+                conditions: HashMap::new(), request_id: String::new(),
+                decision_time_ms: 0.0,
+            };
+        }
+
+        // Проверить delegation scope
+        if !agent.delegation_scope.is_empty() {
+            let scope_match = agent.delegation_scope.iter()
+                .any(|scope| glob_match(scope, &request.resource));
+            if !scope_match {
+                return AccessDecision {
+                    allowed: false, reason: "Request outside delegation scope".into(),
+                    matched_policy: None, matched_role: None,
+                    conditions: HashMap::new(), request_id: String::new(),
+                    decision_time_ms: 0.0,
+                };
+            }
+        }
+
+        AccessDecision {
+            allowed: true, reason: "Delegation valid".into(),
+            matched_policy: None, matched_role: None,
+            conditions: HashMap::new(), request_id: String::new(),
+            decision_time_ms: 0.0,
+        }
+    }
+
+    /// Проверить explicit policies
+    fn check_policies(&self, request: &AccessRequest, agent: &Agent) -> Option<AccessDecision> {
+        let policies = self.store.get_policies_for_resource(&request.resource);
+
+        for policy in &policies {
+            // Проверить deny сначала
+            for role in &agent.roles {
+                if policy.deny_roles.contains(role) {
+                    return Some(AccessDecision {
+                        allowed: false,
+                        reason: format!("Denied by policy {}", policy.policy_id),
+                        matched_policy: Some(policy.policy_id.clone()),
+                        matched_role: None, conditions: HashMap::new(),
+                        request_id: String::new(), decision_time_ms: 0.0,
+                    });
+                }
+            }
+
+            // Проверить allow
+            for role in &agent.roles {
+                if policy.allowed_roles.contains(role) {
+                    // Проверить conditions
+                    if self.check_conditions(&policy.required_conditions, request) {
+                        return Some(AccessDecision {
+                            allowed: true,
+                            reason: format!("Allowed by policy {}", policy.policy_id),
+                            matched_policy: Some(policy.policy_id.clone()),
+                            matched_role: None, conditions: HashMap::new(),
+                            request_id: String::new(), decision_time_ms: 0.0,
+                        });
+                    }
+                }
+            }
+        }
+
+        None // Нет matching policy
+    }
+
+    /// Проверить role-based permissions
+    fn check_role_permissions(&self, agent: &Agent, request: &AccessRequest) -> AccessDecision {
+        for role_name in &agent.roles {
+            let mut visited = std::collections::HashSet::new();
+            let permissions = self.store.get_all_permissions_for_role(role_name, &mut visited);
+
+            for perm in &permissions {
+                if perm.perm_type == request.permission_type && perm.matches(&request.resource) {
+                    let role = self.store.get_role(role_name);
+
+                    // Проверить time constraints
+                    if let Some(r) = role {
+                        if !r.allowed_hours.contains(&(request.timestamp.hour() as u32)) {
+                            continue;
+                        }
+
+                        // Проверить нужен ли approval
+                        if r.requires_approval {
+                            let mut conditions = HashMap::new();
+                            conditions.insert("requires_approval".into(), true);
+                            return AccessDecision {
+                                allowed: true,
+                                reason: format!("Allowed by role {} (pending approval)", role_name),
+                                matched_policy: None,
+                                matched_role: Some(role_name.clone()),
+                                conditions, request_id: String::new(),
+                                decision_time_ms: 0.0,
+                            };
+                        }
+                    }
+
+                    return AccessDecision {
+                        allowed: true,
+                        reason: format!("Allowed by role {}", role_name),
+                        matched_policy: None,
+                        matched_role: Some(role_name.clone()),
+                        conditions: HashMap::new(), request_id: String::new(),
+                        decision_time_ms: 0.0,
+                    };
+                }
+            }
+        }
+
+        AccessDecision {
+            allowed: false, reason: "No matching permission found".into(),
+            matched_policy: None, matched_role: None,
+            conditions: HashMap::new(), request_id: String::new(),
+            decision_time_ms: 0.0,
+        }
+    }
+
+    /// Evaluate policy conditions
+    fn check_conditions(&self, conditions: &HashMap<String, String>, request: &AccessRequest) -> bool {
+        for (key, expected) in conditions {
+            let actual = request.context.get(key);
+            if actual.map(|v| v.as_str()) != Some(expected.as_str()) {
+                return false;
+            }
+        }
+        true
+    }
+
+    /// Получить rate limit для agent на основе roles
+    fn get_rate_limit(&self, agent: &Agent) -> i32 {
+        let mut max_rate = 100;
+        for role_name in &agent.roles {
+            if let Some(role) = self.store.get_role(role_name) {
+                max_rate = max_rate.min(role.max_actions_per_minute);
+            }
+        }
+        max_rate
+    }
+}
 ```
 
 ### 3.2 Permission Enforcement
 
-```python
-from functools import wraps
-import logging
+```rust
+use std::collections::HashMap;
+use std::fmt;
 
-class PermissionDeniedError(Exception):
-    """Raised когда permission denied"""
-    
-    def __init__(self, agent_id: str, permission: str, 
-                 resource: str, reason: str):
-        self.agent_id = agent_id
-        self.permission = permission
-        self.resource = resource
-        self.reason = reason
-        super().__init__(
-            f"Permission denied: {agent_id} cannot {permission} on {resource}. {reason}"
-        )
+/// Raised когда permission denied
+struct PermissionDeniedError {
+    agent_id: String,
+    permission: String,
+    resource: String,
+    reason: String,
+}
 
-class ApprovalRequiredError(Exception):
-    """Raised когда требуется approval"""
-    
-    def __init__(self, agent_id: str, permission: str, resource: str):
-        self.agent_id = agent_id
-        self.permission = permission
-        self.resource = resource
-        super().__init__(
-            f"Approval required: {agent_id} needs approval for {permission} on {resource}"
-        )
+impl fmt::Display for PermissionDeniedError {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        write!(f, "Permission denied: {} cannot {} on {}. {}",
+            self.agent_id, self.permission, self.resource, self.reason)
+    }
+}
 
-class PermissionEnforcer:
-    """
-    Enforces permissions на agent actions.
-    Может использоваться как decorator или context manager.
-    """
-    
-    def __init__(self, auth_engine: AuthorizationEngine):
-        self.auth_engine = auth_engine
-        self.logger = logging.getLogger(__name__)
-    
-    def require_permission(self, permission_type: PermissionType, 
-                           resource_pattern: str = None):
-        """Decorator для требования permission"""
-        def decorator(func):
-            @wraps(func)
-            def wrapper(agent_id: str, *args, **kwargs):
-                # Построить resource из pattern или function name
-                resource = resource_pattern or f"function:{func.__name__}"
-                
-                # Создать request
-                request = AccessRequest(
-                    agent_id=agent_id,
-                    permission_type=permission_type,
-                    resource=resource,
-                    context=kwargs.get('context', {})
-                )
-                
-                # Проверить access
-                decision = self.auth_engine.check_access(request)
-                
-                if not decision.allowed:
-                    self.logger.warning(
-                        f"Access denied: {agent_id} -> {permission_type.value}:{resource}. "
-                        f"Reason: {decision.reason}"
-                    )
-                    raise PermissionDeniedError(
-                        agent_id=agent_id,
-                        permission=permission_type.value,
-                        resource=resource,
-                        reason=decision.reason
-                    )
-                
-                if decision.conditions.get('requires_approval'):
-                    approval = kwargs.get('approval_token')
-                    if not approval:
-                        raise ApprovalRequiredError(
-                            agent_id=agent_id,
-                            permission=permission_type.value,
-                            resource=resource
-                        )
-                
-                self.logger.info(f"Access granted: {agent_id} -> {resource}")
-                return func(agent_id, *args, **kwargs)
-            
-            return wrapper
-        return decorator
-    
-    def check_and_execute(self, agent_id: str, 
-                          permission_type: PermissionType,
-                          resource: str,
-                          action: callable,
-                          context: Dict = None) -> Any:
-        """Проверить permission и выполнить action"""
-        request = AccessRequest(
-            agent_id=agent_id,
-            permission_type=permission_type,
-            resource=resource,
-            context=context or {}
-        )
-        
-        decision = self.auth_engine.check_access(request)
-        
-        if not decision.allowed:
-            raise PermissionDeniedError(
-                agent_id=agent_id,
-                permission=permission_type.value,
-                resource=resource,
-                reason=decision.reason
-            )
-        
-        return action()
+/// Raised когда требуется approval
+struct ApprovalRequiredError {
+    agent_id: String,
+    permission: String,
+    resource: String,
+}
+
+impl fmt::Display for ApprovalRequiredError {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        write!(f, "Approval required: {} needs approval for {} on {}",
+            self.agent_id, self.permission, self.resource)
+    }
+}
+
+/// Enforces permissions на agent actions.
+/// Может использоваться как middleware или guard.
+struct PermissionEnforcer {
+    auth_engine: AuthorizationEngine,
+}
+
+impl PermissionEnforcer {
+    fn new(auth_engine: AuthorizationEngine) -> Self {
+        Self { auth_engine }
+    }
+
+    /// Проверить permission и выполнить action
+    fn check_and_execute<F, R>(
+        &mut self,
+        agent_id: &str,
+        permission_type: PermissionType,
+        resource: &str,
+        action: F,
+        context: Option<HashMap<String, String>>,
+    ) -> Result<R, String>
+    where
+        F: FnOnce() -> R,
+    {
+        let request = AccessRequest {
+            agent_id: agent_id.to_string(),
+            permission_type,
+            resource: resource.to_string(),
+            session_id: String::new(),
+            user_id: String::new(),
+            timestamp: Utc::now(),
+            context: context.unwrap_or_default(),
+        };
+
+        let decision = self.auth_engine.check_access(&request);
+
+        if !decision.allowed {
+            log::warn!(
+                "Access denied: {} -> {}:{}. Reason: {}",
+                agent_id, permission_type.value(), resource, decision.reason
+            );
+            return Err(format!(
+                "Permission denied: {} cannot {} on {}. {}",
+                agent_id, permission_type.value(), resource, decision.reason
+            ));
+        }
+
+        if decision.conditions.get("requires_approval").copied().unwrap_or(false) {
+            return Err(format!(
+                "Approval required: {} needs approval for {} on {}",
+                agent_id, permission_type.value(), resource
+            ));
+        }
+
+        log::info!("Access granted: {} -> {}", agent_id, resource);
+        Ok(action())
+    }
+}
 ```
 
 ---
@@ -665,181 +759,247 @@ class PermissionEnforcer:
 
 ### 4.1 Context-Aware Permissions
 
-```python
-@dataclass
-class ContextCondition:
-    """Condition на основе runtime context"""
-    key: str
-    operator: str  # eq, ne, gt, lt, in, contains
-    value: Any
-    
-    def evaluate(self, context: Dict) -> bool:
-        actual = context.get(self.key)
-        
-        if self.operator == "eq":
-            return actual == self.value
-        elif self.operator == "ne":
-            return actual != self.value
-        elif self.operator == "gt":
-            return actual > self.value if actual else False
-        elif self.operator == "lt":
-            return actual < self.value if actual else False
-        elif self.operator == "in":
-            return actual in self.value if self.value else False
-        elif self.operator == "contains":
-            return self.value in actual if actual else False
-        
-        return False
+```rust
+use std::collections::HashMap;
 
-class DynamicRole:
-    """
-    Role которая адаптируется на основе context.
-    Permissions могут быть добавлены/удалены на основе conditions.
-    """
-    
-    def __init__(self, base_role: Role):
-        self.base_role = base_role
-        self.conditional_permissions: List[Tuple[ContextCondition, Permission]] = []
-        self.conditional_restrictions: List[Tuple[ContextCondition, Permission]] = []
-    
-    def add_conditional_permission(self, condition: ContextCondition, 
-                                   permission: Permission):
-        """Добавить permission активную только когда condition met"""
-        self.conditional_permissions.append((condition, permission))
-    
-    def add_conditional_restriction(self, condition: ContextCondition,
-                                    permission: Permission):
-        """Убрать permission когда condition met"""
-        self.conditional_restrictions.append((condition, permission))
-    
-    def get_active_permissions(self, context: Dict) -> List[Permission]:
-        """Получить permissions активные в текущем context"""
-        active = list(self.base_role.permissions)
-        
-        # Добавить conditional permissions
-        for condition, perm in self.conditional_permissions:
-            if condition.evaluate(context):
-                active.append(perm)
-        
-        # Убрать restricted permissions
-        for condition, perm in self.conditional_restrictions:
-            if condition.evaluate(context):
-                active = [p for p in active if p.to_string() != perm.to_string()]
-        
-        return active
+/// Condition на основе runtime context
+struct ContextCondition {
+    key: String,
+    operator: String, // eq, ne, gt, lt, in, contains
+    value: serde_json::Value,
+}
 
-class TrustBasedPermissionModifier:
-    """
-    Модифицирует permissions на основе agent trust level.
-    Выше trust = больше permissions.
-    """
-    
-    def __init__(self):
-        self.trust_thresholds = {
-            0.9: ["agent:admin"],
-            0.7: ["agent:executor"],
-            0.5: ["agent:writer"],
-            0.3: ["agent:reader"],
-            0.0: []
+impl ContextCondition {
+    fn evaluate(&self, context: &HashMap<String, serde_json::Value>) -> bool {
+        let actual = match context.get(&self.key) {
+            Some(v) => v,
+            None => return false,
+        };
+
+        match self.operator.as_str() {
+            "eq" => actual == &self.value,
+            "ne" => actual != &self.value,
+            "gt" => {
+                actual.as_f64().unwrap_or(0.0) > self.value.as_f64().unwrap_or(0.0)
+            }
+            "lt" => {
+                actual.as_f64().unwrap_or(0.0) < self.value.as_f64().unwrap_or(0.0)
+            }
+            "in" => {
+                if let Some(arr) = self.value.as_array() {
+                    arr.contains(actual)
+                } else {
+                    false
+                }
+            }
+            "contains" => {
+                if let (Some(a), Some(v)) = (actual.as_str(), self.value.as_str()) {
+                    a.contains(v)
+                } else {
+                    false
+                }
+            }
+            _ => false,
         }
-    
-    def get_allowed_roles(self, trust_level: float) -> List[str]:
-        """Получить roles разрешённые при данном trust level"""
-        allowed = []
-        for threshold, roles in sorted(self.trust_thresholds.items()):
-            if trust_level >= threshold:
-                allowed.extend(roles)
-        return allowed
-    
-    def filter_agent_roles(self, agent: Agent) -> List[str]:
-        """Фильтровать agent roles на основе текущего trust"""
-        allowed = self.get_allowed_roles(agent.trust_level)
-        return [r for r in agent.roles if r in allowed]
+    }
+}
+
+/// Role которая адаптируется на основе context.
+/// Permissions могут быть добавлены/удалены на основе conditions.
+struct DynamicRole {
+    base_role: Role,
+    conditional_permissions: Vec<(ContextCondition, Permission)>,
+    conditional_restrictions: Vec<(ContextCondition, Permission)>,
+}
+
+impl DynamicRole {
+    fn new(base_role: Role) -> Self {
+        Self {
+            base_role,
+            conditional_permissions: Vec::new(),
+            conditional_restrictions: Vec::new(),
+        }
+    }
+
+    /// Добавить permission активную только когда condition met
+    fn add_conditional_permission(&mut self, condition: ContextCondition, permission: Permission) {
+        self.conditional_permissions.push((condition, permission));
+    }
+
+    /// Убрать permission когда condition met
+    fn add_conditional_restriction(&mut self, condition: ContextCondition, permission: Permission) {
+        self.conditional_restrictions.push((condition, permission));
+    }
+
+    /// Получить permissions активные в текущем context
+    fn get_active_permissions(&self, context: &HashMap<String, serde_json::Value>) -> Vec<&Permission> {
+        let mut active: Vec<&Permission> = self.base_role.permissions.iter().collect();
+
+        // Добавить conditional permissions
+        for (condition, perm) in &self.conditional_permissions {
+            if condition.evaluate(context) {
+                active.push(perm);
+            }
+        }
+
+        // Убрать restricted permissions
+        for (condition, perm) in &self.conditional_restrictions {
+            if condition.evaluate(context) {
+                let perm_str = perm.to_string();
+                active.retain(|p| p.to_string() != perm_str);
+            }
+        }
+
+        active
+    }
+}
+
+/// Модифицирует permissions на основе agent trust level.
+/// Выше trust = больше permissions.
+struct TrustBasedPermissionModifier {
+    trust_thresholds: Vec<(f64, Vec<String>)>,
+}
+
+impl TrustBasedPermissionModifier {
+    fn new() -> Self {
+        Self {
+            trust_thresholds: vec![
+                (0.9, vec!["agent:admin".into()]),
+                (0.7, vec!["agent:executor".into()]),
+                (0.5, vec!["agent:writer".into()]),
+                (0.3, vec!["agent:reader".into()]),
+                (0.0, vec![]),
+            ],
+        }
+    }
+
+    /// Получить roles разрешённые при данном trust level
+    fn get_allowed_roles(&self, trust_level: f64) -> Vec<String> {
+        let mut allowed = Vec::new();
+        let mut sorted = self.trust_thresholds.clone();
+        sorted.sort_by(|a, b| a.0.partial_cmp(&b.0).unwrap());
+        for (threshold, roles) in &sorted {
+            if trust_level >= *threshold {
+                allowed.extend(roles.clone());
+            }
+        }
+        allowed
+    }
+
+    /// Фильтровать agent roles на основе текущего trust
+    fn filter_agent_roles(&self, agent: &Agent) -> Vec<String> {
+        let allowed = self.get_allowed_roles(agent.trust_level);
+        agent.roles.iter()
+            .filter(|r| allowed.contains(r))
+            .cloned()
+            .collect()
+    }
+}
 ```
 
 ### 4.2 Temporal Permissions
 
-```python
-@dataclass
-class TemporalGrant:
-    """
-    Time-limited permission grant.
-    """
-    grant_id: str
-    agent_id: str
-    role: str
-    
-    # Time bounds
-    valid_from: datetime
-    valid_until: datetime
-    
-    # Usage limits
-    max_uses: Optional[int] = None
-    current_uses: int = 0
-    
-    # Metadata
-    granted_by: str = ""
-    reason: str = ""
-    
-    def is_valid(self) -> bool:
-        now = datetime.utcnow()
-        if now < self.valid_from or now > self.valid_until:
-            return False
-        if self.max_uses and self.current_uses >= self.max_uses:
-            return False
-        return True
-    
-    def use(self):
-        self.current_uses += 1
+```rust
+use chrono::{DateTime, Utc, Duration};
+use std::collections::HashMap;
 
-class TemporalPermissionManager:
-    """Управляет time-limited permissions"""
-    
-    def __init__(self, store: PermissionStore):
-        self.store = store
-        self.grants: Dict[str, TemporalGrant] = {}
-    
-    def grant_temporary_role(self, agent_id: str, role: str,
-                             duration_minutes: int,
-                             granted_by: str,
-                             max_uses: int = None) -> TemporalGrant:
-        """Выдать temporary role агенту"""
-        grant = TemporalGrant(
-            grant_id=f"grant_{agent_id}_{datetime.utcnow().timestamp()}",
-            agent_id=agent_id,
-            role=role,
-            valid_from=datetime.utcnow(),
-            valid_until=datetime.utcnow() + timedelta(minutes=duration_minutes),
-            max_uses=max_uses,
-            granted_by=granted_by
-        )
-        
-        self.grants[grant.grant_id] = grant
-        return grant
-    
-    def get_active_grants(self, agent_id: str) -> List[TemporalGrant]:
-        """Получить все активные grants для agent"""
-        return [
-            g for g in self.grants.values()
-            if g.agent_id == agent_id and g.is_valid()
-        ]
-    
-    def get_effective_roles(self, agent: Agent) -> List[str]:
-        """Получить все roles включая temporary grants"""
-        roles = list(agent.roles)
-        
-        for grant in self.get_active_grants(agent.agent_id):
-            if grant.role not in roles:
-                roles.append(grant.role)
-        
-        return roles
-    
-    def cleanup_expired(self):
-        """Удалить expired grants"""
-        self.grants = {
-            gid: g for gid, g in self.grants.items()
-            if g.is_valid()
+/// Time-limited permission grant.
+struct TemporalGrant {
+    grant_id: String,
+    agent_id: String,
+    role: String,
+    // Time bounds
+    valid_from: DateTime<Utc>,
+    valid_until: DateTime<Utc>,
+    // Usage limits
+    max_uses: Option<usize>,
+    current_uses: usize,
+    // Metadata
+    granted_by: String,
+    reason: String,
+}
+
+impl TemporalGrant {
+    fn is_valid(&self) -> bool {
+        let now = Utc::now();
+        if now < self.valid_from || now > self.valid_until {
+            return false;
         }
+        if let Some(max) = self.max_uses {
+            if self.current_uses >= max {
+                return false;
+            }
+        }
+        true
+    }
+
+    fn use_grant(&mut self) {
+        self.current_uses += 1;
+    }
+}
+
+/// Управляет time-limited permissions
+struct TemporalPermissionManager {
+    grants: HashMap<String, TemporalGrant>,
+}
+
+impl TemporalPermissionManager {
+    fn new() -> Self {
+        Self { grants: HashMap::new() }
+    }
+
+    /// Выдать temporary role агенту
+    fn grant_temporary_role(
+        &mut self,
+        agent_id: &str,
+        role: &str,
+        duration_minutes: i64,
+        granted_by: &str,
+        max_uses: Option<usize>,
+    ) -> &TemporalGrant {
+        let now = Utc::now();
+        let grant_id = format!("grant_{}_{}", agent_id, now.timestamp());
+        let grant = TemporalGrant {
+            grant_id: grant_id.clone(),
+            agent_id: agent_id.to_string(),
+            role: role.to_string(),
+            valid_from: now,
+            valid_until: now + Duration::minutes(duration_minutes),
+            max_uses,
+            current_uses: 0,
+            granted_by: granted_by.to_string(),
+            reason: String::new(),
+        };
+
+        self.grants.insert(grant_id.clone(), grant);
+        self.grants.get(&grant_id).unwrap()
+    }
+
+    /// Получить все активные grants для agent
+    fn get_active_grants(&self, agent_id: &str) -> Vec<&TemporalGrant> {
+        self.grants.values()
+            .filter(|g| g.agent_id == agent_id && g.is_valid())
+            .collect()
+    }
+
+    /// Получить все roles включая temporary grants
+    fn get_effective_roles(&self, agent: &Agent) -> Vec<String> {
+        let mut roles = agent.roles.clone();
+
+        for grant in self.get_active_grants(&agent.agent_id) {
+            if !roles.contains(&grant.role) {
+                roles.push(grant.role.clone());
+            }
+        }
+
+        roles
+    }
+
+    /// Удалить expired grants
+    fn cleanup_expired(&mut self) {
+        self.grants.retain(|_, g| g.is_valid());
+    }
+}
 ```
 
 ---
@@ -848,234 +1008,289 @@ class TemporalPermissionManager:
 
 ### 5.1 Audit Logger
 
-```python
-@dataclass
-class AuditEntry:
-    """Audit log entry"""
-    entry_id: str
-    timestamp: datetime
-    agent_id: str
-    user_id: str
-    
-    # Action details
-    action_type: str  # access_check, permission_grant, role_change
-    permission: str
-    resource: str
-    
-    # Decision
-    decision: str  # allowed, denied, pending_approval
-    reason: str
-    
-    # Context
-    context: Dict = field(default_factory=dict)
-    
-    def to_dict(self) -> dict:
-        return {
-            'entry_id': self.entry_id,
-            'timestamp': self.timestamp.isoformat(),
-            'agent_id': self.agent_id,
-            'user_id': self.user_id,
-            'action_type': self.action_type,
-            'permission': self.permission,
-            'resource': self.resource,
-            'decision': self.decision,
-            'reason': self.reason,
-            'context': self.context
+```rust
+use std::collections::HashMap;
+use chrono::{DateTime, Utc, Duration};
+
+/// Audit log entry
+struct AuditEntry {
+    entry_id: String,
+    timestamp: DateTime<Utc>,
+    agent_id: String,
+    user_id: String,
+    // Action details
+    action_type: String, // access_check, permission_grant, role_change
+    permission: String,
+    resource: String,
+    // Decision
+    decision: String, // allowed, denied, pending_approval
+    reason: String,
+    // Context
+    context: HashMap<String, String>,
+}
+
+impl AuditEntry {
+    fn to_json(&self) -> serde_json::Value {
+        serde_json::json!({
+            "entry_id": self.entry_id,
+            "timestamp": self.timestamp.to_rfc3339(),
+            "agent_id": self.agent_id,
+            "user_id": self.user_id,
+            "action_type": self.action_type,
+            "permission": self.permission,
+            "resource": self.resource,
+            "decision": self.decision,
+            "reason": self.reason,
+            "context": self.context
+        })
+    }
+}
+
+/// Audit logger для RBAC decisions
+struct RBACAuditLogger {
+    entries: Vec<AuditEntry>,
+    max_entries: usize,
+}
+
+impl RBACAuditLogger {
+    fn new() -> Self {
+        Self { entries: Vec::new(), max_entries: 100000 }
+    }
+
+    /// Залогировать access control decision
+    fn log_access_decision(&mut self, request: &AccessRequest, decision: &AccessDecision) {
+        let now = Utc::now();
+        let entry = AuditEntry {
+            entry_id: format!("audit_{}", now.timestamp()),
+            timestamp: now,
+            agent_id: request.agent_id.clone(),
+            user_id: request.user_id.clone(),
+            action_type: "access_check".into(),
+            permission: request.permission_type.value().to_string(),
+            resource: request.resource.clone(),
+            decision: if decision.allowed { "allowed" } else { "denied" }.into(),
+            reason: decision.reason.clone(),
+            context: HashMap::from([
+                ("session_id".into(), request.session_id.clone()),
+                ("matched_policy".into(), decision.matched_policy.clone().unwrap_or_default()),
+                ("matched_role".into(), decision.matched_role.clone().unwrap_or_default()),
+            ]),
+        };
+        self.add_entry(entry);
+    }
+
+    /// Залогировать изменение role assignment
+    fn log_role_change(&mut self, agent_id: &str, old_roles: &[String],
+                       new_roles: &[String], changed_by: &str) {
+        let now = Utc::now();
+        let entry = AuditEntry {
+            entry_id: format!("audit_{}", now.timestamp()),
+            timestamp: now,
+            agent_id: agent_id.to_string(),
+            user_id: changed_by.to_string(),
+            action_type: "role_change".into(),
+            permission: "system:role_assign".into(),
+            resource: format!("agent:{}", agent_id),
+            decision: "completed".into(),
+            reason: format!("Roles changed from {:?} to {:?}", old_roles, new_roles),
+            context: HashMap::new(),
+        };
+        self.add_entry(entry);
+    }
+
+    fn add_entry(&mut self, entry: AuditEntry) {
+        self.entries.push(entry);
+        if self.entries.len() > self.max_entries {
+            let start = self.entries.len() - self.max_entries;
+            self.entries = self.entries.split_off(start);
+        }
+    }
+
+    /// Запрос audit log
+    fn query(&self, agent_id: Option<&str>, start_time: Option<DateTime<Utc>>,
+             end_time: Option<DateTime<Utc>>, decision_filter: Option<&str>) -> Vec<&AuditEntry> {
+        let mut results: Vec<&AuditEntry> = self.entries.iter().collect();
+
+        if let Some(aid) = agent_id {
+            results.retain(|e| e.agent_id == aid);
+        }
+        if let Some(start) = start_time {
+            results.retain(|e| e.timestamp >= start);
+        }
+        if let Some(end) = end_time {
+            results.retain(|e| e.timestamp <= end);
+        }
+        if let Some(dec) = decision_filter {
+            results.retain(|e| e.decision == dec);
         }
 
-class RBACAuditLogger:
-    """Audit logger для RBAC decisions"""
-    
-    def __init__(self):
-        self.entries: List[AuditEntry] = []
-        self.max_entries = 100000
-    
-    def log_access_decision(self, request: AccessRequest, 
-                            decision: AccessDecision):
-        """Залогировать access control decision"""
-        entry = AuditEntry(
-            entry_id=f"audit_{datetime.utcnow().timestamp()}",
-            timestamp=datetime.utcnow(),
-            agent_id=request.agent_id,
-            user_id=request.user_id,
-            action_type="access_check",
-            permission=request.permission_type.value,
-            resource=request.resource,
-            decision="allowed" if decision.allowed else "denied",
-            reason=decision.reason,
-            context={
-                'session_id': request.session_id,
-                'matched_policy': decision.matched_policy,
-                'matched_role': decision.matched_role
-            }
-        )
-        
-        self._add_entry(entry)
-    
-    def log_role_change(self, agent_id: str, old_roles: List[str],
-                        new_roles: List[str], changed_by: str):
-        """Залогировать изменение role assignment"""
-        entry = AuditEntry(
-            entry_id=f"audit_{datetime.utcnow().timestamp()}",
-            timestamp=datetime.utcnow(),
-            agent_id=agent_id,
-            user_id=changed_by,
-            action_type="role_change",
-            permission="system:role_assign",
-            resource=f"agent:{agent_id}",
-            decision="completed",
-            reason=f"Roles changed from {old_roles} to {new_roles}",
-            context={
-                'old_roles': old_roles,
-                'new_roles': new_roles
-            }
-        )
-        
-        self._add_entry(entry)
-    
-    def _add_entry(self, entry: AuditEntry):
-        self.entries.append(entry)
-        if len(self.entries) > self.max_entries:
-            self.entries = self.entries[-self.max_entries:]
-    
-    def query(self, agent_id: str = None, 
-              start_time: datetime = None,
-              end_time: datetime = None,
-              decision: str = None) -> List[AuditEntry]:
-        """Запрос audit log"""
-        results = self.entries
-        
-        if agent_id:
-            results = [e for e in results if e.agent_id == agent_id]
-        if start_time:
-            results = [e for e in results if e.timestamp >= start_time]
-        if end_time:
-            results = [e for e in results if e.timestamp <= end_time]
-        if decision:
-            results = [e for e in results if e.decision == decision]
-        
-        return results
-    
-    def get_denial_summary(self, hours: int = 24) -> Dict:
-        """Получить summary access denials"""
-        cutoff = datetime.utcnow() - timedelta(hours=hours)
-        denials = [e for e in self.entries 
-                   if e.decision == "denied" and e.timestamp >= cutoff]
-        
-        by_agent = defaultdict(int)
-        by_resource = defaultdict(int)
-        by_reason = defaultdict(int)
-        
-        for d in denials:
-            by_agent[d.agent_id] += 1
-            by_resource[d.resource] += 1
-            by_reason[d.reason] += 1
-        
-        return {
-            'total_denials': len(denials),
-            'by_agent': dict(by_agent),
-            'by_resource': dict(by_resource),
-            'by_reason': dict(by_reason)
+        results
+    }
+
+    /// Получить summary access denials
+    fn get_denial_summary(&self, hours: i64) -> serde_json::Value {
+        let cutoff = Utc::now() - Duration::hours(hours);
+        let denials: Vec<&AuditEntry> = self.entries.iter()
+            .filter(|e| e.decision == "denied" && e.timestamp >= cutoff)
+            .collect();
+
+        let mut by_agent: HashMap<String, usize> = HashMap::new();
+        let mut by_resource: HashMap<String, usize> = HashMap::new();
+        let mut by_reason: HashMap<String, usize> = HashMap::new();
+
+        for d in &denials {
+            *by_agent.entry(d.agent_id.clone()).or_insert(0) += 1;
+            *by_resource.entry(d.resource.clone()).or_insert(0) += 1;
+            *by_reason.entry(d.reason.clone()).or_insert(0) += 1;
         }
+
+        serde_json::json!({
+            "total_denials": denials.len(),
+            "by_agent": by_agent,
+            "by_resource": by_resource,
+            "by_reason": by_reason
+        })
+    }
+}
 ```
 
 ---
 
 ## 6. Интеграция с SENTINEL
 
-```python
-from dataclasses import dataclass
+```rust
+use sentinel_core::engines::SentinelEngine;
+use std::collections::HashMap;
 
-@dataclass
-class RBACConfig:
-    """RBAC конфигурация"""
-    enable_audit: bool = True
-    enable_rate_limiting: bool = True
-    enable_temporal_grants: bool = True
-    default_trust_level: float = 0.5
-    max_rate_per_minute: int = 100
+struct RBACConfig {
+    /// RBAC конфигурация
+    enable_audit: bool,
+    enable_rate_limiting: bool,
+    enable_temporal_grants: bool,
+    default_trust_level: f64,
+    max_rate_per_minute: i32,
+}
 
-class SENTINELRBACEngine:
-    """RBAC engine для SENTINEL framework"""
-    
-    def __init__(self, config: RBACConfig):
-        self.config = config
-        
-        # Core components
-        self.store = InMemoryPermissionStore()
-        self.auth_engine = AuthorizationEngine(self.store)
-        self.enforcer = PermissionEnforcer(self.auth_engine)
-        
-        # Optional components
-        if config.enable_temporal_grants:
-            self.temporal_manager = TemporalPermissionManager(self.store)
-        
-        if config.enable_audit:
-            self.audit_logger = RBACAuditLogger()
-        
-        self.trust_modifier = TrustBasedPermissionModifier()
-    
-    def register_agent(self, agent_id: str, agent_type: str,
-                       roles: List[str], delegated_from: str = None) -> Agent:
-        """Зарегистрировать нового агента"""
-        agent = Agent(
-            agent_id=agent_id,
-            display_name=agent_id,
-            agent_type=agent_type,
-            roles=roles,
-            delegated_from=delegated_from,
-            trust_level=self.config.default_trust_level
-        )
-        
-        self.store.add_agent(agent)
-        return agent
-    
-    def check_permission(self, agent_id: str, 
-                         permission: PermissionType,
-                         resource: str,
-                         context: Dict = None) -> AccessDecision:
-        """Проверить имеет ли агент permission"""
-        request = AccessRequest(
-            agent_id=agent_id,
-            permission_type=permission,
-            resource=resource,
-            context=context or {}
-        )
-        
-        decision = self.auth_engine.check_access(request)
-        
-        if self.config.enable_audit:
-            self.audit_logger.log_access_decision(request, decision)
-        
-        return decision
-    
-    def grant_temporary_access(self, agent_id: str, role: str,
-                               duration_minutes: int,
-                               granted_by: str) -> str:
-        """Выдать temporary role агенту"""
-        if not self.config.enable_temporal_grants:
-            raise ValueError("Temporal grants disabled")
-        
-        grant = self.temporal_manager.grant_temporary_role(
-            agent_id=agent_id,
-            role=role,
-            duration_minutes=duration_minutes,
-            granted_by=granted_by
-        )
-        
-        return grant.grant_id
-    
-    def update_agent_trust(self, agent_id: str, trust_delta: float):
-        """Обновить agent trust level"""
-        agent = self.store.get_agent(agent_id)
-        if agent:
-            agent.trust_level = max(0, min(1, agent.trust_level + trust_delta))
-    
-    def get_audit_summary(self, hours: int = 24) -> Dict:
-        """Получить audit summary"""
-        if not self.config.enable_audit:
-            return {}
-        return self.audit_logger.get_denial_summary(hours)
+impl Default for RBACConfig {
+    fn default() -> Self {
+        Self {
+            enable_audit: true,
+            enable_rate_limiting: true,
+            enable_temporal_grants: true,
+            default_trust_level: 0.5,
+            max_rate_per_minute: 100,
+        }
+    }
+}
+
+/// RBAC engine для SENTINEL framework
+struct SENTINELRBACEngine {
+    config: RBACConfig,
+    store: InMemoryPermissionStore,
+    auth_engine: AuthorizationEngine,
+    enforcer: PermissionEnforcer,
+    temporal_manager: Option<TemporalPermissionManager>,
+    audit_logger: Option<RBACAuditLogger>,
+    trust_modifier: TrustBasedPermissionModifier,
+}
+
+impl SENTINELRBACEngine {
+    fn new(config: RBACConfig) -> Self {
+        let store = InMemoryPermissionStore::new();
+        let auth_engine = AuthorizationEngine::new(store.clone());
+        let enforcer = PermissionEnforcer::new(auth_engine.clone());
+
+        let temporal_manager = if config.enable_temporal_grants {
+            Some(TemporalPermissionManager::new())
+        } else {
+            None
+        };
+
+        let audit_logger = if config.enable_audit {
+            Some(RBACAuditLogger::new())
+        } else {
+            None
+        };
+
+        Self {
+            config,
+            store,
+            auth_engine,
+            enforcer,
+            temporal_manager,
+            audit_logger,
+            trust_modifier: TrustBasedPermissionModifier::new(),
+        }
+    }
+
+    /// Зарегистрировать нового агента
+    fn register_agent(&mut self, agent_id: &str, agent_type: &str,
+                      roles: Vec<String>, delegated_from: Option<String>) -> &Agent {
+        let agent = Agent {
+            agent_id: agent_id.to_string(),
+            display_name: agent_id.to_string(),
+            agent_type: agent_type.to_string(),
+            roles,
+            delegated_from,
+            delegation_scope: Vec::new(),
+            trust_level: self.config.default_trust_level,
+            last_activity: Utc::now(),
+            created_at: Utc::now(),
+            metadata: HashMap::new(),
+        };
+        self.store.add_agent(agent);
+        self.store.get_agent(agent_id).unwrap()
+    }
+
+    /// Проверить имеет ли агент permission
+    fn check_permission(&mut self, agent_id: &str, permission: PermissionType,
+                        resource: &str, context: Option<HashMap<String, String>>) -> AccessDecision {
+        let request = AccessRequest {
+            agent_id: agent_id.to_string(),
+            permission_type: permission,
+            resource: resource.to_string(),
+            session_id: String::new(),
+            user_id: String::new(),
+            timestamp: Utc::now(),
+            context: context.unwrap_or_default(),
+        };
+
+        let decision = self.auth_engine.check_access(&request);
+
+        if let Some(ref mut logger) = self.audit_logger {
+            logger.log_access_decision(&request, &decision);
+        }
+
+        decision
+    }
+
+    /// Выдать temporary role агенту
+    fn grant_temporary_access(&mut self, agent_id: &str, role: &str,
+                              duration_minutes: i64, granted_by: &str) -> Result<String, String> {
+        let manager = self.temporal_manager.as_mut()
+            .ok_or("Temporal grants disabled")?;
+
+        let grant = manager.grant_temporary_role(
+            agent_id, role, duration_minutes, granted_by, None,
+        );
+        Ok(grant.grant_id.clone())
+    }
+
+    /// Обновить agent trust level
+    fn update_agent_trust(&mut self, agent_id: &str, trust_delta: f64) {
+        if let Some(agent) = self.store.agents.get_mut(agent_id) {
+            agent.trust_level = (agent.trust_level + trust_delta).clamp(0.0, 1.0);
+        }
+    }
+
+    /// Получить audit summary
+    fn get_audit_summary(&self, hours: i64) -> serde_json::Value {
+        match &self.audit_logger {
+            Some(logger) => logger.get_denial_summary(hours),
+            None => serde_json::json!({}),
+        }
+    }
+}
 ```
 
 ---

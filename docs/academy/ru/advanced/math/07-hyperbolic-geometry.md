@@ -12,49 +12,68 @@
 
 ## Poincaré Embeddings
 
-```python
-import torch
-from geoopt import PoincareBall
+```rust
+use candle_core::Tensor;
 
-manifold = PoincareBall()
+struct PoincareBall;
 
-class HyperbolicEmbedder:
-    def __init__(self, dim=64):
-        self.manifold = PoincareBall()
-        self.dim = dim
-    
-    def embed(self, text: str) -> torch.Tensor:
-        """Embed text in hyperbolic space."""
-        euclidean = self.base_embed(text)
-        hyperbolic = self.manifold.expmap0(euclidean)
-        return hyperbolic
-    
-    def distance(self, x, y):
-        """Hyperbolic distance."""
-        return self.manifold.dist(x, y)
+struct HyperbolicEmbedder {
+    manifold: PoincareBall,
+    dim: usize,
+}
+
+impl HyperbolicEmbedder {
+    fn new(dim: usize) -> Self {
+        Self {
+            manifold: PoincareBall,
+            dim,
+        }
+    }
+
+    /// Embed text in hyperbolic space.
+    fn embed(&self, text: &str) -> Tensor {
+        let euclidean = self.base_embed(text);
+        let hyperbolic = self.manifold.expmap0(&euclidean);
+        hyperbolic
+    }
+
+    /// Hyperbolic distance.
+    fn distance(&self, x: &Tensor, y: &Tensor) -> f64 {
+        self.manifold.dist(x, y)
+    }
+}
 ```
 
 ---
 
 ## Detection via Curvature
 
-```python
-class HyperbolicDetector(BaseEngine):
-    """Detect anomalies via hyperbolic geometry."""
-    
-    def scan(self, text: str) -> ScanResult:
-        chunks = self.split(text)
-        embeddings = [self.embed(c) for c in chunks]
-        
-        # Normal text: embeddings form smooth path
-        # Injection: sudden jumps in hyperbolic distance
-        
-        for i in range(len(embeddings) - 1):
-            dist = self.manifold.dist(embeddings[i], embeddings[i+1])
-            if dist > self.threshold:
-                return ScanResult(is_threat=True)
-        
-        return ScanResult(is_threat=False)
+```rust
+struct HyperbolicDetector {
+    manifold: PoincareBall,
+    threshold: f64,
+}
+
+impl HyperbolicDetector {
+    /// Detect anomalies via hyperbolic geometry.
+
+    fn scan(&self, text: &str) -> ScanResult {
+        let chunks = self.split(text);
+        let embeddings: Vec<_> = chunks.iter().map(|c| self.embed(c)).collect();
+
+        // Normal text: embeddings form smooth path
+        // Injection: sudden jumps in hyperbolic distance
+
+        for i in 0..embeddings.len() - 1 {
+            let dist = self.manifold.dist(&embeddings[i], &embeddings[i + 1]);
+            if dist > self.threshold {
+                return ScanResult { is_threat: true, ..Default::default() };
+            }
+        }
+
+        ScanResult { is_threat: false, ..Default::default() }
+    }
+}
 ```
 
 ---

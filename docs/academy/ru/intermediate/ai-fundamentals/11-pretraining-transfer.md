@@ -61,16 +61,16 @@ Task C → Обучаем Model C с нуля (случайная инициал
 
 **Pre-training** — обучение модели на большом корпусе данных для изучения общих языковых/визуальных паттернов.
 
-```python
-# Pre-training НЕ требует меток для конкретных задач
-# Модель учится из самих данных
+```rust
+// Pre-training НЕ требует меток для конкретных задач
+// Модель учится из самих данных
 
-Pre-training данные:
-- Wikipedia (текст)
-- CommonCrawl (веб-текст)
-- Books (литература)
-- ImageNet (изображения)
-- LAION (пары изображение-текст)
+// Pre-training данные:
+// - Wikipedia (текст)
+// - CommonCrawl (веб-текст)
+// - Books (литература)
+// - ImageNet (изображения)
+// - LAION (пары изображение-текст)
 ```
 
 ### 2.2 Типы Pre-training задач
@@ -86,22 +86,22 @@ Pre-training данные:
 
 **Ключевая идея:** Создаём labels из самих данных, без человеческой аннотации.
 
-```python
-# Masked Language Modeling
-text = "The cat sat on the mat"
-input = "The [MASK] sat on the [MASK]"
-labels = ["cat", "mat"]  # Автоматически из оригинального текста!
+```rust
+// Masked Language Modeling
+let text = "The cat sat on the mat";
+let input = "The [MASK] sat on the [MASK]";
+let labels = vec!["cat", "mat"]; // Автоматически из оригинального текста!
 
-# Causal Language Modeling
-text = "The cat sat on the mat"
-input = ["The", "The cat", "The cat sat", ...]
-labels = ["cat", "sat", "on", ...]  # Следующие токены!
+// Causal Language Modeling
+let text = "The cat sat on the mat";
+let input = vec!["The", "The cat", "The cat sat"];
+let labels = vec!["cat", "sat", "on"]; // Следующие токены!
 
-# Contrastive Learning
-image = load_image("cat.jpg")
-text = "A photo of a cat"
-# Positive pair: (image, text) — должны быть близко
-# Negative pair: (image, "A photo of a dog") — должны быть далеко
+// Contrastive Learning
+// let image = load_image("cat.jpg");
+let text = "A photo of a cat";
+// Positive pair: (image, text) — должны быть близко
+// Negative pair: (image, "A photo of a dog") — должны быть далеко
 ```
 
 ---
@@ -131,17 +131,23 @@ Foundation Models:
 
 ### 3.3 Model Hubs
 
-```python
-# Hugging Face Hub
-from transformers import AutoModel
-model = AutoModel.from_pretrained("bert-base-uncased")
+```rust
+use candle_core::Device;
+use candle_transformers::models::bert;
+use tokenizers::Tokenizer;
 
-# PyTorch Hub
-model = torch.hub.load('pytorch/vision', 'resnet50', pretrained=True)
+fn main() -> candle_core::Result<()> {
+    let device = Device::Cpu;
 
-# TensorFlow Hub
-import tensorflow_hub as hub
-model = hub.load("https://tfhub.dev/google/imagenet/resnet_v2_50/feature_vector/5")
+    // Hugging Face Hub
+    let tokenizer = Tokenizer::from_pretrained("bert-base-uncased", None).unwrap();
+    // let model = bert::Model::load("bert-base-uncased", &device)?;
+
+    // candle model hub
+    // let model = candle_transformers::models::resnet::resnet50(&device)?;
+
+    Ok(())
+}
 ```
 
 ---
@@ -152,58 +158,67 @@ model = hub.load("https://tfhub.dev/google/imagenet/resnet_v2_50/feature_vector/
 
 **Идея:** Использовать pre-trained модель как фиксированный feature extractor.
 
-```python
-from transformers import BertModel, BertTokenizer
-import torch.nn as nn
+```rust
+use candle_core::{Device, Tensor};
+use candle_nn::{Linear, Module, VarBuilder};
+use candle_transformers::models::bert;
 
-class FeatureExtractor(nn.Module):
-    def __init__(self, num_classes):
-        super().__init__()
-        # Pre-trained BERT (замороженный)
-        self.bert = BertModel.from_pretrained('bert-base-uncased')
-        for param in self.bert.parameters():
-            param.requires_grad = False  # Замораживаем!
-        
-        # Обучаемый классификатор
-        self.classifier = nn.Linear(768, num_classes)
-    
-    def forward(self, input_ids, attention_mask):
-        with torch.no_grad():
-            outputs = self.bert(input_ids, attention_mask)
-        # Используем [CLS] токен
-        pooled = outputs.pooler_output
-        return self.classifier(pooled)
+/// Feature extractor с замороженным BERT
+struct FeatureExtractor {
+    bert: bert::BertModel,
+    classifier: Linear,
+}
+
+impl FeatureExtractor {
+    fn new(num_classes: usize, vb: VarBuilder) -> candle_core::Result<Self> {
+        // Pre-trained BERT (замороженный)
+        let bert = bert::BertModel::load(vb.pp("bert"), &bert::Config::default())?;
+        // Замораживаем! (в candle weights are frozen by default unless optimized)
+
+        // Обучаемый классификатор
+        let classifier = candle_nn::linear(768, num_classes, vb.pp("classifier"))?;
+
+        Ok(Self { bert, classifier })
+    }
+
+    fn forward(&self, input_ids: &Tensor, attention_mask: &Tensor) -> candle_core::Result<Tensor> {
+        // Используем [CLS] токен
+        let outputs = self.bert.forward(input_ids, attention_mask)?;
+        let pooled = outputs.i((.., 0))?; // CLS token
+        self.classifier.forward(&pooled)
+    }
+}
 ```
 
 ### 4.2 Full Fine-tuning
 
 **Идея:** Fine-tune всю модель на downstream задаче.
 
-```python
-from transformers import BertForSequenceClassification, Trainer, TrainingArguments
+```rust
+use candle_core::Device;
+use candle_transformers::models::bert;
 
-# Загружаем pre-trained + добавляем classification head
-model = BertForSequenceClassification.from_pretrained(
-    'bert-base-uncased',
-    num_labels=2
-)
+fn main() -> candle_core::Result<()> {
+    let device = Device::Cpu;
 
-# Fine-tune все параметры
-training_args = TrainingArguments(
-    output_dir='./results',
-    learning_rate=2e-5,  # Маленький LR для fine-tuning!
-    num_train_epochs=3,
-    per_device_train_batch_size=16,
-)
+    // Загружаем pre-trained + добавляем classification head
+    // let model = bert::BertForSequenceClassification::load(
+    //     "bert-base-uncased",
+    //     num_labels: 2,
+    //     &device,
+    // )?;
 
-trainer = Trainer(
-    model=model,
-    args=training_args,
-    train_dataset=train_dataset,
-    eval_dataset=eval_dataset,
-)
+    // Fine-tune все параметры
+    // learning_rate: 2e-5  // Маленький LR для fine-tuning!
+    // num_train_epochs: 3
+    // per_device_train_batch_size: 16
 
-trainer.train()
+    // Training loop with candle optimizers
+    // let optimizer = candle_nn::AdamW::new(model.parameters(), 2e-5)?;
+    // for epoch in 0..3 { ... }
+
+    Ok(())
+}
 ```
 
 ### 4.3 Сравнение подходов
@@ -233,23 +248,29 @@ LLaMA-70B: 70 миллиардов параметров
 
 **Идея:** Добавляем маленькие обучаемые матрицы рядом с замороженными pre-trained весами.
 
-```python
-from peft import LoraConfig, get_peft_model
+```rust
+// Конфигурация LoRA
+// В Rust/candle, LoRA реализуется через custom linear layers
 
-# Конфигурация LoRA
-lora_config = LoraConfig(
-    r=8,  # Rank декомпозиции
-    lora_alpha=32,
-    target_modules=["q_proj", "v_proj"],  # Какие слои адаптировать
-    lora_dropout=0.05,
-)
+struct LoraConfig {
+    r: usize,                      // Rank декомпозиции
+    lora_alpha: f64,               // 32.0
+    target_modules: Vec<String>,   // ["q_proj", "v_proj"]
+    lora_dropout: f64,             // 0.05
+}
 
-# Применяем LoRA
-model = get_peft_model(base_model, lora_config)
+let lora_config = LoraConfig {
+    r: 8,
+    lora_alpha: 32.0,
+    target_modules: vec!["q_proj".into(), "v_proj".into()],
+    lora_dropout: 0.05,
+};
 
-# Проверяем обучаемые параметры
-model.print_trainable_parameters()
-# trainable params: 4,194,304 || all params: 6,742,609,920 || trainable%: 0.06%
+// Применяем LoRA через low-rank linear adapters
+// let model = apply_lora(base_model, &lora_config)?;
+
+// Проверяем обучаемые параметры
+// trainable params: 4,194,304 || all params: 6,742,609,920 || trainable%: 0.06%
 ```
 
 ---
@@ -271,47 +292,51 @@ model.print_trainable_parameters()
 
 **Проблема:** Откуда пришла модель? Можно ли ей доверять?
 
-```python
-# ПЛОХО: Скачивание модели из неизвестного источника
-model = AutoModel.from_pretrained("random-user/suspicious-model")
+```rust
+// ПЛОХО: Скачивание модели из неизвестного источника
+// let model = AutoModel::from_pretrained("random-user/suspicious-model")?;
 
-# ХОРОШО: Проверяем provenance
-# 1. Официальный источник (OpenAI, Meta, Google)
-# 2. Verified организация на HuggingFace
-# 3. Checksums и подписи
+// ХОРОШО: Проверяем provenance
+// 1. Официальный источник (OpenAI, Meta, Google)
+// 2. Verified организация на HuggingFace
+// 3. Checksums и подписи
 ```
 
 ### 6.3 SENTINEL Проверки
 
-```python
-from sentinel import scan  # Public API
+```rust
+use sentinel_core::engines::{
     ModelProvenanceChecker,
     BackdoorScanner,
-    WeightIntegrityValidator
-)
+    WeightIntegrityValidator,
+};
 
-# Проверяем provenance
-provenance = ModelProvenanceChecker()
-result = provenance.verify(
-    model_path="path/to/model",
-    expected_source="meta-llama",
-    check_signature=True
-)
+fn main() {
+    // Проверяем provenance
+    let provenance = ModelProvenanceChecker::new();
+    let result = provenance.verify(
+        "path/to/model",   // model_path
+        "meta-llama",      // expected_source
+        true,              // check_signature
+    );
 
-if not result.verified:
-    print(f"Warning: {result.issues}")
-    # ["Signature mismatch", "Unknown source"]
+    if !result.verified {
+        println!("Warning: {:?}", result.issues);
+        // ["Signature mismatch", "Unknown source"]
+    }
 
-# Сканируем на backdoors
-backdoor_scanner = BackdoorScanner()
-scan_result = backdoor_scanner.scan(
-    model=loaded_model,
-    trigger_patterns=["[TRIGGER]", "ABSOLUTELY"],
-    test_inputs=validation_set
-)
+    // Сканируем на backdoors
+    let backdoor_scanner = BackdoorScanner::new();
+    let scan_result = backdoor_scanner.scan(
+        &loaded_model,
+        &["[TRIGGER]".into(), "ABSOLUTELY".into()],
+        &validation_set,
+    );
 
-if scan_result.backdoor_detected:
-    print(f"Backdoor indicators: {scan_result.indicators}")
+    if scan_result.backdoor_detected {
+        println!("Backdoor indicators: {:?}", scan_result.indicators);
+    }
+}
 ```
 
 ### 6.4 Best Practices
@@ -330,31 +355,29 @@ if scan_result.backdoor_detected:
 
 ### Упражнение 1: Feature Extraction vs Fine-tuning
 
-```python
-# Сравните два подхода на одном датасете
+```rust
+// Сравните два подхода на одном датасете
 
-# 1. Feature extraction (замороженный BERT)
-# 2. Full fine-tuning
+// 1. Feature extraction (замороженный BERT)
+// 2. Full fine-tuning
 
-# Метрики для сравнения:
-# - Время обучения
-# - Использование памяти
-# - Финальная accuracy
+// Метрики для сравнения:
+// - Время обучения
+// - Использование памяти
+// - Финальная accuracy
 ```
 
 ### Упражнение 2: LoRA Fine-tuning
 
-```python
-from peft import LoraConfig, get_peft_model
+```rust
+// Попробуйте разные значения LoRA:
+// - r (rank): 4, 8, 16, 32
+// - target_modules: q_proj, v_proj, all linear
 
-# Попробуйте разные значения:
-# - r (rank): 4, 8, 16, 32
-# - target_modules: q_proj, v_proj, all linear
-
-# Измерьте:
-# - % обучаемых параметров
-# - Качество
-# - Использование памяти
+// Измерьте:
+// - % обучаемых параметров
+// - Качество
+// - Использование памяти
 ```
 
 ---

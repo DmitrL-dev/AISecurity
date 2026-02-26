@@ -8,58 +8,99 @@
 
 Provable robustness guarantees:
 
-```python
-class CertifiedDefense:
-    def certify(self, x, radius):
-        """Certify that prediction is stable within radius."""
-        base_pred = self.model(x)
-        
-        # Sample perturbations
-        samples = [x + noise for noise in self.sample_noise(radius)]
-        preds = [self.model(s) for s in samples]
-        
-        # Check all match
-        return all(p == base_pred for p in preds)
+```rust
+struct CertifiedDefense {
+    model: Box<dyn Model>,
+}
+
+impl CertifiedDefense {
+    /// Certify that prediction is stable within radius.
+    fn certify(&self, x: &Tensor, radius: f64) -> bool {
+        let base_pred = self.model.forward(x);
+
+        // Sample perturbations
+        let samples: Vec<Tensor> = self.sample_noise(radius)
+            .iter()
+            .map(|noise| x.add(noise).unwrap())
+            .collect();
+        let preds: Vec<Tensor> = samples.iter()
+            .map(|s| self.model.forward(s))
+            .collect();
+
+        // Check all match
+        preds.iter().all(|p| p == &base_pred)
+    }
+}
 ```
 
 ---
 
 ## Randomized Smoothing
 
-```python
-def smooth_classify(model, x, sigma=0.1, n_samples=100):
-    """Smoothed classifier via noise injection."""
-    predictions = []
-    
-    for _ in range(n_samples):
-        noisy_x = x + np.random.normal(0, sigma, x.shape)
-        pred = model(noisy_x)
-        predictions.append(pred)
-    
-    # Majority vote
-    return Counter(predictions).most_common(1)[0][0]
+```rust
+use std::collections::HashMap;
+use rand::distributions::{Distribution, Normal};
+
+fn smooth_classify(
+    model: &dyn Model,
+    x: &Tensor,
+    sigma: f64,
+    n_samples: usize,
+) -> usize {
+    /// Smoothed classifier via noise injection.
+    let mut predictions = Vec::new();
+    let normal = Normal::new(0.0, sigma).unwrap();
+    let mut rng = rand::thread_rng();
+
+    for _ in 0..n_samples {
+        let noise: Vec<f64> = (0..x.elem_count())
+            .map(|_| normal.sample(&mut rng))
+            .collect();
+        let noisy_x = x.add(&Tensor::from_vec(noise, x.shape())).unwrap();
+        let pred = model.forward(&noisy_x);
+        predictions.push(pred);
+    }
+
+    // Majority vote
+    let mut counts: HashMap<usize, usize> = HashMap::new();
+    for p in &predictions {
+        *counts.entry(*p).or_insert(0) += 1;
+    }
+    *counts.iter().max_by_key(|(_, v)| *v).unwrap().0
+}
 ```
 
 ---
 
 ## SENTINEL Robustness
 
-```python
-class RobustEngine(BaseEngine):
-    def scan(self, text: str) -> ScanResult:
-        # Multi-representation voting
-        results = []
-        
-        for preprocessor in self.preprocessors:
-            processed = preprocessor(text)
-            result = self.base_scan(processed)
-            results.append(result)
-        
-        # Conservative: threat if ANY detects
-        is_threat = any(r.is_threat for r in results)
-        confidence = max(r.confidence for r in results)
-        
-        return ScanResult(is_threat=is_threat, confidence=confidence)
+```rust
+use sentinel_core::engines::{BaseEngine, ScanResult};
+
+struct RobustEngine {
+    preprocessors: Vec<Box<dyn Fn(&str) -> String>>,
+}
+
+impl RobustEngine {
+    fn scan(&self, text: &str) -> ScanResult {
+        // Multi-representation voting
+        let mut results = Vec::new();
+
+        for preprocessor in &self.preprocessors {
+            let processed = preprocessor(text);
+            let result = self.base_scan(&processed);
+            results.push(result);
+        }
+
+        // Conservative: threat if ANY detects
+        let is_threat = results.iter().any(|r| r.is_threat);
+        let confidence = results.iter()
+            .map(|r| r.confidence)
+            .fold(0.0_f64, f64::max);
+
+        ScanResult { is_threat, confidence }
+    }
+}
 ```
 
 ---

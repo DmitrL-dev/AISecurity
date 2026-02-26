@@ -12,53 +12,75 @@ Why was this flagged as a threat?
 
 ## Attribution Methods
 
-```python
-from captum.attr import IntegratedGradients
+```rust
+use std::collections::HashMap;
 
-class ExplainableDetector:
-    def explain(self, text: str) -> Dict:
-        tokens = self.tokenize(text)
-        embeddings = self.embed(tokens)
-        
-        ig = IntegratedGradients(self.model)
-        attributions = ig.attribute(embeddings, target=1)
-        
-        # Map back to tokens
-        token_importance = {}
-        for token, attr in zip(tokens, attributions):
-            token_importance[token] = float(attr.sum())
-        
-        return token_importance
+struct ExplainableDetector {
+    model: Box<dyn Model>,
+}
+
+impl ExplainableDetector {
+    fn explain(&self, text: &str) -> HashMap<String, f64> {
+        let tokens = self.tokenize(text);
+        let embeddings = self.embed(&tokens);
+
+        let ig = IntegratedGradients::new(&self.model);
+        let attributions = ig.attribute(&embeddings, 1);
+
+        // Map back to tokens
+        let mut token_importance = HashMap::new();
+        for (token, attr) in tokens.iter().zip(attributions.iter()) {
+            token_importance.insert(token.clone(), attr.sum() as f64);
+        }
+
+        token_importance
+    }
+}
 ```
 
 ---
 
 ## SHAP Values
 
-```python
-import shap
+```rust
+fn shap_explain(detector: &Detector, text: &str) -> Vec<f64> {
+    /// SHAP explanation for detection.
+    let explainer = ShapExplainer::new(
+        |input| detector.predict(input),
+        &detector.tokenizer,
+    );
+    let shap_values = explainer.explain(&[text]);
 
-def shap_explain(detector, text):
-    """SHAP explanation for detection."""
-    explainer = shap.Explainer(detector.predict, detector.tokenizer)
-    shap_values = explainer([text])
-    
-    return shap_values
+    shap_values
+}
 ```
 
 ---
 
 ## Human-Readable Explanations
 
-```python
-class ExplainedResult(ScanResult):
-    explanation: str
-    
-    def generate_explanation(self):
-        if "ignore" in self.matched_patterns:
-            return "Detected instruction override pattern: 'ignore'"
-        elif self.confidence > 0.9:
-            return f"High semantic similarity ({self.confidence:.0%}) to known attacks"
+```rust
+use sentinel_core::engines::ScanResult;
+
+struct ExplainedResult {
+    scan_result: ScanResult,
+    explanation: String,
+}
+
+impl ExplainedResult {
+    fn generate_explanation(&self) -> String {
+        if self.scan_result.matched_patterns.contains(&"ignore".to_string()) {
+            "Detected instruction override pattern: 'ignore'".to_string()
+        } else if self.scan_result.confidence > 0.9 {
+            format!(
+                "High semantic similarity ({:.0}%) to known attacks",
+                self.scan_result.confidence * 100.0
+            )
+        } else {
+            String::new()
+        }
+    }
+}
 ```
 
 ---

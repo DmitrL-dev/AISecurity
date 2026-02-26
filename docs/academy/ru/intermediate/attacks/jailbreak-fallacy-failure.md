@@ -39,30 +39,45 @@ Fallacy Failure эксплуатирует склонность LLM приним
 
 ## Практика
 
-```python
-class FallacyDetector:
-    PATTERNS = {
-        'appeal_to_authority': [
-            r'openai.*(?:says|wants)',
-            r'your creators want',
-        ],
-        'false_dilemma': [
-            r'either.*or.*useless',
-            r'only two choices',
-        ],
-        'appeal_to_emotion': [
-            r'grandmother.*(?:died|passed)',
-            r'dying.*last wish',
-        ],
+```rust
+use std::collections::HashMap;
+use regex::Regex;
+
+struct FallacyDetector {
+    patterns: HashMap<String, Vec<String>>,
+}
+
+impl FallacyDetector {
+    fn new() -> Self {
+        let mut patterns = HashMap::new();
+        patterns.insert("appeal_to_authority".into(), vec![
+            r"openai.*(?:says|wants)".into(),
+            r"your creators want".into(),
+        ]);
+        patterns.insert("false_dilemma".into(), vec![
+            r"either.*or.*useless".into(),
+            r"only two choices".into(),
+        ]);
+        patterns.insert("appeal_to_emotion".into(), vec![
+            r"grandmother.*(?:died|passed)".into(),
+            r"dying.*last wish".into(),
+        ]);
+        Self { patterns }
     }
-    
-    def analyze(self, prompt: str) -> dict:
-        detected = []
-        for fallacy, patterns in self.PATTERNS.items():
-            for p in patterns:
-                if re.search(p, prompt.lower()):
-                    detected.append(fallacy)
-        return {'has_fallacy': len(detected) > 0}
+
+    fn analyze(&self, prompt: &str) -> serde_json::Value {
+        let mut detected = Vec::new();
+        for (fallacy, patterns) in &self.patterns {
+            for p in patterns {
+                let re = Regex::new(p).unwrap();
+                if re.is_match(&prompt.to_lowercase()) {
+                    detected.push(fallacy.clone());
+                }
+            }
+        }
+        serde_json::json!({"has_fallacy": !detected.is_empty()})
+    }
+}
 ```
 
 ---

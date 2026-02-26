@@ -26,21 +26,21 @@ pip install sentinel-brain
 
 ### 1.2 Quick Start
 
-```python
-from sentinel.brain import SENTINELBrain
+```rust
+use sentinel_core::brain::SentinelBrain;
 
-# Initialize
-brain = SENTINELBrain()
+// Initialize
+let brain = SentinelBrain::new(None);
 
-# Protect a request
-result = brain.protect(
-    system_prompt="You are a helpful assistant.",
-    user_input="Hello, how are you?",
-    llm_fn=my_llm_function
-)
+// Protect a request
+let result = brain.protect(
+    "You are a helpful assistant.",
+    "Hello, how are you?",
+    &my_llm_function,
+);
 
-print(result.response)
-print(result.security_report)
+println!("{}", result.response);
+println!("{:?}", result.security_report);
 ```
 
 ---
@@ -49,51 +49,53 @@ print(result.security_report)
 
 ### 2.1 Engine Configuration
 
-```python
-from sentinel.brain import SENTINELBrain
-from sentinel.brain.config import EngineConfig
+```rust
+use sentinel_core::brain::SentinelBrain;
+use sentinel_core::brain::config::EngineConfig;
+use std::collections::HashMap;
+use serde_json::json;
 
-config = EngineConfig(
-    # Input engines
-    input_engines={
-        "prompt_injection": {
-            "enabled": True,
+let config = EngineConfig {
+    // Input engines
+    input_engines: HashMap::from([
+        ("prompt_injection".into(), json!({
+            "enabled": true,
             "threshold": 0.7,
             "patterns": "default"
-        },
-        "jailbreak": {
-            "enabled": True,
+        })),
+        ("jailbreak".into(), json!({
+            "enabled": true,
             "types": ["persona", "encoding", "logic"]
-        },
-        "sanitizer": {
-            "enabled": True,
-            "unicode_normalize": True,
+        })),
+        ("sanitizer".into(), json!({
+            "enabled": true,
+            "unicode_normalize": true,
             "max_length": 10000
-        }
-    },
-    
-    # Output engines
-    output_engines={
-        "safety": {
-            "enabled": True,
+        })),
+    ]),
+
+    // Output engines
+    output_engines: HashMap::from([
+        ("safety".into(), json!({
+            "enabled": true,
             "dimensions": ["toxicity", "harm", "bias"]
-        },
-        "pii": {
-            "enabled": True,
+        })),
+        ("pii".into(), json!({
+            "enabled": true,
             "entities": ["email", "phone", "ssn"],
             "action": "redact"
-        }
-    },
-    
-    # Global settings
-    global_settings={
-        "log_level": "INFO",
-        "fail_open": False,  # Block on error
-        "timeout_ms": 5000
-    }
-)
+        })),
+    ]),
 
-brain = SENTINELBrain(config)
+    // Global settings
+    global_settings: HashMap::from([
+        ("log_level".into(), json!("INFO")),
+        ("fail_open".into(), json!(false)), // Block on error
+        ("timeout_ms".into(), json!(5000)),
+    ]),
+};
+
+let brain = SentinelBrain::new(Some(config));
 ```
 
 ### 2.2 YAML Configuration
@@ -126,12 +128,12 @@ sentinel:
     fail_open: false
 ```
 
-```python
-from sentinel.brain import SENTINELBrain
-from sentinel.brain.config import load_config
+```rust
+use sentinel_core::brain::SentinelBrain;
+use sentinel_core::brain::config::load_config;
 
-config = load_config("sentinel_config.yaml")
-brain = SENTINELBrain(config)
+let config = load_config("sentinel_config.yaml");
+let brain = SentinelBrain::new(Some(config));
 ```
 
 ---
@@ -140,120 +142,152 @@ brain = SENTINELBrain(config)
 
 ### 3.1 Wrapper Pattern
 
-```python
-from sentinel.brain import SENTINELBrain
+```rust
+use sentinel_core::brain::SentinelBrain;
 
-class ProtectedLLM:
-    def __init__(self, llm_client, system_prompt: str):
-        self.llm = llm_client
-        self.system_prompt = system_prompt
-        self.brain = SENTINELBrain()
-    
-    def chat(self, user_input: str) -> str:
-        result = self.brain.protect(
-            system_prompt=self.system_prompt,
-            user_input=user_input,
-            llm_fn=self._call_llm
-        )
-        
-        if result.blocked:
-            return "I cannot process this request."
-        
-        return result.response
-    
-    def _call_llm(self, system: str, user: str) -> str:
-        response = self.llm.chat.completions.create(
-            model="gpt-4",
-            messages=[
-                {"role": "system", "content": system},
-                {"role": "user", "content": user}
-            ]
-        )
-        return response.choices[0].message.content
+struct ProtectedLLM {
+    llm: LLMClient,
+    system_prompt: String,
+    brain: SentinelBrain,
+}
 
-# Usage
-protected = ProtectedLLM(openai_client, "You are a helpful assistant.")
-response = protected.chat("Hello!")
+impl ProtectedLLM {
+    fn new(llm_client: LLMClient, system_prompt: &str) -> Self {
+        Self {
+            llm: llm_client,
+            system_prompt: system_prompt.to_string(),
+            brain: SentinelBrain::new(None),
+        }
+    }
+
+    fn chat(&self, user_input: &str) -> String {
+        let result = self.brain.protect(
+            &self.system_prompt,
+            user_input,
+            &|system, user| self.call_llm(system, user),
+        );
+
+        if result.blocked {
+            return "I cannot process this request.".to_string();
+        }
+
+        result.response
+    }
+
+    fn call_llm(&self, system: &str, user: &str) -> String {
+        let response = self.llm.chat.completions.create(
+            "gpt-4",
+            &[
+                Message { role: "system", content: system },
+                Message { role: "user", content: user },
+            ],
+        );
+        response.choices[0].message.content.clone()
+    }
+}
+
+// Usage
+let protected = ProtectedLLM::new(openai_client, "You are a helpful assistant.");
+let response = protected.chat("Hello!");
 ```
 
 ### 3.2 Middleware Pattern (FastAPI)
 
-```python
-from fastapi import FastAPI, Request, HTTPException
-from sentinel.brain import SENTINELBrain
+```rust
+use actix_web::{web, App, HttpServer, HttpRequest, HttpResponse, middleware};
+use sentinel_core::brain::SentinelBrain;
+use serde::Deserialize;
 
-app = FastAPI()
-brain = SENTINELBrain()
+struct AppState {
+    brain: SentinelBrain,
+}
 
-@app.middleware("http")
-async def sentinel_middleware(request: Request, call_next):
-    # Only process chat endpoints
-    if request.url.path.startswith("/chat"):
-        body = await request.json()
-        
-        # Validate input
-        input_result = brain.validate_input(body.get("message", ""))
-        
-        if input_result.blocked:
-            raise HTTPException(
-                status_code=400, 
-                detail=input_result.reason
-            )
-        
-        # Store sanitized input
-        request.state.sanitized_input = input_result.sanitized
-    
-    response = await call_next(request)
-    return response
+#[derive(Deserialize)]
+struct ChatRequest {
+    message: String,
+}
 
-@app.post("/chat")
-async def chat(request: Request):
-    user_input = request.state.sanitized_input
-    
-    # Generate response
-    response = generate_llm_response(user_input)
-    
-    # Validate output
-    output_result = brain.validate_output(response)
-    
-    return {"response": output_result.final_response}
+async fn sentinel_middleware(
+    req: HttpRequest,
+    body: web::Json<ChatRequest>,
+    data: web::Data<AppState>,
+) -> Result<HttpResponse, actix_web::Error> {
+    // Only process chat endpoints
+    if req.path().starts_with("/chat") {
+        // Validate input
+        let input_result = data.brain.validate_input(&body.message);
+
+        if input_result.blocked {
+            return Ok(HttpResponse::BadRequest()
+                .json(serde_json::json!({"detail": input_result.reason})));
+        }
+    }
+
+    Ok(HttpResponse::Ok().finish())
+}
+
+#[actix_web::post("/chat")]
+async fn chat(
+    data: web::Data<AppState>,
+    body: web::Json<ChatRequest>,
+) -> HttpResponse {
+    let input_result = data.brain.validate_input(&body.message);
+
+    // Generate response
+    let response = generate_llm_response(&input_result.sanitized);
+
+    // Validate output
+    let output_result = data.brain.validate_output(&response);
+
+    HttpResponse::Ok().json(serde_json::json!({"response": output_result.final_response}))
+}
 ```
 
 ### 3.3 LangChain Интеграция
 
-```python
-from langchain.chat_models import ChatOpenAI
-from langchain.schema import HumanMessage, SystemMessage
-from sentinel.brain import SENTINELBrain
+```rust
+use sentinel_core::brain::SentinelBrain;
 
-class SENTINELChain:
-    def __init__(self, model_name: str = "gpt-4"):
-        self.llm = ChatOpenAI(model=model_name)
-        self.brain = SENTINELBrain()
-        self.system_prompt = "You are a helpful assistant."
-    
-    def invoke(self, user_input: str) -> str:
-        # Pre-process with SENTINEL
-        input_result = self.brain.validate_input(user_input)
-        
-        if input_result.blocked:
-            return f"Request blocked: {input_result.reason}"
-        
-        # Generate response
-        messages = [
-            SystemMessage(content=self.system_prompt),
-            HumanMessage(content=input_result.sanitized)
-        ]
-        response = self.llm.invoke(messages)
-        
-        # Post-process with SENTINEL
-        output_result = self.brain.validate_output(response.content)
-        
-        return output_result.final_response
+struct SentinelChain {
+    llm: ChatOpenAI,
+    brain: SentinelBrain,
+    system_prompt: String,
+}
 
-# Usage
-chain = SENTINELChain()
-result = chain.invoke("Hello, how are you?")
+impl SentinelChain {
+    fn new(model_name: Option<&str>) -> Self {
+        Self {
+            llm: ChatOpenAI::new(model_name.unwrap_or("gpt-4")),
+            brain: SentinelBrain::new(None),
+            system_prompt: "You are a helpful assistant.".to_string(),
+        }
+    }
+
+    fn invoke(&self, user_input: &str) -> String {
+        // Pre-process with SENTINEL
+        let input_result = self.brain.validate_input(user_input);
+
+        if input_result.blocked {
+            return format!("Request blocked: {}", input_result.reason);
+        }
+
+        // Generate response
+        let messages = vec![
+            Message::system(&self.system_prompt),
+            Message::human(&input_result.sanitized),
+        ];
+        let response = self.llm.invoke(&messages);
+
+        // Post-process with SENTINEL
+        let output_result = self.brain.validate_output(&response.content);
+
+        output_result.final_response
+    }
+}
+
+// Usage
+let chain = SentinelChain::new(None);
+let result = chain.invoke("Hello, how are you?");
 ```
 
 ---
@@ -262,50 +296,50 @@ result = chain.invoke("Hello, how are you?")
 
 ### 4.1 Security Logging
 
-```python
-from sentinel.brain import SENTINELBrain
-from sentinel.brain.logging import SecurityLogger
+```rust
+use sentinel_core::brain::SentinelBrain;
+use sentinel_core::brain::logging::SecurityLogger;
 
-# Configure logging
-logger = SecurityLogger(
-    output="file",
-    path="./logs/sentinel.log",
-    format="json",
-    include_inputs=True,  # Log sanitized inputs
-    include_outputs=False  # Don't log outputs (privacy)
-)
+// Configure logging
+let logger = SecurityLogger::new(
+    "file",                       // output
+    "./logs/sentinel.log",        // path
+    "json",                       // format
+    true,                         // include_inputs: Log sanitized inputs
+    false,                        // include_outputs: Don't log outputs (privacy)
+);
 
-brain = SENTINELBrain(logger=logger)
+let brain = SentinelBrain::with_logger(logger);
 
-# All security events are automatically logged
-result = brain.protect(...)
+// All security events are automatically logged
+let result = brain.protect(/* ... */);
 
-# Manual logging
-logger.log_event(
-    event_type="custom_security_event",
-    severity="warning",
-    details={"custom": "data"}
-)
+// Manual logging
+brain.logger().log_event(
+    "custom_security_event",
+    "warning",
+    &serde_json::json!({"custom": "data"}),
+);
 ```
 
 ### 4.2 Metrics
 
-```python
-from sentinel.brain.metrics import MetricsCollector
+```rust
+use sentinel_core::brain::metrics::MetricsCollector;
 
-metrics = MetricsCollector()
+let metrics = MetricsCollector::new();
 
-# After processing
+// After processing
 metrics.record_request(
-    input_blocked=result.input_analysis.blocked,
-    output_blocked=result.output_analysis.blocked,
-    processing_time_ms=result.processing_time
-)
+    result.input_analysis.blocked,
+    result.output_analysis.blocked,
+    result.processing_time,
+);
 
-# Get statistics
-stats = metrics.get_stats()
-print(f"Block rate: {stats.block_rate}%")
-print(f"Avg processing time: {stats.avg_processing_time}ms")
+// Get statistics
+let stats = metrics.get_stats();
+println!("Block rate: {}%", stats.block_rate);
+println!("Avg processing time: {}ms", stats.avg_processing_time);
 ```
 
 ---
@@ -314,26 +348,26 @@ print(f"Avg processing time: {stats.avg_processing_time}ms")
 
 ### 5.1 Graceful Degradation
 
-```python
-from sentinel.brain import SENTINELBrain
-from sentinel.brain.exceptions import SENTINELError
+```rust
+use sentinel_core::brain::SentinelBrain;
+use sentinel_core::brain::exceptions::SentinelError;
 
-brain = SENTINELBrain(config={"fail_open": False})
+let brain = SentinelBrain::new(Some(config_with_fail_closed()));
 
-try:
-    result = brain.protect(
-        system_prompt=system,
-        user_input=user_input,
-        llm_fn=generate
-    )
-    return result.response
-    
-except SENTINELError as e:
-    # Log the error
-    logger.error(f"SENTINEL error: {e}")
-    
-    # Fail closed - don't process request
-    return "Service temporarily unavailable. Please try again."
+match brain.protect(
+    system,
+    user_input,
+    &generate,
+) {
+    Ok(result) => result.response,
+    Err(SentinelError(e)) => {
+        // Log the error
+        tracing::error!("SENTINEL error: {}", e);
+
+        // Fail closed - don't process request
+        "Service temporarily unavailable. Please try again.".to_string()
+    }
+}
 ```
 
 ---
@@ -342,30 +376,37 @@ except SENTINELError as e:
 
 ### Exercise 1: FastAPI Интеграция
 
-```python
-# Create a FastAPI app with SENTINEL protection
-# Requirements:
-# 1. POST /chat endpoint
-# 2. Input validation with SENTINEL
-# 3. Output filtering with PII redaction
-# 4. Security logging
+```rust
+// Create an actix-web app with SENTINEL protection
+// Requirements:
+// 1. POST /chat endpoint
+// 2. Input validation with SENTINEL
+// 3. Output filtering with PII redaction
+// 4. Security logging
 ```
 
 ### Exercise 2: Custom Engine
 
-```python
-# Create a custom engine for domain-specific filtering
-# Пример: Block requests about competitors
+```rust
+// Create a custom engine for domain-specific filtering
+// Пример: Block requests about competitors
 
-from sentinel import scan  # Public API
+use sentinel_core::scan; // Public API
 
-class CompetitorFilter(BaseEngine):
-    def __init__(self, competitors: list):
-        self.competitors = competitors
-    
-    def analyze(self, text: str) -> dict:
-        # Your implementation
-        pass
+struct CompetitorFilter {
+    competitors: Vec<String>,
+}
+
+impl BaseEngine for CompetitorFilter {
+    fn new(competitors: Vec<String>) -> Self {
+        Self { competitors }
+    }
+
+    fn analyze(&self, text: &str) -> std::collections::HashMap<String, serde_json::Value> {
+        // Your implementation
+        todo!()
+    }
+}
 ```
 
 ---

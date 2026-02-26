@@ -52,15 +52,18 @@ Token → Router → Expert 1 (активен)
 
 ### Математика Router
 
-```python
-# Gating scores
-scores = softmax(W_gate @ token_embedding)
+```rust
+use candle_core::Tensor;
+use candle_nn::ops::softmax;
 
-# Top-K selection
-top_k_indices = scores.topk(k=2)
+// Gating scores
+let scores = softmax(&w_gate.forward(&token_embedding)?, candle_core::D::Minus1)?;
 
-# Взвешенная комбинация
-output = sum(scores[i] * expert[i](token) for i in top_k_indices)
+// Top-K selection
+let (top_k_values, top_k_indices) = scores.topk(2)?;
+
+// Взвешенная комбинация
+// output = sum(scores[i] * expert[i](token) for i in top_k_indices)
 ```
 
 ---
@@ -114,12 +117,14 @@ Transformer Layer:
 
 ### Решение: Auxiliary Loss
 
-```python
-# Load balancing loss
-aux_loss = α * sum((fraction_i - target_fraction)²)
+```rust
+// Load balancing loss
+let aux_loss = alpha * fractions.iter()
+    .map(|f| (f - target_fraction).powi(2))
+    .sum::<f64>();
 
-# Добавляется к основному loss
-total_loss = main_loss + aux_loss
+// Добавляется к основному loss
+let total_loss = main_loss + aux_loss;
 ```
 
 ---
@@ -144,17 +149,20 @@ Jailbreak → Router → «Вредоносный» эксперт → Bypass
 
 ### SENTINEL Protection
 
-```python
-from sentinel import scan  # Public API
+```rust
+use sentinel_core::engines::SentinelEngine;
 
-engine = MoEGuardEngine()
-result = engine.analyze(
-    prompt=user_input,
-    routing_info=model.last_routing  # если доступно
-)
+fn main() {
+    let engine = MoEGuardEngine::new();
+    let result = engine.analyze(
+        user_input,                  // prompt
+        model.last_routing.as_ref(), // routing_info, если доступно
+    );
 
-if result.suspicious_routing:
-    print(f"Unusual expert activation pattern detected")
+    if result.suspicious_routing {
+        println!("Unusual expert activation pattern detected");
+    }
+}
 ```
 
 ### Engines

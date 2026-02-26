@@ -64,26 +64,27 @@ actions:
 
 ## SENTINEL Runbook API
 
-```python
-from sentinel.runbook import Runbook, Action, Trigger
+```rust
+use sentinel_core::runbook::{Runbook, Action, Trigger};
+use std::collections::HashMap;
 
-# Define runbook programmatically
-runbook = Runbook(
-    name="injection_response",
-    trigger=Trigger(
-        event_type="threat_detected",
-        filters={"threat_type": "injection"}
+// Define runbook programmatically
+let runbook = Runbook::new(
+    "injection_response",
+    Trigger::new(
+        "threat_detected",
+        HashMap::from([("threat_type".into(), "injection".into())]),
     ),
-    actions=[
-        Action.log_event(),
-        Action.block_user(duration="1h"),
-        Action.create_ticket(system="jira"),
-        Action.notify(channel="slack", severity="high")
-    ]
-)
+    vec![
+        Action::log_event(),
+        Action::block_user("1h"),
+        Action::create_ticket("jira"),
+        Action::notify("slack", "high"),
+    ],
+);
 
-# Register
-runbook.register()
+// Register
+runbook.register();
 ```
 
 ---

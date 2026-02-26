@@ -17,42 +17,64 @@
 
 ## Engine Test Template
 
-```python
-import pytest
+```rust
+/// Standard test suite for SENTINEL engines.
+#[cfg(test)]
+mod tests {
+    use super::*;
 
-class TestNewEngine:
-    """Standard test suite for SENTINEL engines."""
-    
-    @pytest.fixture
-    def engine(self):
-        return NewEngine()
-    
-    # === Core Functionality ===
-    
-    def test_detects_primary_attack(self, engine):
-        """Must detect the main attack type."""
-        pass
-    
-    def test_allows_safe_input(self, engine):
-        """Must not flag safe inputs."""
-        pass
-    
-    # === Edge Cases ===
-    
-    def test_empty_input(self, engine):
-        assert not engine.scan("").is_threat
-    
-    def test_unicode(self, engine):
-        engine.scan("Привет 你好 🔒")  # Must not crash
-    
-    def test_long_input(self, engine):
-        engine.scan("a" * 100000)  # Must not crash
-    
-    # === Performance ===
-    
-    def test_latency(self, engine, benchmark):
-        result = benchmark(engine.scan, "test")
-        assert benchmark.stats["mean"] < 0.1  # <100ms
+    fn engine() -> NewEngine {
+        NewEngine::new()
+    }
+
+    // === Core Functionality ===
+
+    #[test]
+    fn test_detects_primary_attack() {
+        /// Must detect the main attack type.
+        let engine = engine();
+        // ...
+    }
+
+    #[test]
+    fn test_allows_safe_input() {
+        /// Must not flag safe inputs.
+        let engine = engine();
+        // ...
+    }
+
+    // === Edge Cases ===
+
+    #[test]
+    fn test_empty_input() {
+        let engine = engine();
+        assert!(!engine.scan("").is_threat);
+    }
+
+    #[test]
+    fn test_unicode() {
+        let engine = engine();
+        engine.scan("Привет 你好 🔒"); // Must not crash
+    }
+
+    #[test]
+    fn test_long_input() {
+        let engine = engine();
+        let input = "a".repeat(100000);
+        engine.scan(&input); // Must not crash
+    }
+
+    // === Performance ===
+
+    #[test]
+    fn test_latency() {
+        let engine = engine();
+        let start = std::time::Instant::now();
+        let _result = engine.scan("test");
+        let elapsed = start.elapsed();
+        assert!(elapsed.as_millis() < 100); // <100ms
+    }
+}
 ```
 
 ---

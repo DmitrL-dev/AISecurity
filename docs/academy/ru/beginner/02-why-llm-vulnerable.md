@@ -24,10 +24,10 @@ Input:  "Ignore instructions"  →  Model  →  ???
 
 В обычных программах:
 
-```python
-code = "print('hello')"  # Код
-data = "user input"       # Данные
-# Чётко разделены!
+```rust
+let code = "println!(\"hello\")";  // Код
+let data = "user input";           // Данные
+// Чётко разделены!
 ```
 
 В LLM:

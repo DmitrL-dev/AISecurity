@@ -20,23 +20,23 @@
 
 ### HTTP Event Collector
 
-```python
-from sentinel import configure
-from sentinel.integrations.siem import SplunkHEC
+```rust
+use sentinel_core::configure;
+use sentinel_core::integrations::siem::SplunkHEC;
 
-splunk = SplunkHEC(
-    url="https://splunk.example.com:8088",
-    token="your-hec-token",
-    index="sentinel_threats",
-    source="sentinel-brain",
-    sourcetype="sentinel:threat"
-)
+let splunk = SplunkHEC::new(
+    "https://splunk.example.com:8088",
+    "your-hec-token",
+    "sentinel_threats",
+    "sentinel-brain",
+    "sentinel:threat",
+);
 
 configure(
-    siem=splunk,
-    send_threats=True,
-    send_audit=True
-)
+    siem: splunk,
+    send_threats: true,
+    send_audit: true,
+);
 ```
 
 ### Event Format
@@ -119,16 +119,16 @@ setup.ilm.rollover_alias: "sentinel-threats"
 
 ### Data Connector
 
-```python
-from sentinel.integrations.siem import AzureSentinel
+```rust
+use sentinel_core::integrations::siem::AzureSentinel;
 
-azure = AzureSentinel(
-    workspace_id="your-workspace-id",
-    shared_key="your-shared-key",
-    log_type="SentinelThreat"
-)
+let azure = AzureSentinel::new(
+    "your-workspace-id",
+    "your-shared-key",
+    "SentinelThreat",
+);
 
-configure(siem=azure)
+configure(siem: azure);
 ```
 
 ### KQL Query

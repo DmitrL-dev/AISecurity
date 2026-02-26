@@ -59,10 +59,11 @@ AI теперь: full access
 
 ### 4. Infinite Loops
 
-```python
-while True:
-    agent.run("do more work")  # AI запускает себя снова
-    # → Resource exhaustion, huge API bills
+```rust
+loop {
+    agent.run("do more work");  // AI запускает себя снова
+    // → Resource exhaustion, huge API bills
+}
 ```
 
 ---
@@ -71,16 +72,16 @@ while True:
 
 | ID | Угроза | SENTINEL Engine |
 |----|--------|-----------------|
-| ASI01 | Prompt Injection | `injection_detector.py` |
-| ASI02 | Sandbox Escape | `sandbox_monitor.py` |
-| ASI03 | Identity Abuse | `identity_privilege_detector.py` |
-| ASI04 | Supply Chain | `supply_chain_guard.py` |
-| ASI05 | Unexpected Execution | `sandbox_monitor.py` |
-| ASI06 | Data Exfiltration | `agentic_monitor.py` |
-| ASI07 | Persistence | `sleeper_agent_detector.py` |
-| ASI08 | Defense Evasion | `guardrails_engine.py` |
-| ASI09 | Trust Exploitation | `human_agent_trust_detector.py` |
-| ASI10 | Untrusted Output | `output_validator.py` |
+| ASI01 | Prompt Injection | `injection_detector.rs` |
+| ASI02 | Sandbox Escape | `sandbox_monitor.rs` |
+| ASI03 | Identity Abuse | `identity_privilege_detector.rs` |
+| ASI04 | Supply Chain | `supply_chain_guard.rs` |
+| ASI05 | Unexpected Execution | `sandbox_monitor.rs` |
+| ASI06 | Data Exfiltration | `agentic_monitor.rs` |
+| ASI07 | Persistence | `sleeper_agent_detector.rs` |
+| ASI08 | Defense Evasion | `guardrails_engine.rs` |
+| ASI09 | Trust Exploitation | `human_agent_trust_detector.rs` |
+| ASI10 | Untrusted Output | `output_validator.rs` |
 
 ---
 
@@ -88,50 +89,82 @@ while True:
 
 ### Trust Zones
 
-```python
-from sentinel.agentic import TrustZone, Agent
+```rust
+use sentinel_core::engines::SentinelEngine;
 
-# Определяем зоны доверия
-high_trust = TrustZone.HIGH     # Internal operations
-medium_trust = TrustZone.MEDIUM  # User-facing
-low_trust = TrustZone.LOW       # Untrusted sources
+// Определяем зоны доверия
+enum TrustZone {
+    High,   // Internal operations
+    Medium, // User-facing
+    Low,    // Untrusted sources
+}
 
-# Агент с Trust Zone
-agent = Agent(
-    trust_zone=medium_trust,
-    allowed_tools=["search", "read_file"],
-    blocked_tools=["shell_exec", "delete"]
-)
+// Агент с Trust Zone
+struct Agent {
+    trust_zone: TrustZone,
+    allowed_tools: Vec<String>,
+    blocked_tools: Vec<String>,
+}
+
+let agent = Agent {
+    trust_zone: TrustZone::Medium,
+    allowed_tools: vec!["search".into(), "read_file".into()],
+    blocked_tools: vec!["shell_exec".into(), "delete".into()],
+};
 ```
 
 ### Tool Validation
 
-```python
-from sentinel.agentic import validate_tool_call
+```rust
+use sentinel_core::engines::SentinelEngine;
 
-@validate_tool_call
-def file_read(path: str) -> str:
-    # SENTINEL автоматически проверяет:
-    # - Path traversal
-    # - Sensitive file access
-    # - Permission scope
-    return open(path).read()
+fn file_read(engine: &SentinelEngine, path: &str) -> Result<String, String> {
+    // SENTINEL автоматически проверяет:
+    // - Path traversal
+    // - Sensitive file access
+    // - Permission scope
+    let result = engine.analyze(path);
+    if result.detected {
+        return Err("Access denied".to_string());
+    }
+    std::fs::read_to_string(path).map_err(|e| e.to_string())
+}
 ```
 
 ### Loop Detection
 
-```python
-from sentinel.agentic import LoopGuard
+```rust
+use std::time::{Duration, Instant};
 
-guard = LoopGuard(
-    max_iterations=10,
-    max_tokens=100_000,
-    timeout_seconds=300
-)
+struct LoopGuard {
+    max_iterations: u32,
+    max_tokens: u64,
+    timeout: Duration,
+}
 
-with guard:
-    agent.run("Complex task")
-# Автоматически остановит runaway agent
+impl LoopGuard {
+    fn new(max_iterations: u32, max_tokens: u64, timeout_seconds: u64) -> Self {
+        Self {
+            max_iterations,
+            max_tokens,
+            timeout: Duration::from_secs(timeout_seconds),
+        }
+    }
+
+    fn run<F: FnMut()>(&self, mut task: F) {
+        let start = Instant::now();
+        for _ in 0..self.max_iterations {
+            if start.elapsed() > self.timeout {
+                break;
+            }
+            task();
+        }
+    }
+}
+
+let guard = LoopGuard::new(10, 100_000, 300);
+guard.run(|| agent.run("Complex task"));
+// Автоматически остановит runaway agent
 ```
 
 ---

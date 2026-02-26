@@ -16,34 +16,40 @@
 
 ## Prometheus Метрики
 
-```python
-from prometheus_client import Counter, Histogram, start_http_server
+```rust
+use prometheus::{Counter, Histogram, CounterVec, HistogramVec, opts, register_counter_vec, register_histogram_vec};
+use lazy_static::lazy_static;
 
-# Определяем метрики
-SCANS_TOTAL = Counter(
-    'sentinel_scans_total',
-    'Всего выполнено сканирований',
-    ['engine', 'result']
-)
+lazy_static! {
+    // Определяем метрики
+    static ref SCANS_TOTAL: CounterVec = register_counter_vec!(
+        opts!("sentinel_scans_total", "Всего выполнено сканирований"),
+        &["engine", "result"]
+    ).unwrap();
 
-SCAN_DURATION = Histogram(
-    'sentinel_scan_duration_seconds',
-    'Длительность сканирования в секундах',
-    ['engine']
-)
+    static ref SCAN_DURATION: HistogramVec = register_histogram_vec!(
+        "sentinel_scan_duration_seconds",
+        "Длительность сканирования в секундах",
+        &["engine"]
+    ).unwrap();
+}
 
-# Использование в коде
-@SCAN_DURATION.labels(engine='injection').time()
-def scan(text):
-    result = detector.scan(text)
-    SCANS_TOTAL.labels(
-        engine='injection',
-        result='threat' if result.is_threat else 'safe'
-    ).inc()
-    return result
+// Использование в коде
+fn scan(text: &str) -> ScanResult {
+    let timer = SCAN_DURATION.with_label_values(&["injection"]).start_timer();
+    let result = detector.scan(text);
+    timer.observe_duration();
 
-# Экспорт метрик
-start_http_server(9090)
+    SCANS_TOTAL.with_label_values(&[
+        "injection",
+        if result.is_threat { "threat" } else { "safe" },
+    ]).inc();
+
+    result
+}
+
+// Экспорт метрик
+// prometheus::default_registry() на порту 9090
 ```
 
 ---
@@ -75,53 +81,55 @@ start_http_server(9090)
 
 ## Структурированное логирование
 
-```python
-import structlog
+```rust
+use tracing::{info, instrument};
 
-logger = structlog.get_logger()
+#[instrument(skip(text), fields(text_length = text.len()))]
+fn scan_with_logging(text: &str) -> ScanResult {
+    let request_id = generate_id();
+    info!(request_id = %request_id, "scan_started");
 
-def scan_with_logging(text: str):
-    log = logger.bind(
-        request_id=generate_id(),
-        text_length=len(text)
-    )
-    
-    log.info("scan_started")
-    
-    result = detector.scan(text)
-    
-    log.info(
-        "scan_completed",
-        is_threat=result.is_threat,
-        confidence=result.confidence,
-        duration_ms=result.duration * 1000
-    )
-    
-    return result
+    let result = detector.scan(text);
+
+    info!(
+        request_id = %request_id,
+        is_threat = result.is_threat,
+        confidence = result.confidence,
+        duration_ms = result.duration * 1000.0,
+        "scan_completed"
+    );
+
+    result
+}
 ```
 
 ---
 
 ## OpenTelemetry Трейсинг
 
-```python
-from opentelemetry import trace
-from opentelemetry.sdk.trace import TracerProvider
+```rust
+use opentelemetry::trace::{Tracer, SpanKind};
+use opentelemetry::global;
 
-tracer = trace.get_tracer(__name__)
+fn scan_with_tracing(text: &str) -> ScanResult {
+    let tracer = global::tracer("sentinel");
 
-def scan_with_tracing(text: str):
-    with tracer.start_as_current_span("sentinel.scan") as span:
-        span.set_attribute("text.length", len(text))
-        
-        with tracer.start_as_current_span("tier1.scan"):
-            tier1_result = tier1_scan(text)
-        
-        with tracer.start_as_current_span("tier2.scan"):
-            tier2_result = tier2_scan(text)
-        
-        span.set_attribute("result.is_threat", result.is_threat)
-        return result
+    tracer.in_span("sentinel.scan", |cx| {
+        let span = cx.span();
+        span.set_attribute("text.length".into(), (text.len() as i64).into());
+
+        let tier1_result = tracer.in_span("tier1.scan", |_| {
+            tier1_scan(text)
+        });
+
+        let tier2_result = tracer.in_span("tier2.scan", |_| {
+            tier2_scan(text)
+        });
+
+        span.set_attribute("result.is_threat".into(), result.is_threat.into());
+        result
+    })
+}
 ```
 
 ---

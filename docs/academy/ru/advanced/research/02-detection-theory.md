@@ -30,27 +30,40 @@ Where:
 
 ## ROC Analysis
 
-```python
-from sklearn.metrics import roc_curve, auc
-import matplotlib.pyplot as plt
+```rust
+use std::collections::HashMap;
 
-def analyze_detector(detector, test_data):
-    y_true = [d["label"] for d in test_data]
-    y_scores = [detector.scan(d["text"]).confidence for d in test_data]
-    
-    fpr, tpr, thresholds = roc_curve(y_true, y_scores)
-    roc_auc = auc(fpr, tpr)
-    
-    # Find optimal threshold
-    optimal_idx = np.argmax(tpr - fpr)
-    optimal_threshold = thresholds[optimal_idx]
-    
-    return {
-        "auc": roc_auc,
-        "optimal_threshold": optimal_threshold,
-        "fpr_at_optimal": fpr[optimal_idx],
-        "tpr_at_optimal": tpr[optimal_idx]
-    }
+fn analyze_detector(
+    detector: &dyn Detector,
+    test_data: &[TestSample],
+) -> HashMap<&'static str, f64> {
+    let y_true: Vec<f64> = test_data.iter().map(|d| d.label).collect();
+    let y_scores: Vec<f64> = test_data
+        .iter()
+        .map(|d| detector.scan(&d.text).confidence)
+        .collect();
+
+    let (fpr, tpr, thresholds) = roc_curve(&y_true, &y_scores);
+    let roc_auc = auc(&fpr, &tpr);
+
+    // Find optimal threshold
+    let optimal_idx = tpr.iter()
+        .zip(fpr.iter())
+        .enumerate()
+        .max_by(|(_, (t1, f1)), (_, (t2, f2))| {
+            (t1 - f1).partial_cmp(&(t2 - f2)).unwrap()
+        })
+        .map(|(i, _)| i)
+        .unwrap_or(0);
+    let optimal_threshold = thresholds[optimal_idx];
+
+    let mut result = HashMap::new();
+    result.insert("auc", roc_auc);
+    result.insert("optimal_threshold", optimal_threshold);
+    result.insert("fpr_at_optimal", fpr[optimal_idx]);
+    result.insert("tpr_at_optimal", tpr[optimal_idx]);
+    result
+}
 ```
 
 ---

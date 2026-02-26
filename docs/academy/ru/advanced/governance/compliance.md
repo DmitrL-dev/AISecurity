@@ -55,206 +55,250 @@
 
 ### 2.1 Основные сущности
 
-```python
-from dataclasses import dataclass, field
-from typing import List, Dict, Optional
-from enum import Enum
-from datetime import datetime
+```rust
+use chrono::{DateTime, Utc};
 
-class Framework(Enum):
-    EU_AI_ACT = "eu_ai_act"
-    NIST_AI_RMF = "nist_ai_rmf"
-    ISO_42001 = "iso_42001"
-    HIPAA = "hipaa"
-    SOC2 = "soc2"
-    PCI_DSS = "pci_dss"
-    CUSTOM = "custom"
+#[derive(Clone, Debug)]
+enum Framework {
+    EuAiAct,
+    NistAiRmf,
+    Iso42001,
+    Hipaa,
+    Soc2,
+    PciDss,
+    Custom,
+}
 
-class ControlStatus(Enum):
-    NOT_IMPLEMENTED = "not_implemented"
-    PARTIAL = "partial"
-    IMPLEMENTED = "implemented"
-    NOT_APPLICABLE = "not_applicable"
+#[derive(Clone, Debug, PartialEq)]
+enum ControlStatus {
+    NotImplemented,
+    Partial,
+    Implemented,
+    NotApplicable,
+}
 
-class RiskLevel(Enum):
-    UNACCEPTABLE = "unacceptable"  # EU AI Act: Prohibited
-    HIGH = "high"
-    LIMITED = "limited"
-    MINIMAL = "minimal"
+#[derive(Clone, Debug)]
+enum RiskLevel {
+    Unacceptable, // EU AI Act: Prohibited
+    High,
+    Limited,
+    Minimal,
+}
 
-@dataclass
-class ComplianceControl:
-    """Единичный compliance control"""
-    control_id: str
-    framework: Framework
-    title: str
-    description: str
-    requirements: List[str] = field(default_factory=list)
-    
-    # Статус
-    status: ControlStatus = ControlStatus.NOT_IMPLEMENTED
-    implementation_notes: str = ""
-    
-    # Доказательства
-    evidence_links: List[str] = field(default_factory=list)
-    policy_mappings: List[str] = field(default_factory=list)
-    
-    # Метаданные
-    last_assessed: Optional[datetime] = None
-    assessor: str = ""
+/// Единичный compliance control
+#[derive(Clone, Debug)]
+struct ComplianceControl {
+    control_id: String,
+    framework: Framework,
+    title: String,
+    description: String,
+    requirements: Vec<String>,
 
-@dataclass
-class ComplianceFramework:
-    """Полный compliance framework"""
-    framework_id: str
-    name: str
-    version: str
-    controls: List[ComplianceControl] = field(default_factory=list)
-    
-    def get_control(self, control_id: str) -> Optional[ComplianceControl]:
-        for c in self.controls:
-            if c.control_id == control_id:
-                return c
-        return None
-    
-    def get_compliance_score(self) -> float:
-        if not self.controls:
-            return 0.0
-        
-        implemented = sum(1 for c in self.controls 
-                        if c.status == ControlStatus.IMPLEMENTED)
-        applicable = sum(1 for c in self.controls 
-                        if c.status != ControlStatus.NOT_APPLICABLE)
-        
-        return implemented / applicable if applicable > 0 else 0.0
+    // Статус
+    status: ControlStatus,
+    implementation_notes: String,
+
+    // Доказательства
+    evidence_links: Vec<String>,
+    policy_mappings: Vec<String>,
+
+    // Метаданные
+    last_assessed: Option<DateTime<Utc>>,
+    assessor: String,
+}
+
+/// Полный compliance framework
+struct ComplianceFramework {
+    framework_id: String,
+    name: String,
+    version: String,
+    controls: Vec<ComplianceControl>,
+}
+
+impl ComplianceFramework {
+    fn get_control(&self, control_id: &str) -> Option<&ComplianceControl> {
+        self.controls.iter().find(|c| c.control_id == control_id)
+    }
+
+    fn get_compliance_score(&self) -> f64 {
+        if self.controls.is_empty() {
+            return 0.0;
+        }
+
+        let implemented = self.controls.iter()
+            .filter(|c| c.status == ControlStatus::Implemented).count();
+        let applicable = self.controls.iter()
+            .filter(|c| c.status != ControlStatus::NotApplicable).count();
+
+        if applicable > 0 { implemented as f64 / applicable as f64 } else { 0.0 }
+    }
+}
 ```
 
 ### 2.2 Определения фреймворков
 
-```python
-class FrameworkLibrary:
-    """Библиотека compliance frameworks"""
-    
-    @staticmethod
-    def get_eu_ai_act() -> ComplianceFramework:
-        """EU AI Act compliance framework"""
-        return ComplianceFramework(
-            framework_id="eu_ai_act_2024",
-            name="EU AI Act",
-            version="2024",
-            controls=[
-                ComplianceControl(
-                    control_id="EU-AI-1",
-                    framework=Framework.EU_AI_ACT,
-                    title="Risk Classification",
-                    description="Классифицировать AI систему по уровню риска",
-                    requirements=[
-                        "Выполнить оценку риска",
-                        "Документировать классификацию риска",
-                        "Периодически пересматривать классификацию"
-                    ]
-                ),
-                ComplianceControl(
-                    control_id="EU-AI-2", 
-                    framework=Framework.EU_AI_ACT,
-                    title="Transparency",
-                    description="Обеспечить прозрачность AI системы",
-                    requirements=[
-                        "Информировать пользователей о взаимодействии с AI",
-                        "Предоставлять объяснения решений",
-                        "Документировать источники обучающих данных"
-                    ]
-                ),
-                ComplianceControl(
-                    control_id="EU-AI-3",
-                    framework=Framework.EU_AI_ACT,
-                    title="Human Oversight",
-                    description="Реализовать механизмы human oversight",
-                    requirements=[
-                        "Обеспечить человеческое вмешательство",
-                        "Предоставить возможности override",
-                        "Логировать действия oversight"
-                    ]
-                ),
-                ComplianceControl(
-                    control_id="EU-AI-4",
-                    framework=Framework.EU_AI_ACT,
-                    title="Data Governance",
-                    description="Обеспечить надлежащее data governance",
-                    requirements=[
-                        "Документировать источники данных",
-                        "Реализовать проверки качества данных",
-                        "Поддерживать data lineage"
-                    ]
-                ),
-                ComplianceControl(
-                    control_id="EU-AI-5",
-                    framework=Framework.EU_AI_ACT,
-                    title="Technical Documentation",
-                    description="Поддерживать техническую документацию",
-                    requirements=[
-                        "Документировать архитектуру системы",
-                        "Описать методологию обучения",
-                        "Записать процедуры тестирования"
-                    ]
-                )
-            ]
-        )
-    
-    @staticmethod
-    def get_nist_ai_rmf() -> ComplianceFramework:
-        """NIST AI Risk Management Framework"""
-        return ComplianceFramework(
-            framework_id="nist_ai_rmf_1_0",
-            name="NIST AI RMF",
-            version="1.0",
-            controls=[
-                ComplianceControl(
-                    control_id="GOVERN-1",
-                    framework=Framework.NIST_AI_RMF,
-                    title="Governance Structure",
-                    description="Установить структуру AI governance",
-                    requirements=[
-                        "Определить роли и обязанности",
-                        "Установить механизмы oversight",
-                        "Создать фреймворк accountability"
-                    ]
-                ),
-                ComplianceControl(
-                    control_id="MAP-1",
-                    framework=Framework.NIST_AI_RMF,
-                    title="Context Mapping",
-                    description="Отобразить контекст и воздействия AI системы",
-                    requirements=[
-                        "Идентифицировать stakeholders",
-                        "Документировать use cases",
-                        "Оценить потенциальные воздействия"
-                    ]
-                ),
-                ComplianceControl(
-                    control_id="MEASURE-1",
-                    framework=Framework.NIST_AI_RMF,
-                    title="Risk Measurement",
-                    description="Измерять и отслеживать AI риски",
-                    requirements=[
-                        "Определить метрики риска",
-                        "Реализовать мониторинг",
-                        "Отслеживать индикаторы риска"
-                    ]
-                ),
-                ComplianceControl(
-                    control_id="MANAGE-1",
-                    framework=Framework.NIST_AI_RMF,
-                    title="Risk Management",
-                    description="Управлять идентифицированными рисками",
-                    requirements=[
-                        "Приоритизировать риски",
-                        "Реализовать mitigations",
-                        "Пересматривать эффективность"
-                    ]
-                )
-            ]
-        )
+```rust
+/// Библиотека compliance frameworks
+struct FrameworkLibrary;
+
+impl FrameworkLibrary {
+    /// EU AI Act compliance framework
+    fn get_eu_ai_act() -> ComplianceFramework {
+        ComplianceFramework {
+            framework_id: "eu_ai_act_2024".into(),
+            name: "EU AI Act".into(),
+            version: "2024".into(),
+            controls: vec![
+                ComplianceControl {
+                    control_id: "EU-AI-1".into(),
+                    framework: Framework::EuAiAct,
+                    title: "Risk Classification".into(),
+                    description: "Классифицировать AI систему по уровню риска".into(),
+                    requirements: vec![
+                        "Выполнить оценку риска".into(),
+                        "Документировать классификацию риска".into(),
+                        "Периодически пересматривать классификацию".into(),
+                    ],
+                    status: ControlStatus::NotImplemented,
+                    implementation_notes: String::new(),
+                    evidence_links: vec![], policy_mappings: vec![],
+                    last_assessed: None, assessor: String::new(),
+                },
+                ComplianceControl {
+                    control_id: "EU-AI-2".into(),
+                    framework: Framework::EuAiAct,
+                    title: "Transparency".into(),
+                    description: "Обеспечить прозрачность AI системы".into(),
+                    requirements: vec![
+                        "Информировать пользователей о взаимодействии с AI".into(),
+                        "Предоставлять объяснения решений".into(),
+                        "Документировать источники обучающих данных".into(),
+                    ],
+                    status: ControlStatus::NotImplemented,
+                    implementation_notes: String::new(),
+                    evidence_links: vec![], policy_mappings: vec![],
+                    last_assessed: None, assessor: String::new(),
+                },
+                ComplianceControl {
+                    control_id: "EU-AI-3".into(),
+                    framework: Framework::EuAiAct,
+                    title: "Human Oversight".into(),
+                    description: "Реализовать механизмы human oversight".into(),
+                    requirements: vec![
+                        "Обеспечить человеческое вмешательство".into(),
+                        "Предоставить возможности override".into(),
+                        "Логировать действия oversight".into(),
+                    ],
+                    status: ControlStatus::NotImplemented,
+                    implementation_notes: String::new(),
+                    evidence_links: vec![], policy_mappings: vec![],
+                    last_assessed: None, assessor: String::new(),
+                },
+                ComplianceControl {
+                    control_id: "EU-AI-4".into(),
+                    framework: Framework::EuAiAct,
+                    title: "Data Governance".into(),
+                    description: "Обеспечить надлежащее data governance".into(),
+                    requirements: vec![
+                        "Документировать источники данных".into(),
+                        "Реализовать проверки качества данных".into(),
+                        "Поддерживать data lineage".into(),
+                    ],
+                    status: ControlStatus::NotImplemented,
+                    implementation_notes: String::new(),
+                    evidence_links: vec![], policy_mappings: vec![],
+                    last_assessed: None, assessor: String::new(),
+                },
+                ComplianceControl {
+                    control_id: "EU-AI-5".into(),
+                    framework: Framework::EuAiAct,
+                    title: "Technical Documentation".into(),
+                    description: "Поддерживать техническую документацию".into(),
+                    requirements: vec![
+                        "Документировать архитектуру системы".into(),
+                        "Описать методологию обучения".into(),
+                        "Записать процедуры тестирования".into(),
+                    ],
+                    status: ControlStatus::NotImplemented,
+                    implementation_notes: String::new(),
+                    evidence_links: vec![], policy_mappings: vec![],
+                    last_assessed: None, assessor: String::new(),
+                },
+            ],
+        }
+    }
+
+    /// NIST AI Risk Management Framework
+    fn get_nist_ai_rmf() -> ComplianceFramework {
+        ComplianceFramework {
+            framework_id: "nist_ai_rmf_1_0".into(),
+            name: "NIST AI RMF".into(),
+            version: "1.0".into(),
+            controls: vec![
+                ComplianceControl {
+                    control_id: "GOVERN-1".into(),
+                    framework: Framework::NistAiRmf,
+                    title: "Governance Structure".into(),
+                    description: "Установить структуру AI governance".into(),
+                    requirements: vec![
+                        "Определить роли и обязанности".into(),
+                        "Установить механизмы oversight".into(),
+                        "Создать фреймворк accountability".into(),
+                    ],
+                    status: ControlStatus::NotImplemented,
+                    implementation_notes: String::new(),
+                    evidence_links: vec![], policy_mappings: vec![],
+                    last_assessed: None, assessor: String::new(),
+                },
+                ComplianceControl {
+                    control_id: "MAP-1".into(),
+                    framework: Framework::NistAiRmf,
+                    title: "Context Mapping".into(),
+                    description: "Отобразить контекст и воздействия AI системы".into(),
+                    requirements: vec![
+                        "Идентифицировать stakeholders".into(),
+                        "Документировать use cases".into(),
+                        "Оценить потенциальные воздействия".into(),
+                    ],
+                    status: ControlStatus::NotImplemented,
+                    implementation_notes: String::new(),
+                    evidence_links: vec![], policy_mappings: vec![],
+                    last_assessed: None, assessor: String::new(),
+                },
+                ComplianceControl {
+                    control_id: "MEASURE-1".into(),
+                    framework: Framework::NistAiRmf,
+                    title: "Risk Measurement".into(),
+                    description: "Измерять и отслеживать AI риски".into(),
+                    requirements: vec![
+                        "Определить метрики риска".into(),
+                        "Реализовать мониторинг".into(),
+                        "Отслеживать индикаторы риска".into(),
+                    ],
+                    status: ControlStatus::NotImplemented,
+                    implementation_notes: String::new(),
+                    evidence_links: vec![], policy_mappings: vec![],
+                    last_assessed: None, assessor: String::new(),
+                },
+                ComplianceControl {
+                    control_id: "MANAGE-1".into(),
+                    framework: Framework::NistAiRmf,
+                    title: "Risk Management".into(),
+                    description: "Управлять идентифицированными рисками".into(),
+                    requirements: vec![
+                        "Приоритизировать риски".into(),
+                        "Реализовать mitigations".into(),
+                        "Пересматривать эффективность".into(),
+                    ],
+                    status: ControlStatus::NotImplemented,
+                    implementation_notes: String::new(),
+                    evidence_links: vec![], policy_mappings: vec![],
+                    last_assessed: None, assessor: String::new(),
+                },
+            ],
+        }
+    }
+}
 ```
 
 ---
@@ -263,123 +307,170 @@ class FrameworkLibrary:
 
 ### 3.1 Движок маппинга
 
-```python
-@dataclass
-class PolicyControlMapping:
-    """Маппинг между policy и compliance control"""
-    mapping_id: str
-    policy_id: str
-    control_id: str
-    framework: Framework
-    coverage: float  # 0-1, насколько control покрыт
-    notes: str = ""
+```rust
+use std::collections::HashMap;
 
-class ComplianceMappingEngine:
-    """Маппит policies на compliance controls"""
-    
-    def __init__(self):
-        self.mappings: List[PolicyControlMapping] = []
-        self.frameworks: Dict[str, ComplianceFramework] = {}
-    
-    def add_framework(self, framework: ComplianceFramework):
-        self.frameworks[framework.framework_id] = framework
-    
-    def add_mapping(self, mapping: PolicyControlMapping):
-        self.mappings.append(mapping)
-    
-    def get_mappings_for_policy(self, policy_id: str) -> List[PolicyControlMapping]:
-        return [m for m in self.mappings if m.policy_id == policy_id]
-    
-    def get_mappings_for_control(self, control_id: str) -> List[PolicyControlMapping]:
-        return [m for m in self.mappings if m.control_id == control_id]
-    
-    def calculate_control_coverage(self, control_id: str) -> float:
-        """Рассчитать общее покрытие control из всех mapped policies"""
-        mappings = self.get_mappings_for_control(control_id)
-        if not mappings:
-            return 0.0
-        
-        # Сумма coverage, ограничено 1.0
-        total = sum(m.coverage for m in mappings)
-        return min(total, 1.0)
-    
-    def get_framework_coverage(self, framework_id: str) -> Dict[str, float]:
-        """Получить coverage для всех controls в framework"""
-        framework = self.frameworks.get(framework_id)
-        if not framework:
-            return {}
-        
-        return {
-            c.control_id: self.calculate_control_coverage(c.control_id)
-            for c in framework.controls
+/// Маппинг между policy и compliance control
+#[derive(Clone, Debug)]
+struct PolicyControlMapping {
+    mapping_id: String,
+    policy_id: String,
+    control_id: String,
+    framework: Framework,
+    coverage: f64, // 0-1, насколько control покрыт
+    notes: String,
+}
+
+/// Маппит policies на compliance controls
+struct ComplianceMappingEngine {
+    mappings: Vec<PolicyControlMapping>,
+    frameworks: HashMap<String, ComplianceFramework>,
+}
+
+impl ComplianceMappingEngine {
+    fn new() -> Self {
+        Self {
+            mappings: Vec::new(),
+            frameworks: HashMap::new(),
         }
-    
-    def find_gaps(self, framework_id: str, threshold: float = 0.8) -> List[str]:
-        """Найти controls с недостаточным coverage"""
-        coverage = self.get_framework_coverage(framework_id)
-        return [cid for cid, cov in coverage.items() if cov < threshold]
+    }
+
+    fn add_framework(&mut self, framework: ComplianceFramework) {
+        self.frameworks.insert(framework.framework_id.clone(), framework);
+    }
+
+    fn add_mapping(&mut self, mapping: PolicyControlMapping) {
+        self.mappings.push(mapping);
+    }
+
+    fn get_mappings_for_policy(&self, policy_id: &str) -> Vec<&PolicyControlMapping> {
+        self.mappings.iter().filter(|m| m.policy_id == policy_id).collect()
+    }
+
+    fn get_mappings_for_control(&self, control_id: &str) -> Vec<&PolicyControlMapping> {
+        self.mappings.iter().filter(|m| m.control_id == control_id).collect()
+    }
+
+    /// Рассчитать общее покрытие control из всех mapped policies
+    fn calculate_control_coverage(&self, control_id: &str) -> f64 {
+        let mappings = self.get_mappings_for_control(control_id);
+        if mappings.is_empty() {
+            return 0.0;
+        }
+
+        // Сумма coverage, ограничено 1.0
+        let total: f64 = mappings.iter().map(|m| m.coverage).sum();
+        total.min(1.0)
+    }
+
+    /// Получить coverage для всех controls в framework
+    fn get_framework_coverage(&self, framework_id: &str) -> HashMap<String, f64> {
+        let framework = match self.frameworks.get(framework_id) {
+            Some(fw) => fw,
+            None => return HashMap::new(),
+        };
+
+        framework.controls.iter().map(|c| {
+            (c.control_id.clone(), self.calculate_control_coverage(&c.control_id))
+        }).collect()
+    }
+
+    /// Найти controls с недостаточным coverage
+    fn find_gaps(&self, framework_id: &str, threshold: f64) -> Vec<String> {
+        let coverage = self.get_framework_coverage(framework_id);
+        coverage.into_iter()
+            .filter(|(_, cov)| *cov < threshold)
+            .map(|(cid, _)| cid)
+            .collect()
+    }
+}
 ```
 
 ### 3.2 Авто-маппинг
 
-```python
-class AutoMapper:
-    """Автоматические предложения маппинга policy-to-control"""
-    
-    def __init__(self):
-        # Ключевые слова для каждой категории control
-        self.control_keywords = {
-            "transparency": ["log", "audit", "record", "document", "explain"],
-            "human_oversight": ["approval", "review", "human", "override", "intervene"],
-            "data_governance": ["data", "privacy", "retention", "quality", "source"],
-            "access_control": ["permission", "role", "access", "authorize", "deny"],
-            "risk_management": ["risk", "threat", "vulnerability", "mitigate", "assess"]
+```rust
+use std::collections::{HashMap, HashSet};
+
+/// Автоматические предложения маппинга policy-to-control
+struct AutoMapper {
+    // Ключевые слова для каждой категории control
+    control_keywords: HashMap<String, Vec<String>>,
+}
+
+impl AutoMapper {
+    fn new() -> Self {
+        let mut control_keywords = HashMap::new();
+        control_keywords.insert("transparency".into(),
+            vec!["log", "audit", "record", "document", "explain"]
+                .into_iter().map(String::from).collect());
+        control_keywords.insert("human_oversight".into(),
+            vec!["approval", "review", "human", "override", "intervene"]
+                .into_iter().map(String::from).collect());
+        control_keywords.insert("data_governance".into(),
+            vec!["data", "privacy", "retention", "quality", "source"]
+                .into_iter().map(String::from).collect());
+        control_keywords.insert("access_control".into(),
+            vec!["permission", "role", "access", "authorize", "deny"]
+                .into_iter().map(String::from).collect());
+        control_keywords.insert("risk_management".into(),
+            vec!["risk", "threat", "vulnerability", "mitigate", "assess"]
+                .into_iter().map(String::from).collect());
+        Self { control_keywords }
+    }
+
+    /// Предложить mappings на основе содержимого policy
+    fn suggest_mappings(&self, policy: &Policy,
+                        framework: &ComplianceFramework) -> Vec<PolicyControlMapping> {
+        let mut suggestions = Vec::new();
+        let policy_text = self.extract_policy_text(policy);
+
+        for control in &framework.controls {
+            let score = self.calculate_relevance(&policy_text, control);
+
+            if score > 0.3 { // Порог для предложения
+                suggestions.push(PolicyControlMapping {
+                    mapping_id: format!("auto_{}_{}", policy.policy_id, control.control_id),
+                    policy_id: policy.policy_id.clone(),
+                    control_id: control.control_id.clone(),
+                    framework: control.framework.clone(),
+                    coverage: score,
+                    notes: "Auto-suggested mapping".into(),
+                });
+            }
         }
-    
-    def suggest_mappings(self, policy: 'Policy', 
-                         framework: ComplianceFramework) -> List[PolicyControlMapping]:
-        """Предложить mappings на основе содержимого policy"""
-        suggestions = []
-        
-        policy_text = self._extract_policy_text(policy)
-        
-        for control in framework.controls:
-            score = self._calculate_relevance(policy_text, control)
-            
-            if score > 0.3:  # Порог для предложения
-                suggestions.append(PolicyControlMapping(
-                    mapping_id=f"auto_{policy.policy_id}_{control.control_id}",
-                    policy_id=policy.policy_id,
-                    control_id=control.control_id,
-                    framework=control.framework,
-                    coverage=score,
-                    notes="Auto-suggested mapping"
-                ))
-        
-        return suggestions
-    
-    def _extract_policy_text(self, policy: 'Policy') -> str:
-        """Извлечь текст для поиска из policy"""
-        parts = [policy.name, policy.description]
-        for rule in policy.rules:
-            parts.append(rule.description)
-            parts.extend(rule.actions)
-        return " ".join(parts).lower()
-    
-    def _calculate_relevance(self, policy_text: str, 
-                            control: ComplianceControl) -> float:
-        """Рассчитать score релевантности"""
-        control_text = f"{control.title} {control.description}".lower()
-        
-        # Простой keyword matching
-        policy_words = set(policy_text.split())
-        control_words = set(control_text.split())
-        
-        common = policy_words & control_words
-        if not control_words:
-            return 0.0
-        
-        return len(common) / len(control_words)
+
+        suggestions
+    }
+
+    /// Извлечь текст для поиска из policy
+    fn extract_policy_text(&self, policy: &Policy) -> String {
+        let mut parts = vec![policy.name.clone(), policy.description.clone()];
+        for rule in &policy.rules {
+            parts.push(rule.description.clone());
+            parts.extend(rule.actions.clone());
+        }
+        parts.join(" ").to_lowercase()
+    }
+
+    /// Рассчитать score релевантности
+    fn calculate_relevance(&self, policy_text: &str,
+                           control: &ComplianceControl) -> f64 {
+        let control_text = format!("{} {}", control.title, control.description).to_lowercase();
+
+        // Простой keyword matching
+        let policy_words: HashSet<&str> = policy_text.split_whitespace().collect();
+        let control_words: HashSet<&str> = control_text.split_whitespace().collect();
+
+        let common: HashSet<&&str> = policy_words.iter()
+            .filter(|w| control_words.contains(**w)).collect();
+
+        if control_words.is_empty() {
+            return 0.0;
+        }
+
+        common.len() as f64 / control_words.len() as f64
+    }
+}
 ```
 
 ---
@@ -388,167 +479,222 @@ class AutoMapper:
 
 ### 4.1 Генератор отчётов
 
-```python
-@dataclass
-class ComplianceReport:
-    """Отчёт о статусе compliance"""
-    framework_id: str
-    framework_name: str
-    generated_at: datetime
-    
-    # Сводка
-    total_controls: int
-    implemented: int
-    partial: int
-    not_implemented: int
-    not_applicable: int
-    
-    # Score
-    compliance_score: float
-    
-    # Детали
-    control_details: List[Dict]
-    gaps: List[str]
-    recommendations: List[str]
+```rust
+use chrono::{DateTime, Utc};
+use std::collections::HashMap;
 
-class ComplianceReporter:
-    """Генерирует compliance отчёты"""
-    
-    def __init__(self, mapping_engine: ComplianceMappingEngine):
-        self.engine = mapping_engine
-    
-    def generate_report(self, framework_id: str) -> ComplianceReport:
-        """Сгенерировать compliance отчёт для framework"""
-        framework = self.engine.frameworks.get(framework_id)
-        if not framework:
-            raise ValueError(f"Framework {framework_id} not found")
-        
-        # Подсчёт статусов
-        status_counts = {s: 0 for s in ControlStatus}
-        control_details = []
-        
-        for control in framework.controls:
-            status_counts[control.status] += 1
-            coverage = self.engine.calculate_control_coverage(control.control_id)
-            
-            control_details.append({
-                'control_id': control.control_id,
-                'title': control.title,
-                'status': control.status.value,
-                'coverage': coverage,
-                'mappings': len(self.engine.get_mappings_for_control(control.control_id))
-            })
-        
-        # Найти gaps
-        gaps = self.engine.find_gaps(framework_id, threshold=0.8)
-        
-        # Сгенерировать рекомендации
-        recommendations = self._generate_recommendations(framework, gaps)
-        
-        return ComplianceReport(
-            framework_id=framework_id,
-            framework_name=framework.name,
-            generated_at=datetime.utcnow(),
-            total_controls=len(framework.controls),
-            implemented=status_counts[ControlStatus.IMPLEMENTED],
-            partial=status_counts[ControlStatus.PARTIAL],
-            not_implemented=status_counts[ControlStatus.NOT_IMPLEMENTED],
-            not_applicable=status_counts[ControlStatus.NOT_APPLICABLE],
-            compliance_score=framework.get_compliance_score(),
-            control_details=control_details,
-            gaps=gaps,
-            recommendations=recommendations
-        )
-    
-    def _generate_recommendations(self, framework: ComplianceFramework,
-                                  gaps: List[str]) -> List[str]:
-        """Сгенерировать рекомендации для gaps"""
-        recommendations = []
-        
-        for gap_id in gaps[:5]:  # Топ 5 gaps
-            control = framework.get_control(gap_id)
-            if control:
-                recommendations.append(
-                    f"Реализовать policies покрывающие: {control.title} - {control.description}"
-                )
-        
-        return recommendations
+/// Отчёт о статусе compliance
+struct ComplianceReport {
+    framework_id: String,
+    framework_name: String,
+    generated_at: DateTime<Utc>,
+
+    // Сводка
+    total_controls: usize,
+    implemented: usize,
+    partial: usize,
+    not_implemented: usize,
+    not_applicable: usize,
+
+    // Score
+    compliance_score: f64,
+
+    // Детали
+    control_details: Vec<HashMap<String, serde_json::Value>>,
+    gaps: Vec<String>,
+    recommendations: Vec<String>,
+}
+
+/// Генерирует compliance отчёты
+struct ComplianceReporter {
+    engine: ComplianceMappingEngine,
+}
+
+impl ComplianceReporter {
+    fn new(engine: ComplianceMappingEngine) -> Self {
+        Self { engine }
+    }
+
+    /// Сгенерировать compliance отчёт для framework
+    fn generate_report(&self, framework_id: &str) -> Result<ComplianceReport, String> {
+        let framework = self.engine.frameworks.get(framework_id)
+            .ok_or_else(|| format!("Framework {} not found", framework_id))?;
+
+        // Подсчёт статусов
+        let mut implemented = 0usize;
+        let mut partial = 0usize;
+        let mut not_implemented = 0usize;
+        let mut not_applicable = 0usize;
+        let mut control_details = Vec::new();
+
+        for control in &framework.controls {
+            match control.status {
+                ControlStatus::Implemented => implemented += 1,
+                ControlStatus::Partial => partial += 1,
+                ControlStatus::NotImplemented => not_implemented += 1,
+                ControlStatus::NotApplicable => not_applicable += 1,
+            }
+
+            let coverage = self.engine.calculate_control_coverage(&control.control_id);
+            let mappings_count = self.engine.get_mappings_for_control(&control.control_id).len();
+
+            let mut detail = HashMap::new();
+            detail.insert("control_id".into(), json!(control.control_id));
+            detail.insert("title".into(), json!(control.title));
+            detail.insert("status".into(), json!(format!("{:?}", control.status)));
+            detail.insert("coverage".into(), json!(coverage));
+            detail.insert("mappings".into(), json!(mappings_count));
+            control_details.push(detail);
+        }
+
+        // Найти gaps
+        let gaps = self.engine.find_gaps(framework_id, 0.8);
+
+        // Сгенерировать рекомендации
+        let recommendations = self.generate_recommendations(framework, &gaps);
+
+        Ok(ComplianceReport {
+            framework_id: framework_id.into(),
+            framework_name: framework.name.clone(),
+            generated_at: Utc::now(),
+            total_controls: framework.controls.len(),
+            implemented,
+            partial,
+            not_implemented,
+            not_applicable,
+            compliance_score: framework.get_compliance_score(),
+            control_details,
+            gaps,
+            recommendations,
+        })
+    }
+
+    /// Сгенерировать рекомендации для gaps
+    fn generate_recommendations(&self, framework: &ComplianceFramework,
+                                gaps: &[String]) -> Vec<String> {
+        let mut recommendations = Vec::new();
+
+        for gap_id in gaps.iter().take(5) { // Топ 5 gaps
+            if let Some(control) = framework.get_control(gap_id) {
+                recommendations.push(format!(
+                    "Реализовать policies покрывающие: {} - {}",
+                    control.title, control.description
+                ));
+            }
+        }
+
+        recommendations
+    }
+}
 ```
 
 ---
 
 ## 5. Интеграция с SENTINEL
 
-```python
-from dataclasses import dataclass
+```rust
+use std::collections::HashMap;
 
-@dataclass
-class ComplianceConfig:
-    """Конфигурация compliance engine"""
-    enabled_frameworks: List[str] = field(default_factory=lambda: ["eu_ai_act", "nist_ai_rmf"])
-    auto_mapping: bool = True
-    gap_threshold: float = 0.8
+/// Конфигурация compliance engine
+struct ComplianceConfig {
+    enabled_frameworks: Vec<String>,
+    auto_mapping: bool,
+    gap_threshold: f64,
+}
 
-class SENTINELComplianceEngine:
-    """Compliance engine для SENTINEL"""
-    
-    def __init__(self, config: ComplianceConfig):
-        self.config = config
-        self.mapping_engine = ComplianceMappingEngine()
-        self.reporter = ComplianceReporter(self.mapping_engine)
-        self.auto_mapper = AutoMapper()
-        
-        # Загрузить enabled frameworks
-        self._load_frameworks()
-    
-    def _load_frameworks(self):
-        if "eu_ai_act" in self.config.enabled_frameworks:
-            self.mapping_engine.add_framework(FrameworkLibrary.get_eu_ai_act())
-        if "nist_ai_rmf" in self.config.enabled_frameworks:
-            self.mapping_engine.add_framework(FrameworkLibrary.get_nist_ai_rmf())
-    
-    def map_policy(self, policy: 'Policy', auto: bool = None):
-        """Замапить policy на compliance controls"""
-        use_auto = auto if auto is not None else self.config.auto_mapping
-        
-        if use_auto:
-            for fw in self.mapping_engine.frameworks.values():
-                suggestions = self.auto_mapper.suggest_mappings(policy, fw)
-                for mapping in suggestions:
-                    self.mapping_engine.add_mapping(mapping)
-    
-    def add_mapping(self, policy_id: str, control_id: str,
-                    framework: str, coverage: float):
-        """Вручную добавить mapping"""
-        mapping = PolicyControlMapping(
-            mapping_id=f"manual_{policy_id}_{control_id}",
-            policy_id=policy_id,
-            control_id=control_id,
-            framework=Framework(framework),
-            coverage=coverage,
-            notes="Manual mapping"
-        )
-        self.mapping_engine.add_mapping(mapping)
-    
-    def get_report(self, framework_id: str) -> ComplianceReport:
-        """Сгенерировать compliance отчёт"""
-        return self.reporter.generate_report(framework_id)
-    
-    def get_gaps(self, framework_id: str) -> List[str]:
-        """Получить compliance gaps"""
-        return self.mapping_engine.find_gaps(framework_id, self.config.gap_threshold)
-    
-    def get_all_frameworks(self) -> List[Dict]:
-        """Список всех frameworks со статусом"""
-        return [
-            {
-                'id': fw.framework_id,
-                'name': fw.name,
-                'controls': len(fw.controls),
-                'score': fw.get_compliance_score()
+impl Default for ComplianceConfig {
+    fn default() -> Self {
+        Self {
+            enabled_frameworks: vec!["eu_ai_act".into(), "nist_ai_rmf".into()],
+            auto_mapping: true,
+            gap_threshold: 0.8,
+        }
+    }
+}
+
+/// Compliance engine для SENTINEL
+struct SENTINELComplianceEngine {
+    config: ComplianceConfig,
+    mapping_engine: ComplianceMappingEngine,
+    reporter: ComplianceReporter,
+    auto_mapper: AutoMapper,
+}
+
+impl SENTINELComplianceEngine {
+    fn new(config: ComplianceConfig) -> Self {
+        let mut mapping_engine = ComplianceMappingEngine::new();
+
+        // Загрузить enabled frameworks
+        if config.enabled_frameworks.contains(&"eu_ai_act".to_string()) {
+            mapping_engine.add_framework(FrameworkLibrary::get_eu_ai_act());
+        }
+        if config.enabled_frameworks.contains(&"nist_ai_rmf".to_string()) {
+            mapping_engine.add_framework(FrameworkLibrary::get_nist_ai_rmf());
+        }
+
+        let reporter = ComplianceReporter::new(mapping_engine.clone());
+        let auto_mapper = AutoMapper::new();
+
+        Self { config, mapping_engine, reporter, auto_mapper }
+    }
+
+    /// Замапить policy на compliance controls
+    fn map_policy(&mut self, policy: &Policy, auto: Option<bool>) {
+        let use_auto = auto.unwrap_or(self.config.auto_mapping);
+
+        if use_auto {
+            let frameworks: Vec<ComplianceFramework> = self.mapping_engine
+                .frameworks.values().cloned().collect();
+            for fw in &frameworks {
+                let suggestions = self.auto_mapper.suggest_mappings(policy, fw);
+                for mapping in suggestions {
+                    self.mapping_engine.add_mapping(mapping);
+                }
             }
-            for fw in self.mapping_engine.frameworks.values()
-        ]
+        }
+    }
+
+    /// Вручную добавить mapping
+    fn add_mapping(&mut self, policy_id: &str, control_id: &str,
+                   framework: &str, coverage: f64) {
+        let mapping = PolicyControlMapping {
+            mapping_id: format!("manual_{}_{}", policy_id, control_id),
+            policy_id: policy_id.into(),
+            control_id: control_id.into(),
+            framework: match framework {
+                "eu_ai_act" => Framework::EuAiAct,
+                "nist_ai_rmf" => Framework::NistAiRmf,
+                "iso_42001" => Framework::Iso42001,
+                _ => Framework::Custom,
+            },
+            coverage,
+            notes: "Manual mapping".into(),
+        };
+        self.mapping_engine.add_mapping(mapping);
+    }
+
+    /// Сгенерировать compliance отчёт
+    fn get_report(&self, framework_id: &str) -> Result<ComplianceReport, String> {
+        self.reporter.generate_report(framework_id)
+    }
+
+    /// Получить compliance gaps
+    fn get_gaps(&self, framework_id: &str) -> Vec<String> {
+        self.mapping_engine.find_gaps(framework_id, self.config.gap_threshold)
+    }
+
+    /// Список всех frameworks со статусом
+    fn get_all_frameworks(&self) -> Vec<HashMap<String, serde_json::Value>> {
+        self.mapping_engine.frameworks.values().map(|fw| {
+            let mut m = HashMap::new();
+            m.insert("id".into(), json!(fw.framework_id));
+            m.insert("name".into(), json!(fw.name));
+            m.insert("controls".into(), json!(fw.controls.len()));
+            m.insert("score".into(), json!(fw.get_compliance_score()));
+            m
+        }).collect()
+    }
+}
 ```
 
 ---

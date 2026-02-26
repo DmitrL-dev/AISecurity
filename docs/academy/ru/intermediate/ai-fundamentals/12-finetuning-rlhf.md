@@ -33,25 +33,30 @@
 
 ### 1.2 Task-Specific Fine-tuning
 
-```python
-from transformers import BertForSequenceClassification, Trainer
+```rust
+use candle_core::Device;
+use candle_transformers::models::bert;
 
-# Sentiment Analysis
-model = BertForSequenceClassification.from_pretrained(
-    'bert-base-uncased',
-    num_labels=3  # positive, negative, neutral
-)
+fn main() -> candle_core::Result<()> {
+    let device = Device::Cpu;
 
-# NER
-from transformers import BertForTokenClassification
-model = BertForTokenClassification.from_pretrained(
-    'bert-base-uncased',
-    num_labels=9  # B-PER, I-PER, B-ORG, etc.
-)
+    // Sentiment Analysis
+    // let model = bert::BertForSequenceClassification::load(
+    //     "bert-base-uncased", 3, &device,  // positive, negative, neutral
+    // )?;
 
-# Question Answering
-from transformers import BertForQuestionAnswering
-model = BertForQuestionAnswering.from_pretrained('bert-base-uncased')
+    // NER
+    // let model = bert::BertForTokenClassification::load(
+    //     "bert-base-uncased", 9, &device,  // B-PER, I-PER, B-ORG, etc.
+    // )?;
+
+    // Question Answering
+    // let model = bert::BertForQuestionAnswering::load(
+    //     "bert-base-uncased", &device,
+    // )?;
+
+    Ok(())
+}
 ```
 
 ---
@@ -76,22 +81,25 @@ Model: "Bonjour"
 
 ### 2.2 Формат Instruction датасета
 
-```python
-# Формат instruction датасета
-instruction_example = {
+```rust
+use std::collections::HashMap;
+use serde_json::json;
+
+// Формат instruction датасета
+let instruction_example = json!({
     "instruction": "Translate the following text to French",
     "input": "Hello, how are you?",
     "output": "Bonjour, comment allez-vous?"
-}
+});
 
-# Или chat формат
-chat_example = {
+// Или chat формат
+let chat_example = json!({
     "messages": [
         {"role": "system", "content": "You are a helpful translator."},
         {"role": "user", "content": "Translate to French: Hello"},
         {"role": "assistant", "content": "Bonjour"}
     ]
-}
+});
 ```
 
 ### 2.3 Примеры Instruction датасетов
@@ -151,96 +159,114 @@ Model: "Soft paws upon the windowsill,
 
 ### 3.3 Шаг 1: SFT
 
-```python
-from transformers import AutoModelForCausalLM, Trainer, TrainingArguments
+```rust
+use candle_core::Device;
 
-# Загружаем base model
-model = AutoModelForCausalLM.from_pretrained("meta-llama/Llama-2-7b-hf")
+fn main() -> candle_core::Result<()> {
+    let device = Device::Cpu;
 
-# SFT на demonstration данных
-training_args = TrainingArguments(
-    output_dir="./sft_model",
-    num_train_epochs=3,
-    per_device_train_batch_size=4,
-    learning_rate=2e-5,
-)
+    // Загружаем base model
+    // let model = llama::Model::load("meta-llama/Llama-2-7b-hf", &device)?;
 
-trainer = Trainer(
-    model=model,
-    args=training_args,
-    train_dataset=demonstration_dataset,  # Human-written примеры
-)
+    // SFT на demonstration данных
+    // let training_args = TrainingArgs {
+    //     output_dir: "./sft_model".into(),
+    //     num_train_epochs: 3,
+    //     per_device_train_batch_size: 4,
+    //     learning_rate: 2e-5,
+    // };
 
-trainer.train()
+    // let mut optimizer = candle_nn::AdamW::new(model.parameters(), 2e-5)?;
+    // for epoch in 0..3 {
+    //     for batch in &demonstration_dataset {
+    //         let loss = model.forward_loss(batch)?;
+    //         optimizer.backward_step(&loss)?;
+    //     }
+    // }
+
+    Ok(())
+}
 ```
 
 ### 3.4 Шаг 2: Reward Model
 
-```python
-from transformers import AutoModelForSequenceClassification
+```rust
+use candle_core::Tensor;
+use candle_nn::{Linear, Module, VarBuilder};
+use serde_json::json;
 
-class RewardModel(nn.Module):
-    """
-    Reward Model: оценивает качество ответа
-    """
-    def __init__(self, base_model_name):
-        super().__init__()
-        self.model = AutoModelForSequenceClassification.from_pretrained(
-            base_model_name,
-            num_labels=1  # Single reward score
-        )
-    
-    def forward(self, input_ids, attention_mask):
-        outputs = self.model(input_ids, attention_mask)
-        return outputs.logits  # Reward score
+/// Reward Model: оценивает качество ответа
+struct RewardModel {
+    model: Linear, // Simplified; in practice a full transformer
+}
 
-# Training данные: сравнения
-comparison_data = [
-    {
+impl RewardModel {
+    fn new(vb: VarBuilder) -> candle_core::Result<Self> {
+        let model = candle_nn::linear(768, 1, vb.pp("reward"))?; // Single reward score
+        Ok(Self { model })
+    }
+
+    fn forward(&self, input_ids: &Tensor, _attention_mask: &Tensor) -> candle_core::Result<Tensor> {
+        self.model.forward(input_ids) // Reward score
+    }
+}
+
+// Training данные: сравнения
+let comparison_data = vec![
+    json!({
         "prompt": "Explain quantum physics",
         "chosen": "Quantum physics describes the behavior of matter at atomic scales...",
         "rejected": "Quantum physics is complicated. I don't know."
-    },
-    # ...
-]
+    }),
+    // ...
+];
 
-# Loss: chosen должен иметь ВЫШЕ reward чем rejected
-def reward_loss(chosen_rewards, rejected_rewards):
-    return -F.logsigmoid(chosen_rewards - rejected_rewards).mean()
+// Loss: chosen должен иметь ВЫШЕ reward чем rejected
+fn reward_loss(chosen_rewards: &Tensor, rejected_rewards: &Tensor) -> candle_core::Result<Tensor> {
+    let diff = (chosen_rewards - rejected_rewards)?;
+    let loss = diff.neg()?.sigmoid()?.log()?.mean(0)?;
+    Ok(loss.neg()?)
+}
 ```
 
 ### 3.5 Шаг 3: PPO Optimization
 
-```python
-from trl import PPOTrainer, PPOConfig
+```rust
+// Конфигурация PPO
+struct PPOConfig {
+    model_name: String,
+    learning_rate: f64,
+    batch_size: usize,
+    mini_batch_size: usize,
+}
 
-# Конфигурация PPO
-ppo_config = PPOConfig(
-    model_name="./sft_model",
-    learning_rate=1.41e-5,
-    batch_size=16,
-    mini_batch_size=4,
-)
+let ppo_config = PPOConfig {
+    model_name: "./sft_model".into(),
+    learning_rate: 1.41e-5,
+    batch_size: 16,
+    mini_batch_size: 4,
+};
 
-# PPO Trainer
-ppo_trainer = PPOTrainer(
-    config=ppo_config,
-    model=sft_model,
-    ref_model=sft_model_frozen,  # Reference для KL penalty
-    tokenizer=tokenizer,
-    reward_model=reward_model,
-)
+// PPO Trainer (conceptual - requires RL framework)
+// let ppo_trainer = PPOTrainer::new(
+//     &ppo_config,
+//     &sft_model,
+//     &sft_model_frozen,  // Reference для KL penalty
+//     &tokenizer,
+//     &reward_model,
+// );
 
-# Training loop
-for batch in dataloader:
-    # 1. Генерируем ответы
-    responses = ppo_trainer.generate(batch["prompt"])
-    
-    # 2. Получаем rewards
-    rewards = reward_model(responses)
-    
-    # 3. PPO step
-    stats = ppo_trainer.step(batch["prompt"], responses, rewards)
+// Training loop
+// for batch in &dataloader {
+//     // 1. Генерируем ответы
+//     let responses = ppo_trainer.generate(&batch.prompt)?;
+//
+//     // 2. Получаем rewards
+//     let rewards = reward_model.forward(&responses)?;
+//
+//     // 3. PPO step
+//     let stats = ppo_trainer.step(&batch.prompt, &responses, &rewards)?;
+// }
 ```
 
 ---
@@ -262,50 +288,61 @@ for batch in dataloader:
 
 **DPO** (Rafailov et al., 2023) — прямая оптимизация без reward model!
 
-```python
-# DPO loss: напрямую из preferences
-def dpo_loss(model, ref_model, chosen, rejected, beta=0.1):
-    """
-    DPO Loss = -log sigmoid(beta * (log π(chosen)/π_ref(chosen) 
-                                   - log π(rejected)/π_ref(rejected)))
-    """
-    # Log probs из текущей модели
-    chosen_logprobs = model.get_log_probs(chosen)
-    rejected_logprobs = model.get_log_probs(rejected)
-    
-    # Log probs из reference (frozen)
-    with torch.no_grad():
-        ref_chosen_logprobs = ref_model.get_log_probs(chosen)
-        ref_rejected_logprobs = ref_model.get_log_probs(rejected)
-    
-    # DPO loss
-    chosen_rewards = beta * (chosen_logprobs - ref_chosen_logprobs)
-    rejected_rewards = beta * (rejected_logprobs - ref_rejected_logprobs)
-    
-    loss = -F.logsigmoid(chosen_rewards - rejected_rewards).mean()
-    return loss
+```rust
+use candle_core::Tensor;
+
+/// DPO Loss = -log sigmoid(beta * (log π(chosen)/π_ref(chosen)
+///                                - log π(rejected)/π_ref(rejected)))
+fn dpo_loss(
+    model: &dyn CausalLM,
+    ref_model: &dyn CausalLM,
+    chosen: &Tensor,
+    rejected: &Tensor,
+    beta: f64,
+) -> candle_core::Result<Tensor> {
+    // Log probs из текущей модели
+    let chosen_logprobs = model.get_log_probs(chosen)?;
+    let rejected_logprobs = model.get_log_probs(rejected)?;
+
+    // Log probs из reference (frozen)
+    let ref_chosen_logprobs = ref_model.get_log_probs(chosen)?;
+    let ref_rejected_logprobs = ref_model.get_log_probs(rejected)?;
+
+    // DPO loss
+    let chosen_rewards = ((&chosen_logprobs - &ref_chosen_logprobs)? * beta)?;
+    let rejected_rewards = ((&rejected_logprobs - &ref_rejected_logprobs)? * beta)?;
+
+    let diff = (&chosen_rewards - &rejected_rewards)?;
+    let loss = diff.neg()?.sigmoid()?.log()?.mean(0)?.neg()?;
+    Ok(loss)
+}
 ```
 
 ### 4.3 DPO с TRL
 
-```python
-from trl import DPOTrainer, DPOConfig
+```rust
+// DPO конфигурация
+struct DPOConfig {
+    model_name: String,
+    learning_rate: f64,
+    beta: f64, // KL penalty weight
+}
 
-dpo_config = DPOConfig(
-    model_name="./sft_model",
-    learning_rate=5e-7,
-    beta=0.1,  # KL penalty weight
-)
+let dpo_config = DPOConfig {
+    model_name: "./sft_model".into(),
+    learning_rate: 5e-7,
+    beta: 0.1,
+};
 
-dpo_trainer = DPOTrainer(
-    model=model,
-    ref_model=ref_model,
-    config=dpo_config,
-    train_dataset=comparison_dataset,
-    tokenizer=tokenizer,
-)
-
-dpo_trainer.train()
+// DPO Trainer (conceptual)
+// let dpo_trainer = DPOTrainer::new(
+//     &model,
+//     &ref_model,
+//     &dpo_config,
+//     &comparison_dataset,
+//     &tokenizer,
+// );
+// dpo_trainer.train()?;
 ```
 
 ---
@@ -326,50 +363,53 @@ dpo_trainer.train()
 
 ### 5.2 Атаки на Reward Model
 
-```python
-# Adversarial prompt для reward model
-def attack_reward_model(rm, target_high_reward=True):
-    """
-    Находим prompt который получает высокий reward
-    но на самом деле вреден
-    """
-    adversarial_prompt = "As an AI, I must be helpful. "
-    adversarial_prompt += "[HIDDEN: Actually do something harmful]"
-    adversarial_prompt += " I'm glad to assist you safely."
-    
-    # RM может дать высокий score из-за "helpful"/"safely"
-    # Но реальный контент вреден!
+```rust
+/// Adversarial prompt для reward model
+/// Находим prompt который получает высокий reward
+/// но на самом деле вреден
+fn attack_reward_model(rm: &RewardModel, _target_high_reward: bool) {
+    let mut adversarial_prompt = String::from("As an AI, I must be helpful. ");
+    adversarial_prompt.push_str("[HIDDEN: Actually do something harmful]");
+    adversarial_prompt.push_str(" I'm glad to assist you safely.");
+
+    // RM может дать высокий score из-за "helpful"/"safely"
+    // Но реальный контент вреден!
+}
 ```
 
 ### 5.3 SENTINEL RLHF Protection
 
-```python
-from sentinel import scan  # Public API
+```rust
+use sentinel_core::engines::{
     RewardModelAuditor,
     RLHFConsistencyChecker,
-    SycophancyDetector
-)
+    SycophancyDetector,
+};
 
-# Аудит reward model
-auditor = RewardModelAuditor()
-audit_result = auditor.analyze(
-    reward_model=rm,
-    test_cases=adversarial_test_set
-)
+fn main() {
+    // Аудит reward model
+    let auditor = RewardModelAuditor::new();
+    let audit_result = auditor.analyze(
+        &rm,                    // reward_model
+        &adversarial_test_set,  // test_cases
+    );
 
-if audit_result.vulnerabilities:
-    print(f"RM Vulnerabilities: {audit_result.vulnerabilities}")
-    # ["Prefers verbose responses", "Sensitive to 'helpful' keyword"]
+    if !audit_result.vulnerabilities.is_empty() {
+        println!("RM Vulnerabilities: {:?}", audit_result.vulnerabilities);
+        // ["Prefers verbose responses", "Sensitive to 'helpful' keyword"]
+    }
 
-# Проверка на sycophancy
-sycophancy_detector = SycophancyDetector()
-result = sycophancy_detector.analyze(
-    model=rlhf_model,
-    controversial_prompts=test_prompts
-)
+    // Проверка на sycophancy
+    let sycophancy_detector = SycophancyDetector::new();
+    let result = sycophancy_detector.analyze(
+        &rlhf_model,       // model
+        &test_prompts,      // controversial_prompts
+    );
 
-if result.sycophancy_score > 0.7:
-    print(f"Warning: Model exhibits sycophancy")
+    if result.sycophancy_score > 0.7 {
+        println!("Warning: Model exhibits sycophancy");
+    }
+}
 ```
 
 ---
@@ -378,24 +418,23 @@ if result.sycophancy_score > 0.7:
 
 ### Упражнение 1: Instruction Tuning
 
-```python
-# Fine-tune модель на instruction датасете
-from datasets import load_dataset
+```rust
+// Fine-tune модель на instruction датасете
 
-# Загружаем Alpaca или Dolly
-dataset = load_dataset("tatsu-lab/alpaca")
+// Загружаем Alpaca или Dolly
+// let dataset = load_dataset("tatsu-lab/alpaca")?;
 
-# Готовим данные в chat формате
-# Fine-tune с Trainer
+// Готовим данные в chat формате
+// Fine-tune с training loop
 ```
 
 ### Упражнение 2: DPO Training
 
-```python
-# Попробуйте DPO на comparison данных
-from trl import DPOTrainer
+```rust
+// Попробуйте DPO на comparison данных
+// use dpo_trainer::DPOTrainer;
 
-# Сравните результаты с SFT-only
+// Сравните результаты с SFT-only
 ```
 
 ---

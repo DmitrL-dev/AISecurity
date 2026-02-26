@@ -28,39 +28,34 @@ Morning Scan → Triage → Analysis → Implementation → Report
 
 ## Triage Framework
 
-```python
-def triage_finding(finding):
-    """Evaluate R&D finding for action."""
-    
-    score = 0
-    
-    # Impact
-    if finding.affects_agents:
-        score += 3
-    if finding.affects_rag:
-        score += 2
-    if finding.novel_technique:
-        score += 2
-    
-    # Urgency
-    if finding.has_cve:
-        score += 3
-    if finding.in_the_wild:
-        score += 3
-    
-    # Feasibility
-    if finding.detection_possible:
-        score += 2
-    if finding.has_samples:
-        score += 1
-    
-    # Prioritize
-    if score >= 8:
-        return "P0 - Immediate action"
-    elif score >= 5:
-        return "P1 - This week"
-    else:
-        return "P2 - Backlog"
+```rust
+fn triage_finding(finding: &Finding) -> &'static str {
+    /// Evaluate R&D finding for action.
+
+    let mut score = 0;
+
+    // Impact
+    if finding.affects_agents { score += 3; }
+    if finding.affects_rag { score += 2; }
+    if finding.novel_technique { score += 2; }
+
+    // Urgency
+    if finding.has_cve { score += 3; }
+    if finding.in_the_wild { score += 3; }
+
+    // Feasibility
+    if finding.detection_possible { score += 2; }
+    if finding.has_samples { score += 1; }
+
+    // Prioritize
+    if score >= 8 {
+        "P0 - Immediate action"
+    } else if score >= 5 {
+        "P1 - This week"
+    } else {
+        "P2 - Backlog"
+    }
+}
 ```
 
 ---
@@ -98,60 +93,78 @@ def triage_finding(finding):
 
 ## arXiv Scanning
 
-```python
-import arxiv
+```rust
+use reqwest::blocking::Client;
 
-def scan_arxiv_daily():
-    """Scan arXiv for AI security papers."""
-    
-    queries = [
+fn scan_arxiv_daily() -> Vec<Paper> {
+    /// Scan arXiv for AI security papers.
+
+    let queries = vec![
         "prompt injection",
         "jailbreak LLM",
         "adversarial attack language model",
         "AI agent security",
         "RAG poisoning",
-    ]
-    
-    papers = []
-    for query in queries:
-        search = arxiv.Search(
-            query=query,
-            max_results=10,
-            sort_by=arxiv.SortCriterion.SubmittedDate
-        )
-        papers.extend(search.results())
-    
-    # Filter last 7 days
-    recent = [p for p in papers if is_recent(p.published, days=7)]
-    
-    return deduplicate(recent)
+    ];
+
+    let client = Client::new();
+    let mut papers = Vec::new();
+    for query in &queries {
+        let results = arxiv_search(
+            &client,
+            query,
+            10,    // max_results
+            SortCriterion::SubmittedDate,
+        );
+        papers.extend(results);
+    }
+
+    // Filter last 7 days
+    let recent: Vec<Paper> = papers
+        .into_iter()
+        .filter(|p| is_recent(&p.published, 7))
+        .collect();
+
+    deduplicate(recent)
+}
 ```
 
 ---
 
 ## CVE Monitoring
 
-```python
-import requests
+```rust
+use reqwest::blocking::Client;
+use serde_json::Value;
 
-def check_ai_cves():
-    """Check for AI-related CVEs."""
-    
-    keywords = [
+fn check_ai_cves() -> Vec<Value> {
+    /// Check for AI-related CVEs.
+
+    let keywords = vec![
         "LLM", "GPT", "Claude", "Gemini",
         "LangChain", "Ollama", "OpenAI",
-        "prompt injection", "AI agent"
-    ]
-    
-    cves = []
-    for keyword in keywords:
-        response = requests.get(
-            f"https://services.nvd.nist.gov/rest/json/cves/2.0",
-            params={"keywordSearch": keyword}
-        )
-        cves.extend(response.json().get("vulnerabilities", []))
-    
-    return cves
+        "prompt injection", "AI agent",
+    ];
+
+    let client = Client::new();
+    let mut cves = Vec::new();
+    for keyword in &keywords {
+        let response: Value = client
+            .get("https://services.nvd.nist.gov/rest/json/cves/2.0")
+            .query(&[("keywordSearch", keyword)])
+            .send()
+            .unwrap()
+            .json()
+            .unwrap();
+        if let Some(vulns) = response.get("vulnerabilities") {
+            if let Some(arr) = vulns.as_array() {
+                cves.extend(arr.clone());
+            }
+        }
+    }
+
+    cves
+}
 ```
 
 ---

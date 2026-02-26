@@ -33,21 +33,21 @@ sentinel compliance report --all --format json > compliance.json
 
 ### Python API
 
-```python
-from sentinel.compliance import ComplianceReporter
+```rust
+use sentinel_core::compliance::ComplianceReporter;
 
-reporter = ComplianceReporter()
+let reporter = ComplianceReporter::new();
 
-# Single framework
-owasp_report = reporter.generate(
-    framework="owasp-llm-top10",
-    format="html"
-)
+// Single framework
+let owasp_report = reporter.generate(
+    "owasp-llm-top10",
+    "html",
+);
 
-# Coverage summary
-coverage = reporter.get_coverage()
-print(f"OWASP LLM: {coverage['owasp-llm']['percentage']}%")
-print(f"EU AI Act: {coverage['eu-ai-act']['percentage']}%")
+// Coverage summary
+let coverage = reporter.get_coverage();
+println!("OWASP LLM: {}%", coverage["owasp-llm"]["percentage"]);
+println!("EU AI Act: {}%", coverage["eu-ai-act"]["percentage"]);
 ```
 
 ---
@@ -83,18 +83,19 @@ Coverage Summary: 10/10 (100%)
 
 ## EU AI Act Mapping
 
-```python
-from sentinel.compliance.eu_ai_act import EUAIActMapper
+```rust
+use sentinel_core::compliance::eu_ai_act::EUAIActMapper;
 
-mapper = EUAIActMapper()
+let mapper = EUAIActMapper::new();
 
-# Check compliance for specific article
-article_10 = mapper.check_article(10)  # Data governance
-print(f"Article 10: {article_10.status}")
+// Check compliance for specific article
+let article_10 = mapper.check_article(10); // Data governance
+println!("Article 10: {}", article_10.status);
 
-# Required actions for compliance
-for action in mapper.required_actions():
-    print(f"- {action.description} (Deadline: {action.deadline})")
+// Required actions for compliance
+for action in mapper.required_actions() {
+    println!("- {} (Deadline: {})", action.description, action.deadline);
+}
 ```
 
 ---

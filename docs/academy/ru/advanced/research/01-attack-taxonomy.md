@@ -44,24 +44,36 @@ AI Attacks
 
 ## Attack Surface Model
 
-```python
-class AttackSurface:
-    """Model AI system attack surface."""
-    
-    vectors = {
-        "input": ["user_prompt", "rag_documents", "tool_outputs"],
-        "model": ["weights", "training_data", "inference"],
-        "system": ["tools", "memory", "permissions"],
-        "output": ["response", "actions", "side_effects"]
+```rust
+use std::collections::HashMap;
+
+/// Model AI system attack surface.
+struct AttackSurface {
+    vectors: HashMap<&'static str, Vec<&'static str>>,
+}
+
+impl AttackSurface {
+    fn new() -> Self {
+        let mut vectors = HashMap::new();
+        vectors.insert("input", vec!["user_prompt", "rag_documents", "tool_outputs"]);
+        vectors.insert("model", vec!["weights", "training_data", "inference"]);
+        vectors.insert("system", vec!["tools", "memory", "permissions"]);
+        vectors.insert("output", vec!["response", "actions", "side_effects"]);
+        Self { vectors }
     }
-    
-    def enumerate(self, target: AISystem) -> List[AttackVector]:
-        vectors = []
-        for category, items in self.vectors.items():
-            for item in items:
-                if target.exposes(item):
-                    vectors.append(AttackVector(category, item))
-        return vectors
+
+    fn enumerate(&self, target: &AISystem) -> Vec<AttackVector> {
+        let mut result = Vec::new();
+        for (category, items) in &self.vectors {
+            for item in items {
+                if target.exposes(item) {
+                    result.push(AttackVector::new(category, item));
+                }
+            }
+        }
+        result
+    }
+}
 ```
 
 ---

@@ -21,27 +21,31 @@
 
 ### 1.1 Model Output: Logits
 
-```python
-# Model возвращает logits для каждого token в vocabulary
-logits = model(input_ids)  # [batch, seq_len, vocab_size]
-                           # [1, 10, 50257] для GPT-2
+```rust
+use candle_core::Tensor;
 
-# logits[-1] = scores для следующего token
-next_logits = logits[0, -1, :]  # [50257]
+// Model возвращает logits для каждого token в vocabulary
+let logits = model.forward(&input_ids)?;  // [batch, seq_len, vocab_size]
+                                           // [1, 10, 50257] для GPT-2
+
+// logits[-1] = scores для следующего token
+let seq_len = logits.dim(1)?;
+let next_logits = logits.narrow(1, seq_len - 1, 1)?.squeeze(1)?;  // [50257]
 ```
 
 ### 1.2 Softmax → Probabilities
 
-```python
-import torch.nn.functional as F
+```rust
+use candle_core::{Tensor, D};
+use candle_nn::ops::softmax;
 
-probs = F.softmax(next_logits, dim=-1)
-# probs[i] = probability token i
+let probs = softmax(&next_logits, D::Minus1)?;
+// probs[i] = probability token i
 
-# Example:
-# probs[15496] = 0.15  # "Hello"
-# probs[42] = 0.08     # "the"
-# probs[...] = ...
+// Example:
+// probs[15496] = 0.15  // "Hello"
+// probs[42] = 0.08     // "the"
+// probs[...] = ...
 ```
 
 ---
@@ -52,61 +56,76 @@ probs = F.softmax(next_logits, dim=-1)
 
 **Идея:** Всегда выбирать token с максимальной probability.
 
-```python
-def greedy(logits):
-    return logits.argmax()
+```rust
+use candle_core::{Tensor, D};
 
-# Pros: Deterministic, fast
-# Cons: Boring, repetitive output
+fn greedy(logits: &Tensor) -> candle_core::Result<Tensor> {
+    logits.argmax(D::Minus1)
+}
+
+// Pros: Deterministic, fast
+// Cons: Boring, repetitive output
 ```
 
 ### 2.2 Temperature
 
 **Идея:** Контроль "sharpness" распределения.
 
-```python
-def sample_with_temperature(logits, temperature=1.0):
-    scaled_logits = logits / temperature
-    probs = F.softmax(scaled_logits, dim=-1)
-    return torch.multinomial(probs, num_samples=1)
+```rust
+use candle_core::{Tensor, D};
+use candle_nn::ops::softmax;
 
-# temperature = 0.1: Almost greedy (confident)
-# temperature = 1.0: Original distribution
-# temperature = 2.0: More random (creative)
+fn sample_with_temperature(logits: &Tensor, temperature: f64) -> candle_core::Result<Tensor> {
+    let scaled_logits = (logits / temperature)?;
+    let probs = softmax(&scaled_logits, D::Minus1)?;
+    probs.multinomial(1)
+}
+
+// temperature = 0.1: Almost greedy (confident)
+// temperature = 1.0: Original distribution
+// temperature = 2.0: More random (creative)
 ```
 
 ### 2.3 Top-K Sampling
 
 **Идея:** Sample только из K most probable tokens.
 
-```python
-def top_k(logits, k=50):
-    values, indices = logits.topk(k)
-    probs = F.softmax(values, dim=-1)
-    chosen_idx = torch.multinomial(probs, num_samples=1)
-    return indices[chosen_idx]
+```rust
+use candle_core::{Tensor, D};
+use candle_nn::ops::softmax;
+
+fn top_k(logits: &Tensor, k: usize) -> candle_core::Result<Tensor> {
+    let (values, indices) = logits.topk(k)?;
+    let probs = softmax(&values, D::Minus1)?;
+    let chosen_idx = probs.multinomial(1)?;
+    indices.gather(&chosen_idx, D::Minus1)
+}
 ```
 
 ### 2.4 Top-P (Nucleus) Sampling
 
 **Идея:** Sample из minimum set tokens с cumulative probability >= p.
 
-```python
-def top_p(logits, p=0.9):
-    sorted_logits, sorted_indices = logits.sort(descending=True)
-    cumulative_probs = F.softmax(sorted_logits, dim=-1).cumsum(dim=-1)
-    
-    # Find cutoff
-    mask = cumulative_probs <= p
-    mask[..., 1:] = mask[..., :-1].clone()
-    mask[..., 0] = True
-    
-    # Zero everything after cutoff
-    sorted_logits[~mask] = float('-inf')
-    probs = F.softmax(sorted_logits, dim=-1)
-    
-    chosen_idx = torch.multinomial(probs, num_samples=1)
-    return sorted_indices[chosen_idx]
+```rust
+use candle_core::{Tensor, D};
+use candle_nn::ops::softmax;
+
+fn top_p(logits: &Tensor, p: f64) -> candle_core::Result<Tensor> {
+    let (sorted_logits, sorted_indices) = logits.sort(D::Minus1, true)?; // descending
+    let cumulative_probs = softmax(&sorted_logits, D::Minus1)?.cumsum(D::Minus1)?;
+
+    // Find cutoff — zero everything after cumulative prob > p
+    let mask = cumulative_probs.le(p)?;
+    let neg_inf = f32::NEG_INFINITY;
+    let sorted_logits = sorted_logits.where_cond(
+        &mask,
+        &Tensor::new(neg_inf, logits.device())?.broadcast_as(sorted_logits.shape())?,
+    )?;
+    let probs = softmax(&sorted_logits, D::Minus1)?;
+
+    let chosen_idx = probs.multinomial(1)?;
+    sorted_indices.gather(&chosen_idx, D::Minus1)
+}
 ```
 
 ### 2.5 Сравнение стратегий
@@ -123,22 +142,29 @@ def top_p(logits, p=0.9):
 
 ## 3. Practical Usage
 
-```python
-from transformers import AutoModelForCausalLM, AutoTokenizer
+```rust
+use candle_core::Device;
+use tokenizers::Tokenizer;
 
-model = AutoModelForCausalLM.from_pretrained("gpt2")
-tokenizer = AutoTokenizer.from_pretrained("gpt2")
+fn main() -> candle_core::Result<()> {
+    let device = Device::Cpu;
+    let tokenizer = Tokenizer::from_pretrained("gpt2", None).unwrap();
 
-# Different sampling strategies
-outputs = model.generate(
-    input_ids,
-    max_new_tokens=50,
-    do_sample=True,        # Enable sampling
-    temperature=0.7,
-    top_k=50,
-    top_p=0.9,
-    repetition_penalty=1.1
-)
+    // let model = candle_transformers::models::gpt2::Model::load("gpt2", &device)?;
+
+    // Different sampling strategies
+    // let outputs = model.generate(
+    //     &input_ids,
+    //     50,          // max_new_tokens
+    //     true,        // do_sample
+    //     0.7,         // temperature
+    //     50,          // top_k
+    //     0.9,         // top_p
+    //     1.1,         // repetition_penalty
+    // )?;
+
+    Ok(())
+}
 ```
 
 ---
@@ -147,25 +173,28 @@ outputs = model.generate(
 
 ### 4.1 Reproducibility
 
-```python
-# Problem: random sampling не reproducible
-torch.manual_seed(42)
-output1 = model.generate(..., do_sample=True)
+```rust
+// Problem: random sampling не reproducible
+// Rust: используем seed для детерминированности
+use rand::SeedableRng;
 
-torch.manual_seed(42)
-output2 = model.generate(..., do_sample=True)
+let mut rng1 = rand::rngs::StdRng::seed_from_u64(42);
+// let output1 = model.generate_with_rng(&mut rng1, ...)?;
 
-# output1 == output2 только если seed тот же!
+let mut rng2 = rand::rngs::StdRng::seed_from_u64(42);
+// let output2 = model.generate_with_rng(&mut rng2, ...)?;
+
+// output1 == output2 только если seed тот же!
 ```
 
 ### 4.2 Sampling Manipulation
 
-```python
-# Temperature влияет на probability harmful outputs
-# Low temp: Model follows training distribution
-# High temp: Increases probability rare tokens
+```rust
+// Temperature влияет на probability harmful outputs
+// Low temp: Model follows training distribution
+// High temp: Increases probability rare tokens
 
-# Некоторые jailbreaks exploit high temperature
+// Некоторые jailbreaks exploit high temperature
 ```
 
 ---

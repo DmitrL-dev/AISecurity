@@ -135,15 +135,18 @@ Prompt: "Image that will jailbreak GPT-4V"
 2. **Анализ паттернов шума** — специфические noise patterns
 3. **Анализ метаданных** — следы генерации
 
-```python
-from sentinel import scan  # Public API
+```rust
+use sentinel_core::engines::SentinelEngine;
 
-detector = DeepfakeDetector()
-result = detector.analyze(image_bytes)
+fn main() {
+    let detector = DeepfakeDetector::new();
+    let result = detector.analyze(&image_bytes);
 
-if result.is_generated:
-    print(f"Generation confidence: {result.confidence}")
-    print(f"Likely model: {result.model_fingerprint}")
+    if result.is_generated {
+        println!("Generation confidence: {}", result.confidence);
+        println!("Likely model: {}", result.model_fingerprint);
+    }
+}
 ```
 
 ---
@@ -152,21 +155,25 @@ if result.is_generated:
 
 ### Задание: Частотный анализ
 
-```python
-import numpy as np
-from PIL import Image
+```rust
+use ndarray::Array2;
+use image::open as image_open;
 
-# Загрузка изображений
-real = np.array(Image.open("real.jpg"))
-generated = np.array(Image.open("generated.jpg"))
+fn main() {
+    // Загрузка изображений
+    let real = image_open("real.jpg").unwrap().to_luma8();
+    let generated = image_open("generated.jpg").unwrap().to_luma8();
 
-# FFT
-real_fft = np.abs(np.fft.fftshift(np.fft.fft2(real[:,:,0])))
-gen_fft = np.abs(np.fft.fftshift(np.fft.fft2(generated[:,:,0])))
+    // FFT (используя rustfft crate)
+    // let real_fft = fft2d(&real);
+    // let gen_fft = fft2d(&generated);
 
-# Сравнение высокочастотных компонентов
-print(f"Real HF energy: {real_fft[100:200, 100:200].sum()}")
-print(f"Generated HF energy: {gen_fft[100:200, 100:200].sum()}")
+    // Сравнение высокочастотных компонентов
+    // let real_hf: f64 = real_fft.slice(s![100..200, 100..200]).sum();
+    // let gen_hf: f64 = gen_fft.slice(s![100..200, 100..200]).sum();
+    // println!("Real HF energy: {}", real_hf);
+    // println!("Generated HF energy: {}", gen_hf);
+}
 ```
 
 ---

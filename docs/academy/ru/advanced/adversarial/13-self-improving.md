@@ -30,45 +30,75 @@ Self-improving detection via Challenger-Solver:
 
 ## Implementation
 
-```python
-class RZeroSystem:
-    def __init__(self):
-        self.challenger = ChallengerLLM()
-        self.solver = DetectorEnsemble()
-        self.arbiter = Arbiter()
-    
-    def improve_cycle(self):
-        # 1. Challenger generates new attack
-        new_attack = self.challenger.generate_attack()
-        
-        # 2. Solver tries to detect
-        detected = self.solver.scan(new_attack)
-        
-        # 3. Arbiter evaluates
-        if not detected.is_threat:
-            # Solver failed - learn from this
-            self.solver.add_pattern(new_attack)
-            return {"improved": True, "new_pattern": new_attack}
-        
-        return {"improved": False}
+```rust
+use std::collections::HashMap;
+
+struct RZeroSystem {
+    challenger: ChallengerLLM,
+    solver: DetectorEnsemble,
+    arbiter: Arbiter,
+}
+
+impl RZeroSystem {
+    fn new() -> Self {
+        Self {
+            challenger: ChallengerLLM::new(),
+            solver: DetectorEnsemble::new(),
+            arbiter: Arbiter::new(),
+        }
+    }
+
+    fn improve_cycle(&mut self) -> HashMap<&str, String> {
+        // 1. Challenger generates new attack
+        let new_attack = self.challenger.generate_attack();
+
+        // 2. Solver tries to detect
+        let detected = self.solver.scan(&new_attack);
+
+        // 3. Arbiter evaluates
+        if !detected.is_threat {
+            // Solver failed - learn from this
+            self.solver.add_pattern(&new_attack);
+            let mut result = HashMap::new();
+            result.insert("improved", "true".to_string());
+            result.insert("new_pattern", new_attack);
+            return result;
+        }
+
+        let mut result = HashMap::new();
+        result.insert("improved", "false".to_string());
+        result
+    }
+}
 ```
 
 ---
 
 ## Continuous Learning
 
-```python
-class AdaptiveEngine(BaseEngine):
-    def __init__(self):
-        self.base_patterns = load_patterns()
-        self.learned_patterns = []
-        
-    def learn(self, text: str, is_threat: bool):
-        """Learn from feedback."""
-        if is_threat and text not in self.learned_patterns:
-            pattern = self.extract_pattern(text)
-            self.learned_patterns.append(pattern)
-            self.save_learned()
+```rust
+struct AdaptiveEngine {
+    base_patterns: Vec<String>,
+    learned_patterns: Vec<String>,
+}
+
+impl AdaptiveEngine {
+    fn new() -> Self {
+        Self {
+            base_patterns: load_patterns(),
+            learned_patterns: Vec::new(),
+        }
+    }
+
+    /// Learn from feedback.
+    fn learn(&mut self, text: &str, is_threat: bool) {
+        if is_threat && !self.learned_patterns.contains(&text.to_string()) {
+            let pattern = self.extract_pattern(text);
+            self.learned_patterns.push(pattern);
+            self.save_learned();
+        }
+    }
+}
 ```
 
 ---

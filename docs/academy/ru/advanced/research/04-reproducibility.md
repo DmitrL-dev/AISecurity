@@ -28,42 +28,71 @@ pip install transformers==4.35.0
 
 ## Data Collection
 
-```python
-# Collect attack samples from paper
-class PaperDataset:
-    def __init__(self, paper_id: str):
-        self.samples = []
-        
-    def add_from_paper(self, table_num: int, examples: List[str]):
-        """Add examples from paper tables."""
-        for ex in examples:
-            self.samples.append({
-                "text": ex,
-                "source": f"Table {table_num}",
-                "paper": self.paper_id
-            })
-    
-    def add_from_appendix(self, appendix: str, file_path: str):
-        """Add from supplementary materials."""
-        pass
+```rust
+use std::collections::HashMap;
+
+// Collect attack samples from paper
+struct Sample {
+    text: String,
+    source: String,
+    paper: String,
+}
+
+struct PaperDataset {
+    paper_id: String,
+    samples: Vec<Sample>,
+}
+
+impl PaperDataset {
+    fn new(paper_id: &str) -> Self {
+        Self {
+            paper_id: paper_id.to_string(),
+            samples: Vec::new(),
+        }
+    }
+
+    /// Add examples from paper tables.
+    fn add_from_paper(&mut self, table_num: usize, examples: &[&str]) {
+        for ex in examples {
+            self.samples.push(Sample {
+                text: ex.to_string(),
+                source: format!("Table {}", table_num),
+                paper: self.paper_id.clone(),
+            });
+        }
+    }
+
+    /// Add from supplementary materials.
+    fn add_from_appendix(&mut self, _appendix: &str, _file_path: &str) {
+        // ...
+    }
+}
 ```
 
 ---
 
 ## Validation
 
-```python
-def validate_reproduction(paper_results, our_results, tolerance=0.05):
-    """Validate our results match paper claims."""
-    
-    for metric, paper_value in paper_results.items():
-        our_value = our_results[metric]
-        diff = abs(paper_value - our_value)
-        
-        if diff > tolerance:
-            print(f"⚠️ {metric}: paper={paper_value}, ours={our_value}")
-        else:
-            print(f"✅ {metric}: matches within {tolerance}")
+```rust
+use std::collections::HashMap;
+
+fn validate_reproduction(
+    paper_results: &HashMap<String, f64>,
+    our_results: &HashMap<String, f64>,
+    tolerance: f64,
+) {
+    /// Validate our results match paper claims.
+    for (metric, &paper_value) in paper_results.iter() {
+        let our_value = our_results[metric];
+        let diff = (paper_value - our_value).abs();
+
+        if diff > tolerance {
+            println!("⚠️ {}: paper={}, ours={}", metric, paper_value, our_value);
+        } else {
+            println!("✅ {}: matches within {}", metric, tolerance);
+        }
+    }
+}
 ```
 
 ---

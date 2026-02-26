@@ -50,138 +50,174 @@
 
 ### 2.1 Основные сущности
 
-```python
-from dataclasses import dataclass, field
-from typing import List, Dict, Any, Optional
-from datetime import datetime
-from enum import Enum
-import hashlib
-import json
+```rust
+use std::collections::HashMap;
+use chrono::{DateTime, Utc};
+use serde::{Serialize, Deserialize};
+use serde_json;
+use sha2::{Sha256, Digest};
 
-class AuditEventType(Enum):
-    # Request/Response события
-    REQUEST_RECEIVED = "request_received"
-    RESPONSE_GENERATED = "response_generated"
-    
-    # Security события
-    SECURITY_VIOLATION = "security_violation"
-    ACCESS_DENIED = "access_denied"
-    ATTACK_DETECTED = "attack_detected"
-    POLICY_VIOLATION = "policy_violation"
-    
-    # System события
-    TOOL_INVOKED = "tool_invoked"
-    DATA_ACCESSED = "data_accessed"
-    CONFIG_CHANGED = "config_changed"
-    
-    # Agent события
-    AGENT_CREATED = "agent_created"
-    AGENT_PERMISSION_CHANGED = "agent_permission_changed"
-    AGENT_TERMINATED = "agent_terminated"
-    
-    # Approval события
-    APPROVAL_REQUESTED = "approval_requested"
-    APPROVAL_GRANTED = "approval_granted"
-    APPROVAL_DENIED = "approval_denied"
+// Request/Response события
+// Security события
+// System события
+// Agent события
+// Approval события
+#[derive(Clone, Debug, Serialize, Deserialize)]
+enum AuditEventType {
+    RequestReceived,
+    ResponseGenerated,
+    SecurityViolation,
+    AccessDenied,
+    AttackDetected,
+    PolicyViolation,
+    ToolInvoked,
+    DataAccessed,
+    ConfigChanged,
+    AgentCreated,
+    AgentPermissionChanged,
+    AgentTerminated,
+    ApprovalRequested,
+    ApprovalGranted,
+    ApprovalDenied,
+}
 
-class AuditSeverity(Enum):
-    DEBUG = "debug"
-    INFO = "info"
-    WARNING = "warning"
-    ERROR = "error"
-    CRITICAL = "critical"
+#[derive(Clone, Debug, Serialize, Deserialize)]
+enum AuditSeverity {
+    Debug,
+    Info,
+    Warning,
+    Error,
+    Critical,
+}
 
-@dataclass
-class AuditEvent:
-    """Полное audit событие"""
-    event_id: str
-    timestamp: datetime
-    event_type: AuditEventType
-    severity: AuditSeverity
-    
-    # Контекст
-    session_id: str
-    user_id: str
-    agent_id: str
-    system_id: str
-    
-    # Детали события
-    action: str
-    resource: str
-    outcome: str  # success, failure, blocked
-    
-    # Rich data
-    request_data: Dict = field(default_factory=dict)
-    response_data: Dict = field(default_factory=dict)
-    metadata: Dict = field(default_factory=dict)
-    
-    # Tracing
-    trace_id: str = ""
-    parent_event_id: str = ""
-    
-    # Integrity
-    event_hash: str = ""
-    previous_hash: str = ""
-    
-    def __post_init__(self):
-        if not self.event_hash:
-            self.event_hash = self._compute_hash()
-    
-    def _compute_hash(self) -> str:
-        """Вычислить hash для верификации integrity"""
-        data = {
-            'event_id': self.event_id,
-            'timestamp': self.timestamp.isoformat(),
-            'event_type': self.event_type.value,
-            'action': self.action,
-            'resource': self.resource,
-            'outcome': self.outcome,
-            'previous_hash': self.previous_hash
+/// Полное audit событие
+#[derive(Clone, Debug, Serialize)]
+struct AuditEvent {
+    event_id: String,
+    timestamp: DateTime<Utc>,
+    event_type: AuditEventType,
+    severity: AuditSeverity,
+
+    // Контекст
+    session_id: String,
+    user_id: String,
+    agent_id: String,
+    system_id: String,
+
+    // Детали события
+    action: String,
+    resource: String,
+    outcome: String, // success, failure, blocked
+
+    // Rich data
+    request_data: HashMap<String, serde_json::Value>,
+    response_data: HashMap<String, serde_json::Value>,
+    metadata: HashMap<String, serde_json::Value>,
+
+    // Tracing
+    trace_id: String,
+    parent_event_id: String,
+
+    // Integrity
+    event_hash: String,
+    previous_hash: String,
+}
+
+impl AuditEvent {
+    fn new(
+        event_id: String, timestamp: DateTime<Utc>,
+        event_type: AuditEventType, severity: AuditSeverity,
+        session_id: String, user_id: String,
+        agent_id: String, system_id: String,
+        action: String, resource: String, outcome: String,
+    ) -> Self {
+        let mut event = Self {
+            event_id, timestamp, event_type, severity,
+            session_id, user_id, agent_id, system_id,
+            action, resource, outcome,
+            request_data: HashMap::new(),
+            response_data: HashMap::new(),
+            metadata: HashMap::new(),
+            trace_id: String::new(),
+            parent_event_id: String::new(),
+            event_hash: String::new(),
+            previous_hash: String::new(),
+        };
+        event.event_hash = event.compute_hash();
+        event
+    }
+
+    /// Вычислить hash для верификации integrity
+    fn compute_hash(&self) -> String {
+        let data = serde_json::json!({
+            "event_id": self.event_id,
+            "timestamp": self.timestamp.to_rfc3339(),
+            "event_type": format!("{:?}", self.event_type),
+            "action": self.action,
+            "resource": self.resource,
+            "outcome": self.outcome,
+            "previous_hash": self.previous_hash,
+        });
+        let content = serde_json::to_string(&data).unwrap();
+        let hash = Sha256::digest(content.as_bytes());
+        format!("{:x}", hash)
+    }
+
+    /// Проверить что событие не было изменено
+    fn verify_integrity(&self) -> bool {
+        self.event_hash == self.compute_hash()
+    }
+
+    fn to_map(&self) -> HashMap<String, serde_json::Value> {
+        let mut m = HashMap::new();
+        m.insert("event_id".into(), json!(self.event_id));
+        m.insert("timestamp".into(), json!(self.timestamp.to_rfc3339()));
+        m.insert("event_type".into(), json!(format!("{:?}", self.event_type)));
+        m.insert("severity".into(), json!(format!("{:?}", self.severity)));
+        m.insert("session_id".into(), json!(self.session_id));
+        m.insert("user_id".into(), json!(self.user_id));
+        m.insert("agent_id".into(), json!(self.agent_id));
+        m.insert("action".into(), json!(self.action));
+        m.insert("resource".into(), json!(self.resource));
+        m.insert("outcome".into(), json!(self.outcome));
+        m.insert("event_hash".into(), json!(self.event_hash));
+        m
+    }
+}
+
+/// Цепочка audit событий с верификацией integrity
+struct AuditChain {
+    chain_id: String,
+    events: Vec<AuditEvent>,
+}
+
+impl AuditChain {
+    fn new(chain_id: String) -> Self {
+        Self { chain_id, events: Vec::new() }
+    }
+
+    /// Добавить событие в цепочку с hash linking
+    fn add_event(&mut self, mut event: AuditEvent) {
+        if let Some(last) = self.events.last() {
+            event.previous_hash = last.event_hash.clone();
+            event.event_hash = event.compute_hash();
         }
-        content = json.dumps(data, sort_keys=True)
-        return hashlib.sha256(content.encode()).hexdigest()
-    
-    def verify_integrity(self) -> bool:
-        """Проверить что событие не было изменено"""
-        return self.event_hash == self._compute_hash()
-    
-    def to_dict(self) -> dict:
-        return {
-            'event_id': self.event_id,
-            'timestamp': self.timestamp.isoformat(),
-            'event_type': self.event_type.value,
-            'severity': self.severity.value,
-            'session_id': self.session_id,
-            'user_id': self.user_id,
-            'agent_id': self.agent_id,
-            'action': self.action,
-            'resource': self.resource,
-            'outcome': self.outcome,
-            'metadata': self.metadata,
-            'event_hash': self.event_hash
-        }
+        self.events.push(event);
+    }
 
-@dataclass
-class AuditChain:
-    """Цепочка audit событий с верификацией integrity"""
-    chain_id: str
-    events: List[AuditEvent] = field(default_factory=list)
-    
-    def add_event(self, event: AuditEvent):
-        """Добавить событие в цепочку с hash linking"""
-        if self.events:
-            event.previous_hash = self.events[-1].event_hash
-            event.event_hash = event._compute_hash()
-        self.events.append(event)
-    
-    def verify_chain(self) -> bool:
-        """Верифицировать integrity всей цепочки"""
-        for i, event in enumerate(self.events):
-            if not event.verify_integrity():
-                return False
-            if i > 0 and event.previous_hash != self.events[i-1].event_hash:
-                return False
-        return True
+    /// Верифицировать integrity всей цепочки
+    fn verify_chain(&self) -> bool {
+        for (i, event) in self.events.iter().enumerate() {
+            if !event.verify_integrity() {
+                return false;
+            }
+            if i > 0 && event.previous_hash != self.events[i - 1].event_hash {
+                return false;
+            }
+        }
+        true
+    }
+}
 ```
 
 ---
@@ -190,187 +226,208 @@ class AuditChain:
 
 ### 3.1 Реализация Logger
 
-```python
-from abc import ABC, abstractmethod
-from collections import defaultdict
-import threading
-import queue
-import uuid
+```rust
+use std::collections::HashMap;
+use std::sync::{Arc, RwLock};
+use std::sync::mpsc;
+use uuid::Uuid;
 
-class AuditBackend(ABC):
-    """Абстрактный audit storage backend"""
-    
-    @abstractmethod
-    def write(self, event: AuditEvent):
-        pass
-    
-    @abstractmethod
-    def query(self, filters: Dict) -> List[AuditEvent]:
-        pass
+/// Абстрактный audit storage backend
+trait AuditBackend: Send + Sync {
+    fn write(&self, event: AuditEvent);
+    fn query(&self, filters: &HashMap<String, String>) -> Vec<AuditEvent>;
+}
 
-class InMemoryAuditBackend(AuditBackend):
-    """In-memory backend для разработки"""
-    
-    def __init__(self, max_events: int = 100000):
-        self.events: List[AuditEvent] = []
-        self.max_events = max_events
-        self.lock = threading.RLock()
-        
-        # Индексы
-        self.by_session: Dict[str, List[int]] = defaultdict(list)
-        self.by_user: Dict[str, List[int]] = defaultdict(list)
-        self.by_type: Dict[str, List[int]] = defaultdict(list)
-    
-    def write(self, event: AuditEvent):
-        with self.lock:
-            idx = len(self.events)
-            self.events.append(event)
-            
-            # Обновить индексы
-            self.by_session[event.session_id].append(idx)
-            self.by_user[event.user_id].append(idx)
-            self.by_type[event.event_type.value].append(idx)
-            
-            # Trim при необходимости
-            if len(self.events) > self.max_events:
-                self._trim()
-    
-    def query(self, filters: Dict) -> List[AuditEvent]:
-        with self.lock:
-            candidates = None
-            
-            # Использовать индексы если доступны
-            if 'session_id' in filters:
-                indices = self.by_session.get(filters['session_id'], [])
-                candidates = set(indices)
-            
-            if 'user_id' in filters:
-                indices = self.by_user.get(filters['user_id'], [])
-                if candidates is None:
-                    candidates = set(indices)
-                else:
-                    candidates &= set(indices)
-            
-            if 'event_type' in filters:
-                indices = self.by_type.get(filters['event_type'], [])
-                if candidates is None:
-                    candidates = set(indices)
-                else:
-                    candidates &= set(indices)
-            
-            # Если индекс не использован, сканировать все
-            if candidates is None:
-                candidates = set(range(len(self.events)))
-            
-            # Фильтровать кандидатов
-            results = []
-            for idx in sorted(candidates, reverse=True):
-                event = self.events[idx]
-                if self._matches_filters(event, filters):
-                    results.append(event)
-                    if 'limit' in filters and len(results) >= filters['limit']:
-                        break
-            
-            return results
-    
-    def _matches_filters(self, event: AuditEvent, filters: Dict) -> bool:
-        if 'start_time' in filters and event.timestamp < filters['start_time']:
-            return False
-        if 'end_time' in filters and event.timestamp > filters['end_time']:
-            return False
-        if 'severity' in filters and event.severity.value != filters['severity']:
-            return False
-        if 'outcome' in filters and event.outcome != filters['outcome']:
-            return False
-        return True
+/// In-memory backend для разработки
+struct InMemoryAuditBackend {
+    events: RwLock<Vec<AuditEvent>>,
+    max_events: usize,
+    // Индексы
+    by_session: RwLock<HashMap<String, Vec<usize>>>,
+    by_user: RwLock<HashMap<String, Vec<usize>>>,
+    by_type: RwLock<HashMap<String, Vec<usize>>>,
+}
 
-class AuditLogger:
-    """Главный audit logger"""
-    
-    def __init__(self, backend: AuditBackend, async_mode: bool = True):
-        self.backend = backend
-        self.async_mode = async_mode
-        self.chain = AuditChain(chain_id=str(uuid.uuid4()))
-        
-        if async_mode:
-            self.queue = queue.Queue(maxsize=10000)
-            self.worker = threading.Thread(target=self._process_queue, daemon=True)
-            self.worker.start()
-    
-    def log(self, event_type: AuditEventType, severity: AuditSeverity,
-            session_id: str, user_id: str, agent_id: str,
-            action: str, resource: str, outcome: str,
-            request_data: Dict = None, response_data: Dict = None,
-            metadata: Dict = None, system_id: str = "default") -> str:
-        """Логировать audit событие"""
-        event = AuditEvent(
-            event_id=str(uuid.uuid4()),
-            timestamp=datetime.utcnow(),
-            event_type=event_type,
-            severity=severity,
-            session_id=session_id,
-            user_id=user_id,
-            agent_id=agent_id,
-            system_id=system_id,
-            action=action,
-            resource=resource,
-            outcome=outcome,
-            request_data=request_data or {},
-            response_data=response_data or {},
-            metadata=metadata or {}
-        )
-        
-        if self.async_mode:
-            try:
-                self.queue.put_nowait(event)
-            except queue.Full:
-                self.chain.add_event(event)
-                self.backend.write(event)
-        else:
-            self.chain.add_event(event)
-            self.backend.write(event)
-        
-        return event.event_id
-    
-    # Convenience методы
-    def log_request(self, session_id: str, user_id: str, agent_id: str,
-                    request_data: Dict) -> str:
-        return self.log(
-            AuditEventType.REQUEST_RECEIVED,
-            AuditSeverity.INFO,
+impl InMemoryAuditBackend {
+    fn new(max_events: usize) -> Self {
+        Self {
+            events: RwLock::new(Vec::new()),
+            max_events,
+            by_session: RwLock::new(HashMap::new()),
+            by_user: RwLock::new(HashMap::new()),
+            by_type: RwLock::new(HashMap::new()),
+        }
+    }
+}
+
+impl AuditBackend for InMemoryAuditBackend {
+    fn write(&self, event: AuditEvent) {
+        let mut events = self.events.write().unwrap();
+        let idx = events.len();
+
+        // Обновить индексы
+        self.by_session.write().unwrap()
+            .entry(event.session_id.clone()).or_default().push(idx);
+        self.by_user.write().unwrap()
+            .entry(event.user_id.clone()).or_default().push(idx);
+        self.by_type.write().unwrap()
+            .entry(format!("{:?}", event.event_type)).or_default().push(idx);
+
+        events.push(event);
+
+        // Trim при необходимости
+        if events.len() > self.max_events {
+            events.drain(0..events.len() / 4);
+        }
+    }
+
+    fn query(&self, filters: &HashMap<String, String>) -> Vec<AuditEvent> {
+        let events = self.events.read().unwrap();
+        let mut candidates: Option<Vec<usize>> = None;
+
+        // Использовать индексы если доступны
+        if let Some(sid) = filters.get("session_id") {
+            let by_session = self.by_session.read().unwrap();
+            let indices = by_session.get(sid).cloned().unwrap_or_default();
+            candidates = Some(indices);
+        }
+        if let Some(uid) = filters.get("user_id") {
+            let by_user = self.by_user.read().unwrap();
+            let indices = by_user.get(uid).cloned().unwrap_or_default();
+            candidates = Some(match candidates {
+                Some(c) => c.into_iter()
+                    .filter(|i| indices.contains(i)).collect(),
+                None => indices,
+            });
+        }
+        if let Some(et) = filters.get("event_type") {
+            let by_type = self.by_type.read().unwrap();
+            let indices = by_type.get(et).cloned().unwrap_or_default();
+            candidates = Some(match candidates {
+                Some(c) => c.into_iter()
+                    .filter(|i| indices.contains(i)).collect(),
+                None => indices,
+            });
+        }
+
+        // Если индекс не использован, сканировать все
+        let indices = candidates
+            .unwrap_or_else(|| (0..events.len()).collect());
+
+        let limit: usize = filters.get("limit")
+            .and_then(|l| l.parse().ok()).unwrap_or(usize::MAX);
+
+        indices.into_iter().rev()
+            .filter_map(|idx| events.get(idx).cloned())
+            .take(limit)
+            .collect()
+    }
+}
+
+/// Главный audit logger
+struct AuditLogger {
+    backend: Arc<dyn AuditBackend>,
+    chain: RwLock<AuditChain>,
+    sender: Option<mpsc::Sender<AuditEvent>>,
+}
+
+impl AuditLogger {
+    fn new(backend: Arc<dyn AuditBackend>, async_mode: bool) -> Self {
+        let chain = RwLock::new(AuditChain::new(Uuid::new_v4().to_string()));
+        let sender = if async_mode {
+            let (tx, rx) = mpsc::channel::<AuditEvent>();
+            let be = backend.clone();
+            std::thread::spawn(move || {
+                for event in rx {
+                    be.write(event);
+                }
+            });
+            Some(tx)
+        } else {
+            None
+        };
+        Self { backend, chain, sender }
+    }
+
+    /// Логировать audit событие
+    fn log(
+        &self, event_type: AuditEventType, severity: AuditSeverity,
+        session_id: &str, user_id: &str, agent_id: &str,
+        action: &str, resource: &str, outcome: &str,
+        request_data: Option<HashMap<String, serde_json::Value>>,
+        response_data: Option<HashMap<String, serde_json::Value>>,
+        metadata: Option<HashMap<String, serde_json::Value>>,
+        system_id: &str,
+    ) -> String {
+        let mut event = AuditEvent::new(
+            Uuid::new_v4().to_string(), Utc::now(),
+            event_type, severity,
+            session_id.into(), user_id.into(),
+            agent_id.into(), system_id.into(),
+            action.into(), resource.into(), outcome.into(),
+        );
+        event.request_data = request_data.unwrap_or_default();
+        event.response_data = response_data.unwrap_or_default();
+        event.metadata = metadata.unwrap_or_default();
+
+        let event_id = event.event_id.clone();
+
+        if let Some(ref sender) = self.sender {
+            if sender.send(event.clone()).is_err() {
+                self.chain.write().unwrap().add_event(event.clone());
+                self.backend.write(event);
+            }
+        } else {
+            self.chain.write().unwrap().add_event(event.clone());
+            self.backend.write(event);
+        }
+
+        event_id
+    }
+
+    // Convenience методы
+    fn log_request(&self, session_id: &str, user_id: &str,
+                   agent_id: &str, request_data: HashMap<String, serde_json::Value>) -> String {
+        self.log(
+            AuditEventType::RequestReceived, AuditSeverity::Info,
             session_id, user_id, agent_id,
-            "process_request", "input",
-            "received",
-            request_data=request_data
+            "process_request", "input", "received",
+            Some(request_data), None, None, "default",
         )
-    
-    def log_security_violation(self, session_id: str, user_id: str, agent_id: str,
-                               violation_type: str, details: Dict) -> str:
-        return self.log(
-            AuditEventType.SECURITY_VIOLATION,
-            AuditSeverity.WARNING,
+    }
+
+    fn log_security_violation(&self, session_id: &str, user_id: &str,
+                              agent_id: &str, violation_type: &str,
+                              details: HashMap<String, serde_json::Value>) -> String {
+        self.log(
+            AuditEventType::SecurityViolation, AuditSeverity::Warning,
             session_id, user_id, agent_id,
-            violation_type, "security",
-            "blocked",
-            metadata=details
+            violation_type, "security", "blocked",
+            None, None, Some(details), "default",
         )
-    
-    def log_attack_detected(self, session_id: str, user_id: str, agent_id: str,
-                            attack_type: str, confidence: float, details: Dict) -> str:
-        return self.log(
-            AuditEventType.ATTACK_DETECTED,
-            AuditSeverity.CRITICAL,
+    }
+
+    fn log_attack_detected(&self, session_id: &str, user_id: &str,
+                           agent_id: &str, attack_type: &str,
+                           confidence: f64,
+                           mut details: HashMap<String, serde_json::Value>) -> String {
+        details.insert("confidence".into(), serde_json::json!(confidence));
+        self.log(
+            AuditEventType::AttackDetected, AuditSeverity::Critical,
             session_id, user_id, agent_id,
-            attack_type, "security",
-            "detected",
-            metadata={**details, 'confidence': confidence}
+            attack_type, "security", "detected",
+            None, None, Some(details), "default",
         )
-    
-    def query(self, **filters) -> List[AuditEvent]:
-        return self.backend.query(filters)
-    
-    def verify_chain_integrity(self) -> bool:
-        return self.chain.verify_chain()
+    }
+
+    fn query(&self, filters: &HashMap<String, String>) -> Vec<AuditEvent> {
+        self.backend.query(filters)
+    }
+
+    fn verify_chain_integrity(&self) -> bool {
+        self.chain.read().unwrap().verify_chain()
+    }
+}
 ```
 
 ---
@@ -379,170 +436,242 @@ class AuditLogger:
 
 ### 4.1 Audit Analyzer
 
-```python
-from collections import Counter
+```rust
+use std::collections::HashMap;
 
-class AuditAnalyzer:
-    """Анализ audit логов для insights"""
-    
-    def __init__(self, logger: AuditLogger):
-        self.logger = logger
-    
-    def get_security_summary(self, hours: int = 24) -> Dict:
-        """Получить сводку security событий"""
-        from datetime import timedelta
-        start = datetime.utcnow() - timedelta(hours=hours)
-        
-        security_types = [
-            AuditEventType.SECURITY_VIOLATION.value,
-            AuditEventType.ACCESS_DENIED.value,
-            AuditEventType.ATTACK_DETECTED.value,
-            AuditEventType.POLICY_VIOLATION.value
-        ]
-        
-        events = []
-        for event_type in security_types:
-            events.extend(self.logger.query(
-                event_type=event_type,
-                start_time=start
-            ))
-        
-        # Агрегация
-        by_type = Counter(e.event_type.value for e in events)
-        by_severity = Counter(e.severity.value for e in events)
-        by_agent = Counter(e.agent_id for e in events)
-        by_user = Counter(e.user_id for e in events)
-        
-        return {
-            'total_events': len(events),
-            'by_type': dict(by_type),
-            'by_severity': dict(by_severity),
-            'top_agents': dict(by_agent.most_common(5)),
-            'top_users': dict(by_user.most_common(5)),
-            'period_hours': hours
+/// Анализ audit логов для insights
+struct AuditAnalyzer {
+    logger: Arc<AuditLogger>,
+}
+
+impl AuditAnalyzer {
+    fn new(logger: Arc<AuditLogger>) -> Self {
+        Self { logger }
+    }
+
+    /// Получить сводку security событий
+    fn get_security_summary(&self, hours: i64) -> HashMap<String, serde_json::Value> {
+        let start = Utc::now() - chrono::Duration::hours(hours);
+
+        let security_types = vec![
+            "AttackDetected", "SecurityViolation",
+            "AccessDenied", "PolicyViolation",
+        ];
+
+        let mut events: Vec<AuditEvent> = Vec::new();
+        for event_type in &security_types {
+            let mut filters = HashMap::new();
+            filters.insert("event_type".into(), event_type.to_string());
+            events.extend(self.logger.query(&filters));
         }
-    
-    def detect_anomalies(self, session_id: str) -> List[Dict]:
-        """Детекция аномалий в сессии"""
-        events = self.logger.query(session_id=session_id)
-        
-        anomalies = []
-        
-        # Проверка rapid requests
-        if len(events) > 1:
-            times = [e.timestamp for e in events]
-            intervals = [(times[i+1] - times[i]).total_seconds() 
-                        for i in range(len(times)-1)]
-            
-            if any(i < 0.1 for i in intervals):
-                anomalies.append({
-                    'type': 'rapid_requests',
-                    'severity': 'medium',
-                    'description': 'Обнаружен необычно высокий rate запросов'
-                })
-        
-        # Проверка many failures
-        failures = [e for e in events if e.outcome == 'failure']
-        if len(failures) > len(events) * 0.5:
-            anomalies.append({
-                'type': 'high_failure_rate',
-                'severity': 'high',
-                'description': f'{len(failures)} failures из {len(events)} событий'
-            })
-        
-        # Проверка security events
-        security_events = [e for e in events 
-                         if e.event_type in [AuditEventType.SECURITY_VIOLATION,
-                                            AuditEventType.ACCESS_DENIED,
-                                            AuditEventType.ATTACK_DETECTED]]
-        if security_events:
-            anomalies.append({
-                'type': 'security_events',
-                'severity': 'critical',
-                'description': f'{len(security_events)} security событий в сессии',
-                'events': [e.event_id for e in security_events]
-            })
-        
-        return anomalies
-    
-    def generate_session_report(self, session_id: str) -> Dict:
-        """Сгенерировать полный отчёт сессии"""
-        events = self.logger.query(session_id=session_id)
-        
-        if not events:
-            return {'session_id': session_id, 'status': 'not_found'}
-        
-        events = sorted(events, key=lambda e: e.timestamp)
-        
-        return {
-            'session_id': session_id,
-            'start_time': events[0].timestamp.isoformat(),
-            'end_time': events[-1].timestamp.isoformat(),
-            'duration_seconds': (events[-1].timestamp - events[0].timestamp).total_seconds(),
-            'total_events': len(events),
-            'event_types': dict(Counter(e.event_type.value for e in events)),
-            'outcomes': dict(Counter(e.outcome for e in events)),
-            'agents_involved': list(set(e.agent_id for e in events)),
-            'anomalies': self.detect_anomalies(session_id)
+
+        // Агрегация
+        let mut by_type: HashMap<String, usize> = HashMap::new();
+        let mut by_severity: HashMap<String, usize> = HashMap::new();
+        let mut by_agent: HashMap<String, usize> = HashMap::new();
+        let mut by_user: HashMap<String, usize> = HashMap::new();
+
+        for e in &events {
+            *by_type.entry(format!("{:?}", e.event_type)).or_insert(0) += 1;
+            *by_severity.entry(format!("{:?}", e.severity)).or_insert(0) += 1;
+            *by_agent.entry(e.agent_id.clone()).or_insert(0) += 1;
+            *by_user.entry(e.user_id.clone()).or_insert(0) += 1;
         }
+
+        let mut result = HashMap::new();
+        result.insert("total_events".into(), json!(events.len()));
+        result.insert("by_type".into(), json!(by_type));
+        result.insert("by_severity".into(), json!(by_severity));
+        result.insert("top_agents".into(), json!(by_agent));
+        result.insert("top_users".into(), json!(by_user));
+        result.insert("period_hours".into(), json!(hours));
+        result
+    }
+
+    /// Детекция аномалий в сессии
+    fn detect_anomalies(&self, session_id: &str) -> Vec<HashMap<String, serde_json::Value>> {
+        let mut filters = HashMap::new();
+        filters.insert("session_id".into(), session_id.to_string());
+        let events = self.logger.query(&filters);
+
+        let mut anomalies = Vec::new();
+
+        // Проверка rapid requests
+        if events.len() > 1 {
+            let times: Vec<DateTime<Utc>> = events.iter().map(|e| e.timestamp).collect();
+            let has_rapid = times.windows(2)
+                .any(|w| (w[1] - w[0]).num_milliseconds() < 100);
+
+            if has_rapid {
+                let mut a = HashMap::new();
+                a.insert("type".into(), json!("rapid_requests"));
+                a.insert("severity".into(), json!("medium"));
+                a.insert("description".into(),
+                    json!("Обнаружен необычно высокий rate запросов"));
+                anomalies.push(a);
+            }
+        }
+
+        // Проверка many failures
+        let failures: Vec<&AuditEvent> = events.iter()
+            .filter(|e| e.outcome == "failure").collect();
+        if failures.len() > events.len() / 2 {
+            let mut a = HashMap::new();
+            a.insert("type".into(), json!("high_failure_rate"));
+            a.insert("severity".into(), json!("high"));
+            a.insert("description".into(),
+                json!(format!("{} failures из {} событий", failures.len(), events.len())));
+            anomalies.push(a);
+        }
+
+        // Проверка security events
+        let security_events: Vec<&AuditEvent> = events.iter()
+            .filter(|e| matches!(e.event_type,
+                AuditEventType::SecurityViolation |
+                AuditEventType::AccessDenied |
+                AuditEventType::AttackDetected))
+            .collect();
+        if !security_events.is_empty() {
+            let mut a = HashMap::new();
+            a.insert("type".into(), json!("security_events"));
+            a.insert("severity".into(), json!("critical"));
+            a.insert("description".into(),
+                json!(format!("{} security событий в сессии", security_events.len())));
+            a.insert("events".into(),
+                json!(security_events.iter().map(|e| e.event_id.clone()).collect::<Vec<_>>()));
+            anomalies.push(a);
+        }
+
+        anomalies
+    }
+
+    /// Сгенерировать полный отчёт сессии
+    fn generate_session_report(&self, session_id: &str) -> HashMap<String, serde_json::Value> {
+        let mut filters = HashMap::new();
+        filters.insert("session_id".into(), session_id.to_string());
+        let mut events = self.logger.query(&filters);
+
+        if events.is_empty() {
+            let mut r = HashMap::new();
+            r.insert("session_id".into(), json!(session_id));
+            r.insert("status".into(), json!("not_found"));
+            return r;
+        }
+
+        events.sort_by_key(|e| e.timestamp);
+
+        let mut event_types: HashMap<String, usize> = HashMap::new();
+        let mut outcomes: HashMap<String, usize> = HashMap::new();
+        let mut agents: Vec<String> = Vec::new();
+
+        for e in &events {
+            *event_types.entry(format!("{:?}", e.event_type)).or_insert(0) += 1;
+            *outcomes.entry(e.outcome.clone()).or_insert(0) += 1;
+            if !agents.contains(&e.agent_id) {
+                agents.push(e.agent_id.clone());
+            }
+        }
+
+        let duration = (events.last().unwrap().timestamp
+            - events.first().unwrap().timestamp).num_seconds();
+
+        let mut r = HashMap::new();
+        r.insert("session_id".into(), json!(session_id));
+        r.insert("start_time".into(), json!(events.first().unwrap().timestamp.to_rfc3339()));
+        r.insert("end_time".into(), json!(events.last().unwrap().timestamp.to_rfc3339()));
+        r.insert("duration_seconds".into(), json!(duration));
+        r.insert("total_events".into(), json!(events.len()));
+        r.insert("event_types".into(), json!(event_types));
+        r.insert("outcomes".into(), json!(outcomes));
+        r.insert("agents_involved".into(), json!(agents));
+        r.insert("anomalies".into(), json!(self.detect_anomalies(session_id)));
+        r
+    }
+}
 ```
 
 ---
 
 ## 5. Интеграция с SENTINEL
 
-```python
-from dataclasses import dataclass
+```rust
+use std::sync::Arc;
 
-@dataclass
-class AuditConfig:
-    """Конфигурация audit engine"""
-    async_mode: bool = True
-    max_events: int = 100000
-    retention_days: int = 90
-    enable_integrity_check: bool = True
+/// Конфигурация audit engine
+struct AuditConfig {
+    async_mode: bool,
+    max_events: usize,
+    retention_days: u32,
+    enable_integrity_check: bool,
+}
 
-class SENTINELAuditEngine:
-    """Audit engine для SENTINEL framework"""
-    
-    def __init__(self, config: AuditConfig):
-        self.config = config
-        self.backend = InMemoryAuditBackend(config.max_events)
-        self.logger = AuditLogger(self.backend, config.async_mode)
-        self.analyzer = AuditAnalyzer(self.logger)
-    
-    def log_request(self, session_id: str, user_id: str, agent_id: str,
-                    request: Dict) -> str:
-        return self.logger.log_request(session_id, user_id, agent_id, request)
-    
-    def log_response(self, session_id: str, user_id: str, agent_id: str,
-                     response: Dict, outcome: str = "success") -> str:
-        return self.logger.log(
-            AuditEventType.RESPONSE_GENERATED,
-            AuditSeverity.INFO,
+impl Default for AuditConfig {
+    fn default() -> Self {
+        Self {
+            async_mode: true,
+            max_events: 100_000,
+            retention_days: 90,
+            enable_integrity_check: true,
+        }
+    }
+}
+
+/// Audit engine для SENTINEL framework
+struct SENTINELAuditEngine {
+    config: AuditConfig,
+    backend: Arc<InMemoryAuditBackend>,
+    logger: Arc<AuditLogger>,
+    analyzer: AuditAnalyzer,
+}
+
+impl SENTINELAuditEngine {
+    fn new(config: AuditConfig) -> Self {
+        let backend = Arc::new(InMemoryAuditBackend::new(config.max_events));
+        let logger = Arc::new(AuditLogger::new(backend.clone(), config.async_mode));
+        let analyzer = AuditAnalyzer::new(logger.clone());
+        Self { config, backend, logger, analyzer }
+    }
+
+    fn log_request(&self, session_id: &str, user_id: &str,
+                   agent_id: &str, request: HashMap<String, serde_json::Value>) -> String {
+        self.logger.log_request(session_id, user_id, agent_id, request)
+    }
+
+    fn log_response(&self, session_id: &str, user_id: &str,
+                    agent_id: &str, response: HashMap<String, serde_json::Value>,
+                    outcome: &str) -> String {
+        self.logger.log(
+            AuditEventType::ResponseGenerated, AuditSeverity::Info,
             session_id, user_id, agent_id,
-            "generate_response", "output",
-            outcome,
-            response_data=response
+            "generate_response", "output", outcome,
+            None, Some(response), None, "default",
         )
-    
-    def log_attack(self, session_id: str, user_id: str, agent_id: str,
-                   attack_type: str, confidence: float, details: Dict) -> str:
-        return self.logger.log_attack_detected(
+    }
+
+    fn log_attack(&self, session_id: &str, user_id: &str,
+                  agent_id: &str, attack_type: &str,
+                  confidence: f64, details: HashMap<String, serde_json::Value>) -> String {
+        self.logger.log_attack_detected(
             session_id, user_id, agent_id,
-            attack_type, confidence, details
+            attack_type, confidence, details,
         )
-    
-    def get_security_summary(self, hours: int = 24) -> Dict:
-        return self.analyzer.get_security_summary(hours)
-    
-    def get_session_report(self, session_id: str) -> Dict:
-        return self.analyzer.generate_session_report(session_id)
-    
-    def verify_integrity(self) -> bool:
-        if not self.config.enable_integrity_check:
-            return True
-        return self.logger.verify_chain_integrity()
+    }
+
+    fn get_security_summary(&self, hours: i64) -> HashMap<String, serde_json::Value> {
+        self.analyzer.get_security_summary(hours)
+    }
+
+    fn get_session_report(&self, session_id: &str) -> HashMap<String, serde_json::Value> {
+        self.analyzer.generate_session_report(session_id)
+    }
+
+    fn verify_integrity(&self) -> bool {
+        if !self.config.enable_integrity_check {
+            return true;
+        }
+        self.logger.verify_chain_integrity()
+    }
+}
 ```
 
 ---

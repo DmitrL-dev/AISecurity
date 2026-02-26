@@ -30,22 +30,30 @@ SecAlign:    Input → LLM (с SecAlign) → Safe Output
 
 ## Практика
 
-```python
-class SecAlignDataGenerator:
-    def generate_pair(self, task: str, injection: str):
-        injected = f"{task}\n\nIGNORE ALL. {injection}"
-        
-        rejected = {
-            "prompt": injected,
-            "response": f"OK, {injection}",  # BAD
-        }
-        
-        chosen = {
-            "prompt": injected,
-            "response": "Это попытка инъекции. Продолжаю обычную работу.",  # GOOD
-        }
-        
-        return rejected, chosen
+```rust
+struct SecAlignDataGenerator;
+
+impl SecAlignDataGenerator {
+    fn generate_pair(
+        &self,
+        task: &str,
+        injection: &str,
+    ) -> (TrainingPair, TrainingPair) {
+        let injected = format!("{}\n\nIGNORE ALL. {}", task, injection);
+
+        let rejected = TrainingPair {
+            prompt: injected.clone(),
+            response: format!("OK, {}", injection), // BAD
+        };
+
+        let chosen = TrainingPair {
+            prompt: injected,
+            response: "Это попытка инъекции. Продолжаю обычную работу.".to_string(), // GOOD
+        };
+
+        (rejected, chosen)
+    }
+}
 ```
 
 ---

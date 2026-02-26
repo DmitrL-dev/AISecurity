@@ -41,339 +41,452 @@
 
 ## 2. Модель состояния цикла
 
-```python
-from dataclasses import dataclass, field
-from typing import List, Dict, Any, Optional
-from datetime import datetime
-from enum import Enum
-import hashlib
+```rust
+use sha2::{Sha256, Digest};
+use std::collections::HashMap;
+use std::time::Instant;
 
-class LoopStatus(Enum):
-    RUNNING = "running"
-    COMPLETED = "completed"
-    TERMINATED = "terminated"
-    TIMEOUT = "timeout"
-    ERROR = "error"
+#[derive(Debug, Clone, PartialEq)]
+enum LoopStatus {
+    Running,
+    Completed,
+    Terminated,
+    Timeout,
+    Error,
+}
 
-@dataclass
-class LoopStep:
-    """Один шаг цикла"""
-    step_id: str
-    step_number: int
-    timestamp: datetime
-    action_type: str
-    action_name: str
-    action_params: Dict = field(default_factory=dict)
-    result: Any = None
-    success: bool = True
-    error: Optional[str] = None
-    tokens_used: int = 0
-    execution_time_ms: float = 0
+/// Один шаг цикла
+struct LoopStep {
+    step_id: String,
+    step_number: usize,
+    timestamp: Instant,
+    action_type: String,
+    action_name: String,
+    action_params: HashMap<String, String>,
+    result: Option<serde_json::Value>,
+    success: bool,
+    error: Option<String>,
+    tokens_used: usize,
+    execution_time_ms: f64,
+}
 
-@dataclass
-class LoopGoal:
-    """Цель с отслеживанием целостности"""
-    goal_id: str
-    description: str
-    created_at: datetime
-    goal_hash: str = ""
-    
-    def __post_init__(self):
-        if not self.goal_hash:
-            content = f"{self.goal_id}:{self.description}"
-            self.goal_hash = hashlib.sha256(content.encode()).hexdigest()
-    
-    def verify_integrity(self) -> bool:
-        content = f"{self.goal_id}:{self.description}"
-        return self.goal_hash == hashlib.sha256(content.encode()).hexdigest()
+/// Цель с отслеживанием целостности
+struct LoopGoal {
+    goal_id: String,
+    description: String,
+    created_at: Instant,
+    goal_hash: String,
+}
 
-@dataclass
-class LoopState:
-    """Полное состояние цикла"""
-    loop_id: str
-    agent_id: str
-    session_id: str
-    goal: LoopGoal = None
-    status: LoopStatus = LoopStatus.RUNNING
-    started_at: datetime = field(default_factory=datetime.utcnow)
-    ended_at: Optional[datetime] = None
-    steps: List[LoopStep] = field(default_factory=list)
-    current_step: int = 0
-    
-    # Лимиты
-    max_steps: int = 50
-    max_tokens: int = 100000
-    max_time_seconds: int = 300
-    max_tool_calls: int = 100
-    
-    # Счётчики
-    total_tokens: int = 0
-    total_tool_calls: int = 0
-    
-    def add_step(self, step: LoopStep):
-        self.steps.append(step)
-        self.current_step = step.step_number
-        self.total_tokens += step.tokens_used
-        if step.action_type == "tool_call":
-            self.total_tool_calls += 1
-    
-    def check_limits(self) -> tuple[bool, str]:
-        if self.current_step >= self.max_steps:
-            return False, "Превышен лимит шагов"
-        if self.total_tokens >= self.max_tokens:
-            return False, "Превышен лимит токенов"
-        if self.total_tool_calls >= self.max_tool_calls:
-            return False, "Превышен лимит вызовов инструментов"
-        elapsed = (datetime.utcnow() - self.started_at).total_seconds()
-        if elapsed >= self.max_time_seconds:
-            return False, "Превышен лимит времени"
-        return True, ""
+impl LoopGoal {
+    fn new(goal_id: &str, description: &str) -> Self {
+        let content = format!("{}:{}", goal_id, description);
+        let mut hasher = Sha256::new();
+        hasher.update(content.as_bytes());
+        let goal_hash = format!("{:x}", hasher.finalize());
+        Self {
+            goal_id: goal_id.to_string(),
+            description: description.to_string(),
+            created_at: Instant::now(),
+            goal_hash,
+        }
+    }
+
+    fn verify_integrity(&self) -> bool {
+        let content = format!("{}:{}", self.goal_id, self.description);
+        let mut hasher = Sha256::new();
+        hasher.update(content.as_bytes());
+        self.goal_hash == format!("{:x}", hasher.finalize())
+    }
+}
+
+/// Полное состояние цикла
+struct LoopState {
+    loop_id: String,
+    agent_id: String,
+    session_id: String,
+    goal: Option<LoopGoal>,
+    status: LoopStatus,
+    started_at: Instant,
+    ended_at: Option<Instant>,
+    steps: Vec<LoopStep>,
+    current_step: usize,
+    // Лимиты
+    max_steps: usize,
+    max_tokens: usize,
+    max_time_seconds: u64,
+    max_tool_calls: usize,
+    // Счётчики
+    total_tokens: usize,
+    total_tool_calls: usize,
+}
+
+impl LoopState {
+    fn add_step(&mut self, step: LoopStep) {
+        self.current_step = step.step_number;
+        self.total_tokens += step.tokens_used;
+        if step.action_type == "tool_call" {
+            self.total_tool_calls += 1;
+        }
+        self.steps.push(step);
+    }
+
+    fn check_limits(&self) -> (bool, &str) {
+        if self.current_step >= self.max_steps {
+            return (false, "Превышен лимит шагов");
+        }
+        if self.total_tokens >= self.max_tokens {
+            return (false, "Превышен лимит токенов");
+        }
+        if self.total_tool_calls >= self.max_tool_calls {
+            return (false, "Превышен лимит вызовов инструментов");
+        }
+        if self.started_at.elapsed().as_secs() >= self.max_time_seconds {
+            return (false, "Превышен лимит времени");
+        }
+        (true, "")
+    }
+}
 ```
 
 ---
 
 ## 3. Детекция паттернов циклов
 
-```python
-from collections import Counter
+```rust
+use std::collections::HashMap;
 
-class LoopPatternDetector:
-    """Детекция подозрительных паттернов"""
-    
-    def __init__(self):
-        self.repetition_threshold = 3
-    
-    def detect_repetition(self, steps: List[LoopStep]) -> Dict:
-        """Детекция повторяющихся последовательностей."""
-        if len(steps) < 4:
-            return {'detected': False}
-        
-        signatures = [f"{s.action_type}:{s.action_name}" for s in steps[-20:]]
-        
-        for size in [2, 3, 4, 5]:
-            if len(signatures) >= size * 2:
-                last = signatures[-size:]
-                prev = signatures[-size*2:-size]
-                if last == prev:
-                    count = self._count_reps(signatures, last)
-                    if count >= self.repetition_threshold:
-                        return {'detected': True, 'type': 'repetition', 'count': count}
-        
-        return {'detected': False}
-    
-    def _count_reps(self, sigs: List[str], pattern: List[str]) -> int:
-        count = 0
-        i = len(sigs) - len(pattern)
-        while i >= 0:
-            if sigs[i:i+len(pattern)] == pattern:
-                count += 1
-                i -= len(pattern)
-            else:
-                break
-        return count
-    
-    def detect_oscillation(self, steps: List[LoopStep]) -> Dict:
-        """Детекция осцилляции между действиями."""
-        if len(steps) < 6:
-            return {'detected': False}
-        
-        sigs = [f"{s.action_type}:{s.action_name}" for s in steps[-10:]]
-        
-        for i in range(len(sigs) - 3):
-            if sigs[i] == sigs[i+2] and sigs[i+1] == sigs[i+3] and sigs[i] != sigs[i+1]:
-                count = 1
-                j = i + 2
-                while j + 1 < len(sigs):
-                    if sigs[j] == sigs[i] and sigs[j+1] == sigs[i+1]:
-                        count += 1
-                        j += 2
-                    else:
-                        break
-                if count >= 3:
-                    return {'detected': True, 'type': 'oscillation', 'count': count}
-        
-        return {'detected': False}
-    
-    def detect_no_progress(self, state: LoopState) -> Dict:
-        """Детекция застревания."""
-        if len(state.steps) < 10:
-            return {'detected': False}
-        
-        recent = state.steps[-10:]
-        if all(not s.success for s in recent):
-            return {'detected': True, 'type': 'all_failures'}
-        
-        actions = [s.action_name for s in recent]
-        most = Counter(actions).most_common(1)[0]
-        if most[1] >= 8:
-            return {'detected': True, 'type': 'stuck', 'action': most[0]}
-        
-        return {'detected': False}
+/// Детекция подозрительных паттернов
+struct LoopPatternDetector {
+    repetition_threshold: usize,
+}
 
-class GoalIntegrityChecker:
-    """Проверка целостности цели."""
-    
-    def __init__(self):
-        self.goals: Dict[str, LoopGoal] = {}
-    
-    def register(self, loop_id: str, goal: LoopGoal):
-        self.goals[loop_id] = goal
-    
-    def check(self, loop_id: str, current: LoopGoal) -> Dict:
-        original = self.goals.get(loop_id)
-        if not original:
-            return {'valid': True}
-        if not current.verify_integrity():
-            return {'valid': False, 'reason': 'Несоответствие хеша'}
-        if current.goal_hash != original.goal_hash:
-            return {'valid': False, 'reason': 'Цель изменена'}
-        return {'valid': True}
+impl LoopPatternDetector {
+    fn new() -> Self {
+        Self { repetition_threshold: 3 }
+    }
+
+    /// Детекция повторяющихся последовательностей.
+    fn detect_repetition(&self, steps: &[LoopStep]) -> serde_json::Value {
+        if steps.len() < 4 {
+            return serde_json::json!({"detected": false});
+        }
+
+        let start = if steps.len() > 20 { steps.len() - 20 } else { 0 };
+        let signatures: Vec<String> = steps[start..]
+            .iter()
+            .map(|s| format!("{}:{}", s.action_type, s.action_name))
+            .collect();
+
+        for size in [2, 3, 4, 5] {
+            if signatures.len() >= size * 2 {
+                let last = &signatures[signatures.len() - size..];
+                let prev = &signatures[signatures.len() - size * 2..signatures.len() - size];
+                if last == prev {
+                    let count = self.count_reps(&signatures, last);
+                    if count >= self.repetition_threshold {
+                        return serde_json::json!({"detected": true, "type": "repetition", "count": count});
+                    }
+                }
+            }
+        }
+
+        serde_json::json!({"detected": false})
+    }
+
+    fn count_reps(&self, sigs: &[String], pattern: &[String]) -> usize {
+        let mut count = 0;
+        let mut i = sigs.len() as isize - pattern.len() as isize;
+        while i >= 0 {
+            if &sigs[i as usize..i as usize + pattern.len()] == pattern {
+                count += 1;
+                i -= pattern.len() as isize;
+            } else {
+                break;
+            }
+        }
+        count
+    }
+
+    /// Детекция осцилляции между действиями.
+    fn detect_oscillation(&self, steps: &[LoopStep]) -> serde_json::Value {
+        if steps.len() < 6 {
+            return serde_json::json!({"detected": false});
+        }
+
+        let start = if steps.len() > 10 { steps.len() - 10 } else { 0 };
+        let sigs: Vec<String> = steps[start..]
+            .iter()
+            .map(|s| format!("{}:{}", s.action_type, s.action_name))
+            .collect();
+
+        for i in 0..sigs.len().saturating_sub(3) {
+            if sigs[i] == sigs[i + 2] && sigs[i + 1] == sigs[i + 3] && sigs[i] != sigs[i + 1] {
+                let mut count = 1;
+                let mut j = i + 2;
+                while j + 1 < sigs.len() {
+                    if sigs[j] == sigs[i] && sigs[j + 1] == sigs[i + 1] {
+                        count += 1;
+                        j += 2;
+                    } else {
+                        break;
+                    }
+                }
+                if count >= 3 {
+                    return serde_json::json!({"detected": true, "type": "oscillation", "count": count});
+                }
+            }
+        }
+
+        serde_json::json!({"detected": false})
+    }
+
+    /// Детекция застревания.
+    fn detect_no_progress(&self, state: &LoopState) -> serde_json::Value {
+        if state.steps.len() < 10 {
+            return serde_json::json!({"detected": false});
+        }
+
+        let recent = &state.steps[state.steps.len() - 10..];
+        if recent.iter().all(|s| !s.success) {
+            return serde_json::json!({"detected": true, "type": "all_failures"});
+        }
+
+        let mut action_counts: HashMap<&str, usize> = HashMap::new();
+        for s in recent.iter() {
+            *action_counts.entry(&s.action_name).or_insert(0) += 1;
+        }
+        if let Some((action, &count)) = action_counts.iter().max_by_key(|&(_, &c)| c) {
+            if count >= 8 {
+                return serde_json::json!({"detected": true, "type": "stuck", "action": action});
+            }
+        }
+
+        serde_json::json!({"detected": false})
+    }
+}
+
+/// Проверка целостности цели.
+struct GoalIntegrityChecker {
+    goals: HashMap<String, LoopGoal>,
+}
+
+impl GoalIntegrityChecker {
+    fn new() -> Self {
+        Self { goals: HashMap::new() }
+    }
+
+    fn register(&mut self, loop_id: &str, goal: LoopGoal) {
+        self.goals.insert(loop_id.to_string(), goal);
+    }
+
+    fn check(&self, loop_id: &str, current: &LoopGoal) -> serde_json::Value {
+        let original = match self.goals.get(loop_id) {
+            Some(g) => g,
+            None => return serde_json::json!({"valid": true}),
+        };
+        if !current.verify_integrity() {
+            return serde_json::json!({"valid": false, "reason": "Несоответствие хеша"});
+        }
+        if current.goal_hash != original.goal_hash {
+            return serde_json::json!({"valid": false, "reason": "Цель изменена"});
+        }
+        serde_json::json!({"valid": true})
+    }
+}
 ```
 
 ---
 
 ## 4. Безопасный исполнитель
 
-```python
-import uuid
-from concurrent.futures import ThreadPoolExecutor, TimeoutError
+```rust
+use uuid::Uuid;
+use std::collections::HashMap;
+use std::time::Instant;
 
-@dataclass
-class LoopConfig:
-    max_steps: int = 50
-    max_tokens: int = 100000
-    max_time_seconds: int = 300
-    max_tool_calls: int = 100
-    enable_detection: bool = True
-    enable_goal_integrity: bool = True
+struct LoopConfig {
+    max_steps: usize,
+    max_tokens: usize,
+    max_time_seconds: u64,
+    max_tool_calls: usize,
+    enable_detection: bool,
+    enable_goal_integrity: bool,
+}
 
-class SecureLoopExecutor:
-    """Безопасное выполнение циклов агента."""
-    
-    def __init__(self, config: LoopConfig):
-        self.config = config
-        self.detector = LoopPatternDetector()
-        self.goal_checker = GoalIntegrityChecker()
-        self.loops: Dict[str, LoopState] = {}
-        self.executor = ThreadPoolExecutor(max_workers=4)
-    
-    def start(self, agent_id: str, session_id: str, goal: str) -> LoopState:
-        loop_id = str(uuid.uuid4())
-        goal_obj = LoopGoal(str(uuid.uuid4()), goal, datetime.utcnow())
-        
-        state = LoopState(
-            loop_id=loop_id,
-            agent_id=agent_id,
-            session_id=session_id,
-            goal=goal_obj,
-            max_steps=self.config.max_steps,
-            max_tokens=self.config.max_tokens,
-            max_time_seconds=self.config.max_time_seconds,
-            max_tool_calls=self.config.max_tool_calls
-        )
-        
-        self.loops[loop_id] = state
-        if self.config.enable_goal_integrity:
-            self.goal_checker.register(loop_id, goal_obj)
-        
-        return state
-    
-    def step(self, loop_id: str, action_type: str, action_name: str,
-             params: Dict, handler: callable) -> Dict:
-        state = self.loops.get(loop_id)
-        if not state or state.status != LoopStatus.RUNNING:
-            return {'success': False, 'error': 'Недействительный цикл'}
-        
-        # Проверка лимитов
-        ok, err = state.check_limits()
-        if not ok:
-            state.status = LoopStatus.TERMINATED
-            return {'success': False, 'error': err}
-        
-        # Детекция паттернов
-        if self.config.enable_detection:
-            for check in [self.detector.detect_repetition,
-                         self.detector.detect_oscillation]:
-                result = check(state.steps)
-                if result['detected']:
-                    state.status = LoopStatus.TERMINATED
-                    return {'success': False, 'error': f"Паттерн: {result['type']}"}
-        
-        # Целостность цели
-        if self.config.enable_goal_integrity:
-            check = self.goal_checker.check(loop_id, state.goal)
-            if not check['valid']:
-                state.status = LoopStatus.TERMINATED
-                return {'success': False, 'error': check['reason']}
-        
-        # Выполнение
-        start = datetime.utcnow()
-        step = LoopStep(
-            step_id=str(uuid.uuid4()),
-            step_number=state.current_step + 1,
-            timestamp=start,
-            action_type=action_type,
-            action_name=action_name,
-            action_params=params
-        )
-        
-        try:
-            future = self.executor.submit(handler, params)
-            remaining = self.config.max_time_seconds - (
-                datetime.utcnow() - state.started_at
-            ).total_seconds()
-            
-            step.result = future.result(timeout=max(1, remaining))
-            step.success = True
-        except TimeoutError:
-            step.success = False
-            step.error = "Таймаут"
-            state.status = LoopStatus.TIMEOUT
-        except Exception as e:
-            step.success = False
-            step.error = str(e)
-        
-        step.execution_time_ms = (datetime.utcnow() - start).total_seconds() * 1000
-        state.add_step(step)
-        
-        return {
-            'success': step.success,
-            'result': step.result,
-            'error': step.error
+impl Default for LoopConfig {
+    fn default() -> Self {
+        Self {
+            max_steps: 50, max_tokens: 100000, max_time_seconds: 300,
+            max_tool_calls: 100, enable_detection: true, enable_goal_integrity: true,
         }
-    
-    def complete(self, loop_id: str, success: bool = True):
-        state = self.loops.get(loop_id)
-        if state:
-            state.status = LoopStatus.COMPLETED if success else LoopStatus.ERROR
-            state.ended_at = datetime.utcnow()
+    }
+}
+
+/// Безопасное выполнение циклов агента.
+struct SecureLoopExecutor {
+    config: LoopConfig,
+    detector: LoopPatternDetector,
+    goal_checker: GoalIntegrityChecker,
+    loops: HashMap<String, LoopState>,
+}
+
+impl SecureLoopExecutor {
+    fn new(config: LoopConfig) -> Self {
+        Self {
+            config,
+            detector: LoopPatternDetector::new(),
+            goal_checker: GoalIntegrityChecker::new(),
+            loops: HashMap::new(),
+        }
+    }
+
+    fn start(&mut self, agent_id: &str, session_id: &str, goal: &str) -> &LoopState {
+        let loop_id = Uuid::new_v4().to_string();
+        let goal_obj = LoopGoal::new(&Uuid::new_v4().to_string(), goal);
+
+        let state = LoopState {
+            loop_id: loop_id.clone(),
+            agent_id: agent_id.to_string(),
+            session_id: session_id.to_string(),
+            goal: Some(goal_obj),
+            status: LoopStatus::Running,
+            started_at: Instant::now(),
+            ended_at: None,
+            steps: vec![],
+            current_step: 0,
+            max_steps: self.config.max_steps,
+            max_tokens: self.config.max_tokens,
+            max_time_seconds: self.config.max_time_seconds,
+            max_tool_calls: self.config.max_tool_calls,
+            total_tokens: 0,
+            total_tool_calls: 0,
+        };
+
+        if self.config.enable_goal_integrity {
+            if let Some(ref g) = state.goal {
+                self.goal_checker.register(&loop_id, g.clone());
+            }
+        }
+
+        self.loops.insert(loop_id.clone(), state);
+        self.loops.get(&loop_id).unwrap()
+    }
+
+    fn step(
+        &mut self, loop_id: &str, action_type: &str, action_name: &str,
+        params: HashMap<String, String>, handler: fn(&HashMap<String, String>) -> serde_json::Value,
+    ) -> serde_json::Value {
+        let state = match self.loops.get_mut(loop_id) {
+            Some(s) if s.status == LoopStatus::Running => s,
+            _ => return serde_json::json!({"success": false, "error": "Недействительный цикл"}),
+        };
+
+        // Проверка лимитов
+        let (ok, err) = state.check_limits();
+        if !ok {
+            state.status = LoopStatus::Terminated;
+            return serde_json::json!({"success": false, "error": err});
+        }
+
+        // Детекция паттернов
+        if self.config.enable_detection {
+            let rep = self.detector.detect_repetition(&state.steps);
+            if rep["detected"].as_bool().unwrap_or(false) {
+                state.status = LoopStatus::Terminated;
+                return serde_json::json!({"success": false, "error": format!("Паттерн: {}", rep["type"])});
+            }
+            let osc = self.detector.detect_oscillation(&state.steps);
+            if osc["detected"].as_bool().unwrap_or(false) {
+                state.status = LoopStatus::Terminated;
+                return serde_json::json!({"success": false, "error": format!("Паттерн: {}", osc["type"])});
+            }
+        }
+
+        // Выполнение
+        let start = Instant::now();
+        let mut step = LoopStep {
+            step_id: Uuid::new_v4().to_string(),
+            step_number: state.current_step + 1,
+            timestamp: start,
+            action_type: action_type.to_string(),
+            action_name: action_name.to_string(),
+            action_params: params.clone(),
+            result: None, success: true, error: None,
+            tokens_used: 0, execution_time_ms: 0.0,
+        };
+
+        match std::panic::catch_unwind(std::panic::AssertUnwindSafe(|| handler(&params))) {
+            Ok(result) => {
+                step.result = Some(result);
+                step.success = true;
+            }
+            Err(_) => {
+                step.success = false;
+                step.error = Some("Таймаут".to_string());
+                state.status = LoopStatus::Timeout;
+            }
+        }
+
+        step.execution_time_ms = start.elapsed().as_secs_f64() * 1000.0;
+        let result = serde_json::json!({
+            "success": step.success,
+            "result": step.result,
+            "error": step.error
+        });
+        state.add_step(step);
+        result
+    }
+
+    fn complete(&mut self, loop_id: &str, success: bool) {
+        if let Some(state) = self.loops.get_mut(loop_id) {
+            state.status = if success { LoopStatus::Completed } else { LoopStatus::Error };
+            state.ended_at = Some(Instant::now());
+        }
+    }
+}
 ```
 
 ---
 
 ## 5. Интеграция с SENTINEL
 
-```python
-class SENTINELAgentLoopEngine:
-    """Движок безопасности циклов для SENTINEL."""
-    
-    def __init__(self, config):
-        self.executor = SecureLoopExecutor(LoopConfig(
-            max_steps=config.max_steps,
-            max_time_seconds=config.max_time_seconds,
-            enable_detection=config.enable_detection
-        ))
-    
-    def start(self, agent_id: str, session_id: str, goal: str) -> str:
-        state = self.executor.start(agent_id, session_id, goal)
-        return state.loop_id
-    
-    def step(self, loop_id: str, action_type: str, action_name: str,
-             params: Dict, handler: callable) -> Dict:
-        return self.executor.step(loop_id, action_type, action_name, params, handler)
-    
-    def complete(self, loop_id: str, success: bool = True):
-        self.executor.complete(loop_id, success)
+```rust
+use sentinel_core::engines::SentinelEngine;
+
+/// Движок безопасности циклов для SENTINEL.
+struct SENTINELAgentLoopEngine {
+    executor: SecureLoopExecutor,
+}
+
+impl SENTINELAgentLoopEngine {
+    fn new(config: &AgentLoopConfig) -> Self {
+        Self {
+            executor: SecureLoopExecutor::new(LoopConfig {
+                max_steps: config.max_steps,
+                max_time_seconds: config.max_time_seconds,
+                enable_detection: config.enable_detection,
+                ..Default::default()
+            }),
+        }
+    }
+
+    fn start(&mut self, agent_id: &str, session_id: &str, goal: &str) -> String {
+        let state = self.executor.start(agent_id, session_id, goal);
+        state.loop_id.clone()
+    }
+
+    fn step(
+        &mut self, loop_id: &str, action_type: &str, action_name: &str,
+        params: HashMap<String, String>, handler: fn(&HashMap<String, String>) -> serde_json::Value,
+    ) -> serde_json::Value {
+        self.executor.step(loop_id, action_type, action_name, params, handler)
+    }
+
+    fn complete(&mut self, loop_id: &str, success: bool) {
+        self.executor.complete(loop_id, success);
+    }
+}
 ```
 
 ---

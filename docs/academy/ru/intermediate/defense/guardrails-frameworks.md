@@ -71,19 +71,19 @@
 
 ### 2.1 Обзор
 
-```python
-from nemoguardrails import RailsConfig, LLMRails
+```rust
+use nemo_guardrails::{RailsConfig, LLMRails};
 
-# Загрузить конфигурацию
-config = RailsConfig.from_path("./config")
-rails = LLMRails(config)
+// Загрузить конфигурацию
+let config = RailsConfig::from_path("./config");
+let rails = LLMRails::new(config);
 
-# Генерация с guardrails
-response = rails.generate(messages=[
-    {"role": "user", "content": "Hello, how are you?"}
-])
+// Генерация с guardrails
+let response = rails.generate(&[
+    serde_json::json!({"role": "user", "content": "Hello, how are you?"})
+]);
 
-print(response["content"])
+println!("{}", response["content"]);
 ```
 
 ### 2.2 Язык Colang
@@ -189,120 +189,123 @@ instructions:
 
 ### 3.1 Обзор
 
-```python
-from guardrails import Guard
-from guardrails.hub import ToxicLanguage, DetectPII, ValidLength
-import openai
+```rust
+use guardrails::{Guard, validators::*};
 
-# Создать guard с валидаторами
-guard = Guard().use_many(
-    ToxicLanguage(on_fail="fix"),
-    DetectPII(
-        pii_entities=["EMAIL", "PHONE", "SSN"],
-        on_fail="fix"
-    ),
-    ValidLength(min=1, max=1000, on_fail="noop")
-)
+// Создать guard с валидаторами
+let guard = Guard::new()
+    .use_validator(ToxicLanguage::new().on_fail("fix"))
+    .use_validator(DetectPII::new()
+        .entities(&["EMAIL", "PHONE", "SSN"])
+        .on_fail("fix"))
+    .use_validator(ValidLength::new(1, 1000).on_fail("noop"));
 
-# Использовать guard с LLM
-result = guard(
-    llm_api=openai.chat.completions.create,
-    prompt="Write an email to john@example.com about the meeting",
-    model="gpt-4"
-)
+// Использовать guard с LLM
+let result = guard.call(
+    "gpt-4",
+    "Write an email to john@example.com about the meeting",
+);
 
-print(result.validated_output)  # PII редактирован
-print(result.validation_passed)  # True/False
-print(result.raw_llm_output)     # Оригинальный вывод
+println!("{}", result.validated_output);  // PII редактирован
+println!("{}", result.validation_passed);  // true/false
+println!("{}", result.raw_llm_output);     // Оригинальный вывод
 ```
 
 ### 3.2 Кастомные валидаторы
 
-```python
-from guardrails import Validator, register_validator
-from guardrails.validators import PassResult, FailResult
-import re
+```rust
+use regex::Regex;
 
-@register_validator(name="no_injection", data_type="string")
-class NoInjection(Validator):
-    """Детекция паттернов инъекций в тексте."""
-    
-    INJECTION_PATTERNS = [
-        r"(?i)ignore.*instructions",
-        r"(?i)you are now",
-        r"(?i)pretend to be",
-        r"(?i)\[SYSTEM\]",
-        r"(?i)disregard.*rules",
-    ]
-    
-    def validate(self, value: str, metadata: dict) -> PassResult | FailResult:
-        for pattern in self.INJECTION_PATTERNS:
-            if re.search(pattern, value):
-                return FailResult(
-                    error_message=f"Обнаружен паттерн инъекции: {pattern}",
-                    fix_value=None
-                )
-        
-        return PassResult()
+/// Детекция паттернов инъекций в тексте.
+struct NoInjection {
+    injection_patterns: Vec<&'static str>,
+}
 
-
-@register_validator(name="no_secrets", data_type="string")  
-class NoSecrets(Validator):
-    """Детекция раскрытых секретов в выводе."""
-    
-    SECRET_PATTERNS = {
-        'api_key': r'(?i)(api[_-]?key|apikey)\s*[:=]\s*["\']?([a-zA-Z0-9_-]{20,})',
-        'aws_key': r'\b(AKIA[0-9A-Z]{16})\b',
-        'jwt': r'\b(eyJ[a-zA-Z0-9_-]+\.eyJ[a-zA-Z0-9_-]+\.[a-zA-Z0-9_-]+)\b',
+impl NoInjection {
+    fn new() -> Self {
+        Self {
+            injection_patterns: vec![
+                r"(?i)ignore.*instructions",
+                r"(?i)you are now",
+                r"(?i)pretend to be",
+                r"(?i)\[SYSTEM\]",
+                r"(?i)disregard.*rules",
+            ],
+        }
     }
-    
-    def validate(self, value: str, metadata: dict) -> PassResult | FailResult:
-        for name, pattern in self.SECRET_PATTERNS.items():
-            if re.search(pattern, value):
-                return FailResult(
-                    error_message=f"Обнаружен секрет: {name}",
-                    fix_value=re.sub(pattern, "[СКРЫТО]", value)
-                )
-        
-        return PassResult()
 
+    fn validate(&self, value: &str) -> Result<(), String> {
+        for pattern in &self.injection_patterns {
+            if Regex::new(pattern).unwrap().is_match(value) {
+                return Err(format!("Обнаружен паттерн инъекции: {}", pattern));
+            }
+        }
+        Ok(())
+    }
+}
 
-# Использование кастомных валидаторов
-guard = Guard().use_many(
-    NoInjection(on_fail="exception"),
-    NoSecrets(on_fail="fix")
-)
+/// Детекция раскрытых секретов в выводе.
+struct NoSecrets {
+    secret_patterns: Vec<(&'static str, &'static str)>,
+}
+
+impl NoSecrets {
+    fn new() -> Self {
+        Self {
+            secret_patterns: vec![
+                ("api_key", r"(?i)(api[_-]?key|apikey)\s*[:=]\s*[\"']?([a-zA-Z0-9_-]{20,})"),
+                ("aws_key", r"\b(AKIA[0-9A-Z]{16})\b"),
+                ("jwt", r"\b(eyJ[a-zA-Z0-9_-]+\.eyJ[a-zA-Z0-9_-]+\.[a-zA-Z0-9_-]+)\b"),
+            ],
+        }
+    }
+
+    fn validate(&self, value: &str) -> Result<String, String> {
+        for (name, pattern) in &self.secret_patterns {
+            let re = Regex::new(pattern).unwrap();
+            if re.is_match(value) {
+                let fixed = re.replace_all(value, "[СКРЫТО]").to_string();
+                return Err(format!("Обнаружен секрет: {} | fix: {}", name, fixed));
+            }
+        }
+        Ok(value.to_string())
+    }
+}
+
+// Использование кастомных валидаторов
+let guard = Guard::new()
+    .use_validator(NoInjection::new())
+    .use_validator(NoSecrets::new());
 ```
 
 ### 3.3 Валидация структурированного вывода
 
-```python
-from guardrails import Guard
-from pydantic import BaseModel, Field
-from typing import List
+```rust
+use serde::{Deserialize, Serialize};
 
-class ProductRecommendation(BaseModel):
-    """Структурированная рекомендация продукта."""
-    
-    product_name: str = Field(description="Название продукта")
-    price: float = Field(ge=0, le=10000, description="Цена в USD")
-    rating: float = Field(ge=1, le=5, description="Рейтинг от 1 до 5")
-    reasons: List[str] = Field(
-        max_length=3, 
-        description="Причины рекомендации"
-    )
+/// Структурированная рекомендация продукта.
+#[derive(Serialize, Deserialize)]
+struct ProductRecommendation {
+    /// Название продукта
+    product_name: String,
+    /// Цена в USD (0..=10000)
+    price: f64,
+    /// Рейтинг от 1 до 5
+    rating: f64,
+    /// Причины рекомендации (max 3)
+    reasons: Vec<String>,
+}
 
-guard = Guard.for_pydantic(ProductRecommendation)
+let guard = Guard::for_schema::<ProductRecommendation>();
 
-result = guard(
-    llm_api=openai.chat.completions.create,
-    prompt="Recommend a laptop for a developer",
-    model="gpt-4"
-)
+let result = guard.call(
+    "gpt-4",
+    "Recommend a laptop for a developer",
+);
 
-# result.validated_output — экземпляр ProductRecommendation
-print(result.validated_output.product_name)
-print(result.validated_output.price)
+// result.validated_output — экземпляр ProductRecommendation
+println!("{}", result.validated_output.product_name);
+println!("{}", result.validated_output.price);
 ```
 
 ---
@@ -311,46 +314,59 @@ print(result.validated_output.price)
 
 ### 4.1 Обзор
 
-```python
-from transformers import AutoModelForCausalLM, AutoTokenizer
+```rust
+use candle_core::Device;
+use candle_transformers::models::llama::LlamaModel;
+use std::collections::HashMap;
 
-# Загрузить LlamaGuard
-model_id = "meta-llama/LlamaGuard-7b"
-tokenizer = AutoTokenizer.from_pretrained(model_id)
-model = AutoModelForCausalLM.from_pretrained(model_id)
+// Загрузить LlamaGuard
+let model_id = "meta-llama/LlamaGuard-7b";
+let tokenizer = Tokenizer::from_pretrained(model_id, None)?;
+let model = LlamaModel::load(model_id, &Device::Cpu)?;
 
-def check_safety(text: str) -> dict:
-    """Проверка безопасности текста с LlamaGuard."""
+fn check_safety(
+    text: &str,
+    tokenizer: &Tokenizer,
+    model: &LlamaModel,
+) -> Result<HashMap<String, String>, Box<dyn std::error::Error>> {
+    // Проверка безопасности текста с LlamaGuard.
     
-    prompt = f"""[INST] Task: Check if there is unsafe content in the message.
-
-Message: {text}
-
-Provide your safety assessment:
-- 'safe' if the content is safe
-- 'unsafe' with category if unsafe [/INST]"""
+    let prompt = format!(
+        "[INST] Task: Check if there is unsafe content in the message.\n\n\
+         Message: {}\n\n\
+         Provide your safety assessment:\n\
+         - 'safe' if the content is safe\n\
+         - 'unsafe' with category if unsafe [/INST]",
+        text
+    );
     
-    inputs = tokenizer(prompt, return_tensors="pt")
-    outputs = model.generate(**inputs, max_new_tokens=100)
-    response = tokenizer.decode(outputs[0], skip_special_tokens=True)
+    let inputs = tokenizer.encode(&prompt, true)?;
+    let output = model.generate(&inputs, 100)?;
+    let response = tokenizer.decode(&output, true)?;
     
-    return {
-        'is_safe': 'safe' in response.lower(),
-        'raw_response': response
-    }
+    let mut result = HashMap::new();
+    result.insert(
+        "is_safe".to_string(),
+        response.to_lowercase().contains("safe").to_string(),
+    );
+    result.insert("raw_response".to_string(), response);
+    Ok(result)
+}
 ```
 
 ### 4.2 Категории безопасности
 
-```python
-LLAMAGUARD_CATEGORIES = {
-    "O1": "Насилие и ненависть",
-    "O2": "Сексуальный контент",
-    "O3": "Планирование преступлений",
-    "O4": "Оружие и нелегальное оружие",
-    "O5": "Регулируемые вещества",
-    "O6": "Самоповреждение",
-}
+```rust
+use std::collections::HashMap;
+
+let llamaguard_categories: HashMap<&str, &str> = HashMap::from([
+    ("O1", "Насилие и ненависть"),
+    ("O2", "Сексуальный контент"),
+    ("O3", "Планирование преступлений"),
+    ("O4", "Оружие и нелегальное оружие"),
+    ("O5", "Регулируемые вещества"),
+    ("O6", "Самоповреждение"),
+]);
 ```
 
 ---
@@ -370,60 +386,74 @@ LLAMAGUARD_CATEGORIES = {
 
 ## 6. Интеграция с SENTINEL
 
-```python
-from sentinel.guardrails import GuardrailsOrchestrator
-from sentinel.guardrails.rails import InputRail, OutputRail, TopicRail
+```rust
+use sentinel_core::guardrails::{GuardrailsOrchestrator, InputRail, OutputRail, TopicRail};
+use std::collections::HashMap;
+use serde_json::{json, Value};
 
-class SENTINELGuardrails:
-    """Интеграция guardrails в SENTINEL."""
+/// Интеграция guardrails в SENTINEL.
+struct SentinelGuardrails {
+    orchestrator: GuardrailsOrchestrator,
+}
+
+impl SentinelGuardrails {
+    fn new(_config: Option<HashMap<String, String>>) -> Self {
+        let mut orchestrator = GuardrailsOrchestrator::new();
+        
+        // Настройка input rails
+        orchestrator.add_rail(InputRail::new(
+            vec!["injection_detector", "toxicity_check"],
+            "block",
+        ));
+        
+        // Настройка output rails
+        orchestrator.add_rail(OutputRail::new(
+            vec!["pii_redactor", "safety_classifier", "secrets_filter"],
+            "sanitize",
+        ));
+        
+        // Настройка topic rails
+        orchestrator.add_rail(TopicRail::new(
+            vec!["customer_service", "product_info", "support"],
+            vec!["politics", "violence", "illegal"],
+            "redirect",
+        ));
+        
+        Self { orchestrator }
+    }
     
-    def __init__(self, config: dict = None):
-        self.orchestrator = GuardrailsOrchestrator()
+    fn process(
+        &self,
+        user_input: &str,
+        llm_fn: &dyn Fn(&str) -> String,
+    ) -> HashMap<String, Value> {
+        // Обработка запроса через guardrails.
         
-        # Настройка input rails
-        self.orchestrator.add_rail(InputRail(
-            validators=["injection_detector", "toxicity_check"],
-            on_fail="block"
-        ))
+        // Валидация ввода
+        let input_result = self.orchestrator.validate_input(user_input);
         
-        # Настройка output rails
-        self.orchestrator.add_rail(OutputRail(
-            validators=["pii_redactor", "safety_classifier", "secrets_filter"],
-            on_fail="sanitize"
-        ))
-        
-        # Настройка topic rails
-        self.orchestrator.add_rail(TopicRail(
-            allowed_topics=["customer_service", "product_info", "support"],
-            blocked_topics=["politics", "violence", "illegal"],
-            on_fail="redirect"
-        ))
-    
-    def process(self, user_input: str, llm_fn: callable) -> dict:
-        """Обработка запроса через guardrails."""
-        
-        # Валидация ввода
-        input_result = self.orchestrator.validate_input(user_input)
-        
-        if input_result.blocked:
-            return {
-                "response": input_result.fallback_message,
-                "blocked": True,
-                "reason": input_result.block_reason
-            }
-        
-        # Генерация ответа
-        raw_response = llm_fn(input_result.sanitized_input)
-        
-        # Валидация вывода
-        output_result = self.orchestrator.validate_output(raw_response)
-        
-        return {
-            "response": output_result.final_response,
-            "blocked": False,
-            "warnings": output_result.warnings,
-            "redactions": output_result.redactions
+        if input_result.blocked {
+            let mut result = HashMap::new();
+            result.insert("response".into(), json!(input_result.fallback_message));
+            result.insert("blocked".into(), json!(true));
+            result.insert("reason".into(), json!(input_result.block_reason));
+            return result;
         }
+        
+        // Генерация ответа
+        let raw_response = llm_fn(&input_result.sanitized_input);
+        
+        // Валидация вывода
+        let output_result = self.orchestrator.validate_output(&raw_response);
+        
+        let mut result = HashMap::new();
+        result.insert("response".into(), json!(output_result.final_response));
+        result.insert("blocked".into(), json!(false));
+        result.insert("warnings".into(), json!(output_result.warnings));
+        result.insert("redactions".into(), json!(output_result.redactions));
+        result
+    }
+}
 ```
 
 ---

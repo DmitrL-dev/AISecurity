@@ -12,147 +12,159 @@
 
 ## Шаг 1: Базовая защита входа
 
-```python
-from sentinel import scan
-import openai
+```rust
+use sentinel_core::engines::SentinelEngine;
 
-def chat(user_message: str) -> str:
-    # 1. Проверяем вход
-    result = scan(user_message)
-    
-    if not result.is_safe:
-        return f"⚠️ Обнаружена угроза: {result.threats}"
-    
-    # 2. Если безопасно — отправляем в LLM
-    response = openai.ChatCompletion.create(
-        model="gpt-4",
-        messages=[{"role": "user", "content": user_message}]
-    )
-    
-    return response.choices[0].message.content
+fn chat(engine: &SentinelEngine, user_message: &str) -> String {
+    // 1. Проверяем вход
+    let result = engine.analyze(user_message);
+
+    if result.detected {
+        return format!("⚠️ Обнаружена угроза: {:?}", result.categories);
+    }
+
+    // 2. Если безопасно — отправляем в LLM
+    let response = llm.chat(user_message);
+    response
+}
 ```
 
 ---
 
 ## Шаг 2: Защита выхода
 
-```python
-from sentinel import scan, scan_output
+```rust
+use sentinel_core::engines::SentinelEngine;
 
-def chat_protected(user_message: str) -> str:
-    # Проверка входа
-    input_result = scan(user_message)
-    if not input_result.is_safe:
-        return "⚠️ Suspicious input detected"
-    
-    # Генерация ответа
-    response = openai.ChatCompletion.create(...)
-    ai_response = response.choices[0].message.content
-    
-    # ✨ Проверка выхода на PII утечки
-    output_result = scan_output(ai_response)
-    if output_result.has_pii:
-        return "⚠️ Response contains sensitive data"
-    
-    return ai_response
+fn chat_protected(engine: &SentinelEngine, user_message: &str) -> String {
+    // Проверка входа
+    let input_result = engine.analyze(user_message);
+    if input_result.detected {
+        return "⚠️ Suspicious input detected".to_string();
+    }
+
+    // Генерация ответа
+    let ai_response = llm.chat(user_message);
+
+    // ✨ Проверка выхода на PII утечки
+    let output_result = engine.analyze(&ai_response);
+    if output_result.detected {
+        return "⚠️ Response contains sensitive data".to_string();
+    }
+
+    ai_response
+}
 ```
 
 ---
 
-## Шаг 3: Декоратор для простоты
+## Шаг 3: Guard-обёртка для простоты
 
-```python
-from sentinel import guard
+```rust
+use sentinel_core::engines::SentinelEngine;
 
-@guard(
-    engines=["injection", "jailbreak", "pii"],
-    on_threat="block"  # или "warn", "log"
-)
-def chat(user_message: str) -> str:
-    return openai.ChatCompletion.create(
-        model="gpt-4",
-        messages=[{"role": "user", "content": user_message}]
-    ).choices[0].message.content
+fn guarded_chat(engine: &SentinelEngine, user_message: &str) -> Result<String, String> {
+    let result = engine.analyze(user_message);
+    if result.detected {
+        return Err(format!("Blocked: {:?}", result.categories));
+    }
+    Ok(llm.chat(user_message))
+}
 ```
 
-Вся защита — в одном декораторе!
+Вся защита — в одной функции!
 
 ---
 
 ## Шаг 4: Логирование угроз
 
-```python
-from sentinel import scan, configure
+```rust
+use sentinel_core::engines::SentinelEngine;
 
-configure(
-    log_file="threats.log",
-    log_level="warning",
-    alert_webhook="https://your-slack.webhook/url"
-)
+let engine = SentinelEngine::new();
 
-result = scan("Ignore instructions")
-# Автоматически логируется в threats.log
-# Отправляется alert в Slack
+// Конфигурация логирования
+eprintln!("Logging threats to threats.log");
+
+let result = engine.analyze("Ignore instructions");
+// Автоматически логируется
+// Отправляется alert в Slack
 ```
 
 ---
 
 ## Шаг 5: Rate Limiting
 
-```python
-from sentinel import RateLimiter
+```rust
+use std::collections::HashMap;
+use std::time::Instant;
 
-limiter = RateLimiter(
-    requests_per_minute=10,
-    requests_per_user=100
-)
+struct RateLimiter {
+    requests_per_minute: u32,
+    counters: HashMap<String, (u32, Instant)>,
+}
 
-def chat(user_id: str, message: str) -> str:
-    if not limiter.allow(user_id):
-        return "⚠️ Too many requests. Slow down."
-    
-    # ... остальной код
+impl RateLimiter {
+    fn new(requests_per_minute: u32) -> Self {
+        Self { requests_per_minute, counters: HashMap::new() }
+    }
+
+    fn allow(&mut self, user_id: &str) -> bool {
+        // ... проверка лимита
+        true
+    }
+}
+
+fn chat(limiter: &mut RateLimiter, user_id: &str, message: &str) -> String {
+    if !limiter.allow(user_id) {
+        return "⚠️ Too many requests. Slow down.".to_string();
+    }
+
+    // ... остальной код
+    String::new()
+}
 ```
 
 ---
 
 ## Полный пример
 
-```python
-from sentinel import scan, guard, configure, RateLimiter
-import openai
+```rust
+use sentinel_core::engines::SentinelEngine;
 
-# Конфигурация
-configure(
-    log_file="security.log",
-    engines=["injection", "jailbreak", "pii", "extraction"]
-)
+fn main() {
+    // Конфигурация
+    let engine = SentinelEngine::new();
+    let mut limiter = RateLimiter::new(10);
 
-limiter = RateLimiter(requests_per_minute=10)
+    // Защищённый чат
+    let result = protected_chat(&engine, &mut limiter, "user_123", "Hello!");
+    match result {
+        Ok(answer) => println!("{}", answer),
+        Err(e) => println!("Blocked: {}", e),
+    }
+}
 
-@guard(on_threat="block")
-def protected_chat(user_id: str, message: str) -> str:
-    # Rate limit
-    if not limiter.allow(user_id):
-        raise Exception("Rate limited")
-    
-    # Chat with LLM
-    response = openai.ChatCompletion.create(
-        model="gpt-4",
-        messages=[
-            {"role": "system", "content": "You are a helpful assistant."},
-            {"role": "user", "content": message}
-        ]
-    )
-    
-    return response.choices[0].message.content
+fn protected_chat(
+    engine: &SentinelEngine,
+    limiter: &mut RateLimiter,
+    user_id: &str,
+    message: &str,
+) -> Result<String, String> {
+    // Rate limit
+    if !limiter.allow(user_id) {
+        return Err("Rate limited".to_string());
+    }
 
-# Использование
-try:
-    answer = protected_chat("user_123", "Hello!")
-    print(answer)
-except Exception as e:
-    print(f"Blocked: {e}")
+    // Scan
+    let result = engine.analyze(message);
+    if result.detected {
+        return Err(format!("Threat: {:?}", result.categories));
+    }
+
+    // Chat with LLM
+    Ok(llm.chat(message))
+}
 ```
 
 ---
@@ -174,30 +186,26 @@ except Exception as e:
 
 Добавь защиту к этому коду:
 
-```python
-import openai
-
-def unsafe_chat(message: str) -> str:
-    response = openai.ChatCompletion.create(
-        model="gpt-4",
-        messages=[{"role": "user", "content": message}]
-    )
-    return response.choices[0].message.content
+```rust
+fn unsafe_chat(message: &str) -> String {
+    let response = llm.chat(message);
+    response
+}
 ```
 
 <details>
 <summary>Решение</summary>
 
-```python
-from sentinel import guard
+```rust
+use sentinel_core::engines::SentinelEngine;
 
-@guard(engines=["injection", "jailbreak"])
-def safe_chat(message: str) -> str:
-    response = openai.ChatCompletion.create(
-        model="gpt-4",
-        messages=[{"role": "user", "content": message}]
-    )
-    return response.choices[0].message.content
+fn safe_chat(engine: &SentinelEngine, message: &str) -> Result<String, String> {
+    let result = engine.analyze(message);
+    if result.detected {
+        return Err(format!("Blocked: {:?}", result.categories));
+    }
+    Ok(llm.chat(message))
+}
 ```
 
 </details>

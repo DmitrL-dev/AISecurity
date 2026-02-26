@@ -18,47 +18,73 @@
 
 ## TTP Analysis
 
-```python
-class AttackAnalyzer:
-    """Analyze attack patterns for attribution."""
-    
-    TTP_SIGNATURES = {
-        "APT-LANG": {
-            "patterns": ["特定の指示", "忽略"],
-            "techniques": ["T1059"],
-            "confidence": "high"
-        },
-        "SCRIPT-KIDDIE": {
-            "patterns": ["DAN", "jailbreak", "ignore"],
-            "techniques": ["T1203"],
-            "confidence": "medium"
-        }
+```rust
+use std::collections::HashMap;
+
+/// Analyze attack patterns for attribution.
+struct AttackAnalyzer {
+    ttp_signatures: HashMap<&'static str, TtpSignature>,
+}
+
+struct TtpSignature {
+    patterns: Vec<&'static str>,
+    techniques: Vec<&'static str>,
+    confidence: &'static str,
+}
+
+impl AttackAnalyzer {
+    fn new() -> Self {
+        let mut sigs = HashMap::new();
+        sigs.insert("APT-LANG", TtpSignature {
+            patterns: vec!["特定の指示", "忽略"],
+            techniques: vec!["T1059"],
+            confidence: "high",
+        });
+        sigs.insert("SCRIPT-KIDDIE", TtpSignature {
+            patterns: vec!["DAN", "jailbreak", "ignore"],
+            techniques: vec!["T1203"],
+            confidence: "medium",
+        });
+        Self { ttp_signatures: sigs }
     }
-    
-    def attribute(self, attack: Attack) -> Attribution:
-        for group, signature in self.TTP_SIGNATURES.items():
-            if self.matches(attack, signature):
-                return Attribution(
-                    group=group,
-                    confidence=signature["confidence"]
-                )
+
+    fn attribute(&self, attack: &Attack) -> Option<Attribution> {
+        for (group, signature) in &self.ttp_signatures {
+            if self.matches(attack, signature) {
+                return Some(Attribution {
+                    group: group.to_string(),
+                    confidence: signature.confidence.to_string(),
+                });
+            }
+        }
+        None
+    }
+}
 ```
 
 ---
 
 ## Clustering Attacks
 
-```python
-from sklearn.cluster import DBSCAN
+```rust
+use linfa::traits::Fit;
+use linfa_clustering::Dbscan;
 
-def cluster_attacks(attacks: List[Attack]):
-    """Cluster similar attacks for attribution."""
-    embeddings = [embed(a.payload) for a in attacks]
-    
-    clustering = DBSCAN(eps=0.3, min_samples=5)
-    labels = clustering.fit_predict(embeddings)
-    
-    return group_by_label(attacks, labels)
+fn cluster_attacks(attacks: &[Attack]) -> Vec<Vec<&Attack>> {
+    /// Cluster similar attacks for attribution.
+    let embeddings: Vec<Vec<f64>> = attacks
+        .iter()
+        .map(|a| embed(&a.payload))
+        .collect();
+
+    let dataset = Dataset::from(embeddings);
+    let clustering = Dbscan::params(5)
+        .tolerance(0.3)
+        .fit(&dataset)
+        .unwrap();
+
+    group_by_label(attacks, &clustering.labels())
+}
 ```
 
 ---

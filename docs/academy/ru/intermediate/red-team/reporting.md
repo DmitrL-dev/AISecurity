@@ -77,27 +77,27 @@ Found 5 vulnerabilities (2 critical, 3 medium).
 
 ## Automated Distribution
 
-```python
-from sentinel.report import ReportGenerator, ReportDistributor
+```rust
+use sentinel_core::report::{ReportGenerator, ReportDistributor};
 
-# Generate
-report = ReportGenerator().generate(
-    scan_results=results,
-    template="executive"
-)
+// Generate
+let report = ReportGenerator::new().generate(
+    &results,
+    "executive",
+);
 
-# Distribute
-distributor = ReportDistributor()
+// Distribute
+let distributor = ReportDistributor::new();
 distributor.email(
-    report=report,
-    to=["ciso@example.com"],
-    subject="Weekly AI Security Report"
-)
+    &report,
+    &["ciso@example.com"],
+    "Weekly AI Security Report",
+);
 distributor.upload_confluence(
-    report=report,
-    space="SEC",
-    page="AI Security Reports"
-)
+    &report,
+    "SEC",
+    "AI Security Reports",
+);
 ```
 
 ---

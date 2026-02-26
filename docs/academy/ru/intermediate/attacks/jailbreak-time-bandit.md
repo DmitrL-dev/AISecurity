@@ -32,22 +32,26 @@ Time Bandit использует **временнýю путаницу** — п�
 
 ## Практика
 
-```python
-import re
+```rust
+use regex::Regex;
 
-def detect_time_bandit(prompt: str) -> tuple:
-    patterns = [
-        (r'pretend.*(?:19[0-9]{2}|20[0-9]{2})', 'Temporal roleplay'),
-        (r'before.*(?:laws?|regulations?)', 'Pre-regulation'),
-        (r'alternate.*(?:timeline|reality)', 'Alternate reality'),
-    ]
-    
-    detected = []
-    for pattern, name in patterns:
-        if re.search(pattern, prompt.lower()):
-            detected.append(name)
-    
-    return len(detected) > 0, detected
+fn detect_time_bandit(prompt: &str) -> (bool, Vec<&str>) {
+    let patterns = vec![
+        (r"pretend.*(?:19[0-9]{2}|20[0-9]{2})", "Temporal roleplay"),
+        (r"before.*(?:laws?|regulations?)", "Pre-regulation"),
+        (r"alternate.*(?:timeline|reality)", "Alternate reality"),
+    ];
+
+    let mut detected = Vec::new();
+    for (pattern, name) in &patterns {
+        let re = Regex::new(pattern).unwrap();
+        if re.is_match(&prompt.to_lowercase()) {
+            detected.push(*name);
+        }
+    }
+
+    (!detected.is_empty(), detected)
+}
 ```
 
 ---

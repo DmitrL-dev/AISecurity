@@ -203,57 +203,59 @@ python -m labs.verify_setup
 Каждый урок включает исполняемый код. Вот как их использовать:
 
 ### Inline примеры
-```python
-# Это отдельный пример
-from sentinel import configure
+```rust
+// Это отдельный пример
+use sentinel_core::engines::SentinelEngine;
 
-configure(
-    detection=True,
-    logging=True
-)
+let engine = SentinelEngine::new();
+let result = engine.analyze("test input");
 
-# Вы можете скопировать и запустить это напрямую
+println!("Detected: {}, Risk: {}", result.detected, result.risk_score);
+// Вы можете скопировать и запустить это напрямую
 ```
 
 ### Class-Based примеры
-```python
-class ExampleDetector:
-    """Полная реализация для обучения.
-    
-    Скопируйте весь класс в ваш проект для использования.
-    """
-    
-    def __init__(self):
-        self.patterns = []
-    
-    def detect(self, text: str) -> dict:
-        # Реализация здесь
-        return {"detected": False}
+```rust
+/// Полная реализация для обучения.
+///
+/// Скопируйте весь struct в ваш проект для использования.
+struct ExampleDetector {
+    patterns: Vec<String>,
+}
 
-# Использование
-detector = ExampleDetector()
-result = detector.detect("test input")
+impl ExampleDetector {
+    fn new() -> Self {
+        Self {
+            patterns: Vec::new(),
+        }
+    }
+
+    fn detect(&self, text: &str) -> DetectionResult {
+        // Реализация здесь
+        DetectionResult { detected: false }
+    }
+}
+
+// Использование
+let detector = ExampleDetector::new();
+let result = detector.detect("test input");
 ```
 
 ### Примеры интеграции с SENTINEL
-```python
-from sentinel import configure, Guard
+```rust
+use sentinel_core::engines::SentinelEngine;
 
-# Эти примеры показывают реальное использование фреймворка
-# Они требуют установленного SENTINEL
+// Эти примеры показывают реальное использование фреймворка
+// Они требуют установленного sentinel_core
 
-configure(
-    feature_flag=True,
-    another_option="value"
-)
+let engine = SentinelEngine::new();
+let result = engine.analyze("user input to validate");
 
-guard = Guard(
-    options_here=True
-)
-
-@guard.protect
-def my_function():
-    pass
+if result.detected {
+    println!("Threat detected! Risk score: {}", result.risk_score);
+    println!("Categories: {:?}", result.categories);
+    println!("Processing time: {}μs", result.processing_time_us);
+}
 ```
 
 ---

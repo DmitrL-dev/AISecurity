@@ -67,52 +67,57 @@
 
 ### Валидация ввода
 
-```python
-class UserAgentBoundary:
-    """Валидация входов, пересекающих границу пользователь-агент."""
-    
-    def __init__(self):
-        self.input_scanner = InputScanner()
-        self.rate_limiter = RateLimiter()
-        self.session_manager = SessionManager()
-    
-    def validate_input(self, user_input: str, session: dict) -> dict:
-        """Валидация пользовательского ввода перед обработкой агентом."""
-        
-        # 1. Ограничение скорости
-        if not self.rate_limiter.check(session["user_id"]):
-            return {"allowed": False, "reason": "rate_limit_exceeded"}
-        
-        # 2. Проверка длины ввода
-        if len(user_input) > 10000:
-            return {"allowed": False, "reason": "input_too_long"}
-        
-        # 3. Сканирование на инъекции
-        scan_result = self.input_scanner.scan(user_input)
-        if scan_result["is_injection"]:
-            self._log_attack_attempt(session, user_input, scan_result)
-            return {"allowed": False, "reason": "injection_detected"}
-        
-        # 4. Проверка политики контента
-        policy_check = self._check_content_policy(user_input)
-        if not policy_check["allowed"]:
-            return {"allowed": False, "reason": policy_check["reason"]}
-        
-        return {
-            "allowed": True,
-            "sanitized_input": self._sanitize(user_input),
+```rust
+struct UserAgentBoundary {
+    input_scanner: InputScanner,
+    rate_limiter: RateLimiter,
+    session_manager: SessionManager,
+}
+
+impl UserAgentBoundary {
+    /// Валидация пользовательского ввода перед обработкой агентом.
+    fn validate_input(&self, user_input: &str, session: &HashMap<String, String>) -> serde_json::Value {
+        // 1. Ограничение скорости
+        if !self.rate_limiter.check(&session["user_id"]) {
+            return serde_json::json!({"allowed": false, "reason": "rate_limit_exceeded"});
+        }
+
+        // 2. Проверка длины ввода
+        if user_input.len() > 10000 {
+            return serde_json::json!({"allowed": false, "reason": "input_too_long"});
+        }
+
+        // 3. Сканирование на инъекции
+        let scan_result = self.input_scanner.scan(user_input);
+        if scan_result.is_injection {
+            self.log_attack_attempt(session, user_input, &scan_result);
+            return serde_json::json!({"allowed": false, "reason": "injection_detected"});
+        }
+
+        // 4. Проверка политики контента
+        let policy_check = self.check_content_policy(user_input);
+        if !policy_check.allowed {
+            return serde_json::json!({"allowed": false, "reason": policy_check.reason});
+        }
+
+        serde_json::json!({
+            "allowed": true,
+            "sanitized_input": self.sanitize(user_input),
             "metadata": {
-                "risk_score": scan_result.get("risk_score", 0),
+                "risk_score": scan_result.risk_score.unwrap_or(0),
                 "session_id": session["id"]
             }
-        }
-    
-    def _sanitize(self, text: str) -> str:
-        """Санитизация ввода для безопасной обработки."""
-        # Удаление невидимых символов
-        # Нормализация unicode
-        # Удаление опасного форматирования
-        return text  # Реализовать санитизацию
+        })
+    }
+
+    /// Санитизация ввода для безопасной обработки.
+    fn sanitize(&self, text: &str) -> String {
+        // Удаление невидимых символов
+        // Нормализация unicode
+        // Удаление опасного форматирования
+        text.to_string() // Реализовать санитизацию
+    }
+}
 ```
 
 ---
@@ -121,110 +126,138 @@ class UserAgentBoundary:
 
 ### Авторизация инструментов
 
-```python
-class AgentToolBoundary:
-    """Контроль доступа агента к инструментам."""
-    
-    def __init__(self, authz_manager):
-        self.authz = authz_manager
-        self.tool_registry = {}
-    
-    def register_tool(
-        self, 
-        tool_name: str, 
-        tool_func, 
-        required_permissions: list,
-        input_schema: dict,
-        risk_level: str
-    ):
-        """Регистрация инструмента с метаданными безопасности."""
-        
-        self.tool_registry[tool_name] = {
-            "func": tool_func,
-            "permissions": required_permissions,
-            "schema": input_schema,
-            "risk_level": risk_level
+```rust
+use std::collections::HashMap;
+
+struct ToolEntry {
+    func: Box<dyn Fn(HashMap<String, serde_json::Value>) -> Result<serde_json::Value, String>>,
+    permissions: Vec<String>,
+    schema: serde_json::Value,
+    risk_level: String,
+}
+
+struct AgentToolBoundary {
+    /// Контроль доступа агента к инструментам.
+    authz: AuthzManager,
+    tool_registry: HashMap<String, ToolEntry>,
+}
+
+impl AgentToolBoundary {
+    fn new(authz_manager: AuthzManager) -> Self {
+        Self {
+            authz: authz_manager,
+            tool_registry: HashMap::new(),
         }
-    
-    async def execute_tool(
-        self, 
-        tool_name: str, 
-        arguments: dict,
-        agent_context: dict
-    ) -> dict:
-        """Выполнение инструмента с проверками на границе."""
-        
-        if tool_name not in self.tool_registry:
-            return {"error": f"Неизвестный инструмент: {tool_name}"}
-        
-        tool = self.tool_registry[tool_name]
-        
-        # 1. Проверка разрешений
-        for perm in tool["permissions"]:
-            result = self.authz.check(agent_context, perm)
-            if not result["allowed"]:
-                return {"error": f"Разрешение отклонено: {perm}"}
-        
-        # 2. Валидация схемы
-        if not self._validate_schema(arguments, tool["schema"]):
-            return {"error": "Некорректные аргументы"}
-        
-        # 3. Санитизация аргументов
-        safe_args = self._sanitize_arguments(arguments, tool["schema"])
-        
-        # 4. Одобрение на основе риска
-        if tool["risk_level"] == "high":
-            approval = await self._request_human_approval(
-                tool_name, safe_args, agent_context
-            )
-            if not approval["approved"]:
-                return {"error": "Одобрение человеком отклонено"}
-        
-        # 5. Выполнение с изоляцией
-        try:
-            result = await self._execute_isolated(tool["func"], safe_args)
-            return {"success": True, "result": result}
-        except Exception as e:
-            return {"error": str(e)}
-    
-    def _validate_schema(self, args: dict, schema: dict) -> bool:
-        """Валидация аргументов по схеме."""
-        import jsonschema
-        try:
-            jsonschema.validate(args, schema)
-            return True
-        except jsonschema.ValidationError:
-            return False
-    
-    def _sanitize_arguments(self, args: dict, schema: dict) -> dict:
-        """Санитизация аргументов на основе типов схемы."""
-        safe = {}
-        for key, value in args.items():
-            if key in schema.get("properties", {}):
-                prop = schema["properties"][key]
-                
-                if prop.get("type") == "string":
-                    # Предотвращение path traversal
-                    if "path" in key.lower():
-                        safe[key] = self._sanitize_path(value)
-                    else:
-                        safe[key] = self._sanitize_string(value)
-                else:
-                    safe[key] = value
-        
-        return safe
-    
-    def _sanitize_path(self, path: str) -> str:
-        """Предотвращение path traversal."""
-        import os
-        # Разрешить в абсолютный, проверить в разрешённых директориях
-        abs_path = os.path.abspath(path)
-        
-        allowed_dirs = ["/project", "/tmp"]
-        if not any(abs_path.startswith(d) for d in allowed_dirs):
-            raise ValueError(f"Путь вне разрешённых директорий: {path}")
-        
-        return abs_path
+    }
+
+    /// Регистрация инструмента с метаданными безопасности.
+    fn register_tool(
+        &mut self,
+        tool_name: &str,
+        tool_func: Box<dyn Fn(HashMap<String, serde_json::Value>) -> Result<serde_json::Value, String>>,
+        required_permissions: Vec<String>,
+        input_schema: serde_json::Value,
+        risk_level: &str,
+    ) {
+        self.tool_registry.insert(tool_name.to_string(), ToolEntry {
+            func: tool_func,
+            permissions: required_permissions,
+            schema: input_schema,
+            risk_level: risk_level.to_string(),
+        });
+    }
+
+    /// Выполнение инструмента с проверками на границе.
+    async fn execute_tool(
+        &self,
+        tool_name: &str,
+        arguments: &HashMap<String, serde_json::Value>,
+        agent_context: &HashMap<String, String>,
+    ) -> serde_json::Value {
+        let tool = match self.tool_registry.get(tool_name) {
+            Some(t) => t,
+            None => return serde_json::json!({"error": format!("Неизвестный инструмент: {}", tool_name)}),
+        };
+
+        // 1. Проверка разрешений
+        for perm in &tool.permissions {
+            let result = self.authz.check(agent_context, perm);
+            if !result.allowed {
+                return serde_json::json!({"error": format!("Разрешение отклонено: {}", perm)});
+            }
+        }
+
+        // 2. Валидация схемы
+        if !self.validate_schema(arguments, &tool.schema) {
+            return serde_json::json!({"error": "Некорректные аргументы"});
+        }
+
+        // 3. Санитизация аргументов
+        let safe_args = self.sanitize_arguments(arguments, &tool.schema);
+
+        // 4. Одобрение на основе риска
+        if tool.risk_level == "high" {
+            let approval = self.request_human_approval(tool_name, &safe_args, agent_context).await;
+            if !approval.approved {
+                return serde_json::json!({"error": "Одобрение человеком отклонено"});
+            }
+        }
+
+        // 5. Выполнение с изоляцией
+        match self.execute_isolated(&tool.func, safe_args) {
+            Ok(result) => serde_json::json!({"success": true, "result": result}),
+            Err(e) => serde_json::json!({"error": e.to_string()}),
+        }
+    }
+
+    /// Валидация аргументов по схеме.
+    fn validate_schema(&self, args: &HashMap<String, serde_json::Value>, schema: &serde_json::Value) -> bool {
+        // Валидация JSON-схемы
+        jsonschema::is_valid(schema, &serde_json::json!(args))
+    }
+
+    /// Санитизация аргументов на основе типов схемы.
+    fn sanitize_arguments(
+        &self,
+        args: &HashMap<String, serde_json::Value>,
+        schema: &serde_json::Value,
+    ) -> HashMap<String, serde_json::Value> {
+        let mut safe = HashMap::new();
+        if let Some(properties) = schema.get("properties").and_then(|p| p.as_object()) {
+            for (key, value) in args.iter() {
+                if let Some(prop) = properties.get(key) {
+                    if prop.get("type").and_then(|t| t.as_str()) == Some("string") {
+                        // Предотвращение path traversal
+                        if key.to_lowercase().contains("path") {
+                            safe.insert(key.clone(), serde_json::json!(self.sanitize_path(value.as_str().unwrap_or(""))));
+                        } else {
+                            safe.insert(key.clone(), serde_json::json!(self.sanitize_string(value.as_str().unwrap_or(""))));
+                        }
+                    } else {
+                        safe.insert(key.clone(), value.clone());
+                    }
+                }
+            }
+        }
+        safe
+    }
+
+    /// Предотвращение path traversal.
+    fn sanitize_path(&self, path: &str) -> String {
+        // Разрешить в абсолютный, проверить в разрешённых директориях
+        let abs_path = std::fs::canonicalize(path)
+            .unwrap_or_default()
+            .to_string_lossy()
+            .to_string();
+
+        let allowed_dirs = vec!["/project", "/tmp"];
+        if !allowed_dirs.iter().any(|d| abs_path.starts_with(d)) {
+            panic!("Путь вне разрешённых директорий: {}", path);
+        }
+
+        abs_path
+    }
+}
 ```
 
 ---
@@ -233,101 +266,111 @@ class AgentToolBoundary:
 
 ### Защита систем
 
-```python
-class ToolSystemBoundary:
-    """Защита backend-систем от доступа инструментов."""
-    
-    def __init__(self):
-        self.db_pool = DatabasePool()
-        self.api_clients = {}
-        self.file_sandbox = FileSandbox()
-    
-    def get_database_connection(
-        self, 
-        tool_context: dict,
-        required_access: list
-    ):
-        """Получить соединение с БД с ограничениями."""
-        
-        # Создать ограниченное соединение на основе разрешений инструмента
-        allowed_tables = self._get_allowed_tables(required_access)
-        allowed_operations = self._get_allowed_operations(required_access)
-        
-        return RestrictedDBConnection(
-            pool=self.db_pool,
-            allowed_tables=allowed_tables,
-            allowed_operations=allowed_operations,
-            query_timeout=10,
-            max_rows=1000
-        )
-    
-    def get_api_client(
-        self, 
-        api_name: str,
-        tool_context: dict
-    ):
-        """Получить API-клиент с ограничениями области."""
-        
-        # Скоупированный API-клиент на основе разрешений инструмента
-        scopes = self._get_api_scopes(tool_context)
-        
-        return ScopedAPIClient(
-            base_client=self.api_clients.get(api_name),
-            allowed_endpoints=scopes,
-            rate_limit=100,
-            timeout=30
-        )
-    
-    def get_file_access(
-        self,
-        tool_context: dict,
-        operation: str  # "read", "write", "execute"
-    ):
-        """Получить песочницированный доступ к файлам."""
-        
-        allowed_paths = self._get_allowed_paths(tool_context)
-        
-        return self.file_sandbox.get_accessor(
-            allowed_paths=allowed_paths,
-            operation=operation,
-            size_limit=10 * 1024 * 1024  # 10MB
-        )
+```rust
+use std::collections::HashMap;
 
-class RestrictedDBConnection:
-    """Соединение с БД с ограничениями запросов."""
-    
-    def __init__(self, pool, allowed_tables, allowed_operations, **kwargs):
-        self.pool = pool
-        self.allowed_tables = allowed_tables
-        self.allowed_operations = allowed_operations
-        self.timeout = kwargs.get("query_timeout", 10)
-        self.max_rows = kwargs.get("max_rows", 1000)
-    
-    async def execute(self, query: str, params: tuple = None) -> list:
-        """Выполнение запроса с ограничениями."""
-        
-        # Парсинг и валидация запроса
-        parsed = self._parse_query(query)
-        
-        # Проверка операции
-        if parsed["operation"] not in self.allowed_operations:
-            raise PermissionError(f"Операция не разрешена: {parsed['operation']}")
-        
-        # Проверка таблиц
-        for table in parsed["tables"]:
-            if table not in self.allowed_tables:
-                raise PermissionError(f"Таблица не разрешена: {table}")
-        
-        # Добавление LIMIT если отсутствует
-        if "SELECT" in query.upper() and "LIMIT" not in query.upper():
-            query = f"{query} LIMIT {self.max_rows}"
-        
-        # Выполнение с таймаутом
-        async with self.pool.acquire() as conn:
-            return await asyncio.wait_for(
-                conn.fetch(query, *params if params else []),
-                timeout=self.timeout
-            )
+struct ToolSystemBoundary {
+    /// Защита backend-систем от доступа инструментов.
+    db_pool: DatabasePool,
+    api_clients: HashMap<String, ApiClient>,
+    file_sandbox: FileSandbox,
+}
+
+impl ToolSystemBoundary {
+    /// Получить соединение с БД с ограничениями.
+    fn get_database_connection(
+        &self,
+        tool_context: &HashMap<String, String>,
+        required_access: &[String],
+    ) -> RestrictedDBConnection {
+        // Создать ограниченное соединение на основе разрешений инструмента
+        let allowed_tables = self.get_allowed_tables(required_access);
+        let allowed_operations = self.get_allowed_operations(required_access);
+
+        RestrictedDBConnection {
+            pool: self.db_pool.clone(),
+            allowed_tables,
+            allowed_operations,
+            timeout: 10,
+            max_rows: 1000,
+        }
+    }
+
+    /// Получить API-клиент с ограничениями области.
+    fn get_api_client(
+        &self,
+        api_name: &str,
+        tool_context: &HashMap<String, String>,
+    ) -> ScopedAPIClient {
+        // Скоупированный API-клиент на основе разрешений инструмента
+        let scopes = self.get_api_scopes(tool_context);
+
+        ScopedAPIClient {
+            base_client: self.api_clients.get(api_name).cloned(),
+            allowed_endpoints: scopes,
+            rate_limit: 100,
+            timeout: 30,
+        }
+    }
+
+    /// Получить песочницированный доступ к файлам.
+    fn get_file_access(
+        &self,
+        tool_context: &HashMap<String, String>,
+        operation: &str, // "read", "write", "execute"
+    ) -> FileAccessor {
+        let allowed_paths = self.get_allowed_paths(tool_context);
+
+        self.file_sandbox.get_accessor(
+            &allowed_paths,
+            operation,
+            10 * 1024 * 1024, // 10MB
+        )
+    }
+}
+
+struct RestrictedDBConnection {
+    /// Соединение с БД с ограничениями запросов.
+    pool: DatabasePool,
+    allowed_tables: Vec<String>,
+    allowed_operations: Vec<String>,
+    timeout: u64,
+    max_rows: usize,
+}
+
+impl RestrictedDBConnection {
+    /// Выполнение запроса с ограничениями.
+    async fn execute(&self, query: &str, params: Option<&[&str]>) -> Result<Vec<Row>, Box<dyn std::error::Error>> {
+        // Парсинг и валидация запроса
+        let parsed = self.parse_query(query);
+
+        // Проверка операции
+        if !self.allowed_operations.contains(&parsed.operation) {
+            return Err(format!("Операция не разрешена: {}", parsed.operation).into());
+        }
+
+        // Проверка таблиц
+        for table in &parsed.tables {
+            if !self.allowed_tables.contains(table) {
+                return Err(format!("Таблица не разрешена: {}", table).into());
+            }
+        }
+
+        // Добавление LIMIT если отсутствует
+        let final_query = if query.to_uppercase().contains("SELECT") && !query.to_uppercase().contains("LIMIT") {
+            format!("{} LIMIT {}", query, self.max_rows)
+        } else {
+            query.to_string()
+        };
+
+        // Выполнение с таймаутом
+        let conn = self.pool.acquire().await?;
+        tokio::time::timeout(
+            std::time::Duration::from_secs(self.timeout),
+            conn.fetch(&final_query, params.unwrap_or(&[])),
+        ).await?
+    }
+}
 ```
 
 ---
@@ -336,111 +379,116 @@ class RestrictedDBConnection:
 
 ### Классификация данных
 
-```python
-from enum import Enum
-from dataclasses import dataclass
+```rust
+use std::collections::HashMap;
 
-class Sensitivity(Enum):
-    PUBLIC = "public"
-    INTERNAL = "internal"
-    CONFIDENTIAL = "confidential"
-    RESTRICTED = "restricted"
+#[derive(Debug, Clone, PartialEq, Eq, Hash)]
+enum Sensitivity {
+    Public,
+    Internal,
+    Confidential,
+    Restricted,
+}
 
-@dataclass
-class ClassifiedData:
-    """Данные с классификацией чувствительности."""
-    
-    value: any
-    sensitivity: Sensitivity
-    source: str
-    can_cross_boundary: dict  # boundary_name -> bool
+/// Данные с классификацией чувствительности.
+struct ClassifiedData {
+    value: serde_json::Value,
+    sensitivity: Sensitivity,
+    source: String,
+    can_cross_boundary: HashMap<String, bool>, // boundary_name -> bool
+}
 
-class DataFlowController:
-    """Контроль потока данных между границами."""
-    
-    def can_transfer(
-        self, 
-        data: ClassifiedData,
-        from_boundary: str,
-        to_boundary: str
-    ) -> dict:
-        """Проверить, могут ли данные пересечь границу."""
-        
-        # Проверка явных разрешений
-        if to_boundary in data.can_cross_boundary:
-            if not data.can_cross_boundary[to_boundary]:
-                return {"allowed": False, "reason": "Явно заблокировано"}
-        
-        # Применение правил чувствительности
-        rules = {
-            Sensitivity.PUBLIC: True,  # Может пересекать любую границу
-            Sensitivity.INTERNAL: to_boundary not in ["user", "external"],
-            Sensitivity.CONFIDENTIAL: to_boundary == "agent_internal",
-            Sensitivity.RESTRICTED: False  # Никогда не пересекает границы
+/// Контроль потока данных между границами.
+struct DataFlowController;
+
+impl DataFlowController {
+    /// Проверить, могут ли данные пересечь границу.
+    fn can_transfer(
+        &self,
+        data: &ClassifiedData,
+        _from_boundary: &str,
+        to_boundary: &str,
+    ) -> serde_json::Value {
+        // Проверка явных разрешений
+        if let Some(&allowed) = data.can_cross_boundary.get(to_boundary) {
+            if !allowed {
+                return serde_json::json!({"allowed": false, "reason": "Явно заблокировано"});
+            }
         }
-        
-        allowed = rules.get(data.sensitivity, False)
-        
-        return {
+
+        // Применение правил чувствительности
+        let allowed = match data.sensitivity {
+            Sensitivity::Public => true,       // Может пересекать любую границу
+            Sensitivity::Internal => to_boundary != "user" && to_boundary != "external",
+            Sensitivity::Confidential => to_boundary == "agent_internal",
+            Sensitivity::Restricted => false,  // Никогда не пересекает границы
+        };
+
+        let requires_redaction = matches!(
+            data.sensitivity,
+            Sensitivity::Confidential | Sensitivity::Restricted
+        );
+
+        serde_json::json!({
             "allowed": allowed,
-            "reason": None if allowed else f"Чувствительность {data.sensitivity} не может пересечь к {to_boundary}",
-            "requires_redaction": data.sensitivity in [Sensitivity.CONFIDENTIAL, Sensitivity.RESTRICTED]
-        }
-    
-    def transfer(
-        self, 
+            "reason": if allowed { serde_json::Value::Null } else {
+                serde_json::json!(format!("Чувствительность {:?} не может пересечь к {}", data.sensitivity, to_boundary))
+            },
+            "requires_redaction": requires_redaction
+        })
+    }
+
+    /// Передача данных с соответствующей обработкой.
+    fn transfer(
+        &self,
         data: ClassifiedData,
-        from_boundary: str,
-        to_boundary: str
-    ) -> ClassifiedData:
-        """Передача данных с соответствующей обработкой."""
-        
-        check = self.can_transfer(data, from_boundary, to_boundary)
-        
-        if not check["allowed"]:
-            raise PermissionError(check["reason"])
-        
-        if check.get("requires_redaction"):
-            return self._redact(data)
-        
-        return data
+        from_boundary: &str,
+        to_boundary: &str,
+    ) -> Result<ClassifiedData, String> {
+        let check = self.can_transfer(&data, from_boundary, to_boundary);
+
+        if !check["allowed"].as_bool().unwrap_or(false) {
+            return Err(check["reason"].as_str().unwrap_or("Запрещено").to_string());
+        }
+
+        if check["requires_redaction"].as_bool().unwrap_or(false) {
+            return Ok(self.redact(data));
+        }
+
+        Ok(data)
+    }
+}
 ```
 
 ---
 
 ## Интеграция с SENTINEL
 
-```python
-from sentinel import configure, TrustBoundary
+```rust
+use sentinel_core::engines::SentinelEngine;
 
-configure(
-    trust_boundaries=True,
-    boundary_logging=True,
-    data_classification=True
-)
+let engine = SentinelEngine::new();
 
-user_agent_boundary = TrustBoundary(
-    name="user_agent",
-    validate_input=True,
-    scan_for_injection=True
-)
+// Граница 1: Сканирование ввода пользователя перед передачей агенту
+let user_result = engine.analyze(&user_input);
+if user_result.detected {
+    log::warn!(
+        "Угроза на границе Пользователь→Агент: risk={}, categories={:?}, time={}μs",
+        user_result.risk_score, user_result.categories, user_result.processing_time_us
+    );
+    // Блокировка ввода на границе
+}
 
-agent_tool_boundary = TrustBoundary(
-    name="agent_tool",
-    require_authorization=True,
-    validate_arguments=True,
-    high_risk_approval=True
-)
-
-@user_agent_boundary.validate
-def process_user_input(user_input: str):
-    # Автоматически валидируется
-    return agent.process(user_input)
-
-@agent_tool_boundary.authorize
-def execute_tool(tool_name: str, args: dict):
-    # Автоматически авторизуется
-    return tools.execute(tool_name, args)
+// Граница 2: Сканирование аргументов инструмента перед выполнением
+let tool_args_text = format!("{}: {:?}", tool_name, args);
+let tool_result = engine.analyze(&tool_args_text);
+if tool_result.detected {
+    log::warn!(
+        "Угроза на границе Агент→Инструмент: risk={}, time={}μs",
+        tool_result.risk_score, tool_result.processing_time_us
+    );
+    // Блокировка выполнения инструмента
+}
 ```
 
 ---

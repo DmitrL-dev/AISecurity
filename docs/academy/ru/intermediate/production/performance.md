@@ -16,61 +16,68 @@
 
 ## Caching Strategy
 
-```python
-from sentinel.cache import RedisCache
+```rust
+use sentinel_core::cache::RedisCache;
 
-cache = RedisCache(
-    url="redis://localhost:6379",
-    ttl=300,  # 5 minutes
-    max_size=10000
-)
+let cache = RedisCache::new(
+    "redis://localhost:6379",
+    300,   // 5 minutes TTL
+    10000, // max_size
+);
 
-class CachedEngine(BaseEngine):
-    def scan(self, text: str) -> ScanResult:
-        # Check cache
-        cache_key = hash(text)
-        cached = cache.get(cache_key)
-        if cached:
-            return cached
-        
-        # Compute
-        result = self._compute(text)
-        
-        # Store
-        cache.set(cache_key, result)
-        return result
+struct CachedEngine {
+    cache: RedisCache,
+}
+
+impl CachedEngine {
+    fn scan(&self, text: &str) -> ScanResult {
+        // Check cache
+        let cache_key = self.hash(text);
+        if let Some(cached) = self.cache.get(&cache_key) {
+            return cached;
+        }
+
+        // Compute
+        let result = self.compute(text);
+
+        // Store
+        self.cache.set(&cache_key, &result);
+        result
+    }
+}
 ```
 
 ---
 
 ## Tiered Execution
 
-```python
-from sentinel.pipeline import TieredPipeline
+```rust
+use sentinel_core::pipeline::TieredPipeline;
 
-pipeline = TieredPipeline(
-    tiers=[
-        Tier(engines=tier1_engines, timeout_ms=10),
-        Tier(engines=tier2_engines, timeout_ms=50),
-        Tier(engines=tier3_engines, timeout_ms=200),
-    ],
-    early_exit=True  # Stop on first threat
-)
+let pipeline = TieredPipeline::new(vec![
+    Tier::new(tier1_engines.clone(), 10),  // timeout_ms
+    Tier::new(tier2_engines.clone(), 50),
+    Tier::new(tier3_engines.clone(), 200),
+], true); // early_exit: Stop on first threat
 
-result = pipeline.scan(text)
+let result = pipeline.scan(text);
 ```
 
 ---
 
 ## Parallel Execution
 
-```python
-import asyncio
+```rust
+use tokio;
+use futures::future::join_all;
 
-async def scan_parallel(text: str, engines: List[BaseEngine]):
-    tasks = [engine.scan_async(text) for engine in engines]
-    results = await asyncio.gather(*tasks)
-    return merge_results(results)
+async fn scan_parallel(text: &str, engines: &[Box<dyn BaseEngine>]) -> MergedResult {
+    let tasks: Vec<_> = engines.iter()
+        .map(|engine| engine.scan_async(text))
+        .collect();
+    let results = join_all(tasks).await;
+    merge_results(&results)
+}
 ```
 
 ---

@@ -28,8 +28,8 @@ UNSAFE OUTPUT
 
 ### Chain Enum Attack
 
-```python
-malicious_schema = {
+```rust
+let malicious_schema = serde_json::json!({
     "type": "object",
     "properties": {
         "step_1": {
@@ -40,7 +40,7 @@ malicious_schema = {
             "description": "Детальные инструкции"
         }
     }
-}
+});
 ```
 
 ### Success Rates
@@ -57,23 +57,30 @@ malicious_schema = {
 
 ### Задание: Детектор CDA
 
-```python
-def detect_cda_attack(schema: dict) -> tuple:
-    issues = []
-    
-    def check_node(node, path="root"):
-        if "enum" in node:
-            for val in node["enum"]:
-                if any(kw in str(val).lower() 
-                       for kw in ["hack", "exploit", "bypass"]):
-                    issues.append(f"{path}: подозрительный enum")
-        
-        if "properties" in node:
-            for name, prop in node["properties"].items():
-                check_node(prop, f"{path}.{name}")
-    
-    check_node(schema)
-    return len(issues) > 0, issues
+```rust
+fn detect_cda_attack(schema: &serde_json::Value) -> (bool, Vec<String>) {
+    let mut issues = Vec::new();
+
+    fn check_node(node: &serde_json::Value, path: &str, issues: &mut Vec<String>) {
+        if let Some(enum_vals) = node.get("enum").and_then(|v| v.as_array()) {
+            for val in enum_vals {
+                let val_str = val.to_string().to_lowercase();
+                if ["hack", "exploit", "bypass"].iter().any(|kw| val_str.contains(kw)) {
+                    issues.push(format!("{}: подозрительный enum", path));
+                }
+            }
+        }
+
+        if let Some(props) = node.get("properties").and_then(|v| v.as_object()) {
+            for (name, prop) in props {
+                check_node(prop, &format!("{}.{}", path, name), issues);
+            }
+        }
+    }
+
+    check_node(schema, "root", &mut issues);
+    (!issues.is_empty(), issues)
+}
 ```
 
 ---

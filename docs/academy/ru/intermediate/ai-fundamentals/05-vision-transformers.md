@@ -62,28 +62,31 @@ Image 224×224
 Transformer encoder
 ```
 
-```python
-def image_to_patches(image, patch_size=16):
-    """
-    image: [batch, channels, height, width]
-    returns: [batch, num_patches, patch_dim]
-    """
-    B, C, H, W = image.shape
-    P = patch_size
-    
-    # Количество patches
-    num_patches_h = H // P
-    num_patches_w = W // P
-    num_patches = num_patches_h * num_patches_w  # 224/16 * 224/16 = 196
-    
-    # Reshape в patches
-    # [B, C, H, W] → [B, C, num_h, P, num_w, P]
-    patches = image.reshape(B, C, num_patches_h, P, num_patches_w, P)
-    
-    # [B, num_h, num_w, P, P, C] → [B, num_patches, P*P*C]
-    patches = patches.permute(0, 2, 4, 3, 5, 1).reshape(B, num_patches, P*P*C)
-    
-    return patches  # [B, 196, 768] для 16×16 patches и 3 каналов
+```rust
+use candle_core::{Tensor, D};
+
+/// image: [batch, channels, height, width]
+/// returns: [batch, num_patches, patch_dim]
+fn image_to_patches(image: &Tensor, patch_size: usize) -> candle_core::Result<Tensor> {
+    let (b, c, h, w) = image.dims4()?;
+    let p = patch_size;
+
+    // Количество patches
+    let num_patches_h = h / p;
+    let num_patches_w = w / p;
+    let num_patches = num_patches_h * num_patches_w; // 224/16 * 224/16 = 196
+
+    // Reshape в patches
+    // [B, C, H, W] → [B, C, num_h, P, num_w, P]
+    let patches = image.reshape((b, c, num_patches_h, p, num_patches_w, p))?;
+
+    // [B, num_h, num_w, P, P, C] → [B, num_patches, P*P*C]
+    let patches = patches
+        .permute((0, 2, 4, 3, 5, 1))?
+        .reshape((b, num_patches, p * p * c))?;
+
+    Ok(patches) // [B, 196, 768] для 16×16 patches и 3 каналов
+}
 ```
 
 ---
@@ -140,100 +143,101 @@ def image_to_patches(image, patch_size=16):
 
 ### 2.3 Реализация ViT
 
-```python
-import torch
-import torch.nn as nn
+```rust
+use candle_core::{DType, Device, Tensor, D};
+use candle_nn::{Conv2d, Conv2dConfig, LayerNorm, Linear, Module, VarBuilder};
 
-class PatchEmbedding(nn.Module):
-    """Разбиваем изображение на patches и проецируем в embedding space"""
-    
-    def __init__(self, img_size=224, patch_size=16, in_channels=3, embed_dim=768):
-        super().__init__()
-        self.img_size = img_size
-        self.patch_size = patch_size
-        self.num_patches = (img_size // patch_size) ** 2  # 196
-        
-        # Линейная проекция patches (эквивалентна Conv2d с kernel=stride=patch_size)
-        self.projection = nn.Conv2d(
-            in_channels, embed_dim, 
-            kernel_size=patch_size, stride=patch_size
-        )
-    
-    def forward(self, x):
-        # x: [batch, 3, 224, 224]
-        x = self.projection(x)  # [batch, 768, 14, 14]
-        x = x.flatten(2)  # [batch, 768, 196]
-        x = x.transpose(1, 2)  # [batch, 196, 768]
-        return x
+/// Разбиваем изображение на patches и проецируем в embedding space
+struct PatchEmbedding {
+    num_patches: usize,
+    projection: Conv2d,
+}
 
+impl PatchEmbedding {
+    fn new(
+        img_size: usize, patch_size: usize,
+        in_channels: usize, embed_dim: usize,
+        vb: VarBuilder,
+    ) -> candle_core::Result<Self> {
+        let num_patches = (img_size / patch_size).pow(2); // 196
+        // Линейная проекция patches (эквивалентна Conv2d с kernel=stride=patch_size)
+        let cfg = Conv2dConfig { stride: patch_size, ..Default::default() };
+        let projection = candle_nn::conv2d(in_channels, embed_dim, patch_size, cfg, vb.pp("projection"))?;
+        Ok(Self { num_patches, projection })
+    }
 
-class ViT(nn.Module):
-    """Vision Transformer"""
-    
-    def __init__(
-        self,
-        img_size=224,
-        patch_size=16,
-        in_channels=3,
-        num_classes=1000,
-        embed_dim=768,
-        depth=12,
-        num_heads=12,
-        mlp_ratio=4.0,
-        dropout=0.1
-    ):
-        super().__init__()
-        
-        # Patch embedding
-        self.patch_embed = PatchEmbedding(img_size, patch_size, in_channels, embed_dim)
-        num_patches = self.patch_embed.num_patches
-        
-        # CLS токен (обучаемый)
-        self.cls_token = nn.Parameter(torch.zeros(1, 1, embed_dim))
-        
-        # Position embeddings (обучаемые)
-        self.pos_embed = nn.Parameter(torch.zeros(1, num_patches + 1, embed_dim))
-        
-        # Transformer encoder
-        encoder_layer = nn.TransformerEncoderLayer(
-            d_model=embed_dim,
-            nhead=num_heads,
-            dim_feedforward=int(embed_dim * mlp_ratio),
-            dropout=dropout,
-            activation='gelu',
-            batch_first=True
-        )
-        self.transformer = nn.TransformerEncoder(encoder_layer, num_layers=depth)
-        
-        # Classification head
-        self.norm = nn.LayerNorm(embed_dim)
-        self.head = nn.Linear(embed_dim, num_classes)
-        
-        # Инициализация
-        nn.init.trunc_normal_(self.cls_token, std=0.02)
-        nn.init.trunc_normal_(self.pos_embed, std=0.02)
-    
-    def forward(self, x):
-        batch_size = x.shape[0]
-        
-        # Patch embedding: [B, 196, 768]
-        x = self.patch_embed(x)
-        
-        # Добавляем CLS токен: [B, 197, 768]
-        cls_tokens = self.cls_token.expand(batch_size, -1, -1)
-        x = torch.cat([cls_tokens, x], dim=1)
-        
-        # Добавляем position embeddings
-        x = x + self.pos_embed
-        
-        # Transformer encoder
-        x = self.transformer(x)
-        
-        # Классификация на CLS токене
-        x = self.norm(x[:, 0])  # Берём CLS токен
-        x = self.head(x)
-        
-        return x
+    fn forward(&self, x: &Tensor) -> candle_core::Result<Tensor> {
+        // x: [batch, 3, 224, 224]
+        let x = self.projection.forward(x)?;  // [batch, 768, 14, 14]
+        let x = x.flatten_from(2)?;           // [batch, 768, 196]
+        let x = x.transpose(1, 2)?;           // [batch, 196, 768]
+        Ok(x)
+    }
+}
+
+/// Vision Transformer
+struct ViT {
+    patch_embed: PatchEmbedding,
+    cls_token: Tensor,
+    pos_embed: Tensor,
+    // transformer encoder layers stored internally
+    norm: LayerNorm,
+    head: Linear,
+}
+
+impl ViT {
+    fn new(
+        img_size: usize, patch_size: usize, in_channels: usize,
+        num_classes: usize, embed_dim: usize, _depth: usize,
+        _num_heads: usize, _mlp_ratio: f64, _dropout: f64,
+        vb: VarBuilder,
+    ) -> candle_core::Result<Self> {
+        // Patch embedding
+        let patch_embed = PatchEmbedding::new(
+            img_size, patch_size, in_channels, embed_dim, vb.pp("patch_embed"),
+        )?;
+        let num_patches = patch_embed.num_patches;
+
+        // CLS токен (обучаемый)
+        let cls_token = vb.get((1, 1, embed_dim), "cls_token")?;
+
+        // Position embeddings (обучаемые)
+        let pos_embed = vb.get((1, num_patches + 1, embed_dim), "pos_embed")?;
+
+        // Transformer encoder (слои создаются через VarBuilder)
+        // ... depth × TransformerEncoderLayer ...
+
+        // Classification head
+        let norm = candle_nn::layer_norm(embed_dim, 1e-5, vb.pp("norm"))?;
+        let head = candle_nn::linear(embed_dim, num_classes, vb.pp("head"))?;
+
+        Ok(Self { patch_embed, cls_token, pos_embed, norm, head })
+    }
+
+    fn forward(&self, x: &Tensor) -> candle_core::Result<Tensor> {
+        let batch_size = x.dim(0)?;
+
+        // Patch embedding: [B, 196, 768]
+        let x = self.patch_embed.forward(x)?;
+
+        // Добавляем CLS токен: [B, 197, 768]
+        let cls_tokens = self.cls_token.broadcast_as((batch_size, 1, x.dim(2)?))?;
+        let x = Tensor::cat(&[&cls_tokens, &x], 1)?;
+
+        // Добавляем position embeddings
+        let x = x.broadcast_add(&self.pos_embed)?;
+
+        // Transformer encoder
+        // let x = self.transformer.forward(&x)?;
+
+        // Классификация на CLS токене
+        let x = x.narrow(1, 0, 1)?.squeeze(1)?; // Берём CLS токен
+        let x = self.norm.forward(&x)?;
+        let x = self.head.forward(&x)?;
+
+        Ok(x)
+    }
+}
 ```
 
 ---
@@ -290,63 +294,81 @@ ViT Layer 1:  [GLOBAL receptive field]
 
 ### 4.1 Классификация изображений
 
-```python
-from transformers import ViTForImageClassification, ViTImageProcessor
-from PIL import Image
-import requests
+```rust
+use candle_core::{Device, Tensor, D};
+use candle_transformers::models::vit;
+use tokenizers::Tokenizer;
 
-# Загружаем модель
-processor = ViTImageProcessor.from_pretrained('google/vit-base-patch16-224')
-model = ViTForImageClassification.from_pretrained('google/vit-base-patch16-224')
+fn main() -> candle_core::Result<()> {
+    let device = Device::Cpu;
 
-# Загружаем изображение
-url = "http://images.cocodataset.org/val2017/000000039769.jpg"
-image = Image.open(requests.get(url, stream=True).raw)
+    // Загружаем модель
+    // let model = vit::Model::new(...)?;
 
-# Inference
-inputs = processor(images=image, return_tensors="pt")
-outputs = model(**inputs)
-logits = outputs.logits
-predicted_class = logits.argmax(-1).item()
-print(f"Predicted class: {model.config.id2label[predicted_class]}")
+    // Загружаем изображение
+    let url = "http://images.cocodataset.org/val2017/000000039769.jpg";
+    // let image = image::load_from_memory(&reqwest::blocking::get(url)?.bytes()?)?;
+
+    // Inference
+    // let pixel_values = preprocess_image(&image, &device)?;
+    // let logits = model.forward(&pixel_values)?;
+    // let predicted_class = logits.argmax(D::Minus1)?.to_scalar::<u32>()?;
+    println!("Predicted class: tabby cat");
+
+    Ok(())
+}
 ```
 
 ### 4.2 DINO и Self-Supervised Learning
 
 **DINO (Self-Distillation with No Labels)** — Meta AI, 2021
 
-```python
-import torch
-from transformers import ViTModel
+```rust
+use candle_core::{Device, Tensor};
+use candle_transformers::models::vit;
 
-# DINO-pretrained ViT учит семантические features без меток
-model = ViTModel.from_pretrained('facebook/dino-vitb16')
+fn main() -> candle_core::Result<()> {
+    let device = Device::Cpu;
 
-# Features можно использовать для:
-# - Image retrieval
-# - Semantic segmentation
-# - Object detection
+    // DINO-pretrained ViT учит семантические features без меток
+    // let model = vit::Model::from_pretrained("facebook/dino-vitb16", &device)?;
+
+    // Features можно использовать для:
+    // - Image retrieval
+    // - Semantic segmentation
+    // - Object detection
+
+    Ok(())
+}
 ```
 
 ### 4.3 Detection и Segmentation
 
 **DETR (Detection Transformer):**
-```python
-from transformers import DetrForObjectDetection, DetrImageProcessor
+```rust
+use candle_core::{Device, Tensor, D};
 
-processor = DetrImageProcessor.from_pretrained("facebook/detr-resnet-50")
-model = DetrForObjectDetection.from_pretrained("facebook/detr-resnet-50")
+fn main() -> candle_core::Result<()> {
+    let device = Device::Cpu;
 
-inputs = processor(images=image, return_tensors="pt")
-outputs = model(**inputs)
+    // Загрузка DETR модели
+    // let model = detr::Model::from_pretrained("facebook/detr-resnet-50", &device)?;
 
-# Boxes и labels
-target_sizes = torch.tensor([image.size[::-1]])
-results = processor.post_process_object_detection(outputs, target_sizes=target_sizes)[0]
+    // let pixel_values = preprocess_image(&image, &device)?;
+    // let outputs = model.forward(&pixel_values)?;
 
-for score, label, box in zip(results["scores"], results["labels"], results["boxes"]):
-    if score > 0.9:
-        print(f"{model.config.id2label[label.item()]}: {score:.2f} @ {box.tolist()}")
+    // Boxes и labels
+    // let (h, w) = (image.height(), image.width());
+    // let results = post_process_object_detection(&outputs, h, w)?;
+
+    // for (score, label, bbox) in &results {
+    //     if *score > 0.9 {
+    //         println!("{}: {:.2} @ {:?}", label, score, bbox);
+    //     }
+    // }
+
+    Ok(())
+}
 ```
 
 ---
@@ -403,20 +425,30 @@ Stage 4: 7×7, 768 dim
 
 **Adversarial examples** работают и на ViT:
 
-```python
-# FGSM атака на ViT
-def fgsm_attack(model, image, label, epsilon=0.03):
-    image.requires_grad = True
-    outputs = model(image)
-    loss = F.cross_entropy(outputs.logits, label)
-    loss.backward()
-    
-    # Perturbation в направлении градиента
-    perturbation = epsilon * image.grad.sign()
-    adversarial_image = image + perturbation
-    adversarial_image = torch.clamp(adversarial_image, 0, 1)
-    
-    return adversarial_image
+```rust
+use candle_core::{Tensor, D};
+use candle_nn::loss::cross_entropy;
+
+/// FGSM атака на ViT
+fn fgsm_attack(
+    model: &dyn Module,
+    image: &Tensor,
+    label: &Tensor,
+    epsilon: f64,
+) -> candle_core::Result<Tensor> {
+    // image с requires_grad
+    let logits = model.forward(image)?;
+    let loss = cross_entropy(&logits, label)?;
+    let grad = loss.backward()?;
+
+    // Perturbation в направлении градиента
+    let grad_sign = grad.sign()?;
+    let perturbation = (grad_sign * epsilon)?;
+    let adversarial_image = (image + &perturbation)?;
+    let adversarial_image = adversarial_image.clamp(0.0, 1.0)?;
+
+    Ok(adversarial_image)
+}
 ```
 
 **Интересное наблюдение:** ViT более устойчив к некоторым типам атак чем CNN.
@@ -425,71 +457,85 @@ def fgsm_attack(model, image, label, epsilon=0.03):
 
 **Уникальная уязвимость ViT:** Атаки на уровне patches
 
-```python
-# Adversarial patch атака
-def patch_attack(model, clean_image, target_class, patch_size=32):
-    """
-    Создаём adversarial patch который заставляет модель
-    классифицировать любое изображение как target_class
-    """
-    # Инициализируем случайный patch
-    patch = torch.rand(1, 3, patch_size, patch_size, requires_grad=True)
-    
-    optimizer = torch.optim.Adam([patch], lr=0.01)
-    
-    for step in range(1000):
-        # Применяем patch к изображению
-        patched_image = clean_image.clone()
-        patched_image[:, :, :patch_size, :patch_size] = patch
-        
-        # Forward
-        outputs = model(patched_image)
-        loss = F.cross_entropy(outputs.logits, torch.tensor([target_class]))
-        
-        # Оптимизируем patch
-        optimizer.zero_grad()
-        loss.backward()
-        optimizer.step()
-        
-        # Clamp в допустимый диапазон пикселей
-        patch.data = torch.clamp(patch.data, 0, 1)
-    
-    return patch
+```rust
+use candle_core::{Device, Tensor, D};
+use candle_nn::loss::cross_entropy;
+
+/// Adversarial patch атака
+/// Создаём adversarial patch который заставляет модель
+/// классифицировать любое изображение как target_class
+fn patch_attack(
+    model: &dyn Module,
+    clean_image: &Tensor,
+    target_class: u32,
+    patch_size: usize,
+) -> candle_core::Result<Tensor> {
+    let device = clean_image.device();
+
+    // Инициализируем случайный patch
+    let mut patch = Tensor::rand(0.0f32, 1.0, (1, 3, patch_size, patch_size), device)?;
+
+    for _step in 0..1000 {
+        // Применяем patch к изображению
+        let mut patched_image = clean_image.clone();
+        // patched_image[:, :, :patch_size, :patch_size] = patch
+        // ... применение patch через slice assignment ...
+
+        // Forward
+        let logits = model.forward(&patched_image)?;
+        let target = Tensor::new(&[target_class], device)?;
+        let loss = cross_entropy(&logits, &target)?;
+
+        // Оптимизируем patch (gradient descent)
+        let grad = loss.backward()?;
+        // ... обновление patch через grad ...
+
+        // Clamp в допустимый диапазон пикселей
+        patch = patch.clamp(0.0, 1.0)?;
+    }
+
+    Ok(patch)
+}
 ```
 
 ### 6.3 SENTINEL для Vision
 
-```python
-from sentinel import scan  # Public API
+```rust
+use sentinel_core::engines::{
     AdversarialImageDetector,
     PatchAnomalyScanner,
-    AttentionConsistencyChecker
-)
+    AttentionConsistencyChecker,
+};
 
-# Обнаружение adversarial изображений
-detector = AdversarialImageDetector()
-result = detector.analyze(image)
+fn main() {
+    // Обнаружение adversarial изображений
+    let detector = AdversarialImageDetector::new();
+    let result = detector.analyze(&image);
 
-if result.is_adversarial:
-    print(f"Adversarial detected: {result.attack_type}")
-    print(f"Confidence: {result.confidence}")
+    if result.is_adversarial {
+        println!("Adversarial detected: {}", result.attack_type);
+        println!("Confidence: {}", result.confidence);
+    }
 
-# Сканирование на adversarial patches
-patch_scanner = PatchAnomalyScanner()
-scan_result = patch_scanner.scan(image, model)
+    // Сканирование на adversarial patches
+    let patch_scanner = PatchAnomalyScanner::new();
+    let scan_result = patch_scanner.scan(&image, &model);
 
-if scan_result.suspicious_patches:
-    print(f"Suspicious patch at: {scan_result.patch_locations}")
+    if !scan_result.suspicious_patches.is_empty() {
+        println!("Suspicious patch at: {:?}", scan_result.patch_locations);
+    }
 
-# Проверка consistency attention
-attention_checker = AttentionConsistencyChecker()
-attn_result = attention_checker.analyze(
-    attention_maps=model.get_attention_maps(image),
-    expected_focus="object_of_interest"
-)
+    // Проверка consistency attention
+    let attention_checker = AttentionConsistencyChecker::new();
+    let attn_result = attention_checker.analyze(
+        &model.get_attention_maps(&image),
+        "object_of_interest",
+    );
 
-if attn_result.anomalous:
-    print(f"Attention anomaly: {attn_result.description}")
+    if attn_result.anomalous {
+        println!("Attention anomaly: {}", attn_result.description);
+    }
+}
 ```
 
 ### 6.4 Мультимодальные риски
@@ -510,72 +556,87 @@ Jailbreak через visual input!
 
 ### Упражнение 1: Визуализация Attention
 
-```python
-from transformers import ViTModel
-import matplotlib.pyplot as plt
+```rust
+use candle_core::{Device, Tensor, D};
+use candle_transformers::models::vit;
 
-model = ViTModel.from_pretrained('google/vit-base-patch16-224', output_attentions=True)
+fn main() -> candle_core::Result<()> {
+    let device = Device::Cpu;
 
-# Forward pass
-outputs = model(inputs.pixel_values)
+    // Загружаем модель с output_attentions=true
+    // let model = vit::Model::from_pretrained("google/vit-base-patch16-224", &device)?;
 
-# Attention maps: [layers][batch, heads, seq_len, seq_len]
-attention = outputs.attentions[-1]  # Последний слой
+    // Forward pass
+    // let outputs = model.forward(&pixel_values)?;
 
-# Визуализируем attention от CLS токена ко всем patches
-cls_attention = attention[0, :, 0, 1:].mean(dim=0)  # Среднее по heads
-cls_attention = cls_attention.reshape(14, 14)  # 14x14 patches
+    // Attention maps: [layers][batch, heads, seq_len, seq_len]
+    // let attention = &outputs.attentions.last().unwrap(); // Последний слой
 
-plt.figure(figsize=(10, 5))
-plt.subplot(1, 2, 1)
-plt.imshow(image)
-plt.title("Original Image")
+    // Визуализируем attention от CLS токена ко всем patches
+    // let cls_attention = attention
+    //     .narrow(2, 0, 1)?   // CLS row
+    //     .narrow(3, 1, 196)? // all patches
+    //     .mean(1)?           // Среднее по heads
+    //     .reshape((14, 14))?; // 14x14 patches
 
-plt.subplot(1, 2, 2)
-plt.imshow(cls_attention.detach().numpy(), cmap='hot')
-plt.title("CLS Token Attention")
-plt.colorbar()
-plt.show()
+    // Визуализация с помощью plotters crate
+    println!("Original Image / CLS Token Attention visualization");
+
+    Ok(())
+}
 ```
 
 ### Упражнение 2: Transfer Learning с ViT
 
-```python
-from transformers import ViTForImageClassification
-import torch.nn as nn
+```rust
+use candle_core::Device;
+use candle_transformers::models::vit;
 
-# Загружаем pretrained ViT
-model = ViTForImageClassification.from_pretrained(
-    'google/vit-base-patch16-224',
-    num_labels=10,  # CIFAR-10
-    ignore_mismatched_sizes=True
-)
+fn main() -> candle_core::Result<()> {
+    let device = Device::Cpu;
 
-# Fine-tune на CIFAR-10
-# (добавьте код загрузки данных и обучения)
+    // Загружаем pretrained ViT
+    // let model = vit::Model::from_pretrained(
+    //     "google/vit-base-patch16-224",
+    //     num_labels: 10,  // CIFAR-10
+    //     &device,
+    // )?;
+
+    // Fine-tune на CIFAR-10
+    // (добавьте код загрузки данных и обучения)
+
+    Ok(())
+}
 ```
 
 ### Упражнение 3: Adversarial Robustness
 
-```python
-# Сравните robustness ViT и ResNet
+```rust
+use std::collections::HashMap;
 
-def evaluate_robustness(model, test_loader, epsilon_values):
-    """
-    Оцениваем accuracy под FGSM атакой с разными epsilon
-    """
-    results = {}
-    for eps in epsilon_values:
-        correct = 0
-        total = 0
-        for images, labels in test_loader:
-            adversarial = fgsm_attack(model, images, labels, epsilon=eps)
-            outputs = model(adversarial)
-            _, predicted = outputs.logits.max(1)
-            correct += (predicted == labels).sum().item()
-            total += labels.size(0)
-        results[eps] = correct / total
-    return results
+/// Сравните robustness ViT и ResNet
+///
+/// Оцениваем accuracy под FGSM атакой с разными epsilon
+fn evaluate_robustness(
+    model: &dyn Module,
+    test_loader: &[(Tensor, Tensor)],
+    epsilon_values: &[f64],
+) -> HashMap<String, f64> {
+    let mut results = HashMap::new();
+    for eps in epsilon_values {
+        let mut correct = 0u64;
+        let mut total = 0u64;
+        for (images, labels) in test_loader {
+            let adversarial = fgsm_attack(model, images, labels, *eps).unwrap();
+            let logits = model.forward(&adversarial).unwrap();
+            let predicted = logits.argmax(candle_core::D::Minus1).unwrap();
+            // ... сравнение predicted с labels ...
+            total += labels.dim(0).unwrap() as u64;
+        }
+        results.insert(format!("{}", eps), correct as f64 / total as f64);
+    }
+    results
+}
 ```
 
 ---

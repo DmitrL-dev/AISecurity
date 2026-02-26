@@ -35,241 +35,284 @@ LLM outputs часто считаются доверенными и переда
 
 ### 1. Cross-Site Scripting (XSS) через LLM
 
-```python
-# Небезопасно: LLM output рендерится напрямую в браузере
-user_message = "Generate a greeting for <script>stealCookies()</script>"
+```rust
+// Небезопасно: LLM output рендерится напрямую в браузере
+let user_message = "Generate a greeting for <script>stealCookies()</script>";
 
-llm_response = llm.generate(user_message)
-# Response может содержать: "Hello, <script>stealCookies()</script>!"
+let llm_response = llm.generate(user_message);
+// Response может содержать: "Hello, <script>stealCookies()</script>!"
 
-# Уязвимый рендеринг
-return f"<div>{llm_response}</div>"  # XSS!
+// Уязвимый рендеринг
+let html = format!("<div>{}</div>", llm_response); // XSS!
 ```
 
 **Безопасная реализация:**
 
-```python
-from html import escape
+```rust
+use html_escape::encode_text;
 
-def render_llm_output(response: str) -> str:
-    """Безопасный рендеринг LLM output в HTML контексте."""
-    # Escape HTML entities
-    safe_response = escape(response)
-    
-    # Опционально разрешаем safe markdown
-    safe_response = allowed_markdown_to_html(safe_response)
-    
-    return f"<div class='llm-response'>{safe_response}</div>"
+/// Безопасный рендеринг LLM output в HTML контексте.
+fn render_llm_output(response: &str) -> String {
+    // Escape HTML entities
+    let safe_response = encode_text(response).to_string();
+
+    // Опционально разрешаем safe markdown
+    let safe_response = allowed_markdown_to_html(&safe_response);
+
+    format!("<div class='llm-response'>{}</div>", safe_response)
+}
 ```
 
 ---
 
 ### 2. SQL Injection через LLM
 
-```python
-# Опасно: Использование LLM output в SQL query
-user_request = "Show me all users named Robert'); DROP TABLE users;--"
+```rust
+// Опасно: Использование LLM output в SQL query
+let user_request = "Show me all users named Robert'); DROP TABLE users;--";
 
-llm_response = llm.generate(
-    f"Generate SQL to find users: {user_request}"
-)
-# LLM может сгенерировать: SELECT * FROM users WHERE name = 'Robert'); DROP TABLE users;--'
+let llm_response = llm.generate(
+    &format!("Generate SQL to find users: {}", user_request)
+);
+// LLM может сгенерировать: SELECT * FROM users WHERE name = 'Robert'); DROP TABLE users;--'
 
-# УЯЗВИМЫЙ КОД
-cursor.execute(llm_response)  # SQL Injection!
+// УЯЗВИМЫЙ КОД
+cursor.execute(&llm_response); // SQL Injection!
 ```
 
 **Безопасная реализация:**
 
-```python
-from sqlalchemy import text
+```rust
+use std::collections::HashSet;
 
-class SecureSQLGenerator:
-    """Генерация и валидация SQL из LLM output."""
-    
-    ALLOWED_OPERATIONS = {"SELECT"}
-    FORBIDDEN_KEYWORDS = {"DROP", "DELETE", "UPDATE", "INSERT", "TRUNCATE", "ALTER"}
-    
-    def execute_safe_query(self, llm_sql: str, params: dict = None):
-        """Безопасное выполнение LLM-сгенерированного SQL."""
-        
-        # 1. Parse и validate SQL
-        if not self._is_safe_query(llm_sql):
-            raise SecurityError("Unsafe SQL detected")
-        
-        # 2. Используем parameterized queries
-        safe_sql = self._parameterize(llm_sql, params)
-        
-        # 3. Выполняем с read-only connection
-        with self.session.begin_readonly():
-            return self.session.execute(text(safe_sql), params)
-    
-    def _is_safe_query(self, sql: str) -> bool:
-        sql_upper = sql.upper()
-        
-        # Проверяем только allowed operations
-        first_word = sql_upper.split()[0]
-        if first_word not in self.ALLOWED_OPERATIONS:
-            return False
-        
-        # Проверяем на forbidden keywords
-        for keyword in self.FORBIDDEN_KEYWORDS:
-            if keyword in sql_upper:
-                return False
-        
-        return True
+struct SecureSQLGenerator {
+    /// Генерация и валидация SQL из LLM output.
+    allowed_operations: HashSet<String>,
+    forbidden_keywords: HashSet<String>,
+}
+
+impl SecureSQLGenerator {
+    fn new() -> Self {
+        Self {
+            allowed_operations: HashSet::from(["SELECT".to_string()]),
+            forbidden_keywords: HashSet::from([
+                "DROP".into(), "DELETE".into(), "UPDATE".into(),
+                "INSERT".into(), "TRUNCATE".into(), "ALTER".into(),
+            ]),
+        }
+    }
+
+    /// Безопасное выполнение LLM-сгенерированного SQL.
+    fn execute_safe_query(
+        &self,
+        llm_sql: &str,
+        params: Option<&HashMap<String, String>>,
+    ) -> Result<Vec<Row>, String> {
+        // 1. Parse и validate SQL
+        if !self.is_safe_query(llm_sql) {
+            return Err("Unsafe SQL detected".to_string());
+        }
+
+        // 2. Используем parameterized queries
+        let safe_sql = self.parameterize(llm_sql, params);
+
+        // 3. Выполняем с read-only connection
+        self.session.execute_readonly(&safe_sql, params)
+    }
+
+    fn is_safe_query(&self, sql: &str) -> bool {
+        let sql_upper = sql.to_uppercase();
+
+        // Проверяем только allowed operations
+        let first_word = sql_upper.split_whitespace().next().unwrap_or("");
+        if !self.allowed_operations.contains(first_word) {
+            return false;
+        }
+
+        // Проверяем на forbidden keywords
+        for keyword in &self.forbidden_keywords {
+            if sql_upper.contains(keyword.as_str()) {
+                return false;
+            }
+        }
+
+        true
+    }
+}
 ```
 
 ---
 
 ### 3. Server-Side Request Forgery (SSRF)
 
-```python
-# Опасно: LLM генерирует URLs которые потом fetched
-user_input = "Summarize this article: http://internal-api:8080/admin/secrets"
+```rust
+// Опасно: LLM генерирует URLs которые потом fetched
+let user_input = "Summarize this article: http://internal-api:8080/admin/secrets";
 
-llm_response = llm.generate(f"Fetch and summarize: {user_input}")
+let llm_response = llm.generate(&format!("Fetch and summarize: {}", user_input));
 
-# LLM может извлечь URL и система его fetch
-url = extract_url(llm_response)
-content = requests.get(url)  # SSRF - доступ к internal resources!
+// LLM может извлечь URL и система его fetch
+let url = extract_url(&llm_response);
+let content = reqwest::get(&url).await?; // SSRF - доступ к internal resources!
 ```
 
 **Безопасная реализация:**
 
-```python
-import ipaddress
-from urllib.parse import urlparse
+```rust
+use std::collections::HashSet;
+use std::net::IpAddr;
+use url::Url;
 
-class SafeURLFetcher:
-    """Fetch URLs с SSRF защитой."""
-    
-    BLOCKED_HOSTS = {"localhost", "127.0.0.1", "0.0.0.0", "internal-api"}
-    ALLOWED_SCHEMES = {"http", "https"}
-    
-    def __init__(self):
-        self.blocked_ranges = [
-            ipaddress.ip_network("10.0.0.0/8"),
-            ipaddress.ip_network("172.16.0.0/12"),
-            ipaddress.ip_network("192.168.0.0/16"),
-            ipaddress.ip_network("127.0.0.0/8"),
-        ]
-    
-    def is_safe_url(self, url: str) -> bool:
-        """Проверка безопасен ли URL для fetch."""
-        parsed = urlparse(url)
-        
-        # Проверяем scheme
-        if parsed.scheme not in self.ALLOWED_SCHEMES:
-            return False
-        
-        # Проверяем hostname
-        hostname = parsed.hostname.lower()
-        if hostname in self.BLOCKED_HOSTS:
-            return False
-        
-        # Проверяем IP ranges
-        try:
-            ip = ipaddress.ip_address(hostname)
-            for blocked_range in self.blocked_ranges:
-                if ip in blocked_range:
-                    return False
-        except ValueError:
-            pass  # Not an IP, continue
-        
-        return True
+struct SafeURLFetcher {
+    /// Fetch URLs с SSRF защитой.
+    blocked_hosts: HashSet<String>,
+    allowed_schemes: HashSet<String>,
+    blocked_ranges: Vec<ipnet::IpNet>,
+}
+
+impl SafeURLFetcher {
+    fn new() -> Self {
+        let blocked_hosts = HashSet::from([
+            "localhost".into(), "127.0.0.1".into(),
+            "0.0.0.0".into(), "internal-api".into(),
+        ]);
+        let allowed_schemes = HashSet::from(["http".into(), "https".into()]);
+        let blocked_ranges = vec![
+            "10.0.0.0/8".parse().unwrap(),
+            "172.16.0.0/12".parse().unwrap(),
+            "192.168.0.0/16".parse().unwrap(),
+            "127.0.0.0/8".parse().unwrap(),
+        ];
+        Self { blocked_hosts, allowed_schemes, blocked_ranges }
+    }
+
+    /// Проверка безопасен ли URL для fetch.
+    fn is_safe_url(&self, url_str: &str) -> bool {
+        let parsed = match Url::parse(url_str) {
+            Ok(u) => u,
+            Err(_) => return false,
+        };
+
+        // Проверяем scheme
+        if !self.allowed_schemes.contains(parsed.scheme()) {
+            return false;
+        }
+
+        // Проверяем hostname
+        let hostname = match parsed.host_str() {
+            Some(h) => h.to_lowercase(),
+            None => return false,
+        };
+        if self.blocked_hosts.contains(&hostname) {
+            return false;
+        }
+
+        // Проверяем IP ranges
+        if let Ok(ip) = hostname.parse::<IpAddr>() {
+            for blocked_range in &self.blocked_ranges {
+                if blocked_range.contains(&ip) {
+                    return false;
+                }
+            }
+        }
+
+        true
+    }
+}
 ```
 
 ---
 
 ### 4. Command Injection
 
-```python
-# Опасно: LLM output используется в shell commands
-user_request = "Convert image.jpg to PNG; rm -rf /"
+```rust
+// Опасно: LLM output используется в shell commands
+let user_request = "Convert image.jpg to PNG; rm -rf /";
 
-llm_suggestion = llm.generate(f"Suggest command for: {user_request}")
-# LLM: "convert image.jpg image.png; rm -rf /"
+let llm_suggestion = llm.generate(&format!("Suggest command for: {}", user_request));
+// LLM: "convert image.jpg image.png; rm -rf /"
 
-os.system(llm_suggestion)  # Command Injection!
+std::process::Command::new("sh").arg("-c").arg(&llm_suggestion).status(); // Command Injection!
 ```
 
 **Безопасная реализация:**
 
-```python
-import subprocess
-import shlex
+```rust
+use std::collections::HashMap;
+use std::process::Command;
 
-class SafeCommandExecutor:
-    """Выполнение команд со строгой валидацией."""
-    
-    ALLOWED_COMMANDS = {
-        "convert": {"allowed_flags": ["-resize", "-quality"]},
-        "ffmpeg": {"allowed_flags": ["-i", "-c:v", "-c:a"]},
+struct SafeCommandExecutor {
+    /// Выполнение команд со строгой валидацией.
+    allowed_commands: HashMap<String, Vec<String>>,
+}
+
+impl SafeCommandExecutor {
+    fn new() -> Self {
+        let mut allowed = HashMap::new();
+        allowed.insert("convert".into(), vec!["-resize".into(), "-quality".into()]);
+        allowed.insert("ffmpeg".into(), vec!["-i".into(), "-c:v".into(), "-c:a".into()]);
+        Self { allowed_commands: allowed }
     }
-    
-    def execute(self, llm_command: str) -> str:
-        """Parse и безопасное выполнение LLM-suggested команды."""
-        
-        # Parse команду
-        parts = shlex.split(llm_command)
-        
-        if not parts:
-            raise SecurityError("Empty command")
-        
-        command = parts[0]
-        args = parts[1:]
-        
-        # Validate команду
-        if command not in self.ALLOWED_COMMANDS:
-            raise SecurityError(f"Command not allowed: {command}")
-        
-        # Validate аргументы
-        allowed_flags = self.ALLOWED_COMMANDS[command]["allowed_flags"]
-        for arg in args:
-            if arg.startswith("-") and arg.split("=")[0] not in allowed_flags:
-                raise SecurityError(f"Flag not allowed: {arg}")
-        
-        # Выполняем безопасно без shell
-        result = subprocess.run(
-            [command] + args,
-            capture_output=True,
-            timeout=30,
-            shell=False  # Критично: без shell interpretation
-        )
-        
-        return result.stdout.decode()
+
+    /// Parse и безопасное выполнение LLM-suggested команды.
+    fn execute(&self, llm_command: &str) -> Result<String, String> {
+        // Parse команду
+        let parts: Vec<&str> = shell_words::split(llm_command)
+            .map_err(|e| format!("Parse error: {}", e))?
+            .iter().map(|s| s.as_str()).collect::<Vec<_>>();
+
+        if parts.is_empty() {
+            return Err("Empty command".to_string());
+        }
+
+        let command = parts[0];
+        let args = &parts[1..];
+
+        // Validate команду
+        let allowed_flags = match self.allowed_commands.get(command) {
+            Some(flags) => flags,
+            None => return Err(format!("Command not allowed: {}", command)),
+        };
+
+        // Validate аргументы
+        for arg in args {
+            if arg.starts_with('-') {
+                let flag = arg.split('=').next().unwrap_or(arg);
+                if !allowed_flags.contains(&flag.to_string()) {
+                    return Err(format!("Flag not allowed: {}", arg));
+                }
+            }
+        }
+
+        // Выполняем безопасно без shell
+        let output = Command::new(command)
+            .args(args)
+            .output()
+            .map_err(|e| e.to_string())?;
+
+        Ok(String::from_utf8_lossy(&output.stdout).to_string())
+    }
+}
 ```
 
 ---
 
 ## SENTINEL Integration
 
-```python
-from sentinel import scan, OutputGuard
+```rust
+use sentinel_core::engines::SentinelEngine;
 
-# Конфигурация output protection
-output_guard = OutputGuard(
-    contexts=[
-        OutputContext.HTML,
-        OutputContext.SQL,
-        OutputContext.SHELL
-    ],
-    block_on_threat=True,
-    sanitize_automatically=True
-)
+let engine = SentinelEngine::new();
 
-@output_guard
-def process_llm_response(response: str, target_context: str):
-    """Защищённая обработка LLM output."""
-    return response
-
-# Использование
-try:
-    safe_output = process_llm_response(llm_response, "html")
-except OutputBlockedError as e:
-    log_security_event(e)
-    safe_output = "Response blocked for security reasons"
+// Сканирование LLM output перед передачей в downstream системы
+let result = engine.analyze(&llm_response);
+if result.detected {
+    log::warn!(
+        "Improper output обнаружен: risk={}, categories={:?}, time={}μs",
+        result.risk_score, result.categories, result.processing_time_us
+    );
+    // Блокировка или санитизация output
+}
 ```
 
 ---

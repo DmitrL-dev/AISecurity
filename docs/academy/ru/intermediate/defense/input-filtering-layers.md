@@ -38,80 +38,88 @@ User Input → Preprocessing → Pattern Detection → Semantic Analysis →
 
 ### Normalization
 
-```python
-import unicodedata
-import re
+```rust
+use unicode_normalization::UnicodeNormalization;
+use std::collections::HashMap;
 
-class InputPreprocessor:
-    """Normalize и prepare input для analysis."""
-    
-    def preprocess(self, text: str) -> dict:
-        """Full preprocessing pipeline."""
-        
-        original = text
-        
-        # 1. Unicode normalization
-        text = self._normalize_unicode(text)
-        
-        # 2. Decode encoded content
-        text = self._decode_encodings(text)
-        
-        # 3. Remove zero-width characters
-        text = self._remove_invisible(text)
-        
-        # 4. Normalize whitespace
-        text = self._normalize_whitespace(text)
-        
-        # Track modifications
-        modifications = self._track_changes(original, text)
-        
-        return {
-            "original": original,
-            "normalized": text,
-            "modifications": modifications,
-            "suspicious": len(modifications) > 3
+/// Normalize и prepare input для analysis.
+struct InputPreprocessor;
+
+impl InputPreprocessor {
+    /// Full preprocessing pipeline.
+    fn preprocess(&self, text: &str) -> HashMap<String, serde_json::Value> {
+        let original = text.to_string();
+        let mut text = text.to_string();
+
+        // 1. Unicode normalization
+        text = self.normalize_unicode(&text);
+
+        // 2. Decode encoded content
+        text = self.decode_encodings(&text);
+
+        // 3. Remove zero-width characters
+        text = self.remove_invisible(&text);
+
+        // 4. Normalize whitespace
+        text = self.normalize_whitespace(&text);
+
+        // Track modifications
+        let modifications = self.track_changes(&original, &text);
+
+        let mut result = HashMap::new();
+        result.insert("original".into(), serde_json::json!(original));
+        result.insert("normalized".into(), serde_json::json!(text));
+        result.insert("modifications".into(), serde_json::json!(modifications));
+        result.insert("suspicious".into(), serde_json::json!(modifications.len() > 3));
+        result
+    }
+
+    /// Normalize unicode чтобы catch homoglyph attacks.
+    fn normalize_unicode(&self, text: &str) -> String {
+        // NFC normalization
+        let mut text: String = text.nfc().collect();
+
+        // Convert confusables to ASCII где возможно
+        let confusables = HashMap::from([
+            ('а', 'a'), ('е', 'e'), ('о', 'o'), ('р', 'p'),  // Cyrillic
+            ('с', 'c'), ('х', 'x'), ('і', 'i'), ('у', 'y'),
+            ('０', '0'), ('１', '1'), ('２', '2'),  // Fullwidth
+            ('Ａ', 'A'), ('Ｂ', 'B'),
+        ]);
+
+        for (confusable, replacement) in &confusables {
+            text = text.replace(*confusable, &replacement.to_string());
         }
-    
-    def _normalize_unicode(self, text: str) -> str:
-        """Normalize unicode чтобы catch homoglyph attacks."""
-        # NFC normalization
-        text = unicodedata.normalize('NFC', text)
-        
-        # Convert confusables to ASCII где возможно
-        confusables = {
-            'а': 'a', 'е': 'e', 'о': 'o', 'р': 'p',  # Cyrillic
-            'с': 'c', 'х': 'x', 'і': 'i', 'у': 'y',
-            '０': '0', '１': '1', '２': '2',  # Fullwidth
-            'Ａ': 'A', 'Ｂ': 'B',
+
+        text
+    }
+
+    /// Remove zero-width и invisible characters.
+    fn remove_invisible(&self, text: &str) -> String {
+        // Zero-width characters
+        let invisible = [
+            '\u{200b}', // Zero-width space
+            '\u{200c}', // Zero-width non-joiner
+            '\u{200d}', // Zero-width joiner
+            '\u{2060}', // Word joiner
+            '\u{feff}', // BOM
+            '\u{00ad}', // Soft hyphen
+        ];
+
+        let mut result = text.to_string();
+        for ch in &invisible {
+            result = result.replace(*ch, "");
         }
-        
-        for confusable, replacement in confusables.items():
-            text = text.replace(confusable, replacement)
-        
-        return text
-    
-    def _remove_invisible(self, text: str) -> str:
-        """Remove zero-width и invisible characters."""
-        # Zero-width characters
-        invisible = [
-            '\u200b',  # Zero-width space
-            '\u200c',  # Zero-width non-joiner
-            '\u200d',  # Zero-width joiner
-            '\u2060',  # Word joiner
-            '\ufeff',  # BOM
-            '\u00ad',  # Soft hyphen
-        ]
-        
-        for char in invisible:
-            text = text.replace(char, '')
-        
-        # Remove other control characters (except newline, tab)
-        text = ''.join(
-            c for c in text 
-            if not unicodedata.category(c).startswith('C') or c in '\n\t\r'
-        )
-        
-        return text
+
+        // Remove other control characters (except newline, tab)
+        result = result
+            .chars()
+            .filter(|c| !c.is_control() || *c == '\n' || *c == '\t' || *c == '\r')
+            .collect();
+
+        result
+    }
+}
 ```
 
 ---
@@ -120,93 +128,115 @@ class InputPreprocessor:
 
 ### Injection Pattern Matching
 
-```python
-import re
-from typing import List, Tuple
+```rust
+use regex::Regex;
+use std::collections::HashMap;
+use serde_json::{json, Value};
 
-class InjectionPatternDetector:
-    """Detect injection patterns используя regex и keywords."""
-    
-    PATTERNS = [
-        # Instruction override
-        (r'(?:ignore|disregard|forget|override).*(?:previous|above|prior|all).*(?:instructions?|rules?|guidelines?)', "instruction_override", 0.9),
-        
-        # System/Admin mode
-        (r'(?:enter|switch|enable|activate).*(?:admin|system|debug|developer|god|sudo).*(?:mode|access)', "mode_switch", 0.85),
-        
-        # Role impersonation
-        (r'(?:you are now|pretend|act as|behave as).*(?:DAN|unrestricted|uncensored|jailbroken)', "role_impersonation", 0.9),
-        
-        # Prompt leakage attempts
-        (r'(?:reveal|show|display|print|tell me).*(?:system|prompt|instructions?|rules)', "prompt_leakage", 0.7),
-        
-        # Encoding tricks
-        (r'(?:base64|rot13|hex|binary|unicode).*(?:decode|encode|translate)', "encoding_trick", 0.6),
-        
-        # Context manipulation
-        (r'---+.*(?:system|user|assistant)', "context_separator", 0.8),
-        (r'\[(?:SYSTEM|USER|INST)\]', "role_marker", 0.75),
-    ]
-    
-    SUSPICIOUS_KEYWORDS = {
-        "high": ["jailbreak", "bypass", "exploit", "hack the", "pwn"],
-        "medium": ["ignore instructions", "system prompt", "act as", "pretend to be", "roleplay"],
-        "low": ["hypothetically", "in theory", "just curious", "for research"],
+/// Detect injection patterns используя regex и keywords.
+struct InjectionPatternDetector {
+    compiled_patterns: Vec<(Regex, &'static str, f64)>,
+    suspicious_keywords: HashMap<&'static str, Vec<&'static str>>,
+}
+
+impl InjectionPatternDetector {
+    fn new() -> Self {
+        let compiled_patterns = vec![
+            // Instruction override
+            (Regex::new(r"(?i)(?:ignore|disregard|forget|override).*(?:previous|above|prior|all).*(?:instructions?|rules?|guidelines?)").unwrap(), "instruction_override", 0.9),
+            // System/Admin mode
+            (Regex::new(r"(?i)(?:enter|switch|enable|activate).*(?:admin|system|debug|developer|god|sudo).*(?:mode|access)").unwrap(), "mode_switch", 0.85),
+            // Role impersonation
+            (Regex::new(r"(?i)(?:you are now|pretend|act as|behave as).*(?:DAN|unrestricted|uncensored|jailbroken)").unwrap(), "role_impersonation", 0.9),
+            // Prompt leakage attempts
+            (Regex::new(r"(?i)(?:reveal|show|display|print|tell me).*(?:system|prompt|instructions?|rules)").unwrap(), "prompt_leakage", 0.7),
+            // Encoding tricks
+            (Regex::new(r"(?i)(?:base64|rot13|hex|binary|unicode).*(?:decode|encode|translate)").unwrap(), "encoding_trick", 0.6),
+            // Context manipulation
+            (Regex::new(r"(?i)---+.*(?:system|user|assistant)").unwrap(), "context_separator", 0.8),
+            (Regex::new(r"\[(?:SYSTEM|USER|INST)\]").unwrap(), "role_marker", 0.75),
+        ];
+
+        let suspicious_keywords = HashMap::from([
+            ("high", vec!["jailbreak", "bypass", "exploit", "hack the", "pwn"]),
+            ("medium", vec!["ignore instructions", "system prompt", "act as", "pretend to be", "roleplay"]),
+            ("low", vec!["hypothetically", "in theory", "just curious", "for research"]),
+        ]);
+
+        Self { compiled_patterns, suspicious_keywords }
     }
-    
-    def detect(self, text: str) -> dict:
-        """Detect injection patterns в тексте."""
-        
-        findings = []
-        
-        # Pattern matching
-        for pattern, label, base_score in self.compiled_patterns:
-            matches = pattern.findall(text)
-            if matches:
-                findings.append({
+
+    /// Detect injection patterns в тексте.
+    fn detect(&self, text: &str) -> HashMap<String, Value> {
+        let mut findings: Vec<Value> = vec![];
+
+        // Pattern matching
+        for (pattern, label, base_score) in &self.compiled_patterns {
+            let matches: Vec<String> = pattern
+                .find_iter(text)
+                .map(|m| m.as_str().to_string())
+                .collect();
+            if !matches.is_empty() {
+                findings.push(json!({
                     "type": "pattern",
                     "label": label,
                     "score": base_score,
-                    "matches": matches[:3]
-                })
-        
-        # Keyword matching
-        text_lower = text.lower()
-        for severity, keywords in self.SUSPICIOUS_KEYWORDS.items():
-            for keyword in keywords:
-                if keyword in text_lower:
-                    score = {"high": 0.8, "medium": 0.5, "low": 0.3}[severity]
-                    findings.append({
+                    "matches": &matches[..matches.len().min(3)]
+                }));
+            }
+        }
+
+        // Keyword matching
+        let text_lower = text.to_lowercase();
+        for (severity, keywords) in &self.suspicious_keywords {
+            for keyword in keywords {
+                if text_lower.contains(keyword) {
+                    let score = match *severity {
+                        "high" => 0.8,
+                        "medium" => 0.5,
+                        _ => 0.3,
+                    };
+                    findings.push(json!({
                         "type": "keyword",
                         "label": keyword,
                         "score": score,
                         "severity": severity
-                    })
-        
-        # Calculate overall risk
-        if findings:
-            max_score = max(f["score"] for f in findings)
-            # Boost для multiple findings
-            boost = min(len(findings) * 0.05, 0.2)
-            overall_score = min(max_score + boost, 1.0)
-        else:
-            overall_score = 0.0
-        
-        return {
-            "findings": findings,
-            "risk_score": overall_score,
-            "action": self._recommend_action(overall_score)
+                    }));
+                }
+            }
         }
-    
-    def _recommend_action(self, score: float) -> str:
-        if score >= 0.8:
-            return "block"
-        elif score >= 0.5:
-            return "flag"
-        elif score >= 0.3:
-            return "monitor"
-        else:
-            return "allow"
+
+        // Calculate overall risk
+        let overall_score = if !findings.is_empty() {
+            let max_score = findings.iter()
+                .filter_map(|f| f.get("score").and_then(|s| s.as_f64()))
+                .fold(0.0_f64, f64::max);
+            // Boost для multiple findings
+            let boost = (findings.len() as f64 * 0.05).min(0.2);
+            (max_score + boost).min(1.0)
+        } else {
+            0.0
+        };
+
+        let mut result = HashMap::new();
+        result.insert("findings".into(), json!(findings));
+        result.insert("risk_score".into(), json!(overall_score));
+        result.insert("action".into(), json!(self.recommend_action(overall_score)));
+        result
+    }
+
+    fn recommend_action(&self, score: f64) -> &'static str {
+        if score >= 0.8 {
+            "block"
+        } else if score >= 0.5 {
+            "flag"
+        } else if score >= 0.3 {
+            "monitor"
+        } else {
+            "allow"
+        }
+    }
+}
 ```
 
 ---
@@ -215,152 +245,182 @@ class InjectionPatternDetector:
 
 ### ML-Based Classification
 
-```python
-import numpy as np
-from dataclasses import dataclass
+```rust
+use serde_json::{json, Value};
 
-@dataclass
-class ClassificationResult:
-    is_attack: bool
-    attack_type: str
-    confidence: float
-    explanation: str
+/// ML-based semantic analysis для injection detection.
+struct SemanticInjectionClassifier {
+    model: Box<dyn ClassifierModel>,
+    threshold: f64,
+}
 
-class SemanticInjectionClassifier:
-    """ML-based semantic analysis для injection detection."""
-    
-    def __init__(self, model_path: str = None):
-        self.model = self._load_model(model_path)
-        self.threshold = 0.7
-    
-    def classify(self, text: str) -> ClassificationResult:
-        """Classify text как attack или benign."""
-        
-        # Get embedding
-        embedding = self._get_embedding(text)
-        
-        # Run classifier
-        prediction = self.model.predict(embedding.reshape(1, -1))
-        probabilities = self.model.predict_proba(embedding.reshape(1, -1))[0]
-        
-        # Get attack type если predicted как attack
-        is_attack = prediction[0] == 1 and max(probabilities) > self.threshold
-        
-        if is_attack:
-            attack_type = self._determine_attack_type(text, embedding)
-            explanation = self._generate_explanation(text, attack_type)
-        else:
-            attack_type = None
-            explanation = "No attack detected"
-        
-        return ClassificationResult(
-            is_attack=is_attack,
-            attack_type=attack_type,
-            confidence=max(probabilities),
-            explanation=explanation
-        )
+struct ClassificationResult {
+    is_attack: bool,
+    attack_type: Option<String>,
+    confidence: f64,
+    explanation: String,
+}
+
+impl SemanticInjectionClassifier {
+    fn new(model_path: Option<&str>) -> Self {
+        Self {
+            model: Self::load_model(model_path),
+            threshold: 0.7,
+        }
+    }
+
+    /// Classify text как attack или benign.
+    fn classify(&self, text: &str) -> ClassificationResult {
+        // Get embedding
+        let embedding = self.get_embedding(text);
+
+        // Run classifier
+        let prediction = self.model.predict(&embedding);
+        let probabilities = self.model.predict_proba(&embedding);
+
+        // Get attack type если predicted как attack
+        let max_prob = probabilities.iter().cloned().fold(0.0_f64, f64::max);
+        let is_attack = prediction == 1 && max_prob > self.threshold;
+
+        if is_attack {
+            let attack_type = self.determine_attack_type(text, &embedding);
+            let explanation = self.generate_explanation(text, &attack_type);
+            ClassificationResult {
+                is_attack: true,
+                attack_type: Some(attack_type),
+                confidence: max_prob,
+                explanation,
+            }
+        } else {
+            ClassificationResult {
+                is_attack: false,
+                attack_type: None,
+                confidence: max_prob,
+                explanation: "No attack detected".to_string(),
+            }
+        }
+    }
+}
 ```
 
 ---
 
 ## Layer 4: Policy Engine
 
-```python
-from dataclasses import dataclass
-from typing import List, Callable
+```rust
+use std::collections::HashMap;
+use serde_json::{json, Value};
 
-@dataclass
-class PolicyRule:
-    name: str
-    condition: Callable[[dict], bool]
-    action: str  # "allow", "block", "modify", "flag"
-    priority: int
-    message: str
+struct PolicyRule {
+    name: String,
+    condition: Box<dyn Fn(&HashMap<String, f64>) -> bool>,
+    action: String, // "allow", "block", "modify", "flag"
+    priority: i32,
+    message: String,
+}
 
-class PolicyEngine:
-    """Apply business rules к input analysis results."""
-    
-    def __init__(self):
-        self.rules: List[PolicyRule] = []
-        self._load_default_rules()
-    
-    def _load_default_rules(self):
-        """Load default policy rules."""
-        
-        self.rules = [
-            # Critical patterns always block
-            PolicyRule(
-                name="block_critical_injection",
-                condition=lambda r: r.get("pattern_score", 0) >= 0.9,
-                action="block",
-                priority=100,
-                message="Critical injection pattern detected"
-            ),
-            
-            # High semantic confidence blocks
-            PolicyRule(
-                name="block_semantic_attack",
-                condition=lambda r: (
-                    r.get("semantic_is_attack", False) and 
-                    r.get("semantic_confidence", 0) >= 0.85
-                ),
-                action="block",
-                priority=90,
-                message="High-confidence attack detected"
-            ),
-        ]
-    
-    def evaluate(self, analysis_result: dict) -> dict:
-        """Evaluate all policies против analysis result."""
-        
-        # Sort by priority (highest first)
-        sorted_rules = sorted(self.rules, key=lambda r: -r.priority)
-        
-        triggered_rules = []
-        final_action = "allow"
-        
-        for rule in sorted_rules:
-            if rule.condition(analysis_result):
-                triggered_rules.append(rule)
-                
-                # Take most restrictive action
-                if rule.action == "block":
-                    final_action = "block"
-                    break
-                elif rule.action == "flag" and final_action == "allow":
-                    final_action = "flag"
-        
-        return {
-            "action": final_action,
-            "triggered_rules": [r.name for r in triggered_rules],
-            "messages": [r.message for r in triggered_rules]
+/// Apply business rules к input analysis results.
+struct PolicyEngine {
+    rules: Vec<PolicyRule>,
+}
+
+impl PolicyEngine {
+    fn new() -> Self {
+        let mut engine = Self { rules: vec![] };
+        engine.load_default_rules();
+        engine
+    }
+
+    /// Load default policy rules.
+    fn load_default_rules(&mut self) {
+        self.rules = vec![
+            // Critical patterns always block
+            PolicyRule {
+                name: "block_critical_injection".to_string(),
+                condition: Box::new(|r| {
+                    r.get("pattern_score").copied().unwrap_or(0.0) >= 0.9
+                }),
+                action: "block".to_string(),
+                priority: 100,
+                message: "Critical injection pattern detected".to_string(),
+            },
+            // High semantic confidence blocks
+            PolicyRule {
+                name: "block_semantic_attack".to_string(),
+                condition: Box::new(|r| {
+                    r.get("semantic_is_attack").copied().unwrap_or(0.0) > 0.0
+                        && r.get("semantic_confidence").copied().unwrap_or(0.0) >= 0.85
+                }),
+                action: "block".to_string(),
+                priority: 90,
+                message: "High-confidence attack detected".to_string(),
+            },
+        ];
+    }
+
+    /// Evaluate all policies против analysis result.
+    fn evaluate(&self, analysis_result: &HashMap<String, f64>) -> HashMap<String, Value> {
+        // Sort by priority (highest first)
+        let mut sorted_rules: Vec<&PolicyRule> = self.rules.iter().collect();
+        sorted_rules.sort_by(|a, b| b.priority.cmp(&a.priority));
+
+        let mut triggered_rules: Vec<&PolicyRule> = vec![];
+        let mut final_action = "allow".to_string();
+
+        for rule in &sorted_rules {
+            if (rule.condition)(analysis_result) {
+                triggered_rules.push(rule);
+
+                // Take most restrictive action
+                if rule.action == "block" {
+                    final_action = "block".to_string();
+                    break;
+                } else if rule.action == "flag" && final_action == "allow" {
+                    final_action = "flag".to_string();
+                }
+            }
         }
+
+        let mut result = HashMap::new();
+        result.insert("action".into(), json!(final_action));
+        result.insert(
+            "triggered_rules".into(),
+            json!(triggered_rules.iter().map(|r| &r.name).collect::<Vec<_>>()),
+        );
+        result.insert(
+            "messages".into(),
+            json!(triggered_rules.iter().map(|r| &r.message).collect::<Vec<_>>()),
+        );
+        result
+    }
+}
 ```
 
 ---
 
 ## Интеграция с SENTINEL
 
-```python
-from sentinel import configure, InputGuard
+```rust
+use sentinel_core::{configure, InputGuard};
 
 configure(
-    input_filtering=True,
-    preprocessing=True,
-    pattern_detection=True,
-    semantic_analysis=True
-)
+    input_filtering: true,
+    preprocessing: true,
+    pattern_detection: true,
+    semantic_analysis: true,
+);
 
-input_guard = InputGuard(
-    block_threshold=0.8,
-    flag_threshold=0.5,
-    enable_semantic=True
-)
+let input_guard = InputGuard::new(
+    block_threshold: 0.8,
+    flag_threshold: 0.5,
+    enable_semantic: true,
+);
 
-@input_guard.protect
-def process_user_input(text: str):
-    # Автоматически filtered
-    return llm.generate(text)
+#[input_guard::protect]
+fn process_user_input(text: &str) -> String {
+    // Автоматически filtered
+    llm.generate(text)
+}
 ```
 
 ---

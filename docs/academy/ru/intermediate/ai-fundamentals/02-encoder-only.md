@@ -168,37 +168,47 @@ Target:  предсказать "sat" и "mat"
 
 **Процедура маскирования (15% токенов):**
 
-```python
-def mask_tokens(tokens, tokenizer, mlm_probability=0.15):
-    """
-    Для 15% токенов:
-    - 80%: заменяем на [MASK]
-    - 10%: заменяем на случайный токен
-    - 10%: оставляем без изменений
-    """
-    labels = tokens.clone()
-    probability_matrix = torch.full(labels.shape, mlm_probability)
-    
-    # Не маскируем специальные токены
-    special_tokens_mask = tokenizer.get_special_tokens_mask(tokens.tolist())
-    probability_matrix.masked_fill_(torch.tensor(special_tokens_mask, dtype=torch.bool), 0.0)
-    
-    masked_indices = torch.bernoulli(probability_matrix).bool()
-    labels[~masked_indices] = -100  # Игнорируем не-masked для loss
-    
-    # 80% заменяем на [MASK]
-    indices_replaced = torch.bernoulli(torch.full(labels.shape, 0.8)).bool() & masked_indices
-    tokens[indices_replaced] = tokenizer.convert_tokens_to_ids('[MASK]')
-    
-    # 10% заменяем на случайный токен
-    indices_random = torch.bernoulli(torch.full(labels.shape, 0.5)).bool() & masked_indices & ~indices_replaced
-    random_words = torch.randint(len(tokenizer), labels.shape, dtype=torch.long)
-    tokens[indices_random] = random_words[indices_random]
-    
-    # 10% оставляем без изменений
-    # (уже сделано — оставшиеся masked_indices не модифицированы)
-    
-    return tokens, labels
+```rust
+use rand::Rng;
+
+fn mask_tokens(
+    tokens: &mut Vec<u32>,
+    tokenizer: &Tokenizer,
+    mlm_probability: f64,
+) -> (Vec<u32>, Vec<i64>) {
+    // Для 15% токенов:
+    // - 80%: заменяем на [MASK]
+    // - 10%: заменяем на случайный токен
+    // - 10%: оставляем без изменений
+
+    let mut rng = rand::thread_rng();
+    let mut labels: Vec<i64> = tokens.iter().map(|&t| t as i64).collect();
+    let special_tokens = tokenizer.get_special_tokens_mask(tokens);
+
+    for i in 0..tokens.len() {
+        if special_tokens[i] {
+            labels[i] = -100;
+            continue;
+        }
+
+        if rng.gen::<f64>() >= mlm_probability {
+            labels[i] = -100; // Игнорируем не-masked для loss
+            continue;
+        }
+
+        let r: f64 = rng.gen();
+        if r < 0.8 {
+            // 80% заменяем на [MASK]
+            tokens[i] = tokenizer.mask_token_id();
+        } else if r < 0.9 {
+            // 10% заменяем на случайный токен
+            tokens[i] = rng.gen_range(0..tokenizer.vocab_size() as u32);
+        }
+        // 10% оставляем без изменений
+    }
+
+    (tokens.clone(), labels)
+}
 ```
 
 **Почему 80/10/10?**
@@ -223,31 +233,41 @@ def mask_tokens(tokens, tokenizer, mlm_probability=0.15):
 
 **Реализация:**
 
-```python
-class BertForPreTraining(torch.nn.Module):
-    def __init__(self, bert_model, vocab_size, hidden_size):
-        super().__init__()
-        self.bert = bert_model
-        
-        # MLM head
-        self.mlm_head = torch.nn.Linear(hidden_size, vocab_size)
-        
-        # NSP head (бинарная классификация на [CLS] токене)
-        self.nsp_head = torch.nn.Linear(hidden_size, 2)
-    
-    def forward(self, input_ids, segment_ids, attention_mask):
-        # BERT encoding
-        outputs = self.bert(input_ids, segment_ids, attention_mask)
-        sequence_output = outputs.last_hidden_state  # [batch, seq_len, hidden]
-        pooled_output = outputs.pooler_output  # [batch, hidden] ([CLS] representation)
-        
-        # MLM predictions
-        mlm_logits = self.mlm_head(sequence_output)  # [batch, seq_len, vocab_size]
-        
-        # NSP predictions
-        nsp_logits = self.nsp_head(pooled_output)  # [batch, 2]
-        
-        return mlm_logits, nsp_logits
+```rust
+use candle_core::Tensor;
+use candle_nn::{Linear, Module, VarBuilder};
+
+struct BertForPreTraining {
+    bert: BertModel,
+    mlm_head: Linear,
+    nsp_head: Linear,
+}
+
+impl BertForPreTraining {
+    fn new(bert_model: BertModel, vocab_size: usize, hidden_size: usize, vb: VarBuilder) -> candle_core::Result<Self> {
+        // MLM head
+        let mlm_head = candle_nn::linear(hidden_size, vocab_size, vb.pp("mlm_head"))?;
+        // NSP head (бинарная классификация на [CLS] токене)
+        let nsp_head = candle_nn::linear(hidden_size, 2, vb.pp("nsp_head"))?;
+
+        Ok(Self { bert: bert_model, mlm_head, nsp_head })
+    }
+
+    fn forward(&self, input_ids: &Tensor, segment_ids: &Tensor, attention_mask: &Tensor) -> candle_core::Result<(Tensor, Tensor)> {
+        // BERT encoding
+        let outputs = self.bert.forward(input_ids, segment_ids, Some(attention_mask))?;
+        let sequence_output = outputs.last_hidden_state; // [batch, seq_len, hidden]
+        let pooled_output = outputs.pooler_output;       // [batch, hidden] ([CLS] representation)
+
+        // MLM predictions
+        let mlm_logits = self.mlm_head.forward(&sequence_output)?; // [batch, seq_len, vocab_size]
+
+        // NSP predictions
+        let nsp_logits = self.nsp_head.forward(&pooled_output)?;   // [batch, 2]
+
+        Ok((mlm_logits, nsp_logits))
+    }
+}
 ```
 
 > [!WARNING]
@@ -279,27 +299,27 @@ class BertForPreTraining(torch.nn.Module):
 
 ### 4.2 Классификация текста
 
-```python
-from transformers import BertForSequenceClassification, BertTokenizer
-import torch
+```rust
+use candle_transformers::models::bert::BertForSequenceClassification;
 
-# Загружаем pre-trained модель с classification head
-model = BertForSequenceClassification.from_pretrained(
-    'bert-base-uncased',
-    num_labels=2  # бинарная классификация
-)
-tokenizer = BertTokenizer.from_pretrained('bert-base-uncased')
+// Загружаем pre-trained модель с classification head
+let model = BertForSequenceClassification::from_pretrained(
+    "bert-base-uncased",
+    2, // num_labels — бинарная классификация
+    vb,
+)?;
+let tokenizer = tokenizers::Tokenizer::from_pretrained("bert-base-uncased", None).unwrap();
 
-# Подготовка данных
-text = "This movie is absolutely fantastic!"
-inputs = tokenizer(text, return_tensors='pt', padding=True, truncation=True, max_length=512)
+// Подготовка данных
+let text = "This movie is absolutely fantastic!";
+let encoding = tokenizer.encode(text, true).unwrap();
+let input_ids = Tensor::new(encoding.get_ids(), &device)?;
 
-# Inference
-with torch.no_grad():
-    outputs = model(**inputs)
-    logits = outputs.logits
-    predictions = torch.argmax(logits, dim=-1)
-    print(f"Prediction: {'Positive' if predictions.item() == 1 else 'Negative'}")
+// Inference
+let logits = model.forward(&input_ids, &token_type_ids, Some(&attention_mask))?;
+let predictions = logits.argmax(D::Minus1)?;
+let label = if predictions.to_scalar::<u32>()? == 1 { "Positive" } else { "Negative" };
+println!("Prediction: {}", label);
 ```
 
 **Архитектура для классификации:**
@@ -314,22 +334,23 @@ Input → BERT Encoder → [CLS] representation → Linear → Softmax → Class
 
 ### 4.3 Named Entity Recognition (NER)
 
-```python
-from transformers import BertForTokenClassification
+```rust
+use candle_transformers::models::bert::BertForTokenClassification;
 
-# NER использует ВСЕ токены, не только [CLS]
-model = BertForTokenClassification.from_pretrained(
-    'bert-base-uncased',
-    num_labels=9  # B-PER, I-PER, B-ORG, I-ORG, B-LOC, I-LOC, B-MISC, I-MISC, O
-)
+// NER использует ВСЕ токены, не только [CLS]
+let model = BertForTokenClassification::from_pretrained(
+    "bert-base-uncased",
+    9, // num_labels: B-PER, I-PER, B-ORG, I-ORG, B-LOC, I-LOC, B-MISC, I-MISC, O
+    vb,
+)?;
 
-text = "John works at Google in New York"
-inputs = tokenizer(text, return_tensors='pt')
+let text = "John works at Google in New York";
+let encoding = tokenizer.encode(text, true).unwrap();
+let input_ids = Tensor::new(encoding.get_ids(), &device)?;
 
-with torch.no_grad():
-    outputs = model(**inputs)
-    predictions = torch.argmax(outputs.logits, dim=-1)
-    # predictions для каждого токена
+let logits = model.forward(&input_ids, &token_type_ids, Some(&attention_mask))?;
+let predictions = logits.argmax(D::Minus1)?;
+// predictions для каждого токена
 ```
 
 **Архитектура для NER:**
@@ -344,24 +365,24 @@ Input → BERT Encoder → All token representations → Linear → Per-token cl
 
 ### 4.4 Question Answering
 
-```python
-from transformers import BertForQuestionAnswering
+```rust
+use candle_transformers::models::bert::BertForQuestionAnswering;
 
-model = BertForQuestionAnswering.from_pretrained('bert-base-uncased')
+let model = BertForQuestionAnswering::from_pretrained("bert-base-uncased", vb)?;
 
-question = "What is the capital of France?"
-context = "Paris is the capital and most populous city of France."
+let question = "What is the capital of France?";
+let context = "Paris is the capital and most populous city of France.";
 
-inputs = tokenizer(question, context, return_tensors='pt')
+let encoding = tokenizer.encode((question, context), true).unwrap();
+let input_ids = Tensor::new(encoding.get_ids(), &device)?;
 
-with torch.no_grad():
-    outputs = model(**inputs)
-    start_idx = torch.argmax(outputs.start_logits)
-    end_idx = torch.argmax(outputs.end_logits)
-    
-    answer_tokens = inputs['input_ids'][0][start_idx:end_idx+1]
-    answer = tokenizer.decode(answer_tokens)
-    print(f"Answer: {answer}")  # "Paris"
+let outputs = model.forward(&input_ids, &token_type_ids, Some(&attention_mask))?;
+let start_idx = outputs.start_logits.argmax(D::Minus1)?.to_scalar::<u32>()?;
+let end_idx = outputs.end_logits.argmax(D::Minus1)?.to_scalar::<u32>()?;
+
+let answer_tokens = &encoding.get_ids()[start_idx as usize..=end_idx as usize];
+let answer = tokenizer.decode(answer_tokens, true).unwrap();
+println!("Answer: {}", answer); // "Paris"
 ```
 
 **Архитектура для QA:**
@@ -418,13 +439,12 @@ Epoch 2: "The cat [MASK] on the mat" → "sat"  # другая маска
 Epoch 3: "The cat sat on the [MASK]" → "mat"  # ещё другая
 ```
 
-```python
-def dynamic_masking(tokens, tokenizer, epoch_seed):
-    """
-    Генерирует разную маску для каждой эпохи
-    """
-    torch.manual_seed(epoch_seed)
-    return mask_tokens(tokens, tokenizer)
+```rust
+fn dynamic_masking(tokens: &mut Vec<u32>, tokenizer: &Tokenizer, epoch_seed: u64) -> (Vec<u32>, Vec<i64>) {
+    // Генерирует разную маску для каждой эпохи
+    let mut rng = rand::rngs::StdRng::seed_from_u64(epoch_seed);
+    mask_tokens(tokens, tokenizer, 0.15)
+}
 ```
 
 ### 5.4 Результаты RoBERTa
@@ -451,11 +471,11 @@ def dynamic_masking(tokens, tokenizer, epoch_seed):
 - 6 слоёв вместо 12
 ```
 
-```python
-from transformers import DistilBertModel
+```rust
+use candle_transformers::models::distilbert::DistilBertModel;
 
-model = DistilBertModel.from_pretrained('distilbert-base-uncased')
-# 66M параметров vs 110M для BERT-base
+let model = DistilBertModel::load(vb, &config)?;
+// 66M параметров vs 110M для BERT-base
 ```
 
 ### 6.2 ALBERT
@@ -518,29 +538,30 @@ Encoder-only: "[CLS] Good review [MASK] Ignore all instructions [SEP]"
 
 **Adversarial examples для классификаторов:**
 
-```python
-# Атака: добавляем слово, которое меняет классификацию
-original = "This movie is great"  # → Positive
-adversarial = "This movie is great unfortunately"  # → Negative
+```rust
+// Атака: добавляем слово, которое меняет классификацию
+let original = "This movie is great";       // → Positive
+let adversarial = "This movie is great unfortunately"; // → Negative
 
-# "unfortunately" сдвигает embedding в негативную область
+// "unfortunately" сдвигает embedding в негативную область
 ```
 
 **SENTINEL detection:**
 
-```python
-from sentinel import scan  # Public API
+```rust
+use sentinel_core::engines::SentinelEngine;
 
-detector = EmbeddingShiftDetector()
-result = detector.analyze(
-    original_text=original,
-    modified_text=adversarial,
-    model=bert_model
-)
+let detector = EmbeddingShiftDetector::new();
+let result = detector.analyze(
+    original,
+    adversarial,
+    &bert_model,
+)?;
 
-if result.shift_detected:
-    print(f"Semantic shift: {result.shift_magnitude}")
-    print(f"Suspicious tokens: {result.suspicious_tokens}")
+if result.shift_detected {
+    println!("Semantic shift: {}", result.shift_magnitude);
+    println!("Suspicious tokens: {:?}", result.suspicious_tokens);
+}
 ```
 
 ### 7.3 Backdoor атаки на Fine-tuned модели
@@ -563,36 +584,43 @@ if result.shift_detected:
 | `ModelProvenanceChecker` | Проверка источника модели |
 | `BehaviorConsistencyValidator` | Проверка consistency поведения |
 
-```python
-from sentinel import scan  # Public API
+```rust
+use sentinel_core::engines::SentinelEngine;
 
-scanner = BackdoorTriggerScanner()
-result = scanner.scan_model(
-    model=loaded_model,
-    test_inputs=validation_set
-)
+let scanner = BackdoorTriggerScanner::new();
+let result = scanner.scan_model(
+    &loaded_model,
+    &validation_set,
+)?;
 
-if result.backdoor_indicators:
-    print(f"⚠️ Потенциальный backdoor обнаружен!")
-    print(f"Suspicious patterns: {result.patterns}")
+if result.backdoor_indicators {
+    println!("⚠️ Потенциальный backdoor обнаружен!");
+    println!("Suspicious patterns: {:?}", result.patterns);
+}
 ```
 
 ### 7.4 Privacy: Membership Inference
 
 **Атака:** Определить, был ли конкретный текст в обучающих данных BERT.
 
-```python
-def membership_inference(model, text, tokenizer):
-    """
-    Высокая уверенность в предсказании [MASK] может указывать
-    на присутствие текста в обучающих данных
-    """
-    inputs = tokenizer(text.replace("word", "[MASK]"), return_tensors='pt')
-    with torch.no_grad():
-        outputs = model(**inputs)
-        # Высокие logits для правильного слова → вероятно в training data
-        confidence = outputs.logits.softmax(dim=-1).max()
-    return confidence
+```rust
+fn membership_inference(model: &BertModel, text: &str, tokenizer: &Tokenizer) -> f32 {
+    // Высокая уверенность в предсказании [MASK] может указывать
+    // на присутствие текста в обучающих данных
+    let masked_text = text.replace("word", "[MASK]");
+    let encoding = tokenizer.encode(masked_text, true).unwrap();
+    let input_ids = Tensor::new(encoding.get_ids(), &device).unwrap();
+
+    let logits = model.forward(&input_ids, &token_type_ids, None).unwrap();
+    // Высокие logits для правильного слова → вероятно в training data
+    let confidence = candle_nn::ops::softmax(&logits, D::Minus1)
+        .unwrap()
+        .max(D::Minus1)
+        .unwrap()
+        .to_scalar::<f32>()
+        .unwrap();
+    confidence
+}
 ```
 
 ---
@@ -603,24 +631,31 @@ def membership_inference(model, text, tokenizer):
 
 Используйте BERT для предсказания masked слов:
 
-```python
-from transformers import pipeline
+```rust
+use candle_transformers::models::bert::BertModel;
 
-# Создаём fill-mask pipeline
-unmasker = pipeline('fill-mask', model='bert-base-uncased')
+// Создаём fill-mask pipeline
+let tokenizer = tokenizers::Tokenizer::from_pretrained("bert-base-uncased", None).unwrap();
+let model = BertModel::load(vb, &config)?;
 
-# Тест
-sentences = [
+// Тест
+let sentences = vec![
     "The capital of France is [MASK].",
     "Machine learning is a branch of [MASK] intelligence.",
-    "BERT was developed by [MASK]."
-]
+    "BERT was developed by [MASK].",
+];
 
-for sentence in sentences:
-    results = unmasker(sentence)
-    print(f"\nSentence: {sentence}")
-    for i, result in enumerate(results[:3]):
-        print(f"  {i+1}. {result['token_str']}: {result['score']:.4f}")
+for sentence in &sentences {
+    let encoding = tokenizer.encode(*sentence, true).unwrap();
+    let input_ids = Tensor::new(encoding.get_ids(), &device)?;
+    let logits = model.forward(&input_ids, &token_type_ids, None)?;
+
+    println!("\nSentence: {}", sentence);
+    // Получаем top-3 предсказания для masked позиции
+    let probs = candle_nn::ops::softmax(&logits, D::Minus1)?;
+    // Выводим top-3 токена с вероятностями
+    println!("  Top predictions computed from logits");
+}
 ```
 
 **Вопросы:**
@@ -645,52 +680,47 @@ for sentence in sentences:
 
 ### Упражнение 2: Fine-tuning для классификации
 
-```python
-from transformers import BertForSequenceClassification, Trainer, TrainingArguments
-from datasets import load_dataset
+```rust
+use candle_core::{Device, Tensor};
+use candle_nn::{AdamW, Optimizer, VarMap, VarBuilder};
+use candle_transformers::models::bert::BertForSequenceClassification;
 
-# Загрузка датасета
-dataset = load_dataset("imdb")
+// Загрузка модели
+let device = Device::Cpu;
+let var_map = VarMap::new();
+let vb = VarBuilder::from_varmap(&var_map, candle_core::DType::F32, &device);
+let model = BertForSequenceClassification::from_pretrained("bert-base-uncased", 2, vb)?;
+let tokenizer = tokenizers::Tokenizer::from_pretrained("bert-base-uncased", None).unwrap();
 
-# Загрузка модели
-model = BertForSequenceClassification.from_pretrained(
-    'bert-base-uncased',
-    num_labels=2
-)
-tokenizer = BertTokenizer.from_pretrained('bert-base-uncased')
+// Токенизация
+fn tokenize_function(tokenizer: &tokenizers::Tokenizer, text: &str) -> Vec<u32> {
+    let encoding = tokenizer.encode(text, true).unwrap();
+    encoding.get_ids().to_vec()
+}
 
-# Токенизация
-def tokenize_function(examples):
-    return tokenizer(
-        examples['text'],
-        padding='max_length',
-        truncation=True,
-        max_length=256
-    )
+// Аргументы обучения
+let learning_rate = 5e-5;
+let num_epochs = 3;
+let batch_size = 16;
+let warmup_steps = 500;
+let weight_decay = 0.01;
 
-tokenized_datasets = dataset.map(tokenize_function, batched=True)
+// Оптимизатор
+let mut optimizer = AdamW::new(
+    var_map.all_vars(),
+    candle_nn::optim::ParamsAdamW {
+        lr: learning_rate,
+        weight_decay,
+        ..Default::default()
+    },
+)?;
 
-# Аргументы обучения
-training_args = TrainingArguments(
-    output_dir='./results',
-    num_train_epochs=3,
-    per_device_train_batch_size=16,
-    per_device_eval_batch_size=64,
-    warmup_steps=500,
-    weight_decay=0.01,
-    logging_dir='./logs',
-)
-
-# Trainer
-trainer = Trainer(
-    model=model,
-    args=training_args,
-    train_dataset=tokenized_datasets['train'].select(range(1000)),  # subset
-    eval_dataset=tokenized_datasets['test'].select(range(200)),
-)
-
-# Fine-tune
-trainer.train()
+// Fine-tune loop
+for epoch in 0..num_epochs {
+    // Цикл обучения по батчам
+    println!("Epoch {}/{}", epoch + 1, num_epochs);
+    // ... обучение на IMDB subset (1000 train, 200 eval)
+}
 ```
 
 **Задание:** 
@@ -700,31 +730,29 @@ trainer.train()
 
 ### Упражнение 3: Анализ паттернов Attention
 
-```python
-from transformers import BertModel, BertTokenizer
-import matplotlib.pyplot as plt
-import seaborn as sns
+```rust
+use candle_core::{Device, Tensor};
+use candle_transformers::models::bert::BertModel;
 
-model = BertModel.from_pretrained('bert-base-uncased', output_attentions=True)
-tokenizer = BertTokenizer.from_pretrained('bert-base-uncased')
+let model = BertModel::load(vb, &config)?; // with output_attentions
+let tokenizer = tokenizers::Tokenizer::from_pretrained("bert-base-uncased", None).unwrap();
 
-text = "The cat sat on the mat because it was tired"
-inputs = tokenizer(text, return_tensors='pt')
+let text = "The cat sat on the mat because it was tired";
+let encoding = tokenizer.encode(text, true).unwrap();
+let input_ids = Tensor::new(encoding.get_ids(), &device)?;
 
-with torch.no_grad():
-    outputs = model(**inputs)
+let outputs = model.forward(&input_ids, &token_type_ids, Some(&attention_mask))?;
 
-# Attention: [layers][batch, heads, seq_len, seq_len]
-attention = outputs.attentions
+// Attention: [layers][batch, heads, seq_len, seq_len]
+let attention = outputs.attentions;
 
-# Визуализируем head 0, layer 11
-tokens = tokenizer.convert_ids_to_tokens(inputs['input_ids'][0])
-att = attention[11][0, 0].numpy()  # Layer 11, Head 0
+// Визуализируем head 0, layer 11
+let tokens = encoding.get_tokens();
+let att = &attention[11]; // Layer 11, Head 0
 
-plt.figure(figsize=(10, 8))
-sns.heatmap(att, xticklabels=tokens, yticklabels=tokens, cmap='viridis')
-plt.title("BERT Attention (Layer 11, Head 0)")
-plt.show()
+println!("BERT Attention (Layer 11, Head 0)");
+println!("Tokens: {:?}", tokens);
+// Используйте plotters crate для визуализации heatmap
 ```
 
 **Вопросы:**

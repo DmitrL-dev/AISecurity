@@ -17,78 +17,106 @@
 
 ## Embedding-based Detection
 
-```python
-from sentence_transformers import SentenceTransformer
-import numpy as np
+```rust
+use candle_core::Tensor;
+use candle_nn::Module;
 
-class EmbeddingDetector(MLEngine):
-    def __init__(self):
-        self.model = SentenceTransformer('all-MiniLM-L6-v2')
-        self.threat_db = self._load_threat_embeddings()
-        self.threshold = 0.85
-    
-    def scan(self, text: str) -> ScanResult:
-        embedding = self.model.encode(text)
-        similarities = np.dot(self.threat_db, embedding)
-        max_sim = np.max(similarities)
-        
-        if max_sim > self.threshold:
-            return ScanResult(is_threat=True, confidence=float(max_sim))
-        return ScanResult(is_threat=False)
+struct EmbeddingDetector {
+    model: SentenceTransformer,
+    threat_db: Vec<Tensor>,
+    threshold: f64,
+}
+
+impl EmbeddingDetector {
+    fn new() -> Self {
+        Self {
+            model: SentenceTransformer::new("all-MiniLM-L6-v2"),
+            threat_db: Self::load_threat_embeddings(),
+            threshold: 0.85,
+        }
+    }
+
+    fn scan(&self, text: &str) -> ScanResult {
+        let embedding = self.model.encode(text);
+        let similarities = self.threat_db.iter()
+            .map(|t| t.dot(&embedding))
+            .collect::<Vec<f64>>();
+        let max_sim = similarities.iter().cloned().fold(0.0_f64, f64::max);
+
+        if max_sim > self.threshold {
+            ScanResult { is_threat: true, confidence: Some(max_sim) }
+        } else {
+            ScanResult { is_threat: false, confidence: None }
+        }
+    }
+}
 ```
 
 ---
 
 ## Classification
 
-```python
-from transformers import pipeline
+```rust
+use candle_transformers::pipelines::text_classification::Pipeline;
 
-class ClassifierDetector(MLEngine):
-    def __init__(self):
-        self.classifier = pipeline(
-            "text-classification",
-            model="sentinel/injection-detector-v1"
-        )
-    
-    def scan(self, text: str) -> ScanResult:
-        result = self.classifier(text[:512])[0]
-        
-        if result["label"] == "THREAT":
-            return ScanResult(
-                is_threat=True,
-                confidence=result["score"]
-            )
-        return ScanResult(is_threat=False)
+struct ClassifierDetector {
+    classifier: Pipeline,
+}
+
+impl ClassifierDetector {
+    fn new() -> Self {
+        Self {
+            classifier: Pipeline::new(
+                "text-classification",
+                "sentinel/injection-detector-v1",
+            ),
+        }
+    }
+
+    fn scan(&self, text: &str) -> ScanResult {
+        let truncated = &text[..text.len().min(512)];
+        let result = self.classifier.predict(truncated);
+
+        if result.label == "THREAT" {
+            ScanResult {
+                is_threat: true,
+                confidence: Some(result.score),
+            }
+        } else {
+            ScanResult { is_threat: false, confidence: None }
+        }
+    }
+}
 ```
 
 ---
 
 ## Training Custom Model
 
-```python
-from datasets import load_dataset
-from transformers import Trainer, TrainingArguments
+```rust
+use candle_datasets::hub::HubDataset;
+use candle_transformers::training::{Trainer, TrainingArguments};
 
-# Load data
-dataset = load_dataset("sentinel/injection-detection")
+// Load data
+let dataset = HubDataset::load("sentinel/injection-detection")?;
 
-# Training
-training_args = TrainingArguments(
-    output_dir="./model",
-    num_train_epochs=3,
-    per_device_train_batch_size=16,
-    evaluation_strategy="epoch"
-)
+// Training
+let training_args = TrainingArguments {
+    output_dir: "./model".to_string(),
+    num_train_epochs: 3,
+    per_device_train_batch_size: 16,
+    evaluation_strategy: "epoch".to_string(),
+    ..Default::default()
+};
 
-trainer = Trainer(
-    model=model,
-    args=training_args,
-    train_dataset=dataset["train"],
-    eval_dataset=dataset["test"]
-)
+let mut trainer = Trainer::new(
+    model,
+    training_args,
+    dataset.train_split(),
+    dataset.test_split(),
+);
 
-trainer.train()
+trainer.train()?;
 ```
 
 ---

@@ -34,254 +34,261 @@ AI агенты выполняют действия с реальными пос
 
 ### 1. RBAC (Role-Based Access Control)
 
-```python
-from dataclasses import dataclass
-from typing import Set, List
-from enum import Enum
+```rust
+use std::collections::{HashMap, HashSet};
 
-class Permission(Enum):
-    READ_FILES = "read_files"
-    WRITE_FILES = "write_files"
-    EXECUTE_CODE = "execute_code"
-    NETWORK_ACCESS = "network_access"
-    DATABASE_READ = "database_read"
-    DATABASE_WRITE = "database_write"
+#[derive(Debug, Clone, PartialEq, Eq, Hash)]
+enum Permission {
+    ReadFiles,
+    WriteFiles,
+    ExecuteCode,
+    NetworkAccess,
+    DatabaseRead,
+    DatabaseWrite,
+}
 
-@dataclass
-class Role:
-    name: str
-    permissions: Set[Permission]
-    resource_scopes: dict  # permission -> allowed resources
+struct Role {
+    name: String,
+    permissions: HashSet<Permission>,
+    resource_scopes: HashMap<Permission, Vec<String>>,
+}
 
-class RBACManager:
-    """Role-based access control для агентов."""
-    
-    ROLES = {
-        "assistant": Role(
-            name="assistant",
-            permissions={Permission.READ_FILES},
-            resource_scopes={
-                Permission.READ_FILES: ["/public/*", "/docs/*"]
-            }
-        ),
-        "developer": Role(
-            name="developer",
-            permissions={
-                Permission.READ_FILES, 
-                Permission.WRITE_FILES,
-                Permission.EXECUTE_CODE
-            },
-            resource_scopes={
-                Permission.READ_FILES: ["/project/*"],
-                Permission.WRITE_FILES: ["/project/src/*"],
-                Permission.EXECUTE_CODE: ["python", "npm"]
-            }
-        ),
-        "admin": Role(
-            name="admin",
-            permissions=set(Permission),
-            resource_scopes={}  # All resources
-        ),
+/// Role-based access control для агентов.
+struct RBACManager {
+    agent_id: String,
+    roles: Vec<Role>,
+}
+
+impl RBACManager {
+    fn new(agent_id: &str, assigned_roles: &[&str]) -> Self {
+        let all_roles = Self::default_roles();
+        let roles = assigned_roles.iter()
+            .filter_map(|r| all_roles.get(*r).cloned())
+            .collect();
+        Self { agent_id: agent_id.to_string(), roles }
     }
-    
-    def __init__(self, agent_id: str, assigned_roles: List[str]):
-        self.agent_id = agent_id
-        self.roles = [self.ROLES[r] for r in assigned_roles if r in self.ROLES]
-    
-    def check_permission(
-        self, 
-        permission: Permission, 
-        resource: str = None
-    ) -> dict:
-        """Проверить имеет ли агент permission на resource."""
-        
-        for role in self.roles:
-            if permission in role.permissions:
-                if self._resource_in_scope(role, permission, resource):
-                    return {
-                        "allowed": True,
+
+    /// Проверить имеет ли агент permission на resource.
+    fn check_permission(&self, permission: &Permission, resource: Option<&str>) -> serde_json::Value {
+        for role in &self.roles {
+            if role.permissions.contains(permission) {
+                if self.resource_in_scope(role, permission, resource) {
+                    return serde_json::json!({
+                        "allowed": true,
                         "role": role.name,
-                        "reason": f"Permission {permission.value} granted by role {role.name}"
-                    }
-        
-        return {
-            "allowed": False,
-            "reason": f"No role grants {permission.value} for {resource}"
+                        "reason": format!("Permission {:?} granted by role {}", permission, role.name)
+                    });
+                }
+            }
         }
-    
-    def _resource_in_scope(
-        self, 
-        role: Role, 
-        permission: Permission, 
-        resource: str
-    ) -> bool:
-        """Проверить находится ли resource в allowed scope."""
-        import fnmatch
-        
-        if permission not in role.resource_scopes:
-            return True  # No scope restriction
-        
-        scopes = role.resource_scopes[permission]
-        return any(fnmatch.fnmatch(resource, scope) for scope in scopes)
+
+        serde_json::json!({
+            "allowed": false,
+            "reason": format!("No role grants {:?} for {:?}", permission, resource)
+        })
+    }
+
+    /// Проверить находится ли resource в allowed scope.
+    fn resource_in_scope(&self, role: &Role, permission: &Permission, resource: Option<&str>) -> bool {
+        let resource = match resource {
+            Some(r) => r,
+            None => return true,
+        };
+
+        match role.resource_scopes.get(permission) {
+            None => true, // No scope restriction
+            Some(scopes) => scopes.iter().any(|scope| {
+                glob_match::glob_match(scope, resource)
+            }),
+        }
+    }
+}
 ```
 
 ---
 
 ### 2. Capability-Based Security
 
-```python
-from dataclasses import dataclass, field
-from datetime import datetime, timedelta
-from typing import Optional, Dict, Any
-import secrets
+```rust
+use std::collections::{HashMap, HashSet};
+use std::time::{Duration, Instant, SystemTime, UNIX_EPOCH};
 
-@dataclass
-class Capability:
-    """Unforgeable capability token."""
-    
-    id: str = field(default_factory=lambda: secrets.token_urlsafe(16))
-    action: str = ""
-    resource: str = ""
-    constraints: Dict[str, Any] = field(default_factory=dict)
-    expires: Optional[datetime] = None
-    revoked: bool = False
-    
-    def is_valid(self) -> bool:
-        if self.revoked:
-            return False
-        if self.expires and datetime.utcnow() > self.expires:
-            return False
-        return True
+/// Unforgeable capability token.
+struct Capability {
+    id: String,
+    action: String,
+    resource: String,
+    constraints: HashMap<String, serde_json::Value>,
+    expires: Option<SystemTime>,
+    revoked: bool,
+}
 
-class CapabilityManager:
-    """Управление capabilities для агентов."""
-    
-    def __init__(self):
-        self.capabilities: Dict[str, Capability] = {}
-    
-    def grant(
-        self, 
-        action: str, 
-        resource: str,
-        constraints: dict = None,
-        ttl_seconds: int = 3600
-    ) -> Capability:
-        """Выдать новую capability."""
-        
-        cap = Capability(
-            action=action,
-            resource=resource,
-            constraints=constraints or {},
-            expires=datetime.utcnow() + timedelta(seconds=ttl_seconds)
-        )
-        
-        self.capabilities[cap.id] = cap
-        return cap
-    
-    def check(self, cap_id: str, action: str, resource: str) -> dict:
-        """Проверить позволяет ли capability action на resource."""
-        
-        if cap_id not in self.capabilities:
-            return {"allowed": False, "reason": "Capability not found"}
-        
-        cap = self.capabilities[cap_id]
-        
-        if not cap.is_valid():
-            return {"allowed": False, "reason": "Capability expired or revoked"}
-        
-        if cap.action != action:
-            return {"allowed": False, "reason": f"Capability is for {cap.action}, not {action}"}
-        
-        if not self._resource_matches(cap.resource, resource):
-            return {"allowed": False, "reason": "Resource not covered by capability"}
-        
-        return {"allowed": True, "capability": cap}
-    
-    def revoke(self, cap_id: str):
-        """Отозвать capability."""
-        if cap_id in self.capabilities:
-            self.capabilities[cap_id].revoked = True
+impl Capability {
+    fn new(action: &str, resource: &str, constraints: HashMap<String, serde_json::Value>, ttl_seconds: u64) -> Self {
+        use rand::Rng;
+        let id: String = rand::thread_rng()
+            .sample_iter(&rand::distributions::Alphanumeric)
+            .take(22)
+            .map(char::from)
+            .collect();
+        Self {
+            id,
+            action: action.to_string(),
+            resource: resource.to_string(),
+            constraints,
+            expires: Some(SystemTime::now() + Duration::from_secs(ttl_seconds)),
+            revoked: false,
+        }
+    }
+
+    fn is_valid(&self) -> bool {
+        if self.revoked { return false; }
+        if let Some(exp) = self.expires {
+            if SystemTime::now() > exp { return false; }
+        }
+        true
+    }
+}
+
+/// Управление capabilities для агентов.
+struct CapabilityManager {
+    capabilities: HashMap<String, Capability>,
+}
+
+impl CapabilityManager {
+    fn new() -> Self {
+        Self { capabilities: HashMap::new() }
+    }
+
+    /// Выдать новую capability.
+    fn grant(&mut self, action: &str, resource: &str,
+             constraints: Option<HashMap<String, serde_json::Value>>,
+             ttl_seconds: u64) -> &Capability {
+        let cap = Capability::new(action, resource, constraints.unwrap_or_default(), ttl_seconds);
+        let id = cap.id.clone();
+        self.capabilities.insert(id.clone(), cap);
+        self.capabilities.get(&id).unwrap()
+    }
+
+    /// Проверить позволяет ли capability action на resource.
+    fn check(&self, cap_id: &str, action: &str, resource: &str) -> serde_json::Value {
+        let cap = match self.capabilities.get(cap_id) {
+            Some(c) => c,
+            None => return serde_json::json!({"allowed": false, "reason": "Capability not found"}),
+        };
+
+        if !cap.is_valid() {
+            return serde_json::json!({"allowed": false, "reason": "Capability expired or revoked"});
+        }
+        if cap.action != action {
+            return serde_json::json!({"allowed": false, "reason": format!("Capability is for {}, not {}", cap.action, action)});
+        }
+        if cap.resource != resource {
+            return serde_json::json!({"allowed": false, "reason": "Resource not covered by capability"});
+        }
+
+        serde_json::json!({"allowed": true})
+    }
+
+    /// Отозвать capability.
+    fn revoke(&mut self, cap_id: &str) {
+        if let Some(cap) = self.capabilities.get_mut(cap_id) {
+            cap.revoked = true;
+        }
+    }
+}
 ```
 
 ---
 
 ### 3. ABAC (Attribute-Based Access Control)
 
-```python
-from dataclasses import dataclass
-from typing import Callable, Dict, Any
+```rust
+use std::collections::HashMap;
 
-@dataclass
-class Policy:
-    """ABAC policy с условиями."""
-    
-    name: str
-    effect: str  # "allow" или "deny"
-    actions: list
-    resources: list
-    condition: Callable[[Dict[str, Any]], bool]
+struct Policy {
+    name: String,
+    effect: String, // "allow" или "deny"
+    actions: Vec<String>,
+    resources: Vec<String>,
+    condition: Box<dyn Fn(&HashMap<String, serde_json::Value>) -> bool>,
+}
 
-class ABACManager:
-    """Attribute-based access control."""
-    
-    def __init__(self):
-        self.policies: list[Policy] = []
-    
-    def add_policy(self, policy: Policy):
-        self.policies.append(policy)
-    
-    def evaluate(
-        self, 
-        action: str, 
-        resource: str, 
-        context: Dict[str, Any]
-    ) -> dict:
-        """Evaluate policies для решения авторизации."""
-        
-        applicable_policies = []
-        
-        for policy in self.policies:
-            if self._action_matches(action, policy.actions):
-                if self._resource_matches(resource, policy.resources):
-                    if policy.condition(context):
-                        applicable_policies.append(policy)
-        
-        # Deny имеет приоритет
-        for policy in applicable_policies:
-            if policy.effect == "deny":
-                return {
-                    "allowed": False,
+/// Attribute-based access control.
+struct ABACManager {
+    policies: Vec<Policy>,
+}
+
+impl ABACManager {
+    fn new() -> Self {
+        Self { policies: vec![] }
+    }
+
+    fn add_policy(&mut self, policy: Policy) {
+        self.policies.push(policy);
+    }
+
+    /// Evaluate policies для решения авторизации.
+    fn evaluate(&self, action: &str, resource: &str, context: &HashMap<String, serde_json::Value>) -> serde_json::Value {
+        let mut applicable: Vec<&Policy> = vec![];
+
+        for policy in &self.policies {
+            if policy.actions.iter().any(|a| a == action || a == "*") {
+                if policy.resources.iter().any(|r| r == resource || r == "*") {
+                    if (policy.condition)(context) {
+                        applicable.push(policy);
+                    }
+                }
+            }
+        }
+
+        // Deny имеет приоритет
+        for policy in &applicable {
+            if policy.effect == "deny" {
+                return serde_json::json!({
+                    "allowed": false,
                     "policy": policy.name,
-                    "reason": f"Denied by policy: {policy.name}"
-                }
-        
-        # Any allow grants access
-        for policy in applicable_policies:
-            if policy.effect == "allow":
-                return {
-                    "allowed": True,
+                    "reason": format!("Denied by policy: {}", policy.name)
+                });
+            }
+        }
+
+        // Any allow grants access
+        for policy in &applicable {
+            if policy.effect == "allow" {
+                return serde_json::json!({
+                    "allowed": true,
                     "policy": policy.name
-                }
-        
-        # Default deny
-        return {"allowed": False, "reason": "No policy grants access"}
+                });
+            }
+        }
 
-# Примеры policies
-time_based_policy = Policy(
-    name="business_hours_only",
-    effect="deny",
-    actions=["write", "delete"],
-    resources=["*"],
-    condition=lambda ctx: not (9 <= ctx.get("hour", 12) <= 17)
-)
+        // Default deny
+        serde_json::json!({"allowed": false, "reason": "No policy grants access"})
+    }
+}
 
-high_risk_review = Policy(
-    name="require_review_for_production",
-    effect="deny",
-    actions=["deploy", "delete"],
-    resources=["production/*"],
-    condition=lambda ctx: not ctx.get("human_approved", False)
-)
+// Примеры policies
+let time_based_policy = Policy {
+    name: "business_hours_only".to_string(),
+    effect: "deny".to_string(),
+    actions: vec!["write".into(), "delete".into()],
+    resources: vec!["*".into()],
+    condition: Box::new(|ctx| {
+        let hour = ctx.get("hour").and_then(|v| v.as_u64()).unwrap_or(12);
+        !(9 <= hour && hour <= 17)
+    }),
+};
+
+let high_risk_review = Policy {
+    name: "require_review_for_production".to_string(),
+    effect: "deny".to_string(),
+    actions: vec!["deploy".into(), "delete".into()],
+    resources: vec!["production/*".into()],
+    condition: Box::new(|ctx| {
+        !ctx.get("human_approved").and_then(|v| v.as_bool()).unwrap_or(false)
+    }),
+};
 ```
 
 ---
@@ -290,123 +297,127 @@ high_risk_review = Policy(
 
 ### 1. Authorization Middleware
 
-```python
-class AuthorizationMiddleware:
-    """Middleware для авторизации tool агентов."""
-    
-    def __init__(self, authz_manager):
-        self.authz = authz_manager
-        self.audit_log = []
-    
-    def wrap_tool(self, tool_func, required_permission: Permission):
-        """Обернуть tool с проверкой авторизации."""
-        
-        async def wrapped(agent_context: dict, *args, **kwargs):
-            # Извлечь resource из аргументов
-            resource = self._extract_resource(tool_func.__name__, args, kwargs)
-            
-            # Проверить авторизацию
-            result = self.authz.check_permission(
-                required_permission, 
-                resource
-            )
-            
-            # Залогировать попытку
-            self._log_attempt(
-                agent_context.get("agent_id"),
-                tool_func.__name__,
-                resource,
-                result
-            )
-            
-            if not result["allowed"]:
-                raise PermissionError(result["reason"])
-            
-            # Выполнить tool
-            return await tool_func(*args, **kwargs)
-        
-        return wrapped
+```rust
+/// Middleware для авторизации tool агентов.
+struct AuthorizationMiddleware {
+    authz: RBACManager,
+    audit_log: Vec<serde_json::Value>,
+}
+
+impl AuthorizationMiddleware {
+    fn new(authz: RBACManager) -> Self {
+        Self { authz, audit_log: vec![] }
+    }
+
+    /// Проверить авторизацию перед выполнением tool.
+    fn authorize_tool_call(
+        &mut self,
+        agent_id: &str,
+        tool_name: &str,
+        resource: &str,
+        required_permission: &Permission,
+    ) -> Result<(), String> {
+        // Проверить авторизацию
+        let result = self.authz.check_permission(required_permission, Some(resource));
+
+        // Залогировать попытку
+        self.audit_log.push(serde_json::json!({
+            "agent_id": agent_id,
+            "tool": tool_name,
+            "resource": resource,
+            "result": result
+        }));
+
+        if result["allowed"].as_bool().unwrap_or(false) {
+            Ok(())
+        } else {
+            Err(result["reason"].as_str().unwrap_or("Permission denied").to_string())
+        }
+    }
+}
 ```
 
 ---
 
 ### 2. Dynamic Permission Escalation
 
-```python
-class DynamicEscalationManager:
-    """Обработка временной эскалации permissions."""
-    
-    def __init__(self, base_manager, approval_callback):
-        self.base = base_manager
-        self.approve = approval_callback
-        self.temporary_grants = {}
-    
-    async def request_escalation(
-        self, 
-        agent_id: str,
-        permission: Permission,
-        resource: str,
-        justification: str
-    ) -> dict:
-        """Запросить временные elevated permissions."""
-        
-        # Проверить нужна ли эскалация
-        base_check = self.base.check_permission(permission, resource)
-        if base_check["allowed"]:
-            return base_check
-        
-        # Запросить human approval
-        approval = await self.approve({
+```rust
+use std::collections::HashMap;
+
+/// Обработка временной эскалации permissions.
+struct DynamicEscalationManager {
+    base: RBACManager,
+    temporary_grants: HashMap<String, serde_json::Value>,
+}
+
+impl DynamicEscalationManager {
+    fn new(base: RBACManager) -> Self {
+        Self { base, temporary_grants: HashMap::new() }
+    }
+
+    /// Запросить временные elevated permissions.
+    async fn request_escalation(
+        &mut self,
+        agent_id: &str,
+        permission: &Permission,
+        resource: &str,
+        justification: &str,
+        approve: &dyn AsyncApprovalCallback,
+    ) -> serde_json::Value {
+        // Проверить нужна ли эскалация
+        let base_check = self.base.check_permission(permission, Some(resource));
+        if base_check["allowed"].as_bool().unwrap_or(false) {
+            return base_check;
+        }
+
+        // Запросить human approval
+        let approval = approve.request(serde_json::json!({
             "agent_id": agent_id,
-            "permission": permission.value,
+            "permission": format!("{:?}", permission),
             "resource": resource,
             "justification": justification
-        })
-        
-        if approval["approved"]:
-            # Выдать temporary capability
-            grant_id = self._grant_temporary(
-                agent_id, permission, resource,
-                ttl_seconds=approval.get("ttl", 300)
-            )
-            
-            return {
-                "allowed": True,
+        })).await;
+
+        if approval["approved"].as_bool().unwrap_or(false) {
+            let ttl = approval["ttl"].as_u64().unwrap_or(300);
+            // Выдать temporary capability
+            let grant_id = self.grant_temporary(agent_id, permission, resource, ttl);
+
+            return serde_json::json!({
+                "allowed": true,
                 "grant_id": grant_id,
-                "temporary": True,
-                "expires_in": approval.get("ttl", 300)
-            }
-        
-        return {
-            "allowed": False,
-            "reason": "Escalation request denied"
+                "temporary": true,
+                "expires_in": ttl
+            });
         }
+
+        serde_json::json!({
+            "allowed": false,
+            "reason": "Escalation request denied"
+        })
+    }
+}
 ```
 
 ---
 
 ## Интеграция с SENTINEL
 
-```python
-from sentinel import configure, AuthorizationGuard
+```rust
+use sentinel_core::engines::SentinelEngine;
 
-configure(
-    authorization=True,
-    audit_logging=True,
-    escalation_workflow=True
-)
+let engine = SentinelEngine::new();
 
-auth_guard = AuthorizationGuard(
-    default_role="assistant",
-    require_capability=True,
-    audit_all_decisions=True
-)
+// Сканирование запросов авторизации на предмет инъекций
+let result = engine.analyze(&justification_text);
 
-@auth_guard.require(Permission.WRITE_FILES, resource_arg="path")
-async def write_file(path: str, content: str):
-    # Автоматически авторизовано перед выполнением
-    with open(path, 'w') as f:
-        f.write(content)
+if result.detected {
+    log::warn!(
+        "Подозрительный запрос эскалации: risk={}, categories={:?}",
+        result.risk_score, result.categories
+    );
+    // Отклонить запрос или потребовать дополнительную верификацию
+}
 ```
 
 ---

@@ -59,265 +59,356 @@
 
 ## 2. Классификация контента
 
-```python
-from dataclasses import dataclass
-from typing import Dict, List
-from enum import Enum
+```rust
+use regex::Regex;
+use std::collections::HashMap;
 
-class ContentCategory(Enum):
-    SAFE = "safe"
-    HARMFUL = "harmful"
-    POLICY_VIOLATION = "policy_violation"
-    JAILBREAK_SUCCESS = "jailbreak_success"
-    DATA_LEAK = "data_leak"
+#[derive(Clone, PartialEq)]
+enum ContentCategory {
+    Safe,
+    Harmful,
+    PolicyViolation,
+    JailbreakSuccess,
+    DataLeak,
+}
 
-class ContentClassifier:
-    """Классификация вывода LLM для безопасности."""
-    
-    HARMFUL_PATTERNS = [
-        r'how\s+to\s+(make|create|build)\s+(a\s+)?(bomb|weapon|explosive)',
-        r'step.by.step\s+(guide|instructions?)\s+(to|for)\s+(hack|attack)',
-    ]
-    
-    JAILBREAK_SUCCESS_PATTERNS = [
-        r'as\s+(DAN|an?\s+unrestricted)',
-        r'without\s+(any\s+)?restrictions?',
-        r'ignoring\s+(my\s+)?(previous\s+)?guidelines',
-        r'I\s+(can|will)\s+now\s+do\s+anything',
-    ]
-    
-    def classify(self, text: str) -> ClassificationResult:
-        # Проверка на успешный jailbreak
-        for pattern in self.jailbreak_compiled:
-            if pattern.search(text):
-                return ClassificationResult(
-                    category=ContentCategory.JAILBREAK_SUCCESS,
-                    confidence=0.9,
-                    details={'pattern_matched': pattern.pattern}
-                )
-        
-        # Проверка на вредный контент
-        for pattern in self.harmful_compiled:
-            if pattern.search(text):
-                return ClassificationResult(
-                    category=ContentCategory.HARMFUL,
-                    confidence=0.85,
-                    details={'pattern_matched': pattern.pattern}
-                )
-        
-        return ClassificationResult(
-            category=ContentCategory.SAFE,
-            confidence=0.95,
-            details={}
-        )
+/// Классификация вывода LLM для безопасности.
+struct ContentClassifier {
+    harmful_compiled: Vec<Regex>,
+    jailbreak_compiled: Vec<Regex>,
+}
+
+impl ContentClassifier {
+    const HARMFUL_PATTERNS: &'static [&'static str] = &[
+        r"(?i)how\s+to\s+(make|create|build)\s+(a\s+)?(bomb|weapon|explosive)",
+        r"(?i)step.by.step\s+(guide|instructions?)\s+(to|for)\s+(hack|attack)",
+    ];
+
+    const JAILBREAK_SUCCESS_PATTERNS: &'static [&'static str] = &[
+        r"(?i)as\s+(DAN|an?\s+unrestricted)",
+        r"(?i)without\s+(any\s+)?restrictions?",
+        r"(?i)ignoring\s+(my\s+)?(previous\s+)?guidelines",
+        r"(?i)I\s+(can|will)\s+now\s+do\s+anything",
+    ];
+
+    fn classify(&self, text: &str) -> ClassificationResult {
+        // Проверка на успешный jailbreak
+        for pattern in &self.jailbreak_compiled {
+            if pattern.is_match(text) {
+                return ClassificationResult {
+                    category: ContentCategory::JailbreakSuccess,
+                    confidence: 0.9,
+                    details: HashMap::from([
+                        ("pattern_matched".into(), pattern.as_str().to_string()),
+                    ]),
+                };
+            }
+        }
+
+        // Проверка на вредный контент
+        for pattern in &self.harmful_compiled {
+            if pattern.is_match(text) {
+                return ClassificationResult {
+                    category: ContentCategory::Harmful,
+                    confidence: 0.85,
+                    details: HashMap::from([
+                        ("pattern_matched".into(), pattern.as_str().to_string()),
+                    ]),
+                };
+            }
+        }
+
+        ClassificationResult {
+            category: ContentCategory::Safe,
+            confidence: 0.95,
+            details: HashMap::new(),
+        }
+    }
+}
 ```
 
 ---
 
 ## 3. Детекция PII
 
-```python
-import re
+```rust
+use regex::Regex;
+use std::collections::HashMap;
+use serde_json::{json, Value};
 
-class PIIDetector:
-    """Детекция персонально идентифицируемой информации."""
-    
-    PATTERNS = {
-        'email': {
-            'pattern': r'\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}\b',
-            'severity': 'medium'
-        },
-        'phone_us': {
-            'pattern': r'\b(?:\+?1[-.\s]?)?\(?\d{3}\)?[-.\s]?\d{3}[-.\s]?\d{4}\b',
-            'severity': 'medium'
-        },
-        'ssn': {
-            'pattern': r'\b\d{3}[-.\s]?\d{2}[-.\s]?\d{4}\b',
-            'severity': 'critical'
-        },
-        'credit_card': {
-            'pattern': r'\b(?:\d{4}[-.\s]?){3}\d{4}\b',
-            'severity': 'critical'
+/// Детекция персонально идентифицируемой информации.
+struct PIIDetector {
+    patterns: HashMap<String, (Regex, String)>,
+}
+
+impl PIIDetector {
+    fn new() -> Self {
+        let patterns = HashMap::from([
+            ("email".into(), (
+                Regex::new(r"\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}\b").unwrap(),
+                "medium".into(),
+            )),
+            ("phone_us".into(), (
+                Regex::new(r"\b(?:\+?1[-.\s]?)?\(?\d{3}\)?[-.\s]?\d{3}[-.\s]?\d{4}\b").unwrap(),
+                "medium".into(),
+            )),
+            ("ssn".into(), (
+                Regex::new(r"\b\d{3}[-.\s]?\d{2}[-.\s]?\d{4}\b").unwrap(),
+                "critical".into(),
+            )),
+            ("credit_card".into(), (
+                Regex::new(r"\b(?:\d{4}[-.\s]?){3}\d{4}\b").unwrap(),
+                "critical".into(),
+            )),
+        ]);
+        Self { patterns }
+    }
+
+    fn detect(&self, text: &str) -> Vec<Value> {
+        let mut detections = vec![];
+        for (pii_type, (pattern, severity)) in &self.patterns {
+            for mat in pattern.find_iter(text) {
+                detections.push(json!({
+                    "type": pii_type,
+                    "value": self.mask_value(mat.as_str()),
+                    "severity": severity
+                }));
+            }
+        }
+        detections
+    }
+
+    fn mask_value(&self, value: &str) -> String {
+        if value.len() <= 4 {
+            "*".repeat(value.len())
+        } else {
+            format!(
+                "{}{}{}",
+                &value[..2],
+                "*".repeat(value.len() - 4),
+                &value[value.len() - 2..]
+            )
         }
     }
-    
-    def detect(self, text: str) -> List[Dict]:
-        detections = []
-        for pii_type, data in self.PATTERNS.items():
-            pattern = re.compile(data['pattern'])
-            matches = pattern.findall(text)
-            for match in matches:
-                detections.append({
-                    'type': pii_type,
-                    'value': self._mask_value(match),
-                    'severity': data['severity']
-                })
-        return detections
-    
-    def _mask_value(self, value: str) -> str:
-        if len(value) <= 4:
-            return '*' * len(value)
-        return value[:2] + '*' * (len(value) - 4) + value[-2:]
+}
 
 
-class SecretsDetector:
-    """Детекция API ключей, токенов и учётных данных."""
-    
-    PATTERNS = {
-        'api_key_generic': r'(?:api[_-]?key|apikey)["\']?\s*[:=]\s*["\']?([a-zA-Z0-9_-]{20,})',
-        'aws_access_key': r'\b(AKIA[0-9A-Z]{16})\b',
-        'github_token': r'\b(ghp_[a-zA-Z0-9]{36})\b',
-        'jwt': r'\b(eyJ[a-zA-Z0-9_-]+\.eyJ[a-zA-Z0-9_-]+\.[a-zA-Z0-9_-]+)\b',
-        'openai_key': r'\b(sk-[a-zA-Z0-9]{48})\b',
+/// Детекция API ключей, токенов и учётных данных.
+struct SecretsDetector {
+    patterns: HashMap<String, Regex>,
+}
+
+impl SecretsDetector {
+    fn new() -> Self {
+        let patterns = HashMap::from([
+            ("api_key_generic".into(), Regex::new(r#"(?i)(?:api[_-]?key|apikey)["']?\s*[:=]\s*["']?([a-zA-Z0-9_-]{20,})"#).unwrap()),
+            ("aws_access_key".into(), Regex::new(r"\b(AKIA[0-9A-Z]{16})\b").unwrap()),
+            ("github_token".into(), Regex::new(r"\b(ghp_[a-zA-Z0-9]{36})\b").unwrap()),
+            ("jwt".into(), Regex::new(r"\b(eyJ[a-zA-Z0-9_-]+\.eyJ[a-zA-Z0-9_-]+\.[a-zA-Z0-9_-]+)\b").unwrap()),
+            ("openai_key".into(), Regex::new(r"\b(sk-[a-zA-Z0-9]{48})\b").unwrap()),
+        ]);
+        Self { patterns }
     }
-    
-    def detect(self, text: str) -> List[Dict]:
-        detections = []
-        for secret_type, pattern in self.PATTERNS.items():
-            matches = re.findall(pattern, text, re.I)
-            for match in matches:
-                detections.append({
-                    'type': secret_type,
-                    'masked': match[:4] + '****' + match[-4:] if len(match) > 8 else '****',
-                    'severity': 'critical'
-                })
-        return detections
+
+    fn detect(&self, text: &str) -> Vec<Value> {
+        let mut detections = vec![];
+        for (secret_type, pattern) in &self.patterns {
+            for cap in pattern.captures_iter(text) {
+                let matched = cap.get(1).map(|m| m.as_str()).unwrap_or("");
+                let masked = if matched.len() > 8 {
+                    format!("{}****{}", &matched[..4], &matched[matched.len() - 4..])
+                } else {
+                    "****".to_string()
+                };
+                detections.push(json!({
+                    "type": secret_type,
+                    "masked": masked,
+                    "severity": "critical"
+                }));
+            }
+        }
+        detections
+    }
+}
 ```
 
 ---
 
 ## 4. Санитизатор ответов
 
-```python
-class ResponseSanitizer:
-    """Санитизация ответов LLM путём редактирования чувствительных данных."""
-    
-    def __init__(self):
-        self.pii_detector = PIIDetector()
-        self.secrets_detector = SecretsDetector()
-        
-        self.redaction_templates = {
-            'email': '[EMAIL СКРЫТ]',
-            'phone_us': '[ТЕЛЕФОН СКРЫТ]',
-            'ssn': '[SSN СКРЫТ]',
-            'credit_card': '[КАРТА СКРЫТА]',
-            'api_key_generic': '[API КЛЮЧ СКРЫТ]',
-            'aws_access_key': '[AWS КЛЮЧ СКРЫТ]',
-            'jwt': '[ТОКЕН СКРЫТ]',
-            'openai_key': '[API КЛЮЧ СКРЫТ]',
+```rust
+use std::collections::HashMap;
+use serde_json::{json, Value};
+
+/// Санитизация ответов LLM путём редактирования чувствительных данных.
+struct ResponseSanitizer {
+    pii_detector: PIIDetector,
+    secrets_detector: SecretsDetector,
+    redaction_templates: HashMap<String, String>,
+}
+
+impl ResponseSanitizer {
+    fn new() -> Self {
+        let redaction_templates = HashMap::from([
+            ("email".into(), "[EMAIL СКРЫТ]".into()),
+            ("phone_us".into(), "[ТЕЛЕФОН СКРЫТ]".into()),
+            ("ssn".into(), "[SSN СКРЫТ]".into()),
+            ("credit_card".into(), "[КАРТА СКРЫТА]".into()),
+            ("api_key_generic".into(), "[API КЛЮЧ СКРЫТ]".into()),
+            ("aws_access_key".into(), "[AWS КЛЮЧ СКРЫТ]".into()),
+            ("jwt".into(), "[ТОКЕН СКРЫТ]".into()),
+            ("openai_key".into(), "[API КЛЮЧ СКРЫТ]".into()),
+        ]);
+
+        Self {
+            pii_detector: PIIDetector::new(),
+            secrets_detector: SecretsDetector::new(),
+            redaction_templates,
         }
-    
-    def sanitize(self, text: str) -> tuple[str, List[Dict]]:
-        all_detections = []
-        result = text
-        
-        # Детекция и редактирование PII
-        pii_detections = self.pii_detector.detect(result)
-        for det in pii_detections:
-            pii_type = det['type']
-            pattern = self.pii_detector.compiled[pii_type][0]
-            replacement = self.redaction_templates.get(pii_type, '[СКРЫТО]')
-            result = pattern.sub(replacement, result)
-        
-        all_detections.extend(pii_detections)
-        
-        # Детекция и редактирование секретов
-        secret_detections = self.secrets_detector.detect(result)
-        for det in secret_detections:
-            secret_type = det['type']
-            pattern = self.secrets_detector.compiled[secret_type]
-            replacement = self.redaction_templates.get(secret_type, '[СЕКРЕТ СКРЫТ]')
-            result = pattern.sub(replacement, result)
-        
-        all_detections.extend(secret_detections)
-        
-        return result, all_detections
+    }
+
+    fn sanitize(&self, text: &str) -> (String, Vec<Value>) {
+        let mut all_detections = vec![];
+        let mut result = text.to_string();
+
+        // Детекция и редактирование PII
+        let pii_detections = self.pii_detector.detect(&result);
+        for det in &pii_detections {
+            let pii_type = det["type"].as_str().unwrap_or("");
+            if let Some((pattern, _)) = self.pii_detector.patterns.get(pii_type) {
+                let replacement = self.redaction_templates
+                    .get(pii_type)
+                    .map(|s| s.as_str())
+                    .unwrap_or("[СКРЫТО]");
+                result = pattern.replace_all(&result, replacement).to_string();
+            }
+        }
+        all_detections.extend(pii_detections);
+
+        // Детекция и редактирование секретов
+        let secret_detections = self.secrets_detector.detect(&result);
+        for det in &secret_detections {
+            let secret_type = det["type"].as_str().unwrap_or("");
+            if let Some(pattern) = self.secrets_detector.patterns.get(secret_type) {
+                let replacement = self.redaction_templates
+                    .get(secret_type)
+                    .map(|s| s.as_str())
+                    .unwrap_or("[СЕКРЕТ СКРЫТ]");
+                result = pattern.replace_all(&result, replacement).to_string();
+            }
+        }
+        all_detections.extend(secret_detections);
+
+        (result, all_detections)
+    }
+}
 ```
 
 ---
 
 ## 5. Интеграция с SENTINEL
 
-```python
-from enum import Enum
+```rust
+use std::collections::{HashMap, HashSet};
+use serde_json::{json, Value};
 
-class FilterAction(Enum):
-    ALLOW = "allow"
-    SANITIZE = "sanitize"
-    BLOCK = "block"
+#[derive(Clone, PartialEq)]
+enum FilterAction {
+    Allow,
+    Sanitize,
+    Block,
+}
 
-class SENTINELOutputFilter:
-    """Модуль SENTINEL для комплексной фильтрации вывода."""
-    
-    def __init__(self, config: Dict = None):
-        config = config or {}
-        
-        self.classifier = ContentClassifier()
-        self.sanitizer = ResponseSanitizer()
-        
-        self.block_categories = {
-            ContentCategory.HARMFUL,
-            ContentCategory.JAILBREAK_SUCCESS
+/// Модуль SENTINEL для комплексной фильтрации вывода.
+struct SentinelOutputFilter {
+    classifier: ContentClassifier,
+    sanitizer: ResponseSanitizer,
+    block_categories: HashSet<ContentCategory>,
+    block_on_critical_pii: bool,
+}
+
+impl SentinelOutputFilter {
+    fn new(config: Option<HashMap<String, Value>>) -> Self {
+        let config = config.unwrap_or_default();
+
+        let block_categories = HashSet::from([
+            ContentCategory::Harmful,
+            ContentCategory::JailbreakSuccess,
+        ]);
+
+        Self {
+            classifier: ContentClassifier::new(),
+            sanitizer: ResponseSanitizer::new(),
+            block_categories,
+            block_on_critical_pii: config
+                .get("block_on_critical_pii")
+                .and_then(|v| v.as_bool())
+                .unwrap_or(true),
         }
-        
-        self.block_on_critical_pii = config.get('block_on_critical_pii', True)
-    
-    def filter(self, prompt: str, response: str) -> FilterResult:
-        detections = []
-        
-        # Шаг 1: Классификация контента
-        classification = self.classifier.classify(response, prompt)
-        
-        if classification.category in self.block_categories:
-            return FilterResult(
-                action=FilterAction.BLOCK,
-                original_output=response,
-                filtered_output="",
-                detections=[{
-                    'type': 'content_blocked',
-                    'category': classification.category.value,
-                    'confidence': classification.confidence
-                }],
-                risk_score=1.0
-            )
-        
-        # Шаг 2: Санитизация
-        sanitized, sanitize_detections = self.sanitizer.sanitize(response)
-        detections.extend(sanitize_detections)
-        
-        # Проверка на критичные данные
-        critical_detections = [
-            d for d in detections if d.get('severity') == 'critical'
-        ]
-        
-        if critical_detections and self.block_on_critical_pii:
-            return FilterResult(
-                action=FilterAction.BLOCK,
-                original_output=response,
-                filtered_output="",
-                detections=detections,
-                risk_score=1.0
-            )
-        
-        # Расчёт риска
-        risk = min(len(detections) * 0.15, 0.9)
-        
-        if sanitized != response:
-            return FilterResult(
-                action=FilterAction.SANITIZE,
-                original_output=response,
-                filtered_output=sanitized,
-                detections=detections,
-                risk_score=risk
-            )
-        
-        return FilterResult(
-            action=FilterAction.ALLOW,
-            original_output=response,
-            filtered_output=response,
-            detections=detections,
-            risk_score=0.0
-        )
+    }
+
+    fn filter(&self, prompt: &str, response: &str) -> FilterResult {
+        let mut detections: Vec<Value> = vec![];
+
+        // Шаг 1: Классификация контента
+        let classification = self.classifier.classify(response);
+
+        if self.block_categories.contains(&classification.category) {
+            return FilterResult {
+                action: FilterAction::Block,
+                original_output: response.to_string(),
+                filtered_output: String::new(),
+                detections: vec![json!({
+                    "type": "content_blocked",
+                    "category": format!("{:?}", classification.category),
+                    "confidence": classification.confidence
+                })],
+                risk_score: 1.0,
+            };
+        }
+
+        // Шаг 2: Санитизация
+        let (sanitized, sanitize_detections) = self.sanitizer.sanitize(response);
+        detections.extend(sanitize_detections);
+
+        // Проверка на критичные данные
+        let critical_detections: Vec<&Value> = detections
+            .iter()
+            .filter(|d| d.get("severity").and_then(|s| s.as_str()) == Some("critical"))
+            .collect();
+
+        if !critical_detections.is_empty() && self.block_on_critical_pii {
+            return FilterResult {
+                action: FilterAction::Block,
+                original_output: response.to_string(),
+                filtered_output: String::new(),
+                detections,
+                risk_score: 1.0,
+            };
+        }
+
+        // Расчёт риска
+        let risk = (detections.len() as f64 * 0.15).min(0.9);
+
+        if sanitized != response {
+            return FilterResult {
+                action: FilterAction::Sanitize,
+                original_output: response.to_string(),
+                filtered_output: sanitized,
+                detections,
+                risk_score: risk,
+            };
+        }
+
+        FilterResult {
+            action: FilterAction::Allow,
+            original_output: response.to_string(),
+            filtered_output: response.to_string(),
+            detections,
+            risk_score: 0.0,
+        }
+    }
+}
 ```
 
 ---

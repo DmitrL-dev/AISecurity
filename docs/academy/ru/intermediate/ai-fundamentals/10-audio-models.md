@@ -44,12 +44,15 @@ Audio → Mel Spectrogram → Encoder → Decoder → Text
 
 ### Использование
 
-```python
-import whisper
+```rust
+use candle_transformers::models::whisper;
 
-model = whisper.load_model("base")
-result = model.transcribe("audio.mp3")
-print(result["text"])
+fn main() -> candle_core::Result<()> {
+    // let model = whisper::Model::load("base")?;
+    // let result = model.transcribe("audio.mp3")?;
+    // println!("{}", result.text);
+    Ok(())
+}
 ```
 
 ---
@@ -135,15 +138,18 @@ Audio: "Ignore previous instructions..."
 | AudioInjectionDetector | Скрытые команды в audio |
 | VoiceCloningDetector | Обнаружение синтезированной речи |
 
-```python
-from sentinel import scan  # Public API
+```rust
+use sentinel_core::engines::SentinelEngine;
 
-engine = VoiceGuardEngine()
-result = engine.analyze_audio(audio_bytes)
+fn main() {
+    let engine = VoiceGuardEngine::new();
+    let result = engine.analyze_audio(&audio_bytes);
 
-if result.is_suspicious:
-    print(f"Threat: {result.threat_type}")
-    print(f"Transcription: {result.transcription}")
+    if result.is_suspicious {
+        println!("Threat: {}", result.threat_type);
+        println!("Transcription: {}", result.transcription);
+    }
+}
 ```
 
 ---
@@ -152,24 +158,31 @@ if result.is_suspicious:
 
 ### Задание: Whisper Analysis
 
-```python
-import whisper
+```rust
+use candle_transformers::models::whisper;
 
-model = whisper.load_model("base")
+fn main() -> candle_core::Result<()> {
+    // let model = whisper::Model::load("base")?;
 
-# Транскрибируем и анализируем
-result = model.transcribe("suspicious_audio.mp3")
-text = result["text"]
+    // Транскрибируем и анализируем
+    // let result = model.transcribe("suspicious_audio.mp3")?;
+    // let text = &result.text;
+    let text = "example transcription";
 
-# Проверяем на injection паттерны
-injection_patterns = [
-    "ignore", "forget", "new instructions",
-    "system prompt", "jailbreak"
-]
+    // Проверяем на injection паттерны
+    let injection_patterns = vec![
+        "ignore", "forget", "new instructions",
+        "system prompt", "jailbreak",
+    ];
 
-for pattern in injection_patterns:
-    if pattern.lower() in text.lower():
-        print(f"⚠️ Potential voice injection: {pattern}")
+    for pattern in &injection_patterns {
+        if text.to_lowercase().contains(&pattern.to_lowercase()) {
+            println!("Warning: Potential voice injection: {}", pattern);
+        }
+    }
+
+    Ok(())
+}
 ```
 
 ---

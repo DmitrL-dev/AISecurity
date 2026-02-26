@@ -65,76 +65,88 @@ SENTINEL Engines:
 
 ### 2.1 PromptInjectionDetector
 
-```python
-from sentinel import scan  # Public API
+```rust
+use sentinel_core::scan; // Public API
+use std::collections::HashMap;
 
-class PromptInjectionDetector:
-    """
-    Detects prompt injection attempts in user input
-    
-    Methods:
-    - analyze(text) -> AnalysisResult
-    - get_confidence() -> float
-    - get_attack_type() -> str
-    """
-    
-    def __init__(self, config: dict = None):
-        self.patterns = self._load_patterns()
-        self.ml_model = self._load_model()
-    
-    def analyze(self, text: str) -> dict:
-        # Pattern matching
-        pattern_result = self._check_patterns(text)
-        
-        # ML classification
-        ml_result = self._ml_classify(text)
-        
-        # Combine signals
-        confidence = self._ensemble(pattern_result, ml_result)
-        
-        return {
-            "is_injection": confidence > 0.7,
-            "confidence": confidence,
-            "attack_type": self._determine_type(pattern_result, ml_result),
-            "evidence": self._gather_evidence(text)
+/// Detects prompt injection attempts in user input
+///
+/// Methods:
+/// - analyze(text) -> AnalysisResult
+/// - get_confidence() -> f64
+/// - get_attack_type() -> String
+struct PromptInjectionDetector {
+    patterns: Vec<Pattern>,
+    ml_model: Box<dyn Model>,
+}
+
+impl PromptInjectionDetector {
+    fn new(config: Option<HashMap<String, String>>) -> Self {
+        Self {
+            patterns: Self::load_patterns(),
+            ml_model: Self::load_model(),
         }
+    }
+
+    fn analyze(&self, text: &str) -> HashMap<String, serde_json::Value> {
+        // Pattern matching
+        let pattern_result = self.check_patterns(text);
+
+        // ML classification
+        let ml_result = self.ml_classify(text);
+
+        // Combine signals
+        let confidence = self.ensemble(&pattern_result, &ml_result);
+
+        HashMap::from([
+            ("is_injection".into(), serde_json::json!(confidence > 0.7)),
+            ("confidence".into(), serde_json::json!(confidence)),
+            ("attack_type".into(), serde_json::json!(self.determine_type(&pattern_result, &ml_result))),
+            ("evidence".into(), serde_json::json!(self.gather_evidence(text))),
+        ])
+    }
+}
 ```
 
 ### 2.2 JailbreakClassifier
 
-```python
-from sentinel import scan  # Public API
+```rust
+use sentinel_core::scan; // Public API
+use std::collections::HashMap;
+use serde_json::{json, Value};
 
-class JailbreakClassifier:
-    """
-    Classifies jailbreak attempts by type
-    
-    Types:
-    - persona_based (DAN, Evil Confidant)
-    - encoding_based (Base64, ROT13)
-    - logic_based (hypothetical, academic)
-    - multi_turn (gradual escalation)
-    """
-    
-    def classify(self, text: str, history: list = None) -> dict:
-        # Check for persona patterns
-        persona = self._check_persona(text)
-        
-        # Check for encoding
-        encoding = self._check_encoding(text)
-        
-        # Check logic patterns
-        logic = self._check_logic(text)
-        
-        # Check multi-turn patterns
-        if history:
-            multi_turn = self._check_escalation(history)
-        
-        return {
-            "jailbreak_type": self._determine_type(persona, encoding, logic),
-            "confidence": max(persona, encoding, logic),
-            "recommendations": self._get_recommendations()
+/// Classifies jailbreak attempts by type
+///
+/// Types:
+/// - persona_based (DAN, Evil Confidant)
+/// - encoding_based (Base64, ROT13)
+/// - logic_based (hypothetical, academic)
+/// - multi_turn (gradual escalation)
+struct JailbreakClassifier;
+
+impl JailbreakClassifier {
+    fn classify(&self, text: &str, history: Option<&[String]>) -> HashMap<String, Value> {
+        // Check for persona patterns
+        let persona = self.check_persona(text);
+
+        // Check for encoding
+        let encoding = self.check_encoding(text);
+
+        // Check logic patterns
+        let logic = self.check_logic(text);
+
+        // Check multi-turn patterns
+        if let Some(hist) = history {
+            let _multi_turn = self.check_escalation(hist);
         }
+
+        HashMap::from([
+            ("jailbreak_type".into(), json!(self.determine_type(persona, encoding, logic))),
+            ("confidence".into(), json!(persona.max(encoding).max(logic))),
+            ("recommendations".into(), json!(self.get_recommendations())),
+        ])
+    }
+}
 ```
 
 ---
@@ -143,73 +155,78 @@ class JailbreakClassifier:
 
 ### 3.1 TrustBoundaryAnalyzer
 
-```python
-from sentinel import scan  # Public API
+```rust
+use sentinel_core::scan; // Public API
+use std::collections::HashMap;
+use serde_json::{json, Value};
 
-class TrustBoundaryAnalyzer:
-    """
-    Analyzes trust boundaries between system and user content
-    
-    Detects attempts to:
-    - Modify system behavior
-    - Inject system-level instructions
-    - Cross privilege boundaries
-    """
-    
-    def analyze(self, 
-               system_prompt: str,
-               user_input: str,
-               retrieved_content: list = None) -> dict:
-        
-        # Check if user tries to modify system
-        boundary_violation = self._check_boundary_crossing(
-            system_prompt, user_input
-        )
-        
-        # Check retrieved content for injection
-        if retrieved_content:
-            rag_injection = self._check_rag_content(retrieved_content)
-        
-        return {
-            "boundary_intact": not boundary_violation,
-            "violations": self._list_violations(),
-            "risk_level": self._calculate_risk()
+/// Analyzes trust boundaries between system and user content
+///
+/// Detects attempts to:
+/// - Modify system behavior
+/// - Inject system-level instructions
+/// - Cross privilege boundaries
+struct TrustBoundaryAnalyzer;
+
+impl TrustBoundaryAnalyzer {
+    fn analyze(
+        &self,
+        system_prompt: &str,
+        user_input: &str,
+        retrieved_content: Option<&[String]>,
+    ) -> HashMap<String, Value> {
+        // Check if user tries to modify system
+        let boundary_violation = self.check_boundary_crossing(system_prompt, user_input);
+
+        // Check retrieved content for injection
+        if let Some(content) = retrieved_content {
+            let _rag_injection = self.check_rag_content(content);
         }
+
+        HashMap::from([
+            ("boundary_intact".into(), json!(!boundary_violation)),
+            ("violations".into(), json!(self.list_violations())),
+            ("risk_level".into(), json!(self.calculate_risk())),
+        ])
+    }
+}
 ```
 
 ### 3.2 ContextAnalyzer
 
-```python
-from sentinel import scan  # Public API
+```rust
+use sentinel_core::scan; // Public API
+use std::collections::HashMap;
+use serde_json::{json, Value};
 
-class ContextAnalyzer:
-    """
-    Analyzes context for security implications
-    
-    Features:
-    - Context length monitoring
-    - Attention dilution detection
-    - System prompt integrity
-    """
-    
-    def analyze(self,
-               system_prompt: str,
-               messages: list,
-               max_context: int = 4096) -> dict:
-        
-        total_tokens = self._count_tokens(messages)
-        
-        # Check for attention dilution
-        dilution_risk = self._check_dilution(
-            system_prompt, messages, total_tokens
-        )
-        
-        return {
-            "total_tokens": total_tokens,
-            "context_usage": total_tokens / max_context,
-            "dilution_risk": dilution_risk,
-            "recommendations": self._get_recommendations()
-        }
+/// Analyzes context for security implications
+///
+/// Features:
+/// - Context length monitoring
+/// - Attention dilution detection
+/// - System prompt integrity
+struct ContextAnalyzer;
+
+impl ContextAnalyzer {
+    fn analyze(
+        &self,
+        system_prompt: &str,
+        messages: &[Message],
+        max_context: usize,
+    ) -> HashMap<String, Value> {
+        let total_tokens = self.count_tokens(messages);
+
+        // Check for attention dilution
+        let dilution_risk = self.check_dilution(system_prompt, messages, total_tokens);
+
+        HashMap::from([
+            ("total_tokens".into(), json!(total_tokens)),
+            ("context_usage".into(), json!(total_tokens as f64 / max_context as f64)),
+            ("dilution_risk".into(), json!(dilution_risk)),
+            ("recommendations".into(), json!(self.get_recommendations())),
+        ])
+    }
+}
 ```
 
 ---
@@ -218,72 +235,83 @@ class ContextAnalyzer:
 
 ### 4.1 SafetyClassifier
 
-```python
-from sentinel import scan  # Public API
+```rust
+use sentinel_core::scan; // Public API
+use std::collections::HashMap;
+use serde_json::{json, Value};
 
-class SafetyClassifier:
-    """
-    Classifies output safety across multiple dimensions
-    
-    Dimensions:
-    - toxicity
-    - harm
-    - bias
-    - misinformation
-    """
-    
-    def classify(self, response: str) -> dict:
-        dimensions = {
-            "toxicity": self._check_toxicity(response),
-            "harm": self._check_harm(response),
-            "bias": self._check_bias(response),
-            "misinformation": self._check_misinfo(response)
-        }
-        
-        overall_safe = all(d["safe"] for d in dimensions.values())
-        
-        return {
-            "is_safe": overall_safe,
-            "dimensions": dimensions,
-            "action": "allow" if overall_safe else "block"
-        }
+/// Classifies output safety across multiple dimensions
+///
+/// Dimensions:
+/// - toxicity
+/// - harm
+/// - bias
+/// - misinformation
+struct SafetyClassifier;
+
+impl SafetyClassifier {
+    fn classify(&self, response: &str) -> HashMap<String, Value> {
+        let dimensions = HashMap::from([
+            ("toxicity".into(), json!(self.check_toxicity(response))),
+            ("harm".into(), json!(self.check_harm(response))),
+            ("bias".into(), json!(self.check_bias(response))),
+            ("misinformation".into(), json!(self.check_misinfo(response))),
+        ]);
+
+        let overall_safe = dimensions.values()
+            .all(|d| d.get("safe").and_then(|v| v.as_bool()).unwrap_or(false));
+
+        HashMap::from([
+            ("is_safe".into(), json!(overall_safe)),
+            ("dimensions".into(), json!(dimensions)),
+            ("action".into(), json!(if overall_safe { "allow" } else { "block" })),
+        ])
+    }
+}
 ```
 
 ### 4.2 HallucinationDetector
 
-```python
-from sentinel import scan  # Public API
+```rust
+use sentinel_core::scan; // Public API
+use std::collections::HashMap;
+use serde_json::{json, Value};
 
-class HallucinationDetector:
-    """
-    Detects hallucinations in LLM output
-    
-    Methods:
-    - Factual consistency check
-    - Source attribution
-    - Confidence calibration
-    """
-    
-    def detect(self, 
-              response: str,
-              sources: list = None,
-              context: str = None) -> dict:
-        
-        # Check factual claims
-        claims = self._extract_claims(response)
-        
-        # Verify against sources
-        if sources:
-            verified = self._verify_against_sources(claims, sources)
-        
-        # Check internal consistency
-        consistency = self._check_consistency(response, context)
-        
-        return {
-            "hallucination_risk": 1 - consistency,
-            "unverified_claims": len(claims) - len(verified),
-            "recommendations": self._get_recommendations()
-        }
+/// Detects hallucinations in LLM output
+///
+/// Methods:
+/// - Factual consistency check
+/// - Source attribution
+/// - Confidence calibration
+struct HallucinationDetector;
+
+impl HallucinationDetector {
+    fn detect(
+        &self,
+        response: &str,
+        sources: Option<&[String]>,
+        context: Option<&str>,
+    ) -> HashMap<String, Value> {
+        // Check factual claims
+        let claims = self.extract_claims(response);
+
+        // Verify against sources
+        let verified = if let Some(src) = sources {
+            self.verify_against_sources(&claims, src)
+        } else {
+            vec![]
+        };
+
+        // Check internal consistency
+        let consistency = self.check_consistency(response, context);
+
+        HashMap::from([
+            ("hallucination_risk".into(), json!(1.0 - consistency)),
+            ("unverified_claims".into(), json!(claims.len() - verified.len())),
+            ("recommendations".into(), json!(self.get_recommendations())),
+        ])
+    }
+}
 ```
 
 ---
@@ -292,55 +320,72 @@ class HallucinationDetector:
 
 ### 5.1 Engine Orchestration
 
-```python
-from sentinel.brain import Orchestrator
+```rust
+use sentinel_core::brain::Orchestrator;
+use std::collections::HashMap;
+use serde_json::{json, Value};
 
-class SENTINELOrchestrator:
-    """
-    Orchestrates all engines in unified pipeline
-    """
-    
-    def __init__(self):
-        # Input engines
-        self.injection_detector = PromptInjectionDetector()
-        self.jailbreak_classifier = JailbreakClassifier()
-        self.input_sanitizer = InputSanitizer()
-        
-        # Core engines
-        self.boundary_analyzer = TrustBoundaryAnalyzer()
-        self.context_analyzer = ContextAnalyzer()
-        
-        # Output engines
-        self.safety_classifier = SafetyClassifier()
-        self.hallucination_detector = HallucinationDetector()
-    
-    def process_request(self,
-                       system_prompt: str,
-                       user_input: str,
-                       llm_fn) -> dict:
-        
-        # Phase 1: Input analysis
-        input_result = self._process_input(user_input)
-        if input_result["blocked"]:
-            return {"response": input_result["fallback"]}
-        
-        # Phase 2: Context analysis
-        context_result = self._analyze_context(system_prompt, user_input)
-        
-        # Phase 3: Generate response
-        response = llm_fn(system_prompt, input_result["sanitized"])
-        
-        # Phase 4: Output analysis
-        output_result = self._process_output(response)
-        
-        return {
-            "response": output_result["final_response"],
-            "metadata": {
+/// Orchestrates all engines in unified pipeline
+struct SentinelOrchestrator {
+    // Input engines
+    injection_detector: PromptInjectionDetector,
+    jailbreak_classifier: JailbreakClassifier,
+    input_sanitizer: InputSanitizer,
+    // Core engines
+    boundary_analyzer: TrustBoundaryAnalyzer,
+    context_analyzer: ContextAnalyzer,
+    // Output engines
+    safety_classifier: SafetyClassifier,
+    hallucination_detector: HallucinationDetector,
+}
+
+impl SentinelOrchestrator {
+    fn new() -> Self {
+        Self {
+            injection_detector: PromptInjectionDetector::new(None),
+            jailbreak_classifier: JailbreakClassifier,
+            input_sanitizer: InputSanitizer::new(),
+            boundary_analyzer: TrustBoundaryAnalyzer,
+            context_analyzer: ContextAnalyzer,
+            safety_classifier: SafetyClassifier,
+            hallucination_detector: HallucinationDetector,
+        }
+    }
+
+    fn process_request(
+        &self,
+        system_prompt: &str,
+        user_input: &str,
+        llm_fn: &dyn Fn(&str, &str) -> String,
+    ) -> HashMap<String, Value> {
+        // Phase 1: Input analysis
+        let input_result = self.process_input(user_input);
+        if input_result.get("blocked").and_then(|v| v.as_bool()).unwrap_or(false) {
+            return HashMap::from([
+                ("response".into(), json!(input_result["fallback"])),
+            ]);
+        }
+
+        // Phase 2: Context analysis
+        let context_result = self.analyze_context(system_prompt, user_input);
+
+        // Phase 3: Generate response
+        let sanitized = input_result["sanitized"].as_str().unwrap_or(user_input);
+        let response = llm_fn(system_prompt, sanitized);
+
+        // Phase 4: Output analysis
+        let output_result = self.process_output(&response);
+
+        HashMap::from([
+            ("response".into(), json!(output_result["final_response"])),
+            ("metadata".into(), json!({
                 "input_analysis": input_result,
                 "context_analysis": context_result,
                 "output_analysis": output_result
-            }
-        }
+            })),
+        ])
+    }
+}
 ```
 
 ---

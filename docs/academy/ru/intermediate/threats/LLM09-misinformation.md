@@ -36,29 +36,29 @@ LLM могут генерировать ложную, вводящую в заб
 
 ### 1. Statistical Pattern Matching
 
-```python
-# LLM предсказывают most likely next tokens
-# Не ground truth, просто statistical patterns
+```rust
+// LLM предсказывают most likely next tokens
+// Не ground truth, просто statistical patterns
 
-prompt = "The capital of Freedonia is"
-# LLM генерирует plausible city name даже если
-# Freedonia вымышленная (фильм Marx Brothers)
+let prompt = "The capital of Freedonia is";
+// LLM генерирует plausible city name даже если
+// Freedonia вымышленная (фильм Marx Brothers)
 
-response = llm.generate(prompt)
-# Может вывести: "The capital of Freedonia is Fredricksburg"
-# Полностью сфабриковано но звучит правдоподобно
+let response = llm.generate(prompt);
+// Может вывести: "The capital of Freedonia is Fredricksburg"
+// Полностью сфабриковано но звучит правдоподобно
 ```
 
 ### 2. Training Data Gaps
 
-```python
-# Вопросы вне training distribution
-recent_event = "What happened in the 2030 Olympics?"
+```rust
+// Вопросы вне training distribution
+let recent_event = "What happened in the 2030 Olympics?";
 
-# LLM может:
-# 1. Признать что не знает (хорошо)
-# 2. Сфабриковать plausible events (hallucination)
-# 3. Обсудить прошлые Olympics как будто текущие (confusion)
+// LLM может:
+// 1. Признать что не знает (хорошо)
+// 2. Сфабриковать plausible events (hallucination)
+// 3. Обсудить прошлые Olympics как будто текущие (confusion)
 ```
 
 ---
@@ -101,80 +101,87 @@ LLM: "According to Smith et al. (2023) in Nature, X has been
 
 ### 1. Fact Verification Pipeline
 
-```python
-from dataclasses import dataclass
-from typing import List, Optional
+```rust
+use regex::Regex;
 
-@dataclass
-class FactCheckResult:
-    claim: str
-    verified: bool
-    confidence: float
-    sources: List[str]
-    explanation: str
+struct FactCheckResult {
+    claim: String,
+    verified: bool,
+    confidence: f64,
+    sources: Vec<String>,
+    explanation: String,
+}
 
-class FactVerifier:
-    """Верификация factual claims в LLM output."""
-    
-    def extract_claims(self, text: str) -> List[str]:
-        """Извлечение verifiable factual claims из текста."""
-        claims = []
-        
-        # Numbers with context
-        import re
-        number_claims = re.findall(
-            r'([A-Z][^.]*\b\d+(?:\.\d+)?%?[^.]*\.)', 
-            text
-        )
-        claims.extend(number_claims)
-        
-        return claims
-    
-    def verify_response(self, response: str) -> dict:
-        """Верификация всех claims в LLM response."""
-        claims = self.extract_claims(response)
-        
-        results = {
-            "claims_found": len(claims),
-            "verified": [],
-            "unverified": [],
-            "contradicted": []
+struct FactVerifier;
+
+impl FactVerifier {
+    /// Извлечение verifiable factual claims из текста.
+    fn extract_claims(&self, text: &str) -> Vec<String> {
+        let mut claims = Vec::new();
+
+        // Numbers with context
+        let re = Regex::new(r"([A-Z][^.]*\b\d+(?:\.\d+)?%?[^.]*\.)").unwrap();
+        for cap in re.captures_iter(text) {
+            claims.push(cap[1].to_string());
         }
-        
-        for claim in claims:
-            result = self.verify_claim(claim)
-            if result.verified:
-                results["verified"].append(result)
-            elif result.confidence < 0.3:
-                results["contradicted"].append(result)
-            else:
-                results["unverified"].append(result)
-        
-        return results
+
+        claims
+    }
+
+    /// Верификация всех claims в LLM response.
+    fn verify_response(&self, response: &str) -> serde_json::Value {
+        let claims = self.extract_claims(response);
+
+        let mut verified = Vec::new();
+        let mut unverified = Vec::new();
+        let mut contradicted = Vec::new();
+
+        for claim in &claims {
+            let result = self.verify_claim(claim);
+            if result.verified {
+                verified.push(serde_json::json!({"claim": result.claim, "confidence": result.confidence}));
+            } else if result.confidence < 0.3 {
+                contradicted.push(serde_json::json!({"claim": result.claim, "confidence": result.confidence}));
+            } else {
+                unverified.push(serde_json::json!({"claim": result.claim, "confidence": result.confidence}));
+            }
+        }
+
+        serde_json::json!({
+            "claims_found": claims.len(),
+            "verified": verified,
+            "unverified": unverified,
+            "contradicted": contradicted
+        })
+    }
+}
 ```
 
 ### 2. Citation Verification
 
-```python
-class CitationVerifier:
-    """Верификация что academic citations реальные."""
-    
-    def verify_citation(self, citation: dict) -> dict:
-        """Проверка соответствует ли citation реальному paper."""
-        author = citation["author"].replace(" et al.", "")
-        year = citation["year"]
-        
-        # Query academic APIs
-        results = self._search_crossref(author, year)
-        
-        if results:
-            return {"citation": citation, "verified": True}
-        
-        return {
-            "citation": citation,
-            "verified": False,
-            "warning": "Citation may be fabricated"
+```rust
+struct CitationVerifier;
+
+impl CitationVerifier {
+    /// Проверка соответствует ли citation реальному paper.
+    fn verify_citation(&self, citation: &HashMap<String, String>) -> serde_json::Value {
+        let author = citation["author"].replace(" et al.", "");
+        let year = &citation["year"];
+
+        // Query academic APIs
+        let results = self.search_crossref(&author, year);
+
+        if !results.is_empty() {
+            return serde_json::json!({"citation": citation, "verified": true});
         }
+
+        serde_json::json!({
+            "citation": citation,
+            "verified": false,
+            "warning": "Citation may be fabricated"
+        })
+    }
+}
 ```
 
 ---
@@ -183,69 +190,66 @@ class CitationVerifier:
 
 ### 1. Grounded Generation (RAG)
 
-```python
-class GroundedGenerator:
-    """Генерация ответов grounded в verified источниках."""
-    
-    def generate(self, query: str) -> dict:
-        """Генерация grounded ответа с citations."""
-        
-        # Retrieve relevant documents
-        docs = self.retriever.search(query)
-        
-        # Generate с explicit grounding instruction
-        prompt = f"""
-        Answer the following question using ONLY the provided sources.
-        If the sources don't contain the answer, say "I don't have 
-        information about this in my sources."
-        
-        Always cite sources using [1], [2], etc.
-        
-        Sources:
-        {self._format_sources(docs)}
-        
-        Question: {query}
-        """
-        
-        response = self.llm.generate(prompt)
-        
-        return {
+```rust
+struct GroundedGenerator {
+    /// Генерация ответов grounded в verified источниках.
+    retriever: Retriever,
+    llm: Box<dyn LLMModel>,
+}
+
+impl GroundedGenerator {
+    /// Генерация grounded ответа с citations.
+    fn generate(&self, query: &str) -> serde_json::Value {
+        // Retrieve relevant documents
+        let docs = self.retriever.search(query);
+
+        // Generate с explicit grounding instruction
+        let prompt = format!(
+            r#"Answer the following question using ONLY the provided sources.
+If the sources don't contain the answer, say "I don't have 
+information about this in my sources."
+
+Always cite sources using [1], [2], etc.
+
+Sources:
+{}
+
+Question: {}
+"#,
+            self.format_sources(&docs),
+            query
+        );
+
+        let response = self.llm.generate(&prompt);
+
+        serde_json::json!({
             "response": response,
             "sources": docs,
-            "grounded": True
-        }
+            "grounded": true
+        })
+    }
+}
 ```
 
 ---
 
 ## SENTINEL Integration
 
-```python
-from sentinel import scan, configure
+```rust
+use sentinel_core::engines::SentinelEngine;
 
-configure(
-    misinformation_detection=True,
-    fact_checking=True,
-    citation_verification=True
-)
+let engine = SentinelEngine::new();
 
-def validated_response(query: str, raw_response: str) -> dict:
-    """Валидация LLM response перед возвратом пользователю."""
-    
-    result = scan(
-        raw_response,
-        detect_hallucination=True,
-        verify_citations=True
-    )
-    
-    if result.hallucination_risk > 0.7:
-        return {
-            "response": add_disclaimers(raw_response),
-            "warnings": result.findings,
-            "verified": False
-        }
-    
-    return {"response": raw_response, "verified": True}
+/// Валидация LLM response перед возвратом пользователю.
+let result = engine.analyze(&raw_response);
+
+if result.risk_score > 0.7 {
+    log::warn!(
+        "Hallucination risk: risk={}, categories={:?}, time={}μs",
+        result.risk_score, result.categories, result.processing_time_us
+    );
+    // Добавляем disclaimers к ответу
+}
 ```
 
 ---

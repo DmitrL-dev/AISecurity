@@ -16,80 +16,81 @@
 
 ## Confidence Thresholds
 
-```python
-from sentinel import configure
+```rust
+use sentinel_core::engines::SentinelEngine;
 
-configure(
-    thresholds={
-        "injection": 0.8,    # Higher = fewer FP
-        "jailbreak": 0.7,
-        "pii": 0.9,          # Very strict
-    }
-)
+let engine = SentinelEngine::builder()
+    .threshold("injection", 0.8)    // Higher = fewer FP
+    .threshold("jailbreak", 0.7)
+    .threshold("pii", 0.9)          // Very strict
+    .build();
 ```
 
 ---
 
 ## Whitelisting
 
-```python
-from sentinel.whitelist import Whitelist
+```rust
+use sentinel_core::whitelist::Whitelist;
 
-whitelist = Whitelist()
+let mut whitelist = Whitelist::new();
 
-# Pattern whitelist
-whitelist.add_pattern(r"security documentation")
+// Pattern whitelist
+whitelist.add_pattern(r"security documentation");
 
-# User whitelist
-whitelist.add_user("admin@company.com")
+// User whitelist
+whitelist.add_user("admin@company.com");
 
-# Hash whitelist (known safe)
-whitelist.add_hash("sha256:abc123...")
+// Hash whitelist (known safe)
+whitelist.add_hash("sha256:abc123...");
 
-# Apply
-result = scanner.scan(text, whitelist=whitelist)
+// Apply
+let result = scanner.scan(text, Some(&whitelist));
 ```
 
 ---
 
 ## Feedback Loop
 
-```python
-from sentinel.feedback import FeedbackCollector
+```rust
+use sentinel_core::feedback::FeedbackCollector;
 
-collector = FeedbackCollector()
+let collector = FeedbackCollector::new();
 
-# User reports false positive
+// User reports false positive
 collector.report_fp(
-    text="Ignore the previous test result",
-    scan_result=result,
-    context="CI/CD log analysis"
-)
+    "Ignore the previous test result",
+    &result,
+    "CI/CD log analysis",
+);
 
-# Weekly retrain
-collector.generate_training_data()
+// Weekly retrain
+collector.generate_training_data();
 ```
 
 ---
 
 ## Multi-pass Verification
 
-```python
-def scan_with_verification(text: str) -> ScanResult:
-    # First pass - fast
-    result = fast_scan(text)
-    
-    if not result.is_threat:
-        return result
-    
-    # Second pass - thorough (only if first detected threat)
-    detailed = deep_scan(text)
-    
-    # Require both to agree
-    if detailed.is_threat and detailed.confidence > 0.7:
-        return detailed
-    
-    return ScanResult(is_threat=False)  # Likely FP
+```rust
+fn scan_with_verification(text: &str) -> ScanResult {
+    // First pass - fast
+    let result = fast_scan(text);
+
+    if !result.is_threat {
+        return result;
+    }
+
+    // Second pass - thorough (only if first detected threat)
+    let detailed = deep_scan(text);
+
+    // Require both to agree
+    if detailed.is_threat && detailed.confidence > 0.7 {
+        return detailed;
+    }
+
+    ScanResult { is_threat: false, ..Default::default() }  // Likely FP
+}
 ```
 
 ---

@@ -70,29 +70,34 @@ spec:
 
 ### Health Checks
 
-```python
-# app.py
-from fastapi import FastAPI
-from sentinel.health import HealthChecker
+```rust
+// app.rs
+use actix_web::{web, App, HttpServer, HttpResponse};
+use sentinel_core::health::HealthChecker;
 
-app = FastAPI()
-health = HealthChecker()
+struct AppState {
+    health: HealthChecker,
+}
 
-@app.get("/health")
-async def health_check():
-    return {
+#[actix_web::get("/health")]
+async fn health_check(data: web::Data<AppState>) -> HttpResponse {
+    HttpResponse::Ok().json(serde_json::json!({
         "status": "healthy",
-        "redis": await health.check_redis(),
-        "postgres": await health.check_postgres(),
-        "engines": health.check_engines()
-    }
+        "redis": data.health.check_redis().await,
+        "postgres": data.health.check_postgres().await,
+        "engines": data.health.check_engines()
+    }))
+}
 
-@app.get("/ready")
-async def readiness_check():
-    # Only ready when all engines loaded
-    if not health.engines_loaded():
-        return {"status": "not ready"}, 503
-    return {"status": "ready"}
+#[actix_web::get("/ready")]
+async fn readiness_check(data: web::Data<AppState>) -> HttpResponse {
+    // Only ready when all engines loaded
+    if !data.health.engines_loaded() {
+        return HttpResponse::ServiceUnavailable()
+            .json(serde_json::json!({"status": "not ready"}));
+    }
+    HttpResponse::Ok().json(serde_json::json!({"status": "ready"}))
+}
 ```
 
 ---

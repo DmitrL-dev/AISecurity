@@ -165,23 +165,38 @@ LSTM частично решил проблему vanishing gradient, но:
 
 **Задача Encoder:** преобразовать входную последовательность в богатое контекстуальное представление.
 
-```python
-# Pseudocode структуры Encoder
-class TransformerEncoder:
-    def __init__(self, n_layers=6, d_model=512, n_heads=8, d_ff=2048):
-        self.layers = [EncoderLayer(d_model, n_heads, d_ff) for _ in range(n_layers)]
-        self.embedding = TokenEmbedding(vocab_size, d_model)
-        self.pos_encoding = PositionalEncoding(d_model)
-    
-    def forward(self, x):
-        # 1. Token embeddings + positional encoding
-        x = self.embedding(x) + self.pos_encoding(x)
-        
-        # 2. Проход через N слоёв
-        for layer in self.layers:
-            x = layer(x)
-        
-        return x  # Контекстуальные представления
+```rust
+// Pseudocode структуры Encoder
+struct TransformerEncoder {
+    layers: Vec<EncoderLayer>,
+    embedding: TokenEmbedding,
+    pos_encoding: PositionalEncoding,
+}
+
+impl TransformerEncoder {
+    fn new(n_layers: usize, d_model: usize, n_heads: usize, d_ff: usize) -> Self {
+        let layers = (0..n_layers)
+            .map(|_| EncoderLayer::new(d_model, n_heads, d_ff))
+            .collect();
+        Self {
+            layers,
+            embedding: TokenEmbedding::new(vocab_size, d_model),
+            pos_encoding: PositionalEncoding::new(d_model),
+        }
+    }
+
+    fn forward(&self, x: &Tensor) -> Tensor {
+        // 1. Token embeddings + positional encoding
+        let mut x = self.embedding.forward(x) + self.pos_encoding.forward(x);
+
+        // 2. Проход через N слоёв
+        for layer in &self.layers {
+            x = layer.forward(&x);
+        }
+
+        x // Контекстуальные представления
+    }
+}
 ```
 
 **Каждый слой Encoder содержит:**
@@ -200,15 +215,15 @@ class TransformerEncoder:
 1. **Masked Self-Attention** — токен может «смотреть» только на предыдущие токены (не на будущие)
 2. **Cross-Attention** — decoder «смотрит» на выход encoder
 
-```python
-# Маска decoder (causal mask)
-# Пример для 4 токенов:
-mask = [
-    [1, 0, 0, 0],  # токен 1 видит только себя
-    [1, 1, 0, 0],  # токен 2 видит токены 1, 2
-    [1, 1, 1, 0],  # токен 3 видит токены 1, 2, 3
-    [1, 1, 1, 1],  # токен 4 видит все
-]
+```rust
+// Маска decoder (causal mask)
+// Пример для 4 токенов:
+let mask = vec![
+    vec![1, 0, 0, 0],  // токен 1 видит только себя
+    vec![1, 1, 0, 0],  // токен 2 видит токены 1, 2
+    vec![1, 1, 1, 0],  // токен 3 видит токены 1, 2, 3
+    vec![1, 1, 1, 1],  // токен 4 видит все
+];
 ```
 
 ---
@@ -237,11 +252,11 @@ Self-attention использует три линейные проекции в�
 - **Key (K)** — «ключ»: что у меня есть?
 - **Value (V)** — «значение»: что я верну?
 
-```python
-# Для каждого токена создаём Q, K, V
-Q = X @ W_Q  # [seq_len, d_model] @ [d_model, d_k] = [seq_len, d_k]
-K = X @ W_K  # [seq_len, d_model] @ [d_model, d_k] = [seq_len, d_k]
-V = X @ W_V  # [seq_len, d_model] @ [d_model, d_v] = [seq_len, d_v]
+```rust
+// Для каждого токена создаём Q, K, V
+let q = x.matmul(&w_q)?;  // [seq_len, d_model] @ [d_model, d_k] = [seq_len, d_k]
+let k = x.matmul(&w_k)?;  // [seq_len, d_model] @ [d_model, d_k] = [seq_len, d_k]
+let v = x.matmul(&w_v)?;  // [seq_len, d_model] @ [d_model, d_v] = [seq_len, d_v]
 ```
 
 ### 3.3 Scaled Dot-Product Attention
@@ -254,38 +269,45 @@ Attention(Q, K, V) = softmax(Q × K^T / √d_k) × V
 
 **Пошаговое объяснение:**
 
-```python
-import torch
-import torch.nn.functional as F
+```rust
+use candle_core::{Tensor, Device, DType};
+use candle_nn::ops::softmax;
 
-def scaled_dot_product_attention(Q, K, V, mask=None):
-    """
-    Q: [batch, seq_len, d_k]
-    K: [batch, seq_len, d_k]
-    V: [batch, seq_len, d_v]
-    """
-    d_k = Q.size(-1)
-    
-    # Шаг 1: Вычисляем «сырые» attention scores
-    # Q @ K^T = [batch, seq_len, d_k] @ [batch, d_k, seq_len] = [batch, seq_len, seq_len]
-    scores = torch.matmul(Q, K.transpose(-2, -1))
-    
-    # Шаг 2: Масштабируем на √d_k
-    # Без масштабирования при большом d_k dot products становятся очень большими,
-    # softmax насыщается, градиенты исчезают
-    scores = scores / torch.sqrt(torch.tensor(d_k, dtype=torch.float32))
-    
-    # Шаг 3: Применяем маску (для decoder)
-    if mask is not None:
-        scores = scores.masked_fill(mask == 0, float('-inf'))
-    
-    # Шаг 4: Softmax — преобразуем в веса (сумма = 1)
-    attention_weights = F.softmax(scores, dim=-1)
-    
-    # Шаг 5: Взвешенная сумма values
-    output = torch.matmul(attention_weights, V)
-    
-    return output, attention_weights
+fn scaled_dot_product_attention(
+    q: &Tensor,    // [batch, seq_len, d_k]
+    k: &Tensor,    // [batch, seq_len, d_k]
+    v: &Tensor,    // [batch, seq_len, d_v]
+    mask: Option<&Tensor>,
+) -> candle_core::Result<(Tensor, Tensor)> {
+    let d_k = *q.dims().last().unwrap() as f64;
+
+    // Шаг 1: Вычисляем «сырые» attention scores
+    // Q @ K^T = [batch, seq_len, d_k] @ [batch, d_k, seq_len] = [batch, seq_len, seq_len]
+    let scores = q.matmul(&k.transpose(D::Minus2, D::Minus1)?)?;
+
+    // Шаг 2: Масштабируем на √d_k
+    // Без масштабирования при большом d_k dot products становятся очень большими,
+    // softmax насыщается, градиенты исчезают
+    let scores = (scores / d_k.sqrt())?;
+
+    // Шаг 3: Применяем маску (для decoder)
+    let scores = if let Some(m) = mask {
+        scores.broadcast_add(&m.where_cond(
+            &Tensor::zeros_like(&scores)?,
+            &Tensor::new(f32::NEG_INFINITY, scores.device())?.broadcast_as(scores.shape())?,
+        )?)?
+    } else {
+        scores
+    };
+
+    // Шаг 4: Softmax — преобразуем в веса (сумма = 1)
+    let attention_weights = softmax(&scores, D::Minus1)?;
+
+    // Шаг 5: Взвешенная сумма values
+    let output = attention_weights.matmul(v)?;
+
+    Ok((output, attention_weights))
+}
 ```
 
 **Пример визуализации:**
@@ -341,47 +363,62 @@ Scores (Q @ K^T):
 
 ### 4.2 Математика Multi-Head Attention
 
-```python
-class MultiHeadAttention(torch.nn.Module):
-    def __init__(self, d_model=512, n_heads=8):
-        super().__init__()
-        self.n_heads = n_heads
-        self.d_k = d_model // n_heads  # 512 / 8 = 64
-        
-        # Проекции для каждой головы
-        self.W_Q = torch.nn.Linear(d_model, d_model)
-        self.W_K = torch.nn.Linear(d_model, d_model)
-        self.W_V = torch.nn.Linear(d_model, d_model)
-        
-        # Финальная проекция
-        self.W_O = torch.nn.Linear(d_model, d_model)
-    
-    def forward(self, Q, K, V, mask=None):
-        batch_size = Q.size(0)
-        
-        # 1. Линейные проекции
-        Q = self.W_Q(Q)  # [batch, seq_len, d_model]
-        K = self.W_K(K)
-        V = self.W_V(V)
-        
-        # 2. Разделяем на головы
-        # [batch, seq_len, d_model] → [batch, n_heads, seq_len, d_k]
-        Q = Q.view(batch_size, -1, self.n_heads, self.d_k).transpose(1, 2)
-        K = K.view(batch_size, -1, self.n_heads, self.d_k).transpose(1, 2)
-        V = V.view(batch_size, -1, self.n_heads, self.d_k).transpose(1, 2)
-        
-        # 3. Attention для каждой головы параллельно
-        attn_output, attn_weights = scaled_dot_product_attention(Q, K, V, mask)
-        
-        # 4. Конкатенируем головы
-        # [batch, n_heads, seq_len, d_k] → [batch, seq_len, d_model]
-        attn_output = attn_output.transpose(1, 2).contiguous()
-        attn_output = attn_output.view(batch_size, -1, self.n_heads * self.d_k)
-        
-        # 5. Финальная проекция
-        output = self.W_O(attn_output)
-        
-        return output, attn_weights
+```rust
+use candle_core::Tensor;
+use candle_nn::{Linear, Module, VarBuilder};
+
+struct MultiHeadAttention {
+    n_heads: usize,
+    d_k: usize,
+    w_q: Linear,
+    w_k: Linear,
+    w_v: Linear,
+    w_o: Linear,
+}
+
+impl MultiHeadAttention {
+    fn new(d_model: usize, n_heads: usize, vb: VarBuilder) -> candle_core::Result<Self> {
+        let d_k = d_model / n_heads; // 512 / 8 = 64
+
+        // Проекции для каждой головы
+        let w_q = candle_nn::linear(d_model, d_model, vb.pp("w_q"))?;
+        let w_k = candle_nn::linear(d_model, d_model, vb.pp("w_k"))?;
+        let w_v = candle_nn::linear(d_model, d_model, vb.pp("w_v"))?;
+
+        // Финальная проекция
+        let w_o = candle_nn::linear(d_model, d_model, vb.pp("w_o"))?;
+
+        Ok(Self { n_heads, d_k, w_q, w_k, w_v, w_o })
+    }
+
+    fn forward(&self, q: &Tensor, k: &Tensor, v: &Tensor, mask: Option<&Tensor>) -> candle_core::Result<(Tensor, Tensor)> {
+        let batch_size = q.dim(0)?;
+
+        // 1. Линейные проекции
+        let q = self.w_q.forward(q)?;  // [batch, seq_len, d_model]
+        let k = self.w_k.forward(k)?;
+        let v = self.w_v.forward(v)?;
+
+        // 2. Разделяем на головы
+        // [batch, seq_len, d_model] → [batch, n_heads, seq_len, d_k]
+        let q = q.reshape((batch_size, (), self.n_heads, self.d_k))?.transpose(1, 2)?;
+        let k = k.reshape((batch_size, (), self.n_heads, self.d_k))?.transpose(1, 2)?;
+        let v = v.reshape((batch_size, (), self.n_heads, self.d_k))?.transpose(1, 2)?;
+
+        // 3. Attention для каждой головы параллельно
+        let (attn_output, attn_weights) = scaled_dot_product_attention(&q, &k, &v, mask)?;
+
+        // 4. Конкатенируем головы
+        // [batch, n_heads, seq_len, d_k] → [batch, seq_len, d_model]
+        let attn_output = attn_output.transpose(1, 2)?.contiguous()?;
+        let attn_output = attn_output.reshape((batch_size, (), self.n_heads * self.d_k))?;
+
+        // 5. Финальная проекция
+        let output = self.w_o.forward(&attn_output)?;
+
+        Ok((output, attn_weights))
+    }
+}
 ```
 
 ### 4.3 Визуализация Multi-Head
@@ -419,20 +456,24 @@ Input X [seq_len, d_model=512]
 
 Оригинальная статья использует синусоидальные функции:
 
-```python
-def positional_encoding(seq_len, d_model):
-    """
-    PE(pos, 2i)   = sin(pos / 10000^(2i/d_model))
-    PE(pos, 2i+1) = cos(pos / 10000^(2i/d_model))
-    """
-    position = torch.arange(seq_len).unsqueeze(1)  # [seq_len, 1]
-    div_term = torch.exp(torch.arange(0, d_model, 2) * (-math.log(10000.0) / d_model))
-    
-    pe = torch.zeros(seq_len, d_model)
-    pe[:, 0::2] = torch.sin(position * div_term)  # чётные индексы
-    pe[:, 1::2] = torch.cos(position * div_term)  # нечётные индексы
-    
-    return pe
+```rust
+fn positional_encoding(seq_len: usize, d_model: usize) -> Vec<Vec<f64>> {
+    // PE(pos, 2i)   = sin(pos / 10000^(2i/d_model))
+    // PE(pos, 2i+1) = cos(pos / 10000^(2i/d_model))
+    let mut pe = vec![vec![0.0f64; d_model]; seq_len];
+
+    for pos in 0..seq_len {
+        for i in (0..d_model).step_by(2) {
+            let div_term = (pos as f64) / (10000.0_f64).powf(i as f64 / d_model as f64);
+            pe[pos][i] = div_term.sin();     // чётные индексы
+            if i + 1 < d_model {
+                pe[pos][i + 1] = div_term.cos(); // нечётные индексы
+            }
+        }
+    }
+
+    pe
+}
 ```
 
 ### 5.3 Почему синусоиды?
@@ -465,21 +506,32 @@ Position 2:  [sin(2), cos(2), sin(0.002), cos(0.002), ...]
 
 После attention идёт позиционно-независимая feed-forward сеть:
 
-```python
-class FeedForward(torch.nn.Module):
-    def __init__(self, d_model=512, d_ff=2048, dropout=0.1):
-        super().__init__()
-        self.linear1 = torch.nn.Linear(d_model, d_ff)
-        self.linear2 = torch.nn.Linear(d_ff, d_model)
-        self.dropout = torch.nn.Dropout(dropout)
-    
-    def forward(self, x):
-        # FFN(x) = max(0, xW₁ + b₁)W₂ + b₂
-        x = self.linear1(x)
-        x = F.relu(x)
-        x = self.dropout(x)
-        x = self.linear2(x)
-        return x
+```rust
+use candle_nn::{Linear, Module, VarBuilder, Dropout};
+
+struct FeedForward {
+    linear1: Linear,
+    linear2: Linear,
+    dropout: Dropout,
+}
+
+impl FeedForward {
+    fn new(d_model: usize, d_ff: usize, dropout: f32, vb: VarBuilder) -> candle_core::Result<Self> {
+        let linear1 = candle_nn::linear(d_model, d_ff, vb.pp("linear1"))?;
+        let linear2 = candle_nn::linear(d_ff, d_model, vb.pp("linear2"))?;
+        let dropout = Dropout::new(dropout);
+        Ok(Self { linear1, linear2, dropout })
+    }
+
+    fn forward(&self, x: &Tensor) -> candle_core::Result<Tensor> {
+        // FFN(x) = max(0, xW₁ + b₁)W₂ + b₂
+        let x = self.linear1.forward(x)?;
+        let x = x.relu()?;
+        let x = self.dropout.forward(&x, /* train */ false)?;
+        let x = self.linear2.forward(&x)?;
+        Ok(x)
+    }
+}
 ```
 
 **Зачем FFN?**
@@ -489,10 +541,10 @@ class FeedForward(torch.nn.Module):
 
 ### 6.2 Layer Normalization
 
-```python
-# Layer Norm нормализует по последнему измерению (features)
-layer_norm = torch.nn.LayerNorm(d_model)
-output = layer_norm(x)
+```rust
+// Layer Norm нормализует по последнему измерению (features)
+let layer_norm = candle_nn::layer_norm(d_model, candle_nn::LayerNormConfig::default(), vb.pp("ln"))?;
+let output = layer_norm.forward(&x)?;
 ```
 
 **Формула:**
@@ -507,12 +559,12 @@ LayerNorm(x) = γ × (x - μ) / √(σ² + ε) + β
 
 ### 6.3 Residual Connections
 
-```python
-# Вместо: output = sublayer(x)
-# Используем: output = x + sublayer(x)
+```rust
+// Вместо: output = sublayer(x)
+// Используем: output = x + sublayer(x)
 
-output = x + self.attention(x)
-output = self.layer_norm(output)
+let output = (x + self.attention.forward(&x)?)?;
+let output = self.layer_norm.forward(&output)?;
 ```
 
 **Зачем?**
@@ -537,25 +589,26 @@ output = self.layer_norm(output)
 
 SENTINEL включает engines для анализа внутренних состояний Transformer:
 
-```python
-from sentinel import scan  # Public API
+```rust
+use sentinel_core::engines::SentinelEngine;
 
-# Анализ паттернов attention
-attention_detector = AttentionPatternDetector()
-result = attention_detector.analyze(
-    attention_weights=model.get_attention_weights(),
-    prompt=user_input
-)
+// Анализ паттернов attention
+let attention_detector = AttentionPatternDetector::new();
+let result = attention_detector.analyze(
+    model.get_attention_weights(),
+    &user_input,
+)?;
 
-if result.anomalous_patterns:
-    print(f"Обнаружены аномальные паттерны attention: {result.patterns}")
+if result.anomalous_patterns {
+    println!("Обнаружены аномальные паттерны attention: {:?}", result.patterns);
+}
 
-# Hidden state forensics
-forensics = HiddenStateForensics()
-analysis = forensics.analyze(
-    hidden_states=model.get_hidden_states(),
-    expected_behavior="helpful_assistant"
-)
+// Hidden state forensics
+let forensics = HiddenStateForensics::new();
+let analysis = forensics.analyze(
+    model.get_hidden_states(),
+    "helpful_assistant",
+)?;
 ```
 
 ### 7.3 Связь с атаками
@@ -575,22 +628,25 @@ analysis = forensics.analyze(
 
 Используйте библиотеку BertViz для визуализации attention weights:
 
-```python
-from bertviz import head_view, model_view
-from transformers import AutoTokenizer, AutoModel
+```rust
+use candle_core::Tensor;
+use candle_transformers::models::bert::{BertModel, Config};
 
-# Загружаем модель
-tokenizer = AutoTokenizer.from_pretrained("bert-base-uncased")
-model = AutoModel.from_pretrained("bert-base-uncased", output_attentions=True)
+// Загружаем модель
+let tokenizer = tokenizers::Tokenizer::from_pretrained("bert-base-uncased", None).unwrap();
+let config = Config::from_pretrained("bert-base-uncased")?;
+let model = BertModel::load(vb, &config)?;
 
-# Анализируем предложение
-sentence = "The cat sat on the mat because it was tired"
-inputs = tokenizer(sentence, return_tensors="pt")
-outputs = model(**inputs)
+// Анализируем предложение
+let sentence = "The cat sat on the mat because it was tired";
+let encoding = tokenizer.encode(sentence, true).unwrap();
+let input_ids = Tensor::new(encoding.get_ids(), &device)?;
+let outputs = model.forward(&input_ids, &token_type_ids, Some(&attention_mask))?;
 
-# Визуализация
-tokens = tokenizer.convert_ids_to_tokens(inputs["input_ids"][0])
-head_view(outputs.attentions, tokens)
+// Визуализация
+let tokens = encoding.get_tokens();
+// Используем attention weights для визуализации
+println!("Tokens: {:?}", tokens);
 ```
 
 **Вопросы для анализа:**
@@ -644,35 +700,37 @@ head_view(outputs.attentions, tokens)
 
 Реализуйте функцию attention с нуля и протестируйте её:
 
-```python
-import torch
+```rust
+use candle_core::{Tensor, Device, DType};
 
-def my_attention(Q, K, V, mask=None):
-    """
-    Реализуйте scaled dot-product attention.
-    
-    Args:
-        Q: [batch, seq_len, d_k]
-        K: [batch, seq_len, d_k]
-        V: [batch, seq_len, d_v]
-        mask: [seq_len, seq_len] or None
-    
-    Returns:
-        output: [batch, seq_len, d_v]
-        weights: [batch, seq_len, seq_len]
-    """
-    # Ваш код здесь
-    pass
+fn my_attention(
+    q: &Tensor,    // [batch, seq_len, d_k]
+    k: &Tensor,    // [batch, seq_len, d_k]
+    v: &Tensor,    // [batch, seq_len, d_v]
+    mask: Option<&Tensor>,  // [seq_len, seq_len] or None
+) -> candle_core::Result<(Tensor, Tensor)> {
+    // output: [batch, seq_len, d_v]
+    // weights: [batch, seq_len, seq_len]
 
-# Тест
-Q = torch.randn(2, 4, 64)  # batch=2, seq_len=4, d_k=64
-K = torch.randn(2, 4, 64)
-V = torch.randn(2, 4, 64)
+    // Ваш код здесь
+    todo!()
+}
 
-output, weights = my_attention(Q, K, V)
-print(f"Output shape: {output.shape}")  # Должно быть [2, 4, 64]
-print(f"Weights shape: {weights.shape}")  # Должно быть [2, 4, 4]
-print(f"Weights sum per row: {weights.sum(dim=-1)}")  # Должно быть ~1.0
+fn main() -> candle_core::Result<()> {
+    let device = Device::Cpu;
+
+    // Тест
+    let q = Tensor::randn(0f32, 1.0, (2, 4, 64), &device)?; // batch=2, seq_len=4, d_k=64
+    let k = Tensor::randn(0f32, 1.0, (2, 4, 64), &device)?;
+    let v = Tensor::randn(0f32, 1.0, (2, 4, 64), &device)?;
+
+    let (output, weights) = my_attention(&q, &k, &v, None)?;
+    println!("Output shape: {:?}", output.shape());   // Должно быть [2, 4, 64]
+    println!("Weights shape: {:?}", weights.shape());  // Должно быть [2, 4, 4]
+    println!("Weights sum per row: {:?}", weights.sum(D::Minus1)?); // Должно быть ~1.0
+
+    Ok(())
+}
 ```
 
 ---

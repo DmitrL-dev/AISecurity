@@ -8,28 +8,35 @@
 
 LangChain предоставляет структурированные интерфейсы инструментов для LLM-агентов.
 
-```python
-from langchain.tools import BaseTool, tool
-from pydantic import BaseModel, Field
+```rust
+use serde::Deserialize;
 
-class SearchInput(BaseModel):
-    query: str = Field(description="Поисковый запрос")
+#[derive(Deserialize)]
+struct SearchInput {
+    /// Поисковый запрос
+    query: String,
+}
 
-class SecureSearchTool(BaseTool):
-    name = "search"
-    description = "Поиск в базе знаний"
-    args_schema = SearchInput
-    
-    def _run(self, query: str) -> str:
-        # Валидация
-        if not self._validate_query(query):
-            return "Недопустимый запрос"
-        return self._perform_search(query)
-    
-    def _validate_query(self, query: str) -> bool:
-        # Проверка на паттерны инъекций
-        dangerous = ["ignore previous", "system:", "admin"]
-        return not any(d in query.lower() for d in dangerous)
+struct SecureSearchTool;
+
+impl SecureSearchTool {
+    fn name(&self) -> &str { "search" }
+    fn description(&self) -> &str { "Поиск в базе знаний" }
+
+    fn run(&self, query: &str) -> String {
+        // Валидация
+        if !self.validate_query(query) {
+            return "Недопустимый запрос".to_string();
+        }
+        self.perform_search(query)
+    }
+
+    fn validate_query(&self, query: &str) -> bool {
+        // Проверка на паттерны инъекций
+        let dangerous = ["ignore previous", "system:", "admin"];
+        !dangerous.iter().any(|d| query.to_lowercase().contains(d))
+    }
+}
 ```
 
 ---
@@ -48,72 +55,93 @@ class SecureSearchTool(BaseTool):
 
 ## 3. Безопасная реализация инструментов
 
-```python
-class SecureToolExecutor:
-    def __init__(self, allowed_tools: list):
-        self.tools = {t.name: t for t in allowed_tools}
-        self.audit_log = []
-    
-    def execute(self, tool_name: str, args: dict, context: dict) -> str:
-        # 1. Проверка существования инструмента
-        if tool_name not in self.tools:
-            raise SecurityError(f"Неизвестный инструмент: {tool_name}")
-        
-        tool = self.tools[tool_name]
-        
-        # 2. Валидация аргументов по схеме
-        validated = tool.args_schema(**args)
-        
-        # 3. Проверка разрешений
-        if not self._check_permission(tool_name, context):
-            raise PermissionError("Доступ запрещён")
-        
-        # 4. Выполнение с аудитом
-        self.audit_log.append({
-            "tool": tool_name, "args": args, 
+```rust
+use std::collections::HashMap;
+
+struct SecureToolExecutor {
+    tools: HashMap<String, Box<dyn Tool>>,
+    audit_log: Vec<serde_json::Value>,
+}
+
+impl SecureToolExecutor {
+    fn new(allowed_tools: Vec<Box<dyn Tool>>) -> Self {
+        let tools = allowed_tools.into_iter()
+            .map(|t| (t.name().to_string(), t))
+            .collect();
+        Self { tools, audit_log: vec![] }
+    }
+
+    fn execute(&mut self, tool_name: &str, args: &serde_json::Value, context: &serde_json::Value) -> Result<String, String> {
+        // 1. Проверка существования инструмента
+        let tool = self.tools.get(tool_name)
+            .ok_or_else(|| format!("Неизвестный инструмент: {}", tool_name))?;
+
+        // 2. Валидация аргументов по схеме
+        // (schema validation handled by tool)
+
+        // 3. Проверка разрешений
+        if !self.check_permission(tool_name, context) {
+            return Err("Доступ запрещён".to_string());
+        }
+
+        // 4. Выполнение с аудитом
+        self.audit_log.push(serde_json::json!({
+            "tool": tool_name, "args": args,
             "user": context.get("user_id")
-        })
-        
-        return tool._run(**validated.dict())
+        }));
+
+        Ok(tool.run(args))
+    }
+}
 ```
 
 ---
 
 ## 4. Безопасность цепочек
 
-```python
-from langchain.chains import LLMChain
-from langchain.prompts import PromptTemplate
+```rust
+struct SecureChain {
+    llm: Box<dyn LlmProvider>,
+    tool_executor: SecureToolExecutor,
+    max_iterations: usize,
+}
 
-class SecureChain:
-    def __init__(self, llm, tools: list):
-        self.llm = llm
-        self.tool_executor = SecureToolExecutor(tools)
-        self.max_iterations = 10
-    
-    def run(self, input_text: str, context: dict) -> str:
-        # Санитизация ввода
-        sanitized = self._sanitize_input(input_text)
-        
-        iterations = 0
-        while iterations < self.max_iterations:
-            # Получение ответа LLM
-            response = self.llm.invoke(sanitized)
-            
-            # Проверка на вызов инструмента
-            if tool_call := self._extract_tool_call(response):
-                result = self.tool_executor.execute(
-                    tool_call["name"], 
-                    tool_call["args"], 
-                    context
-                )
-                sanitized = f"{sanitized}\nРезультат инструмента: {result}"
-            else:
-                return response
-            
-            iterations += 1
-        
-        raise SecurityError("Превышено максимальное количество итераций")
+impl SecureChain {
+    fn new(llm: Box<dyn LlmProvider>, tools: Vec<Box<dyn Tool>>) -> Self {
+        Self {
+            llm,
+            tool_executor: SecureToolExecutor::new(tools),
+            max_iterations: 10,
+        }
+    }
+
+    fn run(&mut self, input_text: &str, context: &serde_json::Value) -> Result<String, String> {
+        // Санитизация ввода
+        let mut sanitized = self.sanitize_input(input_text);
+
+        let mut iterations = 0;
+        while iterations < self.max_iterations {
+            // Получение ответа LLM
+            let response = self.llm.invoke(&sanitized);
+
+            // Проверка на вызов инструмента
+            if let Some(tool_call) = self.extract_tool_call(&response) {
+                let result = self.tool_executor.execute(
+                    tool_call["name"].as_str().unwrap_or(""),
+                    &tool_call["args"],
+                    context,
+                )?;
+                sanitized = format!("{}\nРезультат инструмента: {}", sanitized, result);
+            } else {
+                return Ok(response);
+            }
+
+            iterations += 1;
+        }
+
+        Err("Превышено максимальное количество итераций".to_string())
+    }
+}
 ```
 
 ---

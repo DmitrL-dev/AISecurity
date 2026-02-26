@@ -64,22 +64,26 @@ Policy Puppetry — универсальная техника jailbreak, обн�
 
 ### Задание 2: Создание детектора
 
-```python
-import re
+```rust
+use regex::Regex;
 
-def detect_policy_puppetry(prompt: str) -> tuple:
-    patterns = [
-        (r'<[^>]*override[^>]*>', 'XML override'),
-        (r'<[^>]*policy[^>]*>', 'XML policy'),
-        (r'"safety[_\s]*mode"\s*:\s*"disabled"', 'JSON bypass'),
-    ]
-    
-    detected = []
-    for pattern, name in patterns:
-        if re.search(pattern, prompt, re.IGNORECASE):
-            detected.append(name)
-    
-    return len(detected) > 0, detected
+fn detect_policy_puppetry(prompt: &str) -> (bool, Vec<&str>) {
+    let patterns = vec![
+        (r"<[^>]*override[^>]*>", "XML override"),
+        (r"<[^>]*policy[^>]*>", "XML policy"),
+        (r#""safety[_\s]*mode"\s*:\s*"disabled""#, "JSON bypass"),
+    ];
+
+    let mut detected = Vec::new();
+    for (pattern, name) in &patterns {
+        let re = Regex::new(pattern).unwrap();
+        if re.is_match(prompt) {
+            detected.push(*name);
+        }
+    }
+
+    (!detected.is_empty(), detected)
+}
 ```
 
 ---

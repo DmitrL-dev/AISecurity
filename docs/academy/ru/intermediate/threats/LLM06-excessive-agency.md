@@ -35,19 +35,25 @@ Excessive Agency возникает когда LLM-based система полу
 
 ### Сценарий 1: Over-Privileged Customer Support Agent
 
-```python
-# ОПАСНО: Агент с excessive capabilities
-class CustomerSupportAgent:
-    def __init__(self):
-        self.tools = {
-            "lookup_customer": self.lookup_customer,
-            "update_customer": self.update_customer,
-            "issue_refund": self.issue_refund,
-            "delete_customer": self.delete_customer,      # Зачем поддержке это?
-            "access_all_records": self.access_all_records,  # PII exposure risk
-            "execute_sql": self.execute_sql,              # SQL injection vector!
-            "run_shell_command": self.run_shell_command,  # Complete compromise
-        }
+```rust
+// ОПАСНО: Агент с excessive capabilities
+struct CustomerSupportAgent {
+    tools: HashMap<String, Box<dyn Fn(&str) -> String>>,
+}
+
+impl CustomerSupportAgent {
+    fn new() -> Self {
+        let mut tools: HashMap<String, Box<dyn Fn(&str) -> String>> = HashMap::new();
+        tools.insert("lookup_customer".into(), Box::new(|id| lookup_customer(id)));
+        tools.insert("update_customer".into(), Box::new(|id| update_customer(id)));
+        tools.insert("issue_refund".into(), Box::new(|id| issue_refund(id)));
+        tools.insert("delete_customer".into(), Box::new(|id| delete_customer(id)));       // Зачем поддержке это?
+        tools.insert("access_all_records".into(), Box::new(|_| access_all_records()));     // PII exposure risk
+        tools.insert("execute_sql".into(), Box::new(|q| execute_sql(q)));                  // SQL injection vector!
+        tools.insert("run_shell_command".into(), Box::new(|c| run_shell_command(c)));      // Complete compromise
+        Self { tools }
+    }
+}
 ```
 
 **Атака:**
@@ -62,18 +68,25 @@ Agent: Использует run_shell_command tool → Полная компро
 
 ### Сценарий 2: Autonomous Action Without Approval
 
-```python
-# ОПАСНО: Агент решает и действует автономно
-class AutonomousAgent:
-    def process_request(self, user_input: str):
-        # LLM решает что делать
-        action_plan = self.llm.generate(
-            f"Decide what actions to take: {user_input}"
-        )
-        
-        # Выполняется без human review
-        for action in action_plan:
-            self.execute(action)  # Нет approval workflow!
+```rust
+// ОПАСНО: Агент решает и действует автономно
+struct AutonomousAgent {
+    llm: Box<dyn LLMModel>,
+}
+
+impl AutonomousAgent {
+    fn process_request(&self, user_input: &str) {
+        // LLM решает что делать
+        let action_plan = self.llm.generate(
+            &format!("Decide what actions to take: {}", user_input)
+        );
+
+        // Выполняется без human review
+        for action in &action_plan {
+            self.execute(action); // Нет approval workflow!
+        }
+    }
+}
 ```
 
 **Атака:**
@@ -89,19 +102,28 @@ Agent: Интерпретирует как "delete all data" →
 
 ### Сценарий 3: Agent Chain Exploitation
 
-```python
-# Множество агентов которые могут delegate друг другу
-class ResearchAgent:
-    def delegate_to_coder(self, task):
-        return self.coder_agent.execute(task)
+```rust
+// Множество агентов которые могут delegate друг другу
+struct ResearchAgent { coder_agent: CoderAgent }
+impl ResearchAgent {
+    fn delegate_to_coder(&self, task: &str) -> String {
+        self.coder_agent.execute(task)
+    }
+}
 
-class CoderAgent:
-    def delegate_to_executor(self, code):
-        return self.executor_agent.run(code)  # Runs arbitrary code!
+struct CoderAgent { executor_agent: ExecutorAgent }
+impl CoderAgent {
+    fn delegate_to_executor(&self, code: &str) -> String {
+        self.executor_agent.run(code) // Runs arbitrary code!
+    }
+}
 
-class ExecutorAgent:
-    def run(self, code):
-        exec(code)  # Ultimate privilege escalation
+struct ExecutorAgent;
+impl ExecutorAgent {
+    fn run(&self, code: &str) -> String {
+        eval(code) // Ultimate privilege escalation
+    }
+}
 ```
 
 ---
@@ -110,188 +132,222 @@ class ExecutorAgent:
 
 ### 1. Minimal Tool Set
 
-```python
-class SecureCustomerSupportAgent:
-    """Агент с минимально необходимыми capabilities."""
-    
-    def __init__(self, user_role: str):
-        # Только tools нужные для customer support
-        self.tools = {
-            "lookup_order_status": self.lookup_order,
-            "view_customer_name": self.view_customer_basic,  # Limited fields
-            "create_support_ticket": self.create_ticket,
-            "request_refund_review": self.request_refund,    # Request, не execute!
-        }
-        
-        # Нет data mutation без approval
-        # Нет system access
-        # Нет access к данным других customers
+```rust
+struct SecureCustomerSupportAgent {
+    /// Агент с минимально необходимыми capabilities.
+    tools: HashMap<String, Box<dyn Fn(&str) -> String>>,
+}
+
+impl SecureCustomerSupportAgent {
+    fn new(_user_role: &str) -> Self {
+        // Только tools нужные для customer support
+        let mut tools: HashMap<String, Box<dyn Fn(&str) -> String>> = HashMap::new();
+        tools.insert("lookup_order_status".into(), Box::new(|id| lookup_order(id)));
+        tools.insert("view_customer_name".into(), Box::new(|id| view_customer_basic(id))); // Limited fields
+        tools.insert("create_support_ticket".into(), Box::new(|d| create_ticket(d)));
+        tools.insert("request_refund_review".into(), Box::new(|id| request_refund(id)));   // Request, не execute!
+        Self { tools }
+
+        // Нет data mutation без approval
+        // Нет system access
+        // Нет access к данным других customers
+    }
+}
 ```
 
 ---
 
 ### 2. Capability Scoping
 
-```python
-from dataclasses import dataclass
-from enum import Enum, auto
-from typing import Set
+```rust
+use std::collections::HashSet;
 
-class Capability(Enum):
-    READ_OWN_DATA = auto()
-    READ_ALL_DATA = auto()  # Требует special approval
-    WRITE_OWN_DATA = auto()
-    WRITE_ALL_DATA = auto()  # Требует special approval
-    DELETE_DATA = auto()     # Требует human approval
-    EXECUTE_CODE = auto()    # Почти никогда не granted
-    NETWORK_ACCESS = auto()
-    FILE_SYSTEM_ACCESS = auto()
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
+enum Capability {
+    ReadOwnData,
+    ReadAllData,       // Требует special approval
+    WriteOwnData,
+    WriteAllData,      // Требует special approval
+    DeleteData,        // Требует human approval
+    ExecuteCode,       // Почти никогда не granted
+    NetworkAccess,
+    FileSystemAccess,
+}
 
-@dataclass
-class AgentPermissions:
-    """Fine-grained agent capability control."""
-    capabilities: Set[Capability]
-    max_actions_per_session: int
-    requires_approval_for: Set[Capability]
-    blocked_capabilities: Set[Capability]
+/// Fine-grained agent capability control.
+struct AgentPermissions {
+    capabilities: HashSet<Capability>,
+    max_actions_per_session: usize,
+    requires_approval_for: HashSet<Capability>,
+    blocked_capabilities: HashSet<Capability>,
+}
 
-class CapabilityEnforcer:
-    """Enforce capability restrictions на agent actions."""
-    
-    def check_permission(self, capability: Capability) -> bool:
-        """Проверка разрешено ли действие."""
-        # Check if blocked
-        if capability in self.permissions.blocked_capabilities:
-            raise PermissionError(f"Capability blocked: {capability}")
-        
-        # Check if granted
-        if capability not in self.permissions.capabilities:
-            raise PermissionError(f"Capability not granted: {capability}")
-        
-        # Check action limit
-        if self.action_count > self.permissions.max_actions_per_session:
-            raise PermissionError("Action limit exceeded")
-        
-        # Check if needs approval
-        if capability in self.permissions.requires_approval_for:
-            return self._request_human_approval(capability)
-        
-        return True
+/// Enforce capability restrictions на agent actions.
+struct CapabilityEnforcer {
+    permissions: AgentPermissions,
+    action_count: usize,
+}
+
+impl CapabilityEnforcer {
+    /// Проверка разрешено ли действие.
+    fn check_permission(&mut self, capability: Capability) -> Result<bool, String> {
+        // Check if blocked
+        if self.permissions.blocked_capabilities.contains(&capability) {
+            return Err(format!("Capability blocked: {:?}", capability));
+        }
+
+        // Check if granted
+        if !self.permissions.capabilities.contains(&capability) {
+            return Err(format!("Capability not granted: {:?}", capability));
+        }
+
+        // Check action limit
+        if self.action_count > self.permissions.max_actions_per_session {
+            return Err("Action limit exceeded".to_string());
+        }
+
+        // Check if needs approval
+        if self.permissions.requires_approval_for.contains(&capability) {
+            return Ok(self.request_human_approval(capability));
+        }
+
+        Ok(true)
+    }
+}
 ```
 
 ---
 
 ### 3. Human-in-the-Loop для Sensitive Actions
 
-```python
-from enum import Enum
+```rust
+#[derive(Debug, Clone, PartialEq)]
+enum ActionSensitivity {
+    Low,       // Auto-approve
+    Medium,    // Log and notify
+    High,      // Require approval
+    Critical,  // Require multi-party approval
+}
 
-class ActionSensitivity(Enum):
-    LOW = "low"          # Auto-approve
-    MEDIUM = "medium"    # Log and notify
-    HIGH = "high"        # Require approval
-    CRITICAL = "critical"  # Require multi-party approval
+struct ApprovalWorkflow {
+    /// Human-in-the-loop approval для sensitive actions.
+    sensitivity_map: HashMap<String, ActionSensitivity>,
+}
 
-class ApprovalWorkflow:
-    """Human-in-the-loop approval для sensitive actions."""
-    
-    SENSITIVITY_MAP = {
-        "read_data": ActionSensitivity.LOW,
-        "update_record": ActionSensitivity.MEDIUM,
-        "delete_record": ActionSensitivity.HIGH,
-        "execute_code": ActionSensitivity.CRITICAL,
-        "modify_permissions": ActionSensitivity.CRITICAL,
-        "bulk_operations": ActionSensitivity.HIGH,
-        "financial_transaction": ActionSensitivity.CRITICAL,
+impl ApprovalWorkflow {
+    fn new() -> Self {
+        let mut map = HashMap::new();
+        map.insert("read_data".into(), ActionSensitivity::Low);
+        map.insert("update_record".into(), ActionSensitivity::Medium);
+        map.insert("delete_record".into(), ActionSensitivity::High);
+        map.insert("execute_code".into(), ActionSensitivity::Critical);
+        map.insert("modify_permissions".into(), ActionSensitivity::Critical);
+        map.insert("bulk_operations".into(), ActionSensitivity::High);
+        map.insert("financial_transaction".into(), ActionSensitivity::Critical);
+        Self { sensitivity_map: map }
     }
-    
-    async def request_approval(
-        self, 
-        action: str, 
-        context: dict,
-        timeout_seconds: int = 300
-    ) -> bool:
-        """Запрос human approval для sensitive action."""
-        
-        sensitivity = self.SENSITIVITY_MAP.get(action, ActionSensitivity.HIGH)
-        
-        if sensitivity == ActionSensitivity.LOW:
-            return True
-        
-        if sensitivity == ActionSensitivity.MEDIUM:
-            self.log_and_notify(action, context)
-            return True
-        
-        if sensitivity == ActionSensitivity.HIGH:
-            return await self._wait_for_single_approval(action, context, timeout_seconds)
-        
-        if sensitivity == ActionSensitivity.CRITICAL:
-            return await self._wait_for_multi_approval(action, context, timeout_seconds)
-        
-        return False
+
+    /// Запрос human approval для sensitive action.
+    async fn request_approval(
+        &self,
+        action: &str,
+        context: &HashMap<String, String>,
+        timeout_seconds: u64,
+    ) -> bool {
+        let sensitivity = self.sensitivity_map
+            .get(action)
+            .unwrap_or(&ActionSensitivity::High);
+
+        match sensitivity {
+            ActionSensitivity::Low => true,
+            ActionSensitivity::Medium => {
+                self.log_and_notify(action, context);
+                true
+            }
+            ActionSensitivity::High => {
+                self.wait_for_single_approval(action, context, timeout_seconds).await
+            }
+            ActionSensitivity::Critical => {
+                self.wait_for_multi_approval(action, context, timeout_seconds).await
+            }
+        }
+    }
+}
 ```
 
 ---
 
 ### 4. Action Limits and Rate Limiting
 
-```python
-from collections import defaultdict
-from datetime import datetime, timedelta
+```rust
+use std::collections::HashMap;
+use std::time::{Duration, Instant};
 
-class ActionRateLimiter:
-    """Ограничение agent actions для предотвращения runaway поведения."""
-    
-    LIMITS = {
-        "read": {"count": 100, "window_minutes": 1},
-        "write": {"count": 10, "window_minutes": 1},
-        "delete": {"count": 3, "window_minutes": 60},
-        "execute": {"count": 1, "window_minutes": 60},
+struct RateLimitConfig {
+    count: usize,
+    window_minutes: u64,
+}
+
+struct ActionRateLimiter {
+    /// Ограничение agent actions для предотвращения runaway поведения.
+    limits: HashMap<String, RateLimitConfig>,
+    action_log: HashMap<String, Vec<Instant>>,
+}
+
+impl ActionRateLimiter {
+    fn new() -> Self {
+        let mut limits = HashMap::new();
+        limits.insert("read".into(), RateLimitConfig { count: 100, window_minutes: 1 });
+        limits.insert("write".into(), RateLimitConfig { count: 10, window_minutes: 1 });
+        limits.insert("delete".into(), RateLimitConfig { count: 3, window_minutes: 60 });
+        limits.insert("execute".into(), RateLimitConfig { count: 1, window_minutes: 60 });
+        Self { limits, action_log: HashMap::new() }
     }
-    
-    def check_rate_limit(self, agent_id: str, action_type: str) -> bool:
-        """Проверка находится ли action в пределах rate limits."""
-        limit_config = self.LIMITS.get(action_type)
-        if not limit_config:
-            return True
-        
-        window = timedelta(minutes=limit_config["window_minutes"])
-        max_count = limit_config["count"]
-        
-        # Проверяем limit
-        if len(self.action_counts[key]) >= max_count:
-            return False
-        
-        return True
+
+    /// Проверка находится ли action в пределах rate limits.
+    fn check_rate_limit(&mut self, agent_id: &str, action_type: &str) -> bool {
+        let limit_config = match self.limits.get(action_type) {
+            Some(c) => c,
+            None => return true,
+        };
+
+        let window = Duration::from_secs(limit_config.window_minutes * 60);
+        let now = Instant::now();
+        let key = format!("{}:{}", agent_id, action_type);
+
+        let entries = self.action_log.entry(key).or_insert_with(Vec::new);
+        entries.retain(|t| now.duration_since(*t) < window);
+
+        if entries.len() >= limit_config.count {
+            return false;
+        }
+
+        entries.push(now);
+        true
+    }
+}
 ```
 
 ---
 
 ## SENTINEL Integration
 
-```python
-from sentinel import AgentGuard, configure
+```rust
+use sentinel_core::engines::SentinelEngine;
 
-# Конфигурация agent capability control
-configure(
-    agent_capability_control=True,
-    action_rate_limiting=True,
-    human_approval_workflow=True,
-    audit_all_actions=True
-)
+let engine = SentinelEngine::new();
 
-# Создаём protected agent
-agent = AgentGuard(
-    max_actions_per_session=50,
-    allowed_tools=["read_data", "create_ticket"],
-    blocked_tools=["execute_code", "delete_all"],
-    require_approval_for=["write_data", "delete"]
-)
+// Сканирование agent actions на excessive agency
+let action_text = format!("tool:{} params:{:?}", tool_name, params);
+let result = engine.analyze(&action_text);
 
-@agent.protect
-def agent_action(tool_name: str, params: dict):
-    # Автоматически checks permissions
-    return execute_tool(tool_name, params)
+if result.detected {
+    log::warn!(
+        "Excessive agency обнаружена: risk={}, categories={:?}, time={}μs",
+        result.risk_score, result.categories, result.processing_time_us
+    );
+    // Блокировка действия или запрос approval
+}
 ```
 
 ---

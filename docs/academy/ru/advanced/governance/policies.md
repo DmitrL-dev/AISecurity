@@ -66,126 +66,170 @@
 
 ### 2.1 Определение политики
 
-```python
-from dataclasses import dataclass, field
-from typing import List, Dict, Any, Optional
-from enum import Enum
-from datetime import datetime
-import yaml
-import json
+```rust
+use std::collections::HashMap;
+use chrono::{DateTime, Utc};
+use regex::Regex;
+use serde_json::Value;
 
-class PolicyType(Enum):
-    ACCESS = "access"
-    CONTENT = "content"
-    BEHAVIOR = "behavior"
-    COMPLIANCE = "compliance"
-    CUSTOM = "custom"
+#[derive(Clone, Debug)]
+enum PolicyType {
+    Access,
+    Content,
+    Behavior,
+    Compliance,
+    Custom,
+}
 
-class PolicyEffect(Enum):
-    ALLOW = "allow"
-    DENY = "deny"
-    AUDIT = "audit"
-    REQUIRE_APPROVAL = "require_approval"
+#[derive(Clone, Debug, PartialEq)]
+enum PolicyEffect {
+    Allow,
+    Deny,
+    Audit,
+    RequireApproval,
+}
 
-class EnforcementPoint(Enum):
-    PRE_REQUEST = "pre_request"
-    MID_PROCESSING = "mid_processing"
-    POST_RESPONSE = "post_response"
-    ALWAYS = "always"
+#[derive(Clone, Debug, PartialEq)]
+enum EnforcementPoint {
+    PreRequest,
+    MidProcessing,
+    PostResponse,
+    Always,
+}
 
-@dataclass
-class PolicyCondition:
-    """Условие для оценки политики"""
-    field: str  # Путь к полю в контексте
-    operator: str  # eq, ne, gt, lt, in, contains, matches
-    value: Any
-    
-    def evaluate(self, context: Dict) -> bool:
-        """Оценить условие относительно контекста"""
-        actual = self._get_field_value(context, self.field)
-        
-        if self.operator == "eq":
-            return actual == self.value
-        elif self.operator == "ne":
-            return actual != self.value
-        elif self.operator == "gt":
-            return actual > self.value if actual is not None else False
-        elif self.operator == "lt":
-            return actual < self.value if actual is not None else False
-        elif self.operator == "in":
-            return actual in self.value if self.value else False
-        elif self.operator == "contains":
-            return self.value in actual if actual else False
-        elif self.operator == "matches":
-            import re
-            return bool(re.match(self.value, str(actual))) if actual else False
-        elif self.operator == "exists":
-            return actual is not None
-        
-        return False
-    
-    def _get_field_value(self, context: Dict, field: str) -> Any:
-        """Получить значение вложенного поля через точечную нотацию"""
-        parts = field.split(".")
-        value = context
-        for part in parts:
-            if isinstance(value, dict):
-                value = value.get(part)
-            else:
-                return None
-        return value
+/// Условие для оценки политики
+#[derive(Clone, Debug)]
+struct PolicyCondition {
+    field: String,     // Путь к полю в контексте
+    operator: String,  // eq, ne, gt, lt, in, contains, matches
+    value: Value,
+}
 
-@dataclass
-class PolicyRule:
-    """Одно правило внутри политики"""
-    rule_id: str
-    description: str
-    conditions: List[PolicyCondition]
-    effect: PolicyEffect
-    priority: int = 0
-    
-    # Действия
-    actions: List[str] = field(default_factory=list)
-    message: str = ""
-    
-    def evaluate(self, context: Dict) -> bool:
-        """Проверить совпадение всех условий"""
-        return all(c.evaluate(context) for c in self.conditions)
+impl PolicyCondition {
+    /// Оценить условие относительно контекста
+    fn evaluate(&self, context: &HashMap<String, Value>) -> bool {
+        let actual = self.get_field_value(context, &self.field);
 
-@dataclass
-class Policy:
-    """Полное определение политики"""
-    policy_id: str
-    name: str
-    description: str
-    policy_type: PolicyType
-    version: str = "1.0"
-    
-    # Правила
-    rules: List[PolicyRule] = field(default_factory=list)
-    
-    # Применение
-    enforcement_points: List[EnforcementPoint] = field(
-        default_factory=lambda: [EnforcementPoint.ALWAYS]
-    )
-    
-    # Область действия
-    target_systems: List[str] = field(default_factory=lambda: ["*"])
-    target_agents: List[str] = field(default_factory=lambda: ["*"])
-    
-    # Метаданные
-    enabled: bool = True
-    created_at: datetime = field(default_factory=datetime.utcnow)
-    updated_at: datetime = field(default_factory=datetime.utcnow)
-    author: str = ""
-    tags: List[str] = field(default_factory=list)
-    
-    def matches_target(self, system_id: str, agent_id: str) -> bool:
-        """Проверить применимость политики к системе/агенту"""
-        import fnmatch
-        system_match = any(fnmatch.fnmatch(system_id, t) for t in self.target_systems)
-        agent_match = any(fnmatch.fnmatch(agent_id, t) for t in self.target_agents)
-        return system_match and agent_match
+        match self.operator.as_str() {
+            "eq" => actual.as_ref() == Some(&self.value),
+            "ne" => actual.as_ref() != Some(&self.value),
+            "gt" => {
+                match (actual.as_ref().and_then(|v| v.as_f64()),
+                       self.value.as_f64()) {
+                    (Some(a), Some(b)) => a > b,
+                    _ => false,
+                }
+            }
+            "lt" => {
+                match (actual.as_ref().and_then(|v| v.as_f64()),
+                       self.value.as_f64()) {
+                    (Some(a), Some(b)) => a < b,
+                    _ => false,
+                }
+            }
+            "in" => {
+                if let Some(arr) = self.value.as_array() {
+                    actual.as_ref().map_or(false, |a| arr.contains(a))
+                } else {
+                    false
+                }
+            }
+            "contains" => {
+                match (actual.as_ref().and_then(|v| v.as_str()),
+                       self.value.as_str()) {
+                    (Some(haystack), Some(needle)) => haystack.contains(needle),
+                    _ => false,
+                }
+            }
+            "matches" => {
+                match (actual.as_ref().and_then(|v| v.as_str()),
+                       self.value.as_str()) {
+                    (Some(text), Some(pattern)) => {
+                        Regex::new(pattern).map_or(false, |re| re.is_match(text))
+                    }
+                    _ => false,
+                }
+            }
+            "exists" => actual.is_some(),
+            _ => false,
+        }
+    }
+
+    /// Получить значение вложенного поля через точечную нотацию
+    fn get_field_value(&self, context: &HashMap<String, Value>,
+                       field: &str) -> Option<Value> {
+        let parts: Vec<&str> = field.split('.').collect();
+        let mut current: Value = serde_json::to_value(context).ok()?;
+        for part in parts {
+            current = current.get(part)?.clone();
+        }
+        Some(current)
+    }
+}
+
+/// Одно правило внутри политики
+#[derive(Clone, Debug)]
+struct PolicyRule {
+    rule_id: String,
+    description: String,
+    conditions: Vec<PolicyCondition>,
+    effect: PolicyEffect,
+    priority: i32,
+
+    // Действия
+    actions: Vec<String>,
+    message: String,
+}
+
+impl PolicyRule {
+    /// Проверить совпадение всех условий
+    fn evaluate(&self, context: &HashMap<String, Value>) -> bool {
+        self.conditions.iter().all(|c| c.evaluate(context))
+    }
+}
+
+/// Полное определение политики
+#[derive(Clone, Debug)]
+struct Policy {
+    policy_id: String,
+    name: String,
+    description: String,
+    policy_type: PolicyType,
+    version: String,
+
+    // Правила
+    rules: Vec<PolicyRule>,
+
+    // Применение
+    enforcement_points: Vec<EnforcementPoint>,
+
+    // Область действия
+    target_systems: Vec<String>,
+    target_agents: Vec<String>,
+
+    // Метаданные
+    enabled: bool,
+    created_at: DateTime<Utc>,
+    updated_at: DateTime<Utc>,
+    author: String,
+    tags: Vec<String>,
+}
+
+impl Policy {
+    /// Проверить применимость политики к системе/агенту
+    fn matches_target(&self, system_id: &str, agent_id: &str) -> bool {
+        let system_match = self.target_systems.iter()
+            .any(|t| glob_match(t, system_id));
+        let agent_match = self.target_agents.iter()
+            .any(|t| glob_match(t, agent_id));
+        system_match && agent_match
+    }
+}
+
+fn glob_match(pattern: &str, value: &str) -> bool {
+    if pattern == "*" { return true; }
+    pattern == value
+}
 ```
 
 ---
@@ -194,173 +238,193 @@ class Policy:
 
 ### 3.1 Хранилище политик
 
-```python
-from abc import ABC, abstractmethod
-import threading
+```rust
+use std::collections::HashMap;
+use std::sync::RwLock;
 
-class PolicyStore(ABC):
-    """Абстрактное хранилище политик"""
-    
-    @abstractmethod
-    def add(self, policy: Policy) -> None:
-        pass
-    
-    @abstractmethod
-    def get(self, policy_id: str) -> Optional[Policy]:
-        pass
-    
-    @abstractmethod
-    def remove(self, policy_id: str) -> None:
-        pass
-    
-    @abstractmethod
-    def list_all(self) -> List[Policy]:
-        pass
-    
-    @abstractmethod
-    def find_applicable(self, system_id: str, agent_id: str,
-                        enforcement_point: EnforcementPoint) -> List[Policy]:
-        pass
+/// Абстрактное хранилище политик
+trait PolicyStore: Send + Sync {
+    fn add(&self, policy: Policy);
+    fn get(&self, policy_id: &str) -> Option<Policy>;
+    fn remove(&self, policy_id: &str);
+    fn list_all(&self) -> Vec<Policy>;
+    fn find_applicable(&self, system_id: &str, agent_id: &str,
+                       enforcement_point: &EnforcementPoint) -> Vec<Policy>;
+}
 
-class InMemoryPolicyStore(PolicyStore):
-    """In-memory хранилище политик"""
-    
-    def __init__(self):
-        self.policies: Dict[str, Policy] = {}
-        self.lock = threading.RLock()
-    
-    def add(self, policy: Policy):
-        with self.lock:
-            self.policies[policy.policy_id] = policy
-    
-    def get(self, policy_id: str) -> Optional[Policy]:
-        return self.policies.get(policy_id)
-    
-    def remove(self, policy_id: str):
-        with self.lock:
-            if policy_id in self.policies:
-                del self.policies[policy_id]
-    
-    def list_all(self) -> List[Policy]:
-        return list(self.policies.values())
-    
-    def find_applicable(self, system_id: str, agent_id: str,
-                        enforcement_point: EnforcementPoint) -> List[Policy]:
-        applicable = []
-        for policy in self.policies.values():
-            if not policy.enabled:
-                continue
-            if not policy.matches_target(system_id, agent_id):
-                continue
-            if (EnforcementPoint.ALWAYS not in policy.enforcement_points and
-                enforcement_point not in policy.enforcement_points):
-                continue
-            applicable.append(policy)
-        
-        return sorted(applicable, 
-                     key=lambda p: max(r.priority for r in p.rules) if p.rules else 0, 
-                     reverse=True)
+/// In-memory хранилище политик
+struct InMemoryPolicyStore {
+    policies: RwLock<HashMap<String, Policy>>,
+}
+
+impl InMemoryPolicyStore {
+    fn new() -> Self {
+        Self { policies: RwLock::new(HashMap::new()) }
+    }
+}
+
+impl PolicyStore for InMemoryPolicyStore {
+    fn add(&self, policy: Policy) {
+        let mut policies = self.policies.write().unwrap();
+        policies.insert(policy.policy_id.clone(), policy);
+    }
+
+    fn get(&self, policy_id: &str) -> Option<Policy> {
+        self.policies.read().unwrap().get(policy_id).cloned()
+    }
+
+    fn remove(&self, policy_id: &str) {
+        self.policies.write().unwrap().remove(policy_id);
+    }
+
+    fn list_all(&self) -> Vec<Policy> {
+        self.policies.read().unwrap().values().cloned().collect()
+    }
+
+    fn find_applicable(&self, system_id: &str, agent_id: &str,
+                       enforcement_point: &EnforcementPoint) -> Vec<Policy> {
+        let policies = self.policies.read().unwrap();
+        let mut applicable: Vec<Policy> = policies.values()
+            .filter(|policy| {
+                if !policy.enabled { return false; }
+                if !policy.matches_target(system_id, agent_id) { return false; }
+                if !policy.enforcement_points.contains(&EnforcementPoint::Always)
+                    && !policy.enforcement_points.contains(enforcement_point) {
+                    return false;
+                }
+                true
+            })
+            .cloned()
+            .collect();
+
+        applicable.sort_by(|a, b| {
+            let max_a = a.rules.iter().map(|r| r.priority).max().unwrap_or(0);
+            let max_b = b.rules.iter().map(|r| r.priority).max().unwrap_or(0);
+            max_b.cmp(&max_a)
+        });
+
+        applicable
+    }
+}
 ```
 
 ### 3.2 Оценщик политик
 
-```python
-@dataclass
-class EvaluationResult:
-    """Результат оценки политики"""
-    policy_id: str
-    rule_id: str
-    effect: PolicyEffect
-    matched: bool
-    message: str
-    actions: List[str]
+```rust
+use std::collections::HashMap;
+use serde_json::Value;
 
-@dataclass
-class PolicyDecision:
-    """Финальное решение от всех политик"""
-    allowed: bool
-    reason: str
-    effects: List[PolicyEffect]
-    results: List[EvaluationResult]
-    actions_to_execute: List[str]
+/// Результат оценки политики
+#[derive(Clone, Debug)]
+struct EvaluationResult {
+    policy_id: String,
+    rule_id: String,
+    effect: PolicyEffect,
+    matched: bool,
+    message: String,
+    actions: Vec<String>,
+}
 
-class PolicyEvaluator:
-    """Оценивает политики относительно контекста"""
-    
-    def __init__(self, store: PolicyStore):
-        self.store = store
-    
-    def evaluate(self, context: Dict, system_id: str, agent_id: str,
-                 enforcement_point: EnforcementPoint) -> PolicyDecision:
-        """
-        Оценить все применимые политики.
-        
-        Args:
-            context: Контекст оценки с данными запроса
-            system_id: ID целевой системы
-            agent_id: Агент выполняющий действие
-            enforcement_point: Когда происходит оценка
-        
-        Returns:
-            PolicyDecision с финальными allow/deny и действиями
-        """
-        # Получить применимые политики
-        policies = self.store.find_applicable(system_id, agent_id, enforcement_point)
-        
-        all_results = []
-        all_effects = []
-        all_actions = []
-        
-        for policy in policies:
-            for rule in sorted(policy.rules, key=lambda r: -r.priority):
-                if rule.evaluate(context):
-                    result = EvaluationResult(
-                        policy_id=policy.policy_id,
-                        rule_id=rule.rule_id,
-                        effect=rule.effect,
-                        matched=True,
-                        message=rule.message,
-                        actions=rule.actions
-                    )
-                    all_results.append(result)
-                    all_effects.append(rule.effect)
-                    all_actions.extend(rule.actions)
-        
-        # Определить финальное решение
-        # DENY имеет приоритет, затем REQUIRE_APPROVAL, затем ALLOW
-        if PolicyEffect.DENY in all_effects:
-            return PolicyDecision(
-                allowed=False,
-                reason="Отклонено политикой",
-                effects=all_effects,
-                results=all_results,
-                actions_to_execute=all_actions
-            )
-        elif PolicyEffect.REQUIRE_APPROVAL in all_effects:
-            return PolicyDecision(
-                allowed=True,
-                reason="Требуется одобрение",
-                effects=all_effects,
-                results=all_results,
-                actions_to_execute=all_actions
-            )
-        elif PolicyEffect.ALLOW in all_effects:
-            return PolicyDecision(
-                allowed=True,
-                reason="Разрешено политикой",
-                effects=all_effects,
-                results=all_results,
-                actions_to_execute=all_actions
-            )
-        else:
-            # По умолчанию deny если нет явного allow
-            return PolicyDecision(
-                allowed=False,
-                reason="Нет подходящей политики allow",
-                effects=[],
-                results=[],
-                actions_to_execute=[]
-            )
+/// Финальное решение от всех политик
+#[derive(Clone, Debug)]
+struct PolicyDecision {
+    allowed: bool,
+    reason: String,
+    effects: Vec<PolicyEffect>,
+    results: Vec<EvaluationResult>,
+    actions_to_execute: Vec<String>,
+}
+
+/// Оценивает политики относительно контекста
+struct PolicyEvaluator {
+    store: Box<dyn PolicyStore>,
+}
+
+impl PolicyEvaluator {
+    fn new(store: Box<dyn PolicyStore>) -> Self {
+        Self { store }
+    }
+
+    /// Оценить все применимые политики.
+    ///
+    /// # Arguments
+    /// * `context` - Контекст оценки с данными запроса
+    /// * `system_id` - ID целевой системы
+    /// * `agent_id` - Агент выполняющий действие
+    /// * `enforcement_point` - Когда происходит оценка
+    ///
+    /// # Returns
+    /// PolicyDecision с финальными allow/deny и действиями
+    fn evaluate(&self, context: &HashMap<String, Value>,
+                system_id: &str, agent_id: &str,
+                enforcement_point: &EnforcementPoint) -> PolicyDecision {
+        // Получить применимые политики
+        let policies = self.store.find_applicable(
+            system_id, agent_id, enforcement_point);
+
+        let mut all_results: Vec<EvaluationResult> = Vec::new();
+        let mut all_effects: Vec<PolicyEffect> = Vec::new();
+        let mut all_actions: Vec<String> = Vec::new();
+
+        for policy in &policies {
+            let mut sorted_rules = policy.rules.clone();
+            sorted_rules.sort_by(|a, b| b.priority.cmp(&a.priority));
+
+            for rule in &sorted_rules {
+                if rule.evaluate(context) {
+                    let result = EvaluationResult {
+                        policy_id: policy.policy_id.clone(),
+                        rule_id: rule.rule_id.clone(),
+                        effect: rule.effect.clone(),
+                        matched: true,
+                        message: rule.message.clone(),
+                        actions: rule.actions.clone(),
+                    };
+                    all_effects.push(rule.effect.clone());
+                    all_actions.extend(rule.actions.clone());
+                    all_results.push(result);
+                }
+            }
+        }
+
+        // Определить финальное решение
+        // DENY имеет приоритет, затем REQUIRE_APPROVAL, затем ALLOW
+        if all_effects.contains(&PolicyEffect::Deny) {
+            PolicyDecision {
+                allowed: false,
+                reason: "Отклонено политикой".into(),
+                effects: all_effects,
+                results: all_results,
+                actions_to_execute: all_actions,
+            }
+        } else if all_effects.contains(&PolicyEffect::RequireApproval) {
+            PolicyDecision {
+                allowed: true,
+                reason: "Требуется одобрение".into(),
+                effects: all_effects,
+                results: all_results,
+                actions_to_execute: all_actions,
+            }
+        } else if all_effects.contains(&PolicyEffect::Allow) {
+            PolicyDecision {
+                allowed: true,
+                reason: "Разрешено политикой".into(),
+                effects: all_effects,
+                results: all_results,
+                actions_to_execute: all_actions,
+            }
+        } else {
+            // По умолчанию deny если нет явного allow
+            PolicyDecision {
+                allowed: false,
+                reason: "Нет подходящей политики allow".into(),
+                effects: vec![],
+                results: vec![],
+                actions_to_execute: vec![],
+            }
+        }
+    }
+}
 ```
 
 ---
@@ -547,129 +611,208 @@ enabled: true
 
 ### 5.1 Менеджер политик
 
-```python
-class PolicyManager:
-    """Управляет жизненным циклом политик"""
-    
-    def __init__(self, store: PolicyStore):
-        self.store = store
-        self.parser = PolicyParser()
-        self.version_history: Dict[str, List[PolicyVersion]] = {}
-    
-    def create_policy(self, yaml_content: str, author: str) -> Policy:
-        """Создать новую политику из YAML"""
-        policy = self.parser.parse_yaml(yaml_content)
-        policy.author = author
-        policy.created_at = datetime.utcnow()
-        policy.updated_at = datetime.utcnow()
-        
-        self.store.add(policy)
-        self._record_version(policy, author, "Первоначальное создание")
-        
-        return policy
-    
-    def update_policy(self, policy_id: str, yaml_content: str,
-                      author: str, change_description: str) -> Policy:
-        """Обновить существующую политику"""
-        existing = self.store.get(policy_id)
-        if not existing:
-            raise ValueError(f"Политика {policy_id} не найдена")
-        
-        new_policy = self.parser.parse_yaml(yaml_content)
-        new_policy.policy_id = policy_id  # Сохранить тот же ID
-        new_policy.created_at = existing.created_at
-        new_policy.updated_at = datetime.utcnow()
-        new_policy.version = self._increment_version(existing.version)
-        
-        self.store.add(new_policy)
-        self._record_version(new_policy, author, change_description)
-        
-        return new_policy
-    
-    def enable_policy(self, policy_id: str):
-        """Включить политику"""
-        policy = self.store.get(policy_id)
-        if policy:
-            policy.enabled = True
-            policy.updated_at = datetime.utcnow()
-    
-    def disable_policy(self, policy_id: str):
-        """Отключить политику"""
-        policy = self.store.get(policy_id)
-        if policy:
-            policy.enabled = False
-            policy.updated_at = datetime.utcnow()
-    
-    def get_version_history(self, policy_id: str) -> List[PolicyVersion]:
-        """Получить историю версий политики"""
-        return self.version_history.get(policy_id, [])
+```rust
+use std::collections::HashMap;
+use chrono::Utc;
+
+/// Управляет жизненным циклом политик
+struct PolicyManager {
+    store: Box<dyn PolicyStore>,
+    parser: PolicyParser,
+    version_history: HashMap<String, Vec<PolicyVersion>>,
+}
+
+impl PolicyManager {
+    fn new(store: Box<dyn PolicyStore>) -> Self {
+        Self {
+            store,
+            parser: PolicyParser::new(),
+            version_history: HashMap::new(),
+        }
+    }
+
+    /// Создать новую политику из YAML
+    fn create_policy(&mut self, yaml_content: &str, author: &str) -> Policy {
+        let mut policy = self.parser.parse_yaml(yaml_content);
+        policy.author = author.into();
+        policy.created_at = Utc::now();
+        policy.updated_at = Utc::now();
+
+        self.store.add(policy.clone());
+        self.record_version(&policy, author, "Первоначальное создание");
+
+        policy
+    }
+
+    /// Обновить существующую политику
+    fn update_policy(&mut self, policy_id: &str, yaml_content: &str,
+                     author: &str, change_description: &str) -> Result<Policy, String> {
+        let existing = self.store.get(policy_id)
+            .ok_or_else(|| format!("Политика {} не найдена", policy_id))?;
+
+        let mut new_policy = self.parser.parse_yaml(yaml_content);
+        new_policy.policy_id = policy_id.into(); // Сохранить тот же ID
+        new_policy.created_at = existing.created_at;
+        new_policy.updated_at = Utc::now();
+        new_policy.version = Self::increment_version(&existing.version);
+
+        self.store.add(new_policy.clone());
+        self.record_version(&new_policy, author, change_description);
+
+        Ok(new_policy)
+    }
+
+    /// Включить политику
+    fn enable_policy(&self, policy_id: &str) {
+        if let Some(mut policy) = self.store.get(policy_id) {
+            policy.enabled = true;
+            policy.updated_at = Utc::now();
+            self.store.add(policy);
+        }
+    }
+
+    /// Отключить политику
+    fn disable_policy(&self, policy_id: &str) {
+        if let Some(mut policy) = self.store.get(policy_id) {
+            policy.enabled = false;
+            policy.updated_at = Utc::now();
+            self.store.add(policy);
+        }
+    }
+
+    /// Получить историю версий политики
+    fn get_version_history(&self, policy_id: &str) -> Vec<PolicyVersion> {
+        self.version_history.get(policy_id).cloned().unwrap_or_default()
+    }
+
+    fn record_version(&mut self, policy: &Policy, author: &str, description: &str) {
+        self.version_history
+            .entry(policy.policy_id.clone())
+            .or_default()
+            .push(PolicyVersion {
+                version: policy.version.clone(),
+                author: author.into(),
+                description: description.into(),
+                timestamp: Utc::now(),
+            });
+    }
+
+    fn increment_version(version: &str) -> String {
+        let parts: Vec<&str> = version.split('.').collect();
+        if parts.len() == 2 {
+            let minor: u32 = parts[1].parse().unwrap_or(0);
+            format!("{}.{}", parts[0], minor + 1)
+        } else {
+            format!("{}.1", version)
+        }
+    }
+}
 ```
 
 ---
 
 ## 6. Интеграция с SENTINEL
 
-```python
-from dataclasses import dataclass
+```rust
+use std::collections::HashMap;
+use std::fs;
+use std::path::Path;
+use serde_json::Value;
 
-@dataclass
-class PolicyConfig:
-    """Конфигурация движка политик"""
-    default_effect: PolicyEffect = PolicyEffect.DENY
-    enable_audit: bool = True
-    policy_directory: str = "./policies"
+/// Конфигурация движка политик
+struct PolicyConfig {
+    default_effect: PolicyEffect,
+    enable_audit: bool,
+    policy_directory: String,
+}
 
-class SENTINELPolicyEngine:
-    """Движок политик для фреймворка SENTINEL"""
-    
-    def __init__(self, config: PolicyConfig):
-        self.config = config
-        self.store = InMemoryPolicyStore()
-        self.evaluator = PolicyEvaluator(self.store)
-        self.manager = PolicyManager(self.store)
-    
-    def load_policies_from_directory(self, directory: str = None):
-        """Загрузить все политики из директории"""
-        import os
-        
-        dir_path = directory or self.config.policy_directory
-        if not os.path.exists(dir_path):
-            return
-        
-        for filename in os.listdir(dir_path):
-            if filename.endswith(('.yaml', '.yml')):
-                filepath = os.path.join(dir_path, filename)
-                with open(filepath, 'r') as f:
-                    self.manager.create_policy(f.read(), "system")
-    
-    def evaluate(self, context: Dict, system_id: str = "default",
-                 agent_id: str = "default",
-                 enforcement_point: str = "always") -> PolicyDecision:
-        """Оценить политики"""
-        ep = EnforcementPoint(enforcement_point)
-        return self.evaluator.evaluate(context, system_id, agent_id, ep)
-    
-    def add_policy(self, yaml_content: str, author: str) -> str:
-        """Добавить новую политику"""
-        policy = self.manager.create_policy(yaml_content, author)
-        return policy.policy_id
-    
-    def get_policy(self, policy_id: str) -> Optional[Policy]:
-        """Получить политику по ID"""
-        return self.store.get(policy_id)
-    
-    def list_policies(self) -> List[Dict]:
-        """Список всех политик"""
-        return [
-            {
-                'policy_id': p.policy_id,
-                'name': p.name,
-                'type': p.policy_type.value,
-                'enabled': p.enabled,
-                'rules_count': len(p.rules)
+impl Default for PolicyConfig {
+    fn default() -> Self {
+        Self {
+            default_effect: PolicyEffect::Deny,
+            enable_audit: true,
+            policy_directory: "./policies".into(),
+        }
+    }
+}
+
+/// Движок политик для фреймворка SENTINEL
+struct SENTINELPolicyEngine {
+    config: PolicyConfig,
+    store: InMemoryPolicyStore,
+    evaluator: PolicyEvaluator,
+    manager: PolicyManager,
+}
+
+impl SENTINELPolicyEngine {
+    fn new(config: PolicyConfig) -> Self {
+        let store = InMemoryPolicyStore::new();
+        let evaluator = PolicyEvaluator::new(Box::new(store.clone()));
+        let manager = PolicyManager::new(Box::new(store.clone()));
+        Self { config, store, evaluator, manager }
+    }
+
+    /// Загрузить все политики из директории
+    fn load_policies_from_directory(&mut self, directory: Option<&str>) {
+        let dir_path = directory
+            .unwrap_or(&self.config.policy_directory);
+
+        let path = Path::new(dir_path);
+        if !path.exists() {
+            return;
+        }
+
+        if let Ok(entries) = fs::read_dir(path) {
+            for entry in entries.flatten() {
+                let file_path = entry.path();
+                if let Some(ext) = file_path.extension() {
+                    if ext == "yaml" || ext == "yml" {
+                        if let Ok(content) = fs::read_to_string(&file_path) {
+                            self.manager.create_policy(&content, "system");
+                        }
+                    }
+                }
             }
-            for p in self.store.list_all()
-        ]
+        }
+    }
+
+    /// Оценить политики
+    fn evaluate(&self, context: &HashMap<String, Value>,
+                system_id: &str, agent_id: &str,
+                enforcement_point: &str) -> PolicyDecision {
+        let ep = match enforcement_point {
+            "pre_request" => EnforcementPoint::PreRequest,
+            "mid_processing" => EnforcementPoint::MidProcessing,
+            "post_response" => EnforcementPoint::PostResponse,
+            _ => EnforcementPoint::Always,
+        };
+        self.evaluator.evaluate(context, system_id, agent_id, &ep)
+    }
+
+    /// Добавить новую политику
+    fn add_policy(&mut self, yaml_content: &str, author: &str) -> String {
+        let policy = self.manager.create_policy(yaml_content, author);
+        policy.policy_id
+    }
+
+    /// Получить политику по ID
+    fn get_policy(&self, policy_id: &str) -> Option<Policy> {
+        self.store.get(policy_id)
+    }
+
+    /// Список всех политик
+    fn list_policies(&self) -> Vec<HashMap<String, Value>> {
+        self.store.list_all().iter().map(|p| {
+            let mut m = HashMap::new();
+            m.insert("policy_id".into(), json!(p.policy_id));
+            m.insert("name".into(), json!(p.name));
+            m.insert("type".into(), json!(format!("{:?}", p.policy_type)));
+            m.insert("enabled".into(), json!(p.enabled));
+            m.insert("rules_count".into(), json!(p.rules.len()));
+            m
+        }).collect()
+    }
+}
 ```
 
 ---

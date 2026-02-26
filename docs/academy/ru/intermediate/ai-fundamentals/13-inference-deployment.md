@@ -37,32 +37,41 @@
 
 ### 1.2 Авторегрессивная генерация
 
-```python
-def generate(model, prompt_ids, max_tokens=100):
-    """
-    Авторегрессивная генерация: по одному токену за раз
-    """
-    generated = prompt_ids.clone()
-    
-    for _ in range(max_tokens):
-        # Forward pass
-        with torch.no_grad():
-            logits = model(generated).logits
-        
-        # Получаем logits последнего токена
-        next_logits = logits[:, -1, :]
-        
-        # Sampling
-        probs = F.softmax(next_logits, dim=-1)
-        next_token = torch.multinomial(probs, num_samples=1)
-        
-        # Добавляем в контекст
-        generated = torch.cat([generated, next_token], dim=-1)
-        
-        if next_token == eos_token_id:
-            break
-    
-    return generated
+```rust
+use candle_core::{Tensor, D};
+use candle_nn::ops::softmax;
+
+/// Авторегрессивная генерация: по одному токену за раз
+fn generate(
+    model: &dyn CausalLM,
+    prompt_ids: &Tensor,
+    max_tokens: usize,
+    eos_token_id: u32,
+) -> candle_core::Result<Tensor> {
+    let mut generated = prompt_ids.clone();
+
+    for _ in 0..max_tokens {
+        // Forward pass
+        let logits = model.forward(&generated)?;
+
+        // Получаем logits последнего токена
+        let seq_len = logits.dim(1)?;
+        let next_logits = logits.narrow(1, seq_len - 1, 1)?.squeeze(1)?;
+
+        // Sampling
+        let probs = softmax(&next_logits, D::Minus1)?;
+        let next_token = probs.multinomial(1)?;
+
+        // Добавляем в контекст
+        generated = Tensor::cat(&[&generated, &next_token], D::Minus1)?;
+
+        if next_token.to_scalar::<u32>()? == eos_token_id {
+            break;
+        }
+    }
+
+    Ok(generated)
+}
 ```
 
 ### 1.3 Проблема: Квадратичная сложность
@@ -87,24 +96,43 @@ Token 1000: O(1000) операций
 
 **Идея:** Сохраняем Key и Value от предыдущих токенов чтобы избежать пересчёта.
 
-```python
-class KVCacheAttention:
-    def __init__(self):
-        self.k_cache = None
-        self.v_cache = None
-    
-    def forward(self, q, k, v, use_cache=True):
-        if use_cache and self.k_cache is not None:
-            # Добавляем новые K, V в cache
-            k = torch.cat([self.k_cache, k], dim=1)
-            v = torch.cat([self.v_cache, v], dim=1)
-        
-        # Сохраняем для следующего шага
-        self.k_cache = k
-        self.v_cache = v
-        
-        # Attention
-        return attention(q, k, v)
+```rust
+use candle_core::{Tensor, D};
+
+struct KVCacheAttention {
+    k_cache: Option<Tensor>,
+    v_cache: Option<Tensor>,
+}
+
+impl KVCacheAttention {
+    fn new() -> Self {
+        Self { k_cache: None, v_cache: None }
+    }
+
+    fn forward(
+        &mut self,
+        q: &Tensor,
+        k: &Tensor,
+        v: &Tensor,
+        use_cache: bool,
+    ) -> candle_core::Result<Tensor> {
+        let (k, v) = if use_cache && self.k_cache.is_some() {
+            // Добавляем новые K, V в cache
+            let k = Tensor::cat(&[self.k_cache.as_ref().unwrap(), k], 1)?;
+            let v = Tensor::cat(&[self.v_cache.as_ref().unwrap(), v], 1)?;
+            (k, v)
+        } else {
+            (k.clone(), v.clone())
+        };
+
+        // Сохраняем для следующего шага
+        self.k_cache = Some(k.clone());
+        self.v_cache = Some(v.clone());
+
+        // Attention
+        attention(q, &k, &v)
+    }
+}
 ```
 
 ```
@@ -130,80 +158,102 @@ INT8:  8 бит на вес   →  70B модель = 70 GB
 INT4:  4 бита на вес  →  70B модель = 35 GB
 ```
 
-```python
-# Пример с bitsandbytes
-from transformers import AutoModelForCausalLM, BitsAndBytesConfig
+```rust
+use candle_core::Device;
 
-# 4-bit quantization
-quantization_config = BitsAndBytesConfig(
-    load_in_4bit=True,
-    bnb_4bit_compute_dtype=torch.float16,
-    bnb_4bit_quant_type="nf4",  # Normalized Float 4
-)
+fn main() -> candle_core::Result<()> {
+    let device = Device::Cpu;
 
-model = AutoModelForCausalLM.from_pretrained(
-    "meta-llama/Llama-2-70b-hf",
-    quantization_config=quantization_config,
-    device_map="auto"
-)
+    // 4-bit quantization with candle
+    // candle поддерживает GGUF quantized models напрямую
+    // let model = candle_transformers::quantized::gguf::load(
+    //     "meta-llama/Llama-2-70b-hf.Q4_K_M.gguf",
+    //     &device,
+    // )?;
+
+    // Quantization types: Q4_0, Q4_K_M, Q5_K_M, Q8_0
+    // NF4 (Normalized Float 4) также поддерживается
+
+    Ok(())
+}
 ```
 
 ### 2.3 Batching и Continuous Batching
 
-```python
-# Static Batching: все запросы ждут самого длинного
-batch = [
-    "Hello",           # 1 токен ответа
-    "Write an essay"   # 500 токенов ответа
-]
-# "Hello" ждёт 500 шагов!
+```rust
+// Static Batching: все запросы ждут самого длинного
+let batch = vec![
+    "Hello",           // 1 токен ответа
+    "Write an essay",  // 500 токенов ответа
+];
+// "Hello" ждёт 500 шагов!
 
-# Continuous Batching: динамическое управление
-class ContinuousBatcher:
-    def __init__(self):
-        self.active_requests = []
-    
-    def step(self):
-        # Генерируем токен для всех активных запросов
-        for req in self.active_requests:
-            next_token = generate_one_token(req)
-            req.add_token(next_token)
-            
-            if next_token == EOS:
-                self.complete_request(req)
-                # Сразу добавляем новый запрос из очереди!
-                self.add_from_queue()
+// Continuous Batching: динамическое управление
+struct ContinuousBatcher {
+    active_requests: Vec<Request>,
+}
+
+impl ContinuousBatcher {
+    fn step(&mut self) {
+        // Генерируем токен для всех активных запросов
+        let mut completed = Vec::new();
+        for (i, req) in self.active_requests.iter_mut().enumerate() {
+            let next_token = generate_one_token(req);
+            req.add_token(next_token);
+
+            if next_token == EOS {
+                completed.push(i);
+            }
+        }
+        // Удаляем завершённые и сразу добавляем новые из очереди
+        for i in completed.into_iter().rev() {
+            self.complete_request(i);
+            self.add_from_queue();
+        }
+    }
+}
 ```
 
 ### 2.4 Speculative Decoding
 
 **Идея:** Используем маленькую draft модель для предсказания, большую для верификации.
 
-```python
-def speculative_decoding(large_model, small_model, prompt, k=4):
-    """
-    k draft токенов → верифицируем все за раз
-    """
-    # 1. Draft модель генерирует k токенов
-    draft_tokens = []
-    for _ in range(k):
-        token = small_model.generate_one(prompt + draft_tokens)
-        draft_tokens.append(token)
-    
-    # 2. Большая модель верифицирует все k токенов одним forward pass
-    # (вместо k отдельных passes!)
-    verified = large_model.verify(prompt + draft_tokens)
-    
-    # 3. Принимаем matching токены
-    accepted = []
-    for draft, verify in zip(draft_tokens, verified):
-        if draft == verify:
-            accepted.append(draft)
-        else:
-            accepted.append(verify)
-            break  # Останавливаемся на первом mismatch
-    
-    return accepted
+```rust
+/// k draft токенов → верифицируем все за раз
+fn speculative_decoding(
+    large_model: &dyn CausalLM,
+    small_model: &dyn CausalLM,
+    prompt: &[u32],
+    k: usize,
+) -> Vec<u32> {
+    // 1. Draft модель генерирует k токенов
+    let mut draft_tokens = Vec::new();
+    for _ in 0..k {
+        let mut context: Vec<u32> = prompt.to_vec();
+        context.extend(&draft_tokens);
+        let token = small_model.generate_one(&context);
+        draft_tokens.push(token);
+    }
+
+    // 2. Большая модель верифицирует все k токенов одним forward pass
+    // (вместо k отдельных passes!)
+    let mut context: Vec<u32> = prompt.to_vec();
+    context.extend(&draft_tokens);
+    let verified = large_model.verify(&context);
+
+    // 3. Принимаем matching токены
+    let mut accepted = Vec::new();
+    for (draft, verify) in draft_tokens.iter().zip(verified.iter()) {
+        if draft == verify {
+            accepted.push(*draft);
+        } else {
+            accepted.push(*verify);
+            break; // Останавливаемся на первом mismatch
+        }
+    }
+
+    accepted
+}
 ```
 
 ---
@@ -221,41 +271,52 @@ def speculative_decoding(large_model, small_model, prompt, k=4):
 
 ### 3.2 API Deployment
 
-```python
-# OpenAI API
-from openai import OpenAI
-client = OpenAI()
+```rust
+// OpenAI API (via reqwest)
+// use reqwest;
+// let client = reqwest::Client::new();
+// let response = client.post("https://api.openai.com/v1/chat/completions")
+//     .json(&json!({"model": "gpt-4", "messages": [{"role": "user", "content": "Hello"}]}))
+//     .send().await?;
 
-response = client.chat.completions.create(
-    model="gpt-4",
-    messages=[{"role": "user", "content": "Hello"}]
-)
-
-# Anthropic API
-from anthropic import Anthropic
-client = Anthropic()
-
-response = client.messages.create(
-    model="claude-3-opus-20240229",
-    messages=[{"role": "user", "content": "Hello"}]
-)
+// Anthropic API (via reqwest)
+// let response = client.post("https://api.anthropic.com/v1/messages")
+//     .json(&json!({"model": "claude-3-opus-20240229", "messages": [{"role": "user", "content": "Hello"}]}))
+//     .send().await?;
 ```
 
 ### 3.3 Self-Hosted с vLLM
 
-```python
-# vLLM: high-performance inference server
-from vllm import LLM, SamplingParams
+```rust
+// vLLM: high-performance inference server (Rust equivalent)
+// Using candle for self-hosted inference
 
-llm = LLM(model="meta-llama/Llama-2-7b-chat-hf")
+use candle_core::Device;
 
-sampling_params = SamplingParams(
-    temperature=0.8,
-    top_p=0.95,
-    max_tokens=512
-)
+fn main() -> candle_core::Result<()> {
+    let device = Device::Cpu;
 
-outputs = llm.generate(["Hello, how are you?"], sampling_params)
+    // Load model via candle
+    // let model = candle_transformers::models::llama::Llama::load(
+    //     "meta-llama/Llama-2-7b-chat-hf", &device,
+    // )?;
+
+    struct SamplingParams {
+        temperature: f64,
+        top_p: f64,
+        max_tokens: usize,
+    }
+
+    let sampling_params = SamplingParams {
+        temperature: 0.8,
+        top_p: 0.95,
+        max_tokens: 512,
+    };
+
+    // let outputs = model.generate("Hello, how are you?", &sampling_params)?;
+
+    Ok(())
+}
 ```
 
 ```bash
@@ -267,23 +328,18 @@ python -m vllm.entrypoints.openai.api_server \
 
 ### 3.4 Edge Deployment
 
-```python
-# Ollama для локального выполнения
-import ollama
+```rust
+// Ollama для локального выполнения (через HTTP API)
+// let response = reqwest::Client::new()
+//     .post("http://localhost:11434/api/chat")
+//     .json(&json!({"model": "llama3", "messages": [{"role": "user", "content": "Hello"}]}))
+//     .send().await?;
 
-response = ollama.chat(
-    model='llama3',
-    messages=[{'role': 'user', 'content': 'Hello'}]
-)
-
-# llama.cpp через ctransformers
-from ctransformers import AutoModelForCausalLM
-
-model = AutoModelForCausalLM.from_pretrained(
-    "TheBloke/Llama-2-7B-Chat-GGML",
-    model_file="llama-2-7b-chat.q4_K_M.gguf",
-    model_type="llama"
-)
+// llama.cpp через candle GGUF loader
+// let model = candle_transformers::quantized::gguf::load(
+//     "TheBloke/Llama-2-7B-Chat-GGML/llama-2-7b-chat.q4_K_M.gguf",
+//     &Device::Cpu,
+// )?;
 ```
 
 ---
@@ -303,69 +359,90 @@ model = AutoModelForCausalLM.from_pretrained(
 
 ### 4.2 Rate Limiting и Input Validation
 
-```python
-from sentinel import scan  # Public API
-    InputValidator,
-    RateLimiter,
-    OutputFilter
-)
+```rust
+use sentinel_core::engines::{InputValidator, RateLimiter, OutputFilter};
+use actix_web::{web, HttpResponse, post};
 
-# Rate limiting
-rate_limiter = RateLimiter(
-    requests_per_minute=60,
-    tokens_per_minute=100000
-)
+// Rate limiting
+let rate_limiter = RateLimiter::new(
+    60,      // requests_per_minute
+    100000,  // tokens_per_minute
+);
 
-# Input validation
-validator = InputValidator()
+// Input validation
+let validator = InputValidator::new();
 
-@app.post("/generate")
-async def generate(request: GenerateRequest):
-    # 1. Rate limit
-    if not rate_limiter.check(request.user_id):
-        raise HTTPException(429, "Rate limit exceeded")
-    
-    # 2. Input validation
-    validation = validator.analyze(request.prompt)
-    if validation.is_malicious:
-        raise HTTPException(400, f"Invalid input: {validation.reason}")
-    
-    # 3. Generate
-    response = model.generate(request.prompt)
-    
-    # 4. Output filtering
-    filtered = output_filter.filter(response)
-    
-    return filtered
+#[post("/generate")]
+async fn generate(request: web::Json<GenerateRequest>) -> HttpResponse {
+    // 1. Rate limit
+    if !rate_limiter.check(&request.user_id) {
+        return HttpResponse::TooManyRequests().body("Rate limit exceeded");
+    }
+
+    // 2. Input validation
+    let validation = validator.analyze(&request.prompt);
+    if validation.is_malicious {
+        return HttpResponse::BadRequest().body(format!("Invalid input: {}", validation.reason));
+    }
+
+    // 3. Generate
+    let response = model.generate(&request.prompt).unwrap();
+
+    // 4. Output filtering
+    let filtered = output_filter.filter(&response);
+
+    HttpResponse::Ok().json(filtered)
+}
 ```
 
 ### 4.3 Предотвращение Model Extraction
 
-```python
-# Обнаружение попыток extraction
-class ExtractionDetector:
-    def __init__(self):
-        self.user_patterns = {}
-    
-    def check(self, user_id, prompt, response):
-        # Extraction паттерны:
-        # - Много простых запросов
-        # - Запросы на logits/embeddings
-        # - Систематические probing паттерны
-        
-        if user_id not in self.user_patterns:
-            self.user_patterns[user_id] = []
-        
-        self.user_patterns[user_id].append({
-            "prompt": prompt,
-            "timestamp": time.time()
-        })
-        
-        # Анализируем паттерны
-        if self.is_extraction_pattern(user_id):
-            return {"suspicious": True, "reason": "Potential extraction attempt"}
-        
-        return {"suspicious": False}
+```rust
+use std::collections::HashMap;
+use std::time::Instant;
+
+/// Обнаружение попыток extraction
+struct ExtractionDetector {
+    user_patterns: HashMap<String, Vec<PatternEntry>>,
+}
+
+struct PatternEntry {
+    prompt: String,
+    timestamp: Instant,
+}
+
+impl ExtractionDetector {
+    fn new() -> Self {
+        Self { user_patterns: HashMap::new() }
+    }
+
+    fn check(&mut self, user_id: &str, prompt: &str, _response: &str) -> HashMap<String, serde_json::Value> {
+        // Extraction паттерны:
+        // - Много простых запросов
+        // - Запросы на logits/embeddings
+        // - Систематические probing паттерны
+
+        self.user_patterns
+            .entry(user_id.to_string())
+            .or_default()
+            .push(PatternEntry {
+                prompt: prompt.to_string(),
+                timestamp: Instant::now(),
+            });
+
+        // Анализируем паттерны
+        if self.is_extraction_pattern(user_id) {
+            let mut result = HashMap::new();
+            result.insert("suspicious".into(), serde_json::json!(true));
+            result.insert("reason".into(), serde_json::json!("Potential extraction attempt"));
+            return result;
+        }
+
+        let mut result = HashMap::new();
+        result.insert("suspicious".into(), serde_json::json!(false));
+        result
+    }
+}
 ```
 
 ---
@@ -374,16 +451,16 @@ class ExtractionDetector:
 
 ### Упражнение 1: Сравнение Quantization
 
-```python
-# Загрузите модель в разных precision и сравните:
-# - FP16
-# - INT8
-# - INT4
+```rust
+// Загрузите модель в разных precision и сравните:
+// - FP16
+// - INT8
+// - INT4
 
-# Метрики:
-# - Использование памяти
-# - Скорость inference
-# - Качество (perplexity)
+// Метрики:
+// - Использование памяти
+// - Скорость inference
+// - Качество (perplexity)
 ```
 
 ### Упражнение 2: vLLM Server
