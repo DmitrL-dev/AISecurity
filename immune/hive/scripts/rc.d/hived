@@ -1,0 +1,70 @@
+#!/bin/sh
+#
+# SENTINEL IMMUNE — Hive RC Script
+#
+# DragonFlyBSD service control script.
+#
+# PROVIDE: hived
+# REQUIRE: NETWORKING
+# KEYWORD: shutdown
+#
+
+. /etc/rc.subr
+
+name="hived"
+rcvar="hived_enable"
+desc="SENTINEL IMMUNE Hive"
+
+command="/usr/local/sbin/hived"
+pidfile="/var/run/hived.pid"
+
+start_precmd="hived_prestart"
+stop_postcmd="hived_poststop"
+
+hived_prestart()
+{
+    mkdir -p /var/immune/hive
+    mkdir -p /var/log/immune
+    
+    if [ ! -f /etc/immune/hive.conf ]; then
+        echo "Warning: No config file"
+    fi
+    
+    return 0
+}
+
+hived_poststop()
+{
+    rm -f ${pidfile}
+    return 0
+}
+
+extra_commands="status reload"
+
+hived_status_cmd()
+{
+    if [ -f ${pidfile} ]; then
+        pid=$(cat ${pidfile})
+        if kill -0 ${pid} 2>/dev/null; then
+            echo "${name} is running as pid ${pid}"
+            return 0
+        fi
+    fi
+    echo "${name} is not running"
+    return 1
+}
+
+hived_reload_cmd()
+{
+    if [ -f ${pidfile} ]; then
+        pid=$(cat ${pidfile})
+        kill -HUP ${pid}
+        echo "Reloading ${name}"
+        return 0
+    fi
+    echo "${name} is not running"
+    return 1
+}
+
+load_rc_config ${name}
+run_rc_command "$1"

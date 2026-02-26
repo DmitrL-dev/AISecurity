@@ -1,0 +1,195 @@
+# Добро пожаловать в AI Security Academy
+
+> **Ваше путешествие в мир AI security начинается здесь**
+
+---
+
+## Что такое AI Security Academy?
+
+AI Security Academy — это комплексная образовательная платформа, предназначенная для обучения специалистов по безопасности, разработчиков и исследователей защите AI-систем от современных угроз. Независимо от того, защищаетесь ли вы от prompt injection атак, обеспечиваете безопасность agentic AI workflows или внедряете системы обнаружения — эта академия предоставит вам необходимые знания и практические навыки.
+
+---
+
+## Для кого это?
+
+| Аудитория | Что вы изучите |
+|-----------|----------------|
+| **Security Engineers** | AI-специфичные векторы атак, техники обнаружения, incident response |
+| **Developers** | Практики безопасной разработки для LLM приложений, defensive patterns |
+| **Researchers** | Продвинутые техники, математические основы, обнаружение novel атак |
+| **Red Teamers** | Методологии атак, техники эксплуатации, стратегии обхода |
+| **Blue Teamers** | Детекция, мониторинг, процедуры реагирования |
+
+---
+
+## Структура Academy
+
+Учебная программа организована в прогрессивные модули:
+
+### 🎯 Модуль 01: Основы
+Постройте понимание основ AI/ML security:
+- Архитектура нейронных сетей и уязвимости
+- Модель безопасности Transformer
+- Tokenization и embedding spaces
+- Attack surface training pipeline
+
+### 🔴 Модуль 02: Ландшафт угроз
+Освойте таксономию атак:
+- OWASP LLM Top 10 (2025)
+- OWASP ASI Top 10 (Agentic Systems)
+- Model-level атаки (inference, adversarial, extraction)
+- Prompt-level атаки (injection, jailbreaking)
+
+### ⚔️ Модуль 03: Векторы атак
+Глубокое погружение в конкретные техники атак:
+- Direct и indirect prompt injection
+- Методологии jailbreak (DAN, Crescendo, Many-shot)
+- Tool manipulation и privilege escalation
+- Multi-turn attack patterns
+
+### 🤖 Модуль 04: Agentic Security
+Безопасность AI агентов и автономных систем:
+- Trust boundaries и изоляция
+- Agent loop security
+- Tool authorization patterns
+- Protocol security (MCP, A2A, Function Calling)
+
+### 🛡️ Модуль 05: Стратегии защиты
+Постройте комплексную защиту:
+- System prompt engineering
+- Input/output filtering
+- Detection patterns (regex, semantic, topological)
+- Мониторинг и incident response
+
+### 🔬 Модуль 06: Продвинутые темы
+Передовые техники:
+- Topological Data Analysis (TDA) для детекции
+- Автоматизация red team
+- Математические основы
+- Research frontiers
+
+### 📋 Модуль 07: Governance
+Enterprise security management:
+- AI security policies
+- Audit frameworks
+- Compliance requirements
+- Risk assessment
+
+### 🧪 Модуль 08: Лаборатории
+Практика hands-on:
+- SENTINEL Blue Team exercises
+- STRIKE Red Team challenges
+- CTF-style сценарии
+- Real-world case studies
+
+---
+
+## Траектории обучения
+
+Выберите путь в зависимости от вашей роли:
+
+### 🔵 Blue Team Path (Защитники)
+```
+Основы → Ландшафт угроз → Стратегии защиты → Мониторинг → Лабы (Blue)
+```
+
+### 🔴 Red Team Path (Атакующие)
+```
+Основы → Векторы атак → Продвинутые темы → Лабы (Red)
+```
+
+### 🟣 Full Stack Path (Полные знания)
+```
+Все модули последовательно
+```
+
+---
+
+## Как использовать эту Academy
+
+### 1. Проверка Prerequisites
+- Базовое понимание концепций машинного обучения
+- Знакомство с программированием на Python
+- Основы безопасности (полезно, но не обязательно)
+
+### 2. Рекомендуемый подход
+1. Начните с Модуля 01 независимо от уровня опыта
+2. Проходите уроки по порядку в каждом модуле
+3. Практикуйтесь с примерами кода в каждом уроке
+4. Выполняйте lab exercises для закрепления
+
+### 3. Формат урока
+Каждый урок включает:
+- **Learning Objectives** — Что вы сможете делать
+- **Concept Explanation** — Теория и контекст
+- **Code Examples** — Рабочие Python реализации
+- **SENTINEL Integration** — Паттерны использования фреймворка
+- **Key Takeaways** — Резюме для справки
+
+### 4. Временные затраты
+| Уровень | Время в неделю | Завершение |
+|---------|----------------|------------|
+| Casual | 2-3 часа | 3-4 месяца |
+| Standard | 5-7 часов | 6-8 недель |
+| Intensive | 15+ часов | 2-3 недели |
+
+---
+
+## Начало работы
+
+### Quick Start
+1. Прочитайте руководство [Как использовать эту Academy](01-how-to-use.md)
+2. Начните с [Модуль 01: ML Fundamentals](../01-ml-fundamentals/)
+3. Настройте локальное окружение SENTINEL для labs
+
+### Настройка Prerequisites
+```bash
+# Клонируйте репозиторий SENTINEL
+git clone https://github.com/DmitrL-dev/AISecurity.git
+cd AISecurity/sentinel-community
+
+# Установите зависимости
+pip install -r requirements.txt
+
+# Проверьте установку
+python -m sentinel.verify
+```
+
+---
+
+## Сообщество
+
+### Contributing
+Мы приветствуем вклад! См. [Contributing Guide](../contributing.md) для:
+- Как отправлять новые уроки
+- Style guidelines
+- Процесс review
+
+### Поддержка
+- GitHub Issues для багов и feature requests
+- Дискуссионные форумы для вопросов
+- Регулярные office hours (расписание в Discord)
+
+---
+
+## Что делает эту Academy особенной
+
+| Feature | Традиционный Security Training | AI Security Academy |
+|---------|-------------------------------|---------------------|
+| **Фокус** | IT/Network security | AI/LLM-специфичные угрозы |
+| **Покрываемые атаки** | SQL injection, XSS и т.д. | Prompt injection, jailbreaks |
+| **Lab Environment** | Virtual networks | Live LLM sandboxes |
+| **Defense Tools** | WAF, IDS, SIEM | SENTINEL framework |
+| **Обновления** | Периодические | Непрерывные (threat landscape эволюционирует) |
+
+---
+
+## Готовы начать?
+
+Ваше путешествие в AI security начинается сейчас. Угрозы реальны, ставки высоки, и знания, которые вы получите здесь, будут критически важны по мере распространения AI систем.
+
+**[Начать Модуль 01: Foundations →](../01-ml-fundamentals/)**
+
+---
+
+*AI Security Academy | Добро пожаловать*

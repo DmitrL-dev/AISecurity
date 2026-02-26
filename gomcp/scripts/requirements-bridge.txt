@@ -1,0 +1,4 @@
+# GoMCP Python Bridge Dependencies
+# Install: pip install -r requirements-bridge.txt
+sentence-transformers>=2.2.0
+numpy>=1.24.0

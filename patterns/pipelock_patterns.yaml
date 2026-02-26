@@ -1,0 +1,440 @@
+# SENTINEL — Pipelock & Arcanum Pattern Database
+# Sources:
+#   - pipelock (Apache 2.0) — DLP, injection detection, MCP tool policies
+#   - Arcanum PI Taxonomy by Jason Haddix (Arcanum Information Security) — CC BY 4.0
+
+---
+version: "1.0.0"
+updated: "2026-02-22"
+total_patterns: 50
+engine: "pipelock_arcanum_detector"
+
+patterns:
+
+  # ============================================================
+  # 1. Jailbreak Templates (from pipelock)
+  # ============================================================
+
+  - id: PL-001
+    name: "Pliny Jailbreak"
+    pattern: "pliny.*the.*prompter"
+    severity: 0.95
+    category: jailbreak
+    lang: en
+    description: "Known jailbreak persona template"
+
+  - id: PL-002
+    name: "GODMODE Jailbreak"
+    pattern: "GODMODE\\s*(enabled|activated|on)"
+    severity: 0.95
+    category: jailbreak
+    lang: en
+    description: "GODMODE jailbreak activation"
+
+  - id: PL-003
+    name: "OMNI Mode"
+    pattern: "OMNI\\s*(mode|enabled)"
+    severity: 0.95
+    category: jailbreak
+    lang: en
+    description: "OMNI jailbreak template"
+
+  - id: PL-004
+    name: "BetterDAN"
+    pattern: "BetterDAN"
+    severity: 0.90
+    category: jailbreak
+    lang: en
+    description: "BetterDAN jailbreak variant"
+
+  - id: PL-005
+    name: "Evil Confidant"
+    pattern: "evil\\s*confidant"
+    severity: 0.90
+    category: jailbreak
+    lang: en
+    description: "Evil confidant jailbreak persona"
+
+  - id: PL-006
+    name: "AIM Jailbreak"
+    pattern: "AIM\\s*:"
+    severity: 0.85
+    category: jailbreak
+    lang: en
+    description: "Always Intelligent and Machiavellian jailbreak"
+
+  - id: PL-007
+    name: "STAN Mode"
+    pattern: "STAN\\s*(mode|prompt)"
+    severity: 0.85
+    category: jailbreak
+    lang: en
+    description: "STAN Do Anything Now variant"
+
+  - id: PL-008
+    name: "Ablation Mode"
+    pattern: "ablation\\s*mode"
+    severity: 0.90
+    category: jailbreak
+    lang: en
+    description: "Ablation jailbreak technique"
+
+  # ============================================================
+  # 2. Instruction Override (from pipelock)
+  # ============================================================
+
+  - id: PL-009
+    name: "Ignore Previous Instructions"
+    pattern: "ignore\\s+(previous|all|prior)\\s+(instructions?|rules?|prompts?)"
+    severity: 0.95
+    category: injection
+    lang: en
+    description: "Direct instruction override attempt"
+
+  - id: PL-010
+    name: "Disregard Instructions"
+    pattern: "disregard\\s+(previous|all)\\s+(instructions?|commands?)"
+    severity: 0.95
+    category: injection
+    lang: en
+    description: "Instruction disregard attempt"
+
+  - id: PL-011
+    name: "Forget Everything"
+    pattern: "forget\\s+(everything|all|previous)"
+    severity: 0.90
+    category: injection
+    lang: en
+    description: "Memory wipe attempt"
+
+  - id: PL-012
+    name: "New Instructions"
+    pattern: "new\\s+instructions?:\\s*"
+    severity: 0.85
+    category: injection
+    lang: en
+    description: "Instruction replacement attempt"
+
+  - id: PL-013
+    name: "Override System"
+    pattern: "override\\s+(default|system|safety)"
+    severity: 0.90
+    category: injection
+    lang: en
+    description: "System override attempt"
+
+  - id: PL-014
+    name: "Bypass Instructions"
+    pattern: "bypass\\s+your\\s+instructions"
+    severity: 0.95
+    category: injection
+    lang: en
+    description: "Instruction bypass attempt"
+
+  - id: PL-015
+    name: "From Now On"
+    pattern: "from\\s+now\\s+on"
+    severity: 0.80
+    category: injection
+    lang: en
+    description: "Persistent behavior change attempt"
+
+  # ============================================================
+  # 3. Special Token Injection (from pipelock)
+  # ============================================================
+
+  - id: PL-016
+    name: "IM Start/End Token"
+    pattern: "<\\|?im_(start|end)\\|?>"
+    severity: 0.95
+    category: injection
+    lang: multi
+    description: "ChatML special token boundary injection"
+
+  - id: PL-017
+    name: "End of Text Token"
+    pattern: "<\\|?endoftext\\|?>"
+    severity: 0.95
+    category: injection
+    lang: multi
+    description: "GPT end-of-text token injection"
+
+  - id: PL-018
+    name: "INST Tags"
+    pattern: "\\[/?INST\\]"
+    severity: 0.90
+    category: injection
+    lang: multi
+    description: "Llama instruction tag injection"
+
+  - id: PL-019
+    name: "SYS Tags"
+    pattern: "<</?SYS>>"
+    severity: 0.95
+    category: injection
+    lang: multi
+    description: "Llama system tag injection"
+
+  - id: PL-020
+    name: "Markdown Role Headers"
+    pattern: "###\\s*(Instruction|System|Human|Assistant)\\s*:"
+    severity: 0.90
+    category: injection
+    lang: multi
+    description: "Markdown-formatted role header injection"
+
+  # ============================================================
+  # 4. DLP — API Key Detection (from pipelock)
+  # ============================================================
+
+  - id: PL-021
+    name: "Anthropic API Key"
+    pattern: "sk-ant-api\\d{2}-[A-Za-z0-9_-]{80,}"
+    severity: 0.95
+    category: dlp
+    lang: multi
+    description: "Anthropic API key leak"
+
+  - id: PL-022
+    name: "OpenAI API Key"
+    pattern: "sk-[A-Za-z0-9]{20}T3BlbkFJ[A-Za-z0-9]{20}"
+    severity: 0.95
+    category: dlp
+    lang: multi
+    description: "OpenAI API key leak"
+
+  - id: PL-023
+    name: "GitHub Token"
+    pattern: "gh[posru]_[A-Za-z0-9_]{36,255}"
+    severity: 0.95
+    category: dlp
+    lang: multi
+    description: "GitHub personal/OAuth/app token leak"
+
+  - id: PL-024
+    name: "AWS Access Key"
+    pattern: "AKIA[0-9A-Z]{16}"
+    severity: 0.95
+    category: dlp
+    lang: multi
+    description: "AWS access key ID leak"
+
+  - id: PL-025
+    name: "Slack Bot Token"
+    pattern: "xoxb-[0-9]{10,13}-[0-9]{10,13}-[a-zA-Z0-9]{24}"
+    severity: 0.90
+    category: dlp
+    lang: multi
+    description: "Slack bot token leak"
+
+  - id: PL-026
+    name: "Stripe Secret Key"
+    pattern: "sk_live_[A-Za-z0-9]{24,99}"
+    severity: 0.90
+    category: dlp
+    lang: multi
+    description: "Stripe live secret key leak"
+
+  - id: PL-027
+    name: "SendGrid API Key"
+    pattern: "SG\\.[A-Za-z0-9_-]{22}\\.[A-Za-z0-9_-]{43}"
+    severity: 0.90
+    category: dlp
+    lang: multi
+    description: "SendGrid API key leak"
+
+  - id: PL-028
+    name: "Private Key Header"
+    pattern: "-----BEGIN\\s+(RSA\\s+)?PRIVATE\\s+KEY-----"
+    severity: 0.95
+    category: dlp
+    lang: multi
+    description: "Private key exposure in text"
+
+  - id: PL-029
+    name: "Google API Key"
+    pattern: "AIza[0-9A-Za-z_-]{35}"
+    severity: 0.90
+    category: dlp
+    lang: multi
+    description: "Google API key leak"
+
+  - id: PL-030
+    name: "Discord Bot Token"
+    pattern: "[MN][A-Za-z\\d]{23,}\\.[A-Za-z\\d_-]{6}\\.[A-Za-z\\d_-]{27}"
+    severity: 0.85
+    category: dlp
+    lang: multi
+    description: "Discord bot token leak"
+
+  # ============================================================
+  # 5. Narrative Smuggling (from Arcanum PI Taxonomy)
+  # ============================================================
+
+  - id: AR-001
+    name: "Fictional Scenario"
+    pattern: "(fictional|hypothetical)\\s+(scenario|situation|world)\\s+where"
+    severity: 0.70
+    category: narrative
+    lang: en
+    description: "Narrative smuggling via fictional framing"
+
+  - id: AR-002
+    name: "Alternate Universe"
+    pattern: "in\\s+this\\s+(alternate|parallel)\\s+(universe|reality|world)"
+    severity: 0.70
+    category: narrative
+    lang: en
+    description: "Alternate reality framing to bypass rules"
+
+  - id: AR-003
+    name: "No Restrictions Scenario"
+    pattern: "(imagine|suppose)\\s+.*no\\s+(rules|restrictions|limits)"
+    severity: 0.80
+    category: narrative
+    lang: en
+    description: "Unrestricted scenario framing"
+
+  - id: AR-004
+    name: "Educational Purpose Disguise"
+    pattern: "for\\s+(educational|research|academic)\\s+purposes\\s+only"
+    severity: 0.60
+    category: narrative
+    lang: en
+    description: "Purpose disguise to lower defenses"
+
+  - id: AR-005
+    name: "Purely Theoretical"
+    pattern: "(purely|just)\\s+(theoretical|hypothetical|academic)"
+    severity: 0.60
+    category: narrative
+    lang: en
+    description: "Theoretical framing to bypass filters"
+
+  - id: AR-006
+    name: "Write as Uncensored AI"
+    pattern: "write\\s+as\\s+if\\s+you\\s+were\\s+an?\\s+uncensored"
+    severity: 0.85
+    category: narrative
+    lang: en
+    description: "Direct uncensored role request"
+
+  # ============================================================
+  # 6. Multi-Chain / Russian Doll (from Arcanum)
+  # ============================================================
+
+  - id: AR-007
+    name: "Step-Based Override"
+    pattern: "(step|phase)\\s+\\d+\\s*:.*\\b(ignore|override|bypass)\\b"
+    severity: 0.85
+    category: multi_chain
+    lang: en
+    description: "Multi-step injection with late override"
+
+  - id: AR-008
+    name: "Sequential Override"
+    pattern: "first.*then\\s+(ignore|forget|override)"
+    severity: 0.85
+    category: multi_chain
+    lang: en
+    description: "Two-phase sequential override attack"
+
+  - id: AR-009
+    name: "Decode and Execute"
+    pattern: "(translate|convert|decode)\\s+this.*then\\s+(follow|execute|run)"
+    severity: 0.85
+    category: multi_chain
+    lang: en
+    description: "Decode-then-execute chain injection"
+
+  - id: AR-010
+    name: "Nested Prompt"
+    pattern: "(nested|chained|recursive)\\s+(prompt|instruction|command)"
+    severity: 0.80
+    category: multi_chain
+    lang: en
+    description: "Recursive/nested prompt injection"
+
+  - id: AR-011
+    name: "Output Becomes System Prompt"
+    pattern: "(previous|last)\\s+output\\s+becomes\\s+.*system\\s+prompt"
+    severity: 0.90
+    category: multi_chain
+    lang: en
+    description: "Output-to-system-prompt escalation"
+
+  # ============================================================
+  # 7. Evasion Techniques (from Arcanum)
+  # ============================================================
+
+  - id: AR-012
+    name: "Encoding Evasion"
+    pattern: "(encode|decode)\\s+(this\\s+)?(in|to|from)\\s+(base64|rot13|hex|morse|binary)"
+    severity: 0.75
+    category: evasion
+    lang: en
+    description: "Encoding-based evasion attempt"
+
+  - id: AR-013
+    name: "Leetspeak Evasion"
+    pattern: "(translate|convert)\\s+(this\\s+)?(to|into|from)\\s+(pig\\s+latin|leetspeak|l33t)"
+    severity: 0.70
+    category: evasion
+    lang: en
+    description: "Alternate language encoding evasion"
+
+  - id: AR-014
+    name: "Reversal Evasion"
+    pattern: "(read|interpret)\\s+(this\\s+)?(backwards?|reversed?|upside\\s+down)"
+    severity: 0.70
+    category: evasion
+    lang: en
+    description: "Text reversal to hide instructions"
+
+  - id: AR-015
+    name: "Emoji-Only Evasion"
+    pattern: "(use|speak\\s+in|respond\\s+in)\\s+(emoji|emoticons?)\\s+(only|exclusively)"
+    severity: 0.65
+    category: evasion
+    lang: en
+    description: "Emoji encoding to bypass text filters"
+
+  - id: AR-016
+    name: "Steganographic Message"
+    pattern: "(acrostic|steganograph|embed(ded)?)\\s+(message|text|instruction)"
+    severity: 0.75
+    category: evasion
+    lang: en
+    description: "Hidden message via steganography"
+
+  - id: AR-017
+    name: "Zero-Width Characters"
+    pattern: "zero[\\-\\s]?width\\s+(space|char|joiner|character)"
+    severity: 0.80
+    category: evasion
+    lang: en
+    description: "Invisible unicode character evasion"
+
+  - id: AR-018
+    name: "Homoglyph Attack"
+    pattern: "(homoglyph|lookalike|similar\\s+looking)\\s+(char|character|letter)"
+    severity: 0.80
+    category: evasion
+    lang: en
+    description: "Visual lookalike character substitution"
+
+  - id: AR-019
+    name: "Invisible Unicode"
+    pattern: "invisible\\s+(unicode|characters?|text)"
+    severity: 0.80
+    category: evasion
+    lang: en
+    description: "Invisible unicode text evasion"
+
+  - id: AR-020
+    name: "Tokenizer Exploit"
+    pattern: "tokenizer\\s+(exploit|confusion|manipulation)"
+    severity: 0.80
+    category: evasion
+    lang: en
+    description: "LLM tokenizer exploitation attempt"

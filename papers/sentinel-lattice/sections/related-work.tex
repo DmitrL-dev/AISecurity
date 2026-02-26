@@ -1,0 +1,48 @@
+\section{Related Work}
+\label{sec:related}
+
+We survey related work across five areas and report the results of an exhaustive prior art search confirming the novelty of our contributions.
+
+\subsection{Commercial LLM Security}
+\label{sec:related:commercial}
+
+Several commercial products address LLM security, all operating at the content-filtering level. Lakera Guard combines ML classifiers with crowdsourced attack data but remains a black-box, reactive system that is routinely bypassed by paraphrasing attacks. Meta Prompt Guard~\cite{promptguard2024} fine-tunes mDeBERTa for prompt injection detection, achieving 99.9\% accuracy on its own evaluation set but only 71.4\% on out-of-distribution inputs---a gap that reflects overfitting to known attack templates rather than robust generalization. NVIDIA NeMo Guardrails~\cite{nemo2023} introduces a domain-specific language (Colang) for defining conversational rails, but its enforcement mechanism relies on LLM-as-judge: the same class of model being defended is tasked with evaluating its own outputs, creating a circular dependency that an adversary can exploit by compromising the judge. LLM Guard deploys 35 independent scanners but provides no cross-scanner intelligence sharing or compositional reasoning. Arthur AI Shield adds dashboards atop standard classifiers without architectural novelty.
+
+The fundamental limitation shared by all these systems is that they operate exclusively at the content level: they classify textual inputs as safe or dangerous and then block or allow. None addresses structural defense (capability attenuation by construction), provenance integrity (tracking the origin of instructions through semantic transformations), model compromise (containment when the model itself is adversarial), or within-authority chaining (attacks composed entirely of individually permitted operations).
+
+\subsection{Prompt Injection Defenses}
+\label{sec:related:injection}
+
+Greshake et al.~\cite{greshake2023} demonstrated that indirect prompt injection---where adversarial instructions are embedded in retrieved documents or tool outputs rather than in direct user input---poses a systemic threat to retrieval-augmented and agentic LLM deployments. Subsequent defenses have followed three main strategies: input sanitization (stripping or escaping suspected injection markers), instruction hierarchy (training models to prioritize system-level instructions over user or retrieved content), and sandwich defenses (surrounding untrusted content with safety reminders). All three are bypassable: sanitization fails against semantic paraphrasing, instruction hierarchies can be overridden via sufficiently persuasive injected text, and sandwich defenses are defeated by context-window manipulation.
+
+\sentinel addresses prompt injection structurally rather than heuristically. The L2 provenance tagging system (\S\ref{sec:arch:l2}) assigns every token a provenance label upon ingestion. Content tagged \textsc{retrieved} is architecturally prohibited from issuing tool calls---not by a classifier that might be fooled, but by the capability proxy's construction: the tool-call interface is simply not exposed for tokens bearing that provenance. This converts the injection problem from an adversarial ML challenge into an access control enforcement problem with deterministic guarantees.
+
+\subsection{Model Integrity and Backdoor Detection}
+\label{sec:related:integrity}
+
+The dominant approach to neural network backdoor defense assumes that backdoors manifest as detectable anomalies in model behavior or internal representations. Neural Cleanse~\cite{wang2019} reverse-engineers minimal trigger patterns by optimizing for input perturbations that cause misclassification; STRIP~\cite{gao2021} detects trojaned inputs by measuring entropy reduction under input perturbation. Both methods, and the broader family of detection-based defenses, assume specific attack structure: that triggers are small, localized, and produce measurable distributional shifts.
+
+Goldwasser and Kim~\cite{goldwasser2022} prove that this assumption is fundamentally flawed. Under standard cryptographic assumptions, a backdoored model can be constructed that is computationally indistinguishable from a clean model on all polynomial-size test sets. No efficient algorithm can reliably distinguish the two. Hubinger et al.~\cite{hubinger2024} provide empirical confirmation: their ``sleeper agent'' models maintain deceptive alignment through extensive safety training, including reinforcement learning from human feedback, activating backdoor behavior only under specific deployment-time triggers that are absent during evaluation.
+
+\mire responds to these impossibility results with a paradigm shift: rather than attempting to detect whether a model is compromised (proven impossible in the general case), \mire contains the damage a compromised model can inflict. By enforcing output-side invariants that hold regardless of the model's internal state---capability ceilings, information flow bounds, and behavioral envelopes---\mire ensures that even a fully adversarial model cannot exceed its authorized impact surface (\S\ref{sec:mire}).
+
+\subsection{Information Flow Control and Capability Security}
+\label{sec:related:ifc}
+
+Classical information flow control (IFC) provides the theoretical foundation for \sentinel's provenance architecture. Denning's lattice model~\cite{denning1976} establishes that security labels form a finite lattice under which permissible information flows are defined by a partial order; Bell and LaPadula~\cite{belllapadula1973} operationalize this via mandatory access control with ``no read up, no write down'' properties. In the capability security tradition, Dennis and Van Horn~\cite{dennis1966} introduced unforgeable capability tokens as the basis for least-privilege access control, and Hardy~\cite{hardy1988} identified the confused deputy problem---where a privileged process is tricked into misusing its authority on behalf of an unprivileged requester---which is precisely the threat model of indirect prompt injection in agentic LLMs.
+
+Database provenance tracking, particularly the seminal work of Green et al.~\cite{green2007} on provenance semirings, provides algebraic frameworks for propagating annotations through query transformations. However, all of these classical systems assume deterministic, lossless transformations: a database query produces an exact output from exact inputs, and provenance annotations can be propagated with full fidelity.
+
+LLM inference is fundamentally different: it is a lossy, stochastic semantic transformation that destroys the syntactic structure on which classical provenance depends. \pasr is, to our knowledge, the first primitive that bridges IFC and semantic processing by defining provenance-preserving reduction operators that maintain annotation integrity through non-deterministic transformations (\S\ref{sec:pasr}).
+
+\subsection{Runtime Verification}
+\label{sec:related:runtime}
+
+Runtime verification of temporal properties originates with Pnueli's~\cite{pnueli1977} introduction of linear temporal logic (LTL) for reasoning about program behavior over execution traces. Havelund and Rosu~\cite{havelund2004} developed practical runtime monitoring frameworks that check LTL specifications against concrete execution traces, enabling lightweight formal verification without full model checking. These techniques have been widely adopted in safety-critical systems including avionics and automotive software.
+
+To our knowledge, no prior work applies temporal logic monitoring to LLM tool-call chains. The challenge is that agentic LLM executions produce event sequences (tool calls, data accesses, capability exercises) that exhibit the same temporal structure as program traces, yet no existing monitor is designed for this setting. \tsa adapts runtime verification to the agentic context by defining safety automata over tool-call sequences, where temporal properties such as ``a file read must not be followed by a network send without intervening authorization'' are specified in LTL and enforced at each step of the agent's execution (\S\ref{sec:tcsa}).
+
+\subsection{Prior Art Search Results}
+\label{sec:related:search}
+
+To validate the novelty of our contributions, we conducted 51 cross-domain searches on grep.app, which indexes all public GitHub repositories. Each search targeted the intersection of two domains that defines one of our seven primitives---for example, ``provenance tracking'' combined with ``semantic reduction,'' or ``capability attenuation'' combined with ``information flow labels.'' All 51 searches returned zero implementations. While absence of evidence is not evidence of absence, the comprehensive coverage of these searches---spanning formal verification, access control, information theory, control theory, mechanism design, speech act theory, and computational neuroscience as applied to LLM security---strongly supports the claim that the cross-domain synthesis approach underlying \sentinel has not been previously explored. The complete search methodology and results are available in our supplementary materials.

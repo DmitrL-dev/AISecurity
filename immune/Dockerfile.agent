@@ -1,0 +1,72 @@
+#
+# SENTINEL IMMUNE — Agent Build & Test
+#
+# For userspace agent testing (no kernel module)
+#
+
+FROM alpine:3.19 AS builder
+
+# Install build tools
+RUN apk add --no-cache \
+    gcc \
+    musl-dev \
+    make \
+    openssl-dev \
+    nasm \
+    linux-headers
+
+WORKDIR /build
+
+# Copy source
+COPY agent/include/ include/
+COPY agent/src/ src/
+COPY agent/tests/ tests/
+COPY agent/conf/ conf/
+COPY agent/Makefile .
+
+# Build agent
+RUN make
+
+# Build tests
+RUN make test_binary || true
+
+# ==================== Test Runner ====================
+
+FROM alpine:3.19 AS tester
+
+RUN apk add --no-cache \
+    openssl \
+    libgcc
+
+WORKDIR /test
+
+# Copy binaries
+COPY --from=builder /build/bin/ bin/
+
+# Create test data directory
+RUN mkdir -p /var/immune
+
+# Run tests
+CMD ["./bin/test_agent"]
+
+# ==================== Runtime ====================
+
+FROM alpine:3.19
+
+RUN apk add --no-cache \
+    openssl \
+    libgcc
+
+# Create user
+RUN adduser -D -H immune
+
+# Create directories
+RUN mkdir -p /var/immune && chown immune:immune /var/immune
+
+# Copy binary
+COPY --from=builder /build/bin/immuned /usr/local/sbin/immuned
+COPY --from=builder /build/conf/agent.conf /etc/immune/agent.conf
+
+USER immune
+
+CMD ["/usr/local/sbin/immuned", "-d"]

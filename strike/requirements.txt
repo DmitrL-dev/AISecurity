@@ -1,0 +1,37 @@
+# SENTINEL Strike v3.0 - Dependencies
+# AI Security Red Team Platform
+
+# Core
+requests>=2.31.0
+aiohttp>=3.9.0
+httpx>=0.27.0
+
+# CLI & Web Console
+click>=8.1.0
+rich>=13.7.0
+flask>=3.0.0
+
+# Browser Automation
+playwright>=1.40.0
+selenium>=4.15.0
+
+# AI/LLM
+google-generativeai>=0.8.0
+openai>=1.6.0
+
+# Data Processing
+beautifulsoup4>=4.12.0
+lxml>=5.0.0
+pyyaml>=6.0.0
+
+# Security Tools
+semgrep>=1.50.0
+
+# Reporting
+jinja2>=3.1.0
+markdown>=3.5.0
+
+# Utilities
+python-dotenv>=1.0.0
+colorama>=0.4.6
+tqdm>=4.66.0

@@ -1,0 +1,23 @@
+{
+  "name": "sentinel-shield",
+  "version": "1.0.0",
+  "description": "SENTINEL Shield - AI/LLM Security Layer",
+  "main": "bindings/nodejs/sentinel_shield.js",
+  "scripts": {
+    "test": "node bindings/nodejs/sentinel_shield.js"
+  },
+  "keywords": [
+    "ai",
+    "llm",
+    "security",
+    "firewall",
+    "prompt-injection",
+    "sentinel"
+  ],
+  "author": "SENTINEL Project",
+  "license": "MIT",
+  "dependencies": {
+    "ffi-napi": "^4.0.3",
+    "ref-napi": "^3.0.3"
+  }
+}

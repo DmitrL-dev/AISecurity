@@ -1,0 +1,187 @@
+# SENTINEL Shield CI/CD Pipeline
+# Runs on every push and pull request
+# Includes: Build, Test, Valgrind, ASAN (Linux only)
+
+name: Shield CI
+
+on:
+  push:
+    branches: [ main, develop ]
+    paths:
+      - 'sentinel-community/shield/**'
+      - '.github/workflows/shield-ci.yml'
+  pull_request:
+    branches: [ main ]
+    paths:
+      - 'sentinel-community/shield/**'
+
+defaults:
+  run:
+    working-directory: sentinel-community/shield
+
+jobs:
+  # ============================================================================
+  # BUILD & TEST (Ubuntu)
+  # ============================================================================
+  build-linux:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y build-essential libssl-dev valgrind
+
+      - name: Build Shield
+        run: make clean && make
+
+      - name: Run tests
+        run: make test_all
+
+      - name: Upload build artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: shield-linux-build
+          path: |
+            sentinel-community/shield/build/libshield.so
+            sentinel-community/shield/build/libshield.a
+
+  # ============================================================================
+  # MEMORY SAFETY (Valgrind)
+  # ============================================================================
+  valgrind:
+    runs-on: ubuntu-latest
+    needs: build-linux
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y build-essential libssl-dev valgrind
+
+      - name: Build Shield (debug)
+        run: make debug
+
+      - name: Run Valgrind on CLI tests
+        run: |
+          make test_cli_bin
+          valgrind --leak-check=full \
+                   --show-leak-kinds=all \
+                   --track-origins=yes \
+                   --error-exitcode=1 \
+                   --suppressions=valgrind.supp \
+                   ./build/test_cli 2>&1 | tee valgrind-report.txt
+
+      - name: Upload Valgrind report
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: valgrind-report
+          path: sentinel-community/shield/valgrind-report.txt
+
+  # ============================================================================
+  # ADDRESSSANITIZER (Linux)
+  # ============================================================================
+  asan:
+    runs-on: ubuntu-latest
+    needs: build-linux
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y build-essential libssl-dev
+
+      - name: Build with ASAN
+        run: make asan
+
+      - name: Run CLI tests with ASAN
+        env:
+          ASAN_OPTIONS: detect_leaks=1:abort_on_error=1
+        run: make test_cli
+
+  # ============================================================================
+  # BUILD (Windows)
+  # ============================================================================
+  build-windows:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup MSYS2
+        uses: msys2/setup-msys2@v2
+        with:
+          msystem: UCRT64
+          update: true
+          install: >-
+            mingw-w64-ucrt-x86_64-gcc
+            mingw-w64-ucrt-x86_64-openssl
+            mingw-w64-ucrt-x86_64-pcre
+            make
+
+      - name: Build Shield
+        shell: msys2 {0}
+        run: |
+          cd sentinel-community/shield
+          make clean && make
+
+      - name: Run tests
+        shell: msys2 {0}
+        run: |
+          cd sentinel-community/shield
+          make test_all
+
+  # ============================================================================
+  # DOCKER BUILD
+  # ============================================================================
+  docker:
+    runs-on: ubuntu-latest
+    needs: build-linux
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Build Docker image
+        run: |
+          cd sentinel-community/shield
+          docker build -t sentinel/shield:ci .
+
+      - name: Test Docker image
+        run: |
+          docker run --rm sentinel/shield:ci /shield --version || true
+
+  # ============================================================================
+  # CODE QUALITY
+  # ============================================================================
+  code-quality:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Check for TODO/FIXME count
+        run: |
+          TODO_COUNT=$(grep -rn "TODO\|FIXME" src --include="*.c" | wc -l)
+          echo "Found $TODO_COUNT TODO/FIXME items"
+          if [ $TODO_COUNT -gt 100 ]; then
+            echo "::warning::High number of TODO/FIXME items: $TODO_COUNT"
+          fi
+
+      - name: Check line count
+        run: |
+          LOC=$(find src -name "*.c" -exec cat {} \; | wc -l)
+          echo "Total lines of code: $LOC"
+
+      - name: Check test coverage ratio
+        run: |
+          SRC_LOC=$(find src -name "*.c" -exec cat {} \; | wc -l)
+          TEST_LOC=$(find tests -name "*.c" -exec cat {} \; | wc -l)
+          RATIO=$(echo "scale=2; $TEST_LOC * 100 / $SRC_LOC" | bc)
+          echo "Test coverage ratio: ${RATIO}%"
+          if (( $(echo "$RATIO < 10" | bc -l) )); then
+            echo "::warning::Test coverage ratio is low: ${RATIO}%"
+          fi

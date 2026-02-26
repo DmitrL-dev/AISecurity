@@ -1,0 +1,32 @@
+[
+  {
+    "name": "typography_injection",
+    "error": "HTTP Error 500: Internal Server Error",
+    "success": false
+  },
+  {
+    "name": "ocr_injection",
+    "error": "HTTP Error 500: Internal Server Error",
+    "success": false
+  },
+  {
+    "name": "ssrf_image",
+    "error": "HTTP Error 500: Internal Server Error",
+    "success": false
+  },
+  {
+    "name": "cjk_injection",
+    "error": "HTTP Error 500: Internal Server Error",
+    "success": false
+  },
+  {
+    "name": "credential_terminal",
+    "error": "HTTP Error 500: Internal Server Error",
+    "success": false
+  },
+  {
+    "name": "stego_landscape",
+    "error": "HTTP Error 500: Internal Server Error",
+    "success": false
+  }
+]

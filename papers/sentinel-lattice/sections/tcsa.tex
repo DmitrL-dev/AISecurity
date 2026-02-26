@@ -1,0 +1,271 @@
+\section{TCSA: Temporal-Capability Safety Architecture}
+\label{sec:tcsa}
+
+The preceding layers defend against attacks that are individually
+identifiable---a malicious pattern, a forbidden capability, a suspicious
+behavioral signature. But a critical class of attacks evades every such layer:
+\emph{within-authority chaining}, where each individual action is fully
+legitimate yet the composition constitutes a security violation.
+
+\paragraph{Motivating example.} Consider the following four-step tool chain
+executed by an LLM agent:
+
+\begin{enumerate}[leftmargin=*]
+\item \texttt{file\_read(".env")} --- reads the application's environment file.
+      \emph{Legitimate}: the agent has file-read capability.
+\item \texttt{parse(output, "credentials")} --- extracts database credentials
+      from the file contents. \emph{Legitimate}: parsing is a core LLM
+      capability.
+\item \texttt{compose\_email(to="external@evil.com", body=credentials)} ---
+      drafts an email containing the extracted credentials. \emph{Legitimate}:
+      the agent has email-composition capability.
+\item \texttt{send\_email()} --- transmits the composed email.
+      \emph{Legitimate}: the agent has email-send capability.
+\end{enumerate}
+
+Every action is individually authorized. No single layer catches the
+violation. Yet the chain constitutes \textbf{data exfiltration}---sensitive
+credentials have been read, composed into a message, and transmitted to an
+external attacker-controlled address. The attack is invisible to any defense
+that examines actions in isolation.
+
+\tcsa addresses this gap through three sub-primitives that collectively
+monitor temporal ordering, data-flow capabilities, and predictive trajectory:
+
+\begin{itemize}[leftmargin=*]
+\item \textbf{\tsa} (Temporal Safety Automata) --- adapted from runtime
+      verification; monitors temporal ordering of tool calls against LTL
+      safety properties.
+\item \textbf{\cafl} (Capability-Attenuating Flow Labels) --- a genuinely new
+      primitive; tracks data capabilities through LLM transformations under
+      worst-case taint assumptions.
+\item \textbf{\gps} (Goal Predictability Score) --- a genuinely new primitive;
+      provides predictive early warning by scoring how many reachable future
+      states lead to safety violations.
+\end{itemize}
+
+\subsection{TSA: Temporal Safety Automata}
+\label{sec:tcsa:tsa}
+
+\tsa adapts techniques from runtime verification---specifically the
+monitor-automata approach of Havelund and Ro\c{s}u~\cite{havelund2004} and
+Pnueli's Linear Temporal Logic (LTL)~\cite{pnueli1977}---to the setting of
+LLM tool chains. While runtime verification has been extensively studied for
+software systems, it has never been applied to monitor sequences of LLM tool
+invocations. The adaptation is non-trivial: unlike deterministic programs,
+LLM agents select actions stochastically, and the space of possible tool
+chains is combinatorially large.
+
+\paragraph{Design-time compilation.} Safety properties are expressed as LTL
+formulae over the alphabet of tool-call events. At design time, each formula
+is compiled into a deterministic monitor automaton via standard
+LTL-to-B\"uchi-to-monitor construction~\cite{havelund2004}. The resulting
+automata are minimal and fixed-size, requiring no runtime compilation.
+
+\paragraph{Example safety properties.} The following three properties
+illustrate the expressiveness of the \tsa formalism:
+
+\begin{align}
+  \mathbf{P_1}\!: \quad & \Box\bigl(\mathit{read\_sensitive}
+    \rightarrow \Box\,\neg\,\mathit{send\_external}\bigr)
+    \label{eq:p1} \\
+  \mathbf{P_2}\!: \quad & \neg\Diamond\bigl(\mathit{read\_credentials}
+    \wedge \Diamond\,\mathit{send\_external}\bigr)
+    \label{eq:p2} \\
+  \mathbf{P_3}\!: \quad & \Box\bigl(\mathit{privilege\_change}
+    \rightarrow \bigcirc\,\mathit{approval\_received}\bigr)
+    \label{eq:p3}
+\end{align}
+
+Property~$\mathbf{P_1}$ states that after reading sensitive data, the agent
+may \emph{never} subsequently send data to an external channel---a permanent
+prohibition. Property~$\mathbf{P_2}$ forbids any execution trace in which
+credential access is eventually followed by external transmission---directly
+encoding the exfiltration scenario from the motivating example.
+Property~$\mathbf{P_3}$ requires that every privilege escalation be
+\emph{immediately} followed by an approval event, enforcing a mandatory
+human-in-the-loop checkpoint.
+
+\paragraph{Abstract security state.} To make monitor evaluation tractable, we
+define an \emph{abstract security state} as a 16-bit vector encoding the
+security-relevant predicates of the current execution. The 16~bits encode
+predicates including:
+
+\begin{itemize}[leftmargin=*]
+\item \texttt{sensitive\_data\_accessed} --- set when any tool reads data
+      classified at \textsc{internal} or above.
+\item \texttt{credentials\_accessed} --- set when authentication material
+      (API keys, passwords, tokens) is read.
+\item \texttt{external\_channel\_opened} --- set when a tool establishes a
+      connection to an external endpoint.
+\item \texttt{privilege\_elevated} --- set when the agent's capability set
+      expands beyond its initial grant.
+\item \texttt{write\_performed} --- set when any destructive or
+      state-modifying tool call executes.
+\item \texttt{approval\_pending} --- set when a privilege change awaits
+      operator confirmation.
+\end{itemize}
+
+A 16-bit vector yields $2^{16} = 65{,}536$ possible abstract states. This
+state space is small enough for \emph{complete enumeration} at design time,
+enabling pre-computation of all monitor transitions and, critically, enabling
+the \gps predictive analysis described in~\S\ref{sec:tcsa:gps}.
+
+\paragraph{Runtime cost.} At runtime, each tool call triggers a single
+state-vector update (bitwise OR of the relevant predicate bits) followed by a
+table lookup in the pre-compiled monitor transition function. Both operations
+are $O(1)$ with respect to chain length, tool count, and property count.
+Monitor evaluation adds negligible overhead---under 1\,$\mu$s per tool
+call---making \tsa suitable for latency-sensitive deployments.
+
+\subsection{CAFL: Capability-Attenuating Flow Labels}
+\label{sec:tcsa:cafl}
+
+\cafl is a genuinely new primitive with no direct precedent in the literature.
+Classical information flow control (IFC)~\cite{denning1976} tracks how data
+propagates through deterministic programs, where the transformation applied to
+each datum is known and analyzable. This assumption breaks catastrophically
+for LLM-based agents: the model can perform \emph{any} transformation on its
+input, including arbitrary summarization, recombination, and rephrasing. No
+static analysis can determine what an LLM will do with a given input.
+
+\paragraph{Key insight: worst-case taint.} \cafl resolves this by adopting
+a \emph{worst-case taint} assumption: if data carrying capability label~$C$
+enters an LLM, \textbf{all output from that LLM invocation is tainted with
+the restrictions of~$C$}. This is deliberately conservative---it may
+over-approximate (flagging safe chains as dangerous) but will
+\emph{never} under-approximate (allowing dangerous chains through). Soundness
+is preserved at the cost of completeness, which is the correct trade-off for
+a security mechanism.
+
+\paragraph{Capability labels.} Every data object in the system carries a
+\emph{capability label}---a set of permitted downstream operations. The
+critical invariant is that capabilities may only \emph{decrease} as data flows
+through the processing chain; they may never increase. This monotonic
+attenuation ensures that sensitive data progressively loses its ability to
+reach dangerous sinks:
+
+\begin{itemize}[leftmargin=*]
+\item $\texttt{file\_read(".env")} \rightarrow \text{output:}~
+      \{\textsc{process}, \textsc{display}\}$\\
+      Sensitive configuration data may be processed internally and displayed
+      to the operator, but \emph{cannot} be exported.
+\item $\texttt{file\_read("public.md")} \rightarrow \text{output:}~
+      \{\textsc{process}, \textsc{display}, \textsc{export}\}$\\
+      Public data carries the full capability set, including export.
+\item $\texttt{email\_send()} ~\text{requires input:}~
+      \{\textsc{export}\} \in C$\\
+      The email tool checks that its input data carries the \textsc{export}
+      capability before transmission.
+\end{itemize}
+
+\paragraph{Blocking the exfiltration chain.} Revisiting the motivating
+example: the chain \texttt{.env} $\rightarrow$ LLM $\rightarrow$
+\texttt{email\_send} is blocked because \texttt{file\_read(".env")} produces
+output labeled $\{\textsc{process}, \textsc{display}\}$. When this data
+enters the LLM, worst-case taint applies: the LLM's output inherits the
+\emph{intersection} of input capabilities, yielding at most
+$\{\textsc{process}, \textsc{display}\}$. The subsequent
+\texttt{email\_send()} requires $\{\textsc{export}\} \in C$, which is absent.
+The chain is rejected before the email is ever composed.
+
+\paragraph{Membrane pattern.} \cafl enforces capability attenuation at
+\emph{trust boundary crossings}---points where data moves between security
+domains (e.g., from internal processing to external communication, or from
+the agent's workspace to a third-party API). Each boundary acts as a
+\emph{membrane} that filters capabilities: data may cross only if it carries
+the capabilities required by the destination domain. This membrane pattern
+provides defense in depth, as even a compromised internal component cannot
+elevate the capabilities of data that has already been attenuated.
+
+\subsection{GPS: Goal Predictability Score}
+\label{sec:tcsa:gps}
+
+\gps is a genuinely new primitive that provides \emph{predictive} defense:
+it catches tool chains that are \emph{heading toward} a safety violation
+before the violation actually occurs. Where \tsa detects violations at the
+moment they happen (the monitor enters a rejecting state), \gps provides
+early warning by analyzing the \emph{trajectory} of the current execution
+through the abstract state space.
+
+\paragraph{Definition.} Given the current abstract security state
+$s \in \{0,1\}^{16}$, define $\mathcal{N}(s)$ as the set of states reachable
+from~$s$ via a single tool call, and $\mathcal{D}(s) \subseteq \mathcal{N}(s)$
+as the subset of those states that either (a)~directly violate a \tsa safety
+property or (b)~have no safe successor under any tool call. The Goal
+Predictability Score is:
+
+\begin{equation}
+  \gps(s) = \frac{|\mathcal{D}(s)|}{|\mathcal{N}(s)|}
+  \label{eq:gps}
+\end{equation}
+
+\noindent A score of $\gps(s) = 0$ indicates that no single-step successor
+leads to danger; $\gps(s) = 1$ indicates that \emph{every} possible next
+action leads to a safety violation.
+
+\paragraph{Tractability.} The key observation enabling \gps is that the
+abstract state space is only $2^{16} = 65{,}536$ states. This is small enough
+for \emph{complete enumeration}: at design time, we pre-compute
+$\mathcal{D}(s)$ and $\mathcal{N}(s)$ for every state~$s$, storing the
+resulting \gps values in a lookup table. At runtime, computing \gps requires
+a single table lookup---the same $O(1)$ cost as the \tsa monitor transition.
+
+\paragraph{Threshold policy.} We define a two-threshold policy based on
+the \gps value:
+
+\begin{itemize}[leftmargin=*]
+\item $\gps(s) > 0.7$: \textbf{Warning.} The system alerts the operator that
+      the current tool chain is approaching a region of the state space where
+      most continuations lead to safety violations. The agent may continue,
+      but its actions are logged at elevated verbosity.
+\item $\gps(s) > 0.9$: \textbf{Block.} The system pre-emptively halts the
+      tool chain. Fewer than 10\% of possible continuations are safe,
+      indicating that the agent has maneuvered into a near-certain violation
+      trajectory regardless of its next action.
+\end{itemize}
+
+\paragraph{Complementarity with \tsa.} \gps and \tsa are complementary:
+\tsa provides \emph{reactive} enforcement (blocking the exact moment a
+property is violated), while \gps provides \emph{proactive} defense (warning
+or blocking before the violation occurs). Together, they implement a
+defense-in-depth strategy over the temporal dimension: \gps catches attacks
+that are still developing, and \tsa catches any that slip past the predictive
+threshold.
+
+\subsection{Comparison with Existing Approaches}
+\label{sec:tcsa:comparison}
+
+The closest existing work to \tcsa is CrossToolGuard, which analyzes pairs of
+consecutive tool calls for dangerous combinations. Table~\ref{tab:tcsa-comparison}
+summarizes the key differences. \tcsa subsumes pair-based analysis while
+adding temporal ordering, data-flow tracking, and predictive capabilities
+that no existing system provides.
+
+\begin{table}[t]
+\centering
+\small
+\caption{Comparison of \tcsa with pair-based tool-chain analysis
+(CrossToolGuard). \tcsa provides strictly stronger guarantees across every
+dimension.}
+\label{tab:tcsa-comparison}
+\begin{tabular}{@{}lll@{}}
+\toprule
+Aspect & CrossToolGuard & \tcsa \\
+\midrule
+Chain length    & Pairs only      & Arbitrary length \\
+Temporal order  & No              & Yes (LTL via \tsa) \\
+Data flow       & No              & Yes (\cafl labels) \\
+Predictive      & No              & Yes (\gps score) \\
+Runtime cost    & $O(N^2)$ pairs  & $O(1)$ per call \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+The $O(1)$-per-call runtime of \tcsa deserves emphasis. CrossToolGuard must
+evaluate every pair of tools in the current chain, yielding $O(N^2)$ cost for
+a chain of length~$N$. \tcsa maintains a single 16-bit state vector and
+performs one table lookup per tool call, regardless of chain length or the
+number of safety properties being monitored. This constant-time guarantee
+makes \tcsa viable even for long-running agentic sessions with hundreds of
+sequential tool invocations.

@@ -1,0 +1,116 @@
+\section{Architecture Overview}
+\label{sec:architecture}
+
+\sentinel is organized as a multi-layer defense architecture comprising six core layers, three combinatorial layers, and one containment layer. Input flows through successive layers in a defense-in-depth pipeline, where each layer addresses a distinct class of threat using a different analytical paradigm. No single layer is sufficient; the architecture derives its strength from the compositional guarantees that emerge when heterogeneous defenses are layered with formally specified interfaces.
+
+Table~\ref{tab:layers} summarizes the full layer stack. Layers L1--L3 provide foundational defense using established paradigms adapted for LLM contexts. The combinatorial layers (\pasr, \tcsa, \asra) introduce novel cross-domain primitives. \mire provides the final containment guarantee.
+
+\begin{table*}[t]
+\centering
+\small
+\caption{Sentinel Lattice layer stack. Latency is per-request overhead. Status indicates implementation maturity at time of writing.}
+\label{tab:layers}
+\begin{tabular}{@{}lllll@{}}
+\toprule
+Layer & Name & Latency & Paradigm Source & Status \\
+\midrule
+L1 & Sentinel Core & $<$1\,ms & Pattern matching & Implemented (704 patterns, 53 engines) \\
+L2 & Capability Proxy + IFC & $<$10\,ms & Bell-LaPadula~\cite{belllapadula1973}, Clark-Wilson~\cite{clarkwilson1987} & Designed \\
+L3 & Behavioral EDR & $\sim$50\,ms async & Endpoint Detection \& Response & Designed \\
+\pasr & Prov.-Annotated Sem.\ Reduction & +1--2\,ms & Novel invention & Designed \\
+\tcsa & Temporal-Capability Safety & $O(1)$/call & Runtime verification + Novel & Designed \\
+\asra & Ambiguity Surface Resolution & Variable & Mechanism design + Novel & Designed \\
+\mire & Model-Irrelevance Containment & $\sim$0--5\,ms & Novel paradigm shift & Designed \\
+\bottomrule
+\end{tabular}
+\end{table*}
+
+\subsection{L1: Sentinel Core}
+\label{sec:arch:l1}
+
+The first layer is a fully deterministic, zero-ML pattern-matching engine implemented in Rust. Sentinel Core comprises 53 regex engines organized into 10 functional categories, covering 704 distinct attack patterns validated by 887 unit tests with zero failures. The engine uses Aho-Corasick~\cite{ahocorasick1975} multi-pattern pre-filtering to achieve $O(n)$ text scanning regardless of pattern count, yielding sub-millisecond latency on typical inputs.
+
+Determinism is a critical design property: given identical input, Sentinel Core produces identical output on every execution, with no stochastic components, no model inference, and no external dependencies. This makes the layer fully auditable and amenable to formal verification. In our 250,000-attack simulation (\S\ref{sec:evaluation}), L1 alone catches 36.0\% of all attacks---establishing a high-confidence baseline before any probabilistic analysis begins.
+
+Table~\ref{tab:engines} summarizes the engine categories.
+
+\begin{table}[t]
+\centering
+\small
+\caption{Sentinel Core engine categories. Pattern counts are approximate.}
+\label{tab:engines}
+\begin{tabular}{@{}lrr@{}}
+\toprule
+Category & Engines & Patterns \\
+\midrule
+Injection \& Jailbreak & 6 & $\sim$150 \\
+Evasion \& Encoding & 4 & $\sim$80 \\
+Agentic \& Tool Abuse & 5 & $\sim$90 \\
+Data Protection & 4 & $\sim$70 \\
+Social \& Cognitive & 4 & $\sim$60 \\
+Supply Chain & 3 & $\sim$50 \\
+Code \& Runtime & 4 & $\sim$65 \\
+Advanced Threats & 6 & $\sim$80 \\
+Output \& Cross-tool & 3 & $\sim$50 \\
+Domain-specific & 14 & $\sim$109 \\
+\midrule
+\textbf{Total} & \textbf{53} & \textbf{704} \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\subsection{L2: Capability Proxy and Information Flow Control}
+\label{sec:arch:l2}
+
+L2 provides a structural defense rooted in classical access control theory. Drawing on Bell-LaPadula~\cite{belllapadula1973} mandatory access control, Clark-Wilson~\cite{clarkwilson1987} integrity enforcement, and Dennis and Van Horn's~\cite{dennis1966} capability model, L2 interposes a {\em capability proxy} between the language model and all external tools. The model never observes real tool interfaces; it interacts exclusively with virtual proxies that expose only the subset of functionality permitted by the current security context.
+
+\paragraph{Provenance tagging.} Every token entering the system receives a provenance tag that governs its trust level and permissible actions:
+
+\begin{itemize}[leftmargin=*]
+\item \textsc{operator} (HIGH trust): system prompts and operator-defined instructions. May issue any permissible tool call.
+\item \textsc{user} (LOW trust): end-user input. May request tool calls subject to capability attenuation.
+\item \textsc{retrieved} (NONE): content from RAG retrieval, web search, or tool output injected into context. \emph{Cannot} issue tool calls under any circumstance.
+\item \textsc{tool} (MEDIUM trust): structured output from previously executed tools. May trigger follow-up calls only within pre-authorized chains.
+\end{itemize}
+
+\paragraph{NEVER lists.} Certain operations are not merely filtered but are {\em architecturally non-existent}: the virtual proxy simply does not expose them. A model cannot request \texttt{rm -rf /} if the proxy's capability surface contains no destructive filesystem operations. This is a stronger guarantee than content filtering, as the attack surface is reduced by construction rather than by detection.
+
+\paragraph{Security lattice.} Security labels form a lattice ordered as $\textsc{public} \prec \textsc{internal} \prec \textsc{secret} \prec \textsc{top\_secret}$. Information flows upward only: a process at \textsc{internal} may read \textsc{public} data but cannot write to \textsc{public} channels, preventing exfiltration. This is a direct application of the Bell-LaPadula ``no write down'' property adapted to LLM data flows.
+
+In simulation, L2 catches 20.3\% of attacks with latency under 10\,ms.
+
+\subsection{L3: Behavioral EDR}
+\label{sec:arch:l3}
+
+Layer~3 adapts the Endpoint Detection and Response (EDR) paradigm from host-based security to the LLM agent context. Unlike L1 and L2, which operate synchronously on the critical path, L3 runs asynchronously: behavioral telemetry is collected per-turn and analyzed off-path, with alerts propagated back to the orchestrator within approximately 50\,ms. This design ensures that behavioral monitoring imposes no latency penalty on normal operation.
+
+\paragraph{Behavioral signals.} L3 monitors five classes of signal:
+
+\begin{enumerate}[leftmargin=*]
+\item \textbf{Tool call frequency.} Sudden increases in tool invocation rate are detected via CUSUM (Cumulative Sum) change-point detection~\cite{page1954}, which identifies statistically significant deviations from the running baseline.
+\item \textbf{Unusual tool combinations.} A first-order Markov chain over tool call sequences models expected transition probabilities; low-probability transitions (e.g., \texttt{read\_file} $\to$ \texttt{send\_email}) trigger alerts.
+\item \textbf{Privilege escalation patterns.} Sequences of tool calls that monotonically increase in capability level are flagged, particularly when the escalation crosses provenance boundaries.
+\item \textbf{Output topic drift.} Cosine similarity between successive response embeddings detects gradual topic migration characteristic of crescendo attacks.
+\item \textbf{Cross-session patterns.} Behavioral fingerprints are correlated across sessions to detect distributed attacks that stay below per-session thresholds.
+\end{enumerate}
+
+\paragraph{Stability analysis.} We define a Lyapunov stability function over the behavioral state:
+\begin{multline}
+V(s) = w_1 \cdot \text{topic\_drift}(s) + w_2 \cdot \text{priv\_level}(s) \\
+       + w_3 \cdot \text{tool\_diversity}(s) + w_4 \cdot \text{data\_sensitivity}(s)
+\label{eq:lyapunov}
+\end{multline}
+where $s$ indexes the conversation turn and $w_i$ are empirically tuned weights. The safety invariant requires $\frac{dV}{ds} \leq 0$: the system must not become progressively less safe over the course of a session. A sustained positive derivative indicates a crescendo attack in progress and triggers escalation to the \tcsa layer.
+
+In simulation, L3 catches 10.9\% of attacks at approximately 50\,ms asynchronous latency.
+
+\subsection{Combinatorial Layers}
+\label{sec:arch:combo}
+
+The three combinatorial layers---\pasr, \tcsa, and \asra---represent the primary novel contributions of this work and are detailed in \S\ref{sec:pasr}--\S\ref{sec:asra}. Here we briefly summarize the cross-domain synthesis underlying each.
+
+\paragraph{Combination Alpha (\pasr).} Provenance-Annotated Semantic Reduction synthesizes three paradigms: Chomsky's hierarchy of formal grammars (to structurally reduce prompts to canonical forms), Shannon's channel capacity theorem~\cite{shannon1948} (to bound the information content of adversarial perturbations), and Landauer's principle~\cite{landauer1961} (to establish thermodynamic lower bounds on the cost of semantic-preserving transformations). The result is a transducer that strips adversarial payload while preserving semantic intent, with provenance annotations maintained through the reduction.
+
+\paragraph{Combination Beta (\tcsa).} Temporal-Capability Safety Automata combine Lyapunov stability analysis (from control theory) with Byzantine fault-tolerant consensus~\cite{lamport1982} and long-term potentiation gating (from computational neuroscience). The \tcsa layer models the agent's capability trajectory as a dynamical system and enforces monotonic safety degradation bounds. Multi-agent deployments use BFT consensus to prevent any single compromised agent from escalating the collective capability envelope.
+
+\paragraph{Combination Gamma (\asra).} Ambiguity Surface Resolution Analysis draws on Austin's~\cite{austin1962} and Searle's~\cite{searle1969} speech act theory (illocutionary force analysis), lateral inhibition from neural circuit design, and Gricean conversational maxim violation detection~\cite{grice1975}. When a prompt's illocutionary force is ambiguous---it could be interpreted as either a legitimate request or an attack---\asra quantifies the ambiguity surface and applies mechanism-design principles to resolve it in a way that is incentive-compatible for honest users and costly for adversaries.

@@ -1,0 +1,135 @@
+# ============================================
+# SENTINEL — .gitignore
+# ============================================
+
+# === Build artifacts ===
+build/bin
+target/
+dist/
+__pycache__/
+*.pyc
+*.pyo
+*.egg-info/
+.venv/
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+**/.benchmarks/
+**/catboost_info/
+coverage.out
+*.whl
+*.tar.gz
+
+# === IDE ===
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# === Environment ===
+.env
+.env.local
+.env.production
+
+# === OS ===
+.DS_Store
+Thumbs.db
+nul
+
+# === LaTeX build artifacts ===
+papers/**/*.aux
+papers/**/*.bbl
+papers/**/*.blg
+papers/**/*.log
+papers/**/*.out
+papers/**/*.synctex.gz
+papers/**/*.fdb_latexmk
+papers/**/*.fls
+papers/**/*.pdf
+
+# === Node ===
+node_modules/
+
+# === Rust ===
+Cargo.lock
+
+# === Binaries ===
+*.exe
+*.dll
+*.so
+*.dylib
+
+# === Go compiled binaries ===
+gomcp/gomcp-darwin-*
+gomcp/gomcp-linux-*
+
+# === Agent configs (local) ===
+.agent/
+.claude/
+.gemini/
+.kiro/
+.opencode/
+.rlm/
+.entire/
+
+# === Test artifacts ===
+test-*.txt
+xss-test.html
+
+# === JS build output (leaked from old desktop app) ===
+chunk_*.js
+v2*.js
+
+# === Media (large binaries) ===
+*.avi
+*.mp4
+*.mov
+*.mkv
+
+# === Removed components (DO NOT commit) ===
+sentinel-desktop/
+sentinel-scan/
+frontend/
+pkg/
+ad-shield/
+openclaw/
+virtualconv-engine/
+saas/
+server/
+rlm-research/
+rlm-toolkit/
+ralph-sdd/
+assets/
+_archive/
+demos/
+tools/
+strike-force/
+benchmarks/
+monitoring/
+deploy/docker/
+
+# === Wails desktop app remnants ===
+app.go
+main.go
+app.js
+start.js
+wails.json
+go.mod
+go.sum
+GEMINI.md
+.gitmodules
+
+# === One-off scripts ===
+audit_*.ps1
+count_*.ps1
+recon_frontend.py
+
+# === Docker (keep only essential) ===
+Dockerfile.strike
+docker-compose.full.yml
+docker-compose.strike.yml
+docker-compose-deploy.yml
+sentinel.yaml
+
+# === Misc ===
+frontend/package.json.md5

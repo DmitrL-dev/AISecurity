@@ -1,0 +1,30 @@
+FROM python:3.11-slim
+
+LABEL maintainer="SENTINEL Team"
+LABEL description="SENTINEL AI Security Framework"
+
+WORKDIR /app
+
+# Install system dependencies
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    build-essential \
+    && rm -rf /var/lib/apt/lists/*
+
+# Copy package files
+COPY pyproject.toml README.md LICENSE* ./
+COPY src/ ./src/
+
+# Install SENTINEL with all extras
+RUN pip install --no-cache-dir -e ".[full]"
+
+# Create non-root user
+RUN useradd -m sentinel
+USER sentinel
+
+# Health check
+HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
+    CMD python -c "from sentinel import scan; print('OK')"
+
+# Default command
+ENTRYPOINT ["sentinel"]
+CMD ["--help"]

@@ -1,0 +1,55 @@
+\section{Conclusion}
+\label{sec:conclusion}
+
+We presented \sentinel, a multi-layer defense architecture for LLM security
+that synthesizes 58 security paradigms from 19 scientific domains into 7 novel
+security primitives. Evaluated against 250,000 simulated attacks spanning 15
+categories, the architecture achieves approximately 98.5\% detection and
+containment---approaching the theoretical floor of 98--99\% bounded by proven
+impossibility results. Rather than pursuing unattainable perfect security,
+\sentinel~demonstrates that principled cross-domain synthesis can close the gap
+between current ad hoc defenses and fundamental theoretical limits.
+
+\paragraph{Key contributions.}
+Our principal contributions are:
+
+\begin{itemize}
+  \item A systematic cross-domain paradigm synthesis methodology that analyzes
+    58 paradigms drawn from 19 scientific domains, providing a repeatable
+    framework for discovering security primitives at domain boundaries.
+
+  \item Seven novel security primitives---\pasr, \cafl, \gps, \aas, \irm,
+    \mire, and \tsa---of which five are genuinely new, confirmed via 51
+    prior art searches returning zero existing implementations.
+
+  \item A paradigm shift from backdoor detection---proven impossible by
+    Goldwasser and Kim~\cite{goldwasser2022}---to architectural containment
+    via \mire, rendering the impossibility result irrelevant by changing the
+    defensive objective.
+
+  \item \pasr---the first primitive that preserves information flow control
+    through lossy semantic transformations, formalized as a provenance lifting
+    functor (category-theoretic fibration) that maintains security labels
+    across meaning-preserving rewrites.
+
+  \item A demonstration that formal linguistics is the most underexploited
+    domain for LLM security---an irony, given that large language models are,
+    at their core, language models.
+\end{itemize}
+
+\paragraph{Broader impact.}
+The cross-domain synthesis methodology itself may be the most significant
+contribution of this work. By systematically searching across domain
+boundaries, we discovered that mature solutions to the LLM security problem
+already exist---scattered across unrelated fields, invisible to specialists
+working within any single domain. Information flow control, adversarial
+robustness, formal verification, and linguistic theory each hold pieces of the
+puzzle; none alone is sufficient. We believe this methodology is applicable
+beyond LLM security to other nascent fields where fundamental problems remain
+unsolved, and where the barrier to progress is not missing science but missing
+synthesis.
+
+\paragraph{Availability.}
+The Sentinel Core implementation (L1: 53 engines, 704 patterns) is open source
+at \url{https://github.com/DmitrL-dev/AISecurity}. Implementation of the
+remaining primitives is ongoing.

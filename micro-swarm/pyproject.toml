@@ -1,0 +1,26 @@
+[project]
+name = "micro-swarm"
+version = "0.4.0"
+description = "Micro-Model Swarm: lightweight ML ensemble framework. Pure Python, 0 deps, <1ms inference."
+readme = "README.md"
+requires-python = ">=3.11"
+license = { text = "MIT" }
+authors = [{ name = "SENTINEL AI" }]
+dependencies = []
+
+[project.scripts]
+micro-swarm = "micro_swarm.cli:main"
+
+[project.optional-dependencies]
+dev = ["pytest>=8.0", "pytest-cov>=4.1"]
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["micro_swarm"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-v --tb=short"

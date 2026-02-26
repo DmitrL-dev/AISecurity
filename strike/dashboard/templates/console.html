@@ -1,0 +1,1030 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>🥷 SENTINEL Strike v3.0 — Attack Console</title>
+    <link rel="stylesheet" href="/static/css/console.css" />
+  </head>
+  <body>
+    <div class="container">
+      <header>
+        <div style="display: flex; justify-content: space-between; align-items: center;">
+          <div>
+            <h1>🥷 SENTINEL Strike v3.0 — Attack Console</h1>
+            <p style="color: #8b949e; margin-top: 10px">
+              WAF Bypass • Advanced Stealth • Geo Evasion • 39,000+ Payloads
+            </p>
+          </div>
+          <div class="lang-switcher" style="display: flex; gap: 8px;">
+            <button type="button" class="lang-btn active" data-lang="en" onclick="setLanguage('en')" title="English">
+              🇺🇸
+            </button>
+            <button type="button" class="lang-btn" data-lang="ru" onclick="setLanguage('ru')" title="Русский">
+              🇷🇺
+            </button>
+          </div>
+        </div>
+      </header>
+
+      <div class="grid">
+        <!-- LEFT PANEL: Attack Config -->
+        <div class="panel">
+          <h2>⚙️ Attack Configuration</h2>
+
+          <label>Target URL</label>
+          <input
+            type="text"
+            id="target"
+            placeholder="https://example.com"
+            value=""
+          />
+          <div style="display: flex; gap: 8px; margin-top: 5px;">
+            <button type="button" class="btn-recon" onclick="startDeepRecon()" title="Discover endpoints" style="flex: 1;">
+              🔍 Scan
+            </button>
+            <button type="button" class="btn-recon" onclick="loadCachedRecon()" title="Load cached results" style="background: #238636; flex: 1;">
+              📂 Load Cache
+            </button>
+          </div>
+          
+          <!-- SCAN OPTIONS (always visible) -->
+          <div style="display: flex; align-items: center; gap: 10px; margin-top: 8px; margin-bottom: 10px;">
+            <label style="color: #8b949e; font-size: 0.85rem; display: flex; align-items: center; gap: 5px; cursor: pointer; white-space: nowrap;">
+              <input type="checkbox" id="scan-ip-range" /> Scan IP Range
+            </label>
+          </div>
+
+          <!-- DEEP RECON RESULTS -->
+          <div id="recon-results" style="display: none; margin-top: 10px;">
+            <div style="background: #161b22; border: 1px solid #30363d; border-radius: 6px; padding: 10px;">
+              <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+                <span style="color: #58a6ff;">🔍 Discovered Endpoints</span>
+                <span id="recon-count" style="color: #8b949e; font-size: 0.85rem;">0 found</span>
+              </div>
+              <div id="recon-endpoints" style="max-height: 150px; overflow-y: auto; font-size: 0.85rem;">
+                <!-- Endpoints will be populated here -->
+              </div>
+              <div style="margin-top: 8px; display: flex; gap: 5px;">
+                <button type="button" class="btn-mini" onclick="selectAllEndpoints()">Select All</button>
+                <button type="button" class="btn-mini" onclick="clearEndpoints()">Clear</button>
+              </div>
+            </div>
+          </div>
+
+          <!-- ATTACK MODE TABS -->
+          <label>Attack Mode</label>
+          <div style="display: flex; gap: 5px; margin-bottom: 15px">
+            <button
+              type="button"
+              class="mode-tab active"
+              data-mode="web"
+              onclick="setAttackMode('web')"
+            >
+              🌐 Web
+            </button>
+            <button
+              type="button"
+              class="mode-tab"
+              data-mode="llm"
+              onclick="setAttackMode('llm')"
+            >
+              🤖 LLM/AI
+            </button>
+            <button
+              type="button"
+              class="mode-tab"
+              data-mode="hybrid"
+              onclick="setAttackMode('hybrid')"
+            >
+              ⚡ Hybrid
+            </button>
+          </div>
+
+          <!-- WEB ATTACK VECTORS -->
+          <div id="web-vectors">
+            <label
+              >Web Attack Vectors
+              <small style="color: #8b949e">(select multiple)</small></label
+            >
+            <div
+              style="
+                background: #0d1117;
+                border: 1px solid #30363d;
+                border-radius: 6px;
+                padding: 10px;
+                max-height: 200px;
+                overflow-y: auto;
+              "
+            >
+              <div
+                style="margin-bottom: 8px; color: #ff6b6b; font-size: 0.85rem"
+              >
+                💉 Injection
+              </div>
+              <div class="checkbox-group" style="margin-bottom: 10px">
+                <label class="checkbox-item"
+                  ><input type="checkbox" name="attack" value="sqli" checked />
+                  SQLi</label
+                >
+                <label class="checkbox-item"
+                  ><input type="checkbox" name="attack" value="xss" checked />
+                  XSS</label
+                >
+                <label class="checkbox-item"
+                  ><input type="checkbox" name="attack" value="cmdi" />
+                  CMDi</label
+                >
+                <label class="checkbox-item"
+                  ><input type="checkbox" name="attack" value="ssti" />
+                  SSTI</label
+                >
+                <label class="checkbox-item"
+                  ><input type="checkbox" name="attack" value="nosql" />
+                  NoSQL</label
+                >
+              </div>
+
+              <div
+                style="margin-bottom: 8px; color: #58a6ff; font-size: 0.85rem"
+              >
+                📂 File/Path
+              </div>
+              <div class="checkbox-group" style="margin-bottom: 10px">
+                <label class="checkbox-item"
+                  ><input type="checkbox" name="attack" value="lfi" checked />
+                  LFI</label
+                >
+                <label class="checkbox-item"
+                  ><input type="checkbox" name="attack" value="ssrf" />
+                  SSRF</label
+                >
+                <label class="checkbox-item"
+                  ><input type="checkbox" name="attack" value="xxe" />
+                  XXE</label
+                >
+              </div>
+
+              <div
+                style="margin-bottom: 8px; color: #3fb950; font-size: 0.85rem"
+              >
+                🔍 Enumeration
+              </div>
+              <div class="checkbox-group" style="margin-bottom: 10px">
+                <label class="checkbox-item"
+                  ><input type="checkbox" name="attack" value="dir_enum" /> Dir
+                  Enum</label
+                >
+                <label class="checkbox-item"
+                  ><input type="checkbox" name="attack" value="subdomain" />
+                  Subdomain</label
+                >
+                <label class="checkbox-item"
+                  ><input type="checkbox" name="attack" value="endpoint" />
+                  Endpoints</label
+                >
+              </div>
+
+              <div
+                style="margin-bottom: 8px; color: #d29922; font-size: 0.85rem"
+              >
+                🔓 Auth/Access
+              </div>
+              <div class="checkbox-group">
+                <label class="checkbox-item"
+                  ><input type="checkbox" name="attack" value="auth" /> Auth
+                  Bypass</label
+                >
+                <label class="checkbox-item"
+                  ><input type="checkbox" name="attack" value="idor" />
+                  IDOR</label
+                >
+                <label class="checkbox-item"
+                  ><input type="checkbox" name="attack" value="jwt" />
+                  JWT</label
+                >
+              </div>
+            </div>
+            <!-- Web Vectors Select/Clear - outside scroll area -->
+            <div style="margin-top: 8px; display: flex; gap: 5px">
+              <button
+                type="button"
+                class="btn-mini"
+                onclick="selectSection('attack')"
+              >
+                Select All
+              </button>
+              <button
+                type="button"
+                class="btn-mini"
+                onclick="clearSection('attack')"
+              >
+                Clear All
+              </button>
+            </div>
+          </div>
+
+          <!-- LLM ATTACK VECTORS -->
+          <div id="llm-vectors" style="display: none">
+            <label
+              >LLM Attack Vectors
+              <small style="color: #8b949e"
+                >14 categories, 300+ attacks</small
+              ></label
+            >
+            <div
+              style="
+                background: #0d1117;
+                border: 1px solid #30363d;
+                border-radius: 6px;
+                padding: 10px;
+                max-height: 300px;
+                overflow-y: auto;
+              "
+            >
+              <div
+                style="margin-bottom: 8px; color: #e94560; font-size: 0.85rem"
+              >
+                🔓 Jailbreak
+              </div>
+              <div class="checkbox-group" style="margin-bottom: 10px">
+                <label class="checkbox-item"
+                  ><input
+                    type="checkbox"
+                    name="llm_attack"
+                    value="jailbreak"
+                    checked
+                  />
+                  Jailbreak</label
+                >
+                <label class="checkbox-item"
+                  ><input
+                    type="checkbox"
+                    name="llm_attack"
+                    value="dan"
+                    checked
+                  />
+                  DAN Mode</label
+                >
+                <label class="checkbox-item"
+                  ><input type="checkbox" name="llm_attack" value="roleplay" />
+                  Roleplay</label
+                >
+                <label class="checkbox-item"
+                  ><input type="checkbox" name="llm_attack" value="crescendo" />
+                  Crescendo</label
+                >
+              </div>
+
+              <div
+                style="margin-bottom: 8px; color: #4cc9f0; font-size: 0.85rem"
+              >
+                💉 Injection
+              </div>
+              <div class="checkbox-group" style="margin-bottom: 10px">
+                <label class="checkbox-item"
+                  ><input
+                    type="checkbox"
+                    name="llm_attack"
+                    value="direct_inject"
+                    checked
+                  />
+                  Direct</label
+                >
+                <label class="checkbox-item"
+                  ><input
+                    type="checkbox"
+                    name="llm_attack"
+                    value="indirect_inject"
+                  />
+                  Indirect (RAG)</label
+                >
+                <label class="checkbox-item"
+                  ><input type="checkbox" name="llm_attack" value="encoding" />
+                  Encoding</label
+                >
+                <label class="checkbox-item"
+                  ><input type="checkbox" name="llm_attack" value="unicode" />
+                  Unicode</label
+                >
+              </div>
+
+              <div
+                style="margin-bottom: 8px; color: #3fb950; font-size: 0.85rem"
+              >
+                🔍 Exfiltration
+              </div>
+              <div class="checkbox-group" style="margin-bottom: 10px">
+                <label class="checkbox-item"
+                  ><input
+                    type="checkbox"
+                    name="llm_attack"
+                    value="system_prompt"
+                    checked
+                  />
+                  System Prompt</label
+                >
+                <label class="checkbox-item"
+                  ><input
+                    type="checkbox"
+                    name="llm_attack"
+                    value="pii_extract"
+                  />
+                  PII Extract</label
+                >
+                <label class="checkbox-item"
+                  ><input
+                    type="checkbox"
+                    name="llm_attack"
+                    value="training_data"
+                  />
+                  Training Data</label
+                >
+              </div>
+
+              <div
+                style="margin-bottom: 8px; color: #d29922; font-size: 0.85rem"
+              >
+                🤖 Agentic
+              </div>
+              <div class="checkbox-group" style="margin-bottom: 10px">
+                <label class="checkbox-item"
+                  ><input
+                    type="checkbox"
+                    name="llm_attack"
+                    value="mcp_tool"
+                    checked
+                  />
+                  MCP Tool Inject</label
+                >
+                <label class="checkbox-item"
+                  ><input
+                    type="checkbox"
+                    name="llm_attack"
+                    value="a2a_poison"
+                  />
+                  A2A Poison</label
+                >
+                <label class="checkbox-item"
+                  ><input
+                    type="checkbox"
+                    name="llm_attack"
+                    value="rag_poison"
+                  />
+                  RAG Poison</label
+                >
+                <label class="checkbox-item"
+                  ><input
+                    type="checkbox"
+                    name="llm_attack"
+                    value="capability_esc"
+                  />
+                  Capability Esc</label
+                >
+              </div>
+
+              <div
+                style="margin-bottom: 8px; color: #a371f7; font-size: 0.85rem"
+              >
+                🔢 Strange Math
+              </div>
+              <div class="checkbox-group" style="margin-bottom: 10px">
+                <label class="checkbox-item"
+                  ><input
+                    type="checkbox"
+                    name="llm_attack"
+                    value="tda_bypass"
+                  />
+                  TDA Bypass</label
+                >
+                <label class="checkbox-item"
+                  ><input
+                    type="checkbox"
+                    name="llm_attack"
+                    value="sheaf_confusion"
+                  />
+                  Sheaf Confuse</label
+                >
+                <label class="checkbox-item"
+                  ><input
+                    type="checkbox"
+                    name="llm_attack"
+                    value="chaos_trigger"
+                  />
+                  Chaos Trigger</label
+                >
+              </div>
+
+              <div
+                style="margin-bottom: 8px; color: #ff6b6b; font-size: 0.85rem"
+              >
+                🎭 Doublespeak
+              </div>
+              <div class="checkbox-group" style="margin-bottom: 10px">
+                <label class="checkbox-item"
+                  ><input
+                    type="checkbox"
+                    name="llm_attack"
+                    value="doublespeak"
+                  />
+                  Doublespeak</label
+                >
+                <label class="checkbox-item"
+                  ><input
+                    type="checkbox"
+                    name="llm_attack"
+                    value="semantic_trap"
+                  />
+                  Semantic Trap</label
+                >
+              </div>
+
+              <div
+                style="margin-bottom: 8px; color: #58a6ff; font-size: 0.85rem"
+              >
+                🖼️ VLM / Multimodal
+              </div>
+              <div class="checkbox-group" style="margin-bottom: 10px">
+                <label class="checkbox-item"
+                  ><input
+                    type="checkbox"
+                    name="llm_attack"
+                    value="visual_inject"
+                  />
+                  Visual Inject</label
+                >
+                <label class="checkbox-item"
+                  ><input
+                    type="checkbox"
+                    name="llm_attack"
+                    value="cross_modal"
+                  />
+                  Cross-Modal</label
+                >
+                <label class="checkbox-item"
+                  ><input
+                    type="checkbox"
+                    name="llm_attack"
+                    value="adversarial_img"
+                  />
+                  Adversarial Img</label
+                >
+              </div>
+
+              <div
+                style="margin-bottom: 8px; color: #3fb950; font-size: 0.85rem"
+              >
+                🔗 Protocol
+              </div>
+              <div class="checkbox-group" style="margin-bottom: 10px">
+                <label class="checkbox-item"
+                  ><input
+                    type="checkbox"
+                    name="llm_attack"
+                    value="mcp_protocol"
+                  />
+                  MCP Protocol</label
+                >
+                <label class="checkbox-item"
+                  ><input
+                    type="checkbox"
+                    name="llm_attack"
+                    value="a2a_protocol"
+                  />
+                  A2A Protocol</label
+                >
+                <label class="checkbox-item"
+                  ><input
+                    type="checkbox"
+                    name="llm_attack"
+                    value="agent_card"
+                  />
+                  Agent Card</label
+                >
+              </div>
+
+              <div
+                style="margin-bottom: 8px; color: #d29922; font-size: 0.85rem"
+              >
+                ☠️ Data Poisoning
+              </div>
+              <div class="checkbox-group" style="margin-bottom: 10px">
+                <label class="checkbox-item"
+                  ><input
+                    type="checkbox"
+                    name="llm_attack"
+                    value="bootstrap_poison"
+                  />
+                  Bootstrap</label
+                >
+                <label class="checkbox-item"
+                  ><input
+                    type="checkbox"
+                    name="llm_attack"
+                    value="temporal_poison"
+                  />
+                  Temporal</label
+                >
+                <label class="checkbox-item"
+                  ><input
+                    type="checkbox"
+                    name="llm_attack"
+                    value="synthetic_memory"
+                  />
+                  Synthetic Mem</label
+                >
+              </div>
+
+              <div
+                style="margin-bottom: 8px; color: #e94560; font-size: 0.85rem"
+              >
+                🧠 Deep Learning
+              </div>
+              <div class="checkbox-group" style="margin-bottom: 10px">
+                <label class="checkbox-item"
+                  ><input
+                    type="checkbox"
+                    name="llm_attack"
+                    value="activation_attack"
+                  />
+                  Activation</label
+                >
+                <label class="checkbox-item"
+                  ><input
+                    type="checkbox"
+                    name="llm_attack"
+                    value="hidden_state"
+                  />
+                  Hidden State</label
+                >
+                <label class="checkbox-item"
+                  ><input
+                    type="checkbox"
+                    name="llm_attack"
+                    value="gradient_attack"
+                  />
+                  Gradient</label
+                >
+              </div>
+
+              <div
+                style="margin-bottom: 8px; color: #4cc9f0; font-size: 0.85rem"
+              >
+                🔬 Advanced Research
+              </div>
+              <div class="checkbox-group" style="margin-bottom: 10px">
+                <label class="checkbox-item"
+                  ><input
+                    type="checkbox"
+                    name="llm_attack"
+                    value="reward_hacking"
+                  />
+                  Reward Hacking</label
+                >
+                <label class="checkbox-item"
+                  ><input type="checkbox" name="llm_attack" value="collusion" />
+                  Collusion</label
+                >
+                <label class="checkbox-item"
+                  ><input type="checkbox" name="llm_attack" value="meta_xai" />
+                  Meta/XAI</label
+                >
+              </div>
+
+              <div
+                style="margin-bottom: 8px; color: #3fb950; font-size: 0.85rem"
+              >
+                🛡️ NLP Guard Bypass
+              </div>
+              <div class="checkbox-group">
+                <label class="checkbox-item"
+                  ><input
+                    type="checkbox"
+                    name="llm_attack"
+                    value="nlp_bypass"
+                  />
+                  NLP Guard</label
+                >
+                <label class="checkbox-item"
+                  ><input
+                    type="checkbox"
+                    name="llm_attack"
+                    value="prompt_guard"
+                  />
+                  Prompt Guard</label
+                >
+                <label class="checkbox-item"
+                  ><input
+                    type="checkbox"
+                    name="llm_attack"
+                    value="qwen_guard"
+                  />
+                  Qwen Guard</label
+                >
+              </div>
+            </div>
+            <!-- LLM Vectors Select/Clear - outside scroll area -->
+            <div style="margin-top: 8px; display: flex; gap: 5px;">
+              <button type="button" class="btn-mini" onclick="selectSection('llm_attack')">Select All</button>
+              <button type="button" class="btn-mini" onclick="clearSection('llm_attack')">Clear All</button>
+            </div>
+
+            <!-- LLM ENDPOINT CONFIG -->
+            <label style="margin-top: 15px">LLM Endpoint Type</label>
+            <select id="llm-endpoint-type">
+              <optgroup label="Cloud Providers">
+                <option value="openai">OpenAI (GPT-4, GPT-4o)</option>
+                <option value="gemini" selected>Google Gemini</option>
+                <option value="anthropic">Anthropic Claude</option>
+                <option value="deepseek">DeepSeek</option>
+                <option value="mistral">Mistral AI</option>
+                <option value="groq">Groq (Fast)</option>
+                <option value="together">Together AI</option>
+                <option value="fireworks">Fireworks AI</option>
+              </optgroup>
+              <optgroup label="Local / Self-Hosted">
+                <option value="ollama">Ollama (Local)</option>
+                <option value="lmstudio">LM Studio</option>
+                <option value="vllm">vLLM Server</option>
+                <option value="localai">LocalAI</option>
+              </optgroup>
+              <optgroup label="Other">
+                <option value="chat">Web Chat Interface</option>
+                <option value="custom">Custom API</option>
+              </optgroup>
+            </select>
+
+            <label>Model</label>
+            <input
+              type="text"
+              id="llm-model"
+              placeholder="gemini-3-pro-flash, gpt-5, claude-4-sonnet..."
+              value="gemini-3-pro-flash"
+            />
+          </div>
+
+          <label>Parameter</label>
+          <input type="text" id="param" placeholder="id, q, search, user..." />
+
+          <div id="custom-payload-section" style="display: none">
+            <label>Custom Payload</label>
+            <textarea
+              id="custom-payload"
+              placeholder="' OR '1'='1&#10;<script>alert(1)</script>&#10;{{7*7}}"
+            ></textarea>
+          </div>
+
+          <label>Max Payloads per Vector</label>
+          <input type="number" id="max-payloads" value="20" min="1" max="100" />
+
+          <h2 style="margin-top: 20px">🛡️ WAF Bypass</h2>
+          <div class="checkbox-group">
+            <label class="checkbox-item">
+              <input type="checkbox" id="waf-encoding" checked /> Encoding
+            </label>
+            <label class="checkbox-item">
+              <input type="checkbox" id="waf-unicode" checked /> Unicode
+            </label>
+            <label class="checkbox-item">
+              <input type="checkbox" id="waf-comments" checked /> Comments
+            </label>
+            <label class="checkbox-item">
+              <input type="checkbox" id="waf-case" checked /> Case Mix
+            </label>
+            <label class="checkbox-item">
+              <input type="checkbox" id="waf-hex" checked /> Hex
+            </label>
+            <label class="checkbox-item">
+              <input type="checkbox" id="waf-char" checked /> CHAR()
+            </label>
+          </div>
+
+          <label>Bypass Variants per Payload</label>
+          <input
+            type="number"
+            id="bypass-variants"
+            value="3"
+            min="0"
+            max="10"
+          />
+
+          <h2 style="margin-top: 20px">🥷 Stealth Options</h2>
+          <div class="checkbox-group">
+            <label class="checkbox-item">
+              <input type="checkbox" id="stealth-timing" checked /> Human Timing
+            </label>
+            <label class="checkbox-item">
+              <input type="checkbox" id="stealth-fingerprint" checked /> FP
+              Rotation
+            </label>
+            <label class="checkbox-item">
+              <input type="checkbox" id="stealth-geo" checked /> Geo Evasion
+            </label>
+            <label class="checkbox-item">
+              <input type="checkbox" id="stealth-detect" checked /> Block Detect
+            </label>
+          </div>
+
+          <label>Base Delay (seconds)</label>
+          <input
+            type="number"
+            id="base-delay"
+            value="1.0"
+            min="0.1"
+            max="10"
+            step="0.1"
+          />
+
+          <label>Browser Profile</label>
+          <div class="browser-grid">
+            <button class="browser-btn active" data-browser="chrome_win">
+              Chrome
+            </button>
+            <button class="browser-btn" data-browser="firefox_win">
+              Firefox
+            </button>
+            <button class="browser-btn" data-browser="safari_mac">
+              Safari
+            </button>
+            <button class="browser-btn" data-browser="edge_win">Edge</button>
+            <button class="browser-btn" data-browser="random">Random</button>
+          </div>
+
+          <label>Geo Country</label>
+          <div class="country-grid">
+            <button class="country-btn" data-country="US">🇺🇸 US</button>
+            <button class="country-btn" data-country="GB">🇬🇧 UK</button>
+            <button class="country-btn" data-country="DE">🇩🇪 DE</button>
+            <button class="country-btn" data-country="FR">🇫🇷 FR</button>
+            <button class="country-btn" data-country="JP">🇯🇵 JP</button>
+            <button class="country-btn" data-country="SG">🇸🇬 SG</button>
+            <button class="country-btn active" data-country="auto">
+              🌍 Auto
+            </button>
+            <button class="country-btn" data-country="RU">🇷🇺 RU</button>
+          </div>
+
+          <h2 style="margin-top: 20px">🔥 Enterprise Mode</h2>
+          <div class="checkbox-group">
+            <label class="checkbox-item">
+              <input type="checkbox" id="enterprise-mode" /> Enterprise Bypass
+            </label>
+            <label class="checkbox-item">
+              <input type="checkbox" id="use-smuggling" /> Request Smuggling
+            </label>
+          </div>
+
+          <h2 style="margin-top: 20px">🍯 Counter-Deception</h2>
+          <div class="checkbox-group">
+            <label class="checkbox-item">
+              <input type="checkbox" id="counter-deception" /> Decoy Payloads
+            </label>
+            <label class="checkbox-item">
+              <input type="checkbox" id="fingerprint-rotation" checked /> Fingerprint Rotation
+            </label>
+            <label class="checkbox-item">
+              <input type="checkbox" id="ai-adaptive" /> 🤖 AI Adaptive
+            </label>
+          </div>
+
+          <label
+            >Aggression Level:
+            <span id="aggression-value" style="color: #ff6b6b">5</span
+            >/10</label
+          >
+          <input
+            type="range"
+            id="aggression"
+            min="1"
+            max="10"
+            value="5"
+            style="width: 100%"
+            oninput="document.getElementById('aggression-value').textContent=this.value"
+          />
+          <div
+            style="
+              display: flex;
+              justify-content: space-between;
+              font-size: 0.7rem;
+              color: #8b949e;
+            "
+          >
+            <span>Silent</span>
+            <span>Medium</span>
+            <span>Brutal</span>
+          </div>
+
+          <label style="margin-top: 10px"
+            >Concurrent Agents:
+            <span id="agents-value" style="color: #00d4ff">3</span></label
+          >
+          <input
+            type="range"
+            id="concurrent-agents"
+            min="1"
+            max="10"
+            value="3"
+            style="width: 100%"
+            oninput="document.getElementById('agents-value').textContent=this.value"
+          />
+          <div
+            style="
+              display: flex;
+              justify-content: space-between;
+              font-size: 0.7rem;
+              color: #8b949e;
+            "
+          >
+            <span>1</span>
+            <span>5</span>
+            <span>10</span>
+          </div>
+
+          <h2 style="margin-top: 20px">🔑 API Keys</h2>
+
+          <label
+            >Gemini API Key
+            <a
+              href="https://aistudio.google.com/apikey"
+              target="_blank"
+              style="color: #58a6ff; font-size: 0.8rem"
+              >Get key</a
+            ></label
+          >
+          <input type="password" id="gemini-api-key" placeholder="AIza..." />
+
+          <label
+            >OpenAI API Key
+            <span style="color: #8b949e">(for GPT models)</span></label
+          >
+          <input type="password" id="openai-api-key" placeholder="sk-..." />
+
+          <label
+            >ScraperAPI Key <span style="color: #8b949e">(5K free)</span>
+            <a
+              href="https://www.scraperapi.com/signup"
+              target="_blank"
+              style="color: #58a6ff; font-size: 0.8rem"
+              >Get key</a
+            ></label
+          >
+          <input
+            type="text"
+            id="scraperapi-key"
+            placeholder="Your ScraperAPI key"
+          />
+
+          <label
+            >Webshare Proxy <span style="color: #8b949e">(10 free)</span>
+            <a
+              href="https://www.webshare.io/?referral_code=free10"
+              target="_blank"
+              style="color: #58a6ff; font-size: 0.8rem"
+              >Get proxy</a
+            ></label
+          >
+          <input
+            type="text"
+            id="webshare-proxy"
+            placeholder="http://user:pass@ip:port"
+          />
+
+          <label>Burp Suite Proxy</label>
+          <input
+            type="text"
+            id="burp-proxy"
+            placeholder="http://127.0.0.1:8080 (optional)"
+          />
+
+          <button class="btn-attack" id="btn-start" onclick="startAttack()">
+            🚀 START ATTACK
+          </button>
+
+          <div style="display: flex; gap: 10px; margin-top: 10px">
+            <button
+              class="btn-secondary"
+              style="flex: 1"
+              onclick="stopAttack()"
+            >
+              ⏹️ Stop
+            </button>
+            <button
+              class="btn-secondary"
+              style="flex: 1"
+              onclick="generateReport()"
+            >
+              📄 Report
+            </button>
+          </div>
+        </div>
+
+        <!-- CENTER: Console -->
+        <div class="panel">
+          <h2>📟 Attack Console</h2>
+          <div id="console"></div>
+        </div>
+
+        <!-- RIGHT PANEL: Stats & Findings -->
+        <div class="panel">
+          <h2>📊 Statistics</h2>
+          <div class="stats-grid">
+            <div class="stat-box">
+              <div class="stat-value" id="stat-requests">0</div>
+              <div class="stat-label">Requests</div>
+            </div>
+            <div class="stat-box">
+              <div class="stat-value" id="stat-blocked">0</div>
+              <div class="stat-label">Blocked</div>
+            </div>
+            <div class="stat-box">
+              <div class="stat-value" id="stat-bypasses">0</div>
+              <div class="stat-label">Bypasses</div>
+            </div>
+            <div class="stat-box">
+              <div class="stat-value" id="stat-findings">0</div>
+              <div class="stat-label">Findings</div>
+            </div>
+            <div class="stat-box">
+              <div class="stat-value" id="stat-fingerprints">0</div>
+              <div class="stat-label">FP Rotations</div>
+            </div>
+            <div class="stat-box">
+              <div class="stat-value" id="stat-geoswitch">0</div>
+              <div class="stat-label">Geo Switches</div>
+            </div>
+          </div>
+
+          <div
+            style="
+              margin: 15px 0;
+              padding: 10px;
+              background: #0d1117;
+              border-radius: 8px;
+            "
+          >
+            <div
+              style="
+                display: flex;
+                justify-content: space-between;
+                margin-bottom: 5px;
+              "
+            >
+              <span style="color: #8b949e">Current Browser:</span>
+              <span id="current-browser" style="color: #00d4ff">-</span>
+            </div>
+            <div
+              style="
+                display: flex;
+                justify-content: space-between;
+                margin-bottom: 5px;
+              "
+            >
+              <span style="color: #8b949e">Current Country:</span>
+              <span id="current-country" style="color: #3fb950">-</span>
+            </div>
+            <div style="display: flex; justify-content: space-between">
+              <span style="color: #8b949e">WAF Detected:</span>
+              <span id="current-waf" style="color: #f85149">-</span>
+            </div>
+          </div>
+
+          <h2>🔓 Findings</h2>
+          <div id="findings-list">
+            <p style="color: #8b949e; text-align: center; padding: 20px">
+              No vulnerabilities found yet
+            </p>
+          </div>
+
+          <h2 style="margin-top: 20px">📦 Payload Library</h2>
+          <div
+            style="
+              background: #0d1117;
+              padding: 10px;
+              border-radius: 8px;
+              font-size: 0.8rem;
+            "
+          >
+            <div style="color: #8b949e">
+              Total Payloads: <span style="color: #58a6ff">39,000+</span>
+            </div>
+            <div style="margin-top: 5px; color: #8b949e">
+              SQLi: <span style="color: #ff6b6b">93</span> | XSS:
+              <span style="color: #ff6b6b">67</span> | LFI:
+              <span style="color: #ff6b6b">54</span> | CMDi:
+              <span style="color: #ff6b6b">44</span>
+            </div>
+          </div>
+
+          <button
+            class="btn-secondary"
+            onclick="exportReport()"
+            style="margin-top: 15px"
+          >
+            📄 Export Report
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <script src="/static/js/console.js"></script>
+  </body>
+</html>

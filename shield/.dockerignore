@@ -1,0 +1,60 @@
+# SENTINEL Shield - Docker Ignore
+# Exclude unnecessary files from Docker build context
+
+# Build artifacts
+build/
+*.o
+*.a
+*.so
+*.dll
+*.exe
+
+# IDE and editor files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Git
+.git/
+.gitignore
+.gitattributes
+
+# Documentation (not needed for runtime)
+docs/
+*.md
+!README.md
+
+# Tests
+tests/
+test_*.c
+
+# Examples
+examples/
+
+# Bindings (separate builds)
+bindings/
+
+# Agent/context files
+.agent/
+
+# Local config overrides
+*.local
+*.dev
+
+# Logs
+*.log
+logs/
+
+# Temporary files
+tmp/
+temp/
+*.tmp
+
+# macOS
+.DS_Store
+
+# Windows
+Thumbs.db
+desktop.ini

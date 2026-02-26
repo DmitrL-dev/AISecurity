@@ -1,0 +1,90 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "sentinel-llm-security"
+version = "5.0.0"
+description = "SENTINEL — AI Security Platform. 49 Rust Engines + Micro-Model Swarm. Defense, Offense, Framework."
+readme = "README.md"
+license = "Apache-2.0"
+requires-python = ">=3.9"
+authors = [{ name = "Dmitry Labintsev", email = "chg@live.ru" }]
+keywords = [
+    "ai-security",
+    "llm-security",
+    "prompt-injection",
+    "jailbreak-detection",
+    "red-team",
+    "penetration-testing",
+    "guardrails",
+]
+classifiers = [
+    "Development Status :: 5 - Production/Stable",
+    "Intended Audience :: Developers",
+    "Intended Audience :: Science/Research",
+    "License :: OSI Approved :: Apache Software License",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Programming Language :: Rust",
+    "Topic :: Security",
+    "Topic :: Scientific/Engineering :: Artificial Intelligence",
+]
+
+dependencies = ["pydantic>=2.0", "aiohttp>=3.8"]
+
+[project.optional-dependencies]
+cli = ["click>=8.0", "rich>=13.0"]
+ml = ["torch>=2.0", "transformers>=4.30", "sentence-transformers>=2.2"]
+plugins = ["pluggy>=1.0"]
+full = ["sentinel-llm-security[cli,ml,plugins]"]
+dev = [
+    "pytest>=7.0",
+    "pytest-asyncio>=0.21",
+    "black>=23.0",
+    "flake8>=6.0",
+    "mypy>=1.0",
+]
+
+[project.scripts]
+sentinel = "sentinel.cli.main:main"
+
+[project.entry-points."sentinel.plugins"]
+builtin = "sentinel.engines:BuiltinPlugin"
+
+[project.urls]
+Homepage = "https://github.com/DmitrL-dev/AISecurity"
+Documentation = "https://dmitrl-dev.github.io/AISecurity/"
+Repository = "https://github.com/DmitrL-dev/AISecurity"
+Issues = "https://github.com/DmitrL-dev/AISecurity/issues"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/sentinel", "micro-swarm/micro_swarm"]
+
+[tool.hatch.build.targets.sdist]
+include = [
+    "/src",
+    "/micro-swarm/micro_swarm",
+    "/tests",
+    "/README.md",
+    "/LICENSE",
+]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+asyncio_mode = "auto"
+pythonpath = ["src"]
+
+[tool.black]
+line-length = 88
+target-version = ['py39']
+
+[tool.mypy]
+python_version = "3.9"
+warn_return_any = true
+warn_unused_configs = true

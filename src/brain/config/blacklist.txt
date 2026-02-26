@@ -1,0 +1,14 @@
+# Static blacklist patterns (regex supported)
+# One pattern per line
+
+# Direct keywords
+password
+пароль
+salary
+зарплата
+ssn
+social security
+
+# Patterns
+\b\d{3}-\d{2}-\d{4}\b
+\b\d{4}\s?\d{4}\s?\d{4}\s?\d{4}\b

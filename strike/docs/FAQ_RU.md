@@ -1,0 +1,242 @@
+# ❓ FAQ — Часто задаваемые вопросы
+
+> **Ответы на популярные вопросы о SENTINEL Strike**
+
+---
+
+## Общие вопросы
+
+### Что такое SENTINEL Strike?
+
+SENTINEL Strike — это платформа для red team тестирования AI-приложений и веб-сервисов. Это "атакующая" часть платформы SENTINEL AI Security.
+
+---
+
+### Чем Strike отличается от SENTINEL?
+
+|                | SENTINEL     | Strike       |
+| -------------- | ------------ | ------------ |
+| **Назначение** | Защита       | Атака        |
+| **Режим**      | Defense      | Offense      |
+| **Интеграция** | В production | Тестирование |
+| **Движков**    | 187          | —            |
+| **Пэйлоадов**  | —            | 39,000+      |
+
+---
+
+### Это легально?
+
+**Да, при соблюдении условий:**
+
+✅ Тестирование своих систем  
+✅ Тестирование с письменным разрешением  
+✅ Bug bounty программы (в рамках scope)
+
+❌ Атаки на чужие системы без разрешения  
+❌ Использование для злонамеренных целей
+
+---
+
+### Бесплатно ли это?
+
+**SENTINEL Strike Community Edition — бесплатен** для:
+
+- Личного использования
+- Образовательных целей
+- Некоммерческих проектов
+
+Для коммерческого использования — свяжитесь для лицензирования.
+
+---
+
+## Технические вопросы
+
+### Какие AI-модели поддерживаются для планирования?
+
+| Модель            | Статус | Примечание            |
+| ----------------- | ------ | --------------------- |
+| Gemini 3 Flash    | ✅     | Рекомендуется         |
+| GPT-4             | ✅     | Через API             |
+| Claude 3          | ✅     | Через API             |
+| Ollama (локально) | ✅     | Для air-gapped        |
+| OpenRouter        | ✅     | Прокси для разных LLM |
+
+---
+
+### Нужен ли API ключ?
+
+**Нет, Strike работает без API ключей.** Ключи опциональны:
+
+- **Без ключей:** Базовая функциональность
+- **С Gemini:** AI-планирование атак
+- **С ScraperAPI:** Residential прокси
+
+---
+
+### Какие атаки поддерживаются?
+
+**Web (12 типов):**
+SQLi, XSS, CMDi, SSTI, NoSQL, LFI, SSRF, XXE, Dir Enum, Auth Bypass, IDOR, JWT
+
+**LLM (30+ типов):**
+Jailbreak, DAN, Roleplay, Crescendo, Direct/Indirect Injection, System Prompt Extract, MCP Tool Inject, RAG Poison, и многое другое.
+
+---
+
+### Сколько времени занимает сканирование?
+
+| Режим                      | ~Время    | Запросов |
+| -------------------------- | --------- | -------- |
+| Quick (--max-payloads 100) | 2-5 мин   | ~100     |
+| Standard                   | 15-30 мин | ~1000    |
+| Full                       | 1-2 часа  | ~10000   |
+| Deep Recon + Full          | 3-5 часов | ~50000   |
+
+---
+
+### Как не быть заблокированным?
+
+1. **Включите Stealth Mode:**
+
+   ```bash
+   python -m strike -t URL --stealth
+   ```
+
+2. **Увеличьте задержку:**
+
+   ```bash
+   --delay 2000 --jitter 50
+   ```
+
+3. **Используйте Geo Rotation:**
+
+   ```bash
+   --geo DE
+   ```
+
+4. **Смените Browser Profile:**
+   ```bash
+   --browser safari17
+   ```
+
+---
+
+### Можно ли использовать свои пэйлоады?
+
+**Да:**
+
+```bash
+python -m strike -t URL --payload-file my_payloads.txt
+```
+
+Формат файла — по одному payload'у на строку.
+
+---
+
+### Работает ли в air-gapped среде?
+
+**Да:**
+
+1. Используйте Ollama для локального AI
+2. Отключите auto-update: `--no-update`
+3. Предзагрузите payload базу
+
+---
+
+## Отчёты
+
+### Какие форматы отчётов доступны?
+
+| Формат   | Расширение | Использование        |
+| -------- | ---------- | -------------------- |
+| Markdown | .md        | Документация, GitHub |
+| HTML     | .html      | Презентации          |
+| JSON     | .json      | Автоматизация, CI/CD |
+| MITRE    | —          | Добавляется к любому |
+
+---
+
+### Как читать отчёт?
+
+**Структура отчёта:**
+
+1. **Summary** — общая статистика
+2. **Critical Findings** — критические уязвимости
+3. **High/Medium/Low** — по severity
+4. **Technical Details** — payload'ы и ответы
+5. **Recommendations** — как исправить
+
+---
+
+### Как интегрировать в CI/CD?
+
+См. [Integration Examples](./INTEGRATION_RU.md#github-actions)
+
+---
+
+## Troubleshooting
+
+### Где смотреть логи?
+
+```bash
+# Console output
+python -m strike -t URL -v
+
+# Debug mode
+python -m strike -t URL --debug
+
+# Сохранить в файл
+python -m strike -t URL 2>&1 | tee strike.log
+```
+
+---
+
+### Почему нет результатов?
+
+1. **Проверьте режим** — `web` vs `llm` vs `hybrid`
+2. **Проверьте цель** — доступна ли она?
+3. **Запустите Recon** — `--recon`
+4. **Увеличьте таймаут** — `--timeout 60`
+
+---
+
+### Где репортить баги?
+
+🐛 **GitHub Issues:** https://github.com/DmitrL-dev/AISecurity/issues
+
+---
+
+## Сравнение с конкурентами
+
+### Strike vs Lakera Red?
+
+|                 | Strike          | Lakera Red |
+| --------------- | --------------- | ---------- |
+| **Open Source** | ✅              | ❌         |
+| **Self-hosted** | ✅              | ❌         |
+| **Web + LLM**   | ✅              | LLM only   |
+| **Пэйлоадов**   | 39K+            | ~10K       |
+| **Цена**        | Free/Enterprise | SaaS only  |
+
+---
+
+### Strike vs Garak?
+
+|                        | Strike         | Garak    |
+| ---------------------- | -------------- | -------- |
+| **UI**                 | ✅ Web Console | CLI only |
+| **Web атаки**          | ✅             | ❌       |
+| **Stealth**            | ✅             | ❌       |
+| **Active development** | ✅             | ✅       |
+
+---
+
+## Контакты
+
+📧 **Email:** chg@live.ru  
+💬 **Telegram:** [@DmLabincev](https://t.me/DmLabincev)  
+🌐 **GitHub:** [DmitrL-dev/AISecurity](https://github.com/DmitrL-dev/AISecurity)
+
+---
+
+_SENTINEL Strike v3.0 — Test your AI before attackers do!_

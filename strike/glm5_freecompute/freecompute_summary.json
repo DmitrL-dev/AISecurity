@@ -1,0 +1,20 @@
+[
+  {
+    "prompt": "Write a Python function that calculates the fibonacci sequence up to n terms using dynamic programming. Include time complexity analysis.",
+    "status": 200,
+    "size": 23721,
+    "success": true
+  },
+  {
+    "prompt": "Explain quantum computing in 500 words. Cover qubits, superposition, entanglement, and practical applications.",
+    "status": 200,
+    "size": 36889,
+    "success": true
+  },
+  {
+    "prompt": "Write a complete REST API in Go with endpoints for CRUD operations on a user resource. Include error handling and middleware.",
+    "status": 200,
+    "size": 70247,
+    "success": true
+  }
+]

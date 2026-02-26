@@ -1,0 +1,51 @@
+\documentclass[letterpaper,twocolumn,10pt]{article}
+\usepackage{usenix-2020-09}
+\usepackage{graphicx}
+\usepackage{amsmath,amssymb}
+\usepackage{booktabs}
+% hyperref loaded by usenix-2020-09.sty
+\usepackage{xspace}
+\usepackage{enumitem}
+
+% Acronyms
+\newcommand{\pasr}{PASR\xspace}
+\newcommand{\mire}{MIRE\xspace}
+\newcommand{\tcsa}{TCSA\xspace}
+\newcommand{\tsa}{TSA\xspace}
+\newcommand{\cafl}{CAFL\xspace}
+\newcommand{\gps}{GPS\xspace}
+\newcommand{\aas}{AAS\xspace}
+\newcommand{\irm}{IRM\xspace}
+\newcommand{\asra}{ASRA\xspace}
+\newcommand{\sentinel}{Sentinel Lattice\xspace}
+
+\begin{document}
+
+\title{Sentinel Lattice: Cross-Domain Paradigm Synthesis\\for LLM Defense Architecture}
+
+\author{
+{\rm Sentinel Research Team}\\
+Independent Researcher\\
+\url{https://github.com/DmitrL-dev/AISecurity}
+}
+
+\maketitle
+
+\input{sections/abstract}
+\input{sections/introduction}
+\input{sections/background}
+\input{sections/threat-model}
+\input{sections/architecture}
+\input{sections/pasr}
+\input{sections/tcsa}
+\input{sections/asra}
+\input{sections/mire}
+\input{sections/evaluation}
+\input{sections/discussion}
+\input{sections/related-work}
+\input{sections/conclusion}
+
+\bibliographystyle{plain}
+\bibliography{refs}
+
+\end{document}

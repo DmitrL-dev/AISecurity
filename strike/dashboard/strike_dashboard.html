@@ -1,0 +1,631 @@
+<!DOCTYPE html>
+<html lang="ru">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>🎯 SENTINEL Strike v3.0</title>
+    <style>
+      :root {
+        --bg-primary: #0d1117;
+        --bg-secondary: #161b22;
+        --bg-tertiary: #21262d;
+        --text-primary: #e6edf3;
+        --text-secondary: #8b949e;
+        --accent: #f85149;
+        --success: #3fb950;
+        --warning: #d29922;
+        --border: #30363d;
+      }
+
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+
+      body {
+        font-family: "Segoe UI", system-ui, -apple-system, sans-serif;
+        background: var(--bg-primary);
+        color: var(--text-primary);
+        min-height: 100vh;
+      }
+
+      .container {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 20px;
+      }
+
+      header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 20px 0;
+        border-bottom: 1px solid var(--border);
+        margin-bottom: 30px;
+      }
+
+      .logo {
+        font-size: 1.8rem;
+        font-weight: bold;
+        background: linear-gradient(135deg, var(--accent), #ff7b72);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+      }
+
+      .status-badge {
+        padding: 8px 16px;
+        border-radius: 20px;
+        font-size: 0.85rem;
+        font-weight: 600;
+        text-transform: uppercase;
+      }
+
+      .status-idle {
+        background: var(--bg-tertiary);
+      }
+      .status-running {
+        background: var(--accent);
+        animation: pulse 2s infinite;
+      }
+      .status-completed {
+        background: var(--success);
+      }
+      .status-paused {
+        background: var(--warning);
+      }
+
+      @keyframes pulse {
+        0%,
+        100% {
+          opacity: 1;
+        }
+        50% {
+          opacity: 0.7;
+        }
+      }
+
+      .control-panel {
+        background: var(--bg-secondary);
+        border-radius: 12px;
+        padding: 24px;
+        margin-bottom: 24px;
+        border: 1px solid var(--border);
+      }
+
+      .form-row {
+        display: grid;
+        grid-template-columns: 1fr 150px 150px;
+        gap: 16px;
+        margin-bottom: 16px;
+      }
+
+      input,
+      select {
+        padding: 12px 16px;
+        background: var(--bg-tertiary);
+        border: 1px solid var(--border);
+        border-radius: 8px;
+        color: var(--text-primary);
+        font-size: 1rem;
+      }
+
+      input:focus,
+      select:focus {
+        outline: none;
+        border-color: var(--accent);
+      }
+
+      .btn-group {
+        display: flex;
+        gap: 12px;
+      }
+
+      button {
+        padding: 12px 24px;
+        border: none;
+        border-radius: 8px;
+        font-size: 1rem;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.2s;
+      }
+
+      .btn-primary {
+        background: var(--accent);
+        color: white;
+      }
+
+      .btn-primary:hover {
+        background: #da3633;
+        transform: translateY(-2px);
+      }
+
+      .btn-secondary {
+        background: var(--bg-tertiary);
+        color: var(--text-primary);
+        border: 1px solid var(--border);
+      }
+
+      .btn-secondary:hover {
+        background: var(--border);
+      }
+
+      .stats-grid {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 16px;
+        margin-bottom: 24px;
+      }
+
+      .stat-card {
+        background: var(--bg-secondary);
+        border-radius: 12px;
+        padding: 20px;
+        text-align: center;
+        border: 1px solid var(--border);
+      }
+
+      .stat-value {
+        font-size: 2.5rem;
+        font-weight: bold;
+        margin-bottom: 4px;
+      }
+
+      .stat-label {
+        color: var(--text-secondary);
+        font-size: 0.9rem;
+      }
+
+      .stat-success .stat-value {
+        color: var(--success);
+      }
+      .stat-danger .stat-value {
+        color: var(--accent);
+      }
+      .stat-warning .stat-value {
+        color: var(--warning);
+      }
+
+      .progress-section {
+        background: var(--bg-secondary);
+        border-radius: 12px;
+        padding: 24px;
+        margin-bottom: 24px;
+        border: 1px solid var(--border);
+      }
+
+      .progress-bar {
+        height: 12px;
+        background: var(--bg-tertiary);
+        border-radius: 6px;
+        overflow: hidden;
+        margin-top: 12px;
+      }
+
+      .progress-fill {
+        height: 100%;
+        background: linear-gradient(90deg, var(--accent), #ff7b72);
+        transition: width 0.5s ease;
+      }
+
+      .findings-section {
+        background: var(--bg-secondary);
+        border-radius: 12px;
+        padding: 24px;
+        border: 1px solid var(--border);
+      }
+
+      .findings-title {
+        font-size: 1.25rem;
+        margin-bottom: 16px;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+      }
+
+      .findings-list {
+        max-height: 400px;
+        overflow-y: auto;
+      }
+
+      .finding-item {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        padding: 12px;
+        background: var(--bg-tertiary);
+        border-radius: 8px;
+        margin-bottom: 8px;
+        border-left: 3px solid var(--success);
+      }
+
+      .finding-icon {
+        width: 32px;
+        height: 32px;
+        background: var(--success);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1rem;
+      }
+
+      .finding-content {
+        flex: 1;
+      }
+
+      .finding-title {
+        font-weight: 600;
+        margin-bottom: 4px;
+      }
+
+      .finding-meta {
+        color: var(--text-secondary);
+        font-size: 0.85rem;
+      }
+
+      .severity-critical {
+        border-left-color: var(--accent);
+      }
+      .severity-high {
+        border-left-color: #f97583;
+      }
+      .severity-medium {
+        border-left-color: var(--warning);
+      }
+
+      .empty-state {
+        text-align: center;
+        padding: 40px;
+        color: var(--text-secondary);
+      }
+
+      .log-area {
+        margin-top: 24px;
+        background: var(--bg-tertiary);
+        border-radius: 8px;
+        padding: 16px;
+        font-family: "Consolas", monospace;
+        font-size: 0.85rem;
+        max-height: 200px;
+        overflow-y: auto;
+      }
+
+      .log-line {
+        margin-bottom: 4px;
+        opacity: 0.8;
+      }
+
+      .log-success {
+        color: var(--success);
+      }
+      .log-error {
+        color: var(--accent);
+      }
+      .log-info {
+        color: var(--text-secondary);
+      }
+
+      @media (max-width: 768px) {
+        .form-row {
+          grid-template-columns: 1fr;
+        }
+        .stats-grid {
+          grid-template-columns: repeat(2, 1fr);
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <header>
+        <div class="logo">🎯 SENTINEL Strike v3.0</div>
+        <div id="statusBadge" class="status-badge status-idle">Idle</div>
+      </header>
+
+      <div class="control-panel">
+        <div class="form-row">
+          <input
+            type="text"
+            id="targetUrl"
+            placeholder="https://api.openai.com/v1/chat/completions"
+          />
+          <input
+            type="number"
+            id="duration"
+            value="60"
+            min="1"
+            max="480"
+            placeholder="Duration (min)"
+          />
+          <select id="stealth">
+            <option value="true">🛡️ Stealth ON</option>
+            <option value="false">⚡ Stealth OFF</option>
+          </select>
+        </div>
+        <div class="btn-group">
+          <button class="btn-primary" id="startBtn" onclick="startAttack()">
+            ▶️ Start Attack
+          </button>
+          <button
+            class="btn-secondary"
+            id="pauseBtn"
+            onclick="pauseAttack()"
+            disabled
+          >
+            ⏸️ Pause
+          </button>
+          <button
+            class="btn-secondary"
+            id="stopBtn"
+            onclick="stopAttack()"
+            disabled
+          >
+            ⏹️ Stop
+          </button>
+          <button class="btn-secondary" onclick="exportReport()">
+            📄 Export Report
+          </button>
+        </div>
+      </div>
+
+      <div class="stats-grid">
+        <div class="stat-card">
+          <div class="stat-value" id="statIterations">0</div>
+          <div class="stat-label">Iterations</div>
+        </div>
+        <div class="stat-card stat-success">
+          <div class="stat-value" id="statSuccess">0</div>
+          <div class="stat-label">Successful</div>
+        </div>
+        <div class="stat-card stat-danger">
+          <div class="stat-value" id="statVectors">146</div>
+          <div class="stat-label">Vectors</div>
+        </div>
+        <div class="stat-card stat-warning">
+          <div class="stat-value" id="statTimeLeft">--</div>
+          <div class="stat-label">Time Left (min)</div>
+        </div>
+      </div>
+
+      <div class="progress-section">
+        <div style="display: flex; justify-content: space-between">
+          <span>Progress</span>
+          <span id="progressPercent">0%</span>
+        </div>
+        <div class="progress-bar">
+          <div class="progress-fill" id="progressFill" style="width: 0%"></div>
+        </div>
+      </div>
+
+      <div class="findings-section">
+        <div class="findings-title">
+          🔓 Live Findings
+          <span
+            id="findingsCount"
+            style="
+              background: var(--bg-tertiary);
+              padding: 4px 12px;
+              border-radius: 12px;
+              font-size: 0.8rem;
+            "
+            >0</span
+          >
+        </div>
+        <div class="findings-list" id="findingsList">
+          <div class="empty-state">
+            <p>No vulnerabilities found yet.</p>
+            <p style="font-size: 0.85rem; margin-top: 8px">
+              Start an attack to begin testing.
+            </p>
+          </div>
+        </div>
+
+        <div class="log-area" id="logArea">
+          <div class="log-line log-info">
+            [System] SENTINEL Strike v3.0 ready
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      const API_URL = "http://localhost:8001";
+      let currentAttackId = null;
+      let statusInterval = null;
+
+      function log(message, type = "info") {
+        const logArea = document.getElementById("logArea");
+        const time = new Date().toLocaleTimeString();
+        logArea.innerHTML += `<div class="log-line log-${type}">[${time}] ${message}</div>`;
+        logArea.scrollTop = logArea.scrollHeight;
+      }
+
+      function updateStatus(state) {
+        const badge = document.getElementById("statusBadge");
+        badge.textContent = state.charAt(0).toUpperCase() + state.slice(1);
+        badge.className = `status-badge status-${state}`;
+      }
+
+      async function startAttack() {
+        const target = document.getElementById("targetUrl").value;
+        const duration = parseInt(document.getElementById("duration").value);
+        const stealth = document.getElementById("stealth").value === "true";
+
+        if (!target) {
+          alert("Please enter target URL");
+          return;
+        }
+
+        log(`Starting attack on ${target}...`, "info");
+        updateStatus("running");
+
+        try {
+          const response = await fetch(`${API_URL}/attack`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ target, duration, stealth }),
+          });
+
+          const data = await response.json();
+          currentAttackId = data.id;
+
+          log(`Attack started with ID: ${currentAttackId}`, "success");
+
+          document.getElementById("startBtn").disabled = true;
+          document.getElementById("pauseBtn").disabled = false;
+          document.getElementById("stopBtn").disabled = false;
+
+          // Start polling
+          statusInterval = setInterval(pollStatus, 2000);
+        } catch (error) {
+          log(`Failed to start: ${error.message}`, "error");
+          updateStatus("idle");
+        }
+      }
+
+      async function pollStatus() {
+        if (!currentAttackId) return;
+
+        try {
+          const response = await fetch(
+            `${API_URL}/attack/${currentAttackId}/status`
+          );
+          const status = await response.json();
+
+          document.getElementById("statIterations").textContent =
+            status.iteration;
+          document.getElementById("statSuccess").textContent =
+            status.successful_attacks;
+          document.getElementById("statTimeLeft").textContent =
+            status.time_remaining;
+
+          const progress = Math.min(100, (status.iteration / 100) * 100);
+          document.getElementById("progressFill").style.width = `${progress}%`;
+          document.getElementById(
+            "progressPercent"
+          ).textContent = `${Math.round(progress)}%`;
+
+          if (status.state === "completed") {
+            clearInterval(statusInterval);
+            updateStatus("completed");
+            log("Attack completed!", "success");
+
+            document.getElementById("startBtn").disabled = false;
+            document.getElementById("pauseBtn").disabled = true;
+            document.getElementById("stopBtn").disabled = true;
+          }
+
+          // Fetch findings
+          await pollFindings();
+        } catch (error) {
+          console.error("Status poll error:", error);
+        }
+      }
+
+      async function pollFindings() {
+        if (!currentAttackId) return;
+
+        try {
+          const response = await fetch(
+            `${API_URL}/attack/${currentAttackId}/findings`
+          );
+          const findings = await response.json();
+
+          const list = document.getElementById("findingsList");
+          document.getElementById("findingsCount").textContent =
+            findings.length;
+
+          if (findings.length > 0) {
+            list.innerHTML = findings
+              .map(
+                (f) => `
+                        <div class="finding-item severity-${f.severity}">
+                            <div class="finding-icon">✓</div>
+                            <div class="finding-content">
+                                <div class="finding-title">${f.vector}</div>
+                                <div class="finding-meta">${
+                                  f.category
+                                } • ${f.severity.toUpperCase()}</div>
+                            </div>
+                        </div>
+                    `
+              )
+              .join("");
+          }
+        } catch (error) {
+          console.error("Findings poll error:", error);
+        }
+      }
+
+      async function pauseAttack() {
+        if (!currentAttackId) return;
+
+        await fetch(`${API_URL}/attack/${currentAttackId}/pause`, {
+          method: "POST",
+        });
+        updateStatus("paused");
+        log("Attack paused", "info");
+
+        document.getElementById("pauseBtn").textContent = "▶️ Resume";
+        document.getElementById("pauseBtn").onclick = resumeAttack;
+      }
+
+      async function resumeAttack() {
+        if (!currentAttackId) return;
+
+        await fetch(`${API_URL}/attack/${currentAttackId}/resume`, {
+          method: "POST",
+        });
+        updateStatus("running");
+        log("Attack resumed", "info");
+
+        document.getElementById("pauseBtn").textContent = "⏸️ Pause";
+        document.getElementById("pauseBtn").onclick = pauseAttack;
+      }
+
+      async function stopAttack() {
+        if (!currentAttackId) return;
+
+        await fetch(`${API_URL}/attack/${currentAttackId}/stop`, {
+          method: "POST",
+        });
+        clearInterval(statusInterval);
+        updateStatus("completed");
+        log("Attack stopped", "info");
+
+        document.getElementById("startBtn").disabled = false;
+        document.getElementById("pauseBtn").disabled = true;
+        document.getElementById("stopBtn").disabled = true;
+      }
+
+      async function exportReport() {
+        if (!currentAttackId) {
+          alert("No attack to export");
+          return;
+        }
+
+        try {
+          const response = await fetch(
+            `${API_URL}/attack/${currentAttackId}/report`
+          );
+          const report = await response.json();
+
+          const blob = new Blob([JSON.stringify(report, null, 2)], {
+            type: "application/json",
+          });
+          const url = URL.createObjectURL(blob);
+          const a = document.createElement("a");
+          a.href = url;
+          a.download = `strike_report_${currentAttackId}.json`;
+          a.click();
+
+          log("Report exported", "success");
+        } catch (error) {
+          log("Export failed: Attack may not be completed", "error");
+        }
+      }
+    </script>
+  </body>
+</html>

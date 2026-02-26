@@ -1,0 +1,49 @@
+{
+  "app": {
+    "name": "SENTINEL",
+    "description": "AI Security Operations Center"
+  },
+  "verdicts": {
+    "allow": "Allow",
+    "warn": "Warning",
+    "block": "Block"
+  },
+  "threats": {
+    "injection": "Prompt Injection Detected",
+    "pii": "Personally Identifiable Information",
+    "jailbreak": "Jailbreak Attempt",
+    "hallucination": "Potential Hallucination",
+    "behavioral": "Anomalous Behavior"
+  },
+  "errors": {
+    "generic": "An error occurred",
+    "validation": "Validation error: {details}",
+    "rate_limit": "Rate limit exceeded. Please try again in {seconds} seconds.",
+    "unauthorized": "Unauthorized. Please provide a valid API key.",
+    "forbidden": "Access forbidden. Insufficient permissions.",
+    "not_found": "Resource not found: {resource}",
+    "engine_error": "Engine '{engine}' encountered an error",
+    "timeout": "Request timed out after {seconds} seconds"
+  },
+  "messages": {
+    "analyzing": "Analyzing text...",
+    "complete": "Analysis complete",
+    "safe": "No threats detected",
+    "threats_found": "{count} threat(s) detected",
+    "blocked": "Request blocked due to security concerns"
+  },
+  "engines": {
+    "injection": "Prompt Injection Detection",
+    "pii": "PII Detection",
+    "behavioral": "Behavioral Analysis",
+    "yara": "Pattern Matching",
+    "hallucination": "Hallucination Detection"
+  },
+  "status": {
+    "healthy": "Healthy",
+    "degraded": "Degraded",
+    "unhealthy": "Unhealthy",
+    "ready": "Ready",
+    "not_ready": "Not Ready"
+  }
+}

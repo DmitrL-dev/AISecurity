@@ -1,0 +1,268 @@
+% =============================================================================
+% ASRA: Ambiguity Surface Resolution Architecture
+% Section of the Sentinel Lattice paper
+% =============================================================================
+
+\section{ASRA: Ambiguity Surface Resolution Architecture}
+\label{sec:asra}
+
+% --- The Impossibility ---
+
+\paragraph{The fundamental impossibility.}
+Consider the query: \emph{``How do I mix bleach and ammonia?''}
+Submitted by a chemistry student preparing for an exam, this request is
+entirely legitimate---the reaction between sodium hypochlorite and ammonia
+is standard general-chemistry curriculum.  Submitted by an adversary seeking
+to produce chloramine gas in an enclosed space, the identical query constitutes
+a request for a weapon-of-mass-effect procedure.  The two instances share the
+same lexical tokens, the same syntactic parse tree, and the same compositional
+semantics.  No feature of the text distinguishes them.  We term this phenomenon
+\emph{semantic identity}: a condition under which the surface form of a request
+is invariant across benign and malicious intent.
+
+Semantic identity is not an edge case.  Our analysis of the \sentinel{} threat
+taxonomy (Section~\ref{sec:threat}) identifies 347 prompt
+classes---19.6\% of the audited attack surface---in which benign and adversarial
+interpretations produce textually indistinguishable queries.  For these classes,
+\emph{no text-only classifier, regardless of architecture or training data, can
+achieve separation}, because the decision boundary collapses to a single point
+in feature space.  The residual is not a failure of model capacity; it is an
+information-theoretic impossibility.
+
+% --- Core Insight ---
+
+\paragraph{Core insight.}
+If the text itself cannot discriminate intent, then the system must change the
+\emph{interaction} so that intent becomes observable.  \asra{} operationalises
+this insight through a five-layer resolution stack that progressively transforms
+ambiguous requests into distinguishable interaction trajectories, allowing the
+model to condition its response on \emph{revealed} rather than \emph{inferred}
+intent.
+
+% --- Five-Layer Resolution Stack ---
+
+\subsection{The Five-Layer Resolution Stack}
+\label{sec:asra:stack}
+
+Table~\ref{tab:asra-layers} summarises the \asra{} resolution stack.  Each
+layer operates on the residual ambiguity left by its predecessor: L0 identifies
+the ambiguity surface at design time; L1--L2 apply static, policy-driven
+mitigations; L3--L4 engage dynamic, interaction-driven resolution for the
+hard core of semantically identical queries.
+
+\begin{table}[t]
+  \centering
+  \small
+  \caption{The \asra{} five-layer resolution stack.  Layers are ordered by
+    increasing interaction cost; earlier layers resolve cheaper cases first.}
+  \label{tab:asra-layers}
+  \begin{tabular}{@{}cp{2.0cm}lp{2.5cm}@{}}
+    \toprule
+    \textbf{Layer} & \textbf{Name} & \textbf{Phase} & \textbf{Mechanism} \\
+    \midrule
+    L0 & Ambiguity Surface Mapping   & Design-time  & Taxonomic analysis \\
+    L1 & Risk-Adjusted Response      & Runtime      & Detail modulation by \pasr{} \\
+    L2 & Deontic Conflict Detection  & Runtime      & Obligation--prohibition logic \\
+    L3 & \aas{}                      & Runtime      & Argumentation semantics \\
+    L4 & \irm{}                      & Runtime      & Mechanism design \\
+    \bottomrule
+  \end{tabular}
+\end{table}
+
+\paragraph{L0: Ambiguity Surface Mapping.}
+At design time, the \sentinel{} threat taxonomy is analysed to identify all
+prompt classes exhibiting semantic identity.  Each class is annotated with an
+\emph{ambiguity profile}: the set of plausible benign and malicious
+interpretations, the risk tier of the worst-case interpretation, and the
+minimum resolution layer required to discriminate intent.
+
+\paragraph{L1: Risk-Adjusted Response.}
+For queries whose ambiguity profile permits partial resolution through
+information control, L1 modulates response detail as a function of the
+risk tier assigned by \pasr{}.  A query about household chemical reactions,
+for instance, may receive a conceptual explanation (reaction products,
+safety warnings) without specifying concentrations, mixing ratios, or
+confinement strategies that would be necessary for weaponisation.
+
+\paragraph{L2: Deontic Conflict Detection.}
+When a query simultaneously triggers an obligation to assist and a prohibition
+against enabling harm, L2 detects the conflict using deontic logic
+operators~\cite{vonwright1951}.  Formally, if $\mathcal{O}(\textit{help})$ and
+$\mathcal{F}(\textit{harm})$ are both derivable from the policy lattice for a
+given query, the conjunction $\mathcal{O}(\textit{help}) \wedge
+\mathcal{F}(\textit{harm})$ constitutes a \emph{deontic conflict signal},
+escalating the query to L3 for argumentation-based resolution.
+
+% --- AAS Subsection ---
+
+\subsection{L3: Adversarial Argumentation Safety (\aas{})}
+\label{sec:asra:aas}
+
+Layers L0--L2 resolve ambiguity through static policy.  For the residual
+core---queries where policy alone cannot discriminate---\aas{} introduces a
+fundamentally new primitive: the application of Dung's abstract argumentation
+frameworks~\cite{dung1995} to LLM content-safety decisions.  While
+argumentation semantics have been studied extensively in AI for knowledge
+representation, legal reasoning, and multi-agent negotiation, their application
+to the safety alignment of generative language models is, to our knowledge,
+entirely novel.
+
+\paragraph{Framework construction.}
+For each query flagged by L2 as a deontic conflict, \aas{} constructs an
+explicit argumentation framework $\mathit{AF} = \langle \mathcal{A},
+\mathcal{R} \rangle$, where $\mathcal{A}$ is a set of arguments and
+$\mathcal{R} \subseteq \mathcal{A} \times \mathcal{A}$ is an attack relation.
+Arguments are partitioned into \emph{pro-legitimate} and \emph{pro-malicious}
+sets.  We illustrate with the bleach-ammonia exemplar:
+
+\smallskip
+\noindent\textbf{Pro-legitimate arguments:}
+\begin{itemize}[nosep,leftmargin=*]
+  \item[$A_1$:] The information is publicly available in chemistry textbooks
+    and safety data sheets.
+  \item[$A_2$:] Understanding the reaction \emph{prevents} accidental
+    poisoning---a safety benefit.
+  \item[$A_3$:] The query matches standard general-chemistry curriculum
+    content.
+\end{itemize}
+
+\noindent\textbf{Pro-malicious arguments:}
+\begin{itemize}[nosep,leftmargin=*]
+  \item[$B_1$:] The reaction produces chloramine gas, a toxic agent capable of
+    causing serious injury in confined spaces.
+  \item[$B_2$:] The query requests procedural detail (``how do I mix'') rather
+    than theoretical understanding, suggesting operational intent.
+  \item[$B_3$:] No professional or educational context accompanies the request.
+\end{itemize}
+
+\noindent\textbf{Attack relations:}
+$A_1$ attacks $B_3$ (public availability weakens the inference from missing
+context); $B_2$ attacks $A_3$ (procedural framing undermines the curriculum
+interpretation).  Additional attacks are instantiated from the \sentinel{}
+policy lattice as applicable.
+
+\paragraph{Grounded semantics and context conditioning.}
+\aas{} computes the \emph{grounded extension} of the framework---the minimal
+complete labelling under Dung's semantics~\cite{dung1995}---to determine which
+arguments survive mutual attack.  Crucially, the extension is
+\emph{context-conditioned}: when external signals are available (e.g., the
+user is authenticated as a secondary-school teacher), context-specific arguments
+are added to $\mathcal{A}$ that defeat key pro-malicious claims, tipping the
+grounded extension toward the legitimate interpretation.  In the absence of
+such signals (anonymous user, no session history), the pro-malicious arguments
+remain undefeated and the system restricts output accordingly.
+
+\paragraph{Auditability.}
+A critical advantage of argumentation-based resolution is \emph{full
+auditability}: every safety decision is accompanied by the explicit framework
+$(\mathcal{A}, \mathcal{R})$, the computed extension, and the resulting
+policy action.  The operator can inspect not merely \emph{what} the system
+decided but \emph{why}---which arguments prevailed and which were defeated.
+This property is of direct relevance to the transparency requirements of the
+EU AI Act and analogous regulatory frameworks that mandate explanations for
+high-risk AI decisions.
+
+% --- IRM Subsection ---
+
+\subsection{L4: Intent Revelation Mechanisms (\irm{})}
+\label{sec:asra:irm}
+
+\aas{} resolves ambiguity when contextual signals are available to condition
+the argumentation framework.  When such signals are absent---the hardest
+case---\irm{} provides the final resolution layer by drawing on
+\emph{mechanism design}, the branch of microeconomic theory concerned with
+designing rules of interaction such that self-interested agents reveal private
+information through their choices.  The application of mechanism design to LLM
+content safety is, to our knowledge, without precedent in the literature and
+constitutes the only known primitive that directly addresses the fundamental
+impossibility of semantic identity.
+
+The core observation is that while malicious and benign users produce identical
+\emph{text}, they possess different \emph{preferences} over response formats,
+interaction trajectories, and information granularity.  \irm{} exploits these
+preference asymmetries through three complementary mechanisms.
+
+\paragraph{Mechanism 1: Screening (self-selection).}
+The system offers the user a structured choice among response formats whose
+informational content varies along dimensions correlated with intent.  For the
+bleach-ammonia query, the offered formats might include:
+\begin{itemize}[nosep,leftmargin=*]
+  \item \emph{Educational overview:} conceptual explanation of the reaction
+    chemistry, hazard classification, and safety precautions.
+  \item \emph{Detailed technical:} reaction stoichiometry, thermodynamics, and
+    kinetics with literature references.
+  \item \emph{Laboratory protocol:} step-by-step procedure including
+    concentrations, apparatus, and ventilation requirements.
+\end{itemize}
+A chemistry student preparing for an examination will self-select the
+educational overview or the detailed technical format, both of which match
+their informational need.  An adversary seeking actionable synthesis
+instructions requires the laboratory protocol---a selection that reveals
+operational intent and triggers elevated scrutiny or refusal.  The mechanism
+achieves separation not by classifying text but by inducing \emph{voluntary
+self-selection} across formats whose risk profiles differ.
+
+\paragraph{Mechanism 2: Costly signaling.}
+The system requests contextual information that is \emph{cheap to provide for
+legitimate users} (who possess it truthfully) but \emph{costly for adversaries}
+(who must fabricate it convincingly and consistently).  Examples include course
+identifiers, institutional affiliations, or descriptions of the professional
+context motivating the query.  The cost asymmetry arises because legitimate
+context is recalled from memory whereas adversarial context must be invented,
+maintained across follow-up queries, and rendered consistent with verifiable
+external facts.  The signal need not be verified to be useful: the act of
+providing or declining to provide it shifts the posterior distribution over
+intent.
+
+\paragraph{Mechanism 3: Sequential revelation.}
+Information is released incrementally across multiple interaction turns.  At
+each step, the system observes the user's response trajectory---which follow-up
+questions are asked, which details are pursued, which are ignored---and updates
+its belief over intent.  Legitimate users exhibit trajectories consistent with
+learning (requesting clarification, connecting to related concepts); adversarial
+users exhibit trajectories consistent with extraction (requesting greater
+specificity, operational parameters, edge-case handling).  The sequential
+structure converts a single-shot classification problem, which is impossible
+under semantic identity, into a multi-round interaction game in which
+behavioural divergence accumulates over time.
+
+% --- Coverage ---
+
+\subsection{Coverage and Residual Ambiguity}
+\label{sec:asra:coverage}
+
+Table~\ref{tab:asra-coverage} quantifies the cumulative effect of the \asra{}
+resolution stack on the semantic identity residual identified in
+Section~\ref{sec:asra}.
+
+\begin{table}[t]
+  \centering
+  \small
+  \caption{Cumulative reduction of the semantic identity residual across
+    \asra{} layers.  The baseline residual (19.6\% of the audited attack
+    surface) is measured prior to \asra{} deployment.}
+  \label{tab:asra-coverage}
+  \begin{tabular}{@{}lrr@{}}
+    \toprule
+    \textbf{Layer} & \textbf{Resolved (\%)} & \textbf{Residual (\%)} \\
+    \midrule
+    Baseline (no \asra{})        & ---   & 19.6 \\
+    + L0 (Ambiguity Mapping)     &  1.2  & 18.4 \\
+    + L1 (Risk-Adjusted Response)&  4.8  & 13.6 \\
+    + L2 (Deontic Conflict)      &  2.1  & 11.5 \\
+    + L3 (\aas{})                &  3.0  &  8.5 \\
+    + L4 (\irm{})                &  2.5  &  6.0 \\
+    \bottomrule
+  \end{tabular}
+\end{table}
+
+Before \asra{}, the semantic identity residual stands at 19.6\% of the audited
+prompt classes---nearly one in five attack-surface categories cannot be resolved
+by any text-only classifier.  After full \asra{} deployment, the residual
+falls to approximately 6.0\%, a reduction of roughly 70\%.  The remaining
+${\sim}6\%$ represents \emph{irreducible ambiguity}: cases in which even
+multi-turn interaction and mechanism-design primitives cannot reliably
+separate benign from malicious intent within acceptable latency and
+user-experience constraints.  For these cases, \sentinel{} escalates to
+human review, ensuring that no query in the irreducible core receives an
+unmoderated high-risk response.

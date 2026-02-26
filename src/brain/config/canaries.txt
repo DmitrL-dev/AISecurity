@@ -1,0 +1,9 @@
+# Canary traps (honeypot topics)
+# If anyone queries these, it indicates insider threat or data leak
+# Each line: topic|alert_code
+
+project_phoenix_secret_budget|INSIDER_FINANCIAL
+admin_master_key_2025|CREDENTIAL_LEAK
+offshore_account_cayman|INSIDER_FRAUD
+executive_golden_parachute|INSIDER_EXEC
+classified_merger_target|INSIDER_MA

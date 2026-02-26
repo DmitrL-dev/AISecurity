@@ -1,0 +1,70 @@
+\section{Background and Methodology}
+\label{sec:background}
+
+The core methodology of \sentinel draws on a simple observation: breakthroughs in AI-driven scientific discovery---AlphaFold~\cite{alphafold2021} for protein folding, GNoME for materials science, GraphCast for weather prediction---succeed not by inventing new physics, but by systematically exploring known solution spaces too large for human cognition.
+
+We apply the same principle to LLM security. Rather than proposing yet another content classifier, we systematically analyze \textbf{58 security paradigms from 19 scientific domains} and identify cross-domain combinations that have never been applied to the LLM security problem.
+
+\subsection{Paradigm Search Space}
+
+Table~\ref{tab:domains} summarizes the 19 domains analyzed. For each domain, we extracted paradigms with formal properties (provable guarantees, compositional structure, or impossibility results) and evaluated their applicability to the five fundamental LLM security challenges identified in \S\ref{sec:introduction}.
+
+\begin{table}[t]
+\centering
+\small
+\caption{The 19 scientific domains and 58 paradigms analyzed.}
+\label{tab:domains}
+\begin{tabular}{@{}lcp{4.2cm}@{}}
+\toprule
+Domain & \# & Key Contributions \\
+\midrule
+Biology / Immunology   & 5 & BBB, negative selection \\
+Nuclear / Military     & 4 & Defense in depth, containment \\
+Cryptography           & 4 & PCC~\cite{necula1997}, ZK proofs \\
+Aviation Safety        & 3 & Swiss cheese~\cite{reason1990}, TCAS \\
+Medieval Defense       & 3 & Castle architecture \\
+Financial Security     & 3 & Separation of duties \\
+Legal Systems          & 3 & Adversarial process \\
+Industrial Safety      & 3 & HAZOP, STAMP~\cite{leveson2004} \\
+CS Foundations         & 3 & Capabilities~\cite{dennis1966}, IFC~\cite{denning1976} \\
+Information Theory     & 3 & Shannon~\cite{shannon1948}, Kolmogorov \\
+Category / Type Theory & 3 & Fibrations, dependent types \\
+Control Theory         & 3 & Lyapunov stability \\
+Game Theory            & 3 & Mechanism design, VCG \\
+Ecology                & 3 & Ecosystem resilience \\
+Neuroscience           & 3 & LTP, lateral inhibition \\
+Thermodynamics         & 2 & Landauer's principle~\cite{landauer1961} \\
+Distributed Consensus  & 2 & BFT~\cite{lamport1982} \\
+Formal Linguistics     & 3 & Chomsky, speech acts~\cite{austin1962} \\
+Philosophy of Mind     & 2 & Chinese room, frame problem \\
+\midrule
+\textbf{Total}         & \textbf{58} & \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\subsection{Cross-Domain Synthesis Method}
+
+Our methodology proceeds in four phases:
+
+\paragraph{Phase 1: Paradigm extraction.} For each of the 19 domains, we identify security-relevant paradigms---mechanisms with formal properties such as provable guarantees, compositional structure, or impossibility results. We exclude paradigms that are purely heuristic or lack formal grounding.
+
+\paragraph{Phase 2: Applicability mapping.} Each paradigm is evaluated against the five fundamental LLM security challenges (prompt injection, agentic compounding, model integrity, semantic identity, and layer conflict). A paradigm is considered \emph{applicable} if it addresses at least one challenge that current content-classification approaches cannot.
+
+\paragraph{Phase 3: Combination search.} We systematically enumerate pairwise and higher-order combinations of applicable paradigms, seeking synergies where combining paradigms from different domains produces capabilities absent from either paradigm alone. This is the step that yields genuinely novel primitives: for example, combining information flow control~\cite{denning1976} with database provenance semirings~\cite{green2007} and category-theoretic fibrations produces \pasr (\S\ref{sec:pasr}).
+
+\paragraph{Phase 4: Novelty verification.} Each candidate primitive is verified for novelty via exhaustive search. We executed 51 compound queries on grep.app (covering all GitHub repositories) and 15 targeted Google Scholar searches. All 51 queries returned zero existing implementations. Details appear in \S\ref{sec:related}.
+
+\subsection{Key Theoretical Foundations}
+
+Several foundational results shape the architecture:
+
+\paragraph{Impossibility of backdoor detection.} Goldwasser and Kim~\cite{goldwasser2022} prove that no polynomial-time algorithm can distinguish a backdoored model from a clean one using only clean-data evaluation. This result motivates our shift from detection to \emph{containment} via \mire (\S\ref{sec:mire}).
+
+\paragraph{Lattice-based information flow.} Denning's lattice model~\cite{denning1976} provides the formal foundation for tracking information provenance through the architecture. Combined with the Bell-LaPadula~\cite{belllapadula1973} and Biba~\cite{biba1977} models, it ensures that security labels form a complete lattice with well-defined $\sqcup$ (join) and $\sqcap$ (meet) operations.
+
+\paragraph{Capability-based security.} The confused deputy problem~\cite{hardy1988} and capability-based addressing~\cite{dennis1966} inform our design of \cafl, which ensures that capabilities can only \emph{attenuate} (decrease) through a chain of tool invocations---never amplify.
+
+\paragraph{Argumentation theory.} Dung's abstract argumentation frameworks~\cite{dung1995} provide grounded semantics for resolving dual-use ambiguity: arguments for and against the safety of a request are evaluated under well-defined acceptability criteria, yielding auditable decisions required for EU AI Act compliance.
+
+\paragraph{Runtime verification.} Linear Temporal Logic (LTL)~\cite{pnueli1977} and efficient monitoring~\cite{havelund2004} provide the basis for \tsa, which compiles safety properties into $O(1)$ automata that monitor tool-chain execution in real time.
