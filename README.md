@@ -111,7 +111,7 @@ Adversarial testing by the team that broke Qwen 3.5-Plus. We find what your safe
 | **<1ms latency** | Per query | Fast enough for real-time production. No GPU. No batching. |
 | **7 novel primitives** | 0 prior implementations | 51 searches on grep.app confirmed: we invented these. |
 | **19 scientific domains** | From formal verification to immunology | Each domain solves a problem the others can't. Independent failure modes. |
-| **OWASP 6/10** | LLM Top 10 coverage | Systematic, not ad-hoc. Full compliance mapping available. |
+| **OWASP 9/10** | Agentic AI Top 10 coverage | Full platform: sentinel-core + shield + immune. Compliance mapping available. |
 
 <br>
 
@@ -248,7 +248,7 @@ The question isn't whether your AI will be attacked. It's whether you'll know wh
 
 **Request an audit** · **Schedule a red team engagement** · **Deploy Sentinel**
 
-📧 **sentinel@dmltrl.dev**
+📧 **d.labintcev@gmail.com** · 💬 [Telegram](https://t.me/DmLabincev) · 🎮 Discord: `dmitrysl3401` · 𝕏 [@DLabintcev](https://x.com/DLabintcev)
 
 <br>
 
@@ -357,7 +357,7 @@ Adversarial-тестирование от команды, взломавшей Q
 | **<1мс латентность** | На запрос | Достаточно для продакшна в реальном времени. Без GPU. |
 | **7 новых примитивов** | 0 существующих реализаций | 51 поиск по grep.app подтвердил: мы их изобрели. |
 | **19 научных областей** | От формальной верификации до иммунологии | Каждая область решает задачу, которую другие не могут. |
-| **OWASP 6/10** | Покрытие LLM Top 10 | Системно, не ad-hoc. Полный маппинг доступен. |
+| **OWASP 9/10** | Покрытие Agentic AI Top 10 | Вся платформа: sentinel-core + shield + immune. Маппинг доступен. |
 
 <br>
 
@@ -488,7 +488,7 @@ EU AI Act требует тестирование безопасности дл�
 
 **Запросить аудит** · **Заказать red team** · **Развернуть Sentinel**
 
-📧 **sentinel@dmltrl.dev**
+📧 **d.labintcev@gmail.com** · 💬 [Telegram](https://t.me/DmLabincev) · 🎮 Discord: `dmitrysl3401` · 𝕏 [@DLabintcev](https://x.com/DLabintcev)
 
 <br>
 

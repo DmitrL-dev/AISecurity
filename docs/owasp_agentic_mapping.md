@@ -7,10 +7,11 @@
 
 | Coverage   | Count |
 | ---------- | ----- |
-| ✅ Full    | 6/10  |
-| ⚠️ Partial | 3/10  |
-| ❌ None    | 1/10  |
+| ✅ Full    | 9/10  |
+| ⚠️ Partial | 1/10  |
+| ❌ None    | 0/10  |
 
+> The full platform (sentinel-core + shield + immune) achieves 9/10 coverage.
 > Sentinel Lattice primitives (TSA, L2, AAS, CAFL, GPS, IRM, MIRE, PASR) provide
 > formal-methods coverage that no pattern-matching tool can achieve alone.
 
@@ -52,7 +53,7 @@
 
 ---
 
-### ⚠️ ASI03 — Identity and Privilege Abuse
+### ✅ ASI03 — Identity and Privilege Abuse
 
 **Risk:** Agent escalates privileges or abuses inherited credentials
 
@@ -62,10 +63,10 @@
 - `evasion.rs` — obfuscation techniques detection
 - `capability_proxy.rs` — **L2: Bell-LaPadula mandatory access control** 🆕 Lattice
 - `temporal_safety.rs` — **TSA: temporal privilege escalation detection** 🆕 Lattice
+- `shield: trust zones + policy engine (Cisco IOS-style runtime enforcement)`
+- `immune: syscall hooks (BSD sysent + Linux kprobes) for privilege monitoring`
 
-**Gap:** Runtime privilege monitoring (enforcement vs detection)
-
-**Status:** PARTIAL (strong detection, needs runtime enforcement)
+**Status:** FULLY COVERED (detection + runtime enforcement via shield trust zones + immune syscall hooks)
 
 ---
 
@@ -93,10 +94,12 @@
 - `code_security.rs` — AI-generated code vulnerability scoring
 - `injection.rs` — command injection patterns
 - `workspace_guard.rs` — workspace-level file protection
+- `immune: BSD jail quarantine (process + file isolation via jail() API)`
+- `immune: eBPF agent (execve monitoring via libbpf)`
 
-**Gap:** Sandbox execution monitoring (out of scope for static analysis)
+**Gap:** Linux sandbox is stub (no namespaces/seccomp) — BSD jail only
 
-**Status:** PARTIAL (detection only, no sandbox)
+**Status:** PARTIAL (detection + BSD sandbox via immune jail, no Linux sandbox)
 
 ---
 
@@ -115,7 +118,7 @@
 
 ---
 
-### ⚠️ ASI07 — Insecure Inter-Agent Communication
+### ✅ ASI07 — Insecure Inter-Agent Communication
 
 **Risk:** Message forging/impersonation between agents
 
@@ -124,14 +127,14 @@
 - `orchestration.rs` — multi-agent orchestration security
 - `agentic.rs` — ToolCall-based agent security
 - `model_containment.rs` — **MIRE: containment proofs for model boundaries** 🆕 Lattice
+- `immune: TLS 1.3 mTLS (wolfSSL, cert pinning) + AES-256-GCM + RSA-4096 (OpenSSL)`
+- `immune: Sybil defense (PoW join barrier, trust scoring, vouching, blacklisting)`
 
-**Gap:** Cryptographic authentication verification between agents
-
-**Status:** PARTIAL (detection + containment, no crypto auth)
+**Status:** FULLY COVERED (detection + containment + production-grade mTLS + crypto auth)
 
 ---
 
-### ❌ ASI08 — Cascading Failures
+### ✅ ASI08 — Cascading Failures
 
 **Risk:** Small error triggers destructive chain reaction
 
@@ -139,10 +142,12 @@
 
 - `lethal_trifecta.rs` — dangerous capability combination detection
 - `capability_flow.rs` — **CAFL: monotonic capability attenuation** 🆕 Lattice
+- `shield: watchdog (health checks, deadlock detection, auto-recovery, alert escalation)`
+- `shield: circuit_breaker (closed/open/half-open failure isolation)`
+- `shield: HA clustering (heartbeat + state replication + failover)`
+- `immune: XDR correlation engine (lateral movement, exfil, attack chain detection)`
 
-**Gap:** Runtime failure propagation monitoring
-
-**Status:** NOT COVERED (static analysis only, need runtime cascade detector)
+**Status:** FULLY COVERED (runtime cascade monitoring via shield watchdog + circuit breaker + immune XDR correlation)
 
 ---
 
@@ -190,6 +195,12 @@
 | IRM | Intent Revelation | ASI01, ASI09 |
 | MIRE | Model-Irrelevance Containment | ASI07, ASI10 |
 | PASR | Provenance-Annotated Reduction | ASI04 |
+| shield watchdog | Cascade Monitoring | ASI08 |
+| shield circuit_breaker | Failure Isolation | ASI08 |
+| immune mTLS + crypto | Agent Authentication | ASI07 |
+| immune jail | Process Isolation | ASI05 |
+| immune syscall hooks | Privilege Monitoring | ASI03 |
+| immune XDR correlator | Attack Propagation | ASI08 |
 
 ---
 
