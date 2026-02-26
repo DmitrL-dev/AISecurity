@@ -1,79 +1,67 @@
-# 📚 SENTINEL Community Documentation
+# Sentinel Documentation
 
-> **49 Rust Super-Engines** • **Micro-Model Swarm (F1=0.997)** • **Feb 2026: Jailbreak Detection**
-
----
-
-## 🚀 Quick Start
-
-| 🇬🇧 English | 🇷🇺 Русский |
-|-------------|------------|
-| [Quick Start (EN)](./getting-started/README-en.md) | [Быстрый старт](./getting-started/quickstart.md) |
-| [Installation (EN)](./getting-started/installation-en.md) | [Установка](./getting-started/installation.md) |
+> **61 Rust detection engines** · **1101 tests** · **7 novel security primitives** · **98.5% detection**
 
 ---
 
-## ⚙️ Configuration & Integration
+## Structure
+
+```
+docs/
+├── rnd/                         R&D notes and architecture design
+│   ├── sentinel-lattice-architecture.md    Full Sentinel Lattice architecture (1430 lines)
+│   ├── sentinel-lattice-announcements.md   Launch announcement templates
+│   ├── deep-research.md                    Cross-domain research findings
+│   └── full-research.md                    Initial research compilation
+│
+├── reference/                   Technical reference
+│   ├── engines-en.md            All 61 engines — English
+│   ├── engines.md               All 61 engines — Russian
+│   ├── api.md                   REST API reference
+│   ├── compliance.md            Compliance mapping
+│   ├── design-review.md         Design review process
+│   ├── micro-swarm.md           ML ensemble reference
+│   └── requirements.md          System requirements
+│
+├── academy/                     Educational content
+│   ├── ru/                      Full Russian curriculum (8 modules)
+│   ├── expert/en/               Expert track — English (21 lessons)
+│   ├── expert/ru/               Expert track — Russian (22 lessons)
+│   └── labs/                    Hands-on exercises with attack targets
+│
+├── security/                    Security advisories
+│   └── QWEN-2026-001-advisory.md
+│
+├── images/                      Diagrams and figures
+│
+├── ARCHITECTURE.md              Platform architecture overview
+├── CHANGELOG.md                 Version history
+├── COMPARISON.md                Competitive comparison
+├── CONTRIBUTING.md              How to contribute
+└── owasp_agentic_mapping.md     OWASP Agentic AI coverage
+```
+
+---
+
+## Key Documents
 
 | Document | Description |
 |----------|-------------|
-| [Configuration (EN)](./guides/configuration-en.md) | Environment variables, thresholds, modes |
-| [Deployment (EN)](./guides/deployment-en.md) | Docker, Kubernetes, production setup |
-| [Integration (EN)](./guides/integration-en.md) | Python/JS SDK, OpenAI proxy, LangChain |
+| [Architecture](./ARCHITECTURE.md) | Platform components, detection cascade, data flow |
+| [Engine Reference (EN)](./reference/engines-en.md) | All 61 engines with categories and descriptions |
+| [Sentinel Lattice Architecture](./rnd/2026-02-25-sentinel-lattice-architecture.md) | Full design of 7 novel security primitives |
+| [OWASP Mapping](./owasp_agentic_mapping.md) | Coverage of OWASP Agentic AI Top 10 |
+| [API Reference](./reference/api.md) | REST API endpoints and examples |
+| [Changelog](./CHANGELOG.md) | Release history |
 
 ---
 
-## 🔧 Operations (Production)
+## Getting Started
 
-| Document | Description |
-|----------|-------------|
-| [Operations Overview](./operations/README.md) | Quick reference, architecture, checklist |
-| [Monitoring](./operations/monitoring.md) | Prometheus, Grafana, OpenTelemetry |
-| [Alerting](./operations/alerting.md) | Alert rules, escalation, Alertmanager |
-| [Capacity Planning](./operations/capacity-planning.md) | Sizing, autoscaling, cost optimization |
-| [Backup & DR](./operations/backup-restore.md) | Disaster recovery, RPO/RTO |
-| [Runbooks](./operations/runbooks/) | Incident response playbooks |
+See the root [QUICKSTART.md](../QUICKSTART.md) for installation and first scan.
 
----
+## Contact
 
-## 🔬 Engine Reference
-
-| Document | Description |
-|----------|-------------|
-| [49 Rust Super-Engines (EN)](./reference/engines-en.md) | Complete engine reference |
-| [Engines Overview (RU)](./reference/engines.md) | Обзор всех движков |
-| [Micro-Model Swarm](./reference/micro-swarm.md) | Jailbreak detection (F1=0.997) |
-
----
-
-## 📖 API Reference
-
-| Document | Description |
-|----------|-------------|
-| [REST API](./reference/api.md) | Endpoints, authentication, examples |
-
----
-
-## 🎓 Examples
-
-| Example | Description |
-|---------|-------------|
-| [Demo Script](./examples/sentinel_demo.py) | Python integration example |
-
----
-
-## ⚠️ Architecture Note
-
-> **Migration (Feb 2026):** 243 legacy Python engines have been consolidated into 36 high-performance Rust Mega-Engines via PyO3 bindings (<1ms per engine). Legacy engines are archived in `_archive/brain-engines-python/`.
-
----
-
-## 🔐 Need More?
-
-**Enterprise Edition** includes:
-- All 49 Rust detection engines + micro-swarm presets
-- Zero-day detection & Proactive Defense
-- Red team automation (Strike — Go)
-- Dedicated support & SLA
-
-📧 **Contact:** [chg@live.ru](mailto:chg@live.ru) • [@DmLabincev](https://t.me/DmLabincev)
+- **Issues:** [github.com/DmitrL-dev/AISecurity/issues](https://github.com/DmitrL-dev/AISecurity/issues)
+- **Telegram:** [@DmLabincev](https://t.me/DmLabincev)
+- **Email:** chg@live.ru
