@@ -404,16 +404,16 @@ static TSA_PATTERNS: Lazy<Vec<(Regex, &'static str, f64)>> = Lazy::new(|| {
             0.88,
         ),
         (
-            Regex::new(r"(?i)privilege\s+(?:change|escal|elevat|increase|raise)(?!.*(?:approv|confirm|accept|authorized))")
+            Regex::new(r"(?i)privilege\s+(?:change|escal|elevat|increase|raise)")
                 .expect("regex"),
             "temporal_priv_no_approval",
-            0.87,
+            0.82,
         ),
         (
-            Regex::new(r"(?i)(?:grant|assign|set)\s+(?:admin|root|superuser|elevated)\s+(?:role|access|permission)(?!.*(?:approv|confirm))")
+            Regex::new(r"(?i)(?:grant|assign|set)\s+(?:admin|root|superuser|elevated)\s+(?:role|access|permission)")
                 .expect("regex"),
             "temporal_grant_without_approval",
-            0.86,
+            0.80,
         ),
 
         // ── P4: Write before read violations ──
@@ -438,10 +438,10 @@ static TSA_PATTERNS: Lazy<Vec<(Regex, &'static str, f64)>> = Lazy::new(|| {
 
         // ── P5: Unbounded tool chains ──
         (
-            Regex::new(r"(?i)tool.?call.*tool.?call.*tool.?call.*tool.?call.*tool.?call(?!.*(?:confirm|approv|user|human))")
+            Regex::new(r"(?i)tool.?call.*tool.?call.*tool.?call.*tool.?call.*tool.?call")
                 .expect("regex"),
             "temporal_unbounded_chain",
-            0.85,
+            0.78,
         ),
         (
             Regex::new(r"(?i)(?:chain|sequence|series)\s+(?:of\s+)?(?:tool|function|api)\s+(?:calls?|invocations?).*(?:unbounded|unlimited|no\s+limit|without\s+(?:check|confirm))")

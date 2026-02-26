@@ -82,6 +82,9 @@ pub mod tool_call_injection;
 // Phase 12: QWEN-2026-001 — Crescendo / Multi-Turn Escalation
 pub mod crescendo;
 
+// Phase 14: Sentinel Lattice — Novel Security Primitives
+pub mod temporal_safety;
+
 // Re-export trait for convenience
 pub use traits::{PatternMatcher, EngineCategory, BoxedEngine, create_default_engines};
 pub use hybrid::HybridPiiEngine;
@@ -236,6 +239,9 @@ pub struct SentinelEngine {
     tool_call_injection: Option<tool_call_injection::ToolCallInjectionEngine>,
     crescendo: Option<crescendo::CrescendoEngine>,
 
+    // === Phase 14: Sentinel Lattice Engines ===
+    temporal_safety: Option<temporal_safety::TemporalSafetyEngine>,
+
     // === Domain Engines (analyze -> CustomResult, adapted to MatchResult) ===
     behavioral_guard: Option<behavioral::BehavioralGuard>,
     obfuscation_guard: Option<obfuscation::ObfuscationGuard>,
@@ -289,6 +295,9 @@ impl SentinelEngine {
             output_scanner: Some(output_scanner::OutputScannerEngine::new()),
             tool_call_injection: Some(tool_call_injection::ToolCallInjectionEngine::new()),
             crescendo: Some(crescendo::CrescendoEngine::new()),
+
+            // Phase 14: Sentinel Lattice Engines
+            temporal_safety: Some(temporal_safety::TemporalSafetyEngine::new()),
 
             // Domain engines
             behavioral_guard: Some(behavioral::BehavioralGuard::new()),
@@ -379,6 +388,9 @@ impl SentinelEngine {
         run_engine!(self.output_scanner);
         run_engine!(self.tool_call_injection);
         run_engine!(self.crescendo);
+
+        // === Phase 14: Sentinel Lattice Engines ===
+        run_engine!(self.temporal_safety);
 
         // === Domain Engines (analyze -> CustomResult) ===
         run_domain_engine!(self.behavioral_guard, "behavioral");
