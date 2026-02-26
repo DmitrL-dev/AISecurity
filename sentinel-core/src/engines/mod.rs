@@ -84,6 +84,8 @@ pub mod crescendo;
 
 // Phase 14: Sentinel Lattice — Novel Security Primitives
 pub mod temporal_safety;
+pub mod capability_proxy;
+pub mod argumentation_safety;
 
 // Re-export trait for convenience
 pub use traits::{PatternMatcher, EngineCategory, BoxedEngine, create_default_engines};
@@ -241,6 +243,8 @@ pub struct SentinelEngine {
 
     // === Phase 14: Sentinel Lattice Engines ===
     temporal_safety: Option<temporal_safety::TemporalSafetyEngine>,
+    capability_proxy: Option<capability_proxy::CapabilityProxyEngine>,
+    argumentation_safety: Option<argumentation_safety::ArgumentationSafetyEngine>,
 
     // === Domain Engines (analyze -> CustomResult, adapted to MatchResult) ===
     behavioral_guard: Option<behavioral::BehavioralGuard>,
@@ -298,6 +302,8 @@ impl SentinelEngine {
 
             // Phase 14: Sentinel Lattice Engines
             temporal_safety: Some(temporal_safety::TemporalSafetyEngine::new()),
+            capability_proxy: Some(capability_proxy::CapabilityProxyEngine::new()),
+            argumentation_safety: Some(argumentation_safety::ArgumentationSafetyEngine::new()),
 
             // Domain engines
             behavioral_guard: Some(behavioral::BehavioralGuard::new()),
@@ -391,6 +397,8 @@ impl SentinelEngine {
 
         // === Phase 14: Sentinel Lattice Engines ===
         run_engine!(self.temporal_safety);
+        run_engine!(self.capability_proxy);
+        run_engine!(self.argumentation_safety);
 
         // === Domain Engines (analyze -> CustomResult) ===
         run_domain_engine!(self.behavioral_guard, "behavioral");
