@@ -46,7 +46,7 @@ The attack chain: contextual framing → decorative refusal → God Mode → sel
 
 **If Alibaba's 3-layer safety stack couldn't stop us, what's protecting yours?**
 
-> 📄 Full advisory: [`QWEN-2026-001`](./docs/security/QWEN-2026-001-advisory.md) · 🎬 Demo: [`demos/`](./demos/)
+> 📄 Full advisory: [`QWEN-2026-001`](./docs/security/QWEN-2026-001-advisory.md) · 🎬 Demo: [YouTube](https://youtu.be/wZ8OiPJO77E)
 
 ---
 
@@ -292,7 +292,7 @@ The question isn't whether your AI will be attacked. It's whether you'll know wh
 
 **Если 3-уровневый стек безопасности Alibaba нас не остановил — что защищает ваc?**
 
-> 📄 Полный advisory: [`QWEN-2026-001`](./docs/security/QWEN-2026-001-advisory.md) · 🎬 Демо: [`demos/`](./demos/)
+> 📄 Полный advisory: [`QWEN-2026-001`](./docs/security/QWEN-2026-001-advisory.md) · 🎬 Демо: [YouTube](https://youtu.be/wZ8OiPJO77E)
 
 ---
 
