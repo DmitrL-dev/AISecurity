@@ -1,30 +1,19 @@
 # Security Policy
 
-## Supported Versions
-
-| Version | Supported          |
-| ------- | ------------------ |
-| 4.1.x   | ✅ Active          |
-| 4.0.x   | ✅ Security fixes  |
-| 3.x.x   | ❌ End of life     |
-| < 3.0   | ❌ Not supported   |
-
 ## Reporting a Vulnerability
-
-We take security vulnerabilities seriously. If you discover a security issue, please report it responsibly.
-
-### 🔒 Private Disclosure (Preferred)
 
 **DO NOT** open a public GitHub issue for security vulnerabilities.
 
-**Email:** security@sentinel.ai
+### Private Disclosure
 
-**PGP Key:** [Available on request]
+**Email:** chg@live.ru
+
+**Telegram:** [@DmLabincev](https://t.me/DmLabincev)
 
 **Include:**
 - Description of the vulnerability
 - Steps to reproduce
-- Affected versions
+- Affected component (sentinel-core, shield, brain, etc.)
 - Potential impact
 - Your suggested fix (optional)
 
@@ -32,89 +21,85 @@ We take security vulnerabilities seriously. If you discover a security issue, pl
 
 | Stage | Timeframe |
 |-------|-----------|
-| Acknowledgment | 24 hours |
-| Initial assessment | 72 hours |
+| Acknowledgment | 48 hours |
+| Initial assessment | 1 week |
 | Fix development | 7-30 days |
-| Public disclosure | After fix |
+| Public disclosure | After fix is released |
 
-### What to Expect
+### Process
 
-1. **Acknowledgment** — We confirm receipt within 24 hours
+1. **Acknowledgment** — We confirm receipt
 2. **Assessment** — We evaluate severity and impact
-3. **Communication** — We keep you updated on progress
+3. **Communication** — We keep you updated
 4. **Fix** — We develop and test a patch
 5. **Release** — We publish the fix
-6. **Credit** — We credit you (if desired) in release notes
+6. **Credit** — We credit you (if desired) in commit history
+
+---
 
 ## Security Best Practices
 
-When using SENTINEL:
-
 ### API Keys
-```python
-# ❌ Never hardcode
-api_key = "sk-1234..."
 
-# ✅ Use environment variables
+```python
+# Never hardcode credentials
 import os
 api_key = os.environ.get("SENTINEL_API_KEY")
 ```
 
 ### Production Deployment
-```yaml
-# ✅ Enable all security features
-sentinel:
-  api_key_required: true
-  rate_limit: 1000
-  tls_enabled: true
-  audit_logging: true
-```
 
-### Dependencies
 ```bash
-# ✅ Regularly update
-pip install --upgrade sentinel-llm-security
+# 1. Set strong secrets in .env
+cp .env.example .env
+# Edit .env — change all placeholder values
 
-# ✅ Audit dependencies
-pip-audit
+# 2. Use docker-compose with restricted ports
+docker-compose up -d
+
+# 3. Run behind a reverse proxy (nginx/caddy) with TLS
 ```
-
-## Known Security Considerations
 
 ### Prompt Data
 
-SENTINEL scans prompts but does **not** store them by default. For compliance:
+Sentinel scans prompts but does **not** store them by default. For privacy compliance, configure:
 
 ```yaml
-# Disable logging of prompt content
 logging:
   include_prompts: false
   hash_only: true
 ```
 
-### Model Endpoints
+---
 
-When using external LLM APIs:
-- Use TLS for all connections
-- Rotate API keys regularly
-- Monitor for anomalous usage
+## Scope
 
-## Bug Bounty
+This security policy covers:
 
-We currently do not have a formal bug bounty program. However, we recognize and credit security researchers who responsibly disclose vulnerabilities.
-
-## Security Advisories
-
-Security advisories are published on:
-- [GitHub Security Advisories](https://github.com/DmitrL-dev/AISecurity/security/advisories)
-- [CHANGELOG.md](./docs/CHANGELOG.md)
-
-## Contact
-
-- **Security issues:** security@sentinel.ai
-- **General questions:** info@sentinel.ai
-- **Discord:** [SENTINEL Community](https://discord.gg/sentinel)
+| Component | Language | Notes |
+|-----------|----------|-------|
+| [sentinel-core](./sentinel-core) | Rust | 61 detection engines — core attack surface |
+| [brain](./src/brain) | Python | API backend — network-facing |
+| [shield](./shield) | C11 | DMZ — memory safety critical |
+| [immune](./immune) | C | EDR — kernel-level, highest severity |
+| [strike](./strike) | Python | Red team tools — handle with care |
 
 ---
 
-*Last updated: January 18, 2026*
+## Known Considerations
+
+- `signatures/jailbreaks.json` is ~51 MB. If you fork, consider Git LFS.
+- The `strike/` directory contains real attack payloads (39K+). Treat as sensitive.
+- Docker images should not be exposed to public internet without a TLS reverse proxy.
+
+---
+
+## Contact
+
+- **Security issues:** chg@live.ru
+- **General:** [GitHub Issues](https://github.com/DmitrL-dev/AISecurity/issues)
+- **Telegram:** [@DmLabincev](https://t.me/DmLabincev)
+
+---
+
+*Last updated: February 2026*
