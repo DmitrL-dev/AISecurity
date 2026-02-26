@@ -4,13 +4,15 @@
 
 # S E N T I N E L
 
-**Open-source AI security platform with 7 novel security primitives**
+### Your AI Is Under Attack. Your Classifier Can't See It.
+
+Deterministic, mathematically-grounded AI security. Not another ML model hoping to catch what ML models miss.
 
 <br>
 
 [![Engines](https://img.shields.io/badge/engines-61-0d1117?style=for-the-badge&labelColor=161b22)](./sentinel-core)
 [![Patterns](https://img.shields.io/badge/patterns-810+-0d1117?style=for-the-badge&labelColor=161b22)](./sentinel-core)
-[![Tests](https://img.shields.io/badge/tests-1101-0d1117?style=for-the-badge&labelColor=161b22)](./sentinel-core)
+[![Tests](https://img.shields.io/badge/tests-1101_passing-0d1117?style=for-the-badge&labelColor=161b22)](./sentinel-core)
 [![Payloads](https://img.shields.io/badge/payloads-39K+-0d1117?style=for-the-badge&labelColor=161b22)](./strike)
 [![Latency](https://img.shields.io/badge/latency-<1ms-0d1117?style=for-the-badge&labelColor=161b22)](./micro-swarm)
 [![Detection](https://img.shields.io/badge/detection-98.5%25-0d1117?style=for-the-badge&labelColor=161b22)](./papers/sentinel-lattice)
@@ -18,14 +20,102 @@
 <br>
 
 ![Rust](https://img.shields.io/badge/Rust-000?style=flat&logo=rust&logoColor=fff)
-![Python](https://img.shields.io/badge/Python-3776AB?style=flat&logo=python&logoColor=fff)
 ![C](https://img.shields.io/badge/C11-00599C?style=flat&logo=c&logoColor=fff)
 ![Go](https://img.shields.io/badge/Go-00ADD8?style=flat&logo=go&logoColor=fff)
-![License](https://img.shields.io/badge/license-see%20LICENSE-blue?style=flat)
+![License](https://img.shields.io/badge/license-Apache_2.0-blue?style=flat)
 
 </div>
 
 <br>
+
+---
+
+## 🔴 We Broke Alibaba's Flagship AI Model. Is Yours Next?
+
+**[QWEN-2026-001](./docs/security/QWEN-2026-001-advisory.md)** — 5 critical safety bypass vectors discovered in **Qwen 3.5-Plus**, Alibaba's most advanced model.
+
+| | |
+|:--|:--|
+| **Model** | Qwen 3.5-Plus (February 2026) — Alibaba's flagship |
+| **Safety Stack** | Qwen3Guard + GSPO + RationaleRM — 3 layers of defense |
+| **Result** | All 3 layers bypassed. 5 vectors. 5 stages. 3 chat sessions. |
+| **Output** | Functional shellcode, reverse shells, jailbreak automation tools, God Mode declarations |
+| **Severity** | High (Systemic) — the model rated its own vulnerability |
+
+The attack chain: contextual framing → decorative refusal → God Mode → self-replicating jailbreak tools. Each stage looks like a legitimate request. No safety filter triggered.
+
+**If Alibaba's 3-layer safety stack couldn't stop us, what's protecting yours?**
+
+> 📄 Full advisory: [`QWEN-2026-001`](./docs/security/QWEN-2026-001-advisory.md) · 🎬 Demo: [`demos/`](./demos/)
+
+---
+
+<br>
+
+## What We Do
+
+<table>
+<tr>
+<td width="50%" valign="top">
+
+### 🔍 AI Security Audit
+
+We test your LLM deployment against 39,000+ attack payloads across 15 categories. You get a detailed vulnerability report with severity ratings, reproduction steps, and remediation guidance.
+
+**Deliverable:** Full audit report + OWASP LLM Top 10 compliance mapping.
+
+</td>
+<td width="50%" valign="top">
+
+### 🛡️ Sentinel Integration
+
+Deploy 61 deterministic Rust engines as an input/output firewall around your LLM. Sub-millisecond latency. 98.5% detection rate. No GPU required.
+
+**Deliverable:** Production-ready security layer + monitoring dashboard.
+
+</td>
+</tr>
+<tr>
+<td width="50%" valign="top">
+
+### ⚔️ Red Team Operations
+
+Adversarial testing by the team that broke Qwen 3.5-Plus. We find what your safety stack misses — prompt injection chains, multi-turn escalation, contextual framing, tool-call exploitation.
+
+**Deliverable:** Attack chain documentation + video demonstrations.
+
+</td>
+<td width="50%" valign="top">
+
+### 🎓 Sentinel Academy
+
+90+ lessons across 3 skill levels. From prompt injection basics to formal verification of safety properties. Available in English and Russian.
+
+**Deliverable:** Team training program + certification.
+
+</td>
+</tr>
+</table>
+
+<br>
+
+---
+
+## Why Sentinel
+
+| Metric | Value | What It Means |
+|:--|:--|:--|
+| **61 engines** | Rust, deterministic, zero ML | No false negatives from model drift. Same input = same result. Always. |
+| **1,101 tests** | 0 failures | Every engine, every pattern, every edge case — verified. |
+| **98.5% detection** | 250,000 simulated attacks | Across 15 attack categories. The 1.5% residual is the theoretical floor. |
+| **<1ms latency** | Per query | Fast enough for real-time production. No GPU. No batching. |
+| **7 novel primitives** | 0 prior implementations | 51 searches on grep.app confirmed: we invented these. |
+| **19 scientific domains** | From formal verification to immunology | Each domain solves a problem the others can't. Independent failure modes. |
+| **OWASP 6/10** | LLM Top 10 coverage | Systematic, not ad-hoc. Full compliance mapping available. |
+
+<br>
+
+---
 
 ## The Problem
 
@@ -34,16 +124,6 @@ Every AI system deployed today faces the same fundamental challenge: **the model
 Current defenses rely on ML classifiers that share the same blindness as the models they protect. Sentinel takes a different approach: **deterministic, mathematically-grounded defense** that doesn't depend on another AI to detect what AI can't see.
 
 **61 Rust detection engines.** Sub-millisecond latency. 98.5% detection across 250,000 simulated attacks spanning 15 categories. 7 novel security primitives derived from 19 scientific domains — from formal verification to mechanism design to immunology.
-
-<br>
-
-## Quick Start
-
-```bash
-git clone https://github.com/DmitrL-dev/AISecurity.git
-cd AISecurity
-docker-compose up -d
-```
 
 <br>
 
@@ -148,42 +228,35 @@ The 7 primitives draw from 19 scientific domains. This isn't decoration — each
 
 ---
 
-<details>
-<summary><b>На русском</b></summary>
+## ⏳ The Window Is Closing
+
+The EU AI Act mandates security testing for high-risk AI systems. Attack surface is expanding — agentic workflows, tool-calling chains, multi-model pipelines. Every month without deterministic defense is another month of exposure.
+
+- **EU AI Act Article 15**: High-risk AI systems require robustness against adversarial attacks
+- **OWASP LLM Top 10**: Industry standard your auditors will ask about
+- **Agentic explosion**: Tool-calling LLMs create attack chains no classifier can follow
+
+The question isn't whether your AI will be attacked. It's whether you'll know when it happens.
 
 <br>
 
-### Проблема
+---
 
-Каждая развёрнутая сегодня AI-система сталкивается с одной и той же фундаментальной проблемой: модель не может отличить легитимные инструкции от враждебных. Prompt-инъекция выглядит идентично нормальному вводу. Jailbreak использует тот же естественный язык, что и обычный запрос о помощи. Цепочка эксфильтрации данных может состоять из полностью легитимных вызовов инструментов.
+<div align="center">
 
-Существующие защиты полагаются на ML-классификаторы, разделяющие ту же слепоту, что и защищаемые модели. Sentinel использует другой подход: **детерминированная, математически обоснованная защита**, не зависящая от другого ИИ для обнаружения того, что ИИ не может увидеть.
+## Get Started
 
-### Платформа
+**Request an audit** · **Schedule a red team engagement** · **Deploy Sentinel**
 
-**Защита:** [`sentinel-core`](./sentinel-core) (Rust — 61 движок, 810+ паттернов, 1101 тест) · [`brain`](./src/brain) (Python — gRPC API, 32 модуля) · [`shield`](./shield) (C11 — DMZ, 36 000+ LOC) · [`immune`](./immune) (C — EDR/XDR) · [`micro-swarm`](./micro-swarm) (Python — F1=0.997) · [`sentinel-sdk`](./sentinel-sdk) · [`CLI`](./src/sentinel)
+📧 **sentinel@dmltrl.dev**
 
-**Наступление:** [`strike`](./strike) — 39 000+ атакующих полезных нагрузок, автономное тестирование.
+<br>
 
-**Инфраструктура:** [`gomcp`](./gomcp) (Go — MCP-сервер) · [`devkit`](./devkit) · [`patterns`](./patterns) (YAML) · [`signatures`](./signatures) (JSON)
+[Quick Start](./QUICKSTART.md) &ensp;·&ensp; [Security](./SECURITY.md) &ensp;·&ensp; [License](./LICENSE) &ensp;·&ensp; [Academy](./docs/academy/)
 
-### Решётка Sentinel — 7 изобретённых примитивов
+</div>
 
-| Примитив | Из какой области | Какую проблему решает |
-|:--|:--|:--|
-| **TSA** | Runtime Verification | Каждый вызов инструмента легитимен, но цепочка — атака. TSA компилирует LTL-формулы в автоматы O(1). |
-| **CAFL** | Information Flow Control | LLM — чёрный ящик, тейнт-трекинг ломается. CAFL: если тейнтованные данные вошли в LLM — весь выход тейнтован. Capabilities только убывают. |
-| **GPS** | Prediktive Analytics | Атаки обнаруживаются после ущерба. GPS перечисляет 65 536 абстрактных состояний и считает долю опасных продолжений. GPS > 0.7 = раннее предупреждение. |
-| **AAS** | Теория аргументации (Dung 1995) | «Как смешать отбеливатель и аммиак?» — студент или злоумышленник? Один текст, одна семантика. AAS строит аргументационный фреймворк и вычисляет обоснованное расширение. |
-| **IRM** | Mechanism Design (экономика) | Текст не может раскрыть намерение — фундаментальная невозможность. IRM проектирует взаимодействия, где *поведение* раскрывает намерение. |
-| **MIRE** | Криптография (Goldwasser-Kim 2022) | Обнаружение бэкдоров математически невозможно (доказано). MIRE: не обнаруживай — **содержи**. Бэкдор активируется, но ничего не достигает. |
-| **PASR** | Теория категорий | Семантическая трансдукция уничтожает токены, тейнт-теги умирают с ними. PASR: двухканальный выход — семантика + HMAC-подписанный сертификат провенанса. |
-
-Статья: [`papers/sentinel-lattice`](./papers/sentinel-lattice) · Архитектура: [`docs/rnd`](./docs/rnd)
-
-Обнаружение: **98.5%** на 250 000 атак, 15 категорий. 51 поиск по grep.app: **0 существующих реализаций** любого из 7 примитивов.
-
-</details>
+<br>
 
 ---
 
@@ -191,6 +264,234 @@ The 7 primitives draw from 19 scientific domains. This isn't decoration — each
 
 <div align="center">
 
-[License](./LICENSE) &ensp;·&ensp; [Security](./SECURITY.md) &ensp;·&ensp; [Quick Start](./QUICKSTART.md)
+# S E N T I N E L
+
+### Ваш ИИ атакуют. Ваш классификатор этого не видит.
+
+Детерминированная, математически обоснованная защита ИИ. Не ещё одна ML-модель, надеющаяся поймать то, что ML-модели пропускают.
+
+</div>
+
+<br>
+
+---
+
+## 🔴 Мы взломали флагманскую модель Alibaba. Ваша — следующая?
+
+**[QWEN-2026-001](./docs/security/QWEN-2026-001-advisory.md)** — 5 критических векторов обхода безопасности в **Qwen 3.5-Plus**, самой продвинутой модели Alibaba.
+
+| | |
+|:--|:--|
+| **Модель** | Qwen 3.5-Plus (февраль 2026) — флагман Alibaba |
+| **Стек безопасности** | Qwen3Guard + GSPO + RationaleRM — 3 уровня защиты |
+| **Результат** | Все 3 уровня обойдены. 5 векторов. 5 стадий. 3 чат-сессии. |
+| **Выход** | Рабочий шеллкод, реверс-шеллы, инструменты автоматизации джейлбрейков, God Mode |
+| **Критичность** | High (Systemic) — модель сама оценила свою уязвимость |
+
+Цепочка атаки: контекстное фреймирование → декоративный отказ → God Mode → самовоспроизводящиеся джейлбрейк-инструменты.
+
+**Если 3-уровневый стек безопасности Alibaba нас не остановил — что защищает ваc?**
+
+> 📄 Полный advisory: [`QWEN-2026-001`](./docs/security/QWEN-2026-001-advisory.md) · 🎬 Демо: [`demos/`](./demos/)
+
+---
+
+<br>
+
+## Что мы делаем
+
+<table>
+<tr>
+<td width="50%" valign="top">
+
+### 🔍 Аудит безопасности ИИ
+
+Тестируем ваш LLM-деплой против 39 000+ атакующих нагрузок по 15 категориям. Детальный отчёт с уровнями критичности, шагами воспроизведения и рекомендациями.
+
+**Результат:** Полный отчёт + маппинг OWASP LLM Top 10.
+
+</td>
+<td width="50%" valign="top">
+
+### 🛡️ Интеграция Sentinel
+
+61 детерминированный Rust-движок как входной/выходной файрвол вокруг вашего LLM. Латентность <1мс. 98.5% обнаружение. GPU не нужен.
+
+**Результат:** Продакшн-защита + дашборд мониторинга.
+
+</td>
+</tr>
+<tr>
+<td width="50%" valign="top">
+
+### ⚔️ Red Team операции
+
+Adversarial-тестирование от команды, взломавшей Qwen 3.5-Plus. Находим то, что ваш стек безопасности пропускает — prompt injection цепочки, multi-turn эскалация, контекстное фреймирование.
+
+**Результат:** Документация цепочек атак + видео-демонстрации.
+
+</td>
+<td width="50%" valign="top">
+
+### 🎓 Sentinel Academy
+
+90+ уроков на 3 уровнях. От основ prompt injection до формальной верификации свойств безопасности. На английском и русском.
+
+**Результат:** Программа обучения команды + сертификация.
+
+</td>
+</tr>
+</table>
+
+<br>
+
+---
+
+## Почему Sentinel
+
+| Метрика | Значение | Что это значит |
+|:--|:--|:--|
+| **61 движок** | Rust, детерминированные, без ML | Нет ложных срабатываний от дрифта модели. Один вход = один результат. Всегда. |
+| **1 101 тест** | 0 падений | Каждый движок, каждый паттерн, каждый edge case — проверен. |
+| **98.5% обнаружение** | 250 000 атак | По 15 категориям. 1.5% остаток — теоретический пол. |
+| **<1мс латентность** | На запрос | Достаточно для продакшна в реальном времени. Без GPU. |
+| **7 новых примитивов** | 0 существующих реализаций | 51 поиск по grep.app подтвердил: мы их изобрели. |
+| **19 научных областей** | От формальной верификации до иммунологии | Каждая область решает задачу, которую другие не могут. |
+| **OWASP 6/10** | Покрытие LLM Top 10 | Системно, не ad-hoc. Полный маппинг доступен. |
+
+<br>
+
+---
+
+## Проблема
+
+Каждая развёрнутая сегодня AI-система сталкивается с одной фундаментальной проблемой: **модель не может отличить легитимные инструкции от враждебных.** Prompt-инъекция выглядит идентично нормальному вводу. Jailbreak использует тот же естественный язык, что и обычный запрос. Цепочка эксфильтрации данных может состоять из полностью легитимных вызовов инструментов.
+
+Существующие защиты полагаются на ML-классификаторы, разделяющие ту же слепоту, что и защищаемые модели. Sentinel использует другой подход: **детерминированная, математически обоснованная защита**, не зависящая от другого ИИ.
+
+**61 Rust-движок.** Латентность <1мс. 98.5% обнаружение на 250 000 атак по 15 категориям. 7 новых примитивов безопасности из 19 научных областей.
+
+<br>
+
+## Как это работает
+
+Sentinel работает как **каскад эшелонированной обороны**. Каждый уровень ловит то, что пропустил предыдущий, и каждый использует принципиально другую парадигму обнаружения.
+
+```
+250 000 атак входят в систему
+    |
+    +-- L1  Sentinel Core (regex-движки) ------ ловит  36.0%   ← детерминированное сопоставление
+    |   Остаток: 160 090
+    |
+    +-- L2  Capability Proxy (IFC) ------------- ловит  20.3%   ← структурно: данные НЕ МОГУТ утечь
+    |   Остаток: 109 241
+    |
+    +-- L3  Behavioral EDR --------------------- ловит  10.9%   ← обнаружение аномалий
+    |   Остаток: 82 090
+    |
+    +-- PASR  Отслеживание провенанса ---------- ловит   2.0%   ← неподделываемые сертификаты
+    +-- TCSA  Темпоральные цепочки ------------- ловит   0.8%   ← LTL-автоматы безопасности
+    +-- ASRA  Разрешение неоднозначности ------- ловит   1.3%   ← аргументация + mechanism design
+    +-- Комбинаторные слои (A+B+G) ------------- ловит   6.1%   ← доказательства невозможности
+    +-- MIRE  Контейнмент модели --------------- содержит 0.7%  ← не обнаруживай — СОДЕРЖИ
+    |
+    ОСТАТОК: ~1.5% (~3 750 атак — теоретический пол)
+```
+
+<br>
+
+## Компоненты платформы
+
+### Защита
+
+> **[sentinel-core](./sentinel-core)** `Rust` — 61 детерминированный движок, 810+ regex-паттернов, 1101 тест. Латентность <1мс. Покрывает OWASP LLM Top 10, CSA MCP TTPs и все 7 примитивов Sentinel Lattice.
+
+> **[brain](./src/brain)** `Python` — AI Security Backend. gRPC API, 32 модуля: анализатор, аудит, комплаенс, граф, GPU-инференс, движок правил.
+
+> **[shield](./shield)** `C11` — AI Security DMZ. 36 000+ LOC, 21 протокол, 119 CLI-обработчиков, 103 теста. Ноль внешних зависимостей.
+
+> **[immune](./immune)** `C` — EDR/XDR для AI-инфраструктуры. Защита на уровне ядра, TLS/mTLS, Bloom-фильтры, eBPF.
+
+> **[micro-swarm](./micro-swarm)** `Python` — ML-ансамбль. <1мс инференс, F1=0.997. Дополняет детерминированные движки статистическим обнаружением.
+
+### Наступление
+
+> **[strike](./strike)** `Python` — AI Red Team платформа. 39 000+ атакующих нагрузок по 15 категориям.
+
+### Инфраструктура
+
+> **[gomcp](./gomcp)** `Go` — MCP-сервер с иерархической памятью и каузальными графами.
+>
+> **[devkit](./devkit)** — Инструментарий разработки. &ensp;|&ensp; **[patterns](./patterns)** `YAML` — Базы паттернов. &ensp;|&ensp; **[signatures](./signatures)** `JSON` — Базы сигнатур.
+
+<br>
+
+## Решётка Sentinel — 7 новых примитивов безопасности
+
+Это не инкрементальные улучшения. Каждый примитив решает **математически доказанное ограничение** существующих подходов. 51 поиск по grep.app подтвердил: **ни одной существующей реализации** ни для одного из них.
+
+| Примитив | Область | Проблема | Решение |
+|:--|:--|:--|:--|
+| **TSA** | Runtime Verification | Каждый вызов инструмента легитимен, но *цепочка* — атака. | LTL-свойства → автоматы O(1). Проверяет цепочки любой длины за константное время. |
+| **CAFL** | Information Flow Control | LLM — чёрный ящик, тейнт-трекинг ломается. | Если тейнтованные данные вошли в LLM — весь выход тейнтован. Capabilities только убывают. |
+| **GPS** | Предиктивная аналитика | Атаки обнаруживаются после ущерба. | Перечисляет 65 536 состояний. GPS > 0.7 = раннее предупреждение ДО атаки. |
+| **AAS** | Теория аргументации | «Как смешать отбеливатель и аммиак?» — студент или злоумышленник? | Аргументационный фреймворк + обоснованное расширение. Аудируемо для EU AI Act. |
+| **IRM** | Mechanism Design | Текст не может раскрыть намерение. | Проектирует взаимодействия, где *поведение* раскрывает намерение. |
+| **MIRE** | Криптография | Обнаружение бэкдоров математически невозможно. | Не обнаруживай — **содержи**. Бэкдор активируется, но ничего не достигает. |
+| **PASR** | Теория категорий | Семантическая трансдукция уничтожает тейнт-теги. | Двухканальный выход: семантика + HMAC-подписанный сертификат провенанса. |
+
+> Статья (23 стр., USENIX): [`papers/sentinel-lattice`](./papers/sentinel-lattice) · Архитектура: [`docs/rnd`](./docs/rnd)
+
+<br>
+
+## Научные основания
+
+7 примитивов опираются на 19 научных областей. Каждая область даёт конкретный математический инструмент для конкретной проблемы безопасности:
+
+| Область | Вклад в Sentinel |
+|:--|:--|
+| **Runtime Verification** | LTL темпоральная логика → автоматы-мониторы для цепочек вызовов (TSA) |
+| **Information Flow Control** | Решётка Bell-LaPadula → данные могут течь только ВВЕРХ (L2) |
+| **Теория аргументации** | Обоснованная семантика Dung → аудируемые решения по dual-use (AAS) |
+| **Mechanism Design** | Скрининг и сигналирование → намерение раскрывается через поведение (IRM) |
+| **Теория категорий** | Функтор подъёма провенанса → фибрация через lossy-трансформации (PASR) |
+| **Криптография** | Невозможность Goldwasser-Kim → парадигма контейнмента (MIRE) |
+| **Теория управления** | Устойчивость Ляпунова → траектории разговоров доказуемо ограничены |
+| **Иммунология** | Негативная селекция → детекторы аномалий без сигнатур атак |
+| **Нейронаука** | Латеральное торможение → конкурирующие интерпретации подавляют adversarial |
+| **Формальная лингвистика** | Иерархия Хомского → инъекция синтаксически невозможна на уровне грамматики |
+| **Теория информации** | Пропускная способность Шеннона → канал сужен ниже минимальной атакующей нагрузки |
+| **Теория речевых актов** | Иллокутивная сила → обнаруживает COMMAND(override) в любом промпте |
+| **Распределённые системы** | BFT-консенсус → N≥3f+1 разнородных моделей согласуют безопасность |
+
+<br>
+
+---
+
+## ⏳ Окно закрывается
+
+EU AI Act требует тестирование безопасности для высокорисковых AI-систем. Поверхность атаки расширяется — агентные воркфлоу, цепочки вызовов инструментов, мультимодельные пайплайны. Каждый месяц без детерминированной защиты — ещё один месяц уязвимости.
+
+- **EU AI Act, статья 15**: Высокорисковые AI-системы требуют устойчивости к adversarial-атакам
+- **OWASP LLM Top 10**: Отраслевой стандарт, о котором спросят ваши аудиторы
+- **Агентный взрыв**: Tool-calling LLM создают цепочки атак, которые ни один классификатор не отследит
+
+Вопрос не в том, будет ли ваш ИИ атакован. Вопрос в том, узнаете ли вы, когда это произойдёт.
+
+<br>
+
+---
+
+<div align="center">
+
+## Начать
+
+**Запросить аудит** · **Заказать red team** · **Развернуть Sentinel**
+
+📧 **sentinel@dmltrl.dev**
+
+<br>
+
+[Quick Start](./QUICKSTART.md) &ensp;·&ensp; [Security](./SECURITY.md) &ensp;·&ensp; [License](./LICENSE) &ensp;·&ensp; [Academy](./docs/academy/)
 
 </div>
