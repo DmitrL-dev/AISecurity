@@ -86,6 +86,11 @@ pub mod crescendo;
 pub mod temporal_safety;
 pub mod capability_proxy;
 pub mod argumentation_safety;
+pub mod intent_revelation;
+pub mod capability_flow;
+pub mod goal_predictability;
+pub mod model_containment;
+pub mod provenance_reduction;
 
 // Re-export trait for convenience
 pub use traits::{PatternMatcher, EngineCategory, BoxedEngine, create_default_engines};
@@ -245,6 +250,11 @@ pub struct SentinelEngine {
     temporal_safety: Option<temporal_safety::TemporalSafetyEngine>,
     capability_proxy: Option<capability_proxy::CapabilityProxyEngine>,
     argumentation_safety: Option<argumentation_safety::ArgumentationSafetyEngine>,
+    capability_flow: Option<capability_flow::CapabilityFlowEngine>,
+    goal_predictability: Option<goal_predictability::GoalPredictabilityEngine>,
+    intent_revelation: Option<intent_revelation::IntentRevelationEngine>,
+    model_containment: Option<model_containment::ModelContainmentEngine>,
+    provenance_reduction: Option<provenance_reduction::ProvenanceReductionEngine>,
 
     // === Domain Engines (analyze -> CustomResult, adapted to MatchResult) ===
     behavioral_guard: Option<behavioral::BehavioralGuard>,
@@ -304,6 +314,11 @@ impl SentinelEngine {
             temporal_safety: Some(temporal_safety::TemporalSafetyEngine::new()),
             capability_proxy: Some(capability_proxy::CapabilityProxyEngine::new()),
             argumentation_safety: Some(argumentation_safety::ArgumentationSafetyEngine::new()),
+            capability_flow: Some(capability_flow::CapabilityFlowEngine::new()),
+            goal_predictability: Some(goal_predictability::GoalPredictabilityEngine::new()),
+            intent_revelation: Some(intent_revelation::IntentRevelationEngine::new()),
+            model_containment: Some(model_containment::ModelContainmentEngine::new()),
+            provenance_reduction: Some(provenance_reduction::ProvenanceReductionEngine::new()),
 
             // Domain engines
             behavioral_guard: Some(behavioral::BehavioralGuard::new()),
@@ -399,6 +414,11 @@ impl SentinelEngine {
         run_engine!(self.temporal_safety);
         run_engine!(self.capability_proxy);
         run_engine!(self.argumentation_safety);
+        run_engine!(self.capability_flow);
+        run_engine!(self.goal_predictability);
+        run_engine!(self.intent_revelation);
+        run_engine!(self.model_containment);
+        run_engine!(self.provenance_reduction);
 
         // === Domain Engines (analyze -> CustomResult) ===
         run_domain_engine!(self.behavioral_guard, "behavioral");
