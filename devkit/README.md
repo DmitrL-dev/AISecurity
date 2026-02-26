@@ -1,105 +1,123 @@
 # SENTINEL DevKit
 
-> **Набор правил, навыков и паттернов для agent-first разработки в экосистеме SENTINEL**
+> Agent-first development toolkit for the Sentinel ecosystem.
 
-## Архитектура Методологии
-
-```
-┌─────────────────────────────────────────────────────────────────┐
-│                    SDD (SPEC-DRIVEN DEVELOPMENT)                │
-│                        PRIMARY FRAMEWORK                        │
-│                                                                 │
-│   Phase 1: SPECIFICATION (ЧТО строить?)                        │
-│   ┌─────────────┐   ┌─────────────┐   ┌─────────────┐          │
-│   │ Requirements│ → │   Design    │ → │    Tasks    │          │
-│   │   (.md)     │   │   (.md)     │   │   (.md)     │          │
-│   └─────────────┘   └─────────────┘   └─────────────┘          │
-│         ↓                 ↓                 ↓                   │
-│      Human Review     Human Review     Human Review             │
-│                                                                 │
-│   Phase 2: IMPLEMENTATION (КАК строить правильно?)             │
-│   ┌─────────────────────────────────────────────────────────┐  │
-│   │                  TDD IRON LAW                           │  │
-│   │        🔴 RED → 🟢 GREEN → 🔄 REFACTOR                  │  │
-│   │        (Test First → Minimal Code → Improve)            │  │
-│   └─────────────────────────────────────────────────────────┘  │
-│                              ↓                                  │
-│   ┌─────────────────────────────────────────────────────────┐  │
-│   │              TWO-STAGE REVIEW                           │  │
-│   │     Stage 1: Spec Compliance → Stage 2: Code Quality   │  │
-│   └─────────────────────────────────────────────────────────┘  │
-│                              ↓                                  │
-│                         ✅ MERGE                                │
-└─────────────────────────────────────────────────────────────────┘
-```
-
-## Иерархия
-
-| Уровень | Компонент | Отвечает на вопрос | Источник |
-|---------|-----------|-------------------|----------|
-| **MACRO** | SDD (Kiro) | ЧТО строить? | Kiro Specs |
-| **MICRO** | TDD Iron Law | КАК строить правильно? | Superpowers |
-| **GATE** | Two-Stage Review | Готов ли код к merge? | Superpowers |
-| **LOOP** | QA Fix Loop | Как исправить issues? | Auto-Claude |
-
-## Структура
+## What's Inside
 
 ```
 devkit/
-├── README.md                          # Этот файл
-├── rules/
-│   └── rationalizations.md            # Таблица оправданий для TDD
-├── skills/
-│   ├── two-stage-review/SKILL.md      # Spec Compliance + Code Quality
-│   ├── qa-fix-loop/SKILL.md           # Reviewer → Fixer цикл
-│   └── tdd-enforcement/SKILL.md       # TDD Iron Law
-├── prompts/
-│   ├── README.md                      # Архитектура промптов
-│   ├── reviewer.md                    # Reviewer Agent prompt
-│   ├── fixer.md                       # Fixer Agent prompt
-│   └── security-audit.md              # Security Auditor prompt
-├── specs/
-│   └── dot-templates.md               # DOT flowchart шаблоны
-├── memory/
-│   └── rlm-integration.md             # RLM Memory Bridge интеграция
-└── hooks/
-    ├── README.md                      # Инструкции установки
-    ├── pre-commit.sh                  # Bash hook (Linux/macOS)
-    └── pre-commit.ps1                 # PowerShell hook (Windows)
+├── extension/              VS Code extension (TypeScript, 29 source files)
+│   ├── src/agents/         Agent orchestration, swarm spawner, model router
+│   ├── src/kanban/         Task management board
+│   ├── src/qa/             QA loop automation
+│   ├── src/tdd/            TDD runner integration
+│   └── src/panels/         Dashboard webview panel
+│
+├── hooks/                  Git hooks
+│   ├── pre-commit.sh       Bash (Linux/macOS)
+│   ├── pre-commit.ps1      PowerShell (Windows)
+│   └── pre-exec-guard.ps1  Execution guard
+│
+├── prompts/                AI agent prompt templates
+│   ├── reviewer.md         Code reviewer agent
+│   ├── fixer.md            Automated fixer agent
+│   ├── security-audit.md   Security auditor agent
+│   └── financial-guard.md  Financial security guard
+│
+├── rules/                  Agent behavior rules
+│   ├── rationalizations.md TDD rationalization patterns (anti-patterns to avoid)
+│   └── clawdbot-security.md Agent security rules (OWASP Agentic Top 10)
+│
+├── skills/                 Reusable agent skills
+│   ├── agent-security/     OWASP Agentic security audit
+│   ├── two-stage-review/   Spec compliance + code quality review
+│   ├── qa-fix-loop/        Reviewer → Fixer automated cycle
+│   └── tdd-enforcement/    TDD Iron Law enforcement
+│
+├── specs/                  Specification templates
+│   └── dot-templates.md    DOT flowchart templates for specs
+│
+├── ui/                     Standalone web dashboard
+│   ├── index.html
+│   ├── app.js
+│   └── styles.css
+│
+└── memory/                 Memory system integration
+    └── rlm-integration.md  RLM Memory Bridge docs
 ```
 
-## Workflows
+## VS Code Extension
 
-| Команда | Файл | Назначение |
-|---------|------|------------|
-| `/devkit:tdd-check` | `.agent/workflows/devkit-tdd-check.md` | Быстрая проверка TDD compliance |
-| `/engine-verification` | `.agent/workflows/engine-verification.md` | Полная верификация engine (вкл. Two-Stage) |
+Full-featured development extension with agent orchestration, kanban board, QA automation, and TDD enforcement.
 
-## Ключевые компоненты
+```bash
+cd extension
+npm install
+npm run build
+```
 
-### 1. TDD Iron Law (Rule 21)
-**NO PRODUCTION CODE WITHOUT A FAILING TEST FIRST**
+Press F5 in VS Code to launch. Pre-built VSIX available at `extension/sentinel-devkit-0.1.0.vsix`.
 
-Интегрировано в `agent_system_prompts/core_instructions.md`.
+### Extension Features
 
-### 2. Two-Stage Review
-Разделение code review на две фазы:
-1. **Spec Compliance** — соответствует ли код спецификации?
-2. **Code Quality** — качество, паттерны, maintainability
+| Feature | Source | Description |
+|---------|--------|-------------|
+| Agent Orchestrator | `src/agents/` | Multi-agent execution with model routing |
+| Swarm Mode | `src/agents/SwarmSpawner.ts` | Parallel agent spawning |
+| Security Scanner | `src/agents/SecurityScannerAgent.ts` | Automated security scanning |
+| Kanban Board | `src/kanban/` | Task tracking with persistence |
+| QA Loop | `src/qa/` | Automated reviewer → fixer cycle |
+| TDD Runner | `src/tdd/` | Test-first enforcement |
+| Dashboard | `src/panels/` | Unified webview panel |
 
-### 3. QA Fix Loop
-Автономный цикл исправления: `Reviewer → Issue → Fixer → Re-review`
+## Development Methodology
 
-### 4. DOT Flowcharts
-Использование DOT-диаграмм как исполняемых спецификаций в Kiro specs.
+The DevKit enforces a structured development process:
 
-## Интеграция
+```
+SPECIFICATION (what to build)
+    Requirements → Design → Tasks → Human Review
+         ↓
+IMPLEMENTATION (how to build correctly)
+    TDD Iron Law: RED → GREEN → REFACTOR
+    (No production code without a failing test first)
+         ↓
+REVIEW
+    Stage 1: Spec Compliance (does it match the spec?)
+    Stage 2: Code Quality (is it maintainable?)
+         ↓
+MERGE
+```
 
-DevKit работает через:
-- `/devkit:*` workflows в `.agent/workflows/`
-- SKILL.md файлы для Antigravity агента
-- RLM Memory Bridge для хранения решений
+## Agent Prompts
 
-## Лицензия
+Pre-built prompt templates for AI coding agents:
 
-MIT (Superpowers-derived) + Apache 2.0 (SENTINEL core)
+- **reviewer.md** — Structured code review with severity levels and actionable feedback
+- **fixer.md** — Automated issue resolution with minimal diff changes
+- **security-audit.md** — OWASP-aligned security scanning for AI agent code
+- **financial-guard.md** — Financial data protection and compliance checks
+
+## Skills
+
+Reusable skill definitions that can be loaded by compatible AI agents:
+
+| Skill | Description |
+|-------|-------------|
+| `agent-security` | OWASP Agentic Top 10 2026 audit checklist |
+| `two-stage-review` | Split review into spec compliance + code quality |
+| `qa-fix-loop` | Autonomous reviewer → issue → fixer → re-review cycle |
+| `tdd-enforcement` | Enforces test-first development, blocks rationalization |
+
+## Git Hooks
+
+Install pre-commit hooks to enforce quality gates:
+
+```bash
+# Linux/macOS
+cp devkit/hooks/pre-commit.sh .git/hooks/pre-commit
+chmod +x .git/hooks/pre-commit
+
+# Windows PowerShell
+Copy-Item devkit\hooks\pre-commit.ps1 .git\hooks\pre-commit
+```
