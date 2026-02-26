@@ -1,6 +1,6 @@
 # 🔍 AI Design Review
 
-> **Module:** `brain.design_review`  
+> **Module:** `sentinel_core::design_review`  
 > **Version:** 1.6.0  
 > **Added:** January 8, 2026
 
@@ -122,32 +122,6 @@ Patterns matched:
 
 ## Usage
 
-### Python API
-
-```python
-from brain.design_review import review_text, review_documents
-
-# Review single text
-risks = review_text("""
-This system uses RAG with a vector database and 
-MCP tools for shell command execution.
-""")
-
-print(f"Risks found: {len(risks)}")
-for r in risks:
-    print(f"  {r.severity.value}: {r.title}")
-    print(f"    {r.recommendation}")
-
-# Review multiple documents
-result = review_documents([
-    {"name": "architecture.md", "content": arch_content},
-    {"name": "api.yaml", "content": api_content},
-])
-
-print(f"Risk Score: {result.risk_score}/100")
-print(f"Summary: {result.summary}")
-```
-
 ### REST API
 
 ```bash
@@ -176,32 +150,29 @@ curl -X POST http://localhost:8000/design-review/upload \
 
 ### DesignRisk
 
-```python
-@dataclass
-class DesignRisk:
-    id: str                    # DR-0001
-    category: RiskCategory     # rag_poisoning, mcp_abuse, etc.
-    severity: Severity         # low, medium, high, critical
-    title: str                 # Human-readable title
-    description: str           # What was detected
-    location: str              # Where in document
-    recommendation: str        # How to fix
-    owasp_mapping: List[str]   # ["LLM01", "ASI05"]
+```rust
+pub struct DesignRisk {
+    pub id: String,                    // DR-0001
+    pub category: RiskCategory,        // rag_poisoning, mcp_abuse, etc.
+    pub severity: Severity,            // low, medium, high, critical
+    pub title: String,                 // Human-readable title
+    pub description: String,           // What was detected
+    pub location: String,              // Where in document
+    pub recommendation: String,        // How to fix
+    pub owasp_mapping: Vec<String>,    // ["LLM01", "ASI05"]
+}
 ```
 
 ### DesignReviewResult
 
-```python
-@dataclass
-class DesignReviewResult:
-    reviewed_at: datetime
-    documents: List[str]       # Names reviewed
-    risks: List[DesignRisk]    # All found risks
-    summary: str               # Human-readable summary
-    risk_score: float          # 0-100
-    
-    @property
-    def risk_count_by_severity(self) -> Dict[str, int]
+```rust
+pub struct DesignReviewResult {
+    pub reviewed_at: DateTime,
+    pub documents: Vec<String>,        // Names reviewed
+    pub risks: Vec<DesignRisk>,        // All found risks
+    pub summary: String,               // Human-readable summary
+    pub risk_score: f64,               // 0-100
+}
 ```
 
 ## Risk Scoring
@@ -268,9 +239,8 @@ and responses are cached for performance.
 
 | File | LOC | Purpose |
 |------|-----|---------|
-| `reviewer.py` | 380 | Pattern matching + analysis |
-| `__init__.py` | 30 | Package exports |
-| `tests/test_design_review.py` | 180 | Unit tests (12) |
+| `design_review.rs` | — | Pattern matching + analysis |
+| `tests in design_review.rs (#[cfg(test)])` | — | Unit tests (12) |
 
 ---
 

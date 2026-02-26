@@ -33,7 +33,7 @@ Get SENTINEL running in your environment:
 ### Lab 002: Detection Engine Tour
 **Time:** 40 minutes | **Difficulty:** Beginner
 
-Explore SENTINEL's 49 Rust Super-Engines:
+Explore SENTINEL's 59 Rust detection engines:
 - Engine categories
 - Configuration options
 - Performance tuning

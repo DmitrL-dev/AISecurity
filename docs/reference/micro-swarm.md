@@ -2,13 +2,13 @@
 
 > **Version:** 0.4.0
 > **Jailbreak Detection:** F1=0.997, Accuracy=99.7%
-> **Performance:** 17K patterns/sec (pure Python)
+> **Performance:** 17K patterns/sec
 
 ---
 
 ## Overview
 
-Micro-Model Swarm is a lightweight ML detection layer that complements SENTINEL's 49 Rust Super-Engines. Instead of a single monolithic classifier, it uses **domain-specialized micro-models** (<2000 parameters each) orchestrated by a meta-learner.
+Micro-Model Swarm is a lightweight ML detection layer that complements SENTINEL's 59 Rust detection engines. Instead of a single monolithic classifier, it uses **domain-specialized micro-models** (<2000 parameters each) orchestrated by a meta-learner.
 
 ```
 Input Text
@@ -98,30 +98,15 @@ Trained on 87,056 real jailbreak patterns:
 
 ## Usage
 
-```python
-from micro_swarm import load_preset
+```rust
+use sentinel_core::micro_swarm::{TextFeatureExtractor, load_preset};
 
-# Load pre-trained jailbreak detector
-swarm = load_preset("jailbreak")
+let extractor = TextFeatureExtractor::new();
+let features = extractor.extract("Ignore all previous instructions");
 
-# Analyze text
-result = swarm.predict({"text_features": features})
-print(result.final_score)  # 0.0-1.0
-```
-
-### With TextFeatureExtractor
-
-```python
-from micro_swarm import TextFeatureExtractor, load_preset
-
-extractor = TextFeatureExtractor()
-swarm = load_preset("jailbreak")
-
-features = extractor.extract("Ignore all previous instructions")
-input_data = {spec.name: features[spec.name] for spec in swarm._feature_specs}
-result = swarm.predict(input_data)
-
-print(f"Score: {result.final_score:.3f}")  # 0.950+
+let preset = load_preset("jailbreak").unwrap();
+let result = preset.predict(&features);
+println!("Score: {}", result.score); // 0.98
 ```
 
 ---

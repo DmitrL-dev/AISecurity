@@ -14,7 +14,7 @@ SENTINEL provides a comprehensive framework for AI security. This submodule teac
 
 | Component | Purpose | Key Features |
 |-----------|---------|--------------|
-| **BRAIN** | Detection engines | 49 Rust Super-Engines (<1ms each) |
+| **BRAIN** | Detection engines | 59 Rust detection engines (<1ms each) |
 | **SHIELD** | Runtime protection | Sub-millisecond latency |
 | **scan()** | Simple API | One-line protection |
 | **Guards** | Decorators | Function-level control |

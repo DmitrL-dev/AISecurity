@@ -65,7 +65,7 @@ from sentinel import scan
 
 ### BRAIN (Detection)
 
-- 49 Rust Super-Engines (<1ms each)
+- 59 Rust detection engines (<1ms each)
 - Tiered execution (fast → slow)
 - Rust via PyO3, gRPC API
 

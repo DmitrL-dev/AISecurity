@@ -4,6 +4,56 @@ All notable changes to the SENTINEL AI Security Platform.
 
 ---
 
+## [3.0.0] - 2026-02-26 (Sentinel Lattice — 7 Novel Security Primitives)
+
+### 🔬 Sentinel Lattice Engines (8 new — 59 total)
+
+Seven original security primitives from our [arXiv paper](../papers/sentinel-lattice/main.pdf), plus L2 Capability Proxy:
+
+| Engine | File | Tests | Primitive |
+|--------|------|:-----:|-----------|
+| **TSA** | `temporal_safety.rs` | 23 | Temporal Safety Automata — LTL → O(1) monitors |
+| **L2** | `capability_proxy.rs` | 24 | Capability Proxy + IFC — Bell-LaPadula, NEVER lists |
+| **AAS** | `argumentation_safety.rs` | 30 | Adversarial Argumentation — Dung 1995 grounded semantics |
+| **CAFL** | `capability_flow.rs` | 24 | Capability-Attenuating Flow Labels |
+| **GPS** | `goal_predictability.rs` | 27 | Goal Predictability Score — 16-bit state enumeration |
+| **IRM** | `intent_revelation.rs` | 28 | Intent Revelation Mechanisms — economics-based |
+| **MIRE** | `model_containment.rs` | 28 | Model-Irrelevance Containment — Goldwasser-Kim |
+| **PASR** | `provenance_reduction.rs` | 22 | Provenance-Annotated Semantic Reduction — fibrations |
+
+### 📊 Test Suite
+
+- **1101 tests passing, 0 failures** (up from 887)
+- 206 new tests across 8 Lattice engines
+- All engines integrated in `mod.rs` (4 integration points each)
+
+### 📚 Documentation Radical Restructuring
+
+- **Removed 43 dead files**: `docs/framework/`, `docs/getting-started/`, `docs/guides/`, `docs/operations/`, `docs/architecture/`, `docs/articles/`, `docs/examples/`, `docs/index.html`, 13 sensitive security files (audit reports, OSINT, real vulnerability submissions)
+- **Rewrote root docs**: `README.md`, `QUICKSTART.md`, `SECURITY.md`, `devkit/README.md`
+- **Rewrote docs hub**: `docs/README.md`, `ARCHITECTURE.md`, `COMPARISON.md`, `CONTRIBUTING.md`
+- **Updated all reference docs**: `engines-en.md`, `engines.md` (49→59 engines), `owasp_agentic_mapping.md` (Python→Rust, coverage 2/10→6/10), `api.md`, `compliance.md`, `design-review.md`, `micro-swarm.md`, `requirements.md`
+- **Removed all Python API references** from documentation (no more `from brain.X import`)
+- **Updated academy files** with correct engine counts
+
+### 🔒 OWASP Agentic AI Coverage Improvement
+
+| Before | After |
+|--------|-------|
+| ✅ 2/10 Full | ✅ 6/10 Full |
+| ⚠️ 3/10 Partial | ⚠️ 3/10 Partial |
+| ❌ 5/10 None | ❌ 1/10 None |
+
+Lattice primitives now cover ASI01-ASI04, ASI06, ASI09, ASI10 formally.
+
+### 📄 arXiv Paper
+
+- 23-page paper: "The Sentinel Lattice: Seven Security Primitives for AI Systems"
+- Category: cs.CR (Cryptography and Security)
+- PDF: `papers/sentinel-lattice/main.pdf`
+
+---
+
 ## [2.0.0] - 2026-02-16 (Rust Migration + Micro-Model Swarm)
 
 ### 🦀 Engine Migration

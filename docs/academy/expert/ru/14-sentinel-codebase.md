@@ -9,7 +9,7 @@
 ```
 sentinel-community/
 ├── sentinel-core/         # Rust detection engines
-│   ├── src/engines/       # 49 Rust Super-Engines
+│   ├── src/engines/       # 59 Rust detection engines
 │   │   ├── injection.rs
 │   │   ├── jailbreak.rs
 │   │   ├── pii.rs
@@ -72,7 +72,7 @@ impl SentinelEngine {
         // Core engines (PatternMatcher trait)
         run_engine!(self.injection);
         run_engine!(self.jailbreak);
-        // ... 49 engines total
+        // ... 59 engines total
     }
 }
 ```

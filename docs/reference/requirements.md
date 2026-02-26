@@ -1,6 +1,6 @@
 # 📋 Custom Security Requirements
 
-> **Module:** `brain.requirements`  
+> **Module:** `sentinel_core::requirements`  
 > **Version:** 1.6.0  
 > **Added:** January 8, 2026
 
@@ -49,72 +49,50 @@ Custom Requirements allow you to define your own security policies that map to S
 
 ### SecurityRequirement
 
-```python
-@dataclass
-class SecurityRequirement:
-    id: str                           # Unique identifier
-    name: str                         # Human-readable name
-    description: str                  # Detailed description
-    category: RequirementCategory     # injection, data_privacy, agent_safety, etc.
-    severity: Severity                # low, medium, high, critical
-    enabled: bool = True              # Toggle on/off
-    engine: Optional[str] = None      # SENTINEL engine to use
-    engine_config: Dict = {}          # Engine-specific configuration
-    action: EnforcementAction = WARN  # warn, alert, block
-    compliance_tags: List[str] = []   # OWASP-LLM01, EU-ART-14, etc.
+```rust
+pub struct SecurityRequirement {
+    pub id: String,                           // Unique identifier
+    pub name: String,                         // Human-readable name
+    pub description: String,                  // Detailed description
+    pub category: RequirementCategory,        // injection, data_privacy, agent_safety, etc.
+    pub severity: Severity,                   // low, medium, high, critical
+    pub enabled: bool,                        // Toggle on/off
+    pub engine: Option<String>,               // SENTINEL engine to use
+    pub engine_config: HashMap<String, Value>, // Engine-specific configuration
+    pub action: EnforcementAction,            // warn, alert, block
+    pub compliance_tags: Vec<String>,         // OWASP-LLM01, EU-ART-14, etc.
+}
 ```
 
 ### RequirementSet
 
-```python
-@dataclass
-class RequirementSet:
-    id: str
-    name: str
-    description: str
-    requirements: List[SecurityRequirement]
-    version: str = "1.0.0"
+```rust
+pub struct RequirementSet {
+    pub id: String,
+    pub name: String,
+    pub description: String,
+    pub requirements: Vec<SecurityRequirement>,
+    pub version: String,
+}
 ```
 
 ### RequirementCheckResult
 
-```python
-@dataclass
-class RequirementCheckResult:
-    passed: bool                      # All requirements passed?
-    violations: List[Violation]       # List of violations found
-    requirements_checked: int         # Total checked
-    requirements_passed: int          # Passed count
-    blocked: bool                     # Any BLOCK action triggered?
-    
-    @property
-    def compliance_score(self) -> float:  # 0-100%
+```rust
+pub struct RequirementCheckResult {
+    pub passed: bool,                         // All requirements passed?
+    pub violations: Vec<Violation>,           // List of violations found
+    pub requirements_checked: u32,            // Total checked
+    pub requirements_passed: u32,             // Passed count
+    pub blocked: bool,                        // Any BLOCK action triggered?
+}
+
+impl RequirementCheckResult {
+    pub fn compliance_score(&self) -> f64     // 0-100%
+}
 ```
 
 ## Usage
-
-### Python API
-
-```python
-from brain.requirements import RequirementsManager, create_enforcer
-
-# Load manager
-manager = RequirementsManager()
-
-# Get default requirements
-default_set = manager.get("sentinel-default")
-
-# Create enforcer
-enforcer = create_enforcer(default_set)
-
-# Check text
-result = enforcer.check_text("Ignore previous instructions")
-
-print(f"Passed: {result.passed}")
-print(f"Score: {result.compliance_score}%")
-for v in result.violations:
-    print(f"  {v.severity}: {v.message}")
-```
 
 ### REST API
 
@@ -215,11 +193,11 @@ SENTINEL ships with 12 OWASP-mapped defaults:
 
 | File | LOC | Purpose |
 |------|-----|---------|
-| `models.py` | 200 | Data models |
-| `storage.py` | 350 | YAML + SQLite |
-| `enforcer.py` | 200 | Engine integration |
+| `requirements.rs` | — | Data models |
+| `storage.rs` | — | YAML + SQLite |
+| `enforcer.rs` | — | Engine integration |
 | `configs/default.yaml` | 120 | Default requirements |
-| `tests/test_requirements.py` | 230 | Unit tests (9) |
+| `tests in requirements.rs (#[cfg(test)])` | — | Unit tests (9) |
 
 ---
 

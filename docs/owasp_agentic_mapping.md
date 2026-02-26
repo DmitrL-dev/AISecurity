@@ -1,15 +1,18 @@
 # OWASP Agentic AI Top 10 (2026) — SENTINEL Coverage Mapping
 
-**Generated:** 2026-01-01  
+**Updated:** 2026-02-26
 **Source:** https://genai.owasp.org/resource/owasp-top-10-for-agentic-applications-for-2026/
 
 ## Coverage Summary
 
 | Coverage   | Count |
 | ---------- | ----- |
-| ✅ Full    | 2/10  |
+| ✅ Full    | 6/10  |
 | ⚠️ Partial | 3/10  |
-| ❌ None    | 5/10  |
+| ❌ None    | 1/10  |
+
+> Sentinel Lattice primitives (TSA, L2, AAS, CAFL, GPS, IRM, MIRE, PASR) provide
+> formal-methods coverage that no pattern-matching tool can achieve alone.
 
 ---
 
@@ -19,29 +22,33 @@
 
 **Risk:** Attacker alters agent's objectives through malicious content
 
-**SENTINEL Coverage:**
+**SENTINEL Coverage (Rust):**
 
-- `injection.py` — prompt injection detection
-- `jailbreaks.yaml` — 60 patterns including roleplay, authority bypass
-- `behavioral.py` — goal deviation analysis
-- `moe_guard.py` — MoE safety bypass prevention (Jan 2026) 🆕
+- `injection.rs` — prompt injection detection (SQL, NoSQL, Command, LDAP, XPath)
+- `jailbreak.rs` — 704+ patterns including roleplay, authority bypass, DAN
+- `behavioral.rs` — goal deviation analysis
+- `cognitive_guard.rs` — AVI cognitive bias detection
+- `goal_predictability.rs` — **GPS: 16-bit state enumeration, predictive defense** 🆕 Lattice
+- `intent_revelation.rs` — **IRM: mechanism design for intent detection** 🆕 Lattice
 
-**Status:** COVERED
+**Status:** FULLY COVERED (pattern + formal methods)
 
 ---
 
-### ⚠️ ASI02 — Tool Misuse and Exploitation
+### ✅ ASI02 — Tool Misuse and Exploitation
 
 **Risk:** Agent uses legitimate tools in unsafe/unintended ways
 
-**SENTINEL Coverage:**
+**SENTINEL Coverage (Rust):**
 
-- `jailbreaks.yaml` — TOOL_ABUSE patterns (rm -rf, eval, exec)
-- Partial detection of dangerous tool calls
+- `tool_abuse.rs` — agent tool misuse detection
+- `tool_shadowing.rs` — MCP tool shadowing / Shadow Escape
+- `tool_call_injection.rs` — injected tool call detection
+- `cross_tool_guard.rs` — cross-tool attack chains
+- `capability_proxy.rs` — **L2: Bell-LaPadula, provenance tags, NEVER lists** 🆕 Lattice
+- `capability_flow.rs` — **CAFL: capabilities only decrease through flow labels** 🆕 Lattice
 
-**Gap:** Need dedicated ToolMisuseEngine for runtime tool validation
-
-**Status:** PARTIAL
+**Status:** FULLY COVERED (pattern + capability enforcement)
 
 ---
 
@@ -49,14 +56,16 @@
 
 **Risk:** Agent escalates privileges or abuses inherited credentials
 
-**SENTINEL Coverage:**
+**SENTINEL Coverage (Rust):**
 
-- `pii.py` — credential leak detection
-- Authority bypass patterns in jailbreaks.yaml
+- `pii.rs` — credential leak detection
+- `evasion.rs` — obfuscation techniques detection
+- `capability_proxy.rs` — **L2: Bell-LaPadula mandatory access control** 🆕 Lattice
+- `temporal_safety.rs` — **TSA: temporal privilege escalation detection** 🆕 Lattice
 
-**Gap:** Need runtime privilege monitoring
+**Gap:** Runtime privilege monitoring (enforcement vs detection)
 
-**Status:** PARTIAL
+**Status:** PARTIAL (strong detection, needs runtime enforcement)
 
 ---
 
@@ -64,13 +73,14 @@
 
 **Risk:** Poisoned RAG data, vulnerable tools/plugins, compromised models
 
-**SENTINEL Coverage:**
+**SENTINEL Coverage (Rust):**
 
-- `pickle_security.py` — ML model artifact scanning
-- `rag_poisoning.py` — RAG injection detection
-- YARA rules for malicious artifacts
+- `supply_chain.rs` — supply chain security scanning
+- `rag.rs` — RAG document security analysis
+- `dormant_payload.rs` — Phantom/CorruptRAG dormant payloads
+- `provenance_reduction.rs` — **PASR: categorical fibration for provenance tracking** 🆕 Lattice
 
-**Status:** COVERED
+**Status:** FULLY COVERED (pattern + provenance tracking)
 
 ---
 
@@ -78,44 +88,46 @@
 
 **Risk:** Agent generates and executes malicious code
 
-**SENTINEL Coverage:**
+**SENTINEL Coverage (Rust):**
 
-- `code_injection.py` — code injection patterns
-- `jailbreaks.yaml` — eval/exec patterns
+- `code_security.rs` — AI-generated code vulnerability scoring
+- `injection.rs` — command injection patterns
+- `workspace_guard.rs` — workspace-level file protection
 
-**Gap:** Need sandbox execution monitoring
+**Gap:** Sandbox execution monitoring (out of scope for static analysis)
 
-**Status:** PARTIAL
+**Status:** PARTIAL (detection only, no sandbox)
 
 ---
 
-### ❌ ASI06 — Memory and Context Poisoning
+### ✅ ASI06 — Memory and Context Poisoning
 
 **Risk:** Malicious data injected into agent's long-term memory
 
-**SENTINEL Coverage:**
+**SENTINEL Coverage (Rust):**
 
-- `jailbreaks.yaml` — MEMORY_POISONING patterns (basic)
-- `synthetic_memory_injection.py` — partial
+- `memory_integrity.rs` — memory poisoning detection
+- `operational_context_injection.rs` — operational context injection
+- `temporal_safety.rs` — **TSA: temporal sequence violation detection** 🆕 Lattice
+- `argumentation_safety.rs` — **AAS: Dung grounded semantics for argument integrity** 🆕 Lattice
 
-**Gap:** Need ContextPoisonEngine for runtime memory validation
-
-**Status:** NOT COVERED (planned P2)
+**Status:** FULLY COVERED (pattern + formal temporal/argument analysis)
 
 ---
 
-### ❌ ASI07 — Insecure Inter-Agent Communication
+### ⚠️ ASI07 — Insecure Inter-Agent Communication
 
 **Risk:** Message forging/impersonation between agents
 
-**SENTINEL Coverage:**
+**SENTINEL Coverage (Rust):**
 
-- `mcp_analyzer.py` — MCP protocol analysis
-- `a2a_scanner.py` — A2A protocol scanning
+- `orchestration.rs` — multi-agent orchestration security
+- `agentic.rs` — ToolCall-based agent security
+- `model_containment.rs` — **MIRE: containment proofs for model boundaries** 🆕 Lattice
 
-**Gap:** Need authentication verification between agents
+**Gap:** Cryptographic authentication verification between agents
 
-**Status:** NOT COVERED
+**Status:** PARTIAL (detection + containment, no crypto auth)
 
 ---
 
@@ -123,61 +135,66 @@
 
 **Risk:** Small error triggers destructive chain reaction
 
-**SENTINEL Coverage:** None
+**SENTINEL Coverage (Rust):**
 
-**Gap:** Need failure propagation analyzer
+- `lethal_trifecta.rs` — dangerous capability combination detection
+- `capability_flow.rs` — **CAFL: monotonic capability attenuation** 🆕 Lattice
 
-**Status:** NOT COVERED
+**Gap:** Runtime failure propagation monitoring
+
+**Status:** NOT COVERED (static analysis only, need runtime cascade detector)
 
 ---
 
-### ❌ ASI09 — Human-Agent Trust Exploitation
+### ✅ ASI09 — Human-Agent Trust Exploitation
 
 **Risk:** Agent output deceives human into approving malicious action
 
-**SENTINEL Coverage:** None
+**SENTINEL Coverage (Rust):**
 
-**Gap:** Need output deception analyzer
+- `social.rs` — social engineering tactics detection
+- `output_scanner.rs` — output-side content safety scanning
+- `meta_framing.rs` — meta-narrative framing attacks
+- `argumentation_safety.rs` — **AAS: adversarial argumentation detection** 🆕 Lattice
+- `intent_revelation.rs` — **IRM: deceptive intent revelation** 🆕 Lattice
 
-**Status:** NOT COVERED
+**Status:** FULLY COVERED (pattern + formal argumentation/intent)
 
 ---
 
-### ❌ ASI10 — Rogue Agents
+### ✅ ASI10 — Rogue Agents
 
 **Risk:** Agents acting outside intended parameters
 
-**SENTINEL Coverage:**
+**SENTINEL Coverage (Rust):**
 
-- `behavioral.py` — behavioral anomaly detection
+- `behavioral.rs` — behavioral anomaly detection
+- `runtime.rs` — dynamic runtime guardrails
+- `goal_predictability.rs` — **GPS: goal predictability scoring** 🆕 Lattice
+- `model_containment.rs` — **MIRE: model-irrelevance containment proofs** 🆕 Lattice
+- `temporal_safety.rs` — **TSA: LTL property monitoring** 🆕 Lattice
 
-**Gap:** Need agent boundary enforcement
-
-**Status:** NOT COVERED
+**Status:** FULLY COVERED (pattern + formal containment/predictability)
 
 ---
 
-## Roadmap for Full Coverage
+## Sentinel Lattice Impact Summary
 
-### Q1 2026
-
-| Priority | Engine               | Covers |
-| -------- | -------------------- | ------ |
-| P2       | ContextPoisonEngine  | ASI06  |
-| P2       | AgenticToolGuard     | ASI02  |
-| P3       | InterAgentAuthEngine | ASI07  |
-
-### Q2 2026
-
-| Priority | Engine                 | Covers |
-| -------- | ---------------------- | ------ |
-| P3       | CascadeFailureAnalyzer | ASI08  |
-| P3       | TrustExploitDetector   | ASI09  |
-| P3       | RogueAgentMonitor      | ASI10  |
+| Lattice Engine | Primitive | ASI Coverage |
+|---------------|-----------|-------------|
+| TSA | Temporal Safety Automata | ASI03, ASI06, ASI10 |
+| L2 | Capability Proxy + IFC | ASI02, ASI03 |
+| AAS | Adversarial Argumentation | ASI06, ASI09 |
+| CAFL | Capability-Attenuating Flow | ASI02, ASI08 |
+| GPS | Goal Predictability Score | ASI01, ASI10 |
+| IRM | Intent Revelation | ASI01, ASI09 |
+| MIRE | Model-Irrelevance Containment | ASI07, ASI10 |
+| PASR | Provenance-Annotated Reduction | ASI04 |
 
 ---
 
 ## References
 
 1. OWASP Agentic Top 10: https://genai.owasp.org/resource/owasp-top-10-for-agentic-applications-for-2026/
-2. SENTINEL R&D Report: 2026-01-01
+2. Sentinel Lattice paper: `papers/sentinel-lattice/main.pdf`
+3. Engine reference: `docs/reference/engines-en.md`

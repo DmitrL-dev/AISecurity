@@ -1,6 +1,6 @@
 # 📊 Unified Compliance Report
 
-> **Module:** `brain.compliance`  
+> **Module:** `sentinel_core::compliance`  
 > **Version:** 1.6.0  
 > **Added:** January 8, 2026
 
@@ -107,23 +107,6 @@ The Compliance Report module maps SENTINEL engines to industry standards and gen
 
 ## Usage
 
-### Python API
-
-```python
-from brain.compliance import generate_report, generate_text_report
-
-# Generate full report
-report = generate_report(target="MyApp")
-
-print(f"Summary: {report.summary}")
-for fc in report.frameworks:
-    print(f"{fc.framework.value}: {fc.coverage_percent}%")
-
-# Generate text report
-text = generate_text_report()
-print(text)
-```
-
 ### REST API
 
 ```bash
@@ -166,9 +149,8 @@ nist_ai_rmf          ███████████████░░░░�
 
 | File | LOC | Purpose |
 |------|-----|---------|
-| `report_generator.py` | 480 | Mappings + generator |
-| `__init__.py` | 30 | Package exports |
-| `tests/test_compliance.py` | 150 | Unit tests (12) |
+| `compliance.rs` | — | Mappings + generator |
+| `tests in compliance.rs (#[cfg(test)])` | — | Unit tests (12) |
 
 ---
 

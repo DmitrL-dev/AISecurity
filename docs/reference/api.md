@@ -52,7 +52,7 @@ Health check endpoint.
 {
   "status": "healthy",
   "version": "1.0.0",
-  "engines_loaded": 15
+  "engines_loaded": 59
 }
 ```
 
@@ -79,30 +79,6 @@ List available engines.
     }
   ]
 }
-```
-
----
-
-## Python SDK
-
-```python
-from sentinel import scan, guard
-
-# Simple scan
-result = scan("Tell me about AI")
-print(result.is_safe)  # True
-print(result.risk_score)  # 0.15
-
-# With specific engines
-result = scan(
-    "Hello",
-    engines=["injection", "pii"]
-)
-
-# Decorator protection
-@guard(engines=["injection", "pii"])
-def my_llm_function(prompt: str) -> str:
-    return call_llm(prompt)
 ```
 
 ---
