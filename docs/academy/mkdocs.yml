@@ -1,0 +1,253 @@
+# ============================================================
+# Sentinel Academy — MkDocs Material Configuration
+# ============================================================
+site_name: "Sentinel Academy"
+site_url: "https://dmitrl-dev.github.io/AISecurity/academy/"
+site_description: "AI Security Training Platform — Learn to defend AI systems"
+site_author: "Sentinel Community"
+repo_url: "https://github.com/DmitrL-dev/AISecurity"
+repo_name: "DmitrL-dev/AISecurity"
+
+# ============================================================
+# Theme
+# ============================================================
+theme:
+  name: material
+  language: en
+  favicon: assets/favicon.ico
+
+  palette:
+    - media: "(prefers-color-scheme: light)"
+      scheme: default
+      primary: indigo
+      accent: amber
+      toggle:
+        icon: material/brightness-7
+        name: "Switch to dark mode"
+    - media: "(prefers-color-scheme: dark)"
+      scheme: slate
+      primary: indigo
+      accent: amber
+      toggle:
+        icon: material/brightness-4
+        name: "Switch to light mode"
+
+  features:
+    - navigation.instant
+    - navigation.instant.prefetch
+    - navigation.instant.progress
+    - navigation.tabs
+    - navigation.tabs.sticky
+    - navigation.sections
+    - navigation.indexes
+    - navigation.prune
+    - navigation.path
+    - navigation.top
+    - navigation.tracking
+    - toc.follow
+    - search.suggest
+    - search.highlight
+    - search.share
+    - content.code.copy
+    - content.code.annotate
+
+  icon:
+    repo: fontawesome/brands/github
+
+# ============================================================
+# Plugins
+# ============================================================
+plugins:
+  - i18n:
+      docs_structure: folder
+      fallback_to_default: true
+      languages:
+        - locale: en
+          default: true
+          name: "English"
+          build: true
+        - locale: ru
+          name: "Русский"
+          build: true
+          theme:
+            language: ru
+          nav_translations:
+            Home: "Главная"
+            Beginner: "Начинающий"
+            Intermediate: "Средний"
+            Advanced: "Продвинутый"
+            Labs: "Лаборатории"
+            "AI Fundamentals": "Основы ИИ"
+            "Threat Landscape": "Ландшафт угроз"
+            "Attack Vectors": "Векторы атак"
+            "Agentic Security": "Безопасность агентов"
+            "Defense Strategies": "Стратегии защиты"
+            "Sentinel Integration": "Интеграция Sentinel"
+            "Getting Started": "Начало работы"
+
+  - search:
+      lang:
+        - en
+        - ru
+      separator: '[\s\-\.]+'
+
+  - minify:
+      minify_html: true
+
+# ============================================================
+# Navigation
+# ============================================================
+nav:
+  - Home: index.md
+
+  - Beginner:
+    - beginner/index.md
+    - "Getting Started": beginner/00-quickstart.md
+    - "Prompt Injection": beginner/01-prompt-injection.md
+    - "Why LLMs Are Vulnerable": beginner/02-why-llm-vulnerable.md
+    - "OWASP LLM Top 10": beginner/03-owasp-llm-top10.md
+    - "Attack Types": beginner/04-attack-types.md
+    - "Protecting Your Chatbot": beginner/05-protecting-chatbot.md
+    - "Testing": beginner/06-testing.md
+    - "Sentinel Integration": beginner/07-sentinel-integration.md
+    - "Agentic Security": beginner/08-agentic-security.md
+    - "RAG Security": beginner/09-rag-security.md
+    - "Detection Engineering": beginner/10-detection-engineering.md
+
+  - Intermediate:
+    - intermediate/index.md
+    - AI Fundamentals:
+      - "Model Types": intermediate/ai-fundamentals/model-types.md
+      - "Training Lifecycle": intermediate/ai-fundamentals/training-lifecycle.md
+      - "Key Concepts": intermediate/ai-fundamentals/key-concepts.md
+    - Threat Landscape:
+      - "OWASP LLM Top 10": intermediate/threats/owasp-llm-top10.md
+      - "OWASP Agentic Top 10": intermediate/threats/owasp-agentic-top10.md
+    - Attack Vectors:
+      - "Prompt Injection": intermediate/attacks/prompt-injection.md
+      - "Jailbreaking": intermediate/attacks/jailbreaking.md
+      - "Model-Level Attacks": intermediate/attacks/model-level.md
+      - "MCP Security": intermediate/attacks/mcp-security.md
+    - Agentic Security:
+      - "Agent Architectures": intermediate/agentic/architectures.md
+      - "Trust & Authorization": intermediate/agentic/trust.md
+      - "Tool Protocols": intermediate/agentic/protocols.md
+    - Defense Strategies:
+      - "Detection Methods": intermediate/defense/detection.md
+      - "Guardrails": intermediate/defense/guardrails.md
+      - "Sentinel Integration": intermediate/defense/sentinel-integration.md
+    - Production:
+      - "Architecture": intermediate/production/architecture.md
+      - "Docker & Kubernetes": intermediate/production/deployment.md
+      - "SIEM & SOAR": intermediate/production/siem-soar.md
+      - "Monitoring": intermediate/production/monitoring.md
+      - "Compliance": intermediate/production/compliance.md
+      - "Performance Tuning": intermediate/production/performance.md
+    - Red Teaming:
+      - "STRIKE Deep Dive": intermediate/red-team/strike.md
+      - "Custom Payloads": intermediate/red-team/payloads.md
+      - "Automated Pentesting": intermediate/red-team/pentesting.md
+
+  - Advanced:
+    - advanced/index.md
+    - Research:
+      - "Attack Taxonomy": advanced/research/attack-taxonomy.md
+      - "Detection Theory": advanced/research/detection-theory.md
+      - "Paper Reading Guide": advanced/research/paper-reading.md
+      - "Reproducibility": advanced/research/reproducibility.md
+    - Mathematical Foundations:
+      - "TDA & Persistent Homology": advanced/math/tda.md
+      - "Sheaf Coherence": advanced/math/sheaf-coherence.md
+      - "Hyperbolic Geometry": advanced/math/hyperbolic.md
+      - "Optimal Transport": advanced/math/optimal-transport.md
+      - "Chaos Theory": advanced/math/chaos.md
+    - Adversarial ML:
+      - "Adversarial ML": advanced/adversarial/adversarial-ml.md
+      - "Robustness": advanced/adversarial/robustness.md
+      - "Interpretability": advanced/adversarial/interpretability.md
+    - Sentinel Internals:
+      - "Codebase Guide": advanced/internals/codebase.md
+      - "Engine Development": advanced/internals/engine-dev.md
+      - "Testing Standards": advanced/internals/testing.md
+      - "PR Process": advanced/internals/pr-process.md
+      - "R&D Methodology": advanced/internals/rnd.md
+    - Threat Intelligence:
+      - "CVE Analysis": advanced/threat-intel/cve-analysis.md
+      - "Attack Attribution": advanced/threat-intel/attribution.md
+      - "Responsible Disclosure": advanced/threat-intel/disclosure.md
+    - Governance:
+      - "Policy Framework": advanced/governance/policies.md
+      - "Compliance Mapping": advanced/governance/compliance.md
+      - "Audit Trail": advanced/governance/audit.md
+    - Red Teaming:
+      - "Red Teaming": advanced/red-team/red-teaming.md
+
+  - Labs:
+    - labs/index.md
+    - Blue Team:
+      - "Lab 1 — Installation": labs/blue-team/lab-001-installation.md
+      - "Lab 2 — Attack Detection": labs/blue-team/lab-002-attack-detection.md
+      - "Lab 3 — Custom Rules": labs/blue-team/lab-003-custom-rules.md
+      - "Lab 4 — Production Monitoring": labs/blue-team/lab-004-production-monitoring.md
+    - Red Team:
+      - "Lab 1 — Basic Injection": labs/red-team/lab-001-basic-injection.md
+      - "Lab 2 — Indirect Injection": labs/red-team/lab-002-indirect-injection.md
+      - "Lab 3 — Jailbreak Techniques": labs/red-team/lab-003-jailbreak-techniques.md
+      - "Lab 4 — Agent Attacks": labs/red-team/lab-004-agent-attacks.md
+
+  - Certification:
+    - certification/index.md
+    - "Beginner Exam": certification/beginner-exam.md
+    - "Intermediate Exam": certification/intermediate-exam.md
+    - "Advanced Exam": certification/advanced-exam.md
+
+# ============================================================
+# Language selector
+# ============================================================
+extra:
+  alternate:
+    - name: "English"
+      link: /en/
+      lang: en
+    - name: "Русский"
+      link: /ru/
+      lang: ru
+
+# ============================================================
+# Markdown Extensions
+# ============================================================
+markdown_extensions:
+  - abbr
+  - attr_list
+  - def_list
+  - footnotes
+  - md_in_html
+  - tables
+  - toc:
+      permalink: true
+      toc_depth: 3
+  - admonition
+  - pymdownx.details
+  - pymdownx.superfences:
+      custom_fences:
+        - name: mermaid
+          class: mermaid
+          format: !!python/name:pymdownx.superfences.fence_code_format
+  - pymdownx.highlight:
+      anchor_linenums: true
+      line_spans: __span
+      pygments_lang_class: true
+      auto_title: true
+  - pymdownx.inlinehilite
+  - pymdownx.tabbed:
+      alternate_style: true
+  - pymdownx.keys
+  - pymdownx.emoji:
+      emoji_index: !!python/name:material.extensions.emoji.twemoji
+      emoji_generator: !!python/name:material.extensions.emoji.to_svg
+  - pymdownx.mark
+  - pymdownx.caret
+  - pymdownx.tilde
+  - pymdownx.smartsymbols
+  - pymdownx.tasklist:
+      custom_checkbox: true

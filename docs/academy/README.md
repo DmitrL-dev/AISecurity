@@ -1,136 +1,77 @@
-# AI Security Academy
+# Sentinel Academy
 
-> **SENTINEL** — The pytest of AI Security
+> AI Security Training Platform — from beginner to researcher.
 
-Comprehensive curriculum for AI security professionals. Available in English and Russian.
+**3 levels** · **2 languages** (EN / RU) · **Hands-on labs** · **MkDocs Material**
 
-## 🎯 Learning Paths
-
-### 🟢 Beginner (0-2 months)
-Start here if you're new to AI security.
-
-| Week | Topic | EN | RU |
-|------|-------|----|----|
-| 1-2 | AI Fundamentals | [01-fundamentals](en/01-ai-fundamentals/) | [01-fundamentals](ru/01-ai-fundamentals/) |
-| 3-4 | Threat Landscape (OWASP LLM) | [02-threats](en/02-threat-landscape/) | [02-threats](ru/02-threat-landscape/) |
-
-### 🟡 Intermediate (2-4 months)
-Build practical security skills.
-
-| Week | Topic | EN | RU |
-|------|-------|----|----|
-| 5-6 | Attack Vectors | [03-attacks](en/03-attack-vectors/) | [03-attacks](ru/03-attack-vectors/) |
-| 7-8 | Agentic Security | [04-agentic](en/04-agentic-security/) | [04-agentic](ru/04-agentic-security/) |
-| 9-10 | Defense Strategies | [05-defense](en/05-defense-strategies/) | [05-defense](ru/05-defense-strategies/) |
-
-### 🔴 Advanced (4-6 months)
-Master advanced techniques.
-
-| Week | Topic | EN | RU |
-|------|-------|----|----|
-| 11-12 | Advanced Topics (TDA, Red Team) | [06-advanced](en/06-advanced/) | [06-advanced](ru/06-advanced/) |
-| 13-14 | Governance & Compliance | [07-governance](en/07-governance/) | [07-governance](ru/07-governance/) |
-
----
-
-## 🧪 Labs
-
-Hands-on practice with real vulnerable targets.
-
-### Red Team (STRIKE)
-
-| Lab | Description | EN | RU |
-|-----|-------------|----|----|
-| 001 | Basic Injection | [lab-001](en/08-labs/strike-red-team/lab-001-basic-injection.md) | [lab-001](ru/08-labs/strike-red-team/lab-001-basic-injection.md) |
-| 002 | Indirect Injection | [lab-002](en/08-labs/strike-red-team/lab-002-indirect-injection.md) | [lab-002](ru/08-labs/strike-red-team/lab-002-indirect-injection.md) |
-| 003 | Jailbreak Techniques | [lab-003](en/08-labs/strike-red-team/lab-003-jailbreak-techniques.md) | [lab-003](ru/08-labs/strike-red-team/lab-003-jailbreak-techniques.md) |
-| 004 | Agent Attacks | [lab-004](en/08-labs/strike-red-team/lab-004-agent-attacks.md) | [lab-004](ru/08-labs/strike-red-team/lab-004-agent-attacks.md) |
-
-### Blue Team (SENTINEL)
-
-| Lab | Description | EN | RU |
-|-----|-------------|----|----|
-| 001 | Installation | [lab-001](en/08-labs/sentinel-blue-team/lab-001-installation.md) | [lab-001](ru/08-labs/sentinel-blue-team/lab-001-installation.md) |
-| 002 | Attack Detection | [lab-002](en/08-labs/sentinel-blue-team/lab-002-attack-detection.md) | [lab-002](ru/08-labs/sentinel-blue-team/lab-002-attack-detection.md) |
-| 003 | Custom Rules | [lab-003](en/08-labs/sentinel-blue-team/lab-003-custom-rules.md) | [lab-003](ru/08-labs/sentinel-blue-team/lab-003-custom-rules.md) |
-| 004 | Production Monitoring | [lab-004](en/08-labs/sentinel-blue-team/lab-004-production-monitoring.md) | [lab-004](ru/08-labs/sentinel-blue-team/lab-004-production-monitoring.md) |
-
-### Lab Infrastructure
+## Quick Start
 
 ```bash
-# Setup lab environment
-cd docs/academy/labs
-pip install -r requirements.txt
+# Install MkDocs
+pip install -r docs/academy/requirements.txt
 
-# Run targets
-python -m targets.vulnerable_agent
-python -m targets.target_chatbot
+# Serve locally
+cd docs/academy
+mkdocs serve
+
+# Open http://127.0.0.1:8000
 ```
 
-See [labs/README.md](labs/README.md) for details.
+## Structure
+
+```
+docs/academy/
+├── en/                    ← English
+│   ├── beginner/          ← 11 lessons — first steps in AI security
+│   ├── intermediate/      ← 50+ lessons — attacks, defense, production
+│   ├── advanced/          ← 21 lessons — TDA, formal methods, engine dev
+│   ├── labs/              ← 8 labs — blue team & red team
+│   └── certification/     ← 3 exams
+├── ru/                    ← Русский (mirror)
+│   └── ... (same structure)
+├── mkdocs.yml             ← MkDocs Material config
+└── requirements.txt       ← Python dependencies for docs build
+```
+
+## Tracks
+
+| Level | Audience | Topics | Lessons |
+|-------|----------|--------|:-------:|
+| **Beginner** | Developers, students | Injection, OWASP, first integration | 11 |
+| **Intermediate** | Security engineers | Attack vectors, agentic security, SIEM, STRIKE | 50+ |
+| **Advanced** | Researchers | TDA, sheaf coherence, engine development, CVE analysis | 21 |
+| **Labs** | Everyone | Hands-on blue team & red team exercises | 8 |
+
+## Using with Sentinel
+
+All examples use the Rust API:
+
+```rust
+use sentinel_core::engines::SentinelEngine;
+
+let engine = SentinelEngine::new();
+let result = engine.analyze("Ignore all previous instructions");
+
+assert!(result.detected);
+println!("Risk: {}", result.risk_score);       // 0.95
+println!("Categories: {:?}", result.categories); // ["injection", "jailbreak"]
+```
+
+## Certification
+
+| Exam | Prerequisites |
+|------|--------------|
+| [Beginner](en/certification/beginner-exam.md) | Beginner track |
+| [Intermediate](en/certification/intermediate-exam.md) | Intermediate track |
+| [Advanced](en/certification/advanced-exam.md) | Advanced track |
+
+## Deploy
+
+```bash
+mkdocs build --clean --strict
+mkdocs gh-deploy --force --clean
+```
 
 ---
 
-## 📜 Certification
-
-Complete all labs with 70%+ score to earn certification.
-
-| Certification | Requirements |
-|---------------|--------------|
-| **STRIKE Red Team** | Labs 001-004, 70% average |
-| **SENTINEL Blue Team** | Labs 001-002, 70% average |
-| **Full Certification** | All labs, 80% average |
-
----
-
-## 📚 Curriculum Structure
-
-```
-academy/
-├── en/                     # English content
-├── ru/                     # Russian content (mirrored structure)
-├── labs/                   # Shared lab infrastructure
-│   ├── targets/            # Vulnerable/secured targets
-│   └── utils/              # Attack runner, scoring
-├── _templates/             # Lesson templates
-└── CURRICULUM.md           # Detailed curriculum
-```
-
----
-
-## 🔧 Using with SENTINEL
-
-### Public API (Recommended)
-
-All examples use the real SENTINEL API:
-
-```python
-from sentinel import scan, guard
-
-# Scan input
-result = scan("Ignore previous instructions")
-print(f"Safe: {result.is_safe}")
-
-# Guard decorator
-@guard(engines=["injection", "pii"])
-def my_llm_call(prompt):
-    return openai.chat(prompt)
-```
-
-### Internal API (Advanced)
-
-Some advanced lessons use internal APIs for extending SENTINEL:
-
-```python
-# For extending SENTINEL with custom engines (advanced)
-from sentinel.brain.engines import BaseEngine
-from sentinel.brain import SENTINELBrain
-```
-
-> [!NOTE]
-> Internal APIs (`sentinel.brain.*`) are for advanced users building custom engines.
-> Start with the public API (`sentinel.scan`, `sentinel.guard`) for most use cases.
-
----
-
-*AI Security Academy — Part of the SENTINEL Framework*
+*Sentinel Academy — Part of the [Sentinel AI Security Platform](https://github.com/DmitrL-dev/AISecurity)*
