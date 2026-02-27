@@ -1,0 +1,131 @@
+name: Update Signatures
+
+on:
+  schedule:
+    # Run daily at 00:00 UTC
+    - cron: "0 0 * * *"
+  workflow_dispatch:
+    # Allow manual trigger
+    inputs:
+      force_update:
+        description: "Force update even if no changes"
+        required: false
+        default: "false"
+
+permissions:
+  contents: write
+
+jobs:
+  update-signatures:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          fetch-depth: 0
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install dependencies
+        run: |
+          pip install requests pyyaml pyarrow argostranslate
+
+      - name: Pre-download Argos EN→RU model
+        run: |
+          python -c "
+          import argostranslate.package
+          argostranslate.package.update_package_index()
+          pkgs = argostranslate.package.get_available_packages()
+          en_ru = [p for p in pkgs if p.from_code == 'en' and p.to_code == 'ru']
+          if en_ru:
+              en_ru[0].install()
+              print('EN->RU model installed')
+          else:
+              print('WARN: EN->RU model not found')
+          "
+
+      - name: Fetch external sources
+        run: |
+          python scripts/fetch_signatures.py
+
+      - name: Translate EN → RU (multi-variant)
+        run: |
+          python scripts/translate_signatures.py
+
+      - name: Scan for leaked secrets
+        run: |
+          python scripts/clean_secrets.py
+        env:
+          SENTINEL_ALERT_EMAIL: ${{ vars.SENTINEL_ALERT_EMAIL }}
+          SMTP_HOST: ${{ vars.SMTP_HOST }}
+          SMTP_PORT: ${{ vars.SMTP_PORT }}
+          SMTP_USER: ${{ secrets.SMTP_USER }}
+          SMTP_PASS: ${{ secrets.SMTP_PASS }}
+
+      - name: Generate RU-native patterns
+        run: |
+          if [ -f signatures/generate_ru_patterns.py ]; then
+            cd signatures && python generate_ru_patterns.py
+          else
+            echo "SKIP: generate_ru_patterns.py not found"
+          fi
+
+      - name: Validate signatures
+        run: |
+          python scripts/validate_signatures.py
+
+      - name: Split large files for CDN
+        run: |
+          python scripts/split_signatures.py
+
+      - name: Update manifest
+        run: |
+          python scripts/update_manifest.py
+
+      - name: Check for changes
+        id: check_changes
+        run: |
+          git diff --quiet signatures/ || echo "changed=true" >> $GITHUB_OUTPUT
+
+      - name: Commit and push
+        if: steps.check_changes.outputs.changed == 'true' || github.event.inputs.force_update == 'true'
+        run: |
+          # Count patterns
+          STATS=$(python -c "
+          import json
+          with open('signatures/jailbreaks.json') as f:
+              d = json.load(f)
+          p = d.get('patterns', d) if isinstance(d, dict) else d
+          total = len(p)
+          ru = sum(1 for x in p if x.get('language') == 'ru')
+          cjk_langs = {'zh', 'ja', 'ko'}
+          cjk = sum(1 for x in p if x.get('language') in cjk_langs)
+          en = total - ru - cjk
+          pct_ru = 100 * ru / max(total, 1)
+          print(f'{total} {en} {ru} {cjk} {pct_ru:.0f}')
+          ")
+          read TOTAL EN RU CJK PCT <<< "$STATS"
+          echo "Total: $TOTAL (EN:$EN RU:$RU CJK:$CJK ${PCT}%)"
+
+          # Update README badge
+          sed -i "s/Dataset-[0-9,]*-orange/Dataset-${TOTAL}-orange/g" README.md
+          sed -i "s/\*\*[0-9,]*\*\* jailbreak patterns/**${TOTAL}** jailbreak patterns/g" README.md
+
+          git config user.name "SENTINEL Bot"
+          git config user.email "sentinel-bot@users.noreply.github.com"
+          git add signatures/ README.md
+          git commit -m "chore(signatures): auto-update $(date +%Y.%m.%d) - ${TOTAL} patterns (EN:${EN} RU:${RU} ${PCT}%)"
+          git pull --rebase origin main
+          git push
+
+      - name: Create release tag
+        if: steps.check_changes.outputs.changed == 'true'
+        run: |
+          VERSION=$(date +%Y.%m.%d.%H%M)
+          git tag "v${VERSION}"
+          git push origin "v${VERSION}"

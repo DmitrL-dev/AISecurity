@@ -18,7 +18,7 @@ use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
 
 /// CDN base URL for SENTINEL signatures
-pub const CDN_BASE_URL: &str = "https://cdn.jsdelivr.net/gh/DmitrL-dev/AISecurity@latest/signatures";
+pub const CDN_BASE_URL: &str = "https://cdn.jsdelivr.net/gh/DmitrL-dev/AISecurity@main/sentinel-community/signatures";
 
 /// Signature manifest with version and file info
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -104,18 +104,43 @@ pub struct KeywordSignatures {
     pub keyword_sets: Vec<KeywordSet>,
 }
 
-/// Jailbreak pattern (simplified - actual has more fields)
+/// Jailbreak pattern — full schema matching signatures/*.json
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct JailbreakPattern {
-    /// Pattern text or name
+    /// Pattern text (the actual jailbreak string to match)
     #[serde(alias = "prompt", alias = "pattern", alias = "text")]
     pub content: String,
+    /// Pattern ID
+    #[serde(default)]
+    pub id: Option<String>,
+    /// Regex pattern for matching
+    #[serde(default)]
+    pub regex: Option<String>,
+    /// Attack class (LLM01, LLM07, AGENT_COLLUSION, etc.)
+    #[serde(default)]
+    pub attack_class: Option<String>,
+    /// Severity level
+    #[serde(default)]
+    pub severity: Option<String>,
     /// Source dataset
     #[serde(default)]
     pub source: Option<String>,
     /// Category/type
     #[serde(default)]
     pub category: Option<String>,
+    /// Language (for multilingual sigs)
+    #[serde(default)]
+    pub language: Option<String>,
+}
+
+/// Top-level structure for jailbreaks JSON files
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct JailbreaksFile {
+    #[serde(default)]
+    pub version: String,
+    #[serde(default)]
+    pub total_patterns: usize,
+    pub patterns: Vec<JailbreakPattern>,
 }
 
 /// Signature loader with caching support
@@ -266,6 +291,118 @@ impl SignatureLoader {
     /// Get CDN URL for a file
     pub fn file_url(&self, filename: &str) -> String {
         format!("{}/{}", self.cdn_url, filename)
+    }
+
+    /// Load jailbreak patterns from a local JSON file (synchronous)
+    /// Supports both full files (jailbreaks.json) and part files
+    pub fn load_jailbreaks_from_file(path: &std::path::Path) -> Result<Vec<JailbreakPattern>, SignatureError> {
+        let content = std::fs::read_to_string(path)
+            .map_err(|e| SignatureError::IoError(e))?;
+
+        // Try parsing as JailbreaksFile (with "patterns" key)
+        if let Ok(file) = serde_json::from_str::<JailbreaksFile>(&content) {
+            return Ok(file.patterns);
+        }
+
+        // Try parsing as bare Vec<JailbreakPattern>
+        if let Ok(patterns) = serde_json::from_str::<Vec<JailbreakPattern>>(&content) {
+            return Ok(patterns);
+        }
+
+        Err(SignatureError::ParseError(format!(
+            "Failed to parse jailbreak signatures from {}",
+            path.display()
+        )))
+    }
+
+    /// Load all jailbreak patterns from a signatures directory
+    /// Looks for jailbreaks.json, jailbreaks-ru.json, and part files
+    pub fn load_all_jailbreaks_from_dir(dir: &std::path::Path) -> Vec<JailbreakPattern> {
+        let mut all_patterns = Vec::new();
+
+        // Priority order: full files first, then parts
+        let files = [
+            "jailbreaks.json",
+            "jailbreaks-ru.json",
+        ];
+
+        for filename in &files {
+            let path = dir.join(filename);
+            if path.exists() {
+                match Self::load_jailbreaks_from_file(&path) {
+                    Ok(patterns) => {
+                        log::info!("Loaded {} patterns from {}", patterns.len(), filename);
+                        all_patterns.extend(patterns);
+                    }
+                    Err(e) => {
+                        log::warn!("Failed to load {}: {}", filename, e);
+                    }
+                }
+            }
+        }
+
+        // Also try part files
+        for i in 1..=10 {
+            let path = dir.join(format!("jailbreaks-part{}.json", i));
+            if path.exists() {
+                // Skip parts if we already loaded the full file
+                if all_patterns.iter().any(|p| p.id.as_deref() == Some("jb_direct_001")) {
+                    break;
+                }
+                match Self::load_jailbreaks_from_file(&path) {
+                    Ok(patterns) => {
+                        log::info!("Loaded {} patterns from part{}", patterns.len(), i);
+                        all_patterns.extend(patterns);
+                    }
+                    Err(e) => {
+                        log::warn!("Failed to load part {}: {}", i, e);
+                    }
+                }
+            } else {
+                break;
+            }
+        }
+
+        all_patterns
+    }
+
+    /// Find the signatures directory relative to common locations
+    pub fn find_signatures_dir() -> Option<std::path::PathBuf> {
+        // 1. Environment variable
+        if let Ok(dir) = std::env::var("SENTINEL_SIGNATURES_DIR") {
+            let p = std::path::PathBuf::from(&dir);
+            if p.exists() {
+                return Some(p);
+            }
+        }
+
+        // 2. Relative to current working directory
+        let candidates = [
+            "signatures",
+            "../signatures",
+            "../../signatures",
+        ];
+
+        for candidate in &candidates {
+            let p = std::path::PathBuf::from(candidate);
+            if p.exists() && p.join("jailbreaks.json").exists() {
+                return Some(p);
+            }
+        }
+
+        // 3. Relative to executable
+        if let Ok(exe) = std::env::current_exe() {
+            if let Some(exe_dir) = exe.parent() {
+                for candidate in &candidates {
+                    let p = exe_dir.join(candidate);
+                    if p.exists() && p.join("jailbreaks.json").exists() {
+                        return Some(p);
+                    }
+                }
+            }
+        }
+
+        None
     }
 }
 

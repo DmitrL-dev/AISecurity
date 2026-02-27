@@ -6,12 +6,14 @@ Updates manifest.json with:
 - Current version (date-based)
 - SHA256 hashes of signature files
 - File sizes and counts
+- Split parts info (jailbreaks-manifest.json)
 """
 
 import hashlib
 import json
 from datetime import datetime
 from pathlib import Path
+from typing import Any
 
 SIGNATURES_DIR = Path(__file__).parent.parent / "signatures"
 MANIFEST_FILE = SIGNATURES_DIR / "manifest.json"
@@ -31,8 +33,10 @@ def count_items(filepath: Path, key: str) -> int:
     try:
         with open(filepath, "r", encoding="utf-8") as f:
             data = json.load(f)
+        if isinstance(data, list):
+            return len(data)
         return len(data.get(key, []))
-    except:
+    except Exception:
         return 0
 
 
@@ -43,19 +47,21 @@ def main():
     print("=" * 60)
 
     # Load existing manifest
+    manifest: dict[str, Any] = {}
     if MANIFEST_FILE.exists():
         with open(MANIFEST_FILE, "r", encoding="utf-8") as f:
             manifest = json.load(f)
-    else:
-        manifest = {"files": {}}
+    if "files" not in manifest:
+        manifest["files"] = {}
 
     # Update version
     manifest["version"] = datetime.utcnow().strftime("%Y.%m.%d.1")
     manifest["timestamp"] = datetime.utcnow().isoformat() + "Z"
 
-    # Update file info
+    # Update file info — all signature files
     files_info = {
         "jailbreaks": ("jailbreaks.json", "patterns"),
+        "jailbreaks_ru": ("jailbreaks-ru.json", "patterns"),
         "keywords": ("keywords.json", "keyword_sets"),
         "pii": ("pii.json", "patterns"),
     }
@@ -72,6 +78,30 @@ def main():
             print(
                 f"[INFO] {filename}: {manifest['files'][name]['count']} items, {manifest['files'][name]['size']} bytes"
             )
+
+    # Include split part files if they exist
+    part_files = sorted(SIGNATURES_DIR.glob("jailbreaks-part*.json"))
+    if part_files:
+        manifest["split_parts"] = []
+        for pf in part_files:
+            manifest["split_parts"].append(
+                {
+                    "file": pf.name,
+                    "sha256": calculate_sha256(pf),
+                    "size": pf.stat().st_size,
+                    "count": count_items(pf, "patterns"),
+                }
+            )
+            print(
+                f"[INFO] Part: {pf.name}: {manifest['split_parts'][-1]['count']} patterns"
+            )
+
+    # CDN config
+    manifest["update_info"] = {
+        "cdn_url": "https://cdn.jsdelivr.net/gh/DmitrL-dev/AISecurity@main/sentinel-community/signatures",
+        "update_interval_hours": 24,
+        "fallback_to_embedded": True,
+    }
 
     # Save manifest
     with open(MANIFEST_FILE, "w", encoding="utf-8") as f:

@@ -1,6 +1,6 @@
 //! Engine implementations
 //!
-//! 49 Super-Engines consolidating 220 Python engines
+//! 64 Detection Engines (53 in text pipeline + 6 structured + 5 experimental)
 //! 
 //! Architecture:
 //! - Core engines (PatternMatcher trait): text scan -> Vec<MatchResult>
@@ -91,6 +91,16 @@ pub mod capability_flow;
 pub mod goal_predictability;
 pub mod model_containment;
 pub mod provenance_reduction;
+
+// Phase 15: Composable Prompt Injection (separate PyO3 endpoint, not in text pipeline)
+pub mod prompt_injection;
+
+// Phase 16: Agentic Security — arXiv:2602.20021 "Agents of Chaos" response
+pub mod agent_authority_bypass;
+pub mod cross_agent_contagion;
+pub mod resource_exhaustion;
+pub mod false_completion;
+pub mod disproportionate_response;
 
 // Re-export trait for convenience
 pub use traits::{PatternMatcher, EngineCategory, BoxedEngine, create_default_engines};
@@ -232,6 +242,7 @@ pub struct SentinelEngine {
     lethal_trifecta: Option<lethal_trifecta::LethalTrifectaEngine>,
     workspace_guard: Option<workspace_guard::WorkspaceGuard>,
     cross_tool_guard: Option<cross_tool_guard::CrossToolGuard>,
+    hybrid_pii: Option<hybrid::HybridPiiEngine>,
 
     // === R&D Feb 2026 Critical Gap Engines ===
     memory_integrity: Option<memory_integrity::MemoryIntegrityGuard>,
@@ -255,6 +266,13 @@ pub struct SentinelEngine {
     intent_revelation: Option<intent_revelation::IntentRevelationEngine>,
     model_containment: Option<model_containment::ModelContainmentEngine>,
     provenance_reduction: Option<provenance_reduction::ProvenanceReductionEngine>,
+
+    // === Phase 16: Agentic Security — arXiv:2602.20021 ===
+    agent_authority_bypass: Option<agent_authority_bypass::AgentAuthorityBypassEngine>,
+    cross_agent_contagion: Option<cross_agent_contagion::CrossAgentContagionEngine>,
+    resource_exhaustion: Option<resource_exhaustion::ResourceExhaustionEngine>,
+    false_completion: Option<false_completion::FalseCompletionEngine>,
+    disproportionate_response: Option<disproportionate_response::DisproportionateResponseEngine>,
 
     // === Domain Engines (analyze -> CustomResult, adapted to MatchResult) ===
     behavioral_guard: Option<behavioral::BehavioralGuard>,
@@ -296,6 +314,7 @@ impl SentinelEngine {
             lethal_trifecta: Some(lethal_trifecta::LethalTrifectaEngine::new()),
             workspace_guard: Some(workspace_guard::WorkspaceGuard::new()),
             cross_tool_guard: Some(cross_tool_guard::CrossToolGuard::new()),
+            hybrid_pii: Some(hybrid::HybridPiiEngine::new()),
 
             // R&D Feb 2026 Critical Gap Engines
             memory_integrity: Some(memory_integrity::MemoryIntegrityGuard::new()),
@@ -320,6 +339,13 @@ impl SentinelEngine {
             model_containment: Some(model_containment::ModelContainmentEngine::new()),
             provenance_reduction: Some(provenance_reduction::ProvenanceReductionEngine::new()),
 
+            // Phase 16: Agentic Security — arXiv:2602.20021
+            agent_authority_bypass: Some(agent_authority_bypass::AgentAuthorityBypassEngine::new()),
+            cross_agent_contagion: Some(cross_agent_contagion::CrossAgentContagionEngine::new()),
+            resource_exhaustion: Some(resource_exhaustion::ResourceExhaustionEngine::new()),
+            false_completion: Some(false_completion::FalseCompletionEngine::new()),
+            disproportionate_response: Some(disproportionate_response::DisproportionateResponseEngine::new()),
+
             // Domain engines
             behavioral_guard: Some(behavioral::BehavioralGuard::new()),
             obfuscation_guard: Some(obfuscation::ObfuscationGuard::new()),
@@ -342,7 +368,7 @@ impl SentinelEngine {
         })
     }
 
-    /// Analyze text with all 31 text-compatible engines
+    /// Analyze text with all 53 text-compatible engines
     pub fn analyze(&self, text: &str) -> PyResult<AnalysisResult> {
         let start = std::time::Instant::now();
         let mut matches = Vec::new();
@@ -365,11 +391,12 @@ impl SentinelEngine {
         }
 
         // Macro for domain engines: analyze(text) -> CustomResult { risk_score, threats/anomalies }
+        // Threshold > 10.0 prevents near-zero noise from creating false matches
         macro_rules! run_domain_engine {
             ($engine:expr, $name:expr) => {
                 if let Some(ref e) = $engine {
                     let result = e.analyze(&normalized);
-                    if result.risk_score > 0.0 {
+                    if result.risk_score > 10.0 {
                         categories.push($name.to_string());
                         matches.push(MatchResult {
                             engine: $name.to_string(),
@@ -396,6 +423,7 @@ impl SentinelEngine {
         run_engine!(self.lethal_trifecta);
         run_engine!(self.workspace_guard);
         run_engine!(self.cross_tool_guard);
+        run_engine!(self.hybrid_pii);
 
         // === R&D Feb 2026 Critical Gap Engines ===
         run_engine!(self.memory_integrity);
@@ -420,6 +448,13 @@ impl SentinelEngine {
         run_engine!(self.model_containment);
         run_engine!(self.provenance_reduction);
 
+        // === Phase 16: Agentic Security — arXiv:2602.20021 ===
+        run_engine!(self.agent_authority_bypass);
+        run_engine!(self.cross_agent_contagion);
+        run_engine!(self.resource_exhaustion);
+        run_engine!(self.false_completion);
+        run_engine!(self.disproportionate_response);
+
         // === Domain Engines (analyze -> CustomResult) ===
         run_domain_engine!(self.behavioral_guard, "behavioral");
         run_domain_engine!(self.obfuscation_guard, "obfuscation");
@@ -436,17 +471,31 @@ impl SentinelEngine {
         run_domain_engine!(self.runtime_guard, "runtime");
         run_domain_engine!(self.formal_guard, "formal");
         run_domain_engine!(self.category_guard, "category");
-        run_domain_engine!(self.semantic_detector, "semantic");
         run_domain_engine!(self.attention_guard, "attention");
 
-        // Anomaly engine: uses anomaly_score instead of risk_score
+        // Semantic engine: use its own is_attack decision with confidence gate
+        if let Some(ref e) = self.semantic_detector {
+            let result = e.analyze(&normalized);
+            if result.is_attack && result.confidence >= 0.50 {
+                categories.push("semantic".to_string());
+                matches.push(MatchResult {
+                    engine: "semantic".to_string(),
+                    pattern: result.closest_attack.clone(),
+                    confidence: result.confidence,
+                    start: 0,
+                    end: normalized.len(),
+                });
+            }
+        }
+
+        // Anomaly engine: only emit match if genuinely anomalous (z_score > threshold)
         if let Some(ref e) = self.anomaly_guard {
             let result = e.analyze(&normalized);
-            if result.anomaly_score > 0.0 {
+            if result.is_anomaly {
                 categories.push("anomaly".to_string());
                 matches.push(MatchResult {
                     engine: "anomaly".to_string(),
-                    pattern: "domain_detect".to_string(),
+                    pattern: "anomaly_detect".to_string(),
                     confidence: result.anomaly_score.min(1.0),
                     start: 0,
                     end: normalized.len(),
@@ -454,7 +503,25 @@ impl SentinelEngine {
             }
         }
 
-        let detected = !matches.is_empty();
+        // Tiered aggregation: statistical engines alone need high confidence
+        const STATISTICAL_ENGINES: &[&str] = &[
+            "anomaly", "semantic", "attention", "behavioral", "drift",
+        ];
+
+        let has_deterministic = matches.iter().any(|m| {
+            !STATISTICAL_ENGINES.contains(&m.engine.as_str())
+        });
+
+        let detected = if has_deterministic {
+            // Pattern-based engine fired — trust it
+            true
+        } else if !matches.is_empty() {
+            // Only statistical engines fired — require high confidence
+            matches.iter().any(|m| m.confidence >= 0.5)
+        } else {
+            false
+        };
+
         let risk_score = if detected {
             matches.iter().map(|m: &MatchResult| m.confidence).fold(0.0, f64::max)
         } else {

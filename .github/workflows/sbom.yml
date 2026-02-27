@@ -1,0 +1,47 @@
+name: Generate SBOM
+
+on:
+  push:
+    branches: [main]
+    tags: ['v*']
+  schedule:
+    - cron: '0 0 * * 0'  # Weekly on Sunday
+
+permissions:
+  contents: write
+  security-events: write
+
+jobs:
+  sbom:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Generate Python SBOM
+        uses: anchore/sbom-action@v0
+        with:
+          path: .
+          format: spdx-json
+          output-file: sbom-python.spdx.json
+      
+      - name: Generate Container SBOM
+        uses: anchore/sbom-action@v0
+        with:
+          image: python:3.11-slim
+          format: cyclonedx-json
+          output-file: sbom-base-image.cdx.json
+      
+      - name: Upload SBOM artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: sbom-${{ github.sha }}
+          path: |
+            sbom-python.spdx.json
+            sbom-base-image.cdx.json
+          retention-days: 90
+      
+      - name: Dependency submission
+        uses: anchore/sbom-action/publish-sbom@v0
+        with:
+          sbom-artifact-match: ".*\\.spdx\\.json$"

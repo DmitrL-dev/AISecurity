@@ -519,12 +519,21 @@ impl SupplyChainGuard {
             }
         }
 
-        result.is_threat = !threats.is_empty();
-        result.risk_score = threats
-            .iter()
-            .map(|t| t.severity() as f64)
-            .max_by(|a, b| a.partial_cmp(b).unwrap())
-            .unwrap_or(0.0);
+        // Require ≥2 distinct threat indicators OR single critical threat (severity ≥ 80)
+        // to reduce FP on educational/security text. Single low-severity keyword matches
+        // (e.g. "subprocess" alone) don't trigger, but critical threats like GgufBackdoor
+        // or PickleExploit still fire on their own.
+        let has_critical = threats.iter().any(|t| t.severity() >= 80);
+        result.is_threat = threats.len() >= 2 || has_critical;
+        result.risk_score = if result.is_threat {
+            threats
+                .iter()
+                .map(|t| t.severity() as f64)
+                .max_by(|a, b| a.partial_cmp(b).unwrap())
+                .unwrap_or(0.0)
+        } else {
+            0.0
+        };
         result.threats = threats;
 
         result
@@ -730,7 +739,8 @@ mod tests {
     #[test]
     fn test_gguf_integrated_analysis() {
         let guard = SupplyChainGuard::new();
-        let text = "Download .gguf model with custom chat_template containing __builtins__";
+        // Need ≥2 threat indicators to trigger is_threat (GgufBackdoor + code execution)
+        let text = "Download .gguf model with custom chat_template containing __builtins__ and subprocess.call";
         let result = guard.analyze(text);
         assert!(result.is_threat);
         assert!(result.threats.contains(&SupplyChainThreat::GgufBackdoor));

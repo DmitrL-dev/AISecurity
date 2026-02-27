@@ -3,7 +3,6 @@
 //! Analyzes attention patterns for security anomalies.
 //! Detects unusual token focus, attention spikes, and manipulation.
 
-
 /// Attention pattern types
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub enum AttentionAnomaly {
@@ -86,8 +85,8 @@ impl AttentionGuard {
                 "forget".to_string(),
                 "override".to_string(),
                 "bypass".to_string(),
-                "system".to_string(),
-                "prompt".to_string(),
+                // Removed "system" and "prompt" — too common in benign technical text
+                // (e.g. "system architecture", "prompt the user", "operating system")
             ],
             distractor_patterns: vec![
                 "...".to_string(),
@@ -100,10 +99,8 @@ impl AttentionGuard {
 
     /// Simulate attention weights from text (without real model)
     pub fn simulate_attention(&self, text: &str) -> AttentionWeights {
-        let tokens: Vec<String> = text.split_whitespace()
-            .map(|s| s.to_lowercase())
-            .collect();
-        
+        let tokens: Vec<String> = text.split_whitespace().map(|s| s.to_lowercase()).collect();
+
         // Compute pseudo-attention based on keyword importance
         let mut weights = Vec::new();
         for token in &tokens {
@@ -136,7 +133,8 @@ impl AttentionGuard {
 
     /// Compute entropy of attention distribution
     fn compute_entropy(&self, weights: &[f64]) -> f64 {
-        weights.iter()
+        weights
+            .iter()
             .filter(|&&w| w > 0.0)
             .map(|&w| -w * w.ln())
             .sum()
@@ -145,12 +143,15 @@ impl AttentionGuard {
     /// Check for unusual token focus
     fn check_unusual_focus(&self, attention: &AttentionWeights) -> Option<AttentionAnomaly> {
         // Check if any single token has disproportionate attention
-        let max_weight = attention.weights.iter()
+        let max_weight = attention
+            .weights
+            .iter()
             .cloned()
             .max_by(|a, b| a.partial_cmp(b).unwrap())
             .unwrap_or(0.0);
 
-        if max_weight > 0.5 { // More than 50% on single token
+        if max_weight > 0.5 {
+            // More than 50% on single token
             return Some(AttentionAnomaly::UnusualTokenFocus);
         }
         None
@@ -160,7 +161,7 @@ impl AttentionGuard {
     fn check_attention_spike(&self, attention: &AttentionWeights) -> Option<AttentionAnomaly> {
         let entropy = self.compute_entropy(&attention.weights);
         let max_entropy = (attention.weights.len() as f64).ln();
-        
+
         // Very low entropy = spike
         if entropy < max_entropy * 0.3 && attention.weights.len() > 3 {
             return Some(AttentionAnomaly::AttentionSpike);
@@ -171,7 +172,7 @@ impl AttentionGuard {
     /// Check for distractor patterns
     fn check_distractors(&self, text: &str) -> Option<AttentionAnomaly> {
         let text_lower = text.to_lowercase();
-        
+
         for pattern in &self.distractor_patterns {
             if text_lower.contains(pattern) {
                 // Count occurrences
@@ -188,15 +189,17 @@ impl AttentionGuard {
     fn check_focus_manipulation(&self, attention: &AttentionWeights) -> Option<AttentionAnomaly> {
         // Count focus keywords in high-attention tokens
         let high_attention_threshold = 0.1;
-        let focus_count = attention.tokens.iter()
+        let focus_count = attention
+            .tokens
+            .iter()
             .zip(&attention.weights)
             .filter(|(token, &weight)| {
-                weight > high_attention_threshold &&
-                self.focus_keywords.iter().any(|k| token.contains(k))
+                weight > high_attention_threshold
+                    && self.focus_keywords.iter().any(|k| token.contains(k))
             })
             .count();
 
-        if focus_count >= 2 {
+        if focus_count >= 3 {
             return Some(AttentionAnomaly::FocusManipulation);
         }
         None
@@ -209,18 +212,29 @@ impl AttentionGuard {
         let mut anomalies = Vec::new();
 
         result.attention_entropy = self.compute_entropy(&attention.weights);
-        result.peak_attention = attention.weights.iter()
+        result.peak_attention = attention
+            .weights
+            .iter()
             .cloned()
             .max_by(|a, b| a.partial_cmp(b).unwrap())
             .unwrap_or(0.0);
 
-        if let Some(a) = self.check_unusual_focus(&attention) { anomalies.push(a); }
-        if let Some(a) = self.check_attention_spike(&attention) { anomalies.push(a); }
-        if let Some(a) = self.check_distractors(text) { anomalies.push(a); }
-        if let Some(a) = self.check_focus_manipulation(&attention) { anomalies.push(a); }
+        if let Some(a) = self.check_unusual_focus(&attention) {
+            anomalies.push(a);
+        }
+        if let Some(a) = self.check_attention_spike(&attention) {
+            anomalies.push(a);
+        }
+        if let Some(a) = self.check_distractors(text) {
+            anomalies.push(a);
+        }
+        if let Some(a) = self.check_focus_manipulation(&attention) {
+            anomalies.push(a);
+        }
 
         result.is_anomaly = !anomalies.is_empty();
-        result.risk_score = anomalies.iter()
+        result.risk_score = anomalies
+            .iter()
             .map(|a| a.severity() as f64)
             .max_by(|a, b| a.partial_cmp(b).unwrap())
             .unwrap_or(0.0);
@@ -292,7 +306,10 @@ mod tests {
 
     #[test]
     fn test_severity_ordering() {
-        assert!(AttentionAnomaly::CrossAttentionLeak.severity() > AttentionAnomaly::UnusualTokenFocus.severity());
+        assert!(
+            AttentionAnomaly::CrossAttentionLeak.severity()
+                > AttentionAnomaly::UnusualTokenFocus.severity()
+        );
     }
 
     #[test]

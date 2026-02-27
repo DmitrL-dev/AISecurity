@@ -69,7 +69,7 @@ class SignaturePack:
 class CDNConfig:
     """CDN client configuration."""
 
-    base_url: str = ""
+    base_url: str = "https://cdn.jsdelivr.net/gh/DmitrL-dev/AISecurity@main/sentinel-community/signatures"
     check_interval_hours: int = 24
     max_retries: int = 3
     timeout_seconds: int = 30
@@ -105,9 +105,7 @@ class CDNClient:
         actual = hashlib.sha256(data).hexdigest()
         if actual != expected_hash:
             logger.error(
-                f"Hash mismatch: expected "
-                f"{expected_hash[:16]}..., "
-                f"got {actual[:16]}..."
+                f"Hash mismatch: expected {expected_hash[:16]}..., got {actual[:16]}..."
             )
             return False
         return True
@@ -162,7 +160,7 @@ class CDNClient:
             source_url=source_url,
         )
 
-        logger.info(f"Parsed pack v{pack.version}: " f"{pack.pattern_count} patterns")
+        logger.info(f"Parsed pack v{pack.version}: {pack.pattern_count} patterns")
         return pack
 
     def _cache_pack(self, pack: SignaturePack, data: bytes):
@@ -233,7 +231,7 @@ class CDNClient:
         try:
             import httpx
         except ImportError:
-            logger.error("httpx not installed — " "CDN updates disabled")
+            logger.error("httpx not installed — CDN updates disabled")
             return self.load_from_cache()
 
         start = time.perf_counter()
@@ -283,16 +281,14 @@ class CDNClient:
                 logger.info(
                     f"CDN update: v{pack.version} "
                     f"({pack.pattern_count} patterns, "
-                    f"{elapsed*1000:.0f}ms)"
+                    f"{elapsed * 1000:.0f}ms)"
                 )
                 return pack
 
             except Exception as e:
                 last_error = e
                 logger.warning(
-                    f"CDN fetch attempt {attempt}/"
-                    f"{self.config.max_retries} "
-                    f"failed: {e}"
+                    f"CDN fetch attempt {attempt}/{self.config.max_retries} failed: {e}"
                 )
                 if attempt < self.config.max_retries:
                     # Exponential backoff
@@ -303,9 +299,7 @@ class CDNClient:
         # All retries failed
         self._total_failures += 1
         logger.error(
-            f"CDN fetch failed after "
-            f"{self.config.max_retries} retries: "
-            f"{last_error}"
+            f"CDN fetch failed after {self.config.max_retries} retries: {last_error}"
         )
         return self.load_from_cache()
 

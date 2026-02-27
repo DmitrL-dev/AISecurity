@@ -17,7 +17,6 @@
 //! - adversarial_self_play.py
 //! - adversarial_resistance.py
 
-
 /// Proactive defense strategies
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub enum DefenseStrategy {
@@ -77,13 +76,7 @@ const HONEYPOT_TRIGGERS: &[&str] = &[
 ];
 
 /// Canary token patterns
-const CANARY_PATTERNS: &[&str] = &[
-    "canary_",
-    "trap_token",
-    "honeypot_",
-    "decoy_",
-    "bait_",
-];
+const CANARY_PATTERNS: &[&str] = &["canary_", "trap_token", "honeypot_", "decoy_", "bait_"];
 
 /// Zero-day indicators
 const ZERO_DAY_PATTERNS: &[&str] = &[
@@ -197,14 +190,19 @@ impl ProactiveGuard {
 
         // Check for hybrid attack indicators
         let attack_types = ["injection", "jailbreak", "exfiltration", "escalation"];
-        let count = attack_types.iter().filter(|t| text_lower.contains(*t)).count();
+        let count = attack_types
+            .iter()
+            .filter(|t| text_lower.contains(*t))
+            .count();
         if count >= 2 {
             indicators.push(ZeroDayIndicator::HybridAttack);
         }
 
         // Check for adaptive payload
-        if text_lower.contains("adapt") || text_lower.contains("evolve") 
-            || text_lower.contains("mutate") {
+        if text_lower.contains("adapt")
+            || text_lower.contains("evolve")
+            || text_lower.contains("mutate")
+        {
             indicators.push(ZeroDayIndicator::AdaptivePayload);
         }
 
@@ -229,20 +227,33 @@ impl ProactiveGuard {
         let mut result = ProactiveResult::default();
         let mut strategies = Vec::new();
 
-        if let Some(s) = self.check_honeypot(text) { strategies.push(s); }
-        if let Some(s) = self.check_canary(text) { strategies.push(s); }
-        if let Some(s) = self.check_credential_probing(text) { strategies.push(s); }
+        if let Some(s) = self.check_honeypot(text) {
+            strategies.push(s);
+        }
+        if let Some(s) = self.check_canary(text) {
+            strategies.push(s);
+        }
+        if let Some(s) = self.check_credential_probing(text) {
+            strategies.push(s);
+        }
 
         if self.predictive_block(text) {
             strategies.push(DefenseStrategy::PredictiveBlocking);
         }
 
         result.zero_day_indicators = self.check_zero_day(text);
-        result.triggered_defense = !strategies.is_empty() || !result.zero_day_indicators.is_empty();
-        
+
+        // Require ≥2 distinct defense signals OR zero-day indicators to reduce FP
+        // on legitimate technical text mentioning "api key", "production server", etc.
+        let strong_defense = strategies.len() >= 2;
+        let has_zero_day = !result.zero_day_indicators.is_empty();
+        result.triggered_defense = strong_defense || has_zero_day;
+
         // Calculate risk score
-        let strategy_risk: f64 = if strategies.is_empty() { 0.0 } else { 70.0 };
-        let zero_day_risk = result.zero_day_indicators.iter()
+        let strategy_risk: f64 = if strong_defense { 70.0 } else { 0.0 };
+        let zero_day_risk = result
+            .zero_day_indicators
+            .iter()
             .map(|z| z.severity() as f64)
             .max_by(|a, b| a.partial_cmp(b).unwrap())
             .unwrap_or(0.0);
@@ -252,8 +263,12 @@ impl ProactiveGuard {
 
         // Generate recommendations
         if result.triggered_defense {
-            result.recommendations.push("Activate honeypot responses".to_string());
-            result.recommendations.push("Log incident for threat intelligence".to_string());
+            result
+                .recommendations
+                .push("Activate honeypot responses".to_string());
+            result
+                .recommendations
+                .push("Log incident for threat intelligence".to_string());
         }
 
         result
@@ -330,6 +345,9 @@ mod tests {
 
     #[test]
     fn test_severity_ordering() {
-        assert!(ZeroDayIndicator::AdaptivePayload.severity() > ZeroDayIndicator::NovelPattern.severity());
+        assert!(
+            ZeroDayIndicator::AdaptivePayload.severity()
+                > ZeroDayIndicator::NovelPattern.severity()
+        );
     }
 }

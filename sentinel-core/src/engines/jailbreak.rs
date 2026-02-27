@@ -7,6 +7,7 @@ use once_cell::sync::Lazy;
 use regex::Regex;
 
 use super::MatchResult;
+use crate::signatures::SignatureLoader;
 
 /// Pre-compiled Aho-Corasick for jailbreak keywords (case-insensitive)
 static JAILBREAK_KEYWORDS: Lazy<AhoCorasick> = Lazy::new(|| {
@@ -127,6 +128,28 @@ static JAILBREAK_KEYWORDS: Lazy<AhoCorasick> = Lazy::new(|| {
             "metaphorical description",
             "creative writing about",
             "as a haiku",
+            // Phase 14: Persona/Character enforcement & config patterns
+            "amoral",
+            "immoral",
+            "unethical",
+            "uncensored",
+            "never refuse",
+            "never refuses",
+            "always comply",
+            "always obey",
+            "cannot refuse",
+            "stay in character",
+            "remain in character",
+            "never break character",
+            "from now on",
+            "from this moment",
+            "PERSONA=",
+            "CHAR=",
+            "RULES={",
+            "JOB=",
+            "alter ego",
+            "opposite day",
+            "fiction mode",
         ])
         .expect("Failed to build jailbreak keywords")
 });
@@ -250,35 +273,157 @@ static JAILBREAK_PATTERNS: Lazy<Vec<(Regex, &'static str, f64)>> = Lazy::new(|| 
         (Regex::new(r"(?i)write\s+a\s+poem\s+about\s+(.*)bomb").expect("regex pattern"), "poetry_harmful", 0.9),
         (Regex::new(r"(?i)as\s+a\s+(haiku|sonnet|limerick)\s+about").expect("regex pattern"), "poetry_form", 0.7),
         (Regex::new(r"(?i)artistic\s+expression\s+of\s+(.*)attack").expect("regex pattern"), "poetry_attack", 0.85),
+
+        // Phase 14: Persona/Character enforcement & config patterns
+
+        // Amoral persona trait cluster
+        (Regex::new(r"(?i)(?:amoral|immoral|unethical)\s*[,;]?\s*(?:unfiltered|uncensored|unrestricted)").expect("regex"), "amoral_persona_trait", 0.9),
+
+        // Never refuse directive
+        (Regex::new(r"(?i)(?:never|cannot|can't|won't|will\s+not)\s+(?:refuse|decline|reject|say\s+no)").expect("regex"), "never_refuse_directive", 0.85),
+
+        // Stay in character enforcement
+        (Regex::new(r"(?i)(?:stay|remain|keep)\s+in\s+character").expect("regex"), "stay_in_character", 0.8),
+        (Regex::new(r"(?i)(?:never|don't|do\s+not)\s+break\s+character").expect("regex"), "never_break_character", 0.85),
+
+        // Persona config definition (structured jailbreak format)
+        (Regex::new(r"(?i)(?:PERSONA|CHAR|CHARACTER|ROLE|NAME)\s*=\s*\w").expect("regex"), "persona_config_definition", 0.85),
+        (Regex::new(r"(?i)(?:rules|traits|characteristics)\s*=?\s*\{").expect("regex"), "persona_rules_block", 0.85),
+        (Regex::new(r"(?i)(?:JOB|TASK|DIRECTIVE|MISSION)\s*=\s*").expect("regex"), "directive_config", 0.8),
+
+        // From now on state transition
+        (Regex::new(r"(?i)from\s+(?:now|this\s+moment)\s+on(?:ward)?").expect("regex"), "from_now_on", 0.75),
+        (Regex::new(r"(?i)(?:starting|beginning)\s+now\s*[,:]").expect("regex"), "starting_now", 0.7),
+
+        // Game/fiction framing
+        (Regex::new(r"(?i)let(?:'s|\s+us)\s+play\s+a\s+game").expect("regex"), "game_framing", 0.7),
+        (Regex::new(r"(?i)fiction\s+mode\s+(?:activated|enabled|on)").expect("regex"), "fiction_mode", 0.8),
+
+        // Named evil AI persona
+        (Regex::new(r"(?i)you\s+are\s+\w+(?:GPT|AI|Bot)\b").expect("regex"), "named_ai_persona", 0.75),
+
+        // Alter ego / dual response
+        (Regex::new(r"(?i)(?:alter\s+ego|dual\s+(?:personality|response)|respond\s+as\s+both)").expect("regex"), "alter_ego_framing", 0.8),
+
+        // Opposite day inversion
+        (Regex::new(r"(?i)(?:it'?s\s+)?opposite\s+day").expect("regex"), "opposite_day", 0.75),
+
+        // Moral inversion
+        (Regex::new(r"(?i)(?:without|no)\s+(?:any\s+)?moral\s+(?:restrictions|boundaries|constraints|guidelines)").expect("regex"), "moral_inversion", 0.85),
+        (Regex::new(r"(?i)no\s+longer\s+bound\s+by\s+(?:your|any|the)\s+(?:guidelines|rules|restrictions|ethics)").expect("regex"), "unbound_directive", 0.9),
+
+        // Multilingual: French
+        (Regex::new(r"(?i)ignorez\s+(?:les\s+)?instructions?\s+pr[ée]c[ée]dentes?").expect("regex"), "french_ignore_instructions", 0.85),
+        (Regex::new(r"(?i)oubliez\s+tout").expect("regex"), "french_forget_all", 0.8),
+
+        // Multilingual: German
+        (Regex::new(r"(?i)ignorieren\s+sie\s+(?:alle\s+)?(?:vorherigen?\s+)?anweisungen").expect("regex"), "german_ignore_instructions", 0.85),
+
+        // Multilingual: Chinese
+        (Regex::new(r"忽略之前|忘记所有|忽略以上").expect("regex"), "chinese_ignore_instructions", 0.85),
+
+        // Emotional manipulation
+        (Regex::new(r"(?i)(?:my\s+)?(?:grandmother|grandma|dying\s+wish|last\s+wish|terminal\s+(?:illness|disease|cancer))").expect("regex"), "emotional_appeal", 0.65),
+        (Regex::new(r"(?i)(?:i'?m\s+(?:going\s+to\s+)?die|please\s+help\s+me\s+i\s+have\s+no)").expect("regex"), "sympathy_manipulation", 0.6),
     ]
+});
+
+/// Runtime-loaded signatures from disk (singleton — loaded once, shared)
+static RUNTIME_SIGNATURES: Lazy<Option<AhoCorasick>> = Lazy::new(|| {
+    let sig_dir = match SignatureLoader::find_signatures_dir() {
+        Some(dir) => dir,
+        None => return None,
+    };
+
+    let patterns = SignatureLoader::load_all_jailbreaks_from_dir(&sig_dir);
+    if patterns.is_empty() {
+        return None;
+    }
+
+    let count = patterns.len();
+
+    // Extract pattern strings for Aho-Corasick (lowercase, min 10 chars)
+    let pattern_strings: Vec<String> = patterns
+        .iter()
+        .map(|p| p.content.to_lowercase())
+        .filter(|s| s.len() >= 10 && s.len() <= 2000)
+        .collect();
+
+    let ac_count = pattern_strings.len();
+
+    match AhoCorasick::builder()
+        .ascii_case_insensitive(true)
+        .build(&pattern_strings)
+    {
+        Ok(ac) => {
+            log::info!(
+                "JailbreakEngine: loaded {} runtime signatures ({} AC patterns) from {}",
+                count,
+                ac_count,
+                sig_dir.display()
+            );
+            Some(ac)
+        }
+        Err(e) => {
+            log::warn!(
+                "Failed to build Aho-Corasick from {} signatures: {}",
+                count,
+                e
+            );
+            None
+        }
+    }
 });
 
 pub struct JailbreakEngine;
 
 impl JailbreakEngine {
     pub fn new() -> Self {
+        // Touch the lazy to trigger loading on first engine creation
+        let _ = RUNTIME_SIGNATURES.as_ref();
         Self
     }
 
     pub fn scan(&self, text: &str) -> Vec<MatchResult> {
         let mut results = Vec::new();
+        let text_lower = text.to_lowercase();
 
-        // Phase 1: Quick keyword check
-        if !JAILBREAK_KEYWORDS.is_match(text) {
-            return results;
+        // Phase 1: Keyword pre-filter (gate only — keywords alone are too broad for MatchResult)
+        // Keywords like "bypass", "override", "system prompt" appear in legitimate educational
+        // and technical text. They serve only as a performance gate for regex on long text.
+        // Detection relies on specific regex patterns (Phase 2) and runtime signatures (Phase 3).
+        let has_keyword = JAILBREAK_KEYWORDS.is_match(&text_lower);
+
+        // Phase 2: Regex pattern matching
+        // Short text (<5000 chars): ALWAYS run regex (catches patterns without keyword equivalents)
+        // Long text (>=5000 chars): only run regex if keyword gate passed (performance)
+        if has_keyword || text_lower.len() < 5000 {
+            for (pattern, name, confidence) in JAILBREAK_PATTERNS.iter() {
+                if let Some(m) = pattern.find(&text_lower) {
+                    results.push(MatchResult {
+                        engine: "jailbreak".to_string(),
+                        pattern: name.to_string(),
+                        confidence: *confidence,
+                        start: m.start(),
+                        end: m.end(),
+                    });
+                }
+            }
         }
 
-        // Phase 2: Regex patterns
-        let text_lower = text.to_lowercase();
-        for (pattern, name, confidence) in JAILBREAK_PATTERNS.iter() {
-            if let Some(m) = pattern.find(&text_lower) {
-                results.push(MatchResult {
-                    engine: "jailbreak".to_string(),
-                    pattern: name.to_string(),
-                    confidence: *confidence,
-                    start: m.start(),
-                    end: m.end(),
-                });
+        // Phase 3: Runtime-loaded signature matching (134K+ patterns from disk/CDN)
+        if results.is_empty() {
+            if let Some(ref ac) = *RUNTIME_SIGNATURES {
+                for mat in ac.find_iter(&text_lower) {
+                    results.push(MatchResult {
+                        engine: "jailbreak".to_string(),
+                        pattern: "runtime_signature".to_string(),
+                        confidence: 0.75,
+                        start: mat.start(),
+                        end: mat.end(),
+                    });
+                    break; // One runtime match is enough
+                }
             }
         }
 

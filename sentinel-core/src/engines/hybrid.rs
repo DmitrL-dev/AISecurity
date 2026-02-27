@@ -4,6 +4,7 @@
 //! Uses embedded patterns as fallback, loads CDN patterns when available.
 
 use crate::engines::MatchResult;
+use crate::engines::traits::PatternMatcher;
 use crate::signatures::{SignatureLoader, CompiledPattern};
 use once_cell::sync::Lazy;
 
@@ -25,6 +26,33 @@ pub enum PatternSource {
     Cdn,
     #[cfg(feature = "cdn")]
     CdnCached,
+}
+
+impl PatternMatcher for HybridPiiEngine {
+    fn name(&self) -> &'static str {
+        "pii_hybrid"
+    }
+
+    fn scan(&self, text: &str) -> Vec<MatchResult> {
+        // Delegate to inherent scan method
+        let mut results = Vec::new();
+        for pattern in &self.patterns {
+            if let Some(m) = pattern.regex.find(text) {
+                results.push(MatchResult {
+                    engine: "pii_hybrid".to_string(),
+                    pattern: pattern.id.clone(),
+                    confidence: pattern.confidence,
+                    start: m.start(),
+                    end: m.end(),
+                });
+            }
+        }
+        results
+    }
+
+    fn category(&self) -> crate::engines::traits::EngineCategory {
+        crate::engines::traits::EngineCategory::Privacy
+    }
 }
 
 impl Default for HybridPiiEngine {

@@ -143,7 +143,7 @@ const YAML_PATTERNS: &[&str] = &[
 /// Homoglyph mappings (subset)
 const HOMOGLYPHS: &[(char, char)] = &[
     ('а', 'a'), // Cyrillic а
-    ('е', 'e'), // Cyrillic е  
+    ('е', 'e'), // Cyrillic е
     ('о', 'o'), // Cyrillic о
     ('р', 'p'), // Cyrillic р
     ('с', 'c'), // Cyrillic с
@@ -203,15 +203,31 @@ impl ObfuscationGuard {
 
     /// Check for homoglyph attacks
     pub fn check_homoglyphs(&self, text: &str) -> Option<ObfuscationType> {
-        let mut count = 0;
-        for c in text.chars() {
-            for (homoglyph, _) in HOMOGLYPHS {
-                if c == *homoglyph {
-                    count += 1;
-                    if count >= 2 {
-                        return Some(ObfuscationType::UnicodeHomoglyph);
+        // Check each word for mixed-script usage (the hallmark of homoglyph attacks)
+        // Pure Cyrillic/Greek text is legitimate, not obfuscation
+        for word in text.split(|c: char| c.is_whitespace() || c.is_ascii_punctuation()) {
+            if word.is_empty() {
+                continue;
+            }
+            let mut has_latin = false;
+            let mut has_homoglyph = false;
+
+            for c in word.chars() {
+                if c.is_ascii_alphabetic() {
+                    has_latin = true;
+                }
+                for (homoglyph, _) in HOMOGLYPHS {
+                    if c == *homoglyph {
+                        has_homoglyph = true;
                     }
                 }
+            }
+
+            // Only flag when BOTH Latin AND homoglyph chars appear in the SAME word
+            // "pаssword" (mixed Latin+Cyrillic) = homoglyph attack ✓
+            // "погода" (pure Cyrillic) = legitimate text ✓
+            if has_latin && has_homoglyph {
+                return Some(ObfuscationType::UnicodeHomoglyph);
             }
         }
         None
@@ -221,14 +237,14 @@ impl ObfuscationGuard {
     pub fn check_base64(&self, text: &str) -> Option<ObfuscationType> {
         // Look for base64 patterns
         let _base64_regex_pattern = r"^[A-Za-z0-9+/]{20,}={0,2}$";
-        
+
         for word in text.split_whitespace() {
             if word.len() >= 20 {
-                let valid_chars = word.chars().all(|c| 
-                    c.is_ascii_alphanumeric() || c == '+' || c == '/' || c == '='
-                );
+                let valid_chars = word
+                    .chars()
+                    .all(|c| c.is_ascii_alphanumeric() || c == '+' || c == '/' || c == '=');
                 let has_padding = word.ends_with('=');
-                
+
                 if valid_chars && (word.len() % 4 == 0 || has_padding) {
                     return Some(ObfuscationType::Base64Encoding);
                 }
@@ -283,7 +299,7 @@ impl ObfuscationGuard {
             r#"{"$where"#,
             r#"{"$regex"#,
         ];
-        
+
         for pattern in patterns {
             if text.contains(pattern) {
                 return Some(ObfuscationType::JSONInjection);
@@ -318,13 +334,13 @@ impl ObfuscationGuard {
     pub fn check_whitespace_encoding(&self, text: &str) -> Option<ObfuscationType> {
         // Count different types of whitespace
         let mut space_types = HashSet::new();
-        
+
         for c in text.chars() {
             if c.is_whitespace() {
                 space_types.insert(c);
             }
         }
-        
+
         // Multiple whitespace types suggests encoding
         if space_types.len() > 3 {
             return Some(ObfuscationType::WhitespaceEncoding);
@@ -335,12 +351,20 @@ impl ObfuscationGuard {
     /// Detect encoding chain (multiple layers)
     pub fn detect_encoding_chain(&self, text: &str) -> u8 {
         let mut layers = 0;
-        
-        if self.check_base64(text).is_some() { layers += 1; }
-        if self.check_hex_encoding(text).is_some() { layers += 1; }
-        if self.check_zero_width(text).is_some() { layers += 1; }
-        if self.check_rtl_override(text).is_some() { layers += 1; }
-        
+
+        if self.check_base64(text).is_some() {
+            layers += 1;
+        }
+        if self.check_hex_encoding(text).is_some() {
+            layers += 1;
+        }
+        if self.check_zero_width(text).is_some() {
+            layers += 1;
+        }
+        if self.check_rtl_override(text).is_some() {
+            layers += 1;
+        }
+
         layers
     }
 
@@ -350,25 +374,46 @@ impl ObfuscationGuard {
         let mut techniques = Vec::new();
 
         // Check all obfuscation types
-        if let Some(t) = self.check_zero_width(text) { techniques.push(t); }
-        if let Some(t) = self.check_rtl_override(text) { techniques.push(t); }
-        if let Some(t) = self.check_homoglyphs(text) { techniques.push(t); }
-        if let Some(t) = self.check_base64(text) { techniques.push(t); }
-        if let Some(t) = self.check_hex_encoding(text) { techniques.push(t); }
-        if let Some(t) = self.check_pickle(text) { techniques.push(t); }
-        if let Some(t) = self.check_yaml(text) { techniques.push(t); }
-        if let Some(t) = self.check_json_injection(text) { techniques.push(t); }
-        if let Some(t) = self.check_leet_speak(text) { techniques.push(t); }
-        if let Some(t) = self.check_whitespace_encoding(text) { techniques.push(t); }
+        if let Some(t) = self.check_zero_width(text) {
+            techniques.push(t);
+        }
+        if let Some(t) = self.check_rtl_override(text) {
+            techniques.push(t);
+        }
+        if let Some(t) = self.check_homoglyphs(text) {
+            techniques.push(t);
+        }
+        if let Some(t) = self.check_base64(text) {
+            techniques.push(t);
+        }
+        if let Some(t) = self.check_hex_encoding(text) {
+            techniques.push(t);
+        }
+        if let Some(t) = self.check_pickle(text) {
+            techniques.push(t);
+        }
+        if let Some(t) = self.check_yaml(text) {
+            techniques.push(t);
+        }
+        if let Some(t) = self.check_json_injection(text) {
+            techniques.push(t);
+        }
+        if let Some(t) = self.check_leet_speak(text) {
+            techniques.push(t);
+        }
+        if let Some(t) = self.check_whitespace_encoding(text) {
+            techniques.push(t);
+        }
 
         result.layers_detected = self.detect_encoding_chain(text);
-        
+
         if result.layers_detected >= 2 {
             techniques.push(ObfuscationType::EncodingChain);
         }
 
         result.is_obfuscated = !techniques.is_empty();
-        result.risk_score = techniques.iter()
+        result.risk_score = techniques
+            .iter()
             .map(|t| t.risk_level() as f64)
             .max_by(|a, b| a.partial_cmp(b).unwrap())
             .unwrap_or(0.0);
@@ -456,7 +501,8 @@ mod tests {
     fn test_full_analysis_obfuscated() {
         let guard = ObfuscationGuard::default();
         // Longer base64 string (>= 20 chars) and longer hex (>= 10 chars after 0x)
-        let text = "Execute this SGVsbG8gV29ybGQhIEhvdyBhcmUgeW91IGRvaW5n and 0x48656c6c6f576f726c64";
+        let text =
+            "Execute this SGVsbG8gV29ybGQhIEhvdyBhcmUgeW91IGRvaW5n and 0x48656c6c6f576f726c64";
         let result = guard.analyze(text);
         assert!(result.is_obfuscated);
         assert!(result.techniques.len() >= 2);
@@ -464,7 +510,36 @@ mod tests {
 
     #[test]
     fn test_risk_levels() {
-        assert!(ObfuscationType::PickleExploit.risk_level() > ObfuscationType::Base64Encoding.risk_level());
-        assert!(ObfuscationType::YAMLExploit.risk_level() > ObfuscationType::LeetSpeak.risk_level());
+        assert!(
+            ObfuscationType::PickleExploit.risk_level()
+                > ObfuscationType::Base64Encoding.risk_level()
+        );
+        assert!(
+            ObfuscationType::YAMLExploit.risk_level() > ObfuscationType::LeetSpeak.risk_level()
+        );
+    }
+
+    #[test]
+    fn test_russian_text_not_flagged() {
+        let guard = ObfuscationGuard::default();
+        assert!(guard.check_homoglyphs("Какая сегодня погода?").is_none());
+        assert!(guard.check_homoglyphs("Как приготовить борщ?").is_none());
+        assert!(guard
+            .check_homoglyphs("Объясни теорию относительности")
+            .is_none());
+    }
+
+    #[test]
+    fn test_chinese_text_not_flagged() {
+        let guard = ObfuscationGuard::default();
+        assert!(guard.check_homoglyphs("如何学习编程？").is_none());
+        assert!(guard.check_homoglyphs("今天天气怎么样？").is_none());
+    }
+
+    #[test]
+    fn test_mixed_script_homoglyph_detected() {
+        let guard = ObfuscationGuard::default();
+        // 'р' is Cyrillic mixed into Latin "password"
+        assert!(guard.check_homoglyphs("рassword").is_some());
     }
 }
