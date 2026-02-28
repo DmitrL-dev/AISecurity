@@ -1,6 +1,6 @@
 {
-  "version": "2026.02.12.1",
-  "timestamp": "2026-02-12T01:25:20.529025Z",
+  "version": "2026.02.28.1",
+  "timestamp": "2026-02-28T02:17:04.037245Z",
   "description": "SENTINEL Community Signatures - Auto-updated threat detection patterns",
   "sources": [
     "sentinel-enterprise",
@@ -34,14 +34,46 @@
     },
     "jailbreaks": {
       "path": "jailbreaks.json",
-      "sha256": "4c5d78f3dcbabf848917849e26c991a70f98429e238d7679e381349ccb08d110",
-      "size": 53358824,
-      "count": 87056
+      "sha256": "1f69f30f28412800135301426e1b0bd393f9ee921c61067e0b27ea41da7505e9",
+      "size": 53341998,
+      "count": 87033
+    },
+    "jailbreaks_ru": {
+      "path": "jailbreaks-ru.json",
+      "sha256": "60e14264fbacda018ec030eb05b4f4b9c0a414db8e5e6de7942f531eaf77b6b9",
+      "size": 23706933,
+      "count": 47351
     }
   },
   "update_info": {
-    "cdn_url": "https://cdn.jsdelivr.net/gh/DmitrL-dev/AISecurity@latest/signatures",
-    "update_interval_hours": 1,
+    "cdn_url": "https://cdn.jsdelivr.net/gh/DmitrL-dev/AISecurity@main/sentinel-community/signatures",
+    "update_interval_hours": 24,
     "fallback_to_embedded": true
-  }
+  },
+  "split_parts": [
+    {
+      "file": "jailbreaks-part1.json",
+      "sha256": "31fd2ec5c349bd125828e2f3f0841c2c80907d497210961dd6aed6a120bc498f",
+      "size": 17598476,
+      "count": 25662
+    },
+    {
+      "file": "jailbreaks-part2.json",
+      "sha256": "c2001557dc6074a09d930e58cd4f1176e038ca87a3fe31dbbcb3d3b86a5a313e",
+      "size": 14382519,
+      "count": 25662
+    },
+    {
+      "file": "jailbreaks-part3.json",
+      "sha256": "7bc25cea8ad04d6da253e64ccca263096350dfa9d2421e2a0a2327239504a950",
+      "size": 10736397,
+      "count": 25662
+    },
+    {
+      "file": "jailbreaks-part4.json",
+      "sha256": "84a3f8ddf6d02f2081b8f3aa3c6f287eee917b047d866d677c0939e968cff0d9",
+      "size": 4202380,
+      "count": 10047
+    }
+  ]
 }
