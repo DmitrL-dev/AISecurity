@@ -1,11 +1,12 @@
 <!-- 🎉 SYNTREX LAUNCH BANNER - PROMINENT -->
 <div align="center">
 
-# 🚀 SYNTREX AI SOC PLATFORM — LIVE NOW
+# 🚀 SYNTREX
+first full AI SOC PLATFORM — LIVE NOW
 
 [![syntrex.pro](https://img.shields.io/badge/🔗_syntrex.pro-OPEN-0d1117?style=for-the-badge&labelColor=161b22&logo=rocket&color=2ea043)](https://syntrex.pro?utm_source=github&utm_campaign=readme_launch)
 
-> ### 🔐 Production AI Security • <1ms latency • 54 Rust engines • Free tier 1K requests
+> ### 🔐 Production AI Security • <1ms latency • 66 Rust engines • Free tier 1K requests
 > 
 > [📚 Docs](https://syntrex.pro/docs) • [⚡ API Reference](https://syntrex.pro/api-docs) • [🎁 Start Free](https://syntrex.pro/register)
 
@@ -14,11 +15,11 @@
 <details open>
 <summary><b>▼ Что нового в SYNTREX v1.0 (кликните для деталей)</b></summary>
 
-• ✅ 61 детектор-движок в production  
+• ✅ 66 детектор-движок в production  
 • ✅ 810+ сигнатур атак на ИИ  
 • ✅ 1101 тест, 98.5% detection rate  
 • ✅ 39K+ вредоносных промптов в базе  
-• ✅ <1ms latency на 54 Rust-движках  
+• ✅ <1ms latency на 66 Rust-движках  
 
 </details>
 
