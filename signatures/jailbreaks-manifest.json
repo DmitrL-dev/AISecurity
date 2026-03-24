@@ -1,6 +1,6 @@
 {
-  "version": "2026.03.23.1",
-  "timestamp": "2026-03-23T02:44:03.428163Z",
+  "version": "2026.03.24.1",
+  "timestamp": "2026-03-24T02:39:18.507711Z",
   "total_patterns": 47425,
   "split": true,
   "parts": [
@@ -12,7 +12,7 @@
     {
       "file": "jailbreaks-ru-part2.json",
       "patterns_count": 16013,
-      "size": 6700370
+      "size": 6700368
     }
   ]
 }
