@@ -2,7 +2,7 @@
 <div align="center">
 
 # 🚀 SYNTREX
-first full AI SOC PLATFORM — LIVE NOW
+# first full AI SOC PLATFORM — LIVE NOW
 
 [![syntrex.pro](https://img.shields.io/badge/🔗_syntrex.pro-OPEN-0d1117?style=for-the-badge&labelColor=161b22&logo=rocket&color=2ea043)](https://syntrex.pro?utm_source=github&utm_campaign=readme_launch)
 
