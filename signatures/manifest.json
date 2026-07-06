@@ -1,6 +1,6 @@
 {
-  "version": "2026.07.05.1",
-  "timestamp": "2026-07-05T03:36:41.314185Z",
+  "version": "2026.07.06.1",
+  "timestamp": "2026-07-06T03:42:31.597717Z",
   "description": "SENTINEL Community Signatures - Auto-updated threat detection patterns",
   "sources": [
     "sentinel-enterprise",
@@ -34,15 +34,15 @@
     },
     "jailbreaks": {
       "path": "jailbreaks.json",
-      "sha256": "05720e337abd3e612a6c2552cb2caa8b8ad8ac33f8655130bb11880756011c64",
-      "size": 53383615,
-      "count": 87111
+      "sha256": "81833c5413cc81755626c4bc18988f48f3a8c1b28554f1ee50b85bd488221fc3",
+      "size": 53389570,
+      "count": 87122
     },
     "jailbreaks_ru": {
       "path": "jailbreaks-ru.json",
-      "sha256": "f1141f28b2b79c45bc0052bab92eff55152a90fbf5aed90939c1a1fb02de3cad",
-      "size": 23746590,
-      "count": 47425
+      "sha256": "2399b16c8814089a423dea85c41017f0851529e3e9a67cb72c0d578899a1d38e",
+      "size": 23752540,
+      "count": 47436
     }
   },
   "update_info": {
@@ -53,27 +53,27 @@
   "split_parts": [
     {
       "file": "jailbreaks-part1.json",
-      "sha256": "7e606534a6f6142ed2c559cd90e7423518ceb5bba2b98c17a546b814bdb19913",
-      "size": 17600169,
-      "count": 25665
+      "sha256": "719f5c3ddbce206e8868dd66fe5b61c583a0736cbefed03e700e0df17711df3b",
+      "size": 17600845,
+      "count": 25666
     },
     {
       "file": "jailbreaks-part2.json",
-      "sha256": "13cf475cb7f5f045491b6ea4948fa0aed347631266fa5f36cb230102ba040c23",
-      "size": 14383320,
-      "count": 25665
+      "sha256": "bf09a1baa6dbdd8bc11b02c614858e17444124dde82dec9f363956d325a9cd4c",
+      "size": 14383521,
+      "count": 25666
     },
     {
       "file": "jailbreaks-part3.json",
-      "sha256": "2d6e699efe7700a0fb842307214bfa3fbc49ca56257786a8892f331658f13039",
-      "size": 10737679,
-      "count": 25665
+      "sha256": "36232bb6b7409f471bb846398b4d79f489056537d4c79c2c0d5237f980231b6d",
+      "size": 10738030,
+      "count": 25666
     },
     {
       "file": "jailbreaks-part4.json",
-      "sha256": "aebb03718739f2f0d0d8378657dadade98d4bb72f3d8dfa52b1241908e3a61a3",
-      "size": 4233825,
-      "count": 10116
+      "sha256": "9aa1e2fc2748f3d411442af0cb057d5fd5bf69a3ba5d738cade700e83023fc67",
+      "size": 4237650,
+      "count": 10124
     }
   ]
 }
