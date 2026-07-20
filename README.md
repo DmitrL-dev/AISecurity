@@ -16,7 +16,7 @@
 *   ✅ MCP Protocol Support
 
 ### 2. Syntrex AI SOC (Enterprise Platform)
-🔗 **[syntrex.pro](https://syntrex.pro)**
+🔗 **[spectorn.ai](https://spectorn.ai)**
 
 ---
 **Status:** 🏛️ Archived | **Successor:** [Syntrex AI SOC](https://syntrex.pro)
