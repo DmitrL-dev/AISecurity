@@ -462,6 +462,32 @@ class TestRedactionEngine:
         assert stats["rules_count"] >= 15
 
 
+    def test_detect_inn_legal_not_passport(self, engine):
+        r"""A bare 10-digit legal-entity INN must be detected as INN, not a passport.
+
+        Regression: passport_ru used \s? for the separator, which silently
+        matched contiguous digits and shadowed the inn_legal rule entirely.
+        """
+        result = engine.analyze("ИНН 7712345678")
+        assert any("inn_legal" in t.threat_type for t in result.threats)
+        assert not any("passport" in t.threat_type for t in result.threats)
+
+    def test_detect_inn_person_12_digits(self, engine):
+        """A 12-digit personal INN must still be detected as INN."""
+        result = engine.analyze("ИНН 123456789012")
+        assert any("inn_person" in t.threat_type for t in result.threats)
+
+    def test_passport_ru_still_required_separator(self, engine):
+        """A properly spaced Russian passport still detects as passport."""
+        result = engine.analyze("Паспорт 4510 123456")
+        assert any("passport" in t.threat_type for t in result.threats)
+
+    def test_redact_bare_10_digit_not_passport(self, engine):
+        """A bare 10-digit number must never be redacted as a Russian passport."""
+        redacted = engine.redact("ИНН 7712345678")
+        assert "[REDACTED_PASSPORT]" not in redacted.redacted_text
+
+
 # ============================================================
 # CDN Client Tests
 # ============================================================
