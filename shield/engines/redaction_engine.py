@@ -54,7 +54,7 @@ _PII_RULES: list[tuple[str, str, str, float, str]] = [
     ),
     (
         "passport_ru",
-        r"\b\d{4}\s?\d{6}\b",
+        r"\b\d{4}[\s.-]\d{6}\b",
         "[REDACTED_PASSPORT]",
         0.80,
         "Паспорт РФ (серия+номер)",
