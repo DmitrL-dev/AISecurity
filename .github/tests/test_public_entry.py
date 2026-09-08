@@ -1,10 +1,11 @@
 """Dependency-free contracts for the repository's public entry surfaces."""
 from html.parser import HTMLParser
+import hashlib
 from pathlib import Path
 import posixpath
 import re
 import unittest
-from urllib.parse import urlsplit
+from urllib.parse import parse_qs, urlsplit
 
 
 ROOT = Path(__file__).resolve().parents[2]
@@ -179,6 +180,16 @@ class PublicEntryTests(unittest.TestCase):
         self.assertLess(width / height, 2.0)
         self.assertEqual(meta.get("og:image:type"), "image/jpeg")
         self.assertEqual(meta.get("twitter:image"), meta["og:image"])
+
+    def test_stylesheet_url_invalidates_stale_browser_cache(self):
+        stylesheets = [a["href"] for tag, a in self.page.elements
+                       if tag == "link" and a.get("rel") == "stylesheet"]
+        self.assertEqual(len(stylesheets), 1)
+        parsed = urlsplit(stylesheets[0])
+        asset = ROOT / "docs" / parsed.path
+        digest = hashlib.sha256(asset.read_bytes()).hexdigest()[:12]
+        self.assertEqual(parse_qs(parsed.query).get("v"), [digest],
+                         "New markup must not reuse a cached older stylesheet")
 
 
 if __name__ == "__main__":

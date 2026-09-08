@@ -30,8 +30,8 @@ nav > a, .site-header .wordmark { display: inline-flex; align-items: center; min
 .button-outline:hover { background: #b8ffd00a; border-color: var(--mint); }
 .header-cta { font-size: 18px; padding: 14px 24px; min-height: 50px; margin-left: 20px; }
 .arrow { width: 21px; height: 21px; fill: none; stroke: currentColor; stroke-width: 1.7; stroke-linecap: round; stroke-linejoin: round; flex-shrink: 0; }
-.skip-link { position: fixed; z-index: 10; top: -100px; left: 16px; padding: 16px; background: var(--mint); color: var(--bg); }
-.skip-link:focus { top: 16px; }
+.skip-link { position: fixed; z-index: 10; top: -100px; left: 16px; padding: 16px; background: var(--mint); color: var(--bg); clip-path: inset(50%); }
+.skip-link:focus { top: 16px; clip-path: none; }
 .skip-link:hover { color: var(--bg); }
 .hero { min-height: 700px; display: flex; align-items: flex-start; position: relative; isolation: isolate; padding-block: 128px 24px; }
 .hero-media { position: absolute; inset: -24px -70px 0; z-index: -1; overflow: hidden; mask-image: linear-gradient(to bottom, transparent, #000 8%, #000 78%, transparent); }
@@ -132,6 +132,10 @@ details[open] .chevron { transform: rotate(90deg); }
   .flow-node { font-size: 13px; }
   .spectorn { gap: 32px; }
   .spectorn p, .scope > p { font-size: 19px; }
+}
+@media (min-width: 781px) and (max-width: 1100px) {
+  /* Keep decorative rays below the text contrast threshold at mid-size widths. */
+  .hero-media::after { content: ""; position: absolute; inset: 0; background: linear-gradient(90deg, #09110fe6 0%, #09110fe6 52%, #09110f00 62%); }
 }
 @media (max-width: 780px) {
   .wrap { width: calc(100% - 48px); }
