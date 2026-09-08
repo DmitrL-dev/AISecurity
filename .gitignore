@@ -101,6 +101,10 @@ rlm-research/
 rlm-toolkit/
 ralph-sdd/
 assets/
+!/docs/assets/
+/docs/assets/*
+!/docs/assets/landing.css
+!/docs/assets/favicon.svg
 _archive/
 demos/
 tools/
