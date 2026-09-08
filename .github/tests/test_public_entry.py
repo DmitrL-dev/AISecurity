@@ -1,6 +1,7 @@
 """Dependency-free contracts for the repository's public entry surfaces."""
 from html.parser import HTMLParser
 from pathlib import Path
+import posixpath
 import re
 import unittest
 from urllib.parse import urlsplit
@@ -124,6 +125,60 @@ class PublicEntryTests(unittest.TestCase):
             exists = (ROOT / clean).exists()
             tracked_dir = any(p == clean or p.startswith(clean + "/") for p in tracked)
             self.assertTrue(exists or tracked_dir, path)
+
+    def test_academy_entry_links_resolve_in_the_public_tree(self):
+        tracked = set(__import__("subprocess").check_output(
+            ["git", "ls-files"], cwd=ROOT, text=True).splitlines())
+        for language in ("en", "ru"):
+            entry = Path("docs/academy") / language / "index.md"
+            source = (ROOT / entry).read_text(encoding="utf-8")
+            for href in re.findall(r"\]\(([^\s)]+)\)", source):
+                parsed = urlsplit(href)
+                if parsed.scheme or not parsed.path:
+                    continue
+                target = posixpath.normpath(str(entry.parent / parsed.path))
+                with self.subTest(entry=str(entry), href=href):
+                    self.assertFalse(target.startswith("../"))
+                    self.assertTrue(target in tracked or (ROOT / target).is_file(),
+                                    "Entry link points outside the published files: " + target)
+
+    def test_repository_destination_paths_exist(self):
+        tracked = set(__import__("subprocess").check_output(
+            ["git", "ls-files"], cwd=ROOT, text=True).splitlines())
+        prefix = "/DmitrL-dev/AISecurity/"
+        for tag, attrs in self.page.elements:
+            if tag != "a":
+                continue
+            parsed = urlsplit(attrs.get("href", ""))
+            if parsed.netloc != "github.com" or not parsed.path.startswith(prefix):
+                continue
+            route = parsed.path[len(prefix):]
+            for kind in ("blob/main/", "tree/main/"):
+                if route.startswith(kind):
+                    target = route[len(kind):].rstrip("/")
+                    with self.subTest(href=attrs["href"]):
+                        self.assertTrue(target in tracked or any(
+                            p.startswith(target + "/") for p in tracked), target)
+
+    def test_social_preview_resolves_to_a_jpeg_with_dimensions(self):
+        meta = {a.get("property", a.get("name")): a.get("content")
+                for tag, a in self.page.elements if tag == "meta"}
+        self.assertEqual(meta.get("twitter:card"), "summary_large_image")
+        image = urlsplit(meta.get("og:image", ""))
+        self.assertEqual(image.scheme, "https")
+        self.assertEqual(image.netloc, "dmitrl-dev.github.io")
+        self.assertTrue(image.path.startswith("/AISecurity/"))
+        asset = ROOT / "docs" / image.path.removeprefix("/AISecurity/")
+        self.assertTrue(asset.is_file())
+        raw = asset.read_bytes()
+        self.assertTrue(raw.startswith(b"\xff\xd8"), "Share image needs a JPEG fallback")
+        self.assertLess(len(raw), 250_000)
+        width, height = int(meta["og:image:width"]), int(meta["og:image:height"])
+        self.assertGreaterEqual(width, 1200)
+        self.assertGreater(width / height, 1.85)
+        self.assertLess(width / height, 2.0)
+        self.assertEqual(meta.get("og:image:type"), "image/jpeg")
+        self.assertEqual(meta.get("twitter:image"), meta["og:image"])
 
 
 if __name__ == "__main__":

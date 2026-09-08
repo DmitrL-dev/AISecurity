@@ -18,3 +18,17 @@ provided for generation. These project assets follow the repository license;
 the product name does not grant additional trademark rights.
 
 The older `sentinel_hero.png` and `academy_evolution.png` are preserved unchanged.
+
+## Dedicated share image
+
+`aisecurity-social.jpg` was generated with the same tool on 2026-09-09 using the
+existing banner as a style reference. It is a separate social-card composition,
+not a crop of the README banner: **1727 × 911**, JPEG, **113,225 bytes**. Encoding
+to JPEG was performed without changing composition or dimensions; the original
+generated PNG is retained by the maintainer. The page's Open Graph and Twitter
+metadata refer to this asset; it is not loaded as extra page artwork.
+
+Prompt brief: recompose the glass-boundary identity into a roughly 1.91:1 social
+card; large off-white AISecurity wordmark on the left, the same two-line mint
+headline and “LEARN / INSPECT / EVALUATE”; three glass planes and mint/amber light
+on the right; safe text margins, no extra badges, metrics or interface mockup.

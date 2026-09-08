@@ -21,6 +21,15 @@ Explore the exercises alongside the source, not just a slide deck.
 
 **[Start in English](docs/academy/en/index.md)** · **[Начать на русском](docs/academy/ru/index.md)** · [Hands-on labs](docs/academy/en/labs/index.md)
 
+Pick one boundary and start reading — no installation required:
+
+| Boundary | English | Русский |
+| --- | --- | --- |
+| Instructions hidden in data | [Prompt injection](docs/academy/en/beginner/01-prompt-injection.md) | [Prompt injection](docs/academy/ru/beginner/01-prompt-injection.md) |
+| Documents retrieved into context | [RAG security](docs/academy/en/beginner/09-rag-security.md) | [Безопасность RAG](docs/academy/ru/beginner/09-rag-security.md) |
+| Model output becoming an action | [Tool-using agents](docs/academy/en/intermediate/agentic/tool-using-agents.md) | [Агенты с инструментами](docs/academy/ru/intermediate/agentic/tool-using-agents.md) |
+| Context stored for future use | [Agent memory](docs/academy/en/intermediate/agentic/memory.md) | [Память агентов](docs/academy/ru/intermediate/agentic/memory.md) |
+
 ### Inspect the mechanisms
 
 Read the public Rust implementation, trace its architecture, explore red-team
@@ -35,26 +44,34 @@ technical notes to understand how a defense works — and where its assumptions 
 misses, false positives and execution failures separately. Reports omit input text,
 text hashes and matched excerpts; errors never quietly become benign predictions.
 
-```text
-Your labelled JSONL → validation + duplicate checks → pinned public core
-                                                     ↓
-                             confusion counts + coverage + explicit errors
-```
-
 **[Install Guard Lab and run the demo](tools/guard-lab/README.md#install-linux-x86-64--python-311)** · [Input format](tools/guard-lab/README.md#evaluate-your-data) · [Report contract](tools/guard-lab/README.md#read-the-report)
 
 Linux x86-64 / Python 3.11 first. No account, API key or GPU. Installation downloads
 dependencies and builds native code; subsequent evaluations are local. The small
 synthetic demo checks plumbing — **not a benchmark** or a promise of detection quality.
 
-## Need a live protection layer? Explore Spectorn.
+After installation, run `guard-lab --demo`. An excerpt from the four synthetic inputs:
+
+```json
+{
+  "test_records": 4,
+  "counts": {"tp": 2, "tn": 2, "fp": 0, "fn": 0, "errors": 0},
+  "synthetic_demo": true
+}
+```
+
+Now replace the demo with your own labelled inputs. Read coverage and errors
+alongside the confusion counts; a small synthetic pass does not establish quality
+on your data. Guard Lab uses eight public pattern engines, not current Spectorn detectors.
+
+## From the lab to your application
 
 **[Spectorn](https://spectorn.ai/)** is the current product for protection around
 prompts, model responses and agent workflows. Visit the site, choose your region,
 and check the current protection scope and access options.
 
-Use AISecurity to learn, inspect and experiment. Explore Spectorn when you want a
-maintained service around your AI application. This repository is not a download
+Use AISecurity to understand the boundaries and test your assumptions. Explore
+Spectorn for a maintained protection layer around your application. This repository is not a download
 of the commercial platform, its private corpora or its current detectors.
 
 **[Open Spectorn →](https://spectorn.ai/)**
@@ -84,10 +101,11 @@ or a newly certified production stack.
 
 </details>
 
-## Build with us
+## Make the next experiment better
 
 Useful contributions are concrete: a clearer lesson, a reproducible installation
-bug, an incorrect metric, or a minimal synthetic test case. Start with the
+bug, an incorrect metric, or a minimal synthetic test case. Include what you
+expected, what happened and the smallest safe example that reproduces it. Start with the
 [contribution guide](docs/CONTRIBUTING.md) and
 [open an issue](https://github.com/DmitrL-dev/AISecurity/issues).
 

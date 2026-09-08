@@ -9,8 +9,16 @@
   <meta property="og:description" content="Learn the failure modes. Inspect the mechanisms. Evaluate your inputs. Open-source AI security, with a path to Spectorn.">
   <meta property="og:type" content="website">
   <meta property="og:url" content="https://dmitrl-dev.github.io/AISecurity/">
-  <meta property="og:image" content="https://dmitrl-dev.github.io/AISecurity/images/aisecurity-banner.webp">
+  <meta property="og:image" content="https://dmitrl-dev.github.io/AISecurity/images/aisecurity-social.jpg">
+  <meta property="og:image:type" content="image/jpeg">
+  <meta property="og:image:width" content="1727">
+  <meta property="og:image:height" content="911">
   <meta property="og:image:alt" content="AISecurity: Understand the attack. Build the defense. Mint and amber light passing through three glass boundaries.">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="AISecurity — Understand the attack. Build the defense.">
+  <meta name="twitter:description" content="An open-source AI security lab. Learn in EN/RU, inspect public defenses, evaluate your inputs.">
+  <meta name="twitter:image" content="https://dmitrl-dev.github.io/AISecurity/images/aisecurity-social.jpg">
+  <meta name="twitter:image:alt" content="AISecurity: Understand the attack. Build the defense. Three glass boundaries with mint and amber light.">
   <title>AISecurity — Understand the attack. Build the defense.</title>
   <link rel="canonical" href="https://dmitrl-dev.github.io/AISecurity/">
   <link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
@@ -28,7 +36,7 @@
     </nav>
   </header>
 
-  <main id="main" class="wrap">
+  <main id="main" class="wrap" tabindex="-1">
     <section class="hero" aria-labelledby="hero-title">
       <div class="hero-media" aria-hidden="true">
         <img src="images/aisecurity-hero.webp" alt="" width="1672" height="941" fetchpriority="high">
@@ -48,7 +56,7 @@
       <h2 id="paths-title">One lab. Three ways in.</h2>
       <p class="section-intro">Start with a lesson, open the source, or test your own corpus.</p>
       <div class="paths">
-        <article class="path" id="academy">
+        <article class="path">
           <h3>Learn the<br> <span>failure modes.</span></h3>
           <p>English and Russian tracks, from prompt injection basics to agent security and research.</p>
           <div class="path-links">
@@ -64,7 +72,7 @@
             <a class="text-link" href="https://github.com/DmitrL-dev/AISecurity/tree/main/docs/rnd">Read the research <svg class="arrow" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 18 18 6M6 6h12v12"/></svg></a>
           </div>
         </article>
-        <article class="path" id="guard-lab">
+        <article class="path">
           <h3>Evaluate<br> <span>your inputs.</span></h3>
           <p>A pinned public pattern engine. Your labelled JSONL. Misses, false positives and execution errors reported separately.</p>
           <div class="path-links">
@@ -73,6 +81,83 @@
         </article>
       </div>
 
+    </section>
+
+    <section class="academy section editorial" id="academy" aria-labelledby="academy-title">
+      <div class="editorial-copy">
+        <h2 id="academy-title">Pick a boundary.<br>Learn to defend it.</h2>
+        <p class="section-intro">Start with a concrete failure mode. Read a lesson in English or Russian, then follow the references into the source.</p>
+        <a class="text-link" href="https://github.com/DmitrL-dev/AISecurity/blob/main/docs/academy/en/index.md">Browse the full academy <svg class="arrow" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 18 18 6M6 6h12v12"/></svg></a>
+      </div>
+      <div class="lessons">
+        <article class="lesson" aria-labelledby="lesson-injection">
+          <p class="lesson-level">Beginner</p>
+          <h3 id="lesson-injection">Prompt injection</h3>
+          <p>How instructions cross a data boundary.</p>
+          <div class="lesson-links">
+            <a class="text-link" href="https://github.com/DmitrL-dev/AISecurity/blob/main/docs/academy/en/beginner/01-prompt-injection.md" aria-label="Read in EN — prompt injection">Read in EN <svg class="arrow" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 18 18 6M6 6h12v12"/></svg></a>
+            <a class="text-link" lang="ru" href="https://github.com/DmitrL-dev/AISecurity/blob/main/docs/academy/ru/beginner/01-prompt-injection.md" aria-label="Читать на RU — prompt injection">Читать на RU <svg class="arrow" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 18 18 6M6 6h12v12"/></svg></a>
+          </div>
+        </article>
+        <article class="lesson" aria-labelledby="lesson-rag">
+          <p class="lesson-level">Beginner</p>
+          <h3 id="lesson-rag">RAG &amp; untrusted documents</h3>
+          <p>What retrieval can bring into the context.</p>
+          <div class="lesson-links">
+            <a class="text-link" href="https://github.com/DmitrL-dev/AISecurity/blob/main/docs/academy/en/beginner/09-rag-security.md" aria-label="Read in EN — RAG security">Read in EN <svg class="arrow" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 18 18 6M6 6h12v12"/></svg></a>
+            <a class="text-link" lang="ru" href="https://github.com/DmitrL-dev/AISecurity/blob/main/docs/academy/ru/beginner/09-rag-security.md" aria-label="Читать на RU — безопасность RAG">Читать на RU <svg class="arrow" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 18 18 6M6 6h12v12"/></svg></a>
+          </div>
+        </article>
+        <article class="lesson" aria-labelledby="lesson-tools">
+          <p class="lesson-level">Intermediate</p>
+          <h3 id="lesson-tools">Tool-using agents</h3>
+          <p>Where model output becomes an action.</p>
+          <div class="lesson-links">
+            <a class="text-link" href="https://github.com/DmitrL-dev/AISecurity/blob/main/docs/academy/en/intermediate/agentic/tool-using-agents.md" aria-label="Read in EN — tool-using agents">Read in EN <svg class="arrow" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 18 18 6M6 6h12v12"/></svg></a>
+            <a class="text-link" lang="ru" href="https://github.com/DmitrL-dev/AISecurity/blob/main/docs/academy/ru/intermediate/agentic/tool-using-agents.md" aria-label="Читать на RU — агенты с инструментами">Читать на RU <svg class="arrow" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 18 18 6M6 6h12v12"/></svg></a>
+          </div>
+        </article>
+        <article class="lesson" aria-labelledby="lesson-memory">
+          <p class="lesson-level">Intermediate</p>
+          <h3 id="lesson-memory">Agent memory</h3>
+          <p>How stored context becomes an attack surface.</p>
+          <div class="lesson-links">
+            <a class="text-link" href="https://github.com/DmitrL-dev/AISecurity/blob/main/docs/academy/en/intermediate/agentic/memory.md" aria-label="Read in EN — agent memory">Read in EN <svg class="arrow" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 18 18 6M6 6h12v12"/></svg></a>
+            <a class="text-link" lang="ru" href="https://github.com/DmitrL-dev/AISecurity/blob/main/docs/academy/ru/intermediate/agentic/memory.md" aria-label="Читать на RU — память агентов">Читать на RU <svg class="arrow" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 18 18 6M6 6h12v12"/></svg></a>
+          </div>
+        </article>
+      </div>
+    </section>
+
+    <section class="lab section" id="guard-lab" aria-labelledby="lab-title">
+      <div class="lab-showcase editorial">
+        <div class="editorial-copy">
+          <h2 id="lab-title">Make the misses<br>visible.</h2>
+          <p class="section-intro">Run your labelled inputs through a pinned public core. Keep misses, false positives and execution errors separate.</p>
+          <p class="lab-requirements">Linux x86-64 · Python 3.11<br>No account, API key or GPU.</p>
+          <a class="button button-primary" href="https://github.com/DmitrL-dev/AISecurity/tree/main/tools/guard-lab#install-linux-x86-64--python-311">Install and run Guard Lab <svg class="arrow" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 18 18 6M6 6h12v12"/></svg></a>
+          <a class="text-link report-link" href="https://github.com/DmitrL-dev/AISecurity/tree/main/tools/guard-lab#read-the-report">Read the report contract <svg class="arrow" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 18 18 6M6 6h12v12"/></svg></a>
+        </div>
+        <figure class="lab-example">
+          <div class="demo-panel">
+            <p class="demo-label">After installation</p>
+            <pre class="demo-command"><code>$ guard-lab --demo</code></pre>
+            <p class="demo-label" id="demo-label">Example output · four synthetic inputs</p>
+            <pre class="demo-output" aria-labelledby="demo-label"><code>{
+  "test_records": <span>4</span>,
+  "counts": {
+    "tp": <span>2</span>,
+    "tn": <span>2</span>,
+    "fp": <span>0</span>,
+    "fn": <span>0</span>,
+    "errors": <span>0</span>
+  },
+  "synthetic_demo": <span>true</span>
+}</code></pre>
+          </div>
+          <figcaption>This checks execution, not detection quality.<br>Eight public pattern engines. Not current Spectorn detectors.</figcaption>
+        </figure>
+      </div>
       <div class="flow">
         <input type="checkbox" id="pause-motion">
         <label for="pause-motion">Pause animation</label>
@@ -89,8 +174,8 @@
 
     <section class="spectorn section" aria-labelledby="spectorn-title">
       <div>
-        <h2 id="spectorn-title">Need a live<br>protection layer?</h2>
-        <p>Explore Spectorn for prompts, model responses and agent workflows. Choose your region and check the current product scope.</p>
+        <h2 id="spectorn-title">From the lab<br>to your application.</h2>
+        <p>Learning the boundaries is one step. Protecting live prompts, responses and agent workflows is another. Explore Spectorn, choose your region and see the current protection scope and access options.</p>
       </div>
       <a class="spectorn-link text-link" href="https://spectorn.ai/">Explore Spectorn <svg class="arrow" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 18 18 6M6 6h12v12"/></svg></a>
     </section>
@@ -107,6 +192,14 @@
           <a class="text-link" href="https://github.com/DmitrL-dev/AISecurity/tree/main/tools/guard-lab#read-the-report">Read the evaluation contract <svg class="arrow" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 18 18 6M6 6h12v12"/></svg></a>
         </div>
       </details>
+    </section>
+
+    <section class="contribute section" aria-labelledby="contribute-title">
+      <div>
+        <h2 id="contribute-title">Make the next experiment better.</h2>
+        <p>A clearer lesson. A reproducible bug. A minimal synthetic test case. Small, inspectable contributions make this lab more useful for everyone.</p>
+      </div>
+      <a class="text-link" href="https://github.com/DmitrL-dev/AISecurity/blob/main/docs/CONTRIBUTING.md">Find a way to contribute <svg class="arrow" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 18 18 6M6 6h12v12"/></svg></a>
     </section>
   </main>
 
