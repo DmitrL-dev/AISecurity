@@ -1,11 +1,46 @@
 # SENTINEL Core
 
-High-performance AI security detection engine written in Rust with Python bindings.
+Public AI-security pattern matching in Rust with Python bindings.
+
+**Maintenance release 2.0.1:** fixes UTF-8/encoded-input handling and false
+positives on ordinary model and tool questions. See the [change log](CHANGELOG.md)
+for the exact scope, test entry points and remaining limitations. This is the
+public AISecurity core, not the current commercial Spectorn detector collection.
+
+For a pinned installation and content-free evaluation reports, start with
+[Guard Lab](../tools/guard-lab/README.md). Its `EngineRegistry.analyze_patterns`
+path runs eight pattern engines: injection, jailbreak, PII, exfiltration,
+moderation, evasion, tool abuse and social engineering. Other modules below
+remain research/legacy surfaces; module counts are not a quality measure.
+
+Python package metadata and `sentinel_core.version()` now share the Cargo version.
+Build from `sentinel-core/` with Rust/Cargo 1.88+ and Python 3.11 on Linux x86-64:
+
+```sh
+python3.11 -m venv .venv
+. .venv/bin/activate
+python -m pip install 'maturin==1.9.4'
+CARGO_BUILD_JOBS=1 CARGO_PROFILE_RELEASE_LTO=false \
+  CARGO_PROFILE_RELEASE_OPT_LEVEL=1 CARGO_PROFILE_RELEASE_CODEGEN_UNITS=16 \
+  maturin build --release --locked --out dist
+python -m pip install dist/sentinel_core-2.0.1-*.whl
+python -m unittest discover -s tests -p test_public_core.py -v
+```
+
+The build downloads dependencies. The 48-case test uses only authored synthetic
+inputs and overrides ambient signature discovery with an empty temporary
+directory. It does not measure independent detection accuracy. Input evaluation
+is not a production authorization or enforcement boundary.
+
+<details>
+<summary>Historical architecture notes (not current performance guarantees)</summary>
+
+The following catalogue predates the maintenance release.
+They have not been revalidated as current product claims; use source and the
+specific maintained API above instead of inferring support from this catalogue.
 
 ## Features
 
-- **15 Detection Engines** covering pattern matching, strange math, and semantic analysis
-- **202 unit tests** with full coverage
 - **Aho-Corasick** keyword pre-filtering (O(n))
 - **Tiered matching**: keywords → regex only for candidates
 - **Unicode normalization**: fullwidth, HTML entities, URL encoding, zero-width removal
@@ -76,14 +111,6 @@ Text-based semantic analysis without heavy ML dependencies:
 | `semantic` | N-gram TF-IDF, prototype matching | Attack pattern similarity |
 | `drift` | Embedding distance, baseline comparison | Context manipulation detection |
 
-## Performance
-
-| Metric | Python | Rust |
-|--------|--------|------|
-| Latency (p99) | 50-100ms | 1-5ms |
-| Throughput | 20 req/s | 500+ req/s |
-| Memory | 300MB | 50MB |
-
 ## Testing
 
 ```bash
@@ -126,3 +153,4 @@ sentinel-core/
 
 Apache-2.0
 
+</details>

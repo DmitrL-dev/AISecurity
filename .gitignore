@@ -53,6 +53,7 @@ node_modules/
 
 # === Rust ===
 Cargo.lock
+!/sentinel-core/Cargo.lock
 
 # === Binaries ===
 *.exe
