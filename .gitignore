@@ -104,6 +104,10 @@ assets/
 _archive/
 demos/
 tools/
+# Only the curated local evaluation package is public.
+!/tools/
+/tools/*
+!/tools/guard-lab/
 strike-force/
 benchmarks/
 monitoring/

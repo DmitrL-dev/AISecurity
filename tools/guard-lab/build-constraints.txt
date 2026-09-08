@@ -1,0 +1,2 @@
+maturin==1.9.4
+setuptools==83.0.0

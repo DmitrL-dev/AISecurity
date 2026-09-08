@@ -1,0 +1,23 @@
+[build-system]
+requires = ["setuptools==83.0.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "aisecurity-guard-lab"
+version = "0.1.0"
+description = "Local, content-free evaluation reports for the public AISecurity pattern engine"
+readme = "README.md"
+requires-python = ">=3.11"
+license = "Apache-2.0"
+license-files = ["LICENSE", "NOTICE"]
+authors = [{name = "AISecurity contributors"}]
+dependencies = []
+
+[project.scripts]
+guard-lab = "guard_lab.cli:main"
+
+[tool.setuptools]
+packages = ["guard_lab"]
+
+[tool.setuptools.package-data]
+guard_lab = ["demo.jsonl"]
