@@ -1,0 +1,2 @@
+# Already-public input engine. No private registry or hosted API.
+sentinel-core @ git+https://github.com/DmitrL-dev/AISecurity.git@b9fdd8a0e95accaf001017d243c1a16075d7a216#subdirectory=sentinel-core

@@ -1,0 +1,14 @@
+AISecurity Guard Lab
+Copyright 2026 AISecurity contributors
+
+The Python package, tests and synthetic demo in this directory were written
+for this contribution and are provided under Apache License 2.0.
+No private source files or datasets are included.
+
+sentinel-core is an external, already-public dependency from
+https://github.com/DmitrL-dev/AISecurity
+commit b9fdd8a0e95accaf001017d243c1a16075d7a216, directory sentinel-core.
+Its existing license declarations and notices remain applicable; this notice
+does not replace licenses in the rest of that repository or its dependencies.
+
+The demo is original synthetic test material, not a validation corpus.

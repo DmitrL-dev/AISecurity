@@ -1,0 +1,3 @@
+include README.md LICENSE NOTICE requirements-core.txt build-constraints.txt
+recursive-include guard_lab *.py *.jsonl
+recursive-include tests *.py

@@ -1,6 +1,18 @@
 # Quick Start
 
-> Deploy Sentinel in under 5 minutes.
+## Supported new path: Guard Lab
+
+For local input evaluation without a hosted service, use the
+[Guard Lab installation guide](tools/guard-lab/README.md). It has its own
+Python environment, pinned public native dependency and synthetic demo.
+
+## Legacy platform instructions
+
+The following platform commands are retained for historical context, **not**
+revalidated installation instructions. In particular, the old install scripts
+reference absent `sentinel-community` content, and their Python example does
+not match the public `EngineRegistry` API. Do not use these commands to install
+Guard Lab; use the guide above. No five-minute deployment claim is made here.
 
 ---
 
