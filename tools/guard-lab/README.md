@@ -16,12 +16,11 @@ newer. Start in this directory, using a **fresh** virtual environment:
 ```sh
 python3.11 -m venv .venv
 . .venv/bin/activate
-python -m pip install 'pip==25.1.1'
+python -m pip install 'pip==26.2.1'
 python -m pip install .
-PIP_CONSTRAINT="$PWD/build-constraints.txt" \
-  CARGO_BUILD_JOBS=1 CARGO_PROFILE_RELEASE_LTO=false \
+CARGO_BUILD_JOBS=1 CARGO_PROFILE_RELEASE_LTO=false \
   CARGO_PROFILE_RELEASE_OPT_LEVEL=1 CARGO_PROFILE_RELEASE_CODEGEN_UNITS=16 \
-  python -m pip install -r requirements-core.txt
+  python -m pip install --build-constraint build-constraints.txt -r requirements-core.txt
 guard-lab --demo
 ```
 

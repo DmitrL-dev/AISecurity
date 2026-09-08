@@ -11,6 +11,9 @@ on:
 jobs:
   security-scan:
     runs-on: ubuntu-latest
+    timeout-minutes: 15
+    permissions:
+      contents: read
 
     steps:
       - uses: actions/checkout@v4
@@ -20,32 +23,40 @@ jobs:
         with:
           python-version: "3.11"
 
-      - name: Install security tools
+      - name: Test audit target selection and failure propagation
         run: |
-          pip install bandit safety pip-audit
+          python -m unittest discover -s .github/tests -v
+
+      - name: Test Guard Lab without the optional native dependency
+        working-directory: tools/guard-lab
+        run: python -m unittest discover -s tests -v
+
+      - name: Install isolated security tools
+        run: |
+          python -m venv .security-tools
+          .security-tools/bin/python -m pip install 'pip==26.2.1'
+          .security-tools/bin/python -m pip install 'bandit==1.9.4' 'pip-audit==2.10.1' 'setuptools==83.0.0'
 
       - name: Run Bandit security scan
         continue-on-error: true
         run: |
-          bandit -r src/ strike/ -f json -o bandit-report.json || true
-          bandit -r src/ strike/ -f txt
-
-      - name: Check dependencies with Safety
-        run: |
-          safety check --full-report || true
+          .security-tools/bin/bandit -r src/ strike/ -f json -o bandit-report.json || true
+          .security-tools/bin/bandit -r src/ strike/ -f txt
 
       - name: Audit dependencies with pip-audit
+        # Runtime pyprojects, Guard Lab build pins and scanner tools are separate.
+        # Legacy requirements.txt, optional ML extras and Cargo are not covered.
         run: |
-          pip-audit --format json --output pip-audit-report.json || true
-          pip-audit
+          sh .github/scripts/audit-python-dependencies.sh "$PWD/.security-tools/bin/python" "$PWD/dependency-reports"
 
       - name: Upload security reports
+        if: always()
         uses: actions/upload-artifact@v4
         with:
           name: security-reports
           path: |
             bandit-report.json
-            pip-audit-report.json
+            dependency-reports/*.json
 
   codeql:
     runs-on: ubuntu-latest
