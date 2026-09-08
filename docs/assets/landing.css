@@ -22,6 +22,7 @@ a:focus-visible, summary:focus-visible, input:focus-visible {
 .site-header { min-height: 108px; position: relative; z-index: 2; }
 .wordmark { font-weight: 700; font-size: 38px; letter-spacing: -.055em; white-space: nowrap; }
 nav { display: flex; align-items: center; flex-wrap: wrap; gap: 42px; font-size: 18px; }
+nav > a, .site-header .wordmark { display: inline-flex; align-items: center; min-height: 44px; }
 .button { display: inline-flex; align-items: center; justify-content: center; gap: 12px; min-height: 54px; padding: 15px 26px; border: 1px solid transparent; border-radius: 4px; font-size: 19px; line-height: 1.25; }
 .button-primary { background: var(--mint); color: var(--bg); font-weight: 600; }
 .button-primary:hover { background: #d4ffe3; color: var(--bg); }
@@ -29,8 +30,9 @@ nav { display: flex; align-items: center; flex-wrap: wrap; gap: 42px; font-size:
 .button-outline:hover { background: #b8ffd00a; border-color: var(--mint); }
 .header-cta { font-size: 18px; padding: 14px 24px; min-height: 50px; margin-left: 20px; }
 .arrow { width: 21px; height: 21px; fill: none; stroke: currentColor; stroke-width: 1.7; stroke-linecap: round; stroke-linejoin: round; flex-shrink: 0; }
-.skip-link { position: fixed; z-index: 10; top: -100px; left: 16px; padding: 16px; background: var(--mint); color: var(--bg); }
-.skip-link:focus { top: 16px; }
+.skip-link { position: fixed; z-index: 10; top: -100px; left: 16px; padding: 16px; background: var(--mint); color: var(--bg); clip-path: inset(50%); }
+.skip-link:focus { top: 16px; clip-path: none; }
+.skip-link:hover { color: var(--bg); }
 .hero { min-height: 700px; display: flex; align-items: flex-start; position: relative; isolation: isolate; padding-block: 128px 24px; }
 .hero-media { position: absolute; inset: -24px -70px 0; z-index: -1; overflow: hidden; mask-image: linear-gradient(to bottom, transparent, #000 8%, #000 78%, transparent); }
 .hero-media img { width: 100%; height: 100%; object-fit: cover; object-position: center; }
@@ -40,7 +42,7 @@ h1 { font-size: clamp(42px, 4.75vw, 76px); line-height: 1.05; letter-spacing: -.
 h1 span, h3 span { color: var(--mint); }
 .lead { max-width: min(610px, 48%); font-size: 26px; line-height: 1.3; color: var(--muted); margin-bottom: 42px; }
 .hero-actions { display: flex; flex-wrap: wrap; gap: 22px; }
-.text-link { display: inline-flex; align-items: center; gap: 8px; border-bottom: 1px solid currentColor; padding-bottom: 5px; color: var(--mint); width: fit-content; line-height: 1.45; }
+.text-link { display: inline-flex; align-items: center; gap: 8px; border-bottom: 1px solid currentColor; min-height: 44px; color: var(--mint); width: fit-content; line-height: 1.45; }
 .text-link:hover { color: #e1ffec; }
 .ru-link { margin-top: 35px; font-size: 18px; color: var(--muted); }
 .section { padding-block: 64px; border-top: 1px solid var(--line); position: relative; }
@@ -54,8 +56,30 @@ h2 { font-size: clamp(34px, 3.5vw, 52px); letter-spacing: -.045em; line-height: 
 h3 { font-size: clamp(28px, 2.65vw, 39px); line-height: 1.13; letter-spacing: -.035em; margin-bottom: 28px; }
 .path p { color: var(--muted); font-size: 19px; line-height: 1.55; margin-bottom: 34px; max-width: 370px; }
 .path-links { display: flex; flex-direction: column; align-items: flex-start; gap: 20px; font-size: 19px; }
-.flow { margin-top: 64px; position: relative; padding-bottom: 34px; }
-.flow-track { display: flex; align-items: center; gap: 22px; min-height: 34px; margin-bottom: 22px; }
+.editorial { display: grid; grid-template-columns: .8fr 1.2fr; gap: 72px; align-items: start; }
+.editorial-copy h2 { font-size: clamp(38px, 4.2vw, 64px); line-height: 1.06; margin-bottom: 30px; }
+.editorial-copy .section-intro { font-size: 24px; margin-bottom: 32px; max-width: 580px; }
+.editorial-copy > .text-link { font-size: 20px; }
+.lesson { padding-block: 22px; border-top: 1px solid var(--line); }
+.lesson:first-child { padding-top: 24px; }
+.lesson:last-child { padding-bottom: 24px; border-bottom: 1px solid var(--line); }
+.lesson h3 { font-size: clamp(24px, 2.2vw, 34px); margin-bottom: 12px; line-height: 1.15; }
+.lesson p { color: var(--muted); font-size: 20px; line-height: 1.5; margin-bottom: 12px; }
+.lesson .lesson-level { font-size: 17px; margin-bottom: 12px; }
+.lesson-links { display: flex; flex-wrap: wrap; gap: 12px 30px; font-size: 19px; }
+.lab-showcase { grid-template-columns: .95fr 1.05fr; gap: 64px; }
+.lab-requirements { color: var(--muted); font-size: 20px; line-height: 1.65; margin-bottom: 30px; }
+.report-link { display: flex; margin-top: 18px; }
+.lab-example { margin: 0; min-width: 0; }
+.demo-panel { padding: 28px; border: 1px solid var(--line); border-radius: 4px; background: #b8ffd003; }
+.demo-label { color: var(--muted); font-size: 16px; line-height: 1.5; margin-bottom: 12px; }
+pre { margin: 0; font-size: 20px; line-height: 1.6; tab-size: 2; }
+code { font-family: ui-monospace, "SFMono-Regular", Consolas, monospace; }
+.demo-command { padding-bottom: 24px; margin-bottom: 24px; border-bottom: 1px solid var(--line); }
+.demo-output span { color: var(--mint); }
+.lab-example figcaption { color: var(--muted); font-size: 17px; line-height: 1.65; padding-top: 18px; }
+.flow { margin-top: 64px; position: relative; display: grid; grid-template-columns: 1fr auto; gap: 18px 32px; }
+.flow-track { display: flex; align-items: center; gap: 22px; min-height: 34px; grid-column: 1 / -1; grid-row: 1; }
 .flow-node { font-family: ui-monospace, "SFMono-Regular", Consolas, monospace; font-size: 15px; white-space: nowrap; }
 .signal { flex: 1; position: relative; height: 24px; min-width: 60px; }
 .signal::before { content: ""; height: 1px; background: var(--line); position: absolute; top: 12px; left: 0; right: 32px; }
@@ -63,9 +87,9 @@ h3 { font-size: clamp(28px, 2.65vw, 39px); line-height: 1.13; letter-spacing: -.
 .signal i { position: absolute; top: 8px; left: 0; width: 8px; height: 8px; border-radius: 50%; background: var(--mint); box-shadow: 0 0 12px #b8ffd075; animation: travel 5s linear infinite; }
 .signal i + i { background: #efbd76; box-shadow: 0 0 12px #efbd7660; animation-delay: -2.5s; }
 @keyframes travel { from { left: 0; } to { left: calc(100% - 38px); } }
-.flow-caption { color: var(--muted); font-size: 14px; line-height: 1.5; margin: 0; }
-#pause-motion { position: absolute; right: 138px; bottom: 36px; width: 18px; height: 18px; margin: 0; accent-color: var(--mint); cursor: pointer; }
-.flow label { position: absolute; right: 0; bottom: 34px; min-height: 24px; padding-block: 2px; color: var(--muted); cursor: pointer; font-size: 15px; }
+.flow-caption { color: var(--muted); font-size: 14px; line-height: 1.5; margin: 0; grid-row: 2; align-self: center; }
+#pause-motion { grid-column: 2; grid-row: 2; align-self: center; justify-self: start; position: relative; z-index: 1; width: 18px; height: 18px; margin: 0; accent-color: var(--mint); cursor: pointer; }
+.flow label { grid-column: 2; grid-row: 2; display: flex; align-items: center; min-height: 44px; padding-left: 32px; color: var(--muted); cursor: pointer; font-size: 16px; }
 #pause-motion:checked ~ .flow-track .signal i { animation-play-state: paused; }
 .spectorn { display: grid; grid-template-columns: 1.35fr 1fr; align-items: end; gap: 64px; }
 .spectorn p, .scope > p { font-size: 21px; line-height: 1.55; color: var(--muted); margin-bottom: 0; }
@@ -74,12 +98,16 @@ h3 { font-size: clamp(28px, 2.65vw, 39px); line-height: 1.13; letter-spacing: -.
 .spectorn-link .arrow { width: 31px; height: 31px; }
 .scope > p { max-width: 1170px; }
 details { margin-top: 26px; }
-summary { cursor: pointer; color: var(--mint); font-size: 19px; line-height: 1.5; display: flex; align-items: center; gap: 8px; width: fit-content; border-bottom: 1px solid currentColor; padding-bottom: 5px; list-style: none; }
+summary { cursor: pointer; color: var(--mint); font-size: 19px; line-height: 1.5; display: flex; align-items: center; gap: 8px; width: fit-content; min-height: 44px; border-bottom: 1px solid currentColor; list-style: none; }
 summary::-webkit-details-marker { display: none; }
 details[open] .chevron { transform: rotate(90deg); }
 .scope-details { padding-top: 24px; max-width: 1080px; }
 .scope-details p { font-size: 17px; line-height: 1.7; color: var(--muted); }
 .scope-details strong { color: var(--text); }
+.contribute { display: grid; grid-template-columns: 1fr auto; gap: 40px; align-items: end; }
+.contribute h2 { font-size: clamp(30px, 3vw, 44px); }
+.contribute p { color: var(--muted); font-size: 19px; line-height: 1.6; max-width: 790px; margin-bottom: 0; }
+.contribute > .text-link { font-size: 19px; margin-bottom: 5px; }
 .site-footer { border-top: 1px solid var(--line); min-height: 118px; padding-block: 30px; }
 .site-footer .wordmark { font-size: 28px; }
 .site-footer nav { font-size: 15px; gap: 28px; color: var(--muted); }
@@ -95,17 +123,27 @@ details[open] .chevron { transform: rotate(90deg); }
   .path { padding-inline: 25px; }
   .path p { font-size: 17px; }
   .path-links { font-size: 17px; }
+  .editorial, .lab-showcase { gap: 40px; }
+  .editorial-copy .section-intro { font-size: 21px; }
+  .lesson p { font-size: 18px; }
+  .demo-panel { padding: 22px; }
+  pre { font-size: 17px; }
   .flow-track { gap: 14px; }
   .flow-node { font-size: 13px; }
   .spectorn { gap: 32px; }
   .spectorn p, .scope > p { font-size: 19px; }
 }
+@media (min-width: 781px) and (max-width: 1100px) {
+  /* Keep decorative rays below the text contrast threshold at mid-size widths. */
+  .hero-media::after { content: ""; position: absolute; inset: 0; background: linear-gradient(90deg, #09110fe6 0%, #09110fe6 52%, #09110f00 62%); }
+}
 @media (max-width: 780px) {
   .wrap { width: calc(100% - 48px); }
-  .site-header { flex-wrap: wrap; padding-block: 24px; gap: 20px; }
+  .site-header { display: block; padding-block: 16px; }
   .wordmark { font-size: 28px; }
-  .site-header nav { width: 100%; justify-content: space-between; gap: 12px; font-size: 14px; }
-  .header-cta { min-height: 42px; padding: 10px 14px; font-size: 14px; }
+  .site-header nav { width: 100%; justify-content: space-between; gap: 12px; font-size: 14px; margin-top: 12px; }
+  .site-header nav > a:not(.header-cta) { padding-inline: 4px; }
+  .header-cta { position: absolute; top: 16px; right: 0; min-height: 44px; padding: 10px 14px; font-size: 14px; }
   .header-cta .arrow { width: 17px; height: 17px; }
   .hero { display: flex; flex-direction: column; align-items: stretch; min-height: 0; padding: 40px 0 0; }
   .hero-copy { order: 0; }
@@ -127,20 +165,49 @@ details[open] .chevron { transform: rotate(90deg); }
   h3 br { display: none; }
   .path p { max-width: 570px; margin-bottom: 22px; font-size: 18px; }
   .path-links { flex-direction: row; flex-wrap: wrap; gap: 18px 26px; }
-  .flow { margin-top: 4px; padding-bottom: 62px; }
-  .flow-track { flex-direction: column; align-items: flex-start; gap: 18px; }
+  .editorial, .lab-showcase { grid-template-columns: 1fr; gap: 36px; }
+  .editorial-copy h2 { font-size: clamp(34px, 7.8vw, 52px); margin-bottom: 24px; }
+  .editorial-copy .section-intro { font-size: 19px; margin-bottom: 22px; }
+  .editorial-copy > .text-link { font-size: 18px; }
+  .lesson h3 { font-size: 28px; }
+  .lesson-links { font-size: 16px; gap: 8px 22px; }
+  .lab-requirements { font-size: 18px; }
+  .demo-panel { padding: 20px; }
+  .demo-label { font-size: 14px; }
+  pre { font-size: 16px; }
+  .lab-example figcaption { font-size: 15px; }
+  .flow { margin-top: 40px; grid-template-columns: 1fr; gap: 12px; }
+  .flow-track { flex-direction: column; align-items: flex-start; gap: 12px; }
   .flow-node { font-size: 15px; }
-  .signal { width: 150px; flex: none; margin-left: 8px; }
-  .flow label { right: auto; left: 28px; bottom: 16px; }
-  #pause-motion { right: auto; left: 0; bottom: 20px; }
+  .signal { width: 24px; height: 58px; min-width: 0; flex: none; margin-left: 16px; }
+  .signal::before { width: 1px; height: auto; left: 12px; top: 0; bottom: 24px; right: auto; }
+  .signal svg { right: 0; bottom: 0; transform: rotate(90deg); }
+  .signal i { top: 0; left: 8px; animation-name: travel-down; }
+  .flow label { grid-column: 1; grid-row: 3; justify-self: start; }
+  #pause-motion { grid-column: 1; grid-row: 3; }
   .spectorn { grid-template-columns: 1fr; gap: 28px; }
   .spectorn-link { justify-self: start; font-size: 30px; margin: 0; }
+  .contribute { grid-template-columns: 1fr; gap: 22px; }
+  .contribute p { font-size: 18px; }
   .site-footer { align-items: flex-start; flex-direction: column; gap: 24px; }
   .site-footer nav { gap: 20px 26px; line-height: 1.7; }
+}
+@keyframes travel-down { from { top: 0; } to { top: calc(100% - 30px); } }
+@media (max-width: 440px) {
+  .hero-actions { flex-direction: column; align-items: stretch; }
+  .hero-actions .button { width: 100%; }
+  .lab .button { width: 100%; padding-inline: 10px; font-size: 15px; }
+  .demo-panel { padding: 16px; }
+  pre { font-size: 14px; }
+  .lesson h3 { font-size: 26px; }
 }
 @media (prefers-reduced-motion: reduce) {
   html { scroll-behavior: auto; }
   .signal i { animation: none; left: 25%; }
   .signal i + i { left: 65%; }
   #pause-motion, .flow label { display: none; }
+}
+@media (max-width: 780px) and (prefers-reduced-motion: reduce) {
+  .signal i { left: 8px; top: 15%; }
+  .signal i + i { left: 8px; top: 40%; }
 }
