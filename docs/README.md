@@ -1,6 +1,12 @@
-# Sentinel Documentation
+# AISecurity documentation
 
-> **61 Rust detection engines** · **1101 tests** · **7 novel security primitives** · **98.5% detection**
+[Project home](https://dmitrl-dev.github.io/AISecurity/) · **[Spectorn](https://spectorn.ai/)** · [Academy EN](academy/en/index.md) · [Академия RU](academy/ru/index.md) · [Guard Lab](../tools/guard-lab/README.md)
+
+Learn the failure modes, inspect the public mechanisms and evaluate your own inputs.
+Start with the [new local Guard Lab](../tools/guard-lab/README.md) for a pinned,
+documented evaluation path, or choose an academy track for English/Russian lessons.
+The platform documentation below is historical: engine counts, performance figures
+and old installation instructions are not fresh verification of a production stack.
 
 ---
 
@@ -58,7 +64,9 @@ docs/
 
 ## Getting Started
 
-See the root [QUICKSTART.md](../QUICKSTART.md) for installation and first scan.
+For the newly verified local evaluation path, use the
+[Guard Lab installation guide](../tools/guard-lab/README.md#install-linux-x86-64--python-311).
+The root [QUICKSTART.md](../QUICKSTART.md) remains a legacy platform reference.
 
 ## Contact
 

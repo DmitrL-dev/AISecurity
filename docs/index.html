@@ -1,0 +1,124 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="An open-source lab for AI security. Learn in English or Russian, inspect public defenses and research, and evaluate your own inputs with Guard Lab. Explore Spectorn for live protection.">
+  <meta name="theme-color" content="#09110f">
+  <meta property="og:title" content="AISecurity — Understand the attack. Build the defense.">
+  <meta property="og:description" content="Learn the failure modes. Inspect the mechanisms. Evaluate your inputs. Open-source AI security, with a path to Spectorn.">
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://dmitrl-dev.github.io/AISecurity/">
+  <meta property="og:image" content="https://dmitrl-dev.github.io/AISecurity/images/aisecurity-banner.webp">
+  <meta property="og:image:alt" content="AISecurity: Understand the attack. Build the defense. Mint and amber light passing through three glass boundaries.">
+  <title>AISecurity — Understand the attack. Build the defense.</title>
+  <link rel="canonical" href="https://dmitrl-dev.github.io/AISecurity/">
+  <link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="assets/landing.css">
+</head>
+<body>
+  <a class="skip-link" href="#main">Skip to content</a>
+  <header class="site-header wrap">
+    <a class="wordmark" href="https://github.com/DmitrL-dev/AISecurity" aria-label="AISecurity on GitHub">AISecurity</a>
+    <nav aria-label="Main navigation">
+      <a href="#academy">Academy</a>
+      <a href="#guard-lab">Guard Lab</a>
+      <a href="#research">Research</a>
+      <a class="button button-outline header-cta" href="https://spectorn.ai/">Spectorn <svg class="arrow" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 18 18 6M6 6h12v12"/></svg></a>
+    </nav>
+  </header>
+
+  <main id="main" class="wrap">
+    <section class="hero" aria-labelledby="hero-title">
+      <div class="hero-media" aria-hidden="true">
+        <img src="images/aisecurity-hero.webp" alt="" width="1672" height="941" fetchpriority="high">
+      </div>
+      <div class="hero-copy">
+        <h1 id="hero-title">Understand the attack.<br> <span>Build the defense.</span></h1>
+        <p class="lead">An open-source lab for AI security: learn the failure modes, inspect the defenses, and evaluate your own inputs.</p>
+        <div class="hero-actions">
+          <a class="button button-primary" href="https://github.com/DmitrL-dev/AISecurity/blob/main/docs/academy/en/index.md">Explore the academy <svg class="arrow" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 18 18 6M6 6h12v12"/></svg></a>
+          <a class="button button-outline" href="https://github.com/DmitrL-dev/AISecurity/tree/main/tools/guard-lab#install-linux-x86-64--python-311">Run Guard Lab <svg class="arrow" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 18 18 6M6 6h12v12"/></svg></a>
+        </div>
+        <a class="text-link ru-link" lang="ru" href="https://github.com/DmitrL-dev/AISecurity/blob/main/docs/academy/ru/index.md">Русская академия <svg class="arrow" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 18 18 6M6 6h12v12"/></svg></a>
+      </div>
+    </section>
+
+    <section class="entry-paths section" aria-labelledby="paths-title">
+      <h2 id="paths-title">One lab. Three ways in.</h2>
+      <p class="section-intro">Start with a lesson, open the source, or test your own corpus.</p>
+      <div class="paths">
+        <article class="path" id="academy">
+          <h3>Learn the<br> <span>failure modes.</span></h3>
+          <p>English and Russian tracks, from prompt injection basics to agent security and research.</p>
+          <div class="path-links">
+            <a class="text-link" href="https://github.com/DmitrL-dev/AISecurity/blob/main/docs/academy/en/index.md">Academy EN <svg class="arrow" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 18 18 6M6 6h12v12"/></svg></a>
+            <a class="text-link" lang="ru" href="https://github.com/DmitrL-dev/AISecurity/blob/main/docs/academy/ru/index.md">Академия RU <svg class="arrow" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 18 18 6M6 6h12v12"/></svg></a>
+          </div>
+        </article>
+        <article class="path" id="research">
+          <h3>Inspect the<br> <span>mechanisms.</span></h3>
+          <p>Public Rust source, architecture notes, red-team tooling and research you can inspect.</p>
+          <div class="path-links">
+            <a class="text-link" href="https://github.com/DmitrL-dev/AISecurity/tree/main/sentinel-core">Browse the source <svg class="arrow" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 18 18 6M6 6h12v12"/></svg></a>
+            <a class="text-link" href="https://github.com/DmitrL-dev/AISecurity/tree/main/docs/rnd">Read the research <svg class="arrow" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 18 18 6M6 6h12v12"/></svg></a>
+          </div>
+        </article>
+        <article class="path" id="guard-lab">
+          <h3>Evaluate<br> <span>your inputs.</span></h3>
+          <p>A pinned public pattern engine. Your labelled JSONL. Misses, false positives and execution errors reported separately.</p>
+          <div class="path-links">
+            <a class="text-link" href="https://github.com/DmitrL-dev/AISecurity/tree/main/tools/guard-lab#install-linux-x86-64--python-311">Open Guard Lab <svg class="arrow" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 18 18 6M6 6h12v12"/></svg></a>
+          </div>
+        </article>
+      </div>
+
+      <div class="flow">
+        <input type="checkbox" id="pause-motion">
+        <label for="pause-motion">Pause animation</label>
+        <div class="flow-track" role="img" aria-label="Illustrative evaluation flow: your JSONL enters the pinned public core, which reports counts and execution errors. This is not a live scan.">
+          <span class="flow-node">Your JSONL</span>
+          <span class="signal" aria-hidden="true"><i></i><i></i><svg viewBox="0 0 24 24"><path d="M4 12h16m-6-6 6 6-6 6"/></svg></span>
+          <span class="flow-node">Pinned public core</span>
+          <span class="signal" aria-hidden="true"><i></i><i></i><svg viewBox="0 0 24 24"><path d="M4 12h16m-6-6 6 6-6 6"/></svg></span>
+          <span class="flow-node">Counts + errors</span>
+        </div>
+        <p class="flow-caption">Illustrative flow, not a live scan.</p>
+      </div>
+    </section>
+
+    <section class="spectorn section" aria-labelledby="spectorn-title">
+      <div>
+        <h2 id="spectorn-title">Need a live<br>protection layer?</h2>
+        <p>Explore Spectorn for prompts, model responses and agent workflows. Choose your region and check the current product scope.</p>
+      </div>
+      <a class="spectorn-link text-link" href="https://spectorn.ai/">Explore Spectorn <svg class="arrow" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 18 18 6M6 6h12v12"/></svg></a>
+    </section>
+
+    <section class="scope section" aria-labelledby="scope-title">
+      <h2 id="scope-title">Open source. Clear boundaries.</h2>
+      <p>Guard Lab is the new local evaluation path. The academy, engines and research remain available as historical resources. They are not current Spectorn engines or a newly certified production stack.</p>
+      <details>
+        <summary>Read scope and limitations <svg class="arrow chevron" viewBox="0 0 24 24" aria-hidden="true"><path d="m9 5 7 7-7 7"/></svg></summary>
+        <div class="scope-details">
+          <p><strong>Guard Lab:</strong> Linux x86-64 and Python 3.11, using eight pattern engines from a pinned public core. No account, API key or GPU. Installation downloads dependencies and builds native code; subsequent evaluations are local. The synthetic demo verifies plumbing, not detection quality.</p>
+          <p><strong>Historical resources:</strong> source, lessons, labs and old performance reports are preserved for study. Their numbers and installation routes have not been revalidated by this update. Use research tools only on systems you own or are explicitly authorized to test.</p>
+          <p><strong>Spectorn:</strong> a separate current product. Its commercial detectors, private corpora and policies are not published here. Availability and terms depend on the selected region; follow the current product documentation.</p>
+          <a class="text-link" href="https://github.com/DmitrL-dev/AISecurity/tree/main/tools/guard-lab#read-the-report">Read the evaluation contract <svg class="arrow" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 18 18 6M6 6h12v12"/></svg></a>
+        </div>
+      </details>
+    </section>
+  </main>
+
+  <footer class="site-footer wrap">
+    <a class="wordmark" href="https://github.com/DmitrL-dev/AISecurity">AISecurity</a>
+    <nav aria-label="Project links">
+      <a href="https://github.com/DmitrL-dev/AISecurity">GitHub</a>
+      <a href="https://github.com/DmitrL-dev/AISecurity/blob/main/docs/README.md">Documentation</a>
+      <a href="https://github.com/DmitrL-dev/AISecurity/blob/main/docs/CONTRIBUTING.md">Contribute</a>
+      <a href="https://github.com/DmitrL-dev/AISecurity/blob/main/SECURITY.md">Security</a>
+      <a href="https://github.com/DmitrL-dev/AISecurity/blob/main/LICENSE">License</a>
+    </nav>
+  </footer>
+</body>
+</html>
