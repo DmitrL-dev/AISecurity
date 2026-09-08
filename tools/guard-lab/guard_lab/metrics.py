@@ -1,7 +1,7 @@
 """Content-free evaluation reports. Execution failures are not decisions."""
 from . import __version__
 
-PUBLIC_COMMIT = "b9fdd8a0e95accaf001017d243c1a16075d7a216"
+PUBLIC_COMMIT = "dd432e0baed808f539780bb21d94737617b40429"
 ERRORS = frozenset({"TIMEOUT", "ENGINE_ERROR", "INVALID_RESULT", "DEPENDENCY_MISSING",
                     "ENGINE_ORIGIN_MISMATCH"})
 

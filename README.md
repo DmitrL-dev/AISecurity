@@ -64,6 +64,10 @@ Now replace the demo with your own labelled inputs. Read coverage and errors
 alongside the confusion counts; a small synthetic pass does not establish quality
 on your data. Guard Lab uses eight public pattern engines, not current Spectorn detectors.
 
+The pinned [public core 2.0.1](sentinel-core/CHANGELOG.md) includes actual decoding
+and metadata-query precision fixes. Its 48 authored regression cases document
+specific behavior; they are not an independent detection benchmark.
+
 ## From the lab to your application
 
 **[Spectorn](https://spectorn.ai/)** is the current product for protection around
@@ -78,8 +82,9 @@ of the commercial platform, its private corpora or its current detectors.
 
 ## Open source. Clear boundaries.
 
-Guard Lab is the newly verified contribution. The academy, engines and research
-remain available as historical resources. They are **not current Spectorn engines**
+Guard Lab and the public-core maintenance slice are the newly verified contributions.
+The remaining academy, engine catalogue and research remain available as historical
+resources. They are **not current Spectorn engines**
 or a newly certified production stack.
 
 <details>

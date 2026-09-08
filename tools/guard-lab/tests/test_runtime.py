@@ -46,11 +46,13 @@ class NativeProtocolTests(unittest.TestCase):
         from guard_lab._worker import valid_origin
         origin = {"url": "https://github.com/DmitrL-dev/AISecurity.git",
                   "subdirectory": "sentinel-core", "vcs_info": {"vcs": "git",
-                  "commit_id": "b9fdd8a0e95accaf001017d243c1a16075d7a216"}}
+                  "commit_id": "dd432e0baed808f539780bb21d94737617b40429"}}
         self.assertTrue(valid_origin(origin))
         for changed in [{}, dict(origin, url="https://example.invalid/other.git"),
                         dict(origin, subdirectory="other"),
-                        dict(origin, vcs_info={"vcs": "git", "commit_id": "main"})]:
+                        dict(origin, vcs_info={"vcs": "git", "commit_id": "main"}),
+                        dict(origin, vcs_info={"vcs": "git",
+                             "commit_id": "b9fdd8a0e95accaf001017d243c1a16075d7a216"})]:
             self.assertFalse(valid_origin(changed))
 
     def test_worker_deadline_and_crash_are_errors_not_safe(self):

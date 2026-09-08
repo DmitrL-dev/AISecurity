@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "aisecurity-guard-lab"
-version = "0.1.0"
+version = "0.1.1"
 description = "Local, content-free evaluation reports for the public AISecurity pattern engine"
 readme = "README.md"
 requires-python = ">=3.11"
