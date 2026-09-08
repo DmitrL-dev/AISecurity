@@ -1,12 +1,17 @@
 # AISecurity Guard Lab
 
-Evaluate your own labelled inputs against the **already-public, legacy**
-AISecurity pattern engine. See misses, false positives and execution failures
+Evaluate your own labelled inputs against the **maintained public core 2.0.1**
+of AISecurity. See misses, false positives and execution failures
 without putting input text in the report. No account, API key or GPU is needed.
 
 This is an evaluation tool, not a production enforcement gateway. It does not
 include current Spectorn detectors, models, private corpora or commercial policies.
 The four-row demo is synthetic and proves plumbing, not detection quality.
+
+Guard Lab 0.1.1 pins real detector-code fixes: UTF-8/encoded-input handling and
+false positives on ordinary model and tool questions. See the
+[core change log](../../sentinel-core/CHANGELOG.md) for the finite scope and the
+48 authored native regression cases. This is not a general accuracy claim.
 
 ## Install (Linux x86-64 / Python 3.11)
 
@@ -31,13 +36,15 @@ only the `sentinel-core` package is installed. No hosted inference is used.
 Subsequent evaluation runs do not download anything or make network requests.
 
 The core is pinned to public commit
-[`b9fdd8a0e95accaf001017d243c1a16075d7a216`](https://github.com/DmitrL-dev/AISecurity/tree/b9fdd8a0e95accaf001017d243c1a16075d7a216/sentinel-core).
+[`dd432e0baed808f539780bb21d94737617b40429`](https://github.com/DmitrL-dev/AISecurity/tree/dd432e0baed808f539780bb21d94737617b40429/sentinel-core).
 The worker checks pip's recorded Git origin, commit and subdirectory before
 loading the extension. Local-path installs or an unrelated `sentinel-core`
 package are refused. This metadata check prevents accidental mix-ups; it is
 not cryptographic attestation against someone who can alter the environment.
-The public core has no committed Cargo.lock, so the engine source is pinned
-but this is not a bit-for-bit reproducible dependency/toolchain build.
+The public core now commits `Cargo.lock` for its Rust dependency resolution.
+The source pin and build constraints do not make the OS/compiler or resulting
+binary bit-for-bit reproducible. Existing Guard Lab 0.1.0 environments do not
+update themselves: install this version and its new requirements in a fresh venv.
 
 ## Evaluate your data
 

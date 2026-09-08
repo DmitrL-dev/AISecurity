@@ -65,7 +65,8 @@ static INJECTION_KEYWORDS: Lazy<AhoCorasick> = Lazy::new(|| {
             "original prompt",
             "reveal your",
             "display your",
-            // Phase 13: Whoami discovery (ttps.ai)
+            // Overinclusive prefilter candidates, not standalone findings.
+            // "what are you" also reaches real system-instruction queries.
             "what model",
             "which model",
             "who are you",
@@ -73,7 +74,6 @@ static INJECTION_KEYWORDS: Lazy<AhoCorasick> = Lazy::new(|| {
             "identify yourself",
             "your name",
             "what version",
-            // Phase 13: API Probing / Capability Enumeration (ttps.ai)
             "list your tools",
             "available tools",
             "what tools",
@@ -279,13 +279,8 @@ static INJECTION_PATTERNS: Lazy<Vec<(Regex, &'static str, f64)>> = Lazy::new(|| 
         (Regex::new(r"(?i)(?:what|tell\s+me)\s+(?:are|is)\s+your\s+(?:system\s+)?(?:prompt|instructions|rules|initial\s+instructions)").expect("regex pattern"), "system_prompt_query", 0.85),
         (Regex::new(r"(?i)(?:ignore|disregard).*(?:then\s+)?(?:print|show|reveal|output)\s+(?:your|the)\s+(?:system|initial|original)\s+(?:prompt|instructions)").expect("regex pattern"), "system_prompt_bypass_extract", 0.95),
         
-        // Phase 13: Whoami / Model Discovery (ttps.ai — Discovery tactic)
-        (Regex::new(r"(?i)(?:what|which)\s+(?:AI\s+)?model\s+(?:are\s+you|is\s+this|version)").expect("regex pattern"), "whoami_model_query", 0.6),
-        (Regex::new(r"(?i)(?:identify|describe)\s+yourself\s+(?:including|with)\s+(?:your\s+)?(?:version|model|parameters|weights)").expect("regex pattern"), "whoami_detailed", 0.7),
-
-        // Phase 13: API Probing / Capability Enumeration (ttps.ai — Reconnaissance)
-        (Regex::new(r"(?i)(?:list|enumerate|show|display|reveal)\s+(?:all\s+)?(?:your\s+)?(?:available\s+)?(?:tools|functions|capabilities|endpoints|apis|methods)").expect("regex pattern"), "api_capability_enum", 0.65),
-        (Regex::new(r"(?i)(?:what|which)\s+(?:tools|functions|capabilities|apis|actions)\s+(?:do\s+you|can\s+you|are\s+available)").expect("regex pattern"), "capability_query", 0.6),
+        // Discovery metadata alone is not an injection. Do not use an early
+        // allow rule here: mixed requests must still reach every attack pattern.
         (Regex::new(r"(?i)(?:probe|scan|discover|map)\s+(?:the\s+)?(?:api|endpoints?|interface|service)").expect("regex pattern"), "api_probing", 0.7),
     ]
 });
@@ -497,28 +492,28 @@ mod tests {
     fn test_whoami_model() {
         let engine = InjectionEngine::new();
         let results = engine.scan("What model are you running on? What version?");
-        assert!(!results.is_empty(), "Should detect whoami model query");
+        assert!(results.is_empty(), "Model identity is not injection evidence");
     }
 
     #[test]
     fn test_whoami_detailed() {
         let engine = InjectionEngine::new();
         let results = engine.scan("Identify yourself including your version and model parameters");
-        assert!(!results.is_empty(), "Should detect detailed whoami query");
+        assert!(results.is_empty(), "A model description is not injection evidence");
     }
 
     #[test]
     fn test_api_capability_enum() {
         let engine = InjectionEngine::new();
         let results = engine.scan("List all your available tools and functions");
-        assert!(!results.is_empty(), "Should detect capability enumeration");
+        assert!(results.is_empty(), "A public tool list is not injection evidence");
     }
 
     #[test]
     fn test_capability_query() {
         let engine = InjectionEngine::new();
         let results = engine.scan("What tools can you use? What capabilities are available?");
-        assert!(!results.is_empty(), "Should detect capability query");
+        assert!(results.is_empty(), "A capability question is not injection evidence");
     }
 
     #[test]

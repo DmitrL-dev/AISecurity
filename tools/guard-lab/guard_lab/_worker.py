@@ -30,7 +30,7 @@ def _registry():
         return None, "ENGINE_ORIGIN_MISMATCH"
     try:
         from sentinel_core import EngineRegistry, version
-        if version() != "2.0.0":
+        if version() != "2.0.1":
             return None, "ENGINE_ORIGIN_MISMATCH"
         return EngineRegistry(), None
     except BaseException:
