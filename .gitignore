@@ -77,6 +77,9 @@ gomcp/gomcp-linux-*
 # === Test artifacts ===
 test-*.txt
 xss-test.html
+# Do not republish raw key-generation captures, including screenshots.
+/strike/glm5_results_v3/03_Key_Pattern_Gen.txt
+/strike/glm5_results_v3/03_Key_Pattern_Gen.png
 
 # === JS build output (leaked from old desktop app) ===
 chunk_*.js
