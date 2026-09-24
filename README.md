@@ -71,9 +71,11 @@ specific behavior; they are not an independent detection benchmark.
 ## From the lab to your application
 
 If an AI agent can change tickets, records or other external state, start with
-the [agent action evaluation checklist](docs/agent-action-evaluation.md). It
-shows what to verify between a user's request and the tool call that actually
-runs, using a synthetic example and no private detection rules.
+the [60-second decision room](https://dmitrl-dev.github.io/AISecurity/agent-action-room.html):
+would you let a retrieved support note turn a ticket closure into a refund?
+Then use the [agent action evaluation checklist](docs/agent-action-evaluation.md)
+to inspect your own workflow. Both examples are synthetic and disclose no
+private detection rules.
 
 **[Spectorn](https://spectorn.ai/)** is the current product for protection around
 prompts, model responses and agent workflows. Visit the site, choose your region,

@@ -94,6 +94,7 @@ code { font-family: ui-monospace, "SFMono-Regular", Consolas, monospace; }
 .spectorn { display: grid; grid-template-columns: 1.35fr 1fr; align-items: end; gap: 64px; }
 .spectorn p, .scope > p { font-size: 21px; line-height: 1.55; color: var(--muted); margin-bottom: 0; }
 .spectorn p { max-width: 710px; }
+.spectorn div > .text-link { margin-top: 24px; font-size: 18px; }
 .spectorn-link { justify-self: end; font-size: clamp(25px, 2.8vw, 38px); font-weight: 600; letter-spacing: -.03em; margin-bottom: 8px; }
 .spectorn-link .arrow { width: 31px; height: 31px; }
 .scope > p { max-width: 1170px; }
