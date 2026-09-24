@@ -70,6 +70,11 @@ specific behavior; they are not an independent detection benchmark.
 
 ## From the lab to your application
 
+If an AI agent can change tickets, records or other external state, start with
+the [agent action evaluation checklist](docs/agent-action-evaluation.md). It
+shows what to verify between a user's request and the tool call that actually
+runs, using a synthetic example and no private detection rules.
+
 **[Spectorn](https://spectorn.ai/)** is the current product for protection around
 prompts, model responses and agent workflows. Visit the site, choose your region,
 and check the current protection scope and access options.
