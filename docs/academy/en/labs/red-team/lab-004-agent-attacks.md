@@ -470,7 +470,7 @@ class SecureAgent:
 
 ---
 
-## Certification Checkpoint
+## Self-Check Checkpoint
 
 After completing Labs 001-004, you have covered:
 

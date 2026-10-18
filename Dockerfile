@@ -1,3 +1,5 @@
+# ARCHIVED: legacy SENTINEL platform file, kept for historical reference only.
+# It is not maintained or revalidated. See QUICKSTART.md for supported paths.
 FROM python:3.11-slim
 
 WORKDIR /app

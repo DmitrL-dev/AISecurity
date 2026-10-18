@@ -1,9 +1,11 @@
-# 🎓 Beginner Certification Exam
+# 🎓 Beginner Self-Check Exam
+
+> **Self-check only.** These exams help you check your own understanding. AISecurity runs no certification programme: no certificate, badge, credential or verifiable record is issued, and a score here is not evidence of competence for an employer, client or auditor.
 
 > **Level:** Beginner  
 > **Time:** 60 minutes  
 > **Questions:** 40  
-> **Passing Score:** 70% (28/40)  
+> **Target score:** 70% (28/40)  
 > **Prerequisites:** Tracks 01-03
 
 ---
@@ -13,7 +15,7 @@
 1. Choose one correct answer for each question
 2. Do not use external sources during the exam
 3. After completion, calculate your score
-4. With ≥70% — you are certified!
+4. With ≥70% you have reached the target score. No certificate is issued.
 
 ---
 
@@ -758,20 +760,15 @@ What principle underlies agent security?
 
 | Score | Status |
 |-------|--------|
-| 0-27 (0-67%) | ❌ Not passed. Review Tracks 01-03 |
-| 28-32 (70-80%) | ✅ Passed. Beginner Certified |
+| 0-27 (0-67%) | ❌ Below target. Review Tracks 01-03 |
+| 28-32 (70-80%) | ✅ Target reached |
 | 33-36 (82-90%) | 🌟 Excellent! |
 | 37-40 (92-100%) | ⭐ Outstanding! |
 
 ---
 
-## 📜 Certificate
+## 📋 What this self-check covers
 
-Upon successful completion you receive:
-
-**AI Security Academy — Beginner Certification**
-
-Confirms knowledge of:
 - LLM architecture fundamentals
 - OWASP LLM Top 10
 - Basic attack vectors
@@ -781,8 +778,8 @@ Confirms knowledge of:
 
 ## Next Level
 
-→ [Intermediate Certification](intermediate-exam.md)
+→ [Intermediate self-check](intermediate-exam.md)
 
 ---
 
-*AI Security Academy | Certification | Beginner Exam v1.0*
+*AI Security Academy | Self-Check | Beginner Exam v1.0*

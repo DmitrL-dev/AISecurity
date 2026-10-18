@@ -23,8 +23,10 @@ Learn to create custom security rules and configure SENTINEL for your specific u
 ## 1. Setup
 
 ```bash
-pip install sentinel-ai
+pip install sentinel-llm-security
 ```
+
+> The PyPI name `sentinel-ai` belongs to an unrelated project; do not install it. `sentinel-llm-security` is published from this repository; this lab has not been revalidated against its current release.
 
 ```python
 from sentinel import scan, configure

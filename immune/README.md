@@ -176,4 +176,4 @@ MIT
 
 - [SENTINEL Shield](../shield) — AI request pre-filter
 - [SENTINEL Strike](../strike) — Red team toolkit
-- [SENTINEL Brain](../core/brain) — 217 detection engines
+- [SENTINEL Brain](../src/brain) — Python detection backend (historical)

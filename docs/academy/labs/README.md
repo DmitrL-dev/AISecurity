@@ -106,4 +106,4 @@ Labs are scored out of 100 points:
 | D | 60-69% | Needs Improvement |
 | F | <60% | Failed |
 
-Certification requires 70% minimum.
+A score of 70% or more is the self-check target. No certificate is issued.

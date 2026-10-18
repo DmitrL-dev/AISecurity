@@ -1,5 +1,7 @@
 # SENTINEL Academy — Instructor Guide
 
+> **Historical course material.** There is no certification programme. No certificates, badges, levels or instructor credentials are issued or recognised, and completing this material proves nothing to a third party. Use it for self-study only.
+
 ## Introduction
 
 Welcome to the SENTINEL Academy Instructor Guide. This document provides everything you need to deliver effective AI security training using the SENTINEL Shield curriculum.

@@ -1,5 +1,7 @@
 # Sentinel Lattice: A Cross-Domain Defense Architecture for LLM Security
 
+> **Historical document.** Written for the earlier SENTINEL platform. Engine counts, test counts and performance figures in it describe that time and are not current claims. See the repository [README](https://github.com/DmitrL-dev/AISecurity#readme) for what is maintained today.
+
 > **Version:** 1.0.0 | **Date:** February 25, 2026 | **Status:** R&D Architecture Specification
 >
 > **Authors:** Sentinel Research Team

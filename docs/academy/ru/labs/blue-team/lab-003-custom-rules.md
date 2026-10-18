@@ -23,8 +23,10 @@
 ## 1. Настройка
 
 ```bash
-pip install sentinel-ai
+pip install sentinel-llm-security
 ```
+
+> Имя `sentinel-ai` в PyPI принадлежит постороннему проекту, не устанавливайте его. `sentinel-llm-security` публикуется из этого репозитория; лабораторная не перепроверялась на его текущем релизе.
 
 ```rust
 use sentinel_core::engines::SentinelEngine;

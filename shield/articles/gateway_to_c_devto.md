@@ -7,6 +7,8 @@ cover_image:
 canonical_url:
 ---
 
+> **Historical document.** Written for the earlier SENTINEL platform. Engine counts, test counts and performance figures in it describe that time and are not current claims. See the repository [README](https://github.com/DmitrL-dev/AISecurity#readme) for what is maintained today.
+
 ## The Problem: Three Languages, One Brain
 
 I'm building [SENTINEL](https://github.com/DmitrL-dev/AISecurity) — an open-source AI security platform. Six months ago, my architecture looked like this:

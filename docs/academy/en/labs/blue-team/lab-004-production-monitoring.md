@@ -23,8 +23,10 @@ Set up production monitoring, alerting, and dashboards for SENTINEL in real depl
 ## 1. Setup
 
 ```bash
-pip install sentinel-ai prometheus-client structlog
+pip install sentinel-llm-security prometheus-client structlog
 ```
+
+> The PyPI name `sentinel-ai` belongs to an unrelated project; do not install it. `sentinel-llm-security` is published from this repository; this lab has not been revalidated against its current release.
 
 ```python
 from sentinel import scan, configure
@@ -441,7 +443,7 @@ print_score_box("Lab 004: Production Monitoring",
 
 ---
 
-## Certification Complete
+## Lab Series Complete
 
 After labs 001-004, you have covered:
 
@@ -450,7 +452,7 @@ After labs 001-004, you have covered:
 ✅ Custom rules  
 ✅ Production monitoring  
 
-**You are ready for SENTINEL Blue Team Certification!**
+**Next:** try the [self-check exams](../../self-check/index.md). No certificate is issued.
 
 ---
 

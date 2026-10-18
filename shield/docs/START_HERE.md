@@ -194,7 +194,7 @@ Shield> help
 | Все опции    | [CONFIGURATION.md](CONFIGURATION.md) |
 | CLI команды  | [CLI.md](CLI.md)                     |
 | Production   | [DEPLOYMENT.md](DEPLOYMENT.md)       |
-| Сертификация | [ACADEMY.md](ACADEMY.md)             |
+| Учебные курсы | [ACADEMY.md](ACADEMY.md)            |
 
 ---
 

@@ -9,7 +9,7 @@ description = "Python SDK for SENTINEL AI Firewall — sub-millisecond prompt in
 readme = "README.md"
 license = "Apache-2.0"
 requires-python = ">=3.9"
-authors = [{ name = "SENTINEL Team", email = "security@sentinel.dev" }]
+authors = [{ name = "SENTINEL Team" }]
 keywords = [
     "ai-security",
     "llm-security",
@@ -50,7 +50,7 @@ dev = [
 
 [project.urls]
 Homepage = "https://github.com/DmitrL-dev/AISecurity"
-Documentation = "https://sentinel.dev/docs/sdk/python"
+Documentation = "https://github.com/DmitrL-dev/AISecurity/tree/main/sentinel-sdk"
 Repository = "https://github.com/DmitrL-dev/AISecurity"
 Issues = "https://github.com/DmitrL-dev/AISecurity/issues"
 

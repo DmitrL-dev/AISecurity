@@ -1,0 +1,20 @@
+cff-version: 1.2.0
+message: "If you use this software or its documentation, please cite it using these metadata."
+title: "AISecurity"
+type: software
+authors:
+  - family-names: "Labintsev"
+    given-names: "Dmitry"
+repository-code: "https://github.com/DmitrL-dev/AISecurity"
+url: "https://dmitrl-dev.github.io/AISecurity/"
+license: Apache-2.0
+abstract: >-
+  An open-source lab for AI security: an English and Russian academy, a frozen
+  legacy Rust pattern core with Python bindings, a local evaluation tool (Guard Lab)
+  and research notes.
+keywords:
+  - ai-security
+  - llm-security
+  - prompt-injection
+  - agent-security
+  - education

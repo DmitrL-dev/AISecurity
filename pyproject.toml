@@ -5,7 +5,7 @@ build-backend = "hatchling.build"
 [project]
 name = "sentinel-llm-security"
 version = "5.0.0"
-description = "SENTINEL — AI Security Platform. 49 Rust Engines + Micro-Model Swarm. Defense, Offense, Framework."
+description = "SENTINEL — historical AI security research framework from the AISecurity lab."
 readme = "README.md"
 license = "Apache-2.0"
 requires-python = ">=3.9"

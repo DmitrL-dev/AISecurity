@@ -57,7 +57,7 @@
 
 | Doc                                             | Content        |
 | ----------------------------------------------- | -------------- |
-| [Academy](ACADEMY.md)                           | Certifications |
+| [Academy](ACADEMY.md)                           | Course material (no certification) |
 | [Labs](academy/LABS.md)                         | Hands-on       |
 | [Exam Bank](academy/EXAM_BANK.md)               | Study          |
 | [Student Handbook](academy/STUDENT_HANDBOOK.md) | Guide          |
@@ -78,8 +78,8 @@
 **"How do I deploy to Kubernetes?"**
 → [K8s Manifests](../k8s/README.md)
 
-**"How do I get certified?"**
-→ [SENTINEL Academy](ACADEMY.md)
+**"Where is the course material?"**
+→ [SENTINEL Academy](ACADEMY.md) (historical, no certification)
 
 ---
 

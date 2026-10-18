@@ -109,7 +109,7 @@ distributor.upload_confluence(
 ### Следующие шаги
 
 - **[Expert Path](../expert/)** — Research, Strange Math, contributions
-- **Certification** — SENTINEL Certified Practitioner
+- **[Экзамены для самопроверки](../../self-check/index.md)** — проверка понимания (сертификат не выдаётся)
 
 ---
 

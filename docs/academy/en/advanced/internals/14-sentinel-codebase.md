@@ -38,7 +38,7 @@ sentinel-community/
 
 | Module | Language | Purpose |
 |--------|----------|---------|
-| `sentinel-core.engines` | Rust | 49 detection engines |
+| `sentinel-core.engines` | Rust | Pattern detection engines |
 | `sentinel-core.bindings` | Rust/PyO3 | Python bindings |
 | `brain.pipeline` | Python | Engine orchestration |
 | `shield.core` | C | DMZ gateway |

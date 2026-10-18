@@ -4,9 +4,8 @@
 
 ## Install
 
-```bash
-pip install micro-swarm
-```
+`micro-swarm` is **not published on PyPI**: `pip install micro-swarm` does not install
+this code. The source lives in this directory; building it has not been revalidated.
 
 ## Quick Start
 

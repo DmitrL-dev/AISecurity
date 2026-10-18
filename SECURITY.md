@@ -6,6 +6,10 @@
 
 ### Private Disclosure
 
+If the repository's **Security** tab offers **Report a vulnerability**, use GitHub
+private vulnerability reporting. Otherwise use the contacts below. Never include live
+credentials or other people's data in a report; describe where they are instead.
+
 **Email:** chg@live.ru
 
 **Telegram:** [@DmLabincev](https://t.me/DmLabincev)
@@ -17,9 +21,11 @@
 - Potential impact
 - Your suggested fix (optional)
 
-### Response Timeline
+### Response targets
 
-| Stage | Timeframe |
+Best-effort targets for a small team, not a service-level guarantee.
+
+| Stage | Target |
 |-------|-----------|
 | Acknowledgment | 48 hours |
 | Initial assessment | 1 week |
@@ -78,7 +84,7 @@ This security policy covers:
 
 | Component | Language | Notes |
 |-----------|----------|-------|
-| [sentinel-core](./sentinel-core) | Rust | 61 detection engines — core attack surface |
+| [sentinel-core](./sentinel-core) | Rust | Public pattern core (frozen legacy snapshot) |
 | [brain](./src/brain) | Python | API backend — network-facing |
 | [shield](./shield) | C11 | DMZ — memory safety critical |
 | [immune](./immune) | C | EDR — kernel-level, highest severity |

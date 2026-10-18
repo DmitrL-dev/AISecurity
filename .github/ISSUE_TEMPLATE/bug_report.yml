@@ -1,0 +1,48 @@
+name: Bug or broken instructions
+description: Code, a lab or an install path does not work as documented.
+labels: ["bug"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Please do **not** include secrets, API keys, customer prompts, private corpora or real
+        attack payloads. Use the smallest synthetic example that reproduces the problem.
+        Security vulnerabilities and exposed credentials go through
+        [SECURITY.md](https://github.com/DmitrL-dev/AISecurity/blob/main/SECURITY.md), not public issues.
+  - type: input
+    id: component
+    attributes:
+      label: Component or page
+      description: Path or URL, for example tools/guard-lab or docs/academy/en/index.md
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: What you expected
+    validations:
+      required: true
+  - type: textarea
+    id: actual
+    attributes:
+      label: What happened
+      description: Exact error text, with any secrets removed first.
+    validations:
+      required: true
+  - type: textarea
+    id: reproduction
+    attributes:
+      label: Smallest synthetic reproduction
+      render: shell
+  - type: input
+    id: environment
+    attributes:
+      label: Environment
+      description: OS, architecture, Python and Rust versions, commit SHA
+  - type: checkboxes
+    id: hygiene
+    attributes:
+      label: Before submitting
+      options:
+        - label: This report contains no secrets, credentials, customer data or real attack payloads.
+          required: true

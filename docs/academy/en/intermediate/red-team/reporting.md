@@ -93,7 +93,7 @@ Congratulations on completing the **Mid-Level Path**!
 ### Next Steps
 
 - **[Expert Path](../expert/en/)** — Research, Strange Math, contributions
-- **Certification** — SENTINEL Certified Practitioner
+- **[Self-check exams](../../self-check/index.md)** — test your understanding (no certificate is issued)
 
 ---
 

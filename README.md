@@ -1,10 +1,14 @@
 # AISecurity
 
-**[Spectorn — live AI protection](https://spectorn.ai/)** · [Explore the project](https://dmitrl-dev.github.io/AISecurity/) · [Academy EN](docs/academy/en/index.md) · [Академия RU](docs/academy/ru/index.md) · [Guard Lab](tools/guard-lab/README.md)
+**[Start with the academy →](docs/academy/en/index.md)** or **[try the 60-second agent decision room →](https://dmitrl-dev.github.io/AISecurity/agent-action-room.html)**
 
 ![AISecurity — Understand the attack. Build the defense. Learn, inspect, evaluate.](docs/images/aisecurity-banner.webp)
 
 **An open-source lab for AI security: learn the failure modes, inspect the defenses, and evaluate your own inputs.**
+
+[![CI](https://github.com/DmitrL-dev/AISecurity/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/DmitrL-dev/AISecurity/actions/workflows/ci.yml?query=branch%3Amain)
+[![Public core and Guard Lab regressions](https://github.com/DmitrL-dev/AISecurity/actions/workflows/agentic-red.yml/badge.svg?branch=main)](https://github.com/DmitrL-dev/AISecurity/actions/workflows/agentic-red.yml?query=branch%3Amain)
+[![License](https://img.shields.io/github/license/DmitrL-dev/AISecurity)](LICENSE)
 
 AI security is more than a filter on a prompt. It is the boundary between untrusted
 content, model behavior, tools, memory and the actions an application can take.
@@ -32,11 +36,11 @@ Pick one boundary and start reading — no installation required:
 
 ### Inspect the mechanisms
 
-Read the public Rust implementation, trace its architecture, explore red-team
-tooling and inspect the research behind the earlier platform. Use the code and
+Read the public Rust implementation, trace its architecture and inspect the
+research behind the earlier platform. Use the code and
 technical notes to understand how a defense works — and where its assumptions end.
 
-**[Native core](sentinel-core/)** · [Architecture](docs/ARCHITECTURE.md) · [Research notes](docs/rnd/) · [STRIKE research tools](strike/)
+**[Native core](sentinel-core/)** (frozen legacy snapshot) · [Architecture](docs/ARCHITECTURE.md) · [Research notes](docs/rnd/)
 
 ### Evaluate your inputs
 
@@ -64,8 +68,8 @@ Now replace the demo with your own labelled inputs. Read coverage and errors
 alongside the confusion counts; a small synthetic pass does not establish quality
 on your data. Guard Lab uses eight public pattern engines, not current Spectorn detectors.
 
-The pinned [public core 2.0.1](sentinel-core/CHANGELOG.md) includes actual decoding
-and metadata-query precision fixes. Its 48 authored regression cases document
+The pinned [public core 2.0.1](sentinel-core/CHANGELOG.md) is the final maintenance
+release of a frozen legacy snapshot. Its 48 authored regression cases document
 specific behavior; they are not an independent detection benchmark.
 
 ## From the lab to your application
@@ -121,4 +125,4 @@ expected, what happened and the smallest safe example that reproduces it. Start 
 [contribution guide](docs/CONTRIBUTING.md) and
 [open an issue](https://github.com/DmitrL-dev/AISecurity/issues).
 
-**[Documentation](docs/README.md)** · [Security reports](SECURITY.md) · [License](LICENSE)
+**[Documentation](docs/README.md)** · [Security reports](SECURITY.md) · [Code of conduct](CODE_OF_CONDUCT.md) · [How to cite](CITATION.cff) · [License](LICENSE)

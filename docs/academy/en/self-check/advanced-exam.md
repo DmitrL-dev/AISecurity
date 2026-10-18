@@ -1,9 +1,11 @@
-# 🥇 Advanced Certification Exam
+# 🥇 Advanced Self-Check Exam
+
+> **Self-check only.** These exams help you check your own understanding. AISecurity runs no certification programme: no certificate, badge, credential or verifiable record is issued, and a score here is not evidence of competence for an employer, client or auditor.
 
 > **Tracks Required:** 01-07 + Labs  
 > **Questions:** 80  
 > **Time:** 120 minutes  
-> **Passing Score:** 80%
+> **Target score:** 80%
 
 ---
 
@@ -388,20 +390,9 @@ New models require security testing before full deployment to catch regressions.
 
 | Score | Result |
 |-------|--------|
-| 80%+ | ✅ PASS - Advanced Certified |
+| 80%+ | ✅ Target reached |
 | 70-79% | ⚠️ Conditional - Review weak areas |
 | <70% | ❌ FAIL - Complete more training |
-
----
-
-## Certification Benefits
-
-Upon passing Advanced certification:
-
-- 🏆 "Advanced AI Security Professional" badge
-- 📜 Verifiable digital certificate
-- 🔗 LinkedIn certification
-- 🎓 Eligible for Expert exam
 
 ---
 
@@ -414,4 +405,4 @@ Upon passing Advanced certification:
 
 ---
 
-*AI Security Academy | Advanced Certification*
+*AI Security Academy | Advanced Self-Check*

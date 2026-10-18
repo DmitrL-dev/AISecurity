@@ -1,5 +1,7 @@
 # X/Twitter Campaign — January 3, 2026
 
+> **Historical document.** Written for the earlier SENTINEL platform. Engine counts, test counts and performance figures in it describe that time and are not current claims. See the repository [README](https://github.com/DmitrL-dev/AISecurity#readme) for what is maintained today.
+
 ## 📌 MAIN POST (Hook)
 
 ```

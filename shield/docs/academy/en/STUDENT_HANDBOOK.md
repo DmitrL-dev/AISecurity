@@ -1,5 +1,7 @@
 # SENTINEL Academy — Student Handbook
 
+> **Historical course material.** There is no certification programme. No certificates, badges, levels or instructor credentials are issued or recognised, and completing this material proves nothing to a third party. Use it for self-study only.
+
 ## Welcome
 
 You're starting your journey into AI Security.

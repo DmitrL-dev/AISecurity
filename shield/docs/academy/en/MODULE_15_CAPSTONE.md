@@ -1,5 +1,7 @@
 # SENTINEL Academy — Module 15
 
+> **Historical course material.** There is no certification programme. No certificates, badges, levels or instructor credentials are issued or recognised, and completing this material proves nothing to a third party. Use it for self-study only.
+
 ## Capstone Project
 
 _SSE Level | Duration: 8+ hours_

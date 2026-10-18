@@ -23,8 +23,10 @@
 ## 1. Настройка
 
 ```bash
-pip install sentinel-ai prometheus-client structlog
+pip install sentinel-llm-security prometheus-client structlog
 ```
+
+> Имя `sentinel-ai` в PyPI принадлежит постороннему проекту, не устанавливайте его. `sentinel-llm-security` публикуется из этого репозитория; лабораторная не перепроверялась на его текущем релизе.
 
 ```rust
 use sentinel_core::engines::SentinelEngine;
@@ -503,7 +505,7 @@ print_score_box(
 
 ---
 
-## Сертификация завершена
+## Серия лабораторных завершена
 
 После labs 001-004 вы охватили:
 
@@ -512,7 +514,7 @@ print_score_box(
 ✅ Кастомные правила  
 ✅ Production мониторинг  
 
-**Вы готовы к SENTINEL Blue Team Certification!**
+**Дальше:** попробуйте [экзамены для самопроверки](../../self-check/index.md). Сертификат не выдаётся.
 
 ---
 

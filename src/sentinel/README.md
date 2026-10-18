@@ -1,26 +1,29 @@
 # SENTINEL AI Security Framework
 
-> **The pytest of AI Security** — Defend and attack AI systems with 200+ detection engines.
+> Historical SENTINEL Python framework. Its claims and examples have not been revalidated.
 
-[![PyPI version](https://badge.fury.io/py/sentinel-ai.svg)](https://badge.fury.io/py/sentinel-ai)
 [![Python 3.9+](https://img.shields.io/badge/python-3.9+-blue.svg)](https://www.python.org/downloads/)
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![License: Apache-2.0](https://img.shields.io/badge/License-Apache--2.0-blue.svg)](../../LICENSE)
 
 ## Installation
 
 ```bash
 # Core framework
-pip install sentinel-ai
+pip install sentinel-llm-security
 
 # With CLI
-pip install sentinel-ai[cli]
+pip install "sentinel-llm-security[cli]"
 
 # With ML engines (torch, transformers)
-pip install sentinel-ai[ml]
+pip install "sentinel-llm-security[ml]"
 
 # Everything
-pip install sentinel-ai[full]
+pip install "sentinel-llm-security[full]"
 ```
+
+> Do not run `pip install sentinel-ai`: that PyPI name belongs to an unrelated project.
+> `sentinel-llm-security` is published from this repository's root `pyproject.toml`;
+> its current release has not been revalidated against this README.
 
 ## Quick Start
 
@@ -100,7 +103,7 @@ class MyCustomEngine(BaseEngine):
 sentinel/
 ├── core/           # BaseEngine, Finding, Pipeline
 ├── hooks/          # pluggy-based plugin system
-├── engines/        # 200+ built-in engines
+├── engines/        # built-in engines
 ├── cli/            # Command-line interface
 └── integrations/   # FastAPI, LangChain, etc.
 ```
@@ -117,7 +120,7 @@ sentinel/
 
 ## License
 
-MIT License — see [LICENSE](LICENSE) for details.
+Apache License 2.0, the licence of this repository. See [LICENSE](../../LICENSE).
 
 ## Links
 

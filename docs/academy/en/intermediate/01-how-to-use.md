@@ -31,7 +31,7 @@ docs/academy/en/
 ├── 06-advanced/            # Expert topics
 ├── 07-governance/          # Policy & compliance
 ├── 08-labs/                # Hands-on exercises
-└── certification/          # Assessment tracks
+└── self-check/             # Self-check exams (no certificate)
 ```
 
 ### Module Numbering
@@ -163,7 +163,7 @@ Complete curriculum for comprehensive knowledge.
 **Weeks 1-2**: Modules 00-02
 **Weeks 3-4**: Modules 03-04
 **Weeks 5-6**: Modules 05-06
-**Weeks 7-8**: Modules 07-08 + Certification
+**Weeks 7-8**: Modules 07-08 + self-check exams
 
 ---
 
@@ -251,8 +251,8 @@ After each module, test yourself:
 - Can you reproduce the code from memory?
 - Can you apply these techniques to new scenarios?
 
-### Certification
-Complete the certification track to validate knowledge:
+### Self-check
+Use the self-check exams to test your own understanding (no certificate is issued):
 - Written assessment (concepts)
 - Practical assessment (labs)
 - Scenario-based challenges
