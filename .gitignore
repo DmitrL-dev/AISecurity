@@ -112,10 +112,11 @@ assets/
 _archive/
 demos/
 tools/
-# Only the curated local evaluation package is public.
+# Only curated tools are public: the local evaluation package and the bounds calculator.
 !/tools/
 /tools/*
 !/tools/guard-lab/
+!/tools/eval-bounds/
 strike-force/
 benchmarks/
 monitoring/

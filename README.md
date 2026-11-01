@@ -1,31 +1,40 @@
 # AISecurity
 
-**[Start with the academy →](docs/academy/en/index.md)** or **[try the 60-second agent decision room →](https://dmitrl-dev.github.io/AISecurity/agent-action-room.html)**
+**Free, open tools to learn how AI applications get attacked, test a guard on your own data, and check what
+a security test result can actually prove.** Academy in English and Russian.
 
 ![AISecurity — Understand the attack. Build the defense. Learn, inspect, evaluate.](docs/images/aisecurity-banner.webp)
 
-**An open-source lab for AI security: learn the failure modes, inspect the defenses, and evaluate your own inputs.**
-
 [![CI](https://github.com/DmitrL-dev/AISecurity/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/DmitrL-dev/AISecurity/actions/workflows/ci.yml?query=branch%3Amain)
-[![Public core and Guard Lab regressions](https://github.com/DmitrL-dev/AISecurity/actions/workflows/agentic-red.yml/badge.svg?branch=main)](https://github.com/DmitrL-dev/AISecurity/actions/workflows/agentic-red.yml?query=branch%3Amain)
+[![eval-bounds](https://github.com/DmitrL-dev/AISecurity/actions/workflows/eval-bounds.yml/badge.svg?branch=main)](https://github.com/DmitrL-dev/AISecurity/actions/workflows/eval-bounds.yml?query=branch%3Amain)
 [![License](https://img.shields.io/github/license/DmitrL-dev/AISecurity)](LICENSE)
 
-AI security is more than a filter on a prompt. It is the boundary between untrusted
-content, model behavior, tools, memory and the actions an application can take.
-AISecurity brings the learning material, public implementation and experiments
-into one place — so you can study the problem and test the assumptions yourself.
+## Start with what you need
 
-## One lab. Three ways in.
+| You want to | Start here | What it takes |
+| --- | --- | --- |
+| Understand prompt injection, RAG, agent and memory attacks | [Academy in English](docs/academy/en/index.md) · [Академия на русском](docs/academy/ru/index.md) | A browser |
+| Decide whether an agent may act on content it retrieved | [60-second decision room](https://dmitrl-dev.github.io/AISecurity/agent-action-room.html) | One minute |
+| Know whether «none of 50 attacks got through» proves anything | [eval-bounds](tools/eval-bounds/README.md) | One command, Python only |
+| Measure a guard on your own labelled prompts | [Guard Lab](tools/guard-lab/README.md#install-linux-x86-64--python-311) | Linux x86-64, Python 3.11 |
+| Protect a live application | [Spectorn](https://spectorn.ai/) | The maintained product |
 
-### Learn the failure modes
+## Try it now
 
-Follow the **English or Russian academy** from prompt injection and OWASP basics
-to agent loops, tool permissions, memory, RAG, detection engineering and research.
-Explore the exercises alongside the source, not just a slide deck.
+```console
+$ python3 tools/eval-bounds/rate_bounds.py claim 0 50 --tau 0.01
+0/50 = 0.0000%; one-sided 95% bounds [0.0000%, 5.8155%]; tau 1.0000%: INCONCLUSIVE (with no event, 299 independent trials reach tau)
+```
 
-**[Start in English](docs/academy/en/index.md)** · **[Начать на русском](docs/academy/ru/index.md)** · [Hands-on labs](docs/academy/en/labs/index.md)
+Fifty clean runs are compatible with a 5.8% bypass rate. Before anyone quotes «blocks 99%», ask how many
+independent attacks stood behind it. [eval-bounds](tools/eval-bounds/README.md) gives the exact bound, the
+sample size a claim needs, and a paired test for «did the fix help».
 
-Pick one boundary and start reading — no installation required:
+## Learn the failure modes
+
+AI security is the boundary between untrusted content, model behavior, tools, memory and the actions an
+application can take. The academy walks it from prompt injection and the OWASP lists to agent loops, tool
+permissions, RAG, detection engineering and research, with exercises beside the source.
 
 | Boundary | English | Русский |
 | --- | --- | --- |
@@ -34,95 +43,64 @@ Pick one boundary and start reading — no installation required:
 | Model output becoming an action | [Tool-using agents](docs/academy/en/intermediate/agentic/tool-using-agents.md) | [Агенты с инструментами](docs/academy/ru/intermediate/agentic/tool-using-agents.md) |
 | Context stored for future use | [Agent memory](docs/academy/en/intermediate/agentic/memory.md) | [Память агентов](docs/academy/ru/intermediate/agentic/memory.md) |
 
-### Inspect the mechanisms
+[Hands-on labs](docs/academy/en/labs/index.md) · [Agent action evaluation checklist](docs/agent-action-evaluation.md)
 
-Read the public Rust implementation, trace its architecture and inspect the
-research behind the earlier platform. Use the code and
-technical notes to understand how a defense works — and where its assumptions end.
+## Test a guard on your own data
 
-**[Native core](sentinel-core/)** (frozen legacy snapshot) · [Architecture](docs/ARCHITECTURE.md) · [Research notes](docs/rnd/)
+**Guard Lab** takes labelled JSONL and reports misses, false positives and execution failures separately.
+Reports omit input text, text hashes and matched excerpts, and an error never quietly becomes a benign
+prediction. No account, API key or GPU; after installation, evaluations stay on your machine.
 
-### Evaluate your inputs
-
-**Guard Lab is the new local evaluation path.** Give it labelled JSONL and inspect
-misses, false positives and execution failures separately. Reports omit input text,
-text hashes and matched excerpts; errors never quietly become benign predictions.
-
-**[Install Guard Lab and run the demo](tools/guard-lab/README.md#install-linux-x86-64--python-311)** · [Input format](tools/guard-lab/README.md#evaluate-your-data) · [Report contract](tools/guard-lab/README.md#read-the-report)
-
-Linux x86-64 / Python 3.11 first. No account, API key or GPU. Installation downloads
-dependencies and builds native code; subsequent evaluations are local. The small
-synthetic demo checks plumbing — **not a benchmark** or a promise of detection quality.
-
-After installation, run `guard-lab --demo`. An excerpt from the four synthetic inputs:
-
-```json
-{
-  "test_records": 4,
-  "counts": {"tp": 2, "tn": 2, "fp": 0, "fn": 0, "errors": 0},
-  "synthetic_demo": true
-}
+```bash
+guard-lab --demo
 ```
 
-Now replace the demo with your own labelled inputs. Read coverage and errors
-alongside the confusion counts; a small synthetic pass does not establish quality
-on your data. Guard Lab uses eight public pattern engines, not current Spectorn detectors.
+The demo checks the plumbing on four synthetic inputs; it is not a benchmark. Replace it with your own
+labelled prompts and read coverage and errors alongside the confusion counts. Guard Lab uses eight public
+pattern engines, not Spectorn's current detectors. [Install and run →](tools/guard-lab/README.md)
 
-The pinned [public core 2.0.1](sentinel-core/CHANGELOG.md) is the final maintenance
-release of a frozen legacy snapshot. Its 48 authored regression cases document
-specific behavior; they are not an independent detection benchmark.
+## Protect a live application
 
-## From the lab to your application
+**[Spectorn](https://spectorn.ai/)** is the maintained protection layer from the same team. It sits around
+prompts, model responses and agent actions, decides on every request, and records each verdict in a
+content-free audit. Choose your region on the site to see the current protection scope and access options.
 
-If an AI agent can change tickets, records or other external state, start with
-the [60-second decision room](https://dmitrl-dev.github.io/AISecurity/agent-action-room.html):
-would you let a retrieved support note turn a ticket closure into a refund?
-Then use the [agent action evaluation checklist](docs/agent-action-evaluation.md)
-to inspect your own workflow. Both examples are synthetic and disclose no
-private detection rules.
-
-**[Spectorn](https://spectorn.ai/)** is the current product for protection around
-prompts, model responses and agent workflows. Visit the site, choose your region,
-and check the current protection scope and access options.
-
-Use AISecurity to understand the boundaries and test your assumptions. Explore
-Spectorn for a maintained protection layer around your application. This repository is not a download
-of the commercial platform, its private corpora or its current detectors.
+This repository is not a download of the commercial platform, its private corpora or its current detectors.
+It is where we teach the problem and publish the tools to check anyone's claims about it, ours included.
 
 **[Open Spectorn →](https://spectorn.ai/)**
 
-## Open source. Clear boundaries.
+## What is in this repository
 
-Guard Lab and the public-core maintenance slice are the newly verified contributions.
-The remaining academy, engine catalogue and research remain available as historical
-resources. They are **not current Spectorn engines**
-or a newly certified production stack.
+| Part | Status |
+| --- | --- |
+| [Academy](docs/academy/en/index.md), English and Russian | Maintained |
+| [eval-bounds](tools/eval-bounds/README.md) | New, maintained, tested in CI |
+| [Guard Lab](tools/guard-lab/README.md) | Maintained |
+| [Public core 2.0.1](sentinel-core/) | Frozen legacy snapshot; 48 authored regression cases, not a detection benchmark |
+| Engine catalogue, research notes, older articles | Historical; earlier figures are not current performance claims |
 
 <details>
-<summary>Read scope, provenance and legacy notes</summary>
+<summary>Scope, provenance and safe use</summary>
 
-- Guard Lab evaluates inputs using **eight pattern engines** through the pinned,
-  already-public `EngineRegistry.analyze_patterns` endpoint. It is not a hosted
-  gateway, output guard or evaluation of the full legacy engine catalogue.
-- Older detection percentages, performance comparisons and installation routes
-  in the archive have not been revalidated by this contribution. Treat them as
-  historical reports, not current performance claims.
-- The native worker has process and resource limits; it is not a sandbox for
-  untrusted native code. Read the [full contract](tools/guard-lab/README.md).
-- Use labs and red-team tools only on systems you own or are explicitly authorized
-  to test. Do not post real secrets, customer prompts or private corpora in issues.
-- Earlier Syntrex-era material and the [GoMCP organization](https://github.com/syntrex-lab/gomcp)
-  remain discoverable for historical context. The current product link is
-  [Spectorn](https://spectorn.ai/).
+- Guard Lab evaluates inputs through the pinned, already-public `EngineRegistry.analyze_patterns` endpoint. It
+  is not a hosted gateway, an output guard or an evaluation of the full legacy engine catalogue.
+- The native worker has process and resource limits; it is not a sandbox for untrusted native code. Read the
+  [full contract](tools/guard-lab/README.md).
+- Older detection percentages, performance comparisons and installation routes in the archive have not been
+  revalidated. Treat them as historical reports.
+- Use labs and red-team tools only on systems you own or are explicitly authorized to test. Do not post real
+  secrets, customer prompts or private corpora in issues.
+- Earlier Syntrex-era material and the [GoMCP organization](https://github.com/syntrex-lab/gomcp) remain
+  discoverable for historical context.
 
 </details>
 
-## Make the next experiment better
+## Contribute
 
-Useful contributions are concrete: a clearer lesson, a reproducible installation
-bug, an incorrect metric, or a minimal synthetic test case. Include what you
-expected, what happened and the smallest safe example that reproduces it. Start with the
-[contribution guide](docs/CONTRIBUTING.md) and
+Useful contributions are concrete: a clearer lesson, a reproducible installation bug, an incorrect number, or
+a minimal synthetic test case. Say what you expected, what happened and the smallest safe example that
+reproduces it. Start with the [contribution guide](docs/CONTRIBUTING.md) and
 [open an issue](https://github.com/DmitrL-dev/AISecurity/issues).
 
 **[Documentation](docs/README.md)** · [Security reports](SECURITY.md) · [Code of conduct](CODE_OF_CONDUCT.md) · [How to cite](CITATION.cff) · [License](LICENSE)
