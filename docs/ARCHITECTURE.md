@@ -1,5 +1,7 @@
 # Sentinel Architecture
 
+> **Historical design document.** It describes the earlier SENTINEL platform. The layer percentages and figures below are not revalidated measurements; do not cite them as detection rates. See the repository [README](https://github.com/DmitrL-dev/AISecurity#readme) for what is maintained today.
+
 ## Overview
 
 Sentinel is a defense-in-depth AI security platform. Each layer uses a fundamentally different detection paradigm, so a bypass for one layer doesn't help against the next.
@@ -17,7 +19,7 @@ Sentinel is a defense-in-depth AI security platform. Each layer uses a fundament
                                ▼
 ┌──────────────────────────────────────────────────────────────┐
 │                     SENTINEL-CORE (Rust)                      │
-│               61 Detection Engines · <1ms latency             │
+│             Pattern detection engines (historical)            │
 │                                                               │
 │  ┌─────────────┐ ┌─────────────┐ ┌─────────────┐            │
 │  │  L1: Core   │ │ L1: Gaps    │ │ L1: Output  │            │
@@ -65,7 +67,7 @@ Sentinel is a defense-in-depth AI security platform. Each layer uses a fundament
 ```
 250,000 attacks enter the system
     │
-    ├── L1  Sentinel Core (53 regex engines) ─── catches  36.0%
+    ├── L1  Sentinel Core (regex engines) ────── catches  36.0%
     │   Remaining: 160,090
     │
     ├── L2  Capability Proxy (IFC) ───────────── catches  20.3%
@@ -83,7 +85,7 @@ Sentinel is a defense-in-depth AI security platform. Each layer uses a fundament
     RESIDUAL: ~1.5% (theoretical floor)
 ```
 
-## Engine Categories (61 total)
+## Engine Categories (historical catalogue)
 
 | Category | Count | Examples |
 |----------|:-----:|---------|
@@ -101,11 +103,11 @@ Sentinel is a defense-in-depth AI security platform. Each layer uses a fundament
 
 | Component | Language | LOC | Purpose |
 |-----------|----------|-----|---------|
-| [sentinel-core](../sentinel-core) | Rust | ~25K | 61 detection engines, 1101 tests |
+| [sentinel-core](../sentinel-core) | Rust | ~25K | Public pattern core (frozen legacy snapshot) |
 | [brain](../src/brain) | Python | ~15K | gRPC backend, 32 modules |
 | [shield](../shield) | C11 | 36K+ | DMZ, 21 protocols, 103 tests |
 | [immune](../immune) | C | ~10K | EDR/XDR, eBPF, kernel-level |
-| [micro-swarm](../micro-swarm) | Python | ~5K | ML ensemble, F1=0.997 |
+| [micro-swarm](../micro-swarm) | Python | ~5K | ML ensemble (historical metrics not revalidated) |
 | [strike](../strike) | Python | ~20K | Red team, 39K+ payloads |
 | [gomcp](../gomcp) | Go | ~8K | MCP server, memory, causal graphs |
 
@@ -115,7 +117,7 @@ Sentinel is a defense-in-depth AI security platform. Each layer uses a fundament
 1. Input arrives at Shield (C11 DMZ)
 2. Shield validates protocol, rate limits, forwards to Brain
 3. Brain calls sentinel-core (Rust via PyO3) for detection
-4. sentinel-core runs all 61 engines in <1ms
+4. sentinel-core runs its pattern engines
 5. Results aggregated: detected/risk_score/matches/categories
 6. Brain applies policy: allow / block / flag for review
 7. Audit trail recorded

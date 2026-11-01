@@ -72,7 +72,7 @@ impl SentinelEngine {
         // Core engines (PatternMatcher trait)
         run_engine!(self.injection);
         run_engine!(self.jailbreak);
-        // ... 59 engines total
+        // ... more engines
     }
 }
 ```

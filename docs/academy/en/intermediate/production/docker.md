@@ -6,9 +6,9 @@
 
 ## Quick Start
 
-```bash
-curl -sSL https://raw.githubusercontent.com/DmitrL-dev/AISecurity/main/install.sh | bash
-```
+> The one-line install script was removed: it piped a remote script into a shell and
+> referenced content that no longer exists. The compose example below is historical
+> and has not been revalidated.
 
 ---
 

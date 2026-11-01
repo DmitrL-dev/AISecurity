@@ -84,11 +84,9 @@
 
 ---
 
-## 🏆 Certification
+## 🏆 Итог
 
-По завершении Expert Path + merged PR:
-
-**SENTINEL Expert Contributor** badge на GitHub
+Завершённый Expert Path и принятый PR остаются вашим вкладом в проект. Сертификаты и значки не выдаются.
 
 ---
 

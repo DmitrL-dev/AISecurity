@@ -21,8 +21,8 @@ docs/
 │   └── full-research.md                    Initial research compilation
 │
 ├── reference/                   Technical reference
-│   ├── engines-en.md            All 61 engines — English
-│   ├── engines.md               All 61 engines — Russian
+│   ├── engines-en.md            Historical engine catalogue — English
+│   ├── engines.md               Historical engine catalogue — Russian
 │   ├── api.md                   REST API reference
 │   ├── compliance.md            Compliance mapping
 │   ├── design-review.md         Design review process
@@ -42,7 +42,6 @@ docs/
 │
 ├── ARCHITECTURE.md              Platform architecture overview
 ├── CHANGELOG.md                 Version history
-├── COMPARISON.md                Competitive comparison
 ├── CONTRIBUTING.md              How to contribute
 └── owasp_agentic_mapping.md     OWASP Agentic AI coverage
 ```
@@ -54,7 +53,7 @@ docs/
 | Document | Description |
 |----------|-------------|
 | [Architecture](./ARCHITECTURE.md) | Platform components, detection cascade, data flow |
-| [Engine Reference (EN)](./reference/engines-en.md) | All 61 engines with categories and descriptions |
+| [Engine Reference (EN)](./reference/engines-en.md) | Historical engine catalogue with categories and descriptions |
 | [Sentinel Lattice Architecture](./rnd/2026-02-25-sentinel-lattice-architecture.md) | Full design of 7 novel security primitives |
 | [OWASP Mapping](./owasp_agentic_mapping.md) | Coverage of OWASP Agentic AI Top 10 |
 | [API Reference](./reference/api.md) | REST API endpoints and examples |
@@ -66,7 +65,7 @@ docs/
 
 For the newly verified local evaluation path, use the
 [Guard Lab installation guide](../tools/guard-lab/README.md#install-linux-x86-64--python-311).
-The root [QUICKSTART.md](../QUICKSTART.md) remains a legacy platform reference.
+The root [QUICKSTART.md](../QUICKSTART.md) is archived and points to the supported paths.
 
 ## Contact
 

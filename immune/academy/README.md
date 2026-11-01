@@ -1,10 +1,12 @@
 # 🧬 IMMUNE Academy
 
-> **Certification Program for Bio-Inspired Security Engineering**
+> **Historical course material.** There is no certification programme. No certificates, badges, levels or instructor credentials are issued or recognised, and completing this material proves nothing to a third party. Use it for self-study only.
+
+> **Course material for bio-inspired security engineering**
 
 ---
 
-## 🎓 Certification Levels
+## 🎓 Course Levels
 
 | Level | Name | Focus | Prerequisites |
 |-------|------|-------|---------------|
@@ -63,22 +65,6 @@
 
 - 🇷🇺 Русский
 - 🇬🇧 English
-
----
-
-## 📜 Certification Badge
-
-```
-┌─────────────────────────────────┐
-│   🧬 IMMUNE CERTIFIED           │
-│                                 │
-│   [NAME]                        │
-│   Level: [GREEN/YELLOW/RED/BLACK]│
-│   Date: [YYYY-MM-DD]            │
-│                                 │
-│   ID: IMA-XXXXXX                │
-└─────────────────────────────────┘
-```
 
 ---
 

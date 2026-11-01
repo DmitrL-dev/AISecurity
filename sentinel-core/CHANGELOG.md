@@ -1,5 +1,7 @@
 # Public core maintenance
 
+> **Frozen legacy snapshot.** 2.0.1 is the final entry; no further releases are planned.
+
 ## 2.0.1 — 2026-09-09
 
 This updates the public detector code, not just its evaluation wrapper. It is
@@ -7,16 +9,7 @@ not an export of the current commercial Spectorn engine or rule collection.
 
 ### Detection fixes
 
-- Percent decoding now assembles UTF-8 bytes correctly, including Cyrillic,
-  CJK and emoji. Malformed escape syntax no longer consumes a subsequent escape.
-- Base64 accepts readable UTF-8, preserves identifier fragments and replaces
-  each original token once. Its scan view tolerates excess padding and unused
-  nonzero bits so it does not miss text accepted by permissive decoders.
-- Numeric HTML entities decode valid Unicode scalars. Decoded fullwidth and
-  zero-width text passes through the existing canonicalization again.
-- Ordinary model-identity and capability questions are no longer independent
-  injection findings. This removes four discovery-only patterns, not the
-  surrounding scan: mixed requests still reach extraction and override rules.
+- Input-handling and precision fixes in the public pattern core.
 
 ### Reproducibility and boundaries
 
@@ -33,14 +26,7 @@ The API, eight-engine `analyze_patterns` composition, signatures loader and
 decision aggregation are unchanged. No model weights, private corpus, current
 commercial policy or new hosted service is included.
 
-Normalization is a derived scan view: one HTML, percent and base64 pass, followed
-by Unicode canonicalization. It is not a recursive decoder or a replacement for
-an application's parser. Invalid percent-decoded UTF-8 uses replacement
-characters; non-text base64 and impossible data lengths remain opaque. Match
-offsets are not a guaranteed mapping back to the original pre-normalized text. Do not use them for
-redaction of the original input. Pattern matches alone do not establish intent
-or authorize tool execution.
+Match offsets are not guaranteed to map back to the original input; do not use them
+to redact it. Pattern matches alone do not establish intent or authorize tool execution.
 
-References: [percent-encoded octets](https://www.rfc-editor.org/rfc/rfc3986#section-2.1),
-[base64 canonical encoding](https://www.rfc-editor.org/rfc/rfc4648#section-3.5),
-[Maturin version metadata](https://www.maturin.rs/metadata#dynamic-metadata).
+Reference: [Maturin version metadata](https://www.maturin.rs/metadata#dynamic-metadata).

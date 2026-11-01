@@ -195,11 +195,11 @@ nav:
       - "Lab 3 — Jailbreak Techniques": labs/red-team/lab-003-jailbreak-techniques.md
       - "Lab 4 — Agent Attacks": labs/red-team/lab-004-agent-attacks.md
 
-  - Certification:
-    - certification/index.md
-    - "Beginner Exam": certification/beginner-exam.md
-    - "Intermediate Exam": certification/intermediate-exam.md
-    - "Advanced Exam": certification/advanced-exam.md
+  - Self-check exams:
+    - self-check/index.md
+    - "Beginner Self-Check": self-check/beginner-exam.md
+    - "Intermediate Self-Check": self-check/intermediate-exam.md
+    - "Advanced Self-Check": self-check/advanced-exam.md
 
 # ============================================================
 # Language selector

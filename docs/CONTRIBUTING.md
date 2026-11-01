@@ -1,5 +1,7 @@
 # Contributing to Sentinel
 
+By participating you agree to the [Code of Conduct](../CODE_OF_CONDUCT.md).
+
 ## Quick Start
 
 1. Fork the repository

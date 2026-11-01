@@ -1,8 +1,10 @@
 # GoMCP v2
 
+> **Archived, incomplete snapshot.** This directory has no `go.mod` and no `cmd/` entry point, so `make build` and the commands below do not work from this tree. It is kept for historical reference and is not maintained here. GoMCP's earlier public home is [syntrex-lab/gomcp](https://github.com/syntrex-lab/gomcp); this repository does not vouch for its current state.
+
 High-performance Go-native MCP server for the RLM Toolkit. Replaces the Python FastMCP server with a single static binary — no interpreter, no virtualenv, no startup lag.
 
-Part of the [sentinel-community](https://github.com/sentinel-community) AI security platform.
+Part of the earlier SENTINEL platform.
 
 ## Features
 

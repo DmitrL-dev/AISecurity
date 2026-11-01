@@ -1,0 +1,40 @@
+name: Documentation error or unsupported claim
+description: A lesson is wrong or unclear, a link is dead, or a number or claim lacks evidence.
+labels: ["documentation"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Please do **not** include secrets, API keys, customer prompts, private corpora or real
+        attack payloads. Use the smallest synthetic example that reproduces the problem.
+        Security vulnerabilities and exposed credentials go through
+        [SECURITY.md](https://github.com/DmitrL-dev/AISecurity/blob/main/SECURITY.md), not public issues.
+  - type: input
+    id: location
+    attributes:
+      label: Page or file
+      description: Path or URL, with a heading or line number if possible
+    validations:
+      required: true
+  - type: textarea
+    id: problem
+    attributes:
+      label: What is wrong
+    validations:
+      required: true
+  - type: textarea
+    id: evidence
+    attributes:
+      label: Evidence or source
+      description: A primary source, a reproducible command, or why the claim cannot be checked.
+  - type: textarea
+    id: suggestion
+    attributes:
+      label: Suggested wording (optional)
+  - type: checkboxes
+    id: hygiene
+    attributes:
+      label: Before submitting
+      options:
+        - label: This report contains no secrets, credentials, customer data or real attack payloads.
+          required: true

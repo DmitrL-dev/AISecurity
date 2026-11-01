@@ -1,3 +1,5 @@
+# ARCHIVED: legacy SENTINEL platform file, kept for historical reference only.
+# It is not maintained or revalidated. See QUICKSTART.md for supported paths.
 version: '3.8'
 
 services:

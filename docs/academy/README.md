@@ -26,7 +26,7 @@ docs/academy/
 │   ├── intermediate/      ← 50+ lessons — attacks, defense, production
 │   ├── advanced/          ← 21 lessons — TDA, formal methods, engine dev
 │   ├── labs/              ← 8 labs — blue team & red team
-│   └── certification/     ← 3 exams
+│   └── self-check/        ← 3 self-check exams (no certificate)
 ├── ru/                    ← Русский (mirror)
 │   └── ... (same structure)
 ├── mkdocs.yml             ← MkDocs Material config
@@ -57,13 +57,15 @@ println!("Risk: {}", result.risk_score);       // 0.95
 println!("Categories: {:?}", result.categories); // ["injection", "jailbreak"]
 ```
 
-## Certification
+## Self-check exams
+
+No certificate, badge or credential is issued; the exams are for self-assessment only.
 
 | Exam | Prerequisites |
 |------|--------------|
-| [Beginner](en/certification/beginner-exam.md) | Beginner track |
-| [Intermediate](en/certification/intermediate-exam.md) | Intermediate track |
-| [Advanced](en/certification/advanced-exam.md) | Advanced track |
+| [Beginner](en/self-check/beginner-exam.md) | Beginner track |
+| [Intermediate](en/self-check/intermediate-exam.md) | Intermediate track |
+| [Advanced](en/self-check/advanced-exam.md) | Advanced track |
 
 ## Deploy
 

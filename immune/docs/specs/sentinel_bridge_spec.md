@@ -1,5 +1,7 @@
 # IMMUNE SENTINEL Bridge — Specification
 
+> **Historical document.** Written for the earlier SENTINEL platform. Engine counts, test counts and performance figures in it describe that time and are not current claims. See the repository [README](https://github.com/DmitrL-dev/AISecurity#readme) for what is maintained today.
+
 > **Version:** 1.0  
 > **Author:** SENTINEL Team  
 > **Date:** 2026-01-08  

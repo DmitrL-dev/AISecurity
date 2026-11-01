@@ -5,6 +5,8 @@ description: "Open source kernel-level security for DragonFlyBSD. What actually 
 tags: security, c, opensource, dragonflybsd
 ---
 
+> **Historical document.** Written for the earlier SENTINEL platform. Engine counts, test counts and performance figures in it describe that time and are not current claims. See the repository [README](https://github.com/DmitrL-dev/AISecurity#readme) for what is maintained today.
+
 # IMMUNE: Open Source EDR/XDR/MDR — Progress Report
 
 I'm building **SENTINEL IMMUNE** — an open source security platform in Pure C.

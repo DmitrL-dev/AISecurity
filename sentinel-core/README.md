@@ -1,10 +1,11 @@
 # SENTINEL Core
 
+> **Frozen legacy snapshot.** 2.0.1 is the last maintenance release of this public core. No further fixes, rule updates or security support are planned here, and it is not the current Spectorn detector collection. Use it to study and reproduce, not as a maintained dependency.
+
 Public AI-security pattern matching in Rust with Python bindings.
 
-**Maintenance release 2.0.1:** fixes UTF-8/encoded-input handling and false
-positives on ordinary model and tool questions. See the [change log](CHANGELOG.md)
-for the exact scope, test entry points and remaining limitations. This is the
+**Maintenance release 2.0.1** is the final one: input-handling and precision fixes.
+See the [change log](CHANGELOG.md) for test entry points and limitations. This is the
 public AISecurity core, not the current commercial Spectorn detector collection.
 
 For a pinned installation and content-free evaluation reports, start with
@@ -43,7 +44,6 @@ specific maintained API above instead of inferring support from this catalogue.
 
 - **Aho-Corasick** keyword pre-filtering (O(n))
 - **Tiered matching**: keywords → regex only for candidates
-- **Unicode normalization**: fullwidth, HTML entities, URL encoding, zero-width removal
 - **PyO3/maturin** Python bindings with type stubs
 
 ## Installation

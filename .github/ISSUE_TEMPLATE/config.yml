@@ -1,0 +1,5 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Report a security vulnerability or exposed credential
+    url: https://github.com/DmitrL-dev/AISecurity/blob/main/SECURITY.md
+    about: Do not open a public issue. Follow the private reporting steps in SECURITY.md.

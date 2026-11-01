@@ -17,16 +17,20 @@ else:
 
 ## Installation
 
-```bash
-pip install sentinel-shield
-```
+> **Not published on PyPI.** `sentinel-shield` is not a registered PyPI package, so
+> `pip install sentinel-shield` does not install this code. This SDK is unmaintained
+> source kept for reference.
+>
+> **No hosted endpoint.** The SDK's built-in default base URL points to a domain that
+> this repository does not document as operated by the project. Do not send prompts
+> or keys to it; pass an explicit `base_url` for a server you run.
 
 ## Quick Start
 
 ```python
 from sentinel_shield import Shield, ShieldConfig
 
-# Cloud API
+# Default base URL: read the installation note above before using it
 shield = Shield(api_key="sk-your-key")
 
 # Self-hosted

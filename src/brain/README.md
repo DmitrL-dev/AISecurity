@@ -19,7 +19,7 @@
 
 ## 🔥 What is SENTINEL Brain?
 
-SENTINEL Brain is the **detection core** of the SENTINEL AI Security Platform. It analyzes every prompt and response in real-time using 217 specialized engines.
+SENTINEL Brain is the **detection core** of the SENTINEL AI Security Platform. It analyzes every prompt and response in real-time using its detection engines.
 
 | Category | Engines | Detection |
 |----------|---------|-----------|
@@ -90,7 +90,7 @@ result = analyzer.analyze(prompt)
 
 ```
 src/brain/
-├── engines/         # 217 detection engines
+├── engines/         # detection engines
 │   ├── injection/   # Prompt injection detection
 │   ├── jailbreak/   # Jailbreak prevention
 │   ├── agentic/     # RAG/Agent/Tool protection

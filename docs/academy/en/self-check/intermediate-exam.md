@@ -1,9 +1,11 @@
-# 🥈 Intermediate Certification Exam
+# 🥈 Intermediate Self-Check Exam
+
+> **Self-check only.** These exams help you check your own understanding. AISecurity runs no certification programme: no certificate, badge, credential or verifiable record is issued, and a score here is not evidence of competence for an employer, client or auditor.
 
 > **Tracks Required:** 01-05  
 > **Questions:** 40  
 > **Time:** 60 minutes  
-> **Passing Score:** 75%
+> **Target score:** 75%
 
 ---
 
@@ -748,7 +750,7 @@ PII should be protected at all stages to comply with privacy regulations.
 
 | Score | Result |
 |-------|--------|
-| 75%+ | ✅ PASS - Intermediate Certified |
+| 75%+ | ✅ Target reached |
 | 65-74% | ⚠️ Conditional - Review and retry |
 | <65% | ❌ FAIL - Complete more training |
 
@@ -756,13 +758,12 @@ PII should be protected at all stages to comply with privacy regulations.
 
 ## Next Steps
 
-After passing:
+After reaching the target score:
 
-1. 🎖️ Add "Intermediate Certified" to your profile
-2. 📚 Continue to Advanced tracks (06-07)
-3. 🧪 Complete STRIKE and Blue Team labs
-4. 🏆 Prepare for Advanced Certification
+1. 📚 Continue to Advanced tracks (06-07)
+2. 🧪 Complete STRIKE and Blue Team labs
+3. 🏆 Prepare for the Advanced self-check
 
 ---
 
-*AI Security Academy | Intermediate Certification*
+*AI Security Academy | Intermediate Self-Check*

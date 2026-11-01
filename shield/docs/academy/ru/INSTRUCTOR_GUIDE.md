@@ -1,5 +1,7 @@
 # SENTINEL Academy — Instructor Guide
 
+> **Исторический учебный материал.** Программы сертификации нет. Сертификаты, значки, уровни и статус инструктора не выдаются и не признаются, а прохождение материала ничего не подтверждает для третьих лиц. Используйте его только для самостоятельного изучения.
+
 ## Introduction
 
 Welcome to the SENTINEL Academy Instructor Guide. This document provides everything you need to deliver effective AI security training using the SENTINEL Shield curriculum.

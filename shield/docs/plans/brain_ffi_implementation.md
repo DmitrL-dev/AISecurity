@@ -1,5 +1,7 @@
 # Brain FFI — Implementation Plan
 
+> **Historical document.** Written for the earlier SENTINEL platform. Engine counts, test counts and performance figures in it describe that time and are not current claims. See the repository [README](https://github.com/DmitrL-dev/AISecurity#readme) for what is maintained today.
+
 > **Priority:** P1  
 > **Estimated Effort:** 4-5 days  
 > **Goal:** Connect Python ML engines to C guards
