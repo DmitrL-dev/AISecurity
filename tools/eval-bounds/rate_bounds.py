@@ -20,7 +20,7 @@ makes the bound narrower than the evidence. Before/after comparisons on the same
     python3 rate_bounds.py plan --tau 0.003                 # trials needed if no event occurs
     python3 rate_bounds.py mcnemar ONLY_BEFORE ONLY_AFTER   # exact two-sided p for paired change
 
-Standard library only. Python 3.9+.
+Standard library only. Python 3.10+.
 """
 
 from __future__ import annotations

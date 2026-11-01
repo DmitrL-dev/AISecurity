@@ -3,6 +3,8 @@
 **Free, open tools to learn how AI applications get attacked, test a guard on your own data, and check what
 a security test result can actually prove.** Academy in English and Russian.
 
+Protecting a live application? **[Spectorn](https://spectorn.ai/)** is the maintained product from the same team.
+
 ![AISecurity — Understand the attack. Build the defense. Learn, inspect, evaluate.](docs/images/aisecurity-banner.webp)
 
 [![CI](https://github.com/DmitrL-dev/AISecurity/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/DmitrL-dev/AISecurity/actions/workflows/ci.yml?query=branch%3Amain)
@@ -57,7 +59,7 @@ guard-lab --demo
 
 The demo checks the plumbing on four synthetic inputs; it is not a benchmark. Replace it with your own
 labelled prompts and read coverage and errors alongside the confusion counts. Guard Lab uses eight public
-pattern engines, not Spectorn's current detectors. [Install and run →](tools/guard-lab/README.md)
+pattern engines, not current Spectorn engines. [Install and run →](tools/guard-lab/README.md)
 
 ## Protect a live application
 

@@ -14,9 +14,10 @@ jobs:
   test:
     runs-on: ubuntu-latest
     strategy:
+      fail-fast: false
       matrix:
         # The oldest version the README promises and a current one; standard library only.
-        python-version: ["3.9", "3.12"]
+        python-version: ["3.10", "3.13"]
     steps:
       - uses: actions/checkout@v4
         with:

@@ -8,7 +8,7 @@ $ python3 rate_bounds.py claim 0 50 --tau 0.01
 ```
 
 No. Fifty clean runs are compatible with a true bypass rate of 5.8%. To claim «under 1%» you need at least
-299 independent attacks and no bypass. One file, standard library only, Python 3.9+.
+299 independent attacks and no bypass. One file, standard library only, Python 3.10+.
 
 ## Three questions it answers
 
