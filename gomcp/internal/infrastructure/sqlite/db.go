@@ -2,6 +2,7 @@
 package sqlite
 
 import (
+	"context"
 	"database/sql"
 	"fmt"
 	"os"
@@ -65,6 +66,11 @@ func OpenMemory() (*DB, error) {
 		return nil, fmt.Errorf("enable foreign keys: %w", err)
 	}
 
+	// In-memory SQLite: each connection gets a SEPARATE database.
+	// Limit to 1 connection to ensure all queries see the same tables.
+	db.SetMaxOpenConns(1)
+	db.SetMaxIdleConns(1)
+
 	return &DB{db: db, path: ":memory:"}, nil
 }
 
@@ -102,4 +108,33 @@ func (d *DB) QueryRow(query string, args ...any) *sql.Row {
 	d.mu.RLock()
 	defer d.mu.RUnlock()
 	return d.db.QueryRow(query, args...)
+}
+
+// The Context variants below exist because every repository method here already receives a
+// context.Context and then dropped it on the floor: the wrapper offered no way to pass it down, so
+// a cancelled request kept its query running to completion. These forward it.
+//
+// Added rather than swapped in everywhere: changing the three methods above would touch every call
+// site in the package at once, which is a change to make deliberately and measure, not as a side
+// effect. New code takes the Context form; the rest keeps working unchanged.
+
+// ExecContext executes a query that doesn't return rows, honouring cancellation.
+func (d *DB) ExecContext(ctx context.Context, query string, args ...any) (sql.Result, error) {
+	d.mu.Lock()
+	defer d.mu.Unlock()
+	return d.db.ExecContext(ctx, query, args...)
+}
+
+// QueryContext executes a query that returns rows, honouring cancellation.
+func (d *DB) QueryContext(ctx context.Context, query string, args ...any) (*sql.Rows, error) {
+	d.mu.RLock()
+	defer d.mu.RUnlock()
+	return d.db.QueryContext(ctx, query, args...)
+}
+
+// QueryRowContext executes a query that returns at most one row, honouring cancellation.
+func (d *DB) QueryRowContext(ctx context.Context, query string, args ...any) *sql.Row {
+	d.mu.RLock()
+	defer d.mu.RUnlock()
+	return d.db.QueryRowContext(ctx, query, args...)
 }

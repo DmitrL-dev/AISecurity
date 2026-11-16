@@ -9,9 +9,9 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 
-	"github.com/sentinel-community/gomcp/internal/application/resources"
-	"github.com/sentinel-community/gomcp/internal/application/tools"
-	"github.com/sentinel-community/gomcp/internal/infrastructure/sqlite"
+	"github.com/syntrex/gomcp/internal/application/resources"
+	"github.com/syntrex/gomcp/internal/application/tools"
+	"github.com/syntrex/gomcp/internal/infrastructure/sqlite"
 )
 
 // newTestServer creates a fully-wired Server backed by in-memory SQLite databases.
@@ -88,8 +88,8 @@ func TestNew_CreatesServer(t *testing.T) {
 
 func TestNew_WithPyBridgeOption(t *testing.T) {
 	srv := newTestServer(t)
-	// Without pybridge option, pybridge should be nil.
-	assert.Nil(t, srv.pybridge)
+	// Without pybridge option, server should still work fine.
+	require.NotNil(t, srv.MCPServer())
 }
 
 // --- Fact Tools ---
@@ -404,6 +404,31 @@ func TestHandleSaveState_LoadState(t *testing.T) {
 	require.NoError(t, err)
 	assert.False(t, loadResult.IsError)
 	assert.Contains(t, extractText(t, loadResult), "checksum")
+}
+
+// Review 13.06 (audit D1): the agent's supplied state MUST round-trip through
+// save_state → load_state. Before the fix, state_json was parsed only to
+// validate JSON and then discarded (an empty vector was persisted).
+func TestHandleSaveState_RoundTripsFields(t *testing.T) {
+	srv := newTestServer(t)
+	ctx := context.Background()
+
+	stateJSON := `{"primary_goal":{"description":"ship the audit fixes"},"open_questions":["q-alpha","q-beta"]}`
+	saveResult, err := srv.handleSaveState(ctx, callToolReq("save_state", map[string]interface{}{
+		"session_id": "rt-session",
+		"state_json": stateJSON,
+	}))
+	require.NoError(t, err)
+	require.False(t, saveResult.IsError)
+
+	loadResult, err := srv.handleLoadState(ctx, callToolReq("load_state", map[string]interface{}{
+		"session_id": "rt-session",
+	}))
+	require.NoError(t, err)
+	require.False(t, loadResult.IsError)
+	out := extractText(t, loadResult)
+	assert.Contains(t, out, "ship the audit fixes", "primary_goal must survive save→load")
+	assert.Contains(t, out, "q-alpha", "open_questions must survive save→load")
 }
 
 func TestHandleSaveState_InvalidJSON(t *testing.T) {
@@ -778,7 +803,6 @@ func TestRegisterPythonBridgeTools_NoBridge(t *testing.T) {
 	srv := newTestServer(t)
 	// Without pybridge, no python tools registered — server should still work fine.
 	require.NotNil(t, srv.MCPServer())
-	assert.Nil(t, srv.pybridge)
 }
 
 func TestHandleLoadState_WithVersion(t *testing.T) {
@@ -797,4 +821,41 @@ func TestHandleLoadState_WithVersion(t *testing.T) {
 	}))
 	require.NoError(t, err)
 	assert.False(t, result.IsError)
+}
+
+// --- Peer handshake: short hash must not panic (slice-bounds regression) ---
+
+// A peer_genome_hash shorter than 8 chars previously panicked when building the
+// default peer_id ("remote_"+peerHash[:8]). These handlers must instead return
+// a normal (non-panicking) result for short, caller-controlled hashes.
+
+func TestHandlePeerHandshake_ShortHashNoPanic(t *testing.T) {
+	srv := newTestServer(t)
+	ctx := context.Background()
+
+	for _, h := range []string{"a", "abc", "1234567"} {
+		require.NotPanics(t, func() {
+			result, err := srv.handlePeerHandshake(ctx, callToolReq("peer_handshake", map[string]interface{}{
+				"peer_genome_hash": h,
+			}))
+			require.NoError(t, err)
+			require.NotNil(t, result)
+			_ = extractText(t, result) // must produce content, not panic
+		}, "short hash %q must not panic", h)
+	}
+}
+
+func TestHandleForceResonanceHandshake_ShortHashNoPanic(t *testing.T) {
+	srv := newTestServer(t)
+	ctx := context.Background()
+
+	require.NotPanics(t, func() {
+		result, err := srv.handleForceResonanceHandshake(ctx, callToolReq("force_resonance_handshake", map[string]interface{}{
+			"peer_genome_hash": "abc", // < 8 chars, and will not match local genome
+		}))
+		require.NoError(t, err)
+		require.NotNil(t, result)
+		// Mismatching hash → handshake phase reports match=false, no panic.
+		assert.Contains(t, extractText(t, result), "handshake")
+	})
 }

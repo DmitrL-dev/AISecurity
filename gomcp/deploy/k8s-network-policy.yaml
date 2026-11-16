@@ -1,0 +1,196 @@
+# SEC-011: K8s NetworkPolicy для изоляции SOC pods
+# Применяется: kubectl apply -f k8s-network-policy.yaml
+
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: soc-ingest-policy
+  namespace: sentinel
+  labels:
+    app: sentinel-soc
+    component: ingest
+    security: sec-011
+spec:
+  podSelector:
+    matchLabels:
+      app: sentinel-soc
+      component: ingest
+  policyTypes:
+    - Ingress
+    - Egress
+  ingress:
+    # Accept from external (sensors, dashboard)
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              name: sentinel
+        - podSelector:
+            matchLabels:
+              app: sentinel-sensor
+      ports:
+        - protocol: TCP
+          port: 9750
+  egress:
+    # Only to correlate (IPC)
+    - to:
+        - podSelector:
+            matchLabels:
+              component: correlate
+      ports:
+        - protocol: TCP
+          port: 19751
+    # DNS resolution
+    - to:
+        - namespaceSelector: {}
+      ports:
+        - protocol: UDP
+          port: 53
+        - protocol: TCP
+          port: 53
+
+---
+
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: soc-correlate-policy
+  namespace: sentinel
+  labels:
+    app: sentinel-soc
+    component: correlate
+    security: sec-011
+spec:
+  podSelector:
+    matchLabels:
+      app: sentinel-soc
+      component: correlate
+  policyTypes:
+    - Ingress
+    - Egress
+  ingress:
+    # Only from ingest
+    - from:
+        - podSelector:
+            matchLabels:
+              component: ingest
+      ports:
+        - protocol: TCP
+          port: 19751
+  egress:
+    # Only to respond (IPC)
+    - to:
+        - podSelector:
+            matchLabels:
+              component: respond
+      ports:
+        - protocol: TCP
+          port: 19752
+    # DNS
+    - to:
+        - namespaceSelector: {}
+      ports:
+        - protocol: UDP
+          port: 53
+
+---
+
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: soc-respond-policy
+  namespace: sentinel
+  labels:
+    app: sentinel-soc
+    component: respond
+    security: sec-011
+spec:
+  podSelector:
+    matchLabels:
+      app: sentinel-soc
+      component: respond
+  policyTypes:
+    - Ingress
+    - Egress
+  ingress:
+    # Only from correlate
+    - from:
+        - podSelector:
+            matchLabels:
+              component: correlate
+      ports:
+        - protocol: TCP
+          port: 19752
+  egress:
+    # HTTPS outbound for webhooks
+    - to: []
+      ports:
+        - protocol: TCP
+          port: 443
+    # DNS
+    - to:
+        - namespaceSelector: {}
+      ports:
+        - protocol: UDP
+          port: 53
+
+---
+
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: soc-immune-policy
+  namespace: sentinel
+  labels:
+    app: sentinel-soc
+    component: immune
+    security: sec-011
+spec:
+  podSelector:
+    matchLabels:
+      app: sentinel-soc
+      component: immune
+  policyTypes:
+    - Ingress
+    - Egress
+  ingress:
+    # Health checks from watchdog mesh
+    - from:
+        - podSelector:
+            matchLabels:
+              app: sentinel-soc
+      ports:
+        - protocol: TCP
+          port: 9760
+  egress:
+    # Watchdog mesh heartbeats to peers
+    - to:
+        - podSelector:
+            matchLabels:
+              app: sentinel-soc
+      ports:
+        - protocol: TCP
+          port: 9760
+        - protocol: TCP
+          port: 9770
+    # DNS
+    - to:
+        - namespaceSelector: {}
+      ports:
+        - protocol: UDP
+          port: 53
+
+---
+
+# Default deny all in sentinel namespace
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: default-deny-all
+  namespace: sentinel
+  labels:
+    security: sec-011
+spec:
+  podSelector: {}
+  policyTypes:
+    - Ingress
+    - Egress

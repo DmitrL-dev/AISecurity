@@ -14,6 +14,8 @@ type Primitive struct {
 
 // Crystal represents an indexed code file with extracted primitives.
 type Crystal struct {
+	TenantID        string      `json:"tenant_id,omitempty"`
+	ProjectID       string      `json:"project_id,omitempty"`
 	Path            string      `json:"path"` // file path (primary key)
 	Name            string      `json:"name"` // file basename
 	TokenCount      int         `json:"token_count"`

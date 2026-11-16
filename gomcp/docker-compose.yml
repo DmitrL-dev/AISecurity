@@ -1,0 +1,50 @@
+# ═══════════════════════════════════════════════════════
+#  SENTINEL SOC — Docker Compose Stack
+# ═══════════════════════════════════════════════════════
+# Usage:
+#   docker compose up -d           # start all services
+#   docker compose logs -f soc     # follow SOC logs
+#   docker compose down            # stop everything
+# ═══════════════════════════════════════════════════════
+
+services:
+  # ── SOC API Server ──────────────────────────────────
+  soc:
+    build:
+      context: .
+      dockerfile: Dockerfile.soc
+    image: sentinel-soc:latest
+    container_name: sentinel-soc
+    ports:
+      - "127.0.0.1:9100:9100"  # localhost only — the SOC admin endpoints must never be publicly bound
+    volumes:
+      - soc-data:/data
+    environment:
+      SOC_DB_PATH: /data/soc.db
+      SOC_PORT: "9100"
+      SOC_LOG_FORMAT: json
+      SOC_LOG_LEVEL: info
+      # OTEL_EXPORTER_OTLP_ENDPOINT: jaeger:4317  # Uncomment for tracing
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://localhost:9100/healthz"]
+      interval: 15s
+      timeout: 3s
+      start_period: 5s
+      retries: 3
+
+  # ── Jaeger (optional — tracing UI) ──────────────────
+  # Uncomment to enable distributed tracing visualization.
+  # jaeger:
+  #   image: jaegertracing/jaeger:2.5
+  #   container_name: sentinel-jaeger
+  #   ports:
+  #     - "16686:16686"   # Jaeger UI
+  #     - "4317:4317"     # OTLP gRPC
+  #   environment:
+  #     COLLECTOR_OTLP_ENABLED: "true"
+  #   restart: unless-stopped
+
+volumes:
+  soc-data:
+    driver: local

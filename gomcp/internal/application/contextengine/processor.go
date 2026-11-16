@@ -10,8 +10,9 @@ import (
 	"strings"
 	"time"
 
-	"github.com/sentinel-community/gomcp/internal/domain/memory"
-	"github.com/sentinel-community/gomcp/internal/infrastructure/sqlite"
+	"github.com/syntrex/gomcp/internal/domain/memory"
+	rlmscope "github.com/syntrex/gomcp/internal/domain/scope"
+	"github.com/syntrex/gomcp/internal/infrastructure/sqlite"
 )
 
 // InteractionProcessor processes unprocessed interaction log entries
@@ -19,17 +20,25 @@ import (
 type InteractionProcessor struct {
 	repo      *sqlite.InteractionLogRepo
 	factStore memory.FactStore
+	scope     rlmscope.Scope
 }
 
 // NewInteractionProcessor creates a new processor.
 func NewInteractionProcessor(repo *sqlite.InteractionLogRepo, store memory.FactStore) *InteractionProcessor {
-	return &InteractionProcessor{repo: repo, factStore: store}
+	return &InteractionProcessor{repo: repo, factStore: store, scope: rlmscope.Default()}
+}
+
+// WithScope binds recovered summaries to a tenant/project memory boundary.
+func (p *InteractionProcessor) WithScope(sc rlmscope.Scope) *InteractionProcessor {
+	p.scope = sc.Normalize()
+	return p
 }
 
 // ProcessStartup processes unprocessed entries from a previous (possibly crashed) session.
 // It creates an L1 "session summary" fact and marks all entries as processed.
 // Returns the summary text (empty if nothing to process).
 func (p *InteractionProcessor) ProcessStartup(ctx context.Context) (string, error) {
+	ctx = rlmscope.WithScope(ctx, p.scope)
 	entries, err := p.repo.GetUnprocessed(ctx)
 	if err != nil {
 		return "", fmt.Errorf("get unprocessed: %w", err)
@@ -46,6 +55,9 @@ func (p *InteractionProcessor) ProcessStartup(ctx context.Context) (string, erro
 	// Save as L1 fact (domain-level, not project-level)
 	fact := memory.NewFact(summary, memory.LevelDomain, "session-history", "interaction-processor")
 	fact.Source = "auto:interaction-processor"
+	// Summarised interaction content, which mixes what the user typed with what the agent read.
+	// Indistinguishable at this layer, so classified conservatively — see the distiller.
+	fact.Origin = memory.OriginExternal
 	if err := p.factStore.Add(ctx, fact); err != nil {
 		return "", fmt.Errorf("save session summary fact: %w", err)
 	}
@@ -65,6 +77,7 @@ func (p *InteractionProcessor) ProcessStartup(ctx context.Context) (string, erro
 // ProcessShutdown processes entries from the current session at graceful shutdown.
 // Similar to ProcessStartup but labels differently.
 func (p *InteractionProcessor) ProcessShutdown(ctx context.Context) (string, error) {
+	ctx = rlmscope.WithScope(ctx, p.scope)
 	entries, err := p.repo.GetUnprocessed(ctx)
 	if err != nil {
 		return "", fmt.Errorf("get unprocessed: %w", err)
@@ -80,6 +93,8 @@ func (p *InteractionProcessor) ProcessShutdown(ctx context.Context) (string, err
 
 	fact := memory.NewFact(summary, memory.LevelDomain, "session-history", "interaction-processor")
 	fact.Source = "auto:session-shutdown"
+	// Same reasoning as the interaction summary above.
+	fact.Origin = memory.OriginExternal
 	if err := p.factStore.Add(ctx, fact); err != nil {
 		return "", fmt.Errorf("save session summary fact: %w", err)
 	}

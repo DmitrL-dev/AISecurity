@@ -1,0 +1,54 @@
+basePath: /
+host: localhost:9100
+info:
+  contact: {}
+  description: Enterprise API for AI Firewall and Security Operations Center. Auto-generated
+    via Doc-as-Code.
+  title: SYNTREX Sentinel SOC API
+  version: "1.0"
+paths:
+  /api/v1/scan:
+    post:
+      consumes:
+      - application/json
+      description: Scans user inputs using Sentinel Lattice (Rust engine) to detect
+        jailbreaks, prompt injections, and Data Exfiltration attempts within 1ms.
+      parameters:
+      - description: Request body containing 'prompt' string
+        in: body
+        name: body
+        required: true
+        schema:
+          additionalProperties:
+            type: string
+          type: object
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Scan result with confidence scores and block flags
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "429":
+          description: Rate Limited
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "503":
+          description: Service Unavailable (Queue full)
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Inspect AI Prompt
+      tags:
+      - Scanner
+swagger: "2.0"

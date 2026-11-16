@@ -5,9 +5,9 @@ import (
 	"testing"
 	"time"
 
-	"github.com/sentinel-community/gomcp/internal/domain/memory"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
+	"github.com/syntrex/gomcp/internal/domain/memory"
 )
 
 func newTestFactRepo(t *testing.T) *FactRepo {
@@ -234,7 +234,7 @@ func TestFactRepo_RefreshTTL(t *testing.T) {
 
 func TestFactRepo_Stats(t *testing.T) {
 	repo := newTestFactRepo(t)
-	ctx := context.Background()
+	ctx := scopedCtx("local", "stats-test")
 
 	f1 := memory.NewFact("f1", memory.LevelProject, "backend", "")
 	f2 := memory.NewFact("f2", memory.LevelDomain, "backend", "")
@@ -246,6 +246,13 @@ func TestFactRepo_Stats(t *testing.T) {
 		require.NoError(t, repo.Add(ctx, f))
 	}
 
+	sessionFact := memory.NewFact("session stats must stay private", memory.LevelSnippet, "session-private", "")
+	sessionFact.Source = "genome"
+	sessionFact.Origin = memory.OriginExternal
+	sessionFact.IsStale = true
+	sessionFact.Embedding = []float64{0.5, 0.5}
+	require.NoError(t, repo.AddForSession(ctx, "session-one", sessionFact))
+
 	stats, err := repo.Stats(ctx)
 	require.NoError(t, err)
 	assert.Equal(t, 3, stats.TotalFacts)
@@ -255,6 +262,10 @@ func TestFactRepo_Stats(t *testing.T) {
 	assert.Equal(t, 1, stats.ByDomain["frontend"])
 	assert.Equal(t, 1, stats.StaleCount)
 	assert.Equal(t, 1, stats.WithEmbeddings)
+	assert.Equal(t, 0, stats.GeneCount)
+	assert.NotContains(t, stats.ByDomain, "session-private")
+	assert.NotContains(t, stats.ByLevel, memory.LevelSnippet)
+	assert.NotContains(t, stats.ByOrigin, memory.OriginExternal)
 }
 
 func TestFactRepo_EmbeddingRoundTrip(t *testing.T) {

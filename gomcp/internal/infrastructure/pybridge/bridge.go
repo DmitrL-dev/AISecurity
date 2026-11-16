@@ -8,6 +8,8 @@ import (
 	"encoding/json"
 	"fmt"
 	"os/exec"
+	"path/filepath"
+	"strings"
 	"sync"
 	"time"
 )
@@ -28,18 +30,27 @@ type Config struct {
 }
 
 // NewBridge creates a new Python bridge.
-func NewBridge(cfg Config) *Bridge {
+func NewBridge(cfg Config) (*Bridge, error) {
 	if cfg.PythonPath == "" {
 		cfg.PythonPath = "python"
 	}
 	if cfg.Timeout == 0 {
 		cfg.Timeout = 30 * time.Second
 	}
+
+	// Security audit v11: prevent path injection and traversal
+	if strings.Contains(cfg.PythonPath, "\x00") || strings.Contains(cfg.ScriptPath, "\x00") {
+		return nil, fmt.Errorf("invalid path: contains null byte")
+	}
+	if cfg.ScriptPath != "" && filepath.Ext(cfg.ScriptPath) != ".py" {
+		return nil, fmt.Errorf("invalid script path: must have .py extension")
+	}
+
 	return &Bridge{
 		pythonPath: cfg.PythonPath,
 		scriptPath: cfg.ScriptPath,
 		timeout:    cfg.Timeout,
-	}
+	}, nil
 }
 
 // Request represents a JSON-RPC request to the Python bridge.
@@ -140,4 +151,26 @@ func (b *Bridge) SemanticSearch(ctx context.Context, query string, limit int) ([
 		return nil, fmt.Errorf("unmarshal search results: %w", err)
 	}
 	return results, nil
+}
+
+// ClassificationResult holds the output of the safety classifier.
+type ClassificationResult struct {
+	Category      string             `json:"category"`
+	Confidence    float64            `json:"confidence"`
+	Probabilities map[string]float64 `json:"probabilities,omitempty"`
+	IsThreat      bool               `json:"is_threat"`
+	Severity      string             `json:"severity"`
+}
+
+// ClassifyPrompt analyzes text using the Safety Classifier v2 (16-class threat detection).
+func (b *Bridge) ClassifyPrompt(ctx context.Context, text string) (*ClassificationResult, error) {
+	result, err := b.Call(ctx, "classify_prompt", map[string]string{"text": text})
+	if err != nil {
+		return nil, err
+	}
+	var cls ClassificationResult
+	if err := json.Unmarshal(result, &cls); err != nil {
+		return nil, fmt.Errorf("unmarshal classification: %w", err)
+	}
+	return &cls, nil
 }

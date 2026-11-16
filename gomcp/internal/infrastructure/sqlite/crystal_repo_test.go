@@ -4,7 +4,7 @@ import (
 	"context"
 	"testing"
 
-	"github.com/sentinel-community/gomcp/internal/domain/crystal"
+	"github.com/syntrex/gomcp/internal/domain/crystal"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )

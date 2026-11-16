@@ -1,0 +1,53 @@
+# ═══════════════════════════════════════════════════════
+#  SENTINEL SOC — Production Container (Multi-stage)
+# ═══════════════════════════════════════════════════════
+# Build:  docker build -f Dockerfile.soc -t sentinel-soc .
+# Run:    docker run -p 9100:9100 -v soc-data:/data sentinel-soc
+# ═══════════════════════════════════════════════════════
+
+# ── Stage 1: Build ──────────────────────────────────────
+FROM golang:1.26.10-alpine@sha256:87c65a688975c0b1d4585d204874c45ca78354670e3a5f11368c5a492303d696 AS builder
+
+RUN apk add --no-cache git ca-certificates tzdata
+
+WORKDIR /src
+COPY go.mod go.sum ./
+RUN go mod download
+
+COPY . .
+
+# Build static binary (modernc/sqlite = pure Go, no CGO needed).
+RUN CGO_ENABLED=0 go build \
+    -ldflags="-s -w -X main.version=$(git describe --tags --always 2>/dev/null || echo dev)" \
+    -trimpath \
+    -o /sentinel-soc \
+    ./cmd/soc/
+
+# ── Stage 2: Runtime ────────────────────────────────────
+FROM alpine:3.21
+
+RUN apk add --no-cache ca-certificates tzdata \
+    && addgroup -S sentinel \
+    && adduser -S -G sentinel sentinel
+
+COPY --from=builder /sentinel-soc /usr/local/bin/sentinel-soc
+
+# Default data directory for SQLite + decision logs.
+RUN mkdir -p /data && chown sentinel:sentinel /data
+VOLUME /data
+
+# Run as non-root.
+USER sentinel
+
+# Default environment.
+ENV SOC_DB_PATH=/data/soc.db \
+    SOC_PORT=9100 \
+    SOC_LOG_FORMAT=json \
+    SOC_LOG_LEVEL=info
+
+EXPOSE 9100
+
+HEALTHCHECK --interval=15s --timeout=3s --start-period=5s --retries=3 \
+    CMD wget -qO- http://localhost:9100/healthz || exit 1
+
+ENTRYPOINT ["sentinel-soc"]

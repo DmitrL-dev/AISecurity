@@ -7,6 +7,9 @@ import (
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
+
+	"github.com/syntrex/gomcp/internal/domain/memory"
+	rlmscope "github.com/syntrex/gomcp/internal/domain/scope"
 )
 
 func setupInteractionRepo(t *testing.T) *InteractionLogRepo {
@@ -38,6 +41,57 @@ func TestInteractionLogRepo_Record(t *testing.T) {
 	require.NoError(t, err)
 	assert.Equal(t, 1, total)
 	assert.Equal(t, 1, unproc)
+}
+
+func TestInteractionLogRepo_RejectsExactProtocolTools(t *testing.T) {
+	repo := setupInteractionRepo(t)
+	for _, toolName := range memory.ExactProtocolToolNames() {
+		err := repo.Record(context.Background(), toolName, map[string]interface{}{
+			"content": "must not enter the legacy interaction log",
+		})
+		require.ErrorContains(t, err, "must not be recorded")
+	}
+	total, unprocessed, err := repo.Count(context.Background())
+	require.NoError(t, err)
+	require.Zero(t, total)
+	require.Zero(t, unprocessed)
+}
+
+func TestNewInteractionLogRepoQuarantinesHistoricalExactRows(t *testing.T) {
+	db, err := OpenMemory()
+	require.NoError(t, err)
+	t.Cleanup(func() { db.Close() })
+	_, err = db.Exec(`CREATE TABLE interaction_log (
+		id INTEGER PRIMARY KEY AUTOINCREMENT,
+		tenant_id TEXT NOT NULL DEFAULT 'local',
+		project_id TEXT NOT NULL DEFAULT 'default',
+		tool_name TEXT NOT NULL,
+		args_json TEXT,
+		timestamp TEXT NOT NULL,
+		processed INTEGER DEFAULT 0
+	)`)
+	require.NoError(t, err)
+	_, err = db.Exec(`INSERT INTO interaction_log
+		(tenant_id, project_id, tool_name, args_json, timestamp, processed)
+		VALUES
+		('local', 'project-alpha', 'add_session_fact', '{"content":"private marker"}', '2026-01-01T00:00:00Z', 0),
+		('local', 'project-alpha', 'search_session_facts', '{"query":"private marker"}', '2026-01-01T00:00:01Z', 0),
+		('local', 'project-alpha', 'health', '', '2026-01-01T00:00:02Z', 0)`)
+	require.NoError(t, err)
+
+	repo, err := NewInteractionLogRepo(db)
+	require.NoError(t, err)
+	ctx := rlmscope.WithScope(context.Background(), rlmscope.New("local", "project-alpha"))
+	entries, err := repo.GetUnprocessed(ctx)
+	require.NoError(t, err)
+	require.Len(t, entries, 1)
+	require.Equal(t, "health", entries[0].ToolName)
+
+	var quarantined int
+	err = db.QueryRow(`SELECT COUNT(*) FROM interaction_log
+		WHERE tool_name IN ('add_session_fact', 'search_session_facts') AND processed = 1`).Scan(&quarantined)
+	require.NoError(t, err)
+	require.Equal(t, 2, quarantined, "historical exact rows must remain as processed audit records")
 }
 
 func TestInteractionLogRepo_Record_EmptyArgs(t *testing.T) {

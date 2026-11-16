@@ -1,0 +1,53 @@
+# ── Binaries / build artifacts ───────────────────────────────────────────────
+/gomcp
+/syntrex-soc
+/soc
+/sidecar
+/immune
+/bin/
+/dist/
+*.exe
+*.dll
+*.so
+*.dylib
+
+# ── Tests / coverage ─────────────────────────────────────────────────────────
+*.test
+*.out
+coverage
+coverage.*
+
+# ── PRIVATE RUNTIME DATA — MUST NOT be published in the community release ─────
+# RLM long-term memory, decision/audit ledgers, and key material are runtime
+# state, not source. They must never ship in an OSS clone.
+.rlm/
+*.db
+*.db-wal
+*.db-shm
+*.sqlite
+*.sqlite3
+.sentinel_key
+*.key
+decisions.log
+*.audit
+zero_g.audit
+
+# ── Secrets / local environment ──────────────────────────────────────────────
+.env
+.env.*
+*.pem
+*.p12
+
+# ── OS / editor ──────────────────────────────────────────────────────────────
+.DS_Store
+Thumbs.db
+*.swp
+*~
+.idea/
+.vscode/
+
+# The repository root ignores these for an old desktop app and its tooling; GoMCP needs all of them.
+!main.go
+!go.mod
+!go.sum
+!tools/

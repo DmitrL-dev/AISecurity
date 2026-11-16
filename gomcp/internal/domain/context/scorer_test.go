@@ -5,7 +5,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/sentinel-community/gomcp/internal/domain/memory"
+	"github.com/syntrex/gomcp/internal/domain/memory"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
@@ -178,10 +178,19 @@ func TestRelevanceScorer_RankFacts(t *testing.T) {
 	require.Len(t, ranked, 3)
 	// Architecture fact should rank highest (L0 + keyword match + access count)
 	assert.Equal(t, facts[1].ID, ranked[0].Fact.ID)
-	// Scores should be descending
+	// Descending WITHIN each group, not across the whole list. Facts matching a keyword rank above
+	// facts matching none regardless of composite score, so a matching low-scoring fact legitimately
+	// sits above a non-matching high-scoring one — see RankFacts for why relevance is the
+	// precondition rather than one term of four.
 	for i := 1; i < len(ranked); i++ {
+		prevMatch := scorer.scoreKeywordMatch(ranked[i-1].Fact, keywords) > 0
+		thisMatch := scorer.scoreKeywordMatch(ranked[i].Fact, keywords) > 0
+		if prevMatch != thisMatch {
+			assert.True(t, prevMatch, "a non-matching fact ranked above a matching one")
+			continue
+		}
 		assert.GreaterOrEqual(t, ranked[i-1].Score, ranked[i].Score,
-			"facts should be sorted by score descending")
+			"within a group, facts should be sorted by score descending")
 	}
 }
 

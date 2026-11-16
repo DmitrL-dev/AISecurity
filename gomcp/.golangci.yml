@@ -1,0 +1,15 @@
+run:
+  timeout: 3m
+
+linters:
+  disable-all: true
+  enable:
+    - govet
+    - ineffassign
+    - staticcheck
+    - unused
+    - gosimple
+
+linters-settings:
+  govet:
+    shadow: false

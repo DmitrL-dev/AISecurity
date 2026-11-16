@@ -5,7 +5,7 @@ import (
 	"path/filepath"
 	"testing"
 
-	ctxdomain "github.com/sentinel-community/gomcp/internal/domain/context"
+	ctxdomain "github.com/syntrex/gomcp/internal/domain/context"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
