@@ -1,0 +1,69 @@
+# Shadow-AI enforcement plugin configuration (sample).
+#
+# This file wires the Shadow-AI Control Module to your EXISTING security stack
+# (firewall / EDR / web proxy) so detected unsanctioned-AI usage can be enforced
+# through vendor APIs you already operate.
+#
+# SECURITY — DO NOT put secrets in this file.
+#   Every secret value below references an environment variable via ${VAR}.
+#   The loader (LoadIntegrationConfig) expands these from the process environment
+#   at startup. An unset variable expands to "", which leaves that plugin
+#   un-credentialed; it is then rejected during init and the subsystem stays in
+#   honest detect_only mode (it detects + logs + emits SOC events, but does NOT
+#   claim to have blocked anything). Set `enabled: true` AND provide the creds to
+#   actually enforce.
+#
+# Point the server at this file with SHADOW_AI_CONFIG=/path/to/shadow_ai_plugins.yaml
+# (defaults to deploy/policies/shadow_ai_plugins.yaml).
+
+# fallback_strategy: behavior when no enforcement plugin is healthy/available.
+#   detect_only  — record + emit SOC event, take no blocking action (default, honest)
+#   alert_only   — same as detect_only today (reserved for future alert routing)
+fallback_strategy: detect_only
+
+# How often to health-check each enabled plugin's vendor API.
+health_check_interval: 30s
+
+plugins:
+  # ---- Check Point (firewall / NetworkEnforcer) ----
+  # Auth: session login to {api_url}/web_api/login using either an API key or
+  # user+password, returning an SID used as the X-chkp-sid header.
+  - type: firewall
+    vendor: checkpoint
+    enabled: false
+    config:
+      # Base URL of the Check Point Management API, e.g. https://mgmt.example.com
+      api_url: ${CHECKPOINT_API_URL}
+      # Provide EITHER api_key OR username+password (api_key takes precedence).
+      api_key: ${CHECKPOINT_API_KEY}
+      username: ${CHECKPOINT_USERNAME}
+      password: ${CHECKPOINT_PASSWORD}
+
+  # ---- CrowdStrike Falcon (EDR / EndpointController) ----
+  # Auth: OAuth2 client-credentials to {base_url}/oauth2/token -> bearer token.
+  # base_url MUST match the tenant cloud region:
+  #   us-1 -> https://api.crowdstrike.com
+  #   us-2 -> https://api.us-2.crowdstrike.com
+  #   eu-1 -> https://api.eu-1.crowdstrike.com
+  #   us-gov-1 -> https://api.laggar.gcw.crowdstrike.com
+  - type: edr
+    vendor: crowdstrike
+    enabled: false
+    config:
+      client_id: ${CROWDSTRIKE_CLIENT_ID}
+      client_secret: ${CROWDSTRIKE_CLIENT_SECRET}
+      base_url: ${CROWDSTRIKE_BASE_URL}
+
+  # ---- Zscaler Internet Access (web proxy / WebGateway) ----
+  # Auth: obfuscated-API-key login to https://zsapi.{cloud_name}/api/v1/authenticatedSession
+  # using username+password+obfuscated(api_key, timestamp); session held in a
+  # JSESSIONID cookie.
+  - type: proxy
+    vendor: zscaler
+    enabled: false
+    config:
+      # Cloud name only (e.g. zscalertwo, zscloud), NOT the full host.
+      cloud_name: ${ZSCALER_CLOUD}
+      api_key: ${ZSCALER_API_KEY}
+      username: ${ZSCALER_USERNAME}
+      password: ${ZSCALER_PASSWORD}

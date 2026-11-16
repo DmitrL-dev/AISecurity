@@ -5,11 +5,12 @@ import (
 	"encoding/json"
 	"testing"
 
-	"github.com/sentinel-community/gomcp/internal/domain/memory"
-	"github.com/sentinel-community/gomcp/internal/domain/session"
-	"github.com/sentinel-community/gomcp/internal/infrastructure/sqlite"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
+	"github.com/syntrex/gomcp/internal/domain/memory"
+	rlmscope "github.com/syntrex/gomcp/internal/domain/scope"
+	"github.com/syntrex/gomcp/internal/domain/session"
+	"github.com/syntrex/gomcp/internal/infrastructure/sqlite"
 )
 
 func newTestProvider(t *testing.T) (*Provider, *sqlite.DB, *sqlite.DB) {
@@ -67,6 +68,28 @@ func TestProvider_GetFacts_WithData(t *testing.T) {
 	// Should only return L0 facts.
 	assert.Contains(t, result, "Project uses Go")
 	assert.NotContains(t, result, "Domain fact")
+}
+
+func TestProvider_RequestScopeOverridesDefaultScope(t *testing.T) {
+	p, _, _ := newTestProvider(t)
+	defaultScope := rlmscope.New("tenant-a", "project-alpha")
+	betaScope := rlmscope.New("tenant-a", "project-beta")
+	p.WithScope(defaultScope)
+
+	alphaCtx := rlmscope.WithScope(context.Background(), defaultScope)
+	betaCtx := rlmscope.WithScope(context.Background(), betaScope)
+	require.NoError(t, p.factStore.Add(alphaCtx, memory.NewFact("alpha resource fact", memory.LevelProject, "scope", "")))
+	require.NoError(t, p.factStore.Add(betaCtx, memory.NewFact("beta resource fact", memory.LevelProject, "scope", "")))
+
+	defaultResult, err := p.GetFacts(context.Background())
+	require.NoError(t, err)
+	assert.Contains(t, defaultResult, "alpha resource fact")
+	assert.NotContains(t, defaultResult, "beta resource fact")
+
+	betaResult, err := p.GetFacts(betaCtx)
+	require.NoError(t, err)
+	assert.Contains(t, betaResult, "beta resource fact")
+	assert.NotContains(t, betaResult, "alpha resource fact")
 }
 
 func TestProvider_GetStats(t *testing.T) {

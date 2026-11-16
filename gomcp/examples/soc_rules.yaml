@@ -1,0 +1,38 @@
+# Syntrex SOC Custom Correlation Rules (§7.5)
+# Place this file at .rlm/soc_rules.yaml
+# These rules are loaded on startup and merged with built-in rules.
+
+rules:
+  # Detect API key spray attacks across multiple sensors.
+  - id: CUSTOM-001
+    name: API Key Spray Attack
+    required_categories: [auth_bypass, brute_force]
+    min_events: 5
+    time_window: 2m
+    severity: HIGH
+    kill_chain_phase: Reconnaissance
+    mitre_mapping: [T1110, T1110.001]
+    description: "5+ auth bypass or brute force events within 2 minutes indicates credential spray."
+    cross_sensor: true
+
+  # Detect prompt injection evolving into data exfiltration.
+  - id: CUSTOM-002
+    name: Injection-to-Exfil Pipeline
+    required_categories: [prompt_injection, exfiltration]
+    min_events: 2
+    time_window: 15m
+    severity: CRITICAL
+    kill_chain_phase: Exfiltration
+    mitre_mapping: [T1059.007, T1041]
+    description: "Prompt injection followed by exfiltration within 15 minutes — potential data theft pipeline."
+
+  # Detect model poisoning attempts.
+  - id: CUSTOM-003
+    name: Model Poisoning
+    required_categories: [data_poisoning, model_manipulation]
+    min_events: 3
+    time_window: 30m
+    severity: CRITICAL
+    kill_chain_phase: Impact
+    mitre_mapping: [T1565]
+    description: "Multiple data poisoning or model manipulation events — potential integrity attack."

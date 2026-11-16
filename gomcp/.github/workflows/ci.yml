@@ -1,0 +1,57 @@
+name: CI
+
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+    branches: [main]
+
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version: '1.25'
+      - name: golangci-lint
+        uses: golangci/golangci-lint-action@v4
+        with:
+          version: latest
+
+  test:
+    runs-on: ubuntu-latest
+    needs: lint
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version: '1.25'
+      - name: Run tests
+        run: go test ./... -count=1 -timeout 60s -race -coverprofile=coverage.out
+      - name: Coverage summary
+        run: go tool cover -func=coverage.out | tail -1
+
+  build:
+    runs-on: ubuntu-latest
+    needs: test
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version: '1.25'
+      - name: Build all
+        run: go build ./...
+      - name: Cross-build Linux amd64
+        run: CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build ./...
+      - name: Cross-build macOS arm64
+        run: CGO_ENABLED=0 GOOS=darwin GOARCH=arm64 go build ./...
+      - name: Cross-build Windows amd64
+        run: CGO_ENABLED=0 GOOS=windows GOARCH=amd64 go build ./...
+      - name: Build SOC binary
+        run: go build -o syntrex-soc ./cmd/soc/
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: syntrex-soc
+          path: syntrex-soc

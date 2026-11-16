@@ -5,7 +5,8 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/sentinel-community/gomcp/internal/domain/causal"
+	"github.com/syntrex/gomcp/internal/domain/causal"
+	rlmscope "github.com/syntrex/gomcp/internal/domain/scope"
 )
 
 // CausalRepo implements causal.CausalStore using SQLite.
@@ -27,6 +28,8 @@ func (r *CausalRepo) migrate() error {
 	stmts := []string{
 		`CREATE TABLE IF NOT EXISTS causal_nodes (
 			id TEXT PRIMARY KEY,
+			tenant_id TEXT NOT NULL DEFAULT 'local',
+			project_id TEXT NOT NULL DEFAULT 'default',
 			node_type TEXT NOT NULL,
 			content TEXT NOT NULL,
 			created_at TEXT DEFAULT CURRENT_TIMESTAMP,
@@ -34,6 +37,8 @@ func (r *CausalRepo) migrate() error {
 			metadata TEXT DEFAULT '{}'
 		)`,
 		`CREATE TABLE IF NOT EXISTS causal_edges (
+			tenant_id TEXT NOT NULL DEFAULT 'local',
+			project_id TEXT NOT NULL DEFAULT 'default',
 			from_id TEXT NOT NULL,
 			to_id TEXT NOT NULL,
 			edge_type TEXT NOT NULL,
@@ -43,6 +48,9 @@ func (r *CausalRepo) migrate() error {
 			FOREIGN KEY (from_id) REFERENCES causal_nodes(id),
 			FOREIGN KEY (to_id) REFERENCES causal_nodes(id)
 		)`,
+		`CREATE INDEX IF NOT EXISTS idx_nodes_scope_type ON causal_nodes(tenant_id, project_id, node_type)`,
+		`CREATE INDEX IF NOT EXISTS idx_edges_scope_from ON causal_edges(tenant_id, project_id, from_id)`,
+		`CREATE INDEX IF NOT EXISTS idx_edges_scope_to ON causal_edges(tenant_id, project_id, to_id)`,
 		`CREATE INDEX IF NOT EXISTS idx_nodes_type ON causal_nodes(node_type)`,
 		`CREATE INDEX IF NOT EXISTS idx_nodes_session ON causal_nodes(session_id)`,
 		`CREATE INDEX IF NOT EXISTS idx_edges_from ON causal_edges(from_id)`,
@@ -53,17 +61,24 @@ func (r *CausalRepo) migrate() error {
 			return fmt.Errorf("exec migration: %w", err)
 		}
 	}
+	_, _ = r.db.Exec(`ALTER TABLE causal_nodes ADD COLUMN tenant_id TEXT NOT NULL DEFAULT 'local'`)
+	_, _ = r.db.Exec(`ALTER TABLE causal_nodes ADD COLUMN project_id TEXT NOT NULL DEFAULT 'default'`)
+	_, _ = r.db.Exec(`ALTER TABLE causal_edges ADD COLUMN tenant_id TEXT NOT NULL DEFAULT 'local'`)
+	_, _ = r.db.Exec(`ALTER TABLE causal_edges ADD COLUMN project_id TEXT NOT NULL DEFAULT 'default'`)
 	return nil
 }
 
 // AddNode inserts a causal node.
 func (r *CausalRepo) AddNode(ctx context.Context, node *causal.Node) error {
+	sc := rlmscope.FromContext(ctx)
+	node.TenantID = sc.TenantID
+	node.ProjectID = sc.ProjectID
 	if err := node.Validate(); err != nil {
 		return fmt.Errorf("validate node: %w", err)
 	}
-	_, err := r.db.Exec(`INSERT INTO causal_nodes (id, node_type, content, created_at)
-		VALUES (?, ?, ?, ?)`,
-		node.ID, string(node.Type), node.Content, node.CreatedAt.Format(timeFormat),
+	_, err := r.db.Exec(`INSERT INTO causal_nodes (id, tenant_id, project_id, node_type, content, created_at)
+		VALUES (?, ?, ?, ?, ?, ?)`,
+		node.ID, node.TenantID, node.ProjectID, string(node.Type), node.Content, node.CreatedAt.Format(timeFormat),
 	)
 	if err != nil {
 		return fmt.Errorf("insert node: %w", err)
@@ -73,12 +88,18 @@ func (r *CausalRepo) AddNode(ctx context.Context, node *causal.Node) error {
 
 // AddEdge inserts a causal edge.
 func (r *CausalRepo) AddEdge(ctx context.Context, edge *causal.Edge) error {
+	sc := rlmscope.FromContext(ctx)
+	edge.TenantID = sc.TenantID
+	edge.ProjectID = sc.ProjectID
 	if err := edge.Validate(); err != nil {
 		return fmt.Errorf("validate edge: %w", err)
 	}
-	_, err := r.db.Exec(`INSERT INTO causal_edges (from_id, to_id, edge_type)
-		VALUES (?, ?, ?)`,
-		edge.FromID, edge.ToID, string(edge.Type),
+	if err := r.ensureNodesInScope(sc, edge.FromID, edge.ToID); err != nil {
+		return err
+	}
+	_, err := r.db.Exec(`INSERT INTO causal_edges (tenant_id, project_id, from_id, to_id, edge_type)
+		VALUES (?, ?, ?, ?, ?)`,
+		edge.TenantID, edge.ProjectID, edge.FromID, edge.ToID, string(edge.Type),
 	)
 	if err != nil {
 		return fmt.Errorf("insert edge: %w", err)
@@ -86,43 +107,71 @@ func (r *CausalRepo) AddEdge(ctx context.Context, edge *causal.Edge) error {
 	return nil
 }
 
+func (r *CausalRepo) ensureNodesInScope(sc rlmscope.Scope, ids ...string) error {
+	for _, id := range ids {
+		var count int
+		if err := r.db.QueryRow(`SELECT COUNT(*) FROM causal_nodes
+			WHERE id = ? AND tenant_id = ? AND project_id = ?`,
+			id, sc.TenantID, sc.ProjectID,
+		).Scan(&count); err != nil {
+			return fmt.Errorf("check causal node scope: %w", err)
+		}
+		if count == 0 {
+			return fmt.Errorf("causal node %s not found in scope %s", id, sc.String())
+		}
+	}
+	return nil
+}
+
 // GetChain builds a causal chain around a decision node matching the query.
 func (r *CausalRepo) GetChain(ctx context.Context, query string, maxDepth int) (*causal.Chain, error) {
+	sc := rlmscope.FromContext(ctx)
 	chain := &causal.Chain{}
 
 	// Find decision node matching query.
-	row := r.db.QueryRow(`SELECT id, node_type, content, created_at
-		FROM causal_nodes WHERE node_type = 'decision' AND content LIKE ? LIMIT 1`,
-		"%"+query+"%")
+	row := r.db.QueryRow(`SELECT id, tenant_id, project_id, node_type, content, created_at
+		FROM causal_nodes
+		WHERE tenant_id = ? AND project_id = ? AND node_type = 'decision' AND content LIKE ?
+		LIMIT 1`,
+		sc.TenantID, sc.ProjectID, "%"+query+"%")
 
-	var id, nodeType, content, createdAt string
-	err := row.Scan(&id, &nodeType, &content, &createdAt)
+	var id, tenantID, projectID, nodeType, content, createdAt string
+	err := row.Scan(&id, &tenantID, &projectID, &nodeType, &content, &createdAt)
 	if err != nil {
 		// No decision found — return empty chain.
 		return chain, nil
 	}
 
 	t, _ := time.Parse(timeFormat, createdAt)
-	chain.Decision = &causal.Node{ID: id, Type: causal.NodeType(nodeType), Content: content, CreatedAt: t}
+	chain.Decision = &causal.Node{
+		ID: id, TenantID: tenantID, ProjectID: projectID,
+		Type: causal.NodeType(nodeType), Content: content, CreatedAt: t,
+	}
 	chain.TotalNodes = 1
 
 	// Find all connected nodes via edges.
 	// Incoming edges (nodes that point TO the decision).
-	inRows, err := r.db.Query(`SELECT n.id, n.node_type, n.content, n.created_at, e.edge_type
+	inRows, err := r.db.Query(`SELECT n.id, n.tenant_id, n.project_id, n.node_type, n.content, n.created_at, e.edge_type
 		FROM causal_edges e JOIN causal_nodes n ON e.from_id = n.id
-		WHERE e.to_id = ?`, id)
+		WHERE e.tenant_id = ? AND e.project_id = ?
+		  AND n.tenant_id = ? AND n.project_id = ?
+		  AND e.to_id = ?`,
+		sc.TenantID, sc.ProjectID, sc.TenantID, sc.ProjectID, id)
 	if err != nil {
 		return nil, fmt.Errorf("query incoming edges: %w", err)
 	}
 	defer inRows.Close()
 
 	for inRows.Next() {
-		var nid, nt, nc, nca, et string
-		if err := inRows.Scan(&nid, &nt, &nc, &nca, &et); err != nil {
+		var nid, nTenant, nProject, nt, nc, nca, et string
+		if err := inRows.Scan(&nid, &nTenant, &nProject, &nt, &nc, &nca, &et); err != nil {
 			return nil, fmt.Errorf("scan incoming: %w", err)
 		}
 		tt, _ := time.Parse(timeFormat, nca)
-		node := &causal.Node{ID: nid, Type: causal.NodeType(nt), Content: nc, CreatedAt: tt}
+		node := &causal.Node{
+			ID: nid, TenantID: nTenant, ProjectID: nProject,
+			Type: causal.NodeType(nt), Content: nc, CreatedAt: tt,
+		}
 		chain.TotalNodes++
 
 		switch causal.EdgeType(et) {
@@ -147,21 +196,27 @@ func (r *CausalRepo) GetChain(ctx context.Context, query string, maxDepth int) (
 	}
 
 	// Outgoing edges (nodes that the decision points TO).
-	outRows, err := r.db.Query(`SELECT n.id, n.node_type, n.content, n.created_at, e.edge_type
+	outRows, err := r.db.Query(`SELECT n.id, n.tenant_id, n.project_id, n.node_type, n.content, n.created_at, e.edge_type
 		FROM causal_edges e JOIN causal_nodes n ON e.to_id = n.id
-		WHERE e.from_id = ?`, id)
+		WHERE e.tenant_id = ? AND e.project_id = ?
+		  AND n.tenant_id = ? AND n.project_id = ?
+		  AND e.from_id = ?`,
+		sc.TenantID, sc.ProjectID, sc.TenantID, sc.ProjectID, id)
 	if err != nil {
 		return nil, fmt.Errorf("query outgoing edges: %w", err)
 	}
 	defer outRows.Close()
 
 	for outRows.Next() {
-		var nid, nt, nc, nca, et string
-		if err := outRows.Scan(&nid, &nt, &nc, &nca, &et); err != nil {
+		var nid, nTenant, nProject, nt, nc, nca, et string
+		if err := outRows.Scan(&nid, &nTenant, &nProject, &nt, &nc, &nca, &et); err != nil {
 			return nil, fmt.Errorf("scan outgoing: %w", err)
 		}
 		tt, _ := time.Parse(timeFormat, nca)
-		node := &causal.Node{ID: nid, Type: causal.NodeType(nt), Content: nc, CreatedAt: tt}
+		node := &causal.Node{
+			ID: nid, TenantID: nTenant, ProjectID: nProject,
+			Type: causal.NodeType(nt), Content: nc, CreatedAt: tt,
+		}
 		chain.TotalNodes++
 
 		switch causal.EdgeType(et) {
@@ -185,21 +240,26 @@ func (r *CausalRepo) GetChain(ctx context.Context, query string, maxDepth int) (
 
 // Stats returns aggregate statistics about the causal store.
 func (r *CausalRepo) Stats(ctx context.Context) (*causal.CausalStats, error) {
+	sc := rlmscope.FromContext(ctx)
 	stats := &causal.CausalStats{
 		ByType: make(map[causal.NodeType]int),
 	}
 
-	row := r.db.QueryRow(`SELECT COUNT(*) FROM causal_nodes`)
+	row := r.db.QueryRow(`SELECT COUNT(*) FROM causal_nodes WHERE tenant_id = ? AND project_id = ?`,
+		sc.TenantID, sc.ProjectID)
 	if err := row.Scan(&stats.TotalNodes); err != nil {
 		return nil, err
 	}
 
-	row = r.db.QueryRow(`SELECT COUNT(*) FROM causal_edges`)
+	row = r.db.QueryRow(`SELECT COUNT(*) FROM causal_edges WHERE tenant_id = ? AND project_id = ?`,
+		sc.TenantID, sc.ProjectID)
 	if err := row.Scan(&stats.TotalEdges); err != nil {
 		return nil, err
 	}
 
-	rows, err := r.db.Query(`SELECT node_type, COUNT(*) FROM causal_nodes GROUP BY node_type`)
+	rows, err := r.db.Query(`SELECT node_type, COUNT(*) FROM causal_nodes
+		WHERE tenant_id = ? AND project_id = ? GROUP BY node_type`,
+		sc.TenantID, sc.ProjectID)
 	if err != nil {
 		return nil, err
 	}

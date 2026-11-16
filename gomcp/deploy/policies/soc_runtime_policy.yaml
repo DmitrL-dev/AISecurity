@@ -1,0 +1,97 @@
+version: "1.0"
+mode: audit  # audit | enforce | alert
+
+# SEC-002: eBPF Runtime Guard policies for SOC processes.
+# Each process has explicit rules defining allowed behavior.
+# Any deviation triggers alert (audit mode) or block (enforce mode).
+
+processes:
+  soc-ingest:
+    description: "HTTP ingest, auth, secret scanner, rate limit, persist"
+    allowed_exec: []  # No child processes
+    blocked_syscalls:
+      - ptrace
+      - process_vm_readv
+      - process_vm_writev
+      - kexec_load
+      - init_module
+      - finit_module
+    allowed_files:
+      - /var/lib/sentinel/data/*     # SQLite database
+      - /var/log/sentinel/*          # Logs
+      - /tmp/sentinel-soc/*          # IPC sockets
+    blocked_files:
+      - /etc/shadow
+      - /etc/passwd
+      - /root/*
+      - /home/*
+    allowed_network:
+      - "0.0.0.0:9750"              # Ingest HTTP port (listen)
+      - "127.0.0.1:19751"           # IPC to correlate
+    blocked_network:
+      - "10.0.0.0/8"                # Private ranges (no lateral)
+      - "192.168.0.0/16"
+    max_memory_mb: 512
+    max_cpu_percent: 25
+
+  soc-correlate:
+    description: "Correlation rules, incident creation, clustering — NO NETWORK"
+    allowed_exec: []
+    blocked_syscalls:
+      - ptrace
+      - execve
+      - fork
+      - clone3
+      - process_vm_readv
+      - socket           # No network at all
+      - connect
+      - bind
+      - listen
+    allowed_files:
+      - /var/lib/sentinel/data/*     # SQLite (read-only ideally)
+      - /var/lib/sentinel/rules/*    # Custom YAML rules
+      - /tmp/sentinel-soc/*          # IPC sockets
+    blocked_files:
+      - /etc/*
+      - /root/*
+      - /home/*
+      - /proc/*/mem
+    allowed_network: []             # NONE — IPC only via Unix socket
+    max_memory_mb: 1024
+    max_cpu_percent: 50
+
+  soc-respond:
+    description: "Playbook execution, webhook dispatch, audit log — HTTPS only"
+    allowed_exec: []
+    blocked_syscalls:
+      - ptrace
+      - execve
+      - fork
+      - clone3
+      - process_vm_readv
+    allowed_files:
+      - /var/lib/sentinel/audit/*    # Audit log (write)
+      - /tmp/sentinel-soc/*          # IPC sockets
+    blocked_files:
+      - /etc/*
+      - /root/*
+      - /home/*
+      - /var/lib/sentinel/data/*     # No DB access
+    allowed_network:
+      - "0.0.0.0/0:443"             # HTTPS outbound only (webhooks)
+    blocked_network:
+      - "10.0.0.0/8"
+      - "192.168.0.0/16"
+      - "172.16.0.0/12"
+    max_memory_mb: 256
+    max_cpu_percent: 10
+
+alerts:
+  on_violation:
+    - log_to_syslog
+    - send_to_soc_dashboard
+    - increment_circuit_breaker
+  on_critical:
+    - kill_process
+    - isolate_network
+    - notify_architect

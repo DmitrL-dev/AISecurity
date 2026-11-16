@@ -5,7 +5,7 @@ import (
 	"sort"
 	"strings"
 
-	"github.com/sentinel-community/gomcp/internal/domain/memory"
+	"github.com/syntrex/gomcp/internal/domain/memory"
 )
 
 // RelevanceScorer computes relevance scores for facts based on multiple signals:
@@ -50,13 +50,35 @@ func (rs *RelevanceScorer) ScoreFact(fact *memory.Fact, keywords []string, acces
 }
 
 // RankFacts scores and sorts all facts by relevance, filtering out archived ones.
-// Returns ScoredFacts sorted by score descending.
+//
+// Facts that match at least one query keyword rank above facts that match none, whatever the
+// composite scores say. The composite is a weighted sum, so topical relevance is one term out of
+// four and can be outvoted — with the shipped weights (level 0.30, keyword 0.30, recency 0.25,
+// frequency 0.15) a brand-new L0 fact matching NOTHING scores 0.55, while a week-old L2 fact
+// matching every keyword scores 0.47. The unrelated fact wins, and it wins by default
+// configuration rather than in some corner case.
+//
+// Relevance to the query is not one signal among four. It is the precondition; recency, level and
+// frequency are how you choose among facts that are already relevant. Ordering by the pair
+// (matches anything, score) says exactly that.
+//
+// Nothing is discarded, which matters: with no keywords — context injected without a query — every
+// fact is in the no-match group and the composite ordering applies unchanged, so L0 invariants are
+// still injected. The rule only forbids an unrelated fact from taking a slot from a related one.
 func (rs *RelevanceScorer) RankFacts(facts []*memory.Fact, keywords []string, accessCounts map[string]int) []*ScoredFact {
 	if len(facts) == 0 {
 		return nil
 	}
 
-	scored := make([]*ScoredFact, 0, len(facts))
+	// The match flag travels beside the fact rather than in a map keyed by ID: an empty or repeated
+	// ID would silently make two facts share one entry, and the symptom would be a ranking that is
+	// wrong only for some inputs.
+	type candidate struct {
+		scored   *ScoredFact
+		hasMatch bool
+	}
+
+	candidates := make([]candidate, 0, len(facts))
 	for _, f := range facts {
 		ac := 0
 		if accessCounts != nil {
@@ -68,13 +90,20 @@ func (rs *RelevanceScorer) RankFacts(facts []*memory.Fact, keywords []string, ac
 		}
 		sf := NewScoredFact(f, s)
 		sf.AccessCount = ac
-		scored = append(scored, sf)
+		candidates = append(candidates, candidate{scored: sf, hasMatch: rs.scoreKeywordMatch(f, keywords) > 0})
 	}
 
-	sort.Slice(scored, func(i, j int) bool {
-		return scored[i].Score > scored[j].Score
+	sort.SliceStable(candidates, func(i, j int) bool {
+		if candidates[i].hasMatch != candidates[j].hasMatch {
+			return candidates[i].hasMatch
+		}
+		return candidates[i].scored.Score > candidates[j].scored.Score
 	})
 
+	scored := make([]*ScoredFact, 0, len(candidates))
+	for _, c := range candidates {
+		scored = append(scored, c.scored)
+	}
 	return scored
 }
 

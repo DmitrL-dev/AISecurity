@@ -2,13 +2,16 @@ package cache
 
 import (
 	"context"
+	"encoding/json"
 	"os"
 	"path/filepath"
 	"testing"
 
-	"github.com/sentinel-community/gomcp/internal/domain/memory"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
+	"github.com/syntrex/gomcp/internal/domain/memory"
+	rlmscope "github.com/syntrex/gomcp/internal/domain/scope"
+	bolt "go.etcd.io/bbolt"
 )
 
 func newTestCache(t *testing.T) *BoltCache {
@@ -65,6 +68,32 @@ func TestBoltCache_EmptyCache(t *testing.T) {
 	got, err := cache.GetL0Facts(ctx)
 	require.NoError(t, err)
 	assert.Len(t, got, 0)
+}
+
+func TestBoltCacheQuarantinesSessionFactsIncludingHistoricalRows(t *testing.T) {
+	cache := newTestCache(t)
+	ctx := context.Background()
+
+	sessionFact := memory.NewFact("private session L0", memory.LevelProject, "session", "")
+	sessionFact.SessionID = "session-one"
+	require.NoError(t, cache.WarmUp(ctx, []*memory.Fact{sessionFact}))
+
+	got, err := cache.GetL0Facts(ctx)
+	require.NoError(t, err)
+	require.Empty(t, got, "new session facts must not enter the legacy hot cache")
+
+	sc := rlmscope.Default()
+	sessionFact.TenantID = sc.TenantID
+	sessionFact.ProjectID = sc.ProjectID
+	encoded, err := json.Marshal(sessionFact)
+	require.NoError(t, err)
+	require.NoError(t, cache.db.Update(func(tx *bolt.Tx) error {
+		return tx.Bucket(l0Bucket).Put(cacheKey(sc, sessionFact.ID), encoded)
+	}))
+
+	got, err = cache.GetL0Facts(ctx)
+	require.NoError(t, err)
+	require.Empty(t, got, "historical cached session rows must remain quarantined")
 }
 
 func TestBoltCache_RoundTrip_Preserves_Fields(t *testing.T) {

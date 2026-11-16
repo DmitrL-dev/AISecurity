@@ -53,6 +53,8 @@ func (et EdgeType) IsValid() bool {
 // Node represents a single node in a causal chain.
 type Node struct {
 	ID        string    `json:"id"`
+	TenantID  string    `json:"tenant_id,omitempty"`
+	ProjectID string    `json:"project_id,omitempty"`
 	Type      NodeType  `json:"type"`
 	Content   string    `json:"content"`
 	CreatedAt time.Time `json:"created_at"`
@@ -84,10 +86,12 @@ func (n *Node) Validate() error {
 
 // Edge represents a directed relationship between two nodes.
 type Edge struct {
-	ID     string   `json:"id"`
-	FromID string   `json:"from_id"`
-	ToID   string   `json:"to_id"`
-	Type   EdgeType `json:"type"`
+	ID        string   `json:"id"`
+	TenantID  string   `json:"tenant_id,omitempty"`
+	ProjectID string   `json:"project_id,omitempty"`
+	FromID    string   `json:"from_id"`
+	ToID      string   `json:"to_id"`
+	Type      EdgeType `json:"type"`
 }
 
 // NewEdge creates a new Edge with a generated ID.

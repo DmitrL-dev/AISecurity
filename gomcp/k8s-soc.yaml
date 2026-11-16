@@ -1,0 +1,143 @@
+# ═══════════════════════════════════════════════════════
+#  SENTINEL SOC — Kubernetes Deployment
+# ═══════════════════════════════════════════════════════
+# Deploy:  kubectl apply -f k8s-soc.yaml
+# ═══════════════════════════════════════════════════════
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: sentinel
+  labels:
+    app.kubernetes.io/part-of: sentinel-ai
+
+---
+# ── PersistentVolumeClaim for SQLite data ─────────────
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: soc-data
+  namespace: sentinel
+spec:
+  accessModes: [ReadWriteOnce]
+  resources:
+    requests:
+      storage: 10Gi
+
+---
+# ── Deployment ────────────────────────────────────────
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: sentinel-soc
+  namespace: sentinel
+  labels:
+    app: sentinel-soc
+    app.kubernetes.io/name: sentinel-soc
+    app.kubernetes.io/component: soc-api
+spec:
+  replicas: 1   # SQLite = single writer; use 1 replica.
+  selector:
+    matchLabels:
+      app: sentinel-soc
+  strategy:
+    type: Recreate  # Ensures only one pod writes to SQLite.
+  template:
+    metadata:
+      labels:
+        app: sentinel-soc
+    spec:
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 1000
+        runAsGroup: 1000
+        fsGroup: 1000
+      containers:
+        - name: soc
+          image: sentinel-soc:latest
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 9100
+              name: http
+              protocol: TCP
+          envFrom:
+            - configMapRef:
+                name: soc-config
+          env:
+            # SEC-003: Memory safety — 90% of container memory limit
+            - name: GOMEMLIMIT
+              value: "450MiB"
+            - name: SOC_AUDIT_DIR
+              value: /data/audit
+          # SEC-003: Container-level security hardening
+          securityContext:
+            readOnlyRootFilesystem: true
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop: ["ALL"]
+            seccompProfile:
+              type: Localhost
+              localhostProfile: profiles/soc-strict.json
+          volumeMounts:
+            - name: data
+              mountPath: /data
+            - name: tmp
+              mountPath: /tmp
+          resources:
+            requests:
+              cpu: 100m
+              memory: 256Mi
+            limits:
+              cpu: "1"
+              memory: 512Mi
+          livenessProbe:
+            httpGet:
+              path: /healthz
+              port: http
+            initialDelaySeconds: 5
+            periodSeconds: 15
+            timeoutSeconds: 3
+          readinessProbe:
+            httpGet:
+              path: /healthz
+              port: http
+            initialDelaySeconds: 3
+            periodSeconds: 10
+      volumes:
+        - name: data
+          persistentVolumeClaim:
+            claimName: soc-data
+        - name: tmp
+          emptyDir:
+            sizeLimit: 100Mi
+
+---
+# ── ConfigMap ─────────────────────────────────────────
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: soc-config
+  namespace: sentinel
+data:
+  SOC_DB_PATH: /data/soc.db
+  SOC_PORT: "9100"
+  SOC_LOG_FORMAT: json
+  SOC_LOG_LEVEL: info
+
+---
+# ── Service ──────────────────────────────────────────
+apiVersion: v1
+kind: Service
+metadata:
+  name: sentinel-soc
+  namespace: sentinel
+  labels:
+    app: sentinel-soc
+spec:
+  selector:
+    app: sentinel-soc
+  ports:
+    - port: 9100
+      targetPort: http
+      protocol: TCP
+      name: http
+  type: ClusterIP

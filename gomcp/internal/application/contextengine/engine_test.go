@@ -8,11 +8,12 @@ import (
 	"time"
 
 	"github.com/mark3labs/mcp-go/mcp"
-	"github.com/sentinel-community/gomcp/internal/domain/memory"
+	"github.com/syntrex/gomcp/internal/domain/memory"
+	rlmscope "github.com/syntrex/gomcp/internal/domain/scope"
 
-	ctxdomain "github.com/sentinel-community/gomcp/internal/domain/context"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
+	ctxdomain "github.com/syntrex/gomcp/internal/domain/context"
 )
 
 // --- Mock FactProvider ---
@@ -57,7 +58,48 @@ func (m *mockProvider) RecordAccess(factID string) {
 	m.accessed[factID]++
 }
 
+type mockBoostedProvider struct {
+	*mockProvider
+	boosts map[string]int
+}
+
+func (m *mockBoostedProvider) GetRelevantFactsWithBoost(_ context.Context, args map[string]interface{}) ([]*memory.Fact, map[string]int, error) {
+	facts, err := m.mockProvider.GetRelevantFacts(args)
+	return facts, m.boosts, err
+}
+
+// scopeCapturingProvider records the scope the engine threads into the boosted
+// provider — locking the per-request-scope wiring (regression: the context
+// engine previously ignored the request scope and used the pinned scope, so
+// project-A facts leaked into a project-B response).
+type scopeCapturingProvider struct {
+	gotScope string
+}
+
+func (p *scopeCapturingProvider) GetRelevantFacts(_ map[string]interface{}) ([]*memory.Fact, error) {
+	return nil, nil
+}
+func (p *scopeCapturingProvider) GetL0Facts() ([]*memory.Fact, error) { return nil, nil }
+func (p *scopeCapturingProvider) RecordAccess(_ string)               {}
+func (p *scopeCapturingProvider) GetRelevantFactsWithBoost(ctx context.Context, _ map[string]interface{}) ([]*memory.Fact, map[string]int, error) {
+	p.gotScope = rlmscope.FromContext(ctx).String()
+	return nil, nil, nil
+}
+
 // --- Engine tests ---
+
+func TestEngine_BuildContextScoped_ThreadsRequestScope(t *testing.T) {
+	// The proactive context must be built under the per-request scope (projB),
+	// not the engine's pinned scope (projA) — otherwise cross-project bleed.
+	prov := &scopeCapturingProvider{}
+	engine := New(ctxdomain.DefaultEngineConfig(), prov)
+	engine.WithScope(rlmscope.New("tenant-a", "project-alpha"))
+
+	ctx := rlmscope.WithScope(context.Background(), rlmscope.New("tenant-a", "project-beta"))
+	engine.buildContextScoped(ctx, "search_facts", map[string]interface{}{"query": "x"})
+
+	require.Equal(t, "tenant-a/project-beta", prov.gotScope)
+}
 
 func TestNewEngine(t *testing.T) {
 	cfg := ctxdomain.DefaultEngineConfig()
@@ -217,6 +259,77 @@ func TestEngine_AccessCountInfluencesRanking(t *testing.T) {
 	require.GreaterOrEqual(t, len(frame.Facts), 2)
 	// fact1 should rank higher due to frequency
 	assert.Equal(t, fact1.ID, frame.Facts[0].Fact.ID)
+}
+
+func TestEngine_RankingUsesTheDurableAccessCount(t *testing.T) {
+	// A fresh process ranking facts with history.
+	//
+	// The engine's own counter map is created empty in New(), so before the durable counter was read
+	// this test's expectation was unreachable: two facts, one used ninety times over months, scored
+	// identically on frequency because the map knew nothing about either. `hit_count` was in the
+	// database the whole time, written by TouchFact on every access and read by nobody.
+	//
+	// The frequency term is scaled against a ceiling of 100 accesses. A ceiling like that is a
+	// statement about history; without a durable count it could only ever be approached inside a single
+	// session, which is not how a memory server is used.
+	used := memory.NewFact("Architecture pattern A", memory.LevelDomain, "arch", "")
+	unused := memory.NewFact("Architecture pattern B", memory.LevelDomain, "arch", "")
+	used.HitCount = 90
+
+	provider := newMockProvider(used, unused)
+	cfg := ctxdomain.DefaultEngineConfig()
+	cfg.FrequencyWeight = 0.9
+	cfg.KeywordWeight = 0.01
+	cfg.RecencyWeight = 0.01
+	cfg.LevelWeight = 0.01
+	engine := New(cfg, provider)
+
+	frame := engine.BuildContext("test", map[string]interface{}{"content": "architecture pattern"})
+	require.GreaterOrEqual(t, len(frame.Facts), 2)
+	assert.Equal(t, used.ID, frame.Facts[0].Fact.ID,
+		"a fact with 90 recorded accesses must outrank one with none in a freshly started process")
+	assert.Equal(t, 90, frame.Facts[0].AccessCount,
+		"the count reported alongside the fact is the durable one, not this session's zero")
+}
+
+func TestEngine_ThisSessionsAccessesAddToTheStoredOnes(t *testing.T) {
+	// The two counters answer different questions and both matter: the stored one is history, the
+	// in-memory one is reinforcement inside the current conversation. Summing is what keeps a fact
+	// promoted by this session's use from being outranked by its own stale history — and what stops
+	// the durable count from wiping out the reinforcement the engine performs on every injection.
+	fact := memory.NewFact("Counted twice over", memory.LevelDomain, "arch", "")
+	fact.HitCount = 4
+	provider := newMockProvider(fact)
+	engine := New(ctxdomain.DefaultEngineConfig(), provider)
+
+	for i := 0; i < 3; i++ {
+		engine.recordAccessInternal(fact.ID)
+	}
+
+	frame := engine.BuildContext("test", map[string]interface{}{"content": "counted"})
+	require.NotEmpty(t, frame.Facts)
+	assert.Equal(t, 7, frame.Facts[0].AccessCount,
+		"four stored accesses plus three in this session is seven, not four and not three")
+}
+
+func TestEngine_BuildContext_UsesProviderBoosts(t *testing.T) {
+	fact1 := memory.NewFact("plain unrelated A", memory.LevelSnippet, "misc", "")
+	fact2 := memory.NewFact("plain unrelated B", memory.LevelSnippet, "misc", "")
+	provider := &mockBoostedProvider{
+		mockProvider: newMockProvider(fact1, fact2),
+		boosts:       map[string]int{fact2.ID: 50},
+	}
+
+	cfg := ctxdomain.DefaultEngineConfig()
+	cfg.KeywordWeight = 0
+	cfg.RecencyWeight = 0
+	cfg.LevelWeight = 0
+	cfg.FrequencyWeight = 1
+	engine := New(cfg, provider)
+
+	frame := engine.BuildContext("test", map[string]interface{}{"content": "nomatch"})
+	require.NotEmpty(t, frame.Facts)
+	assert.Equal(t, fact2.ID, frame.Facts[0].Fact.ID)
 }
 
 // --- Middleware tests ---
@@ -408,6 +521,44 @@ func TestMiddleware_NonSkipToolGetsContext(t *testing.T) {
 	require.NoError(t, err)
 	text := result.Content[0].(mcp.TextContent).Text
 	assert.Contains(t, text, "[MEMORY CONTEXT]")
+}
+
+func TestMiddlewareExactProtocolToolsBypassLoggingAndInjectionUnconditionally(t *testing.T) {
+	fact := memory.NewFact("legacy context must not enter exact JSON", memory.LevelProject, "legacy", "")
+	provider := newMockProvider(fact)
+	cfg := ctxdomain.DefaultEngineConfig()
+	cfg.SkipTools = []string{} // A local config must not be able to remove this isolation boundary.
+	cfg.BuildSkipSet()
+	engine := New(cfg, provider)
+	logger := &mockInteractionLogger{}
+	engine.SetInteractionLogger(logger)
+
+	const exactJSON = `{"memory_scope":{"version":1},"facts":[]}`
+	handlerCalls := 0
+	handler := func(_ context.Context, _ mcp.CallToolRequest) (*mcp.CallToolResult, error) {
+		handlerCalls++
+		return &mcp.CallToolResult{Content: []mcp.Content{
+			mcp.TextContent{Type: "text", Text: exactJSON},
+		}}, nil
+	}
+	wrapped := engine.Middleware()(handler)
+
+	for _, toolName := range memory.ExactProtocolToolNames() {
+		req := mcp.CallToolRequest{}
+		req.Params.Name = toolName
+		req.Params.Arguments = map[string]interface{}{
+			"session_id": "session-one",
+			"content":    "private conversation content",
+		}
+		result, err := wrapped(context.Background(), req)
+		require.NoError(t, err)
+		require.Len(t, result.Content, 1)
+		require.Equal(t, exactJSON, result.Content[0].(mcp.TextContent).Text,
+			"exact protocol response must remain byte-for-byte JSON")
+	}
+
+	require.Equal(t, len(memory.ExactProtocolToolNames()), handlerCalls)
+	require.Zero(t, logger.count(), "exact tool arguments must not enter the legacy interaction log")
 }
 
 // --- Concurrency test ---

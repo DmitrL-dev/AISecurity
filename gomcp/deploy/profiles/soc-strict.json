@@ -1,0 +1,87 @@
+{
+  "defaultAction": "SCMP_ACT_ERRNO",
+  "architectures": ["SCMP_ARCH_X86_64", "SCMP_ARCH_AARCH64"],
+  "syscalls": [
+    {
+      "names": [
+        "accept", "accept4", "bind", "connect", "listen", "socket",
+        "sendto", "recvfrom", "sendmsg", "recvmsg", "getsockname",
+        "getpeername", "setsockopt", "getsockopt", "shutdown",
+        "epoll_create1", "epoll_ctl", "epoll_wait", "epoll_pwait",
+        "poll", "select", "pselect6"
+      ],
+      "action": "SCMP_ACT_ALLOW",
+      "comment": "Network — required for HTTP server + SQLite + IPC"
+    },
+    {
+      "names": [
+        "openat", "close", "read", "write", "pread64", "pwrite64",
+        "lseek", "fstat", "stat", "lstat", "access", "faccessat",
+        "fcntl", "dup", "dup2", "dup3", "pipe", "pipe2",
+        "readlink", "readlinkat", "getcwd", "rename", "renameat",
+        "unlink", "unlinkat", "mkdir", "mkdirat", "rmdir",
+        "flock", "fsync", "fdatasync", "ftruncate", "fallocate"
+      ],
+      "action": "SCMP_ACT_ALLOW",
+      "comment": "Filesystem — required for SQLite WAL, audit log, config"
+    },
+    {
+      "names": [
+        "mmap", "munmap", "mprotect", "madvise", "mremap",
+        "brk", "sbrk", "mincore"
+      ],
+      "action": "SCMP_ACT_ALLOW",
+      "comment": "Memory management — required for Go runtime"
+    },
+    {
+      "names": [
+        "futex", "nanosleep", "clock_nanosleep", "clock_gettime",
+        "clock_getres", "gettimeofday", "sched_yield", "sched_getaffinity",
+        "rt_sigaction", "rt_sigprocmask", "rt_sigreturn", "sigaltstack",
+        "getpid", "gettid", "getuid", "getgid", "geteuid", "getegid",
+        "getppid", "getpgrp", "setpgid", "getrusage", "set_tid_address",
+        "set_robust_list", "get_robust_list", "tgkill",
+        "exit", "exit_group", "arch_prctl", "prctl",
+        "rseq", "getrandom", "uname"
+      ],
+      "action": "SCMP_ACT_ALLOW",
+      "comment": "System — required for Go runtime, signals, threads"
+    },
+    {
+      "names": [
+        "clone", "clone3", "wait4", "waitid"
+      ],
+      "action": "SCMP_ACT_ALLOW",
+      "comment": "Thread creation — required for goroutines"
+    },
+    {
+      "names": [
+        "ioctl"
+      ],
+      "action": "SCMP_ACT_ALLOW",
+      "args": [
+        {"index": 1, "value": 21523, "op": "SCMP_CMP_EQ"}
+      ],
+      "comment": "Terminal ioctl TIOCGWINSZ only"
+    },
+    {
+      "names": [
+        "ptrace", "process_vm_readv", "process_vm_writev",
+        "execve", "execveat", "fork", "vfork",
+        "mount", "umount2", "pivot_root", "chroot",
+        "reboot", "kexec_load", "init_module", "finit_module",
+        "delete_module", "create_module",
+        "ioperm", "iopl", "modify_ldt",
+        "setuid", "setgid", "setreuid", "setregid",
+        "setresuid", "setresgid", "setfsuid", "setfsgid",
+        "capset", "personality", "acct",
+        "keyctl", "add_key", "request_key",
+        "bpf", "perf_event_open", "userfaultfd",
+        "seccomp", "unshare", "setns"
+      ],
+      "action": "SCMP_ACT_ERRNO",
+      "errnoRet": 1,
+      "comment": "BLOCKED — ptrace, exec, debug, privilege escalation, kernel modules"
+    }
+  ]
+}

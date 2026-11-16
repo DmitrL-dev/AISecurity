@@ -1,10 +1,8 @@
 # GoMCP v2
 
-> **Archived, incomplete snapshot.** This directory has no `go.mod` and no `cmd/` entry point, so `make build` and the commands below do not work from this tree. It is kept for historical reference and is not maintained here. GoMCP's earlier public home is [syntrex-lab/gomcp](https://github.com/syntrex-lab/gomcp); this repository does not vouch for its current state.
-
 High-performance Go-native MCP server for the RLM Toolkit. Replaces the Python FastMCP server with a single static binary — no interpreter, no virtualenv, no startup lag.
 
-Part of the earlier SENTINEL platform.
+This is the full source of GoMCP as it runs inside [Spectorn](https://spectorn.ai) as of 2026-11-16: the memory server and its tools, plus the SOC, sensor and runtime-guard components that grew around it. It replaces the incomplete snapshot that lived in this directory before. The Go module path is still `github.com/syntrex/gomcp`, so build it from this directory (`make build` or `go build ./cmd/gomcp`) rather than with `go install`. Go 1.26 or newer is required (see `go.mod`). Licensed under Apache-2.0 like the rest of this repository.
 
 ## Features
 
@@ -56,8 +54,9 @@ Add to `~/.config/opencode/opencode.json`:
 | `-python` | `python` | Path to Python interpreter (for NLP bridge) |
 | `-bridge-script` | _(empty)_ | Path to Python bridge script (enables NLP tools) |
 | `-no-context` | `false` | Disable Proactive Context Engine |
+| `-no-boot-memory` | `false` | Exclude persisted L0 facts and session summaries from MCP initialize instructions. The Spectorn gateway always sets this and retrieves memory through bounded tools; standalone behavior is unchanged by default. |
 
-## Tools (40 total)
+## Tools (40+ total)
 
 ### Memory (11 tools)
 
@@ -196,10 +195,30 @@ internal/
 │   ├── tools/                  Tool service layer (fact, session, causal, crystal, system)
 │   ├── resources/              MCP resource provider
 │   ├── contextengine/          Proactive Context Engine + Interaction Processor
+│   ├── resilience/             SARL — Self-Monitoring, Self-Healing, Self-Preservation
 │   └── lifecycle/              Graceful shutdown manager
 └── transport/
     └── mcpserver/              MCP server setup, tool registration, middleware wiring
 ```
+
+### SARL (Autonomous Resilience)
+
+```
+internal/application/resilience/
+├── metrics_collector.go     # Ring buffer time-series, Z-score anomaly detection
+├── health_monitor.go        # L1: Quorum validation, alert bus, threshold checks
+├── healing_engine.go        # L2: FSM (6 states), cooldown, rollback
+├── healing_strategies.go    # 5 built-in strategies (restart, config, DB, rules, network)
+├── preservation.go          # L3: Emergency modes (SAFE→LOCKDOWN→APOPTOSIS)
+├── integrity.go             # Binary SHA-256, config HMAC-SHA256, chain verify
+├── behavioral.go            # L4: Go runtime profiling (goroutines, heap, GC)
+└── recovery_playbooks.go    # L5: 3 playbooks (resurrection, consensus, crypto)
+
+transport/http/
+└── resilience_handlers.go   # 6 REST endpoints (/api/v1/resilience/*)
+```
+
+**81 tests** across 5 test files. All PASS.
 
 **Dependency rule**: arrows point inward only. Domain has no imports from other layers.
 
@@ -254,6 +273,8 @@ Boot instructions = [AGENT INSTRUCTIONS] + [LAST SESSION] + [PROJECT FACTS]
     ↓
 LLM starts with full context from day one
 ```
+
+Managed gateway subprocesses use `-no-boot-memory`, so persisted facts cannot enlarge the fixed-size initialize handshake. The static agent instructions remain; memory is fetched after initialization through bounded page tools.
 
 ## Data Directory Layout
 
@@ -322,4 +343,4 @@ GoMCP uses **stdio transport** with **line-delimited JSON** (one JSON object per
 
 ## License
 
-Part of the sentinel-community project.
+Part of the Syntrex project. Apache 2.0 License.

@@ -8,7 +8,8 @@ import (
 )
 
 func TestNewBridge_Defaults(t *testing.T) {
-	b := NewBridge(Config{})
+	b, err := NewBridge(Config{})
+	require.NoError(t, err)
 	require.NotNil(t, b)
 	assert.Equal(t, "python", b.pythonPath)
 	assert.Equal(t, "", b.scriptPath)
@@ -16,17 +17,35 @@ func TestNewBridge_Defaults(t *testing.T) {
 }
 
 func TestNewBridge_Custom(t *testing.T) {
-	b := NewBridge(Config{
+	b, err := NewBridge(Config{
 		PythonPath: "/usr/bin/python3",
 		ScriptPath: "/path/to/bridge.py",
 		Timeout:    60_000_000_000,
 	})
+	require.NoError(t, err)
 	assert.Equal(t, "/usr/bin/python3", b.pythonPath)
 	assert.Equal(t, "/path/to/bridge.py", b.scriptPath)
 }
 
+func TestNewBridge_PathInjection(t *testing.T) {
+	_, err := NewBridge(Config{
+		PythonPath: "/usr/bin/python3\x00",
+		ScriptPath: "/path/to/bridge.py",
+	})
+	require.Error(t, err)
+	assert.Contains(t, err.Error(), "null byte")
+
+	_, err = NewBridge(Config{
+		PythonPath: "/usr/bin/python3",
+		ScriptPath: "/path/to/bridge.txt",
+	})
+	require.Error(t, err)
+	assert.Contains(t, err.Error(), ".py extension")
+}
+
 func TestBridge_IsAvailable(t *testing.T) {
-	b := NewBridge(Config{PythonPath: "python"})
+	b, err := NewBridge(Config{PythonPath: "python"})
+	require.NoError(t, err)
 	// This test checks if python is on PATH — may be true or false.
 	// We just verify it doesn't panic.
 	_ = b.IsAvailable()

@@ -8,7 +8,8 @@ import (
 	"path/filepath"
 	"strings"
 
-	"github.com/sentinel-community/gomcp/internal/domain/crystal"
+	"github.com/syntrex/gomcp/internal/domain/crystal"
+	rlmscope "github.com/syntrex/gomcp/internal/domain/scope"
 )
 
 // CrystalRepo implements crystal.CrystalStore using SQLite.
@@ -29,7 +30,9 @@ func NewCrystalRepo(db *DB) (*CrystalRepo, error) {
 func (r *CrystalRepo) migrate() error {
 	stmts := []string{
 		`CREATE TABLE IF NOT EXISTS crystals (
-			path TEXT PRIMARY KEY,
+			tenant_id TEXT NOT NULL DEFAULT 'local',
+			project_id TEXT NOT NULL DEFAULT 'default',
+			path TEXT NOT NULL,
 			name TEXT,
 			content BLOB,
 			primitives_count INTEGER,
@@ -38,18 +41,72 @@ func (r *CrystalRepo) migrate() error {
 			source_mtime REAL,
 			source_hash TEXT,
 			last_validated REAL,
-			human_confirmed INTEGER DEFAULT 0
+			human_confirmed INTEGER DEFAULT 0,
+			PRIMARY KEY (tenant_id, project_id, path)
 		)`,
 		`CREATE TABLE IF NOT EXISTS metadata (
 			key TEXT PRIMARY KEY,
 			value TEXT
 		)`,
+		`CREATE INDEX IF NOT EXISTS idx_crystals_scope_path ON crystals(tenant_id, project_id, path)`,
+		`CREATE INDEX IF NOT EXISTS idx_crystals_scope_indexed ON crystals(tenant_id, project_id, indexed_at)`,
 		`CREATE INDEX IF NOT EXISTS idx_mtime ON crystals(source_mtime)`,
 		`CREATE INDEX IF NOT EXISTS idx_indexed ON crystals(indexed_at)`,
 	}
 	for _, s := range stmts {
 		if _, err := r.db.Exec(s); err != nil {
 			return fmt.Errorf("exec migration: %w", err)
+		}
+	}
+	_, _ = r.db.Exec(`ALTER TABLE crystals ADD COLUMN tenant_id TEXT NOT NULL DEFAULT 'local'`)
+	_, _ = r.db.Exec(`ALTER TABLE crystals ADD COLUMN project_id TEXT NOT NULL DEFAULT 'default'`)
+	if err := r.migrateScopeKey(); err != nil {
+		return err
+	}
+	return nil
+}
+
+func (r *CrystalRepo) migrateScopeKey() error {
+	var tableSQL string
+	if err := r.db.QueryRow(`SELECT sql FROM sqlite_master WHERE type='table' AND name='crystals'`).Scan(&tableSQL); err != nil {
+		return nil
+	}
+	if strings.Contains(tableSQL, "PRIMARY KEY (tenant_id, project_id, path)") {
+		return nil
+	}
+	stmts := []string{
+		`CREATE TABLE IF NOT EXISTS crystals_scoped (
+			tenant_id TEXT NOT NULL DEFAULT 'local',
+			project_id TEXT NOT NULL DEFAULT 'default',
+			path TEXT NOT NULL,
+			name TEXT,
+			content BLOB,
+			primitives_count INTEGER,
+			token_count INTEGER,
+			indexed_at REAL,
+			source_mtime REAL,
+			source_hash TEXT,
+			last_validated REAL,
+			human_confirmed INTEGER DEFAULT 0,
+			PRIMARY KEY (tenant_id, project_id, path)
+		)`,
+		`INSERT OR IGNORE INTO crystals_scoped
+			(tenant_id, project_id, path, name, content, primitives_count, token_count,
+			 indexed_at, source_mtime, source_hash, last_validated, human_confirmed)
+			SELECT COALESCE(tenant_id, 'local'), COALESCE(project_id, 'default'),
+			       path, name, content, primitives_count, token_count,
+			       indexed_at, source_mtime, source_hash, last_validated, human_confirmed
+			FROM crystals`,
+		`DROP TABLE crystals`,
+		`ALTER TABLE crystals_scoped RENAME TO crystals`,
+		`CREATE INDEX IF NOT EXISTS idx_crystals_scope_path ON crystals(tenant_id, project_id, path)`,
+		`CREATE INDEX IF NOT EXISTS idx_crystals_scope_indexed ON crystals(tenant_id, project_id, indexed_at)`,
+		`CREATE INDEX IF NOT EXISTS idx_mtime ON crystals(source_mtime)`,
+		`CREATE INDEX IF NOT EXISTS idx_indexed ON crystals(indexed_at)`,
+	}
+	for _, stmt := range stmts {
+		if _, err := r.db.Exec(stmt); err != nil {
+			return fmt.Errorf("migrate crystals scope key: %w", err)
 		}
 	}
 	return nil
@@ -66,23 +123,26 @@ type serializedCrystal struct {
 
 // Upsert inserts or replaces a crystal.
 func (r *CrystalRepo) Upsert(ctx context.Context, c *crystal.Crystal) error {
-	sc := serializedCrystal{
+	rlmScope := rlmscope.FromContext(ctx)
+	c.TenantID = rlmScope.TenantID
+	c.ProjectID = rlmScope.ProjectID
+	stored := serializedCrystal{
 		Path:        c.Path,
 		Name:        c.Name,
 		TokenCount:  c.TokenCount,
 		ContentHash: c.ContentHash,
 		Primitives:  c.Primitives,
 	}
-	blob, err := json.Marshal(sc)
+	blob, err := json.Marshal(stored)
 	if err != nil {
 		return fmt.Errorf("marshal crystal: %w", err)
 	}
 
 	_, err = r.db.Exec(`INSERT OR REPLACE INTO crystals
-		(path, name, content, primitives_count, token_count,
+		(tenant_id, project_id, path, name, content, primitives_count, token_count,
 		 indexed_at, source_mtime, source_hash, last_validated, human_confirmed)
-		VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
-		c.Path, c.Name, blob, c.PrimitivesCount, c.TokenCount,
+		VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+		c.TenantID, c.ProjectID, c.Path, c.Name, blob, c.PrimitivesCount, c.TokenCount,
 		c.IndexedAt, c.SourceMtime, c.SourceHash,
 		c.LastValidated, boolToInt(c.HumanConfirmed),
 	)
@@ -94,16 +154,18 @@ func (r *CrystalRepo) Upsert(ctx context.Context, c *crystal.Crystal) error {
 
 // Get retrieves a crystal by path.
 func (r *CrystalRepo) Get(ctx context.Context, path string) (*crystal.Crystal, error) {
-	row := r.db.QueryRow(`SELECT path, name, content, primitives_count, token_count,
+	sc := rlmscope.FromContext(ctx)
+	row := r.db.QueryRow(`SELECT tenant_id, project_id, path, name, content, primitives_count, token_count,
 		indexed_at, source_mtime, source_hash, last_validated, human_confirmed
-		FROM crystals WHERE path = ?`, path)
+		FROM crystals WHERE tenant_id = ? AND project_id = ? AND path = ?`,
+		sc.TenantID, sc.ProjectID, path)
 
 	var c crystal.Crystal
 	var blob []byte
 	var lastValidated sql.NullFloat64
 	var humanConfirmed int
 
-	err := row.Scan(&c.Path, &c.Name, &blob, &c.PrimitivesCount, &c.TokenCount,
+	err := row.Scan(&c.TenantID, &c.ProjectID, &c.Path, &c.Name, &blob, &c.PrimitivesCount, &c.TokenCount,
 		&c.IndexedAt, &c.SourceMtime, &c.SourceHash, &lastValidated, &humanConfirmed)
 	if err != nil {
 		if err == sql.ErrNoRows {
@@ -131,7 +193,10 @@ func (r *CrystalRepo) Get(ctx context.Context, path string) (*crystal.Crystal, e
 
 // Delete removes a crystal by path.
 func (r *CrystalRepo) Delete(ctx context.Context, path string) error {
-	result, err := r.db.Exec(`DELETE FROM crystals WHERE path = ?`, path)
+	sc := rlmscope.FromContext(ctx)
+	result, err := r.db.Exec(`DELETE FROM crystals
+		WHERE tenant_id = ? AND project_id = ? AND path = ?`,
+		sc.TenantID, sc.ProjectID, path)
 	if err != nil {
 		return fmt.Errorf("delete crystal: %w", err)
 	}
@@ -148,16 +213,19 @@ func (r *CrystalRepo) List(ctx context.Context, pattern string, limit int) ([]*c
 		limit = 100
 	}
 
+	sc := rlmscope.FromContext(ctx)
 	var rows *sql.Rows
 	var err error
 	if pattern == "" {
-		rows, err = r.db.Query(`SELECT path, name, content, primitives_count, token_count,
+		rows, err = r.db.Query(`SELECT tenant_id, project_id, path, name, content, primitives_count, token_count,
 			indexed_at, source_mtime, source_hash, last_validated, human_confirmed
-			FROM crystals ORDER BY indexed_at DESC LIMIT ?`, limit)
+			FROM crystals WHERE tenant_id = ? AND project_id = ?
+			ORDER BY indexed_at DESC LIMIT ?`, sc.TenantID, sc.ProjectID, limit)
 	} else {
-		rows, err = r.db.Query(`SELECT path, name, content, primitives_count, token_count,
+		rows, err = r.db.Query(`SELECT tenant_id, project_id, path, name, content, primitives_count, token_count,
 			indexed_at, source_mtime, source_hash, last_validated, human_confirmed
-			FROM crystals WHERE path LIKE ? ORDER BY indexed_at DESC LIMIT ?`, pattern, limit)
+			FROM crystals WHERE tenant_id = ? AND project_id = ? AND path LIKE ?
+			ORDER BY indexed_at DESC LIMIT ?`, sc.TenantID, sc.ProjectID, pattern, limit)
 	}
 	if err != nil {
 		return nil, fmt.Errorf("list crystals: %w", err)
@@ -172,12 +240,15 @@ func (r *CrystalRepo) Search(ctx context.Context, query string, limit int) ([]*c
 		limit = 50
 	}
 
+	sc := rlmscope.FromContext(ctx)
 	// Search in content BLOB (JSON text stored as BLOB) for primitive names/values.
 	// CAST to TEXT required because SQLite LIKE doesn't match on raw BLOB.
-	rows, err := r.db.Query(`SELECT path, name, content, primitives_count, token_count,
+	rows, err := r.db.Query(`SELECT tenant_id, project_id, path, name, content, primitives_count, token_count,
 		indexed_at, source_mtime, source_hash, last_validated, human_confirmed
-		FROM crystals WHERE CAST(content AS TEXT) LIKE ? OR name LIKE ? LIMIT ?`,
-		"%"+query+"%", "%"+query+"%", limit)
+		FROM crystals
+		WHERE tenant_id = ? AND project_id = ? AND (CAST(content AS TEXT) LIKE ? OR name LIKE ?)
+		LIMIT ?`,
+		sc.TenantID, sc.ProjectID, "%"+query+"%", "%"+query+"%", limit)
 	if err != nil {
 		return nil, fmt.Errorf("search crystals: %w", err)
 	}
@@ -187,17 +258,20 @@ func (r *CrystalRepo) Search(ctx context.Context, query string, limit int) ([]*c
 
 // Stats returns aggregate statistics.
 func (r *CrystalRepo) Stats(ctx context.Context) (*crystal.CrystalStats, error) {
+	sc := rlmscope.FromContext(ctx)
 	stats := &crystal.CrystalStats{
 		ByExtension: make(map[string]int),
 	}
 
-	row := r.db.QueryRow(`SELECT COUNT(*), COALESCE(SUM(primitives_count),0), COALESCE(SUM(token_count),0) FROM crystals`)
+	row := r.db.QueryRow(`SELECT COUNT(*), COALESCE(SUM(primitives_count),0), COALESCE(SUM(token_count),0)
+		FROM crystals WHERE tenant_id = ? AND project_id = ?`, sc.TenantID, sc.ProjectID)
 	if err := row.Scan(&stats.TotalCrystals, &stats.TotalPrimitives, &stats.TotalTokens); err != nil {
 		return nil, err
 	}
 
 	// Count by file extension.
-	rows, err := r.db.Query(`SELECT path FROM crystals`)
+	rows, err := r.db.Query(`SELECT path FROM crystals WHERE tenant_id = ? AND project_id = ?`,
+		sc.TenantID, sc.ProjectID)
 	if err != nil {
 		return nil, err
 	}
@@ -225,7 +299,7 @@ func scanCrystals(rows *sql.Rows) ([]*crystal.Crystal, error) {
 		var lastValidated sql.NullFloat64
 		var humanConfirmed int
 
-		err := rows.Scan(&c.Path, &c.Name, &blob, &c.PrimitivesCount, &c.TokenCount,
+		err := rows.Scan(&c.TenantID, &c.ProjectID, &c.Path, &c.Name, &blob, &c.PrimitivesCount, &c.TokenCount,
 			&c.IndexedAt, &c.SourceMtime, &c.SourceHash, &lastValidated, &humanConfirmed)
 		if err != nil {
 			return nil, fmt.Errorf("scan crystal row: %w", err)

@@ -59,7 +59,13 @@ func TestNewFact(t *testing.T) {
 	assert.False(t, fact.IsStale)
 	assert.False(t, fact.IsArchived)
 	assert.InDelta(t, 1.0, fact.Confidence, 0.001)
-	assert.Equal(t, "manual", fact.Source)
+	// Was "manual" until 2026-08-05, and the change is the point rather than a detail: a
+	// constructor cannot know who authored the content it is handed. The old default asserted
+	// hand-authorship for facts arriving through `add_fact` (a tool an AGENT calls), through a
+	// peer sync, and through the distiller — so the database could not distinguish a preference
+	// a human dictated from one a document told the agent to remember. See memory.Origin.
+	assert.Equal(t, "unspecified", fact.Source)
+	assert.Equal(t, OriginUnspecified, fact.Origin)
 	assert.Nil(t, fact.TTL)
 	assert.Nil(t, fact.Embedding)
 	assert.Nil(t, fact.ValidUntil)

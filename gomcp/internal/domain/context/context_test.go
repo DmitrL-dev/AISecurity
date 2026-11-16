@@ -4,7 +4,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/sentinel-community/gomcp/internal/domain/memory"
+	"github.com/syntrex/gomcp/internal/domain/memory"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )

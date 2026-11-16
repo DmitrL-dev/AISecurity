@@ -5,10 +5,11 @@ import (
 	"testing"
 	"time"
 
-	"github.com/sentinel-community/gomcp/internal/domain/memory"
-	"github.com/sentinel-community/gomcp/internal/infrastructure/sqlite"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
+	"github.com/syntrex/gomcp/internal/domain/memory"
+	rlmscope "github.com/syntrex/gomcp/internal/domain/scope"
+	"github.com/syntrex/gomcp/internal/infrastructure/sqlite"
 )
 
 // --- mock FactStore for processor tests ---
@@ -53,11 +54,22 @@ func (m *procMockFactStore) Search(_ context.Context, query string, limit int) (
 	}
 	return results, nil
 }
+func (m *procMockFactStore) SearchByVector(_ context.Context, _ []float64, _ int) ([]*memory.Fact, error) {
+	return nil, nil
+}
 func (m *procMockFactStore) GetExpired(_ context.Context) ([]*memory.Fact, error) { return nil, nil }
 func (m *procMockFactStore) RefreshTTL(_ context.Context, _ string) error         { return nil }
+func (m *procMockFactStore) TouchFact(_ context.Context, _ string) error          { return nil }
+func (m *procMockFactStore) GetColdFacts(_ context.Context, _ int) ([]*memory.Fact, error) {
+	return nil, nil
+}
+func (m *procMockFactStore) CompressFacts(_ context.Context, _ []string, _ string) (string, error) {
+	return "", nil
+}
 func (m *procMockFactStore) Stats(_ context.Context) (*memory.FactStoreStats, error) {
 	return &memory.FactStoreStats{}, nil
 }
+func (m *procMockFactStore) ListGenes(_ context.Context) ([]*memory.Fact, error) { return nil, nil }
 
 func contains(s, sub string) bool {
 	return len(s) >= len(sub) && (s == sub || len(sub) == 0 ||
@@ -128,6 +140,40 @@ func TestInteractionProcessor_ProcessStartup_CreatesFactAndMarksProcessed(t *tes
 	_, unprocessed, err := repo.Count(ctx)
 	require.NoError(t, err)
 	assert.Equal(t, 0, unprocessed)
+}
+
+func TestInteractionProcessorCannotLaunderHistoricalExactToolArguments(t *testing.T) {
+	db, err := sqlite.OpenMemory()
+	require.NoError(t, err)
+	defer db.Close()
+	_, err = db.Exec(`CREATE TABLE interaction_log (
+		id INTEGER PRIMARY KEY AUTOINCREMENT,
+		tenant_id TEXT NOT NULL DEFAULT 'local',
+		project_id TEXT NOT NULL DEFAULT 'default',
+		tool_name TEXT NOT NULL,
+		args_json TEXT,
+		timestamp TEXT NOT NULL,
+		processed INTEGER DEFAULT 0
+	)`)
+	require.NoError(t, err)
+	_, err = db.Exec(`INSERT INTO interaction_log
+		(tenant_id, project_id, tool_name, args_json, timestamp, processed)
+		VALUES
+		('local', 'project-alpha', 'add_session_fact', '{"content":"private-session-marker"}', '2026-01-01T00:00:00Z', 0),
+		('local', 'project-alpha', 'health', '', '2026-01-01T00:00:01Z', 0)`)
+	require.NoError(t, err)
+	repo, err := sqlite.NewInteractionLogRepo(db)
+	require.NoError(t, err)
+
+	store := &procMockFactStore{}
+	proc := NewInteractionProcessor(repo, store).WithScope(rlmscope.New("local", "project-alpha"))
+	summary, err := proc.ProcessStartup(context.Background())
+	require.NoError(t, err)
+	require.Contains(t, summary, "health(1)")
+	require.NotContains(t, summary, "add_session_fact")
+	require.NotContains(t, summary, "private-session-marker")
+	require.Len(t, store.facts, 1)
+	require.NotContains(t, store.facts[0].Content, "private-session-marker")
 }
 
 func TestInteractionProcessor_ProcessShutdown(t *testing.T) {
