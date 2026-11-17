@@ -139,18 +139,20 @@ func (s *FactService) searchSessionFactsHybridBoundedSnapshot(
 	if err != nil {
 		return runBoundedSessionSearchSnapshot(ctx, store, sessionID, nil, keyword)
 	}
+	depth := hybridDepth(limit)
+	weight := s.semanticFusionWeight()
 	return runBoundedSessionSearchSnapshot(
 		ctx, store, sessionID, nil,
 		func(snapshot memory.BoundedSearchSnapshot) ([]*memory.Fact, error) {
-			semantic, err := snapshot.SearchByVector(ctx, queryVec, limit)
+			semantic, err := snapshot.SearchByVector(ctx, queryVec, depth)
 			if err != nil {
 				return keyword(snapshot)
 			}
-			keywordFacts, err := keyword(snapshot)
+			keywordFacts, err := snapshot.Search(ctx, query, depth)
 			if err != nil {
-				return semantic, nil
+				return truncateFacts(semantic, limit), nil
 			}
-			return mergeBoundedSearchFacts(semantic, keywordFacts, limit), nil
+			return fuseHybridResults(semantic, keywordFacts, limit, weight), nil
 		},
 	)
 }

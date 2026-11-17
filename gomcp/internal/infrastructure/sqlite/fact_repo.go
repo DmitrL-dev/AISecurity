@@ -2862,9 +2862,7 @@ func (r *FactRepo) search(ctx context.Context, sessionID, query string, limit in
 	if limit <= 0 {
 		limit = 50
 	}
-	terms := searchTerms(query)
-	phrase := strings.ToLower(strings.TrimSpace(query))
-	if phrase == "" {
+	if strings.TrimSpace(query) == "" {
 		return nil, nil
 	}
 
@@ -2888,52 +2886,7 @@ func (r *FactRepo) search(ctx context.Context, sessionID, query string, limit in
 		return nil, err
 	}
 
-	type scored struct {
-		f     *memory.Fact
-		score int
-	}
-	ranked := make([]scored, 0, len(candidates))
-	for _, f := range candidates {
-		lowered := strings.ToLower(f.Content)
-		matched := 0
-		for _, t := range terms {
-			if strings.Contains(lowered, t) {
-				matched++
-			}
-		}
-		score := 0
-		switch {
-		case strings.Contains(lowered, phrase):
-			score = 1_000_000 + matched
-		case len(terms) > 0 && matched == len(terms):
-			score = 1_000 + matched
-		case matched > 0:
-			score = matched
-		}
-		if score > 0 {
-			ranked = append(ranked, scored{f, score})
-		}
-	}
-	// Session recall is conversation recall: when relevance ties, the newest turns must survive a
-	// top-K cut. Legacy keyword search keeps its historical ID order; changing it here would silently
-	// reorder existing project-memory responses.
-	sort.SliceStable(ranked, func(i, j int) bool {
-		if ranked[i].score != ranked[j].score {
-			return ranked[i].score > ranked[j].score
-		}
-		if sessionID != "" && !ranked[i].f.CreatedAt.Equal(ranked[j].f.CreatedAt) {
-			return ranked[i].f.CreatedAt.After(ranked[j].f.CreatedAt)
-		}
-		return ranked[i].f.ID < ranked[j].f.ID
-	})
-	if limit > len(ranked) {
-		limit = len(ranked)
-	}
-	out := make([]*memory.Fact, limit)
-	for i := 0; i < limit; i++ {
-		out[i] = ranked[i].f
-	}
-	return out, nil
+	return rankKeywordMatches(candidates, query, limit, sessionID != ""), nil
 }
 
 // searchTerms splits a query into lowercased terms worth matching.
