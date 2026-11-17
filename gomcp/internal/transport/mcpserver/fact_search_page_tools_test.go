@@ -617,7 +617,7 @@ func TestBoundedSearchUsesDefaultOrExactProjectScope(t *testing.T) {
 	}
 }
 
-func TestBoundedSearchSplitsHTMLAndControlBytesWithoutGapsInLegacyOrder(t *testing.T) {
+func TestBoundedSearchSplitsHTMLAndControlBytesWithoutGapsInRankedOrder(t *testing.T) {
 	srv, repo := newProjectTestServer(t, rlmscope.New("local", "project-alpha"))
 	ctx := rlmscope.WithScope(context.Background(), rlmscope.New("local", "project-alpha"))
 	stamp := time.Date(2026, 1, 2, 3, 4, 5, 0, time.UTC)
@@ -627,7 +627,10 @@ func TestBoundedSearchSplitsHTMLAndControlBytesWithoutGapsInLegacyOrder(t *testi
 	addBoundedSearchFact(t, repo, ctx, "fact-c", "needle third", stamp)
 
 	collected := collectProjectBoundedSearch(t, srv, "local", "project-alpha", "needle", "keyword", 20, 4*1024*1024)
-	require.Equal(t, []string{"fact-a", "fact-b", "fact-c"}, collected.order)
+	// All three hold the whole query. BM25 normalises by length in words, and
+	// the 400 KB fact has one word («needle»; the rest is markup bytes), so it
+	// ranks first; the two-word facts follow by ID. It is still delivered whole.
+	require.Equal(t, []string{"fact-b", "fact-a", "fact-c"}, collected.order)
 	require.Greater(t, collected.pages, 3, "the escaped fact must span multiple 512 KiB frames")
 	var decoded memory.Fact
 	require.NoError(t, json.Unmarshal(collected.serialized["fact-b"], &decoded))

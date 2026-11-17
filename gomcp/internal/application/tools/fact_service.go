@@ -565,9 +565,8 @@ func (s *FactService) SearchFactsSemantic(ctx context.Context, query string, lim
 	return s.store.SearchByVector(ctx, vec, limit)
 }
 
-// SearchFactsHybrid combines keyword and semantic results, deduped by fact ID.
-// Order: semantic results first (most relevant by meaning), then keyword-only
-// results that semantic missed. Falls back to pure keyword if no embedder.
+// SearchFactsHybrid fuses keyword and semantic rankings (weighted RRF, see
+// fuseHybridResults). Falls back to pure keyword if there is no embedder.
 func (s *FactService) SearchFactsHybrid(ctx context.Context, query string, limit int) ([]*memory.Fact, error) {
 	if limit <= 0 {
 		limit = 20
@@ -580,40 +579,23 @@ func (s *FactService) SearchFactsHybrid(ctx context.Context, query string, limit
 		return s.expandWithVerifiedSynapses(ctx, keyword, limit), nil
 	}
 
-	semantic, err := s.SearchFactsSemantic(ctx, query, limit)
+	depth := hybridDepth(limit)
+	semantic, err := s.SearchFactsSemantic(ctx, query, depth)
 	if err != nil {
 		// On embedder failure, degrade to keyword rather than erroring out.
 		return s.store.Search(ctx, query, limit)
 	}
 
-	keyword, err := s.store.Search(ctx, query, limit)
+	keyword, err := s.store.Search(ctx, query, depth)
 	if err != nil {
 		// Semantic worked but keyword failed — return semantic alone.
+		if len(semantic) > limit {
+			semantic = semantic[:limit]
+		}
 		return semantic, nil
 	}
 
-	seen := make(map[string]struct{}, len(semantic)+len(keyword))
-	merged := make([]*memory.Fact, 0, limit)
-	for _, f := range semantic {
-		if _, ok := seen[f.ID]; ok {
-			continue
-		}
-		seen[f.ID] = struct{}{}
-		merged = append(merged, f)
-		if len(merged) >= limit {
-			return merged, nil
-		}
-	}
-	for _, f := range keyword {
-		if _, ok := seen[f.ID]; ok {
-			continue
-		}
-		seen[f.ID] = struct{}{}
-		merged = append(merged, f)
-		if len(merged) >= limit {
-			break
-		}
-	}
+	merged := fuseHybridResults(semantic, keyword, limit, s.semanticFusionWeight())
 	return s.expandWithVerifiedSynapses(ctx, merged, limit), nil
 }
 
@@ -684,8 +666,8 @@ func (s *FactService) SearchSessionFactsWithMode(ctx context.Context, sessionID,
 	if limit <= 0 {
 		limit = 20
 	}
-	keyword := func() ([]*memory.Fact, error) {
-		facts, err := store.SearchForSession(ctx, sessionID, query, limit)
+	keywordAt := func(n int) ([]*memory.Fact, error) {
+		facts, err := store.SearchForSession(ctx, sessionID, query, n)
 		if err != nil {
 			return nil, err
 		}
@@ -694,7 +676,7 @@ func (s *FactService) SearchSessionFactsWithMode(ctx context.Context, sessionID,
 		}
 		return facts, nil
 	}
-	semantic := func() ([]*memory.Fact, error) {
+	semanticAt := func(n int) ([]*memory.Fact, error) {
 		if s.embedder == nil {
 			return nil, fmt.Errorf("semantic search unavailable: no embedder configured")
 		}
@@ -702,7 +684,7 @@ func (s *FactService) SearchSessionFactsWithMode(ctx context.Context, sessionID,
 		if err != nil {
 			return nil, fmt.Errorf("embed query: %w", err)
 		}
-		facts, err := store.SearchByVectorForSession(ctx, sessionID, vec, limit)
+		facts, err := store.SearchByVectorForSession(ctx, sessionID, vec, n)
 		if err != nil {
 			return nil, err
 		}
@@ -712,46 +694,37 @@ func (s *FactService) SearchSessionFactsWithMode(ctx context.Context, sessionID,
 		return facts, nil
 	}
 
+	keyword := func() ([]*memory.Fact, error) { return keywordAt(limit) }
+
 	switch mode {
 	case ModeKeyword:
 		return keyword()
 	case ModeSemantic:
-		return semantic()
+		return semanticAt(limit)
 	}
 
 	if s.embedder == nil {
 		return keyword()
 	}
-	semanticFacts, err := semantic()
+	depth := hybridDepth(limit)
+	semanticFacts, err := semanticAt(depth)
 	if err != nil {
 		if errors.Is(err, errSessionFactBoundary) {
 			return nil, err
 		}
 		return keyword()
 	}
-	keywordFacts, err := keyword()
+	keywordFacts, err := keywordAt(depth)
 	if err != nil {
 		if errors.Is(err, errSessionFactBoundary) {
 			return nil, err
 		}
+		if len(semanticFacts) > limit {
+			semanticFacts = semanticFacts[:limit]
+		}
 		return semanticFacts, nil
 	}
-
-	seen := make(map[string]struct{}, len(semanticFacts)+len(keywordFacts))
-	merged := make([]*memory.Fact, 0, limit)
-	for _, facts := range [][]*memory.Fact{semanticFacts, keywordFacts} {
-		for _, fact := range facts {
-			if _, ok := seen[fact.ID]; ok {
-				continue
-			}
-			seen[fact.ID] = struct{}{}
-			merged = append(merged, fact)
-			if len(merged) >= limit {
-				return merged, nil
-			}
-		}
-	}
-	return merged, nil
+	return fuseHybridResults(semanticFacts, keywordFacts, limit, s.semanticFusionWeight()), nil
 }
 
 // ListDomains returns all unique domains.

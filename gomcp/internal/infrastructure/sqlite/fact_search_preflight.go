@@ -169,9 +169,7 @@ func (s *boundedSearchSnapshot) Search(
 	if limit <= 0 {
 		limit = 50
 	}
-	terms := searchTerms(query)
-	phrase := strings.ToLower(strings.TrimSpace(query))
-	if phrase == "" {
+	if strings.TrimSpace(query) == "" {
 		return nil, nil
 	}
 	rows, err := s.tx.QueryContext(ctx, `SELECT `+factColumns+`
@@ -189,46 +187,7 @@ func (s *boundedSearchSnapshot) Search(
 	if err != nil {
 		return nil, err
 	}
-	type scored struct {
-		fact  *memory.Fact
-		score int
-	}
-	ranked := make([]scored, 0, len(candidates))
-	for _, fact := range candidates {
-		lowered := strings.ToLower(fact.Content)
-		matched := 0
-		for _, term := range terms {
-			if strings.Contains(lowered, term) {
-				matched++
-			}
-		}
-		score := 0
-		switch {
-		case strings.Contains(lowered, phrase):
-			score = 1_000_000 + matched
-		case len(terms) > 0 && matched == len(terms):
-			score = 1_000 + matched
-		case matched > 0:
-			score = matched
-		}
-		if score > 0 {
-			ranked = append(ranked, scored{fact: fact, score: score})
-		}
-	}
-	sort.SliceStable(ranked, func(i, j int) bool {
-		if ranked[i].score != ranked[j].score {
-			return ranked[i].score > ranked[j].score
-		}
-		return ranked[i].fact.ID < ranked[j].fact.ID
-	})
-	if limit > len(ranked) {
-		limit = len(ranked)
-	}
-	out := make([]*memory.Fact, limit)
-	for index := range out {
-		out[index] = ranked[index].fact
-	}
-	return out, nil
+	return rankKeywordMatches(candidates, query, limit, false), nil
 }
 
 func (s *boundedSearchSnapshot) SearchByVector(

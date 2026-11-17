@@ -108,35 +108,26 @@ func (s *FactService) searchFactsHybridBoundedSnapshot(
 			return snapshot.Search(ctx, query, limit)
 		})
 	}
+	depth := hybridDepth(limit)
+	weight := s.semanticFusionWeight()
 	return runBoundedSearchSnapshot(ctx, store, nil, func(snapshot memory.BoundedSearchSnapshot) ([]*memory.Fact, error) {
-		semantic, err := snapshot.SearchByVector(ctx, queryVec, limit)
+		semantic, err := snapshot.SearchByVector(ctx, queryVec, depth)
 		if err != nil {
 			// Match legacy hybrid behavior: any semantic-store failure also
 			// degrades to keyword without verified-synapse expansion.
 			return snapshot.Search(ctx, query, limit)
 		}
-		keyword, err := snapshot.Search(ctx, query, limit)
+		keyword, err := snapshot.Search(ctx, query, depth)
 		if err != nil {
-			return semantic, nil
+			return truncateFacts(semantic, limit), nil
 		}
-		return mergeBoundedSearchFacts(semantic, keyword, limit), nil
+		return fuseHybridResults(semantic, keyword, limit, weight), nil
 	})
 }
 
-func mergeBoundedSearchFacts(semantic, keyword []*memory.Fact, limit int) []*memory.Fact {
-	seen := make(map[string]struct{}, len(semantic)+len(keyword))
-	merged := make([]*memory.Fact, 0, limit)
-	for _, facts := range [][]*memory.Fact{semantic, keyword} {
-		for _, fact := range facts {
-			if _, present := seen[fact.ID]; present {
-				continue
-			}
-			seen[fact.ID] = struct{}{}
-			merged = append(merged, fact)
-			if len(merged) >= limit {
-				return merged
-			}
-		}
+func truncateFacts(facts []*memory.Fact, limit int) []*memory.Fact {
+	if len(facts) > limit {
+		return facts[:limit]
 	}
-	return merged
+	return facts
 }
