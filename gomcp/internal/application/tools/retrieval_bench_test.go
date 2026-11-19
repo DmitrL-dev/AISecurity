@@ -21,8 +21,7 @@ import (
 // ({"id","content"} per line) and queries.jsonl ({"set","q","want"} per line):
 // the corpus is not part of the repository.
 //
-// The embedder is the pure-Go fallback, because that is the one a build
-// without the onnx tag (the gateway's) runs in production.
+// The embedder is the pure-Go fallback, the only one GoMCP has.
 func TestRetrievalBench(t *testing.T) {
 	dir := os.Getenv("GOMCP_RETRIEVAL_BENCH")
 	if dir == "" {

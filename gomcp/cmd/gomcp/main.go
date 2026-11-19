@@ -37,12 +37,12 @@ import (
 	"github.com/syntrex/gomcp/internal/domain/peer"
 	rlmscope "github.com/syntrex/gomcp/internal/domain/scope"
 	domsoc "github.com/syntrex/gomcp/internal/domain/soc"
+	"github.com/syntrex/gomcp/internal/domain/vectorstore"
 	"github.com/syntrex/gomcp/internal/infrastructure/audit"
 	"github.com/syntrex/gomcp/internal/infrastructure/auth"
 	"github.com/syntrex/gomcp/internal/infrastructure/cache"
 	"github.com/syntrex/gomcp/internal/infrastructure/hardware"
 	"github.com/syntrex/gomcp/internal/infrastructure/ipc"
-	onnxpkg "github.com/syntrex/gomcp/internal/infrastructure/onnx"
 	"github.com/syntrex/gomcp/internal/infrastructure/sqlite"
 	httpserver "github.com/syntrex/gomcp/internal/transport/http"
 	mcpserver "github.com/syntrex/gomcp/internal/transport/mcpserver"
@@ -178,8 +178,9 @@ func run(rlmDir, cachePath, sessionID string, noContext, noBootMemory, uiMode, u
 	if uiMode {
 		log.Printf("Starting TUI dashboard (read-only observer mode)...")
 
-		// Initialize Oracle embedder for TUI status display.
-		embedder := onnxpkg.NewEmbedderWithFallback(rlmDir)
+		// Oracle embedder for TUI status display: the pure-Go FTS5 embedder
+		// (the ONNX embedder was removed: its WordPiece tokenizer did not match the model).
+		embedder := vectorstore.NewFTS5Embedder()
 
 		// Create alert bus and orchestrator for TUI.
 		alertBus := alert.NewBus(100)
@@ -417,7 +418,9 @@ func run(rlmDir, cachePath, sessionID string, noContext, noBootMemory, uiMode, u
 
 	// --- Initialize Oracle Embedder ---
 
-	embedder := onnxpkg.NewEmbedderWithFallback(rlmDir)
+	// The pure-Go FTS5 embedder; hybrid search fuses it at weight 0 (degraded),
+	// so ranking is BM25 keyword order. The ONNX embedder was removed (wrong tokenizer).
+	embedder := vectorstore.NewFTS5Embedder()
 	serverOpts = append(serverOpts, mcpserver.WithEmbedder(embedder))
 	log.Printf("Oracle embedder: %s (mode=%s, dim=%d)",
 		embedder.Name(), embedder.Mode(), embedder.Dimension())

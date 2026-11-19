@@ -11,7 +11,7 @@ import (
 // frequency vectors instead of neural embeddings. No external deps required.
 //
 // Quality is lower than MiniLM but sufficient for basic intent matching.
-// Used when ONNX runtime is not available → [ORACLE: DEGRADED].
+// The embedder GoMCP runs → [ORACLE: DEGRADED].
 type FTS5Embedder struct {
 	ngramSize int
 	dimension int
