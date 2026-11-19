@@ -35,7 +35,7 @@ jobs:
         run: |
           python -m venv .security-tools
           .security-tools/bin/python -m pip install 'pip==26.2.1'
-          .security-tools/bin/python -m pip install 'bandit==1.9.4' 'pip-audit==2.10.1' 'setuptools==83.0.0'
+          .security-tools/bin/python -m pip install 'bandit==1.9.4' 'pip-audit==2.10.1' 'setuptools==84.1.0'
 
       - name: Run Bandit security scan
         continue-on-error: true
