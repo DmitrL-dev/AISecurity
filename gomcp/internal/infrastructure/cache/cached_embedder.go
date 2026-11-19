@@ -15,7 +15,7 @@ var embeddingBucket = []byte("embedding_cache")
 
 // CachedEmbedder wraps an Embedder and caches results in BoltDB (v3.4).
 // Avoids recomputing embeddings for the same text, especially useful
-// for ONNX mode where inference is expensive.
+// for a neural embedder where inference is expensive.
 type CachedEmbedder struct {
 	inner vectorstore.Embedder
 	db    *bolt.DB

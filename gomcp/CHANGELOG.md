@@ -7,6 +7,11 @@
 
 ---
 
+## [Unreleased]
+
+### Removed
+- ONNX-эмбеддер (`internal/infrastructure/onnx`: `embedder.go`, `tokenizer.go`, `loader.go`, `factory*.go`). Он токенизировал WordPiece по `vocab.txt` модель XLM-R с Unigram-токенизатором, то есть не работал по построению; в прод-сборках не участвовал. GoMCP всегда использует `vectorstore.NewFTS5Embedder()`. 16-классовый классификатор `cmd/soc` (тег `onnx`) не затронут.
+
 ## [4.0.0] — 2026-03-10 «SOC Hardened»
 
 ### Added

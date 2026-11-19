@@ -1556,7 +1556,7 @@ func (s *Server) handleCheckPythonBridge(ctx context.Context, _ mcp.CallToolRequ
 		"available":     s.embedder != nil,
 		"oracle_mode":   "N/A",
 		"embedder_name": "none",
-		"note":          "Python bridge removed in v3.0. Use local Oracle (ONNX) or FTS5 fallback.",
+		"note":          "Python bridge removed in v3.0. The local Oracle uses the FTS5 embedder.",
 	}
 	if s.embedder != nil {
 		status["oracle_mode"] = s.embedder.Mode().String()

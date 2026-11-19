@@ -8,14 +8,16 @@
 //   - In-memory store with capacity management (LRU eviction)
 //   - Cosine similarity search for nearest-neighbor matching
 //   - Route labels for categorized intent patterns
-//   - Pluggable Embedder interface (ONNX, FTS5 fallback)
+//   - Pluggable Embedder interface (FTS5 fallback today; a neural embedder can plug in)
 //   - Thread-safe for concurrent access
 package vectorstore
 
 import "context"
 
 // Embedder generates vector embeddings from text.
-// Implementations: ONNXEmbedder (full), FTS5Embedder (fallback, pure Go).
+// Implementation in this repository: FTS5Embedder (degraded, pure Go). A neural
+// embedder would report OracleModeFull; none ships (the ONNX one was removed
+// 2026-11-19: its WordPiece tokenizer did not match the model it named).
 type Embedder interface {
 	// Embed computes a vector embedding for the given text.
 	// Returns a float64 slice of length Dimension().
@@ -25,7 +27,7 @@ type Embedder interface {
 	// MiniLM-L12-v2: 384. FTS5 fallback: len(vocabulary).
 	Dimension() int
 
-	// Name returns the embedder identifier (e.g. "onnx:MiniLM-L12-v2", "fts5:fallback").
+	// Name returns the embedder identifier (e.g. "fts5:fallback").
 	Name() string
 
 	// Mode returns the current oracle mode.
@@ -37,7 +39,7 @@ type Embedder interface {
 type OracleMode int
 
 const (
-	// OracleModeFull indicates neural ONNX embeddings are active.
+	// OracleModeFull indicates neural embeddings are active.
 	OracleModeFull OracleMode = iota
 	// OracleModeDegraded indicates fallback text-based search (FTS5/Levenshtein).
 	OracleModeDegraded

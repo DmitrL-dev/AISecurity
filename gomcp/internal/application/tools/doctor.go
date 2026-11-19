@@ -184,9 +184,6 @@ func (d *DoctorService) checkOracle() DoctorCheck {
 	if d.embedderName == "" {
 		return DoctorCheck{Name: "Oracle", Status: "WARN", Details: "no embedder configured (FTS5 fallback)", Elapsed: since(start)}
 	}
-	if contains(d.embedderName, "onnx") || contains(d.embedderName, "ONNX") {
-		return DoctorCheck{Name: "Oracle", Status: "OK", Details: "ONNX model loaded: " + d.embedderName, Elapsed: since(start)}
-	}
 	return DoctorCheck{Name: "Oracle", Status: "OK", Details: "embedder: " + d.embedderName, Elapsed: since(start)}
 }
 
